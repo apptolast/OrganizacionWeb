@@ -18,6 +18,10 @@ Confirmado por el usuario:
 
 La plantilla aporta el proceso; no obliga a conservar Angular. No se crean datos de Zenit Digital como proyectos reales sin indicación.
 
+## Requisito transversal UI/UX confirmado
+
+El usuario incorpora Laws of UX en español como referencia obligatoria para todas las interfaces. Revisar sus 30 principios y aplicar los criterios responsive y de accesibilidad de [docs/ux-requirements.md](docs/ux-requirements.md) en cada contrato UI. Registrar evidencia y pendientes por principio; la primera entrega no acredita automáticamente esta matriz ampliada. Móvil, tablet y ordenador deben conservar todos los recorridos funcionales.
+
 ## Decisiones propuestas y alternativas
 
 | Propuesta | Alternativa | Motivo y estado |

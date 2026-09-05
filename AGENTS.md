@@ -44,6 +44,10 @@
 | `examples/`                | Arneses completos y ejecutables (Python y Node/JS) de referencia          | Para ver el método en acción      |
 | `src/` · `tests/`          | Código de la aplicación y sus tests                                       | Para implementar / verificar      |
 
+## Referencia obligatoria de interfaces
+
+Para diseñar, implementar o revisar cualquier interfaz, leer [docs/ux-requirements.md](docs/ux-requirements.md): matriz completa de los 30 principios Laws of UX, criterios responsive y evidencia requerida. No declarar cumplimiento global por pasar únicamente axe o unas pocas resoluciones.
+
 ## 3. Reglas duras (no negociables)
 
 - **Una sola feature a la vez.**

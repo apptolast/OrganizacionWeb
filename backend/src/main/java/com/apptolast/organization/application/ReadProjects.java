@@ -19,7 +19,7 @@ public final class ReadProjects implements ReadProjectsUseCase {
     return new ProjectPage(items, next);
   }
 
-  public Project detail(String ownerId, java.util.UUID id) {
+  public ProjectSnapshot detail(String ownerId, java.util.UUID id) {
     return queries.find(ownerId, id).orElseThrow(ProjectNotFoundException::new);
   }
 }

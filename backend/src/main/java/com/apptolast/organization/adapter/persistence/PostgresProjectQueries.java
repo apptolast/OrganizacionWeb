@@ -41,23 +41,29 @@ public final class PostgresProjectQueries implements ProjectQueries {
         arguments.toArray());
   }
 
-  public Optional<Project> find(String ownerId, UUID id) {
-    return access(() -> findRows(ownerId, id));
+  public Optional<ProjectSnapshot> find(String ownerId, UUID id) {
+    return access(() -> findRows(ownerId, id, ""));
   }
 
-  private Optional<Project> findRows(String ownerId, UUID id) {
+  Optional<ProjectSnapshot> findForUpdate(String ownerId, UUID id) {
+    return findRows(ownerId, id, " FOR UPDATE");
+  }
+
+  private Optional<ProjectSnapshot> findRows(String ownerId, UUID id, String suffix) {
     return jdbc
         .query(
-            "SELECT * FROM projects WHERE owner_id=? AND id=?",
+            "SELECT * FROM projects WHERE owner_id=? AND id=?" + suffix,
             (rs, index) ->
-                new Project(
-                    rs.getObject("id", UUID.class),
-                    rs.getString("owner_id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getString("status"),
-                    rs.getTimestamp("created_at").toInstant(),
-                    rs.getTimestamp("updated_at").toInstant()),
+                new ProjectSnapshot(
+                    new Project(
+                        rs.getObject("id", UUID.class),
+                        rs.getString("owner_id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getString("status"),
+                        rs.getTimestamp("created_at").toInstant(),
+                        rs.getTimestamp("updated_at").toInstant()),
+                    rs.getLong("version")),
             ownerId,
             id)
         .stream()

@@ -49,8 +49,9 @@ class ReadProjectsTest {
         com.apptolast.organization.domain.Project.create(
             UUID.randomUUID(), "owner", "Idea", "Description", java.time.Instant.EPOCH);
     var queries = org.mockito.Mockito.mock(ProjectQueries.class);
-    org.mockito.Mockito.when(queries.find("owner", project.id())).thenReturn(Optional.of(project));
-    assertThat(new ReadProjects(queries).detail("owner", project.id())).isSameAs(project);
+    org.mockito.Mockito.when(queries.find("owner", project.id()))
+        .thenReturn(Optional.of(new com.apptolast.organization.domain.ProjectSnapshot(project, 0)));
+    assertThat(new ReadProjects(queries).detail("owner", project.id()).project()).isSameAs(project);
   }
 
   @Test

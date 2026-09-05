@@ -437,4 +437,34 @@ class PublishOutboxTest {
         .extracting(PublicationAttempt::code)
         .isEqualTo("INVALID_EVENT");
   }
+
+  @Test
+  void edit_s15_publishesUpdatedWithOriginalEnvelope() {
+    var source = message(0);
+    var payload = new HashMap<>(source.payload());
+    payload.put("type", "ProjectUpdated.v1");
+    var event =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            source.occurredAt(),
+            "ProjectUpdated.v1",
+            1,
+            source.json(),
+            payload,
+            0);
+    var work = new Work(event);
+    new PublishOutbox(
+            work,
+            delivered -> {
+              assertThat(delivered).isSameAs(event);
+              return DeliveryOutcome.ACCEPTED;
+            },
+            audit,
+            Clock.fixed(NOW, ZoneOffset.UTC))
+        .runCycle();
+    assertThat(work.persisted)
+        .containsExactly(new PublicationAttempt(event.eventId(), "published", 1, NOW, null, null));
+  }
 }

@@ -85,9 +85,13 @@ public final class ProjectReadController {
   }
 
   @GetMapping("/api/v1/projects/{id}")
-  public Project detail(@PathVariable String id, Principal principal) {
+  public org.springframework.http.ResponseEntity<Project> detail(
+      @PathVariable String id, Principal principal) {
     if (!id.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))
       throw invalid("id");
-    return read.detail(principal.getName(), UUID.fromString(id));
+    var snapshot = read.detail(principal.getName(), UUID.fromString(id));
+    return org.springframework.http.ResponseEntity.ok()
+        .eTag("\"" + snapshot.project().id() + ":" + snapshot.version() + "\"")
+        .body(snapshot.project());
   }
 }

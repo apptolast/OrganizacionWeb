@@ -112,7 +112,8 @@ async function createProject(name) {
   );
   return response.json();
 }
-function outbox(id) {
+function outbox(id, type = "ProjectCreated.v1") {
+  assert.ok(["ProjectCreated.v1", "ProjectUpdated.v1"].includes(type));
   assert.match(id, /^[0-9a-f-]{36}$/i);
   const value = docker([
     "exec",
@@ -125,7 +126,7 @@ function outbox(id) {
     "organization",
     "-At",
     "-c",
-    `SELECT row_to_json(e) FROM outbox_events e WHERE aggregate_id='${id}'`,
+    `SELECT row_to_json(e) FROM outbox_events e WHERE aggregate_id='${id}' AND event_type='${type}'`,
   ]);
   return value ? JSON.parse(value) : undefined;
 }
@@ -234,6 +235,40 @@ try {
   );
   assert.equal(pending.published_at, null);
   assert.equal(pending.last_error_code, "BROKER_UNAVAILABLE");
+  const detail = await fetch(`${origin}/api/v1/projects/${created.id}`, {
+    headers: { Authorization: authorization },
+    signal: AbortSignal.timeout(4500),
+  });
+  assert.equal(detail.status, 200);
+  const edited = await fetch(`${origin}/api/v1/projects/${created.id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: authorization,
+      Origin: origin,
+      "Content-Type": "application/json",
+      "If-Match": detail.headers.get("ETag"),
+    },
+    body: JSON.stringify({
+      name: "Smoke edición durante caída",
+      description: "smoke-private-description",
+    }),
+    signal: AbortSignal.timeout(4500),
+  });
+  assert.equal(
+    edited.status,
+    200,
+    "Edit API must confirm independently of broker",
+  );
+  const updatedPending = await eventually(
+    "edit @s14 enabled worker retries Updated while broker is stopped",
+    () => {
+      const row = outbox(created.id, "ProjectUpdated.v1");
+      return row?.status === "pending" && row.attempts >= 1 ? row : false;
+    },
+    30,
+  );
+  assert.equal(updatedPending.published_at, null);
+  assert.equal(updatedPending.last_error_code, "BROKER_UNAVAILABLE");
   docker(["start", "rabbitmq"], undefined, 30000);
   const recovered = await eventually(
     "@s9 background publisher recovers automatically",
@@ -254,6 +289,41 @@ try {
   );
   console.log(
     "PASS @s16/@s9: broker stopped, API201 under4.5s, original pending event published after recovery",
+  );
+  const updatedPublished = await eventually(
+    "edit @s14 Updated publishes after broker recovery",
+    () => {
+      const row = outbox(created.id, "ProjectUpdated.v1");
+      return row?.status === "published" ? row : false;
+    },
+    120,
+  );
+  assert.equal(updatedPublished.event_id, updatedPending.event_id);
+  assert.deepEqual(updatedPublished.payload, updatedPending.payload);
+  assert.ok(updatedPublished.attempts > updatedPending.attempts);
+  const updatedReceived = await eventually(
+    "edit @s15 dedicated Updated queue receives original event",
+    () => {
+      const received = management(
+        "queues/organization/organization.project-updated.v1/get",
+        {
+          count: 100,
+          ackmode: "ack_requeue_true",
+          encoding: "auto",
+          truncate: 1000000,
+        },
+      );
+      return received.some(
+        (item) => item.properties.message_id === updatedPublished.event_id,
+      )
+        ? received
+        : false;
+    },
+    30,
+  );
+  assertMessage(updatedPublished, updatedReceived);
+  console.log(
+    "PASS edit @s14/@s15: enabled worker, broker stopped, PUT200 under4.5s, pending retry, original Updated published after recovery",
   );
   // Freeze publisher activity: recovery must come from the existing Rabbit volume,
   // not a worker silently recreating topology or republishing during the assertion.

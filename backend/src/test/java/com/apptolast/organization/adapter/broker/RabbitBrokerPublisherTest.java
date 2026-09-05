@@ -152,4 +152,34 @@ class RabbitBrokerPublisherTest {
       }
     }
   }
+
+  @Test
+  void edit_s16_routesUpdatedToDedicatedDurableQueue() throws Exception {
+    var source = message();
+    var payload = new java.util.HashMap<>(source.payload());
+    payload.put("type", "ProjectUpdated.v1");
+    var event =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            source.occurredAt(),
+            "ProjectUpdated.v1",
+            1,
+            json.writeValueAsString(payload),
+            payload,
+            0);
+    assertThat(publisher().publish(event)).isEqualTo(DeliveryOutcome.ACCEPTED);
+    try (var connection = factory().newConnection();
+        var channel = connection.createChannel()) {
+      var received = channel.basicGet("organization.project-updated.v1", true);
+      assertThat(received).isNotNull();
+      assertThat(received.getEnvelope().getRoutingKey()).isEqualTo("project.updated.v1");
+      assertThat(received.getProps().getMessageId()).isEqualTo(event.eventId().toString());
+      assertThat(received.getProps().getDeliveryMode()).isEqualTo(2);
+      assertThat(received.getProps().getContentType()).isEqualTo("application/json");
+      assertThat(received.getBody())
+          .isEqualTo(event.json().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
+  }
 }

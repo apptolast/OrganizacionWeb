@@ -39,21 +39,26 @@ public final class RabbitBrokerPublisher implements BrokerPublisher {
 
   @Override
   public DeliveryOutcome publish(OutboxMessage message) {
+    String kind =
+        switch (message.type()) {
+          case "ProjectCreated.v1" -> "created";
+          case "ProjectUpdated.v1" -> "updated";
+          default -> throw new IllegalArgumentException("Unsupported event type");
+        };
+    String queue = "organization.project-" + kind + ".v1", routing = "project." + kind + ".v1";
     com.rabbitmq.client.Connection connection = null;
     try {
       connection = factory.newConnection();
       var channel = connection.createChannel();
       channel.exchangeDeclare("organization.events", "direct", true);
-      channel.queueDeclare(
-          "organization.project-created.v1", true, false, false, Map.of("x-queue-type", "quorum"));
-      channel.queueBind(
-          "organization.project-created.v1", "organization.events", "project.created.v1");
+      channel.queueDeclare(queue, true, false, false, Map.of("x-queue-type", "quorum"));
+      channel.queueBind(queue, "organization.events", routing);
       channel.confirmSelect();
       var returned = new java.util.concurrent.atomic.AtomicBoolean();
       channel.addReturnListener((com.rabbitmq.client.ReturnCallback) reply -> returned.set(true));
       channel.basicPublish(
           "organization.events",
-          "project.created.v1",
+          routing,
           true,
           new AMQP.BasicProperties.Builder()
               .messageId(message.eventId().toString())

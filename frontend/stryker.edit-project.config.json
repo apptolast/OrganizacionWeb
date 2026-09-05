@@ -3,17 +3,25 @@
   "testRunner": "vitest",
   "plugins": ["@stryker-mutator/vitest-runner"],
   "mutate": [
-    "src/projects-api.ts",
-    "src/use-create-project.ts",
     "src/read-projects-api.ts",
-    "src/use-read-projects.ts",
-    "src/navigation.tsx",
     "src/edit-project-api.ts",
     "src/use-edit-project.ts"
   ],
   "reporters": ["clear-text", "json", "html"],
-  "thresholds": { "high": 90, "low": 80, "break": 80 },
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 80
+  },
   "concurrency": 2,
   "coverageAnalysis": "perTest",
-  "vitest": { "configFile": "vite.config.ts" }
+  "vitest": {
+    "configFile": "vite.config.ts"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation-edit-project/mutation.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation-edit-project/mutation.html"
+  }
 }

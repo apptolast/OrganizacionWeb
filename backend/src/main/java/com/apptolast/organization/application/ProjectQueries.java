@@ -6,5 +6,5 @@ import java.util.List;
 public interface ProjectQueries {
   List<ProjectSummary> list(String ownerId, ProjectPosition after, int limit);
 
-  java.util.Optional<Project> find(String ownerId, java.util.UUID id);
+  java.util.Optional<ProjectSnapshot> find(String ownerId, java.util.UUID id);
 }

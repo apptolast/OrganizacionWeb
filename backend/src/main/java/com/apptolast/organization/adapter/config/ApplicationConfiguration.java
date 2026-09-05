@@ -23,4 +23,10 @@ public class ApplicationConfiguration {
       com.apptolast.organization.application.ProjectQueries queries) {
     return new com.apptolast.organization.application.ReadProjects(queries);
   }
+
+  @Bean
+  com.apptolast.organization.application.EditProject editProject(
+      com.apptolast.organization.application.ProjectEditing store, Clock clock) {
+    return new com.apptolast.organization.application.EditProject(store, clock);
+  }
 }

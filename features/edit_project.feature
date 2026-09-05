@@ -45,6 +45,8 @@ Feature: Editar el nombre y la descripción de un proyecto propio
       | repetido       |
       | débil          |
       | comodín        |
+      | UUID no canónico en mayúsculas |
+      | versión con ceros iniciales |
 
   @s6
   Scenario Outline: Reutilizar la validación de campos y JSON

@@ -4,9 +4,9 @@ Organización personal por proyectos y sesiones de trabajo acotadas: decidir qu�
 
 ## Estado del producto
 
-La web permite crear proyectos propios, recuperarlos en una lista persistente de 20 elementos por página y abrir su detalle mediante un enlace directo. PostgreSQL conserva proyectos y eventos de forma atómica; el publicador RabbitMQ añade entrega confirmada, reintentos y recuperación conservando la identidad del evento. El estado de verificación de cada entrega está en el [roadmap](feature_list.json).
+La web permite crear proyectos propios, recuperarlos en una lista persistente de 20 elementos por página, abrir su detalle y editar nombre y descripción. La edición protege frente a cambios concurrentes y conserva el borrador ante errores recuperables. PostgreSQL conserva proyectos y eventos de forma atómica; el publicador RabbitMQ añade entrega confirmada, reintentos y recuperación conservando la identidad del evento. El estado de verificación de cada entrega está en el [roadmap](feature_list.json).
 
-Rutas: `/` conserva el formulario de creación; `/proyectos` muestra la lista privada; `/proyectos/{id}` muestra nombre, descripción, estado y fechas. La consulta ofrece estados de espera, vacío y error recuperable. Edición, tareas, calendario y temporizador siguen en desarrollo; el MVP completo todavía no está terminado.
+Rutas: `/` conserva el formulario de creación; `/proyectos` muestra la lista privada; `/proyectos/{id}` muestra nombre, descripción, estado y fechas; `/proyectos/{id}/editar` permite guardar cambios con control de versión. Un conflicto ofrece recargar deliberadamente la versión guardada. Estados de proyecto, tareas, calendario y temporizador siguen en desarrollo; el MVP completo todavía no está terminado.
 
 ## Ejecutar localmente
 
@@ -34,7 +34,7 @@ El Compose base mantiene el publicador desactivado. Para habilitar RabbitMQ, com
 docker compose -f docker-compose.yml -f deploy/compose.publisher.yml up --build -d --wait
 ```
 
-El broker usa una cola quorum durable y un volumen persistente. AMQP y su administración permanecen en la red interna de Docker. La API puede crear proyectos aunque el broker esté caído; el outbox conserva los eventos y reintenta con espera creciente hasta 60 segundos. La entrega es al menos una vez: un consumidor debe deduplicar por `eventId`.
+El broker usa colas quorum durables para ProjectCreated y ProjectUpdated y un volumen persistente. AMQP y su administración permanecen en la red interna de Docker. La API puede crear y editar proyectos aunque el broker esté caído; el outbox conserva los eventos y reintenta con espera creciente hasta 60 segundos. La entrega es al menos una vez: un consumidor debe deduplicar por `eventId`.
 
 Para detener esta instancia conservando sus datos, utiliza los mismos dos argumentos `-f` con `down`, sin `--volumes`. Las credenciales de RabbitMQ inicializan el volumen la primera vez; modificar `.env` no rota un usuario existente.
 

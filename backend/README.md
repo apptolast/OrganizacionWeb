@@ -60,3 +60,11 @@ Los fallos conservan pending y aplican intervalos1,2,4,8,16,32,60 segundos con t
 `GET /api/v1/projects/{id}` devuelve la representación completa original. Un recurso ajeno o inexistente responde 404 PROJECT_NOT_FOUND con el mismo mensaje. Parámetros/UUID mal formados responden 400 VALIDATION_ERROR; fallos de almacenamiento, 503; errores inesperados, 500 con referencia segura. Todas las lecturas requieren la autenticación existente y llevan Cache-Control no-store, también en error. Las consultas no escriben proyectos/outbox ni publican eventos.
 
 La frontera es `ProjectReadController → ReadProjectsUseCase ← ReadProjects → ProjectQueries ← PostgresProjectQueries`. Páginas inmutables y lógica de paginación permanecen en dominio/aplicación; JSON/cursor/HTTP y SQL permanecen en adaptadores.
+
+## Editar proyectos propios
+
+`GET /api/v1/projects/{id}` añade un ETag fuerte opaco, obtenido de la misma fila que el cuerpo. `PUT /api/v1/projects/{id}` exige ese valor exacto en `If-Match` y un objeto JSON con `name` y `description` de tipo string. La respuesta conserva los siete campos públicos, sin exponer una propiedad de versión. La migración V4 añade la versión interna, inicialmente cero.
+
+`ProjectEditController → EditProjectUseCase ← EditProject → ProjectEditing ← PostgresProjectEditing` mantiene HTTP y SQL fuera del núcleo. La transacción bloquea la fila propia antes de comparar la revisión. Un cambio equivalente devuelve el snapshot original; una revisión antigua devuelve 412 PROJECT_CONFLICT, incluso si el cuerpo coincide. Una modificación actualiza la fila y añade exactamente un ProjectUpdated.v1; ambas escrituras deben afectar una fila y cualquier fallo revierte la transacción.
+
+If-Match ausente devuelve 428 PRECONDITION_REQUIRED; formato inválido, campos inválidos o JSON ambiguo devuelven 400 VALIDATION_ERROR. La edición conserva la autenticación, protección Origin y respuestas privadas no-store. ProjectUpdated.v1 usa la misma estructura de siete campos que ProjectCreated.v1, sin descripción. El publicador selecciona de forma cerrada la cola quorum durable `organization.project-updated.v1` y la ruta `project.updated.v1`, conservando el exchange y las garantías de confirmación existentes.

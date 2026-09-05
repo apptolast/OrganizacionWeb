@@ -19,7 +19,8 @@ public record OutboxMessage(
   }
 
   public String validationCode() {
-    if (!"ProjectCreated.v1".equals(type) || schemaVersion != 1) return "UNSUPPORTED_EVENT";
+    if ((!"ProjectCreated.v1".equals(type) && !"ProjectUpdated.v1".equals(type))
+        || schemaVersion != 1) return "UNSUPPORTED_EVENT";
     if (!java.util.Set.of(
                 "eventId", "aggregateId", "ownerId", "occurredAt", "schemaVersion", "name", "type")
             .equals(payload.keySet())

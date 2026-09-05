@@ -21,6 +21,16 @@ function isSummary(value: unknown): value is ProjectSummary {
     Number.isFinite(Date.parse(value.updatedAt as string))
   );
 }
+export function isProjectDetail(data: unknown, id: string): data is Project {
+  return (
+    isSummary(data) &&
+    "ownerId" in data &&
+    "description" in data &&
+    typeof data.ownerId === "string" &&
+    typeof data.description === "string" &&
+    data.id === id
+  );
+}
 export async function readProjects(
   route: string,
   signal: AbortSignal,
@@ -32,14 +42,7 @@ export async function readProjects(
   if (response.status !== 200) throw response;
   const data: unknown = await response.json();
   if (route.startsWith("/proyectos/")) {
-    if (
-      isSummary(data) &&
-      "ownerId" in data &&
-      "description" in data &&
-      typeof data.ownerId === "string" &&
-      typeof data.description === "string" &&
-      data.id === route.slice("/proyectos/".length)
-    )
+    if (isProjectDetail(data, route.slice("/proyectos/".length)))
       return data as Project;
   } else if (
     isRecord(data) &&

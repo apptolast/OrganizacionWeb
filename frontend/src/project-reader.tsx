@@ -43,6 +43,14 @@ export function ProjectReader({ route }: { route: string }) {
             <span aria-hidden="true">＋</span> Crear proyecto
           </RouteLink>
         )}
+        {project && (
+          <RouteLink
+            className="primary-link"
+            href={`/proyectos/${project.id}/editar`}
+          >
+            Editar proyecto
+          </RouteLink>
+        )}
       </div>
       {failure === 401 ? (
         <section className="read-notice">

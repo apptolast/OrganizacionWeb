@@ -964,3 +964,43 @@ button {
     margin-bottom: 18px;
   }
 }
+
+.editor .edit-card {
+  max-width: 760px;
+  padding-bottom: 25px;
+}
+.edit-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.edit-feedback {
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid #d9bfa8;
+  border-radius: 10px;
+  background: #fff9f2;
+  p {
+    margin: 0 0 12px;
+    line-height: 1.6;
+  }
+  p:last-child {
+    margin-bottom: 0;
+  }
+}
+.edit-status {
+  padding: 14px 0 0;
+  margin: 14px 0 0;
+  border-top: 1px solid #e0e7d9;
+  color: #36512d;
+  font-weight: 600;
+}
+@media (max-width: 600px) {
+  .edit-actions > * {
+    width: 100%;
+  }
+  .edit-feedback button {
+    white-space: normal;
+  }
+}

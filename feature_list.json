@@ -1,23 +1,289 @@
 {
-  "project": "mi-proyecto",
-  "description": "Lista de features del proyecto. Una feature a la vez. Ver AGENTS.md y docs/workflow.md. Estados: pending → spec_ready → in_progress → done (o blocked).",
+  "project": "OrganizationWeb",
+  "description": "Roadmap propuesto. Una feature a la vez; spec_ready indica contrato preparado, pendiente de aprobación humana.",
   "rules": {
     "one_feature_at_a_time": true,
     "require_tests_to_close": true,
     "require_approved_spec_to_implement": true,
-    "valid_status": ["pending", "spec_ready", "in_progress", "done", "blocked"],
+    "valid_status": [
+      "pending",
+      "spec_ready",
+      "in_progress",
+      "done",
+      "blocked"
+    ],
     "sdd_required_when": "feature has \"sdd\": true"
   },
   "features": [
     {
       "id": 1,
-      "name": "ejemplo_feature",
-      "title": "Feature de ejemplo (renómbrala o bórrala al empezar)",
-      "description": "Sustituye esta feature por la primera real de tu proyecto. Toda feature con \"sdd\": true recorre spec → gherkin → puerta humana → TDD → judge → mutación.",
+      "name": "create_project",
+      "title": "Crear proyecto",
+      "description": "Capturar una idea propia persistente; contrato en features/create_project.feature.",
       "acceptance": [
-        "Describe aquí los criterios de aceptación observables",
-        "Cada criterio debe poder convertirse en un escenario Gherkin medible"
+        "Cumplir los escenarios @s1–@s28 de features/create_project.feature tras aprobación humana."
       ],
+      "sdd": true,
+      "status": "in_progress"
+    },
+    {
+      "id": 2,
+      "name": "publish_outbox",
+      "title": "Publicar outbox a RabbitMQ",
+      "description": "Publicar outbox a RabbitMQ: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 3,
+      "name": "read_projects",
+      "title": "Consultar proyectos propios",
+      "description": "Consultar proyectos propios: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 4,
+      "name": "edit_project",
+      "title": "Editar proyecto",
+      "description": "Editar proyecto: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 5,
+      "name": "project_states",
+      "title": "Estados de proyecto",
+      "description": "Estados de proyecto: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 6,
+      "name": "authentication",
+      "title": "Inicio y cierre de sesión",
+      "description": "Inicio y cierre de sesión: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 7,
+      "name": "create_task",
+      "title": "Crear tarea",
+      "description": "Crear tarea: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 8,
+      "name": "split_task",
+      "title": "Dividir tarea",
+      "description": "Dividir tarea: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 9,
+      "name": "complete_reopen_task",
+      "title": "Completar y reabrir tarea",
+      "description": "Completar y reabrir tarea: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 10,
+      "name": "availability",
+      "title": "Disponibilidad",
+      "description": "Disponibilidad: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 11,
+      "name": "schedule_block",
+      "title": "Planificar bloque",
+      "description": "Planificar bloque: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 12,
+      "name": "today",
+      "title": "Consultar Hoy",
+      "description": "Consultar Hoy: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 13,
+      "name": "reschedule",
+      "title": "Replanificar",
+      "description": "Replanificar: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 14,
+      "name": "start_work_session",
+      "title": "Iniciar sesión de trabajo",
+      "description": "Iniciar sesión de trabajo: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 15,
+      "name": "pause_resume_session",
+      "title": "Pausar y reanudar",
+      "description": "Pausar y reanudar: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 16,
+      "name": "close_work_session",
+      "title": "Cerrar sesión",
+      "description": "Cerrar sesión: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 17,
+      "name": "end_time_notification",
+      "title": "Aviso de fin",
+      "description": "Aviso de fin: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 18,
+      "name": "history",
+      "title": "Historial",
+      "description": "Historial: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 19,
+      "name": "weekly_review",
+      "title": "Revisión semanal",
+      "description": "Revisión semanal: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 20,
+      "name": "appearance",
+      "title": "Apariencia",
+      "description": "Apariencia: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 21,
+      "name": "custom_views_fields",
+      "title": "Vistas y campos",
+      "description": "Vistas y campos: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 22,
+      "name": "export_data",
+      "title": "Exportación",
+      "description": "Exportación: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 23,
+      "name": "import_data",
+      "title": "Importación",
+      "description": "Importación: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 24,
+      "name": "integration_api",
+      "title": "API para integraciones",
+      "description": "API para integraciones: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 25,
+      "name": "webhooks",
+      "title": "Webhooks",
+      "description": "Webhooks: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 26,
+      "name": "ics_calendar",
+      "title": "Calendario ICS",
+      "description": "Calendario ICS: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 27,
+      "name": "github_connector",
+      "title": "GitHub",
+      "description": "GitHub: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 28,
+      "name": "external_calendar",
+      "title": "Calendario externo",
+      "description": "Calendario externo: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 29,
+      "name": "additional_connectors",
+      "title": "Otros conectores",
+      "description": "Otros conectores: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": 30,
+      "name": "automations",
+      "title": "Automatizaciones",
+      "description": "Automatizaciones: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "acceptance": [],
       "sdd": true,
       "status": "pending"
     }

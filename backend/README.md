@@ -29,7 +29,7 @@ Las solicitudes de navegador con `Origin` requieren coincidencia exacta con `APP
 
 `POST /api/v1/projects` admite `name` y `description`. El nombre recorta únicamente Unicode White_Space exterior y valida 1–120 puntos de código; la descripción conserva el texto y admite hasta 4000. Ausencia/null de descripción se convierte en `""`. Se rechazan otros tipos y campos desconocidos. El nombre puede repetirse.
 
-201 incluye `Location: /api/v1/projects/{id}` y `id`, `ownerId`, `name`, `description`, `status: idea`, `createdAt`, `updatedAt`. Los instantes UTC se truncan a microsegundos antes de crear proyecto/evento para conservar exactamente la precisión de PostgreSQL. No hay GET de ese recurso en este corte.
+201 incluye `Location: /api/v1/projects/{id}` y `id`, `ownerId`, `name`, `description`, `status: idea`, `createdAt`, `updatedAt`. Los instantes UTC se truncan a microsegundos antes de crear proyecto/evento para conservar exactamente la precisión de PostgreSQL. La lectura del recurso y su colección se describe a continuación.
 
 Los errores usan `application/problem+json` con `type`, `title`, `status`, `code`; validación añade `errors` (`field`, `code`, `message`) y error interno añade `correlationId`. Mensajes en español y códigos estables: `VALIDATION_ERROR` (400), `MALFORMED_JSON` (400), `UNAUTHENTICATED` (401), `UNTRUSTED_ORIGIN` (403), `UNSUPPORTED_MEDIA_TYPE` (415), `STORAGE_UNAVAILABLE` (503), `INTERNAL_ERROR` (500).
 
@@ -52,3 +52,11 @@ PIT desactiva `FRECORD`, porque el filtro predeterminado excluye también la val
 Rabbit prepara exchange durable direct `organization.events`, cola durable quorum `organization.project-created.v1` y binding `project.created.v1`. Mensajes persistentes, content-type application/json, message-id igual al eventId, mandatory y confirmaciones del publicador. Una devolución prevalece sobre ACK. Una topología incompatible se conserva y registra TOPOLOGY_MISMATCH; no se borra ni sustituye.
 
 Los fallos conservan pending y aplican intervalos1,2,4,8,16,32,60 segundos con tope60, calculados desde finalización. Eventos incompatibles quedan blocked sin incrementar intentos; ninguna fila se elimina. La API no espera a Rabbit. Transporte y cleanup tienen plazos finitos y cada intento usa conexión/canal nuevos; recuperación automática del cliente desactivada. Los logs del publicador solo contienen eventId/outcome/attempt/code, y worker_error con código estable.
+
+## Consultar proyectos propios
+
+`GET /api/v1/projects` devuelve `{items, nextCursor}` con un máximo de 20 resúmenes propios. Cada resumen contiene id, name, status, createdAt y updatedAt; orden createdAt DESC e id DESC. La continuación acepta `?cursor=...` opaco, sin parámetros adicionales. El cursor señala el último elemento visible y la consulta selecciona posiciones estrictamente más antiguas, siempre filtradas por el propietario autenticado. La migración aditiva V3 incorpora el índice por propietario, fecha e id.
+
+`GET /api/v1/projects/{id}` devuelve la representación completa original. Un recurso ajeno o inexistente responde 404 PROJECT_NOT_FOUND con el mismo mensaje. Parámetros/UUID mal formados responden 400 VALIDATION_ERROR; fallos de almacenamiento, 503; errores inesperados, 500 con referencia segura. Todas las lecturas requieren la autenticación existente y llevan Cache-Control no-store, también en error. Las consultas no escriben proyectos/outbox ni publican eventos.
+
+La frontera es `ProjectReadController → ReadProjectsUseCase ← ReadProjects → ProjectQueries ← PostgresProjectQueries`. Páginas inmutables y lógica de paginación permanecen en dominio/aplicación; JSON/cursor/HTTP y SQL permanecen en adaptadores.

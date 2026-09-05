@@ -17,4 +17,10 @@ public class ApplicationConfiguration {
   CreateProject createProject(ProjectCommit commit, Clock clock) {
     return new CreateProject(commit, clock);
   }
+
+  @Bean
+  com.apptolast.organization.application.ReadProjects readProjects(
+      com.apptolast.organization.application.ProjectQueries queries) {
+    return new com.apptolast.organization.application.ReadProjects(queries);
+  }
 }

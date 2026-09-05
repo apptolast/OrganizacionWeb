@@ -49,7 +49,7 @@ public final class ApiErrors {
     String correlation = java.util.UUID.randomUUID().toString();
     org.slf4j.LoggerFactory.getLogger(ApiErrors.class)
         .error(
-            "Project creation failed; correlationId={} category={}",
+            "Project operation failed; correlationId={} category={}",
             correlation,
             error.getClass().getSimpleName());
     var body =
@@ -68,5 +68,12 @@ public final class ApiErrors {
     var body = problem(400, "VALIDATION_ERROR", error.getMessage());
     body.put("errors", error.errors());
     return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_PROBLEM_JSON).body(body);
+  }
+
+  @ExceptionHandler(com.apptolast.organization.application.ProjectNotFoundException.class)
+  ResponseEntity<Map<String, Object>> notFound() {
+    return ResponseEntity.status(404)
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+        .body(problem(404, "PROJECT_NOT_FOUND", "Proyecto no encontrado"));
   }
 }

@@ -263,7 +263,7 @@ describe("crear proyecto", () => {
     expect(screen.getByRole("navigation")).toHaveAccessibleName("Principal");
     expect(screen.getByRole("link", { name: "Proyectos" })).toHaveAttribute(
       "href",
-      "#proyectos",
+      "/proyectos",
     );
     expect(
       screen.getByRole("link", { name: "Saltar al contenido" }),

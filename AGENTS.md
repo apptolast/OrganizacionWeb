@@ -50,6 +50,8 @@ Para diseñar, implementar o revisar cualquier interfaz, leer [docs/ux-requireme
 
 ## 3. Reglas duras (no negociables)
 
+Autorización vigente del usuario: el 5 de septiembre de 2026 indicó «Si las apruebo todas» para las funcionalidades propuestas. Ver la sección de autorización global en `project-spec.md`: continuar dentro de ese alcance sin repetir la puerta humana por contrato; conservar especificación previa, TDD, revisión y pruebas. Esta instrucción del usuario prevalece sobre la puerta por feature de la plantilla.
+
 - **Una sola feature a la vez.**
 - **No declares `done`** sin tests verdes **y** umbral de mutación superado
   (`bin/harness test` y `bin/harness mutate`).

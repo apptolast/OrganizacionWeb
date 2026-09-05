@@ -4,9 +4,9 @@ Organización personal por proyectos y sesiones de trabajo acotadas: decidir qu�
 
 ## Estado del producto
 
-Primera feature implementada: crear un proyecto propio como idea, validar entradas y guardar proyecto y evento pendiente de forma atómica en PostgreSQL. El publicador RabbitMQ añade entrega confirmada, reintentos y recuperación de eventos conservando su identidad. Estas dos primeras funcionalidades están implementadas; el resto del [roadmap](feature_list.json) sigue pendiente.
+La web permite crear proyectos propios, recuperarlos en una lista persistente de 20 elementos por página y abrir su detalle mediante un enlace directo. PostgreSQL conserva proyectos y eventos de forma atómica; el publicador RabbitMQ añade entrega confirmada, reintentos y recuperación conservando la identidad del evento. El estado de verificación de cada entrega está en el [roadmap](feature_list.json).
 
-La interfaz inicial cubre creación y confirmación. Todavía no hay listado persistente, edición, calendario ni temporizador. No se muestran estadísticas de ejemplo como si fueran datos reales.
+Rutas: `/` conserva el formulario de creación; `/proyectos` muestra la lista privada; `/proyectos/{id}` muestra nombre, descripción, estado y fechas. La consulta ofrece estados de espera, vacío y error recuperable. Edición, tareas, calendario y temporizador siguen en desarrollo; el MVP completo todavía no está terminado.
 
 ## Ejecutar localmente
 

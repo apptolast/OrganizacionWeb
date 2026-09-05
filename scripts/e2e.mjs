@@ -57,7 +57,16 @@ try {
     await new Promise((resolveWait) => setTimeout(resolveWait, 1000));
   }
   if (!ready) throw new Error("API did not become ready");
-  run("pnpm", ["exec", "playwright", "test"], { env });
+  run(
+    "pnpm",
+    [
+      "exec",
+      "playwright",
+      "test",
+      ...process.argv.slice(2).filter((argument) => argument !== "--"),
+    ],
+    { env },
+  );
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;

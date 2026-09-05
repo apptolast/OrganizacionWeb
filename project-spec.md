@@ -225,9 +225,9 @@ Este paquete de decisiones fue aprobado por el usuario el 5 de septiembre de 202
 Tests de aplicación con reloj/control del broker; integración con PostgreSQL y RabbitMQ reales para confirms, devolución obligatoria, persistencia tras reinicio, rollback y reclamación concurrente. Pruebas de caída entre aceptación y commit usando un punto de fallo controlado: primer intento, sin otros envíos ni consumidores; el caso posterior a aceptación verifica que el broker retuvo esa primera copia antes de cortar el proceso. Los conteos de copias de ese experimento no son una garantía de número de duplicados ante fallos arbitrarios de red. No se probará procesamiento por un consumidor que todavía no existe.
 
 Fuentes primarias consultadas el 5 de septiembre de 2026: [RabbitMQ: publisher confirms y mandatory](https://www.rabbitmq.com/docs/confirms) y [RabbitMQ: quorum queues](https://www.rabbitmq.com/docs/quorum-queues). La propuesta usa la separación documentada entre confirmación al publicador y reconocimiento del consumidor; la topología y los intervalos concretos son decisiones propuestas para este producto.
-## Feature 3 — Consultar proyectos propios (propuesta pendiente de aprobación)
+## Feature 3 — Consultar proyectos propios (aprobada, en implementación)
 
-Contrato: `features/read_projects.feature`. Estado **spec_ready**, sin autorización para implementar. La aprobación de publish_outbox no se extiende a este contrato.
+Contrato: `features/read_projects.feature`. Estado **in_progress**, aprobado mediante «Si las apruebo todas» el 5 de septiembre de 2026.
 
 ### Comportamiento y decisiones propuestas
 
@@ -285,4 +285,10 @@ Responsive: revisar lista y detalle en 320, 360, 390, 480, 600, 768, 820, 1024, 
 
 ### Puerta de aprobación
 
-Preparar contrato no habilita código ni tests de implementación. Tras aprobación explícita, recorrer escenarios con TDD estricto, probar PostgreSQL real/autorización/paginación, UI y E2E, mutación y juez independiente. Las decisiones propuestas a revisar son páginas de 20 proyectos por cursor, recientes primero y detalle de solo lectura.
+Aprobación explícita recibida. Recorrer escenarios con TDD estricto, probar PostgreSQL real/autorización/paginación, UI y E2E, mutación y juez independiente. Las decisiones propuestas a revisar son páginas de 20 proyectos por cursor, recientes primero y detalle de solo lectura.
+
+## Autorización global del usuario — 5 de septiembre de 2026
+
+El usuario indica «Si las apruebo todas» después de discutir el MVP y el roadmap. Se aprueba read_projects y se autoriza avanzar por las funcionalidades propuestas sin repetir una puerta humana por cada contrato. Esta instrucción del usuario prevalece sobre la puerta por feature de la plantilla. Se mantienen contratos antes de producción, una feature a la vez, TDD, revisión independiente y verificación relevante. Las ampliaciones ajenas al alcance acordado no quedan autorizadas por esta anotación.
+
+Prioridad: recorrido útil de proyectos/tareas, planificación diaria con inicio y fin, registro de completados, historial, acceso privado y preparación de despliegue. Personalización avanzada y conectores después. Esta aprobación no consume créditos de restablecimiento de uso ni autoriza compras.

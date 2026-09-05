@@ -39,10 +39,10 @@
       "id": 3,
       "name": "read_projects",
       "title": "Consultar proyectos propios",
-      "description": "Lista paginada y detalle propios persistentes; propuesta pendiente de aprobación en features/read_projects.feature.",
+      "description": "Lista paginada y detalle propios persistentes; contrato aprobado en features/read_projects.feature.",
       "acceptance": ["Cumplir @s1–@s32 de features/read_projects.feature tras aprobación humana explícita."],
       "sdd": true,
-      "status": "spec_ready"
+      "status": "in_progress"
     },
     {
       "id": 4,

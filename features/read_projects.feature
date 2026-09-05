@@ -1,7 +1,7 @@
-@read_projects @pending_approval
+@read_projects @approved
 Feature: Recuperar y consultar los proyectos propios guardados
   Como propietario quiero ver mis proyectos y sus detalles después de volver a la web.
-  Propuesta pendiente de aprobación humana; no autoriza implementación.
+  Contrato aprobado por el usuario: «Si las apruebo todas» (5 de septiembre de 2026).
 
   @s1
   Scenario: Listar solo proyectos del propietario autenticado

@@ -304,7 +304,7 @@ El formulario `/proyectos/{id}/editar` precarga detalle/ETag, permite guardar o 
 
 ## Feature 5: estados de proyecto — contrato aprobado
 
-Contrato `features/project_states.feature` aprobado mediante la autorización global. Estado **done** tras revisión conjunta APPROVED: 328 pruebas backend, 176 frontend, PIT 163/163, Stryker 284/312 (91,03 %) y replay separado 14/14. Integración 22 E2E, dos recorridos Firefox/WebKit, zoom real y smoke con broker detenido. CI del commit de esta entrega pendiente; no se declara despliegue. La propuesta acotada está en `progress/proposal_project_states.md`.
+Contrato `features/project_states.feature` aprobado mediante la autorización global. Estado **done** tras revisión conjunta APPROVED: 328 pruebas backend, 176 frontend, PIT 163/163, Stryker 284/312 (91,03 %) y replay separado 14/14. Integración 22 E2E, dos recorridos Firefox/WebKit, zoom real y smoke con broker detenido. CI 33998753845 SUCCESS sobre 171be09; no se declara despliegue. La propuesta acotada está en `progress/proposal_project_states.md`.
 
 Estados cerrados Idea, Activo, Pausado y Terminado. Crear conserva Idea. Transiciones: Idea a Activo/Terminado, Activo a Pausado/Terminado, Pausado a Activo/Terminado y Terminado a Pausado. Igual estado es no-op con precondición vigente; otras transiciones son 409 INVALID_PROJECT_TRANSITION. Reabrir no activa trabajo automáticamente. El estado no inventa tareas, sesiones ni tiempo trabajado.
 

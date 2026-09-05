@@ -36,4 +36,4 @@ La suite frontend final 28182 confirma 176 pruebas y lint. Se conserva la eviden
 
 No quedan hallazgos bloqueantes de esta feature. El autor TDD puede marcar project_states como done. La publicación y CI del commit final se registrarán aparte; no se declara el MVP completo ni despliegue en el servidor del usuario.
 
-Publicado en `171be090c43aae40a77bcf1cb8bcce236d4c2b5e`. CI 33998753845 iniciada sobre ese commit; resultado todavía pendiente. La autenticación comienza después de este cierre local, con su contrato previo versionado.
+Publicado en `171be090c43aae40a77bcf1cb8bcce236d4c2b5e`. CI 33998753845 completada con **SUCCESS** sobre ese commit, verificada mediante GitHub CLI. Incluye el arnés verify, build, E2E y smoke de publicación. La autenticación comienza después del cierre local, con su contrato previo versionado.

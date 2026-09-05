@@ -35,7 +35,7 @@ Las pruebas nuevas se ejecutaron individualmente o mediante su único esquema pa
 | s9, s11 | EditProjectsApiTest.s9_s11_boundaryRejectsUntrustedRequestsWithoutWrites. |
 | s10 | EditProjectsApiTest.s10_invalidIdentityIs400WithoutWrites. |
 | s13 | EditProjectsApiTest.s13_anyFailedWriteRollsBackProjectVersionAndEvent: errores y escrituras suprimidas en ambos registros, con PostgreSQL real. |
-| s14 | Smoke independiente encargado a integración con publicador activo y RabbitMQ detenido. Pendiente resultado; no se atribuye este caso a las pruebas API con publicador desactivado. |
+| s14 | Smoke independiente de integración aprobado: publicador activo, RabbitMQ detenido, PUT 200, evento pendiente y publicación original después de recuperar RabbitMQ. El coordinador revisó fuente y resultado. |
 | s15 | PublishOutboxTest.edit_s15_publishesUpdatedWithOriginalEnvelope; RabbitBrokerPublisherTest.edit_s16_routesUpdatedToDedicatedDurableQueue (el nombre histórico del método usa s16; su contenido cubre s15). |
 | s16 | Regresión completa PublishOutboxTest y RabbitBrokerPublisherTest: Created conserva ruta, los tipos/versiones desconocidos se bloquean, el JSON incompatible conserva su clasificación. |
 | s17–s20, s22–s23 | Interfaz y E2E a cargo de los agentes frontend e integración; fuera de la autoría backend. |
@@ -43,3 +43,4 @@ Las pruebas nuevas se ejecutaron individualmente o mediante su único esquema pa
 | s24 | EditProjectsApiTest.s24_internalFailureHasSafeProblemAndCorrelationId. |
 
 No se añaden dependencias ni se modifican las garantías históricas de creación, publicación o lectura. La migración V4 es aditiva. No se ha desplegado el servidor del usuario.
+Cierre local autorizado: init raíz 8183 con 240 pruebas backend y 122 frontend verdes; juez conjunto APPROVED, 18/18 E2E y smoke con broker detenido correctos. Feature 4 done; CI pendiente del commit de entrega. Ponytail full y Caveman lite permanecen activos.

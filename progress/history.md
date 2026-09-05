@@ -62,3 +62,14 @@
 - Resultado: feature 3 done localmente. Código publicado como `24b1e50ad000fe6fbc96fef5809c12f82d552854`; [Application CI 33995196185](https://github.com/apptolast/OrganizacionWeb/actions/runs/33995196185) todavía en curso en la última consulta. No se declara éxito remoto ni despliegue en servidor.
 - Continuidad: edit_project tiene contrato aprobado bajo la autorización global y queda spec_ready. No requiere otra aprobación humana. Producción de feature 4 todavía sin iniciar al cerrar esta entrada.
 - Eficiencia: Ponytail full y Caveman lite leídos y activos; no se omiten requisitos de arquitectura, TDD, seguridad ni accesibilidad.
+
+## 2026-09-06 — feature `edit_project`
+
+- Autorización global persistente; contrato aprobado antes de producción, TDD por ciclos y una sola feature activa. Ponytail full y Caveman lite activos, subordinados a arquitectura, seguridad, accesibilidad y pruebas exigidas.
+- Backend: GET detalle y ETag comparten un snapshot SQL. PUT propio valida una precondición fuerte exacta; comprueba versión y no-op dentro de la transacción. Actualización de proyecto e inserción de ProjectUpdated.v1 atómicas, ambas con comprobación de una fila. Migración V4 aditiva y ruta RabbitMQ Updated cerrada, sin cambiar Created.
+- Frontend: formulario de edición con borrador, validación, cancelación, conflicto y recarga deliberada. Conserva literalidad, accesibilidad, foco y protección frente a respuestas obsoletas; no guarda borradores ni credenciales en almacenamiento persistente.
+- Verificación raíz 8183: salida 0, lint, 240 pruebas backend y 122 frontend verdes, sin fallos, errores ni omitidos backend. PIT 125/125, líneas 150/150. Stryker completo 209/255 (81,96 %); replays 36/42 y 3/3 documentados por separado, sin sumar sus denominadores al resultado global. Huecos observables reforzados y equivalencias justificadas.
+- Integración final: 18/18 E2E, 22 anchos, teclado/táctil, Firefox/WebKit y zoom nativo al 200 %. Smoke con worker activo y RabbitMQ detenido confirma PUT 200, evento pendiente y publicación original tras recuperar el broker. El coordinador revisó su fuente y resultado. La evidencia no certifica dispositivos físicos ni evaluación humana.
+- Juez conjunto APPROVED en progress/judge_edit_project.md y revisión backend independiente APPROVED. Informes TDD, mutación y UX enlazados desde los informes del corte.
+- Resultado: feature 4 done localmente por señal del coordinador. CI de edición pendiente de commit y ejecución al registrar este cierre; no se afirma éxito remoto ni despliegue en servidor. El MVP completo sigue en desarrollo.
+- Continuidad: feature 5 project_states queda spec_ready, con contrato preparado y revisado dentro de la autorización global. No requiere nueva aprobación humana y no se ha iniciado producción en este cierre.

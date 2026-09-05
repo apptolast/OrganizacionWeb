@@ -51,16 +51,16 @@
       "description": "Editar proyecto propio con precondición ETag; contrato aprobado por autorización global en features/edit_project.feature.",
       "acceptance": [],
       "sdd": true,
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 5,
       "name": "project_states",
       "title": "Estados de proyecto",
-      "description": "Estados de proyecto: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "description": "Estados y capacidad activa: contrato preparado y aprobado por autorización global en features/project_states.feature.",
       "acceptance": [],
       "sdd": true,
-      "status": "pending"
+      "status": "spec_ready"
     },
     {
       "id": 6,

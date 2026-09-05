@@ -27,7 +27,7 @@ El publicador actual sólo admite ProjectCreated.v1 y usa ruta fija. Por tanto e
 | ProjectCreated.v1 | organization.events | project.created.v1 | organization.project-created.v1 |
 | ProjectUpdated.v1 | organization.events | project.updated.v1 | organization.project-updated.v1 |
 
-Conservar JSON original, mandatory, confirms, cinco códigos de fallo, política de reintento y entrega al menos una vez. No derivar rutas de texto arbitrario; otros tipos permanecen INVALID_EVENT. No crear consumer de producto. Probar regresión de Created y entrega real de Updated con su metadata, así como rollback del update/outbox; no repetir toda la matriz de crash si la frontera transaccional/confirm no cambia. No confundir orden de llegada al broker con historial ordenado de versiones: este corte no expone consumidores ni promete orden global.
+Conservar JSON original, mandatory, confirms, cinco códigos de fallo, política de reintento y entrega al menos una vez. No derivar rutas de texto arbitrario; otros tipos permanecen UNSUPPORTED_EVENT. INVALID_EVENT sigue reservado al payload incompatible, conservando el contrato de publish_outbox. No crear consumer de producto. Probar regresión de Created y entrega real de Updated con su metadata, así como rollback del update/outbox; no repetir toda la matriz de crash si la frontera transaccional/confirm no cambia. No confundir orden de llegada al broker con historial ordenado de versiones: este corte no expone consumidores ni promete orden global.
 
 ## Formulario y recuperación
 

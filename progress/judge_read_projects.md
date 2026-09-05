@@ -11,3 +11,7 @@ PIT: 103/103 mutantes eliminados en dominio/aplicación. Stryker global: 276/297
 Límites: no se certifica WCAG global, dispositivos físicos, teclado virtual ni usabilidad humana. La CI 33995196185 del commit 24b1e50ad000fe6fbc96fef5809c12f82d552854 seguía en curso al emitir este dictamen; el cierre local no equivale a CI confirmada ni despliegue en el servidor.
 
 Ponytail full y Caveman lite aplicados: reutilización, alcance acotado y evidencia explícita, conservando el contrato y las garantías de calidad.
+
+Confirmación posterior: CI 33995196185 completada con `success` para 24b1e50ad000fe6fbc96fef5809c12f82d552854. La CI 33995645977 del cierre de pruebas y skills en 317e868cc22dead80c9ffcbe992062284240e46b sigue en curso; se distinguen ambos commits.
+
+Confirmación final: CI 33995645977 también completada con `success`. El cierre de pruebas y la integración de las skills tienen CI confirmada en 317e868cc22dead80c9ffcbe992062284240e46b.

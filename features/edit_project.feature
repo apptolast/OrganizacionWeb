@@ -148,7 +148,7 @@ Feature: Editar el nombre y la descripción de un proyecto propio
     When el publicador los evalúa
     Then ProjectCreated.v1 conserva organization.project-created.v1 y project.created.v1
     And ProjectUpdated.v1 utiliza únicamente su ruta acordada
-    And el tipo desconocido permanece bloqueado como INVALID_EVENT sin publicar una ruta arbitraria
+    And el tipo desconocido permanece bloqueado como UNSUPPORTED_EVENT sin publicar una ruta arbitraria
 
   @s17
   Scenario: Precargar y guardar el formulario de edición

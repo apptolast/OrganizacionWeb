@@ -4,7 +4,7 @@ Organización personal por proyectos y sesiones de trabajo acotadas: decidir qu�
 
 ## Estado del producto
 
-Primera feature implementada: crear un proyecto propio como idea, validar entradas y guardar proyecto y evento pendiente de forma atómica en PostgreSQL. El resto del [roadmap](feature_list.json) sigue pendiente. La tabla outbox prepara la entrega de eventos; el publicador RabbitMQ es el siguiente corte, todavía no implementado.
+Primera feature implementada: crear un proyecto propio como idea, validar entradas y guardar proyecto y evento pendiente de forma atómica en PostgreSQL. El publicador RabbitMQ añade entrega confirmada, reintentos y recuperación de eventos conservando su identidad. Estas dos primeras funcionalidades están implementadas; el resto del [roadmap](feature_list.json) sigue pendiente.
 
 La interfaz inicial cubre creación y confirmación. Todavía no hay listado persistente, edición, calendario ni temporizador. No se muestran estadísticas de ejemplo como si fueran datos reales.
 
@@ -25,6 +25,20 @@ docker compose down
 Ese comando conserva datos. No añadir `--volumes` si se quieren conservar proyectos.
 
 ## Desarrollo y verificación
+
+### Publicador de eventos opcional
+
+El Compose base mantiene el publicador desactivado. Para habilitar RabbitMQ, completa `RABBITMQ_USERNAME` y `RABBITMQ_PASSWORD` en `.env` y ejecuta:
+
+```sh
+docker compose -f docker-compose.yml -f deploy/compose.publisher.yml up --build -d --wait
+```
+
+El broker usa una cola quorum durable y un volumen persistente. AMQP y su administración permanecen en la red interna de Docker. La API puede crear proyectos aunque el broker esté caído; el outbox conserva los eventos y reintenta con espera creciente hasta 60 segundos. La entrega es al menos una vez: un consumidor debe deduplicar por `eventId`.
+
+Para detener esta instancia conservando sus datos, utiliza los mismos dos argumentos `-f` con `down`, sin `--volumes`. Las credenciales de RabbitMQ inicializan el volumen la primera vez; modificar `.env` no rota un usuario existente.
+
+La prueba de integración `pnpm test:publisher` utiliza otra instancia aislada, credenciales sintéticas y un puerto local efímero automático. El script elimina únicamente sus propios contenedores y volúmenes. El recorrido existente `pnpm test:e2e` sigue verificando el modo sin broker en el puerto 18080.
 
 Requisitos adicionales: JDK 25, Node.js 22.12 o posterior y pnpm 10.21.0. Gradle se descarga mediante el wrapper versionado. Docker debe estar disponible para pruebas de PostgreSQL real.
 
@@ -51,7 +65,8 @@ Las pruebas de producto y sus resultados concretos se registran en `progress/`; 
 
 ## Arquitectura y documentación
 
-- [Arquitectura](docs/architecture.md): dominio puro, aplicación, puertos y adaptadores.
+- [Arquitectura](docs/architecture.md): monorepo, dominio puro, aplicación, puertos y adaptadores.
+- [Publicación y recuperación de eventos](docs/outbox-publishing.md).
 - [Especificación](project-spec.md) y [contrato de creación](features/create_project.feature).
 - [Campos y recorrido](docs/product-fields.md).
 - [Personalización, conectores e infraestructura](docs/implementation-proposal.md).

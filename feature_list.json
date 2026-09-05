@@ -39,10 +39,10 @@
       "id": 3,
       "name": "read_projects",
       "title": "Consultar proyectos propios",
-      "description": "Consultar proyectos propios: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
-      "acceptance": [],
+      "description": "Lista paginada y detalle propios persistentes; propuesta pendiente de aprobación en features/read_projects.feature.",
+      "acceptance": ["Cumplir @s1–@s32 de features/read_projects.feature tras aprobación humana explícita."],
       "sdd": true,
-      "status": "pending"
+      "status": "spec_ready"
     },
     {
       "id": 4,

@@ -32,3 +32,4 @@ jobs:
       - run: node .harness/harness.mjs verify
       - run: pnpm build
       - run: pnpm test:e2e
+      - run: pnpm test:publisher

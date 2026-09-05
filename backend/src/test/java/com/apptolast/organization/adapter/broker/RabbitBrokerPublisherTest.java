@@ -1,0 +1,155 @@
+package com.apptolast.organization.adapter.broker;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.apptolast.organization.application.DeliveryOutcome;
+import com.apptolast.organization.domain.OutboxMessage;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rabbitmq.client.ConnectionFactory;
+import java.time.Instant;
+import java.util.Map;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+@Testcontainers
+class RabbitBrokerPublisherTest {
+  @Container
+  static final GenericContainer<?> rabbit =
+      new GenericContainer<>("rabbitmq:4.3.5-management-alpine")
+          .withEnv("RABBITMQ_DEFAULT_USER", "broker-test")
+          .withEnv("RABBITMQ_DEFAULT_PASS", "broker-test-secret")
+          .withEnv("RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS", "+S 2:2")
+          .withExposedPorts(5672)
+          .waitingFor(Wait.forLogMessage(".*Server startup complete.*\\n", 1));
+
+  final ObjectMapper json = new ObjectMapper();
+
+  OutboxMessage message() throws Exception {
+    UUID eventId = UUID.randomUUID(), aggregateId = UUID.randomUUID();
+    Instant now = Instant.parse("2026-09-05T12:00:00Z");
+    Map<String, Object> payload =
+        Map.of(
+            "eventId",
+            eventId.toString(),
+            "aggregateId",
+            aggregateId.toString(),
+            "ownerId",
+            "owner-canary",
+            "occurredAt",
+            now.toString(),
+            "schemaVersion",
+            1,
+            "name",
+            "name-canary",
+            "type",
+            "ProjectCreated.v1");
+    return new OutboxMessage(
+        eventId,
+        aggregateId,
+        "owner-canary",
+        now,
+        "ProjectCreated.v1",
+        1,
+        json.writeValueAsString(payload),
+        payload,
+        0);
+  }
+
+  ConnectionFactory factory() {
+    var factory = new ConnectionFactory();
+    factory.setHost(rabbit.getHost());
+    factory.setPort(rabbit.getMappedPort(5672));
+    factory.setUsername("broker-test");
+    factory.setPassword("broker-test-secret");
+    return factory;
+  }
+
+  RabbitBrokerPublisher publisher() {
+    return new RabbitBrokerPublisher(
+        rabbit.getHost(), rabbit.getMappedPort(5672), "broker-test", "broker-test-secret", "/");
+  }
+
+  @Test
+  void s1_confirmsPersistentOriginalJsonAndMetadataOnRealBroker() throws Exception {
+    var event = message();
+    assertThat(publisher().publish(event)).isEqualTo(DeliveryOutcome.ACCEPTED);
+    try (var connection = factory().newConnection();
+        var channel = connection.createChannel()) {
+      var received = channel.basicGet("organization.project-created.v1", true);
+      assertThat(received).isNotNull();
+      assertThat(received.getProps().getMessageId()).isEqualTo(event.eventId().toString());
+      assertThat(received.getProps().getContentType()).isEqualTo("application/json");
+      assertThat(received.getProps().getDeliveryMode()).isEqualTo(2);
+      assertThat(json.readTree(received.getBody())).isEqualTo(json.readTree(event.json()));
+      assertThat(json.readTree(received.getBody()).has("description")).isFalse();
+    }
+  }
+
+  @Test
+  void s6_realMandatoryReturnWinsOverPositiveConfirm() throws Exception {
+    var connection = factory().newConnection();
+    var channel = org.mockito.Mockito.spy(connection.createChannel());
+    var positiveConfirm = new java.util.concurrent.atomic.AtomicBoolean();
+    org.mockito.Mockito.doAnswer(
+            invocation -> {
+              boolean confirmed = (boolean) invocation.callRealMethod();
+              positiveConfirm.set(confirmed);
+              return confirmed;
+            })
+        .when(channel)
+        .waitForConfirms(5000);
+    var wrappedConnection = org.mockito.Mockito.spy(connection);
+    org.mockito.Mockito.doReturn(channel).when(wrappedConnection).createChannel();
+    org.mockito.Mockito.doAnswer(
+            invocation -> {
+              channel.queueUnbind(
+                  "organization.project-created.v1", "organization.events", "project.created.v1");
+              return invocation.callRealMethod();
+            })
+        .when(channel)
+        .basicPublish(
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyBoolean(),
+            org.mockito.ArgumentMatchers.any(com.rabbitmq.client.AMQP.BasicProperties.class),
+            org.mockito.ArgumentMatchers.any(byte[].class));
+    try (var factories =
+        org.mockito.Mockito.mockConstruction(
+            ConnectionFactory.class,
+            (factory, context) ->
+                org.mockito.Mockito.when(factory.newConnection()).thenReturn(wrappedConnection))) {
+      assertThat(publisher().publish(message())).isEqualTo(DeliveryOutcome.UNROUTABLE);
+      assertThat(positiveConfirm).isTrue();
+    } finally {
+      connection.abort(1000);
+    }
+  }
+
+  @Test
+  void s21_incompatibleQueueIsPreservedAndReported() throws Exception {
+    try (var connection = factory().newConnection();
+        var channel = connection.createChannel()) {
+      channel.queueDelete("organization.project-created.v1");
+      channel.queueDeclare(
+          "organization.project-created.v1", true, false, false, Map.of("x-queue-type", "classic"));
+      channel.basicPublish(
+          "",
+          "organization.project-created.v1",
+          null,
+          "retained-canary".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      try {
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> publisher().publish(message()))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("topology_mismatch");
+        assertThat(channel.basicGet("organization.project-created.v1", true).getBody())
+            .isEqualTo("retained-canary".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      } finally {
+        channel.queueDelete("organization.project-created.v1");
+      }
+    }
+  }
+}

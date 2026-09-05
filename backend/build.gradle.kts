@@ -14,6 +14,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("com.rabbitmq:amqp-client")
     implementation("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
@@ -24,7 +25,11 @@ dependencies {
     testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
-tasks.test { useJUnitPlatform(); systemProperty("api.version", "1.44") }
+tasks.test {
+    useJUnitPlatform()
+    systemProperty("api.version", "1.44")
+    doFirst { systemProperty("outbox.test.classpath", sourceSets.test.get().runtimeClasspath.asPath) }
+}
 pitest {
     pitestVersion.set("1.22.0")
     junit5PluginVersion.set("1.2.3")

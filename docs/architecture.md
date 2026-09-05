@@ -2,6 +2,26 @@
 
 Contrato confirmado el 5 de septiembre de 2026. Referencia: «Planos del VPS Monitor», leída en la sesión de Chrome del usuario. Se aplican sus fronteras al producto de organización, sin copiar entidades de monitorización.
 
+## Monorepo confirmado
+
+El usuario confirma un único repositorio Git para la API y la web, con código separado por carpetas. La estructura existente cumple esa decisión:
+
+```text
+OrganizacionWeb/
+  backend/       # API Java/Spring Boot; fuentes, tests, migraciones y build Gradle propios
+  frontend/      # Web React/TypeScript/SCSS; fuentes, tests y build pnpm propios
+  e2e/           # Pruebas de la web contra la API y PostgreSQL reales
+  deploy/        # Proxy y contenedor de la web
+  scripts/       # Comandos coordinados desde la raíz
+  features/      # Contratos SDD
+  docs/          # Arquitectura y requisitos compartidos
+  docker-compose.yml
+```
+
+Un mismo historial, roadmap y CI coordinan ambos componentes. Los comandos raíz de test, lint, build y mutación ejecutan las herramientas de cada carpeta; Gradle gobierna la API y pnpm la web. Cada componente conserva sus dependencias y artefacto de despliegue. Monorepo no implica un único contenedor ni mezclar código Java con React. La comunicación entre ambos se hace por el contrato HTTP de la API, no importando detalles internos del otro componente.
+
+La infraestructura operativa sigue en DockerSwarmInfrastrcture; ello no divide el código del producto en repositorios separados. No se trasladan carpetas ni se introducen gestores adicionales para cumplir esta decisión, ya reflejada en la estructura actual.
+
 ## Fronteras
 
 - `backend/`: Java, Spring Boot, Gradle Kotlin DSL.

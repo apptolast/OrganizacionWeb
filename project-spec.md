@@ -8,6 +8,8 @@ Web personal para organizar proyectos, dividirlos en tareas pequeñas, planifica
 
 Confirmado por el usuario:
 
+- Monorepo: API y web en el mismo repositorio, separadas en `backend/` y `frontend/`, con builds propios y verificación conjunta desde la raíz.
+
 - React, pnpm y SCSS para la presentación; sin Tailwind. TypeScript es la propuesta para el código de interfaz.
 - Java, Spring Boot y Gradle Kotlin DSL; arquitectura hexagonal orientada a eventos (EDA).
 - Base de datos, API propia, personalización extensa y conectores ampliables.

@@ -161,9 +161,9 @@ Antes de desplegar verificar dominio, proxy/TLS, redes, secretos, volúmenes, ba
 5. Host, dominio, secretos y configuración de infraestructura exacta.
 6. Priorización de conectores, extensión de personalización y política de borrado/conservación en contratos posteriores.
 
-## Segunda feature propuesta: publish_outbox
+## Segunda feature: publish_outbox
 
-**Estado: propuesta pendiente de aprobación humana de features/publish_outbox.feature. No implementada.** Esta sección concreta únicamente el publicador; no amplía la aprobación de create_project.
+**Estado: contrato features/publish_outbox.feature aprobado explícitamente el 5 de septiembre de 2026. Implementación en curso.** Alcance: publicador y recuperación según los 23 escenarios aprobados.
 
 ### Propósito y límites
 
@@ -218,7 +218,7 @@ Resultado observable por evento en registro estructurado: eventId, outcome (publ
 | Bloqueo de fila por intento de hasta 5 s | Leases persistentes renovables | Menos estados de recuperación para este volumen; medir contención antes de ampliar el diseño. |
 | Conservar published y blocked | Purga automática tras entrega | Mantener trazabilidad; retención/limpieza necesita un contrato y política propios. |
 
-Estas son propuestas, no decisiones atribuidas al usuario. Los escenarios presentan estas opciones como paquete concreto para la puerta de aprobación.
+Este paquete de decisiones fue aprobado por el usuario el 5 de septiembre de 2026, después de presentar el contrato y su resumen.
 
 ### Validación prevista y fuentes
 

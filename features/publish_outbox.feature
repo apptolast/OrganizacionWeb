@@ -1,8 +1,8 @@
-@publish_outbox @approval_pending
+@publish_outbox @approved
 Feature: Entregar los eventos de proyecto confirmados a RabbitMQ sin perder su identidad
   Como propietario quiero conservar y publicar los hechos de mis proyectos
   para que las futuras integraciones puedan recibirlos sin depender de su disponibilidad al guardar.
-  Este contrato es una propuesta pendiente de aprobación humana.
+  Contrato aprobado explícitamente por el usuario el 5 de septiembre de 2026; implementación TDD autorizada.
 
   @s1
   Scenario: Publicar el evento original con metadatos persistentes

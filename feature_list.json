@@ -33,7 +33,7 @@
       "description": "Publicar eventos ya confirmados con publisher confirms y recuperación al menos una vez; contrato aprobado en features/publish_outbox.feature.",
       "acceptance": ["Cumplir @s1–@s23 de features/publish_outbox.feature tras aprobación humana explícita."],
       "sdd": true,
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 3,

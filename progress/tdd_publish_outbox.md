@@ -1,6 +1,6 @@
 # Publicador outbox — trazabilidad de verificación
 
-Contrato aprobado: `features/publish_outbox.feature`, 23 escenarios / 36 casos. Implementación en curso; esta matriz no sustituye aprobación del juez ni verificación final. Fuentes y tests de producción conservan el corte `create_project`.
+Contrato aprobado: `features/publish_outbox.feature`, 23 escenarios / 36 casos. Implementación completada: verificación local, juez APPROVED y CI remoto SUCCESS. Fuentes y tests de producción conservan el corte `create_project`.
 
 | Escenario | Evidencia ejecutable |
 | --- | --- |
@@ -35,4 +35,6 @@ Contrato aprobado: `features/publish_outbox.feature`, 23 escenarios / 36 casos. 
 - Compose, runner y revisión independiente: `progress/tdd_publish_outbox_integration.md`, `progress/judge_publish_outbox_tooling.md`.
 - Smoke real completo verde: `progress/tdd_publish_outbox_smoke.md`.
 - PIT dominio/aplicación: 90/90 mutantes eliminados, 105/105 líneas cubiertas, ningún superviviente ni NO_COVERAGE. `FRECORD` desactivado; solo equals/hashCode/toString generados se excluyen, igual que feature 1. Adaptadores fuera del alcance PIT: tests de infraestructura y mutantes semánticos Rabbit aportan evidencia separada.
-- Recuperación OS y rollback con broker real: tres casos verdes, exit 0 en 35 s, registrados en `progress/tdd_publish_outbox_recovery.md`; juez inspeccionó los fixtures y las aserciones. Verificación global y dictamen final aún pendientes. No se ha desplegado esta feature en servidor ni se afirma entrega exactamente una vez; un fallo entre aceptación Rabbit y commit PostgreSQL puede producir duplicados con la misma identidad.
+- Recuperación OS y rollback con broker real: tres casos verdes, exit 0 en 35 s, registrados en `progress/tdd_publish_outbox_recovery.md`; juez inspeccionó los fixtures y las aserciones. Verificación final local del coordinador 6887 completada con exit 0 y dictamen del juez APPROVED. No se ha desplegado esta feature en servidor ni se afirma entrega exactamente una vez; un fallo entre aceptación Rabbit y commit PostgreSQL puede producir duplicados con la misma identidad.
+- Verificación local final del coordinador: lint, 147 tests backend, 38 tests frontend, PIT 90/90 y Stryker 143/148 (96,62 %) verdes. E2E 49506: ocho pruebas base y las tres etapas de smoke del publicador verdes; builds correctos. Los cinco supervivientes Stryker pertenecen al baseline anterior, sin cambios de frontend.
+- Código publicado en commit `1a3737758c655462fc3814f6af8d0f87138eb1a8`. Application CI run `33993262637` terminó SUCCESS, incluidos verify, build, E2E y publisher smoke. Feature 2 cerrada como done tras confirmación del coordinador.

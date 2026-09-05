@@ -163,7 +163,7 @@ Antes de desplegar verificar dominio, proxy/TLS, redes, secretos, volúmenes, ba
 
 ## Segunda feature: publish_outbox
 
-**Estado: contrato features/publish_outbox.feature aprobado explícitamente el 5 de septiembre de 2026. Implementación en curso.** Alcance: publicador y recuperación según los 23 escenarios aprobados.
+**Estado: completada tras contrato aprobado explícitamente el 5 de septiembre de 2026, implementación TDD, verificación local y juez APPROVED. Application CI 33993262637 terminó SUCCESS para el commit 1a3737758c655462fc3814f6af8d0f87138eb1a8.** Alcance: publicador y recuperación según los 23 escenarios aprobados.
 
 ### Propósito y límites
 

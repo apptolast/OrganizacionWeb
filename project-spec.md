@@ -225,9 +225,9 @@ Este paquete de decisiones fue aprobado por el usuario el 5 de septiembre de 202
 Tests de aplicación con reloj/control del broker; integración con PostgreSQL y RabbitMQ reales para confirms, devolución obligatoria, persistencia tras reinicio, rollback y reclamación concurrente. Pruebas de caída entre aceptación y commit usando un punto de fallo controlado: primer intento, sin otros envíos ni consumidores; el caso posterior a aceptación verifica que el broker retuvo esa primera copia antes de cortar el proceso. Los conteos de copias de ese experimento no son una garantía de número de duplicados ante fallos arbitrarios de red. No se probará procesamiento por un consumidor que todavía no existe.
 
 Fuentes primarias consultadas el 5 de septiembre de 2026: [RabbitMQ: publisher confirms y mandatory](https://www.rabbitmq.com/docs/confirms) y [RabbitMQ: quorum queues](https://www.rabbitmq.com/docs/quorum-queues). La propuesta usa la separación documentada entre confirmación al publicador y reconocimiento del consumidor; la topología y los intervalos concretos son decisiones propuestas para este producto.
-## Feature 3 — Consultar proyectos propios (aprobada, en implementación)
+## Feature 3 — Consultar proyectos propios (completada localmente)
 
-Contrato: `features/read_projects.feature`. Estado **in_progress**, aprobado mediante «Si las apruebo todas» el 5 de septiembre de 2026.
+Contrato: `features/read_projects.feature`. Estado **done** tras TDD, revisión independiente y verificación local. Autorizado mediante «Si las apruebo todas». Backend 190 tests y frontend 73 en suite global; cinco casos frontend adicionales verificados focalmente. PIT 103/103 y Stryker global 276/297 (92,93 %), replay selectivo 17/17. CI 33995196185 en curso para 24b1e50ad000fe6fbc96fef5809c12f82d552854 al cerrar localmente; no se atribuye éxito remoto aún.
 
 ### Comportamiento y decisiones propuestas
 

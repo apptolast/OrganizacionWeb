@@ -1,7 +1,7 @@
 # Sesión actual
 
-- Feature: #3 read_projects, in_progress.
-- Aprobación: usuario «Si las apruebo todas»; autorización persistente registrada en project-spec.md.
-- Init 37769 correcto: lint, backend y 38 tests frontend verdes.
-- Backend y frontend implementan el mismo contrato en carpetas independientes. TDD y juez al finalizar; sin repetir verificaciones globales sin cambios.
-- Prioridad siguiente: recorrido MVP. No volver a solicitar aprobación de cada contrato dentro del alcance acordado.
+- Feature activa: #4 edit_project, in_progress.
+- Contrato aprobado mediante autorización global del usuario. Cierre local de read_projects confirmado; CI anterior se registra según su resultado real.
+- Baseline de esta sesión: init raíz correcto con 190 tests backend y 73 frontend. No se repite antes de este corte.
+- Backend: snapshot único de proyecto/versión, ETag, PUT atómico y outbox Updated por TDD.
+- Ponytail full y Caveman lite activos; arquitectura, seguridad y pruebas exigidas prevalecen.

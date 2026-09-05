@@ -49,3 +49,16 @@
 - Verificación remota: Application CI SUCCESS para código `1a3737758c655462fc3814f6af8d0f87138eb1a8`, run `33993262637`, incluidos verify, build, E2E y publisher smoke. [Ejecución GitHub Actions](https://github.com/apptolast/OrganizacionWeb/actions/runs/33993262637).
 - Resultado: feature 2 done tras señal expresa de cierre del coordinador posterior al CI verde. No desplegada en servidor. El roadmap completo no se declara terminado y la entrega es al menos una vez, con duplicados de identidad estable posibles.
 - Continuidad: feature 3 read_projects en spec_ready, contrato de 32 escenarios / 50 casos validado y matriz completa de 30 principios UX con verificaciones pendientes. Requiere su propia aprobación humana; no se ha implementado. Resumen de revisión en outputs/Consultar-proyectos.md del workspace.
+
+## 2026-09-06 — feature `read_projects`
+
+- Autorización persistente del usuario: «Si las apruebo todas». Se mantuvo el contrato propio de 32 escenarios / 50 casos y una sola implementación activa.
+- Backend: lista privada de 20 proyectos por cursor estable, detalle propio, respuestas sin caché, errores uniformes y ninguna escritura al consultar. Índice aditivo por propietario/fecha/id. Una revisión detectó fechas de cursor fuera del rango PostgreSQL; corrección comprobada con fronteras HTTP reales.
+- Frontend: lista/detalle persistentes, navegación por URL, espera/errores recuperables, texto literal y protección frente a respuestas obsoletas. React/pnpm/SCSS y arquitectura hexagonal conservados.
+- Verificación raíz 91741: exit 0, 190 tests backend y 73 frontend, lint correcto. Se añadieron después cinco casos frontend sin cambios de producción: 40 pruebas focalizadas de lectura y lint final verdes; 78 casos declarados en total, sin atribuir una segunda ejecución global.
+- Integración: 14 E2E Chromium, dos recorridos Firefox/WebKit, 12 anchos, teclado/axe y zoom nativo al 200 % con reflow de 320 px. Capturas corregidas inspeccionadas por el coordinador. Pendientes explícitos de dispositivos físicos y evaluación humana, sin certificación global de UX/accesibilidad.
+- Mutación: PIT 103/103 (13 nuevos y 90 previos), sin supervivientes. Stryker global 276/297 (92,93 %); 21 supervivientes iniciales revisados. Replay selectivo 17/17 detecta seis huecos observables tras reforzar pruebas; 15 equivalentes justificados. No se suman denominadores ni se elimina código del alcance.
+- Jueces de backend y frontend APPROVED; integración revisada independientemente por el coordinador. Ver progress/judge_read_projects_backend.md, progress/judge_read_projects_frontend.md y progress/judge_read_projects_integration.md.
+- Resultado: feature 3 done localmente. Código publicado como `24b1e50ad000fe6fbc96fef5809c12f82d552854`; [Application CI 33995196185](https://github.com/apptolast/OrganizacionWeb/actions/runs/33995196185) todavía en curso en la última consulta. No se declara éxito remoto ni despliegue en servidor.
+- Continuidad: edit_project tiene contrato aprobado bajo la autorización global y queda spec_ready. No requiere otra aprobación humana. Producción de feature 4 todavía sin iniciar al cerrar esta entrada.
+- Eficiencia: Ponytail full y Caveman lite leídos y activos; no se omiten requisitos de arquitectura, TDD, seguridad ni accesibilidad.

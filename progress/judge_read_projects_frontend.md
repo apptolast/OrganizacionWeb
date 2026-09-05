@@ -2,7 +2,7 @@
 
 ## Dictamen de fuente
 
-**APPROVED condicionado a la evidencia final de tests, mutación e integración del frontend.** Revisión por backend_craftsman, sin autoría ni cambios en producción/tests frontend. No se repiten suites durante esta revisión. No se han encontrado defectos bloqueantes en el código inspeccionado.
+**APPROVED.** Revisión por backend_craftsman, sin autoría ni cambios en producción/tests frontend. No se repiten suites durante esta revisión. No se han encontrado defectos bloqueantes en el código inspeccionado.
 
 Archivos revisados: App.tsx, navigation.tsx, workspace.tsx, project-reader.tsx, use-read-projects.ts, read-projects-api.ts, estilos SCSS y pruebas de lectura. Comparación con features/read_projects.feature y la sección UI de project-spec.md.
 
@@ -16,3 +16,13 @@ Archivos revisados: App.tsx, navigation.tsx, workspace.tsx, project-reader.tsx, 
 ## Límites del dictamen
 
 Esta inspección no certifica las 30 heurísticas ni WCAG 2.2 AA por sí sola. Deben incorporarse resultados finales de tests/mutación y E2E, matriz de 12 anchos y breakpoints, zoom real al 200 %, contraste/foco/táctil y los navegadores/dispositivos realmente comprobados. Los pendientes de evaluación humana y dispositivos físicos deben quedar identificados, sin convertir requisitos en resultados. No se atribuye revisión independiente del backend a este archivo: ese código lo escribió su autor y lo revisan el coordinador y otro agente.
+
+## Evidencia final revisada
+
+La suite completa inicial de frontend verificó 73 tests, lint y build. Después se añadieron cinco casos sin cambios de producción: los 40 casos focalizados de lectura y lint final pasaron; junto con los 38 históricos hay 78 declarados. No se afirma una ejecución global nueva de 78.
+
+Inspección independiente de los JSON Stryker: informe global con 276 Killed y 21 Survived de 297 (92,93 %), sin errores ni falta de cobertura. El replay separado tiene 17 Killed de 17. La bitácora identifica seis huecos observables corregidos por las nuevas pruebas y 15 equivalentes justificados. Se revisaron las justificaciones en el contexto del consumidor: los guardas debilitados siguen rechazando JSON incompatible o llegan al mismo error seguro; el contador de retry es opaco; los cambios de título de History API no afectan la ruta. No se combinan denominadores ni se presenta el replay como nueva puntuación global.
+
+Integración revisada: 14 E2E Chromium, dos recorridos Firefox/WebKit, matriz de 12 anchos, teclado/axe y zoom real al 200 % con reflow a 320 px. El coordinador inspeccionó las capturas corregidas. Se conservan los límites declarados de dispositivos físicos, teclado virtual y evaluación humana; no se certifica accesibilidad universal. Fuentes: progress/tdd_read_projects_integration.md, progress/ux_read_projects.md y progress/mutation_read_projects_frontend.md.
+
+Ponytail full y Caveman lite aplicados en esta revisión. No se solicitan capas, dependencias ni pruebas redundantes; se conserva la evidencia exigida por el contrato.

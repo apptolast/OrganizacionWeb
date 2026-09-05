@@ -42,16 +42,16 @@
       "description": "Lista paginada y detalle propios persistentes; contrato aprobado en features/read_projects.feature.",
       "acceptance": ["Cumplir @s1–@s32 de features/read_projects.feature tras aprobación humana explícita."],
       "sdd": true,
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 4,
       "name": "edit_project",
       "title": "Editar proyecto",
-      "description": "Editar proyecto: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "description": "Editar proyecto propio con precondición ETag; contrato aprobado por autorización global en features/edit_project.feature.",
       "acceptance": [],
       "sdd": true,
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "id": 5,

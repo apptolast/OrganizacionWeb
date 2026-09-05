@@ -26,7 +26,7 @@ Refactor en verde: Workspace compartido, hook useReadProjects y adaptador read-p
 
 Diseño: lista semántica de tarjetas con nombre íntegro/estado/fecha, detalle de descripción completa, jerarquía y paleta coherentes con creación, SCSS con wrap de palabras largas, controles44px, estados vacíos/cargando/error. Matriz responsive/axe/navegación queda a cargo de integración y revisión visual; no se atribuye cumplimiento universal por JSDOM.
 
-Verificación frontend24834 exit0: lint,73 tests completos y build. Mutación45125 en curso,297 mutantes en projects-api/use-create-project anteriores y read-projects-api/use-read-projects/navigation nuevos. No se baja umbral80 ni se excluye la nueva lógica. Los38 tests del corte anterior permanecen, salvo href Proyectos que ahora apunta al recorrido aprobado.
+Verificación frontend24834 exit0: lint,73 tests completos y build. Mutación45125 finalizada:276/297 eliminados (92,93 %),297 mutantes en projects-api/use-create-project anteriores y read-projects-api/use-read-projects/navigation nuevos. No se baja umbral80 ni se excluye la nueva lógica. Los38 tests del corte anterior permanecen, salvo href Proyectos que ahora apunta al recorrido aprobado.
 
 ## Trazabilidad frontend
 
@@ -40,3 +40,14 @@ Verificación frontend24834 exit0: lint,73 tests completos y build. Mutación451
 - @s29: cache no-store y ausencia de escrituras localStorage/sessionStorage.
 - @s31/@s32: error de detalle red/503/500 recuperable y espera singular inmediata.
 - @s1–@s13/@s28: contrato servidor, propiedad backend; UI no sustituye evidencia de autorización/SQL/cursores.
+
+## Cierre de mutación y refuerzo focalizado
+
+La ejecución completa45125 terminó exit0 con276/297 mutantes eliminados (92,93 %),21 supervivientes y cero timeout/noCoverage/errores. Conserva el alcance de cinco archivos y umbral80. El informe progress/mutation_read_projects_frontend.md documenta individualmente los21 supervivientes.
+
+Cinco casos adicionales, sin cambios de producción, comprueban estado desconocido, ownerId numérico, cursor array, preventDefault del enlace y cleanup del listener. Los40 casos focalizados de lectura pasan; con los38 casos anteriores hay78 tests declarados. Se conserva la evidencia de suite completa73/build anterior y no se inventa una ejecución global78.
+
+El replay selectivo12207 terminó exit0 con17/17 mutantes eliminados: cubre los seis huecos observables iniciales y mutantes vecinos. Los15 restantes son equivalentes justificados. La puntuación global publicada sigue siendo92,93 %, no una suma de ejecuciones. Lint final posterior a los cinco casos pasa. Producción congelada.
+
+Leídas .agents/skills/ponytail/SKILL.md, .agents/skills/caveman/SKILL.md y docs/agent-efficiency.md. Se aplican Ponytail full y Caveman lite sin reducir arquitectura, contrato, pruebas exigidas ni documentación de evidencia.
+

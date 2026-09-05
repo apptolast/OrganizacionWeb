@@ -330,6 +330,32 @@ it.each(["network", 503, 500])(
   },
 );
 afterEach(() => window.history.replaceState(null, "", "/"));
+it("navegación cliente cancela el salto nativo para no provocar una segunda carga", () => {
+  render(<RouteLink href="/proyectos">Abrir proyectos</RouteLink>);
+  expect(fireEvent.click(screen.getByRole("link"))).toBe(false);
+  expect(window.location.pathname).toBe("/proyectos");
+});
+it("la navegación libera su suscripción al desmontar la aplicación", () => {
+  const subscriptions = new Set<EventListenerOrEventListenerObject>();
+  const add = window.addEventListener.bind(window);
+  const remove = window.removeEventListener.bind(window);
+  vi.spyOn(window, "addEventListener").mockImplementation(
+    (type, listener, options) => {
+      if (type === "popstate") subscriptions.add(listener);
+      add(type, listener, options);
+    },
+  );
+  vi.spyOn(window, "removeEventListener").mockImplementation(
+    (type, listener, options) => {
+      if (type === "popstate") subscriptions.delete(listener);
+      remove(type, listener, options);
+    },
+  );
+  const { unmount } = render(<App />);
+  expect(subscriptions.size).toBe(1);
+  unmount();
+  expect(subscriptions.size).toBe(0);
+});
 it.each([
   { ctrlKey: true },
   { metaKey: true },

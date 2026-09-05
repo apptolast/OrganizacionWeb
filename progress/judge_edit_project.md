@@ -27,3 +27,5 @@ Dictamen conjunto final: revisión backend independiente APPROVED en `judge_edit
 La corrida final de navegador pasó 18/18 E2E, incluyendo 22 anchos (matriz base y ambos lados de breakpoints), teclado/táctil y errores recuperables. Se conservan además dos recorridos reales Firefox/WebKit y la evidencia independiente de zoom nativo al 200 %. Matriz de 30 principios y límites revisada en `ux_edit_project.md`. No quedan bloqueos locales de corrección; la evaluación humana y de dispositivos físicos permanece explícitamente pendiente, sin atribuir una certificación global de accesibilidad.
 
 Implementación publicada en `f8c1963cfe68cca85769b1e9efa3730b0160f861`. CI `33997062229` iniciada, resultado pendiente al registrar el cierre local. Los fixtures de integración y smoke fueron eliminados por sus propietarios, sin dejar servicios de prueba activos.
+
+Confirmación posterior: la CI `33997062229` completó con `success` para el commit de implementación. Edición verificada localmente y en CI; el despliegue y el resto del MVP siguen pendientes.

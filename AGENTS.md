@@ -10,6 +10,8 @@
 
 ## 1. Antes de empezar (obligatorio)
 
+Por petición del usuario, todos los agentes aplican [Ponytail](.agents/skills/ponytail/SKILL.md) y [Caveman](.agents/skills/caveman/SKILL.md). Leerlos una vez por contexto y seguir [su integración en este proyecto](docs/agent-efficiency.md): Ponytail full, Caveman lite, requisitos explícitos y calidad conservados.
+
 1. Ejecuta `./init.sh` (o `bin/harness init`). Si falla, **para** y resuelve
    el entorno antes de tocar código.
 2. Lee `progress/current.md` (estado de la última sesión).

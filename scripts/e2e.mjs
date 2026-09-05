@@ -28,6 +28,7 @@ const env = {
   APP_AUTH_USERNAME: "e2e-user",
   APP_AUTH_PASSWORD: "e2e-only-password",
   WEB_PORT: "18080",
+  APP_MAX_ACTIVE_PROJECTS: "3",
   E2E_COMPOSE_PROJECT: project,
   E2E_ENV_FILE: environmentFile,
 };

@@ -11,11 +11,15 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public final class ProjectEditController {
   private final EditProjectUseCase edit;
+  private final com.apptolast.organization.application.ChangeProjectStatusUseCase states;
   private final com.fasterxml.jackson.databind.ObjectMapper json;
 
   public ProjectEditController(
-      EditProjectUseCase edit, com.fasterxml.jackson.databind.ObjectMapper json) {
+      EditProjectUseCase edit,
+      com.fasterxml.jackson.databind.ObjectMapper json,
+      com.apptolast.organization.application.ChangeProjectStatusUseCase states) {
     this.edit = edit;
+    this.states = states;
     this.json = json;
   }
 
@@ -26,7 +30,7 @@ public final class ProjectEditController {
       @RequestBody String raw,
       Principal principal) {
     var expected = precondition(matches);
-    var body = body(raw);
+    var body = body(raw, "name", "description");
     if (!id.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))
       throw invalid("id");
     var result =
@@ -70,7 +74,7 @@ public final class ProjectEditController {
             new FieldError(field, "INVALID_VALUE", "El valor enviado no es válido.")));
   }
 
-  private JsonNode body(String raw) {
+  private JsonNode body(String raw, String... required) {
     JsonNode body;
     try {
       body =
@@ -87,9 +91,9 @@ public final class ProjectEditController {
     body.fieldNames()
         .forEachRemaining(
             field -> {
-              if (!field.equals("name") && !field.equals("description")) throw invalid("body");
+              if (!java.util.Arrays.asList(required).contains(field)) throw invalid("body");
             });
-    for (String field : java.util.List.of("name", "description")) {
+    for (String field : required) {
       if (!body.has(field) || !body.get(field).isTextual()) throw invalid(field);
     }
     return body;
@@ -105,5 +109,23 @@ public final class ProjectEditController {
     return ResponseEntity.badRequest()
         .contentType(org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON)
         .body(result);
+  }
+
+  @PutMapping(value = "/api/v1/projects/{id}/status", consumes = "application/json")
+  public ResponseEntity<Project> status(
+      @PathVariable String id,
+      @RequestHeader("If-Match") java.util.List<String> matches,
+      @RequestBody String raw,
+      Principal principal) {
+    var expected = precondition(matches);
+    var body = body(raw, "status");
+    if (!id.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))
+      throw invalid("id");
+    var target = body.get("status").asText();
+    if (!ProjectStates.valid(target)) throw invalid("status");
+    var result = states.execute(principal.getName(), UUID.fromString(id), expected, target);
+    return ResponseEntity.ok()
+        .eTag("\"" + result.project().id() + ":" + result.version() + "\"")
+        .body(result.project());
   }
 }

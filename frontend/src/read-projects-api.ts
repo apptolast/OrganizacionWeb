@@ -1,4 +1,5 @@
 import type { Project } from "./projects-api";
+import { isProjectStatus } from "./project-status";
 export type ProjectSummary = Pick<
   Project,
   "id" | "name" | "status" | "createdAt" | "updatedAt"
@@ -7,6 +8,7 @@ export type ProjectPage = {
   items: ProjectSummary[];
   nextCursor: string | null;
 };
+export type ProjectSnapshot = { project: Project; etag: string | null };
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -16,7 +18,7 @@ function isSummary(value: unknown): value is ProjectSummary {
     ["id", "name", "createdAt", "updatedAt"].every(
       (key) => typeof value[key] === "string",
     ) &&
-    value.status === "idea" &&
+    isProjectStatus(value.status) &&
     Number.isFinite(Date.parse(value.createdAt as string)) &&
     Number.isFinite(Date.parse(value.updatedAt as string))
   );
@@ -34,7 +36,7 @@ export function isProjectDetail(data: unknown, id: string): data is Project {
 export async function readProjects(
   route: string,
   signal: AbortSignal,
-): Promise<ProjectPage | Project> {
+): Promise<ProjectPage | ProjectSnapshot> {
   const response = await fetch(
     "/api/v1/projects" + route.slice("/proyectos".length),
     { credentials: "same-origin", cache: "no-store", signal },
@@ -43,7 +45,7 @@ export async function readProjects(
   const data: unknown = await response.json();
   if (route.startsWith("/proyectos/")) {
     if (isProjectDetail(data, route.slice("/proyectos/".length)))
-      return data as Project;
+      return { project: data, etag: response.headers.get("ETag") };
   } else if (
     isRecord(data) &&
     Array.isArray(data.items) &&

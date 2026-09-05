@@ -20,7 +20,7 @@ class ProjectTest {
             () -> new Project(id, null, "Idea", "", "idea", Instant.EPOCH, Instant.EPOCH))
         .isInstanceOf(IllegalArgumentException.class);
     org.assertj.core.api.Assertions.assertThatThrownBy(
-            () -> new Project(id, "persona-a", "Idea", "", "active", Instant.EPOCH, Instant.EPOCH))
+            () -> new Project(id, "persona-a", "Idea", "", "unknown", Instant.EPOCH, Instant.EPOCH))
         .isInstanceOf(IllegalArgumentException.class);
     org.assertj.core.api.Assertions.assertThatThrownBy(
             () -> new Project(id, "persona-a", "Idea", "", null, Instant.EPOCH, Instant.EPOCH))
@@ -168,5 +168,14 @@ class ProjectTest {
     assertThat(project.status()).isEqualTo("idea");
     assertThat(project.createdAt()).isEqualTo(now);
     assertThat(project.updatedAt()).isEqualTo(now);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"idea", "active", "paused", "completed"})
+  void states_s14_acceptsAllDefinedStoredStates(String state) {
+    var now = Instant.EPOCH;
+    var project = new Project(UUID.randomUUID(), "owner", "Name", "Text", state, now, now);
+    assertThat(project.status()).isEqualTo(state);
   }
 }

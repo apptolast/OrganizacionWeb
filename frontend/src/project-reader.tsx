@@ -1,13 +1,31 @@
 import { useRef, useLayoutEffect } from "react";
 import { RouteLink } from "./navigation";
 import { useReadProjects } from "./use-read-projects";
+import { statusLabels } from "./project-status";
+import { ProjectStatusControl } from "./project-status-control";
 
 export function ProjectReader({ route }: { route: string }) {
-  const { page, project, failure, retry, isDetail, isContinuation } =
-    useReadProjects(route);
+  const {
+    page,
+    project,
+    snapshot,
+    confirmProject,
+    revokeProject,
+    failure,
+    retry,
+    isDetail,
+    isContinuation,
+  } = useReadProjects(route);
   const heading = useRef<HTMLHeadingElement>(null);
+  const hasFocused = useRef(false);
   useLayoutEffect(() => {
-    if (page || project) heading.current?.focus();
+    if (
+      (page || project) &&
+      (!hasFocused.current || document.activeElement === document.body)
+    ) {
+      heading.current?.focus();
+      hasFocused.current = true;
+    }
   }, [page, project]);
   const title =
     failure === 401
@@ -80,7 +98,15 @@ export function ProjectReader({ route }: { route: string }) {
         </section>
       ) : project ? (
         <article className="detail-card">
-          <span className="idea-badge">Idea</span>
+          <span className="idea-badge" data-status={project.status}>
+            {statusLabels[project.status]}
+          </span>
+          <ProjectStatusControl
+            snapshot={snapshot!}
+            onConfirmed={confirmProject}
+            onAccessFailure={revokeProject}
+            onReload={retry}
+          />
           <h2>La idea, en tus palabras</h2>
           <p className="project-description">
             {project.description || "Sin descripción."}
@@ -147,7 +173,9 @@ export function ProjectReader({ route }: { route: string }) {
                       </RouteLink>
                     </h2>
                     <div className="project-row-meta">
-                      <span className="idea-badge">Idea</span>
+                      <span className="idea-badge" data-status={item.status}>
+                        {statusLabels[item.status]}
+                      </span>
                       <span>
                         Creado <ProjectTime value={item.createdAt} />
                       </span>

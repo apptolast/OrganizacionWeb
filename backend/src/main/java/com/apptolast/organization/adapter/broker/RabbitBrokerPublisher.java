@@ -43,6 +43,7 @@ public final class RabbitBrokerPublisher implements BrokerPublisher {
         switch (message.type()) {
           case "ProjectCreated.v1" -> "created";
           case "ProjectUpdated.v1" -> "updated";
+          case "ProjectStatusChanged.v1" -> "status-changed";
           default -> throw new IllegalArgumentException("Unsupported event type");
         };
     String queue = "organization.project-" + kind + ".v1", routing = "project." + kind + ".v1";

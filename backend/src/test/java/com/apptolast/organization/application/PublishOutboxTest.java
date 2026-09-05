@@ -467,4 +467,82 @@ class PublishOutboxTest {
     assertThat(work.persisted)
         .containsExactly(new PublicationAttempt(event.eventId(), "published", 1, NOW, null, null));
   }
+
+  @Test
+  void states_s13_publishesExactStatusEnvelope() {
+    var source = message(0);
+    var payload = new HashMap<>(source.payload());
+    payload.remove("name");
+    payload.put("type", "ProjectStatusChanged.v1");
+    payload.put("fromStatus", "idea");
+    payload.put("toStatus", "active");
+    var event =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            source.occurredAt(),
+            "ProjectStatusChanged.v1",
+            1,
+            source.json(),
+            payload,
+            0);
+    var work = new Work(event);
+    new PublishOutbox(
+            work,
+            delivered -> {
+              assertThat(delivered).isSameAs(event);
+              return DeliveryOutcome.ACCEPTED;
+            },
+            audit,
+            Clock.fixed(NOW, ZoneOffset.UTC))
+        .runCycle();
+    assertThat(work.persisted)
+        .containsExactly(new PublicationAttempt(event.eventId(), "published", 1, NOW, null, null));
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"fromType", "toType", "same", "impossible", "unknown", "extra", "missing"})
+  void states_s13_blocksIncompatibleStatusPayload(String defect) {
+    var source = message(0);
+    var payload = new HashMap<>(source.payload());
+    payload.remove("name");
+    payload.put("type", "ProjectStatusChanged.v1");
+    payload.put("fromStatus", "idea");
+    payload.put("toStatus", "active");
+    switch (defect) {
+      case "fromType" -> payload.put("fromStatus", 1);
+      case "toType" -> payload.put("toStatus", false);
+      case "same" -> payload.put("toStatus", "idea");
+      case "impossible" -> payload.put("toStatus", "paused");
+      case "unknown" -> payload.put("fromStatus", "other");
+      case "extra" -> payload.put("name", "private");
+      default -> payload.remove("fromStatus");
+    }
+    var event =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            source.occurredAt(),
+            "ProjectStatusChanged.v1",
+            1,
+            source.json(),
+            payload,
+            0);
+    var work = new Work(event);
+    new PublishOutbox(
+            work,
+            delivered -> {
+              throw new AssertionError("Invalid event sent");
+            },
+            audit,
+            Clock.fixed(NOW, ZoneOffset.UTC))
+        .runCycle();
+    assertThat(work.persisted)
+        .singleElement()
+        .extracting(PublicationAttempt::code)
+        .isEqualTo("INVALID_EVENT");
+  }
 }

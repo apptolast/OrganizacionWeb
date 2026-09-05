@@ -1,17 +1,8 @@
 import { test, expect } from "@playwright/test";
-import { sql, create } from "./support/projects.mjs";
+import { sql, create, stored } from "./support/projects.mjs";
 import AxeBuilder from "@axe-core/playwright";
 
 test.beforeEach(() => sql("TRUNCATE outbox_events, projects"));
-
-function stored(id) {
-  expect(id).toMatch(/^[0-9a-f-]{36}$/i);
-  return JSON.parse(
-    sql(
-      `SELECT json_build_object('project',row_to_json(p),'events',(SELECT json_agg(e ORDER BY event_id) FROM outbox_events e WHERE e.aggregate_id=p.id)) FROM projects p WHERE p.id='${id}'`,
-    ),
-  );
-}
 
 test("edit_project: real update persists its event and unchanged save writes nothing @s1 @s3 @s7 @s12 @s17 @s21", async ({
   page,

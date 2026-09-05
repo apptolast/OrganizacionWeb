@@ -83,4 +83,26 @@ public final class ApiErrors {
         .contentType(MediaType.APPLICATION_PROBLEM_JSON)
         .body(problem(412, "PROJECT_CONFLICT", "El proyecto tiene una versión más reciente."));
   }
+
+  @ExceptionHandler(com.apptolast.organization.application.InvalidProjectTransitionException.class)
+  ResponseEntity<Map<String, Object>> invalidTransition() {
+    return ResponseEntity.status(409)
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+        .body(
+            problem(
+                409, "INVALID_PROJECT_TRANSITION", "La transición solicitada no está permitida."));
+  }
+
+  @ExceptionHandler(com.apptolast.organization.application.ActiveProjectLimitException.class)
+  ResponseEntity<Map<String, Object>> activeLimit(
+      com.apptolast.organization.application.ActiveProjectLimitException error) {
+    var body =
+        problem(
+            409,
+            "ACTIVE_PROJECT_LIMIT",
+            "No hay plazas activas disponibles. Pausa o termina otro proyecto.");
+    body.put("activeCount", error.activeCount());
+    body.put("limit", error.limit());
+    return ResponseEntity.status(409).contentType(MediaType.APPLICATION_PROBLEM_JSON).body(body);
+  }
 }

@@ -1004,3 +1004,56 @@ button {
     white-space: normal;
   }
 }
+
+.project-status-control {
+  border-bottom: 1px solid $line;
+  padding: 0 0 26px;
+  margin-bottom: 26px;
+  h2 {
+    font-size: 17px;
+  }
+}
+.status-help {
+  font-size: 14px;
+  color: $muted;
+  line-height: 1.7;
+  margin: 0 0 18px;
+}
+.status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.status-notice {
+  padding: 16px;
+  margin: 20px 0 12px;
+  border: 1px solid #d9bfa8;
+  border-radius: 10px;
+  background: #fff9f2;
+  line-height: 1.7;
+  font-size: 14px;
+}
+.idea-badge[data-status="active"] {
+  background: #234d3c;
+  color: #fff;
+  border-color: #234d3c;
+}
+.idea-badge[data-status="paused"] {
+  background: #f4eee3;
+  color: #65512f;
+  border-color: #ded0b7;
+}
+.idea-badge[data-status="completed"] {
+  background: #edf0ed;
+  color: #4f6255;
+  border-color: #cdd8ce;
+}
+@media (max-width: 600px) {
+  .status-actions > * {
+    width: 100%;
+  }
+  .project-status-control button {
+    white-space: normal;
+  }
+}

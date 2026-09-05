@@ -1,9 +1,10 @@
+import type { ProjectStatus } from "./project-status";
 export type Project = {
   id: string;
   ownerId: string;
   name: string;
   description: string;
-  status: "idea";
+  status: ProjectStatus;
   createdAt: string;
   updatedAt: string;
 };

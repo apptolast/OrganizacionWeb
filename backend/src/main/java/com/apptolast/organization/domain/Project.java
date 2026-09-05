@@ -20,7 +20,7 @@ public record Project(
     if (id == null
         || ownerId == null
         || ownerId.isBlank()
-        || !"idea".equals(status)
+        || !ProjectStates.valid(status)
         || createdAt == null
         || updatedAt == null
         || updatedAt.isBefore(createdAt)) {

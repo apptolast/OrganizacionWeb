@@ -60,16 +60,16 @@
       "description": "Estados y capacidad activa: contrato preparado y aprobado por autorización global en features/project_states.feature.",
       "acceptance": [],
       "sdd": true,
-      "status": "spec_ready"
+      "status": "done"
     },
     {
       "id": 6,
       "name": "authentication",
       "title": "Inicio y cierre de sesión",
-      "description": "Inicio y cierre de sesión: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "description": "Sesión privada revocable: contrato aprobado en features/authentication.feature; producción pendiente de activación del coordinador.",
       "acceptance": [],
       "sdd": true,
-      "status": "pending"
+      "status": "spec_ready"
     },
     {
       "id": 7,

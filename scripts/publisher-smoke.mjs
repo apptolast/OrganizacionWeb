@@ -24,6 +24,7 @@ const fixture = {
   RABBITMQ_USERNAME: `smoke-${nonce}`,
   RABBITMQ_PASSWORD: randomBytes(24).toString("hex"),
   WEB_PORT: String(port),
+  APP_MAX_ACTIVE_PROJECTS: "3",
 };
 const env = { ...process.env, ...fixture };
 const environmentFile = join(scratch, "test.env");
@@ -113,7 +114,13 @@ async function createProject(name) {
   return response.json();
 }
 function outbox(id, type = "ProjectCreated.v1") {
-  assert.ok(["ProjectCreated.v1", "ProjectUpdated.v1"].includes(type));
+  assert.ok(
+    [
+      "ProjectCreated.v1",
+      "ProjectUpdated.v1",
+      "ProjectStatusChanged.v1",
+    ].includes(type),
+  );
   assert.match(id, /^[0-9a-f-]{36}$/i);
   const value = docker([
     "exec",
@@ -174,10 +181,13 @@ function assertMessage(row, received) {
   assert.deepEqual(Object.keys(row.payload).sort(), [
     "aggregateId",
     "eventId",
-    "name",
+    ...(row.event_type === "ProjectStatusChanged.v1"
+      ? ["fromStatus"]
+      : ["name"]),
     "occurredAt",
     "ownerId",
     "schemaVersion",
+    ...(row.event_type === "ProjectStatusChanged.v1" ? ["toStatus"] : []),
     "type",
   ]);
   assert.equal(message.properties.content_type, "application/json");
@@ -269,6 +279,37 @@ try {
   );
   assert.equal(updatedPending.published_at, null);
   assert.equal(updatedPending.last_error_code, "BROKER_UNAVAILABLE");
+  const stateChanged = await fetch(
+    `${origin}/api/v1/projects/${created.id}/status`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: authorization,
+        Origin: origin,
+        "Content-Type": "application/json",
+        "If-Match": edited.headers.get("ETag"),
+      },
+      body: JSON.stringify({ status: "active" }),
+      signal: AbortSignal.timeout(4500),
+    },
+  );
+  assert.equal(
+    stateChanged.status,
+    200,
+    "State API must confirm independently of broker",
+  );
+  const statePending = await eventually(
+    "states @s11 enabled worker retries with stopped broker",
+    () => {
+      const row = outbox(created.id, "ProjectStatusChanged.v1");
+      return row?.status === "pending" && row.attempts >= 1 ? row : false;
+    },
+    30,
+  );
+  assert.equal(statePending.published_at, null);
+  assert.equal(statePending.last_error_code, "BROKER_UNAVAILABLE");
+  assert.equal(statePending.payload.fromStatus, "idea");
+  assert.equal(statePending.payload.toStatus, "active");
   docker(["start", "rabbitmq"], undefined, 30000);
   const recovered = await eventually(
     "@s9 background publisher recovers automatically",
@@ -324,6 +365,51 @@ try {
   assertMessage(updatedPublished, updatedReceived);
   console.log(
     "PASS edit @s14/@s15: enabled worker, broker stopped, PUT200 under4.5s, pending retry, original Updated published after recovery",
+  );
+  const statePublished = await eventually(
+    "states @s13 StatusChanged publishes after recovery",
+    () => {
+      const row = outbox(created.id, "ProjectStatusChanged.v1");
+      return row?.status === "published" ? row : false;
+    },
+    120,
+  );
+  assert.equal(statePublished.event_id, statePending.event_id);
+  assert.deepEqual(statePublished.payload, statePending.payload);
+  assert.ok(statePublished.attempts > statePending.attempts);
+  const stateReceived = await eventually(
+    "states @s13 dedicated queue receives original event",
+    () => {
+      const received = management(
+        "queues/organization/organization.project-status-changed.v1/get",
+        {
+          count: 100,
+          ackmode: "ack_requeue_true",
+          encoding: "auto",
+          truncate: 1000000,
+        },
+      );
+      return received.some(
+        (item) => item.properties.message_id === statePublished.event_id,
+      )
+        ? received
+        : false;
+    },
+    30,
+  );
+  assertMessage(statePublished, stateReceived);
+  const stateQueue = management(
+    "queues/organization/organization.project-status-changed.v1",
+  );
+  assert.equal(stateQueue.durable, true);
+  assert.equal(stateQueue.type, "quorum");
+  assert.ok(
+    management(
+      "bindings/organization/e/organization.events/q/organization.project-status-changed.v1",
+    ).some((binding) => binding.routing_key === "project.status-changed.v1"),
+  );
+  console.log(
+    "PASS states @s11/@s13: enabled worker, stopped broker, HTTP 200, pending retry, original eight-field event received after recovery",
   );
   // Freeze publisher activity: recovery must come from the existing Rabbit volume,
   // not a worker silently recreating topology or republishing during the assertion.

@@ -29,4 +29,16 @@ public class ApplicationConfiguration {
       com.apptolast.organization.application.ProjectEditing store, Clock clock) {
     return new com.apptolast.organization.application.EditProject(store, clock);
   }
+
+  @Bean
+  com.apptolast.organization.application.ChangeProjectStatus changeProjectStatus(
+      com.apptolast.organization.application.ProjectStatusEditing store,
+      Clock clock,
+      @org.springframework.beans.factory.annotation.Value("${app.max-active-projects:3}")
+          String configured) {
+    int limit = Integer.parseInt(configured);
+    if (limit < 1 || limit > 10)
+      throw new IllegalArgumentException("APP_MAX_ACTIVE_PROJECTS must be an integer from 1 to 10");
+    return new com.apptolast.organization.application.ChangeProjectStatus(store, clock, limit);
+  }
 }

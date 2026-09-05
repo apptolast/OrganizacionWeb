@@ -73,3 +73,14 @@
 - Juez conjunto APPROVED en progress/judge_edit_project.md y revisión backend independiente APPROVED. Informes TDD, mutación y UX enlazados desde los informes del corte.
 - Resultado: feature 4 done localmente por señal del coordinador. CI de edición pendiente de commit y ejecución al registrar este cierre; no se afirma éxito remoto ni despliegue en servidor. El MVP completo sigue en desarrollo.
 - Continuidad: feature 5 project_states queda spec_ready, con contrato preparado y revisado dentro de la autorización global. No requiere nueva aprobación humana y no se ha iniciado producción en este cierre.
+
+## 2026-09-06 — feature `project_states`
+
+- Contrato aprobado antes de producción bajo la autorización global. Ponytail full y Caveman lite activos; se conservaron arquitectura hexagonal, TDD, seguridad y accesibilidad.
+- Backend: cuatro estados, tabla cerrada de transiciones y no-op vigente; comparte versión/ETag con edición. Capacidad propia configurable entre 1 y 10, predeterminada 3. Bloqueo asesor transaccional global antes de fila/conteo bajo READ_COMMITTED, con su límite de concurrencia documentado. Estado y ProjectStatusChanged.v1 de ocho campos se confirman atómicamente; rutas anteriores intactas.
+- Evidencia PostgreSQL/RabbitMQ real: última plaza concurrente con un único éxito, aislamiento por propietario, liberación de plaza, reducción sin pausas automáticas, rollback de errores y escrituras suprimidas, conflictos entre texto y estado, publicación del evento original y recuperación con broker detenido.
+- Regresión raíz 51375: salida 0, lint, 328 pruebas backend sin fallos, errores ni omitidos y 171 frontend verdes. Tras los refuerzos de mutación, el autor confirmó la suite frontend final de 176 y lint verdes. No se atribuye una repetición backend innecesaria.
+- Mutación: PIT 163/163 eliminados; 205/206 líneas, únicamente el constructor privado vacío de ProjectStates sin recorrer. Stryker global 284/312 (91,03 %), replay selectivo 14/14 y 22 equivalencias justificadas. Denominadores separados, sin puntuación global inventada.
+- Integración final: 22 E2E, dos recorridos adicionales Firefox/WebKit y smoke con salida 0; fixture aislado limpiado. Evidencia responsive, zoom y matriz UX documentada con límites explícitos. No se certifican dispositivos físicos ni evaluación humana universal.
+- Juez conjunto APPROVED en progress/judge_project_states.md. Resultado: feature 5 done localmente por señal del coordinador. Commit/push y CI de esta entrega pendientes al registrar el cierre; no se declara despliegue en el servidor ni finalización del MVP.
+- Continuidad: feature 6 authentication queda spec_ready con contrato aprobado en febc9d1. La propuesta contrasta APIs y esquema de Spring Security 6.5.8 / Spring Session JDBC 3.5.5, sin producción iniciada. Espera activación del coordinador posterior al commit/push de estados.

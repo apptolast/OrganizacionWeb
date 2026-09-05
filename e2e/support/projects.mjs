@@ -42,3 +42,12 @@ export async function create(
   expect(response.status()).toBe(201);
   return response.json();
 }
+
+export function stored(id) {
+  expect(id).toMatch(/^[0-9a-f-]{36}$/i);
+  return JSON.parse(
+    sql(
+      `SELECT json_build_object('project',row_to_json(p),'events',(SELECT json_agg(e ORDER BY event_id) FROM outbox_events e WHERE e.aggregate_id=p.id)) FROM projects p WHERE p.id='${id}'`,
+    ),
+  );
+}

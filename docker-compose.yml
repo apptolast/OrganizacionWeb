@@ -16,6 +16,7 @@ services:
     build: ./backend
     environment:
       OUTBOX_PUBLISHER_ENABLED: "false"
+      APP_MAX_ACTIVE_PROJECTS: ${APP_MAX_ACTIVE_PROJECTS:-3}
       DB_URL: jdbc:postgresql://postgres:5432/organization
       DB_USERNAME: ${DB_USERNAME:?Set DB_USERNAME in .env}
       DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}

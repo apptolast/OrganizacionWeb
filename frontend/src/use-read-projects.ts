@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
-import type { Project } from "./projects-api";
-import { readProjects, type ProjectPage } from "./read-projects-api";
+import {
+  readProjects,
+  type ProjectPage,
+  type ProjectSnapshot,
+} from "./read-projects-api";
 export function useReadProjects(route: string) {
-  const [data, setData] = useState<ProjectPage | Project>();
+  const [data, setData] = useState<ProjectPage | ProjectSnapshot>();
   const [failure, setFailure] = useState<number | null>(null);
   const [revision, setRevision] = useState(0);
   useEffect(() => {
@@ -21,7 +24,13 @@ export function useReadProjects(route: string) {
     isDetail: route.startsWith("/proyectos/"),
     isContinuation: route.includes("?"),
     page: data && "items" in data ? data : undefined,
-    project: data && "id" in data ? data : undefined,
+    project: data && "project" in data ? data.project : undefined,
+    snapshot: data && "project" in data ? data : undefined,
+    confirmProject: (snapshot: ProjectSnapshot) => setData(snapshot),
+    revokeProject: (status: number) => {
+      setData(undefined);
+      setFailure(status);
+    },
     failure,
     retry: () => {
       setData(undefined);

@@ -1,18 +1,18 @@
 {
   "$schema": "./harness.schema.json",
-  "project": "mi-proyecto",
-  "language": "generic",
-  "description": "Rellena este archivo con los comandos de TU stack. Es el único punto que hace al arnés dependiente del lenguaje. Ver docs/configuration.md y los ejemplos en examples/.",
+  "project": "OrganizationWeb",
+  "language": "java-typescript",
+  "description": "React SCSS + Spring Boot hexagonal. PostgreSQL integration is mandatory in test.",
   "commands": {
-    "install": "",
-    "lint": "",
-    "test": "",
-    "mutate": "",
-    "build": ""
+    "install": "node scripts/project.mjs install",
+    "lint": "node scripts/project.mjs lint",
+    "test": "node scripts/project.mjs test",
+    "mutate": "node scripts/project.mjs mutate",
+    "build": "node scripts/project.mjs build"
   },
   "paths": {
-    "src": "src",
-    "tests": "tests",
+    "src": "backend/src/main",
+    "tests": "backend/src/test",
     "features": "features",
     "progress": "progress",
     "spec": "project-spec.md",

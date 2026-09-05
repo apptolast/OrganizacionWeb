@@ -1,168 +1,66 @@
-# TemplateSSDUncleBob — Arnés SDD estilo Uncle Bob (agnóstico al lenguaje)
+# OrganizationWeb
 
-Plantilla **reutilizable para cualquier proyecto** que aplica el flujo de
-desarrollo con IA de **Robert C. Martin (Uncle Bob)**, popularizado por
-[BettaTech](https://github.com/betta-tech/harness-sdd):
+Organización personal por proyectos y sesiones de trabajo acotadas: decidir qué hacer, reservar tiempo y conservar un historial del avance. React + TypeScript + SCSS, pnpm, Java + Spring Boot y Gradle Kotlin DSL.
 
-> **conversar la spec → destilarla en Gherkin → tallar con TDD estricto →
-> podar con juicio (review) → validar con prueba de mutación.**
+## Estado del producto
 
-Lo importante no es la app: es **cómo se estructura el trabajo para que un
-agente de IA desarrolle de forma autónoma y verificable**, con una sola puerta
-de aprobación humana en el punto de máximo apalancamiento (el contrato Gherkin).
+Primera feature implementada: crear un proyecto propio como idea, validar entradas y guardar proyecto y evento pendiente de forma atómica en PostgreSQL. El resto del [roadmap](feature_list.json) sigue pendiente. La tabla outbox prepara la entrega de eventos; el publicador RabbitMQ es el siguiente corte, todavía no implementado.
 
-> 📚 Documentación viva y ampliada: **https://cenit-digital.github.io/DocsTemplateSSDUncleBob/**
+La interfaz inicial cubre creación y confirmación. Todavía no hay listado persistente, edición, calendario ni temporizador. No se muestran estadísticas de ejemplo como si fueran datos reales.
 
-## Qué la hace distinta: es agnóstica al lenguaje
+## Ejecutar localmente
 
-El proceso, los agentes y las puertas son **fijos**. Lo único que cambia por
-proyecto son los comandos de tu stack, declarados en un `harness.config.json`:
+Requisitos: Docker con Compose. Crear `.env` a partir de `.env.example` y completar usuario/contraseña de base de datos y de acceso. No hay credenciales predeterminadas. Los valores permanecen fuera de Git.
 
-```json
-{
-  "commands": {
-    "test":   "…tu comando de tests…",
-    "mutate": "…tu prueba de mutación…"
-  },
-  "mutation": { "threshold": 0.8 }
-}
+```sh
+docker compose up --build -d
 ```
 
-Un motor de **cero dependencias** (`.harness/harness.mjs`, solo Node ≥ 18) lee
-esa config y ejecuta tus comandos. Así el mismo arnés sirve para Python,
-Node/TS, Go, Rust, Java… Ver `docs/configuration.md` y `.harness/adapters/`.
+Abrir http://127.0.0.1:8080 (o WEB_PORT configurado). El acceso inicial usa autenticación HTTP Basic. La web y API comparten origen; PostgreSQL no publica puerto al host. Los datos quedan en un volumen persistente.
 
-## El pipeline
-
-```
-pending
-  → [spec_partner]    CONVERSACIÓN  → project-spec.md
-  → [gherkin_author]  DESTILACIÓN   → features/<name>.feature   (spec_ready)
-  → ⏸  PUERTA HUMANA: el humano aprueba los escenarios
-  → in_progress
-  → [tdd_craftsman]   ROJO → VERDE → REFACTOR  → src/ + tests/
-  → [judge]           REVIEW ("el review es el juego entero")
-  → [mutation_tester] MUTACIÓN (valida que los tests muerden)
-  → done
+```sh
+docker compose down
 ```
 
-Una sola feature a la vez. Estado en disco (no en el chat): `project-spec.md`,
-`features/`, `progress/` sobreviven a reinicios y ventanas de contexto.
+Ese comando conserva datos. No añadir `--volumes` si se quieren conservar proyectos.
 
-## Arranque rápido
+## Desarrollo y verificación
 
-### Usar como plantilla
+Requisitos adicionales: JDK 25, Node.js 22.12 o posterior y pnpm 10.21.0. Gradle se descarga mediante el wrapper versionado. Docker debe estar disponible para pruebas de PostgreSQL real.
 
-1. En GitHub, pulsa **«Use this template»** (o clona el repo).
-2. Requisito único del arnés: **Node.js ≥ 18** (para el motor). Tu proyecto
-   usa el runtime que quieras.
-3. Edita `harness.config.json` con los comandos de tu stack
-   (ver `docs/configuration.md` o copia un ejemplo de `examples/`).
-4. Verifica el entorno:
-
-   ```bash
-   ./init.sh                 # POSIX / macOS / Linux
-   pwsh ./init.ps1           # Windows / PowerShell
-   # o, en cualquier plataforma:
-   node .harness/harness.mjs init
-   ```
-
-5. Abre Claude Code en la raíz: `CLAUDE.md` fuerza el rol `craftsman_lead`
-   (orquesta, no teclea). Pide: **«implementa la siguiente feature pendiente»**.
-
-### Comandos del arnés
-
-| Comando                    | Qué hace                                            |
-| -------------------------- | --------------------------------------------------- |
-| `bin/harness init`         | Verifica entorno, ficheros base, feature_list, tests |
-| `bin/harness test`         | La suite de tests declarada                          |
-| `bin/harness mutate [t]`   | La prueba de mutación                                |
-| `bin/harness verify`       | init + mutación (puerta de cierre)                  |
-| `bin/harness status`       | Resumen de `feature_list.json`                      |
-
-(En Windows: `bin\harness.ps1 <comando>`.)
-
-## Ejemplos ejecutables (verificados al 100%)
-
-Cuatro arneses completos, listos para inspeccionar o copiar como punto de partida:
-
-| Ejemplo                     | Stack                    | Tests | Mutación |
-| --------------------------- | ------------------------ | ----- | -------- |
-| `examples/python-notes-cli` | Python (stdlib)          | 47    | 100%     |
-| `examples/node-notes-cli`   | Node/JS (cero deps)      | 29    | 100%     |
-| `examples/go-notes-cli`     | Go (stdlib)              | 35    | 100%     |
-| `examples/rust-notes-cli`   | Rust (cero deps)         | 58    | 100%     |
-
-Los cuatro demuestran el flujo Uncle Bob de punta a punta con un mutador propio
-sin dependencias. Para producción en TS, el adaptador Node usa Vitest +
-StrykerJS; para Go, el adaptador usa gremlins; para Rust, cargo-mutants.
-
-## Los agentes (`.claude/agents/`)
-
-**Pipeline (6):** `craftsman_lead` (orquesta, no implementa), `spec_partner`
-(debate la spec), `gherkin_author` (destila el contrato), `tdd_craftsman`
-(Rojo-Verde-Refactor), `judge` (poda) y `mutation_tester` (mide que los tests
-muerden).
-
-**Apoyo, opcionales (3):** `security_reviewer`, `a11y_seo_auditor` (UI web) y
-`mentor`. Bórralos si tu proyecto no los necesita.
-
-## Estructura
-
-```
-.
-├── CLAUDE.md · AGENTS.md · CHECKPOINTS.md   # gobernanza del arnés
-├── harness.config.json · harness.schema.json # ⭐ el punto agnóstico
-├── init.sh · init.ps1 · bin/harness(.ps1)    # lanzadores multiplataforma
-├── scripts/sync-memoria.(sh|ps1)             # memoria organizacional (paso 2bis)
-├── .harness/
-│   ├── harness.mjs                           # motor agnóstico (cero deps)
-│   └── adapters/                             # python.md · node.md · go.md · rust.md · java.md · generic.md
-├── docs/                                     # workflow · tdd · gherkin · mutation
-│   │                                         #   architecture · conventions · verification
-│   └── configuration · tooling · autonomous · memoria-organizacional
-├── .claude/agents/                           # 6 del pipeline + 3 de apoyo
-├── feature_list.json · project-spec.md       # alcance y spec
-├── features/ · progress/ · src/ · tests/     # contrato, estado y código
-├── examples/{python,node}-notes-cli/         # arneses completos de referencia
-└── .github/
-    ├── workflows/harness-ci.yml              # CI: init + mutación de los ejemplos
-    ├── workflows/autonomous-evolve.yml       # bot diario de auto-mejora (solo PR)
-    ├── workflows/guard-sensitive-paths.yml   # marca PRs que tocan rutas sensibles
-    ├── AUTONOMOUS.md                          # mandato del bot (ver docs/autonomous.md)
-    └── CODEOWNERS                             # revisión obligatoria del dueño (sensibles)
+```sh
+node scripts/project.mjs install
+pnpm exec playwright install chromium
+pnpm test
+pnpm lint
+pnpm build
+pnpm mutate
+pnpm test:e2e
 ```
 
-## Evolución autónoma (opcional)
+`pnpm test:e2e` crea su propia instancia aislada y elimina solamente sus contenedores y datos al finalizar. Usa credenciales exclusivas de prueba. No ejecutar pruebas contra una base productiva.
 
-Un workflow programado puede mejorar el propio arnés de forma acotada: una vez
-por semana elige una tarea de un backlog, la completa con verificación real y
-**abre un Pull Request que un humano revisa y fusiona a mano** (nunca auto-merge).
+El arnés SDD conserva sus comandos:
 
-- Disparador: `.github/workflows/autonomous-evolve.yml`
-- Mandato y límites duros: `.github/AUTONOMOUS.md`
-- Guardián + propietarios: `.github/workflows/guard-sensitive-paths.yml` · `.github/CODEOWNERS`
-- Puesta en marcha, coste y **protección de rama obligatoria**: **`docs/autonomous.md`**
+```sh
+node .harness/harness.mjs init
+node .harness/harness.mjs verify
+```
 
-La política "solo abre PR" se respalda mecánicamente con protección de rama sobre
-`main` (paso obligatorio de la checklist en `docs/autonomous.md`). Solo corre en el
-repositorio canónico; quien use la plantilla opta explícitamente con la variable de
-repo `ENABLE_AUTONOMOUS_EVOLVE=true`, o borra esos ficheros si no lo quiere.
+Las pruebas de producto y sus resultados concretos se registran en `progress/`; que exista un comando o un workflow no significa que ya haya pasado. Mutación con umbral 80 % y revisión independiente antes de marcar una feature como done.
 
-## Memoria organizacional (opcional)
+## Arquitectura y documentación
 
-Los proyectos de Cénit Digital comparten patrones ya validados a través de un
-repo privado de memoria (`SistemaDeMemoriaUncleBob`). Esta plantilla nace
-conectada: el paso 2bis del Protocolo de arranque (`CLAUDE.md`) sincroniza esos
-patrones en `.memoria-cache/` con `scripts/sync-memoria.(sh|ps1)` y los consulta
-antes de diseñar desde cero. El paso es **no bloqueante**: sin acceso a ese repo
-(p. ej. usando la plantilla desde fuera de la organización), el arranque sigue
-exactamente igual — y puedes borrar los dos scripts y el paso 2bis si no lo
-quieres. Detalles: `docs/memoria-organizacional.md`.
+- [Arquitectura](docs/architecture.md): dominio puro, aplicación, puertos y adaptadores.
+- [Especificación](project-spec.md) y [contrato de creación](features/create_project.feature).
+- [Campos y recorrido](docs/product-fields.md).
+- [Personalización, conectores e infraestructura](docs/implementation-proposal.md).
+- [Proceso SDD](docs/workflow.md) y [plantilla original](docs/template-harness.md).
 
-## Créditos
+Las skills de React y revisión de interfaces están versionadas en `.agents/skills/`. Los plugins del agente no son los conectores del producto.
 
-Método de **Robert C. Martin (Uncle Bob)**, destilado por **BettaTech**
-([playlist](https://www.youtube.com/playlist?list=PLJkcleqxxobX8POJ0sMoG62VyyZGrvhM2),
-[repo](https://github.com/betta-tech/harness-sdd/tree/uncle-bob-harness)).
-Generalización agnóstica y plantilla por **Cenit Digital**. Licencia MIT.
+## Despliegue productivo
+
+Este Compose sirve para ejecutar y verificar el producto localmente. El servidor se gobierna desde `apptolast/DockerSwarmInfrastrcture`: integrar allí rutas Traefik, DNS, secrets, imágenes, recursos y backups. No se ha desplegado OrganizationWeb en el servidor.
+
+Antes de producción se requiere HTTPS, identidad operativa, configuración de secretos, revisión del presupuesto de capacidad, migraciones y prueba de restauración. No trasladar credenciales E2E al servidor. Consultar los hallazgos concretos en `docs/implementation-proposal.md`.

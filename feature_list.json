@@ -24,16 +24,16 @@
         "Cumplir los escenarios @s1–@s28 de features/create_project.feature tras aprobación humana."
       ],
       "sdd": true,
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 2,
       "name": "publish_outbox",
       "title": "Publicar outbox a RabbitMQ",
-      "description": "Publicar outbox a RabbitMQ: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
-      "acceptance": [],
+      "description": "Publicar eventos ya confirmados con publisher confirms y recuperación al menos una vez; contrato propuesto en features/publish_outbox.feature, pendiente de aprobación.",
+      "acceptance": ["Cumplir @s1–@s23 de features/publish_outbox.feature tras aprobación humana explícita."],
       "sdd": true,
-      "status": "pending"
+      "status": "spec_ready"
     },
     {
       "id": 3,

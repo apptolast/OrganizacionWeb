@@ -1,65 +1,34 @@
-name: Harness CI
-
+name: Application CI
 on:
   push:
     branches: [main]
   pull_request:
   workflow_dispatch:
-
 permissions:
   contents: read
-
-env:
-  NO_COLOR: "1"
-
 jobs:
-  root-harness:
-    name: Arnés raíz (init)
+  verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.21.0
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
-      - run: node .harness/harness.mjs init
-
-  python-example:
-    name: Ejemplo Python (init + mutación 100%)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: examples/python-notes-cli
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            frontend/pnpm-lock.yaml
+      - uses: actions/setup-java@v5
         with:
-          node-version: "22"
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.13"
-      - name: init (entorno + tests)
-        run: node ../../.harness/harness.mjs init
-      - name: mutación (los 3 módulos deben quedar en 100%)
-        run: |
-          node ../../.harness/harness.mjs mutate src/notes.py
-          node ../../.harness/harness.mjs mutate src/storage.py
-          node ../../.harness/harness.mjs mutate src/cli.py
-
-  node-example:
-    name: Ejemplo Node (init + mutación 100%)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: examples/node-notes-cli
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: "22"
-      - name: init (entorno + tests)
-        run: node ../../.harness/harness.mjs init
-      - name: mutación (los 3 módulos deben quedar en 100%)
-        run: |
-          node ../../.harness/harness.mjs mutate src/notes.mjs
-          node ../../.harness/harness.mjs mutate src/storage.mjs
-          node ../../.harness/harness.mjs mutate src/cli.mjs
+          distribution: temurin
+          java-version: "25"
+      - uses: gradle/actions/setup-gradle@v4
+      - run: node scripts/project.mjs install
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: node .harness/harness.mjs verify
+      - run: pnpm build
+      - run: pnpm test:e2e

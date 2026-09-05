@@ -44,3 +44,11 @@ Thumbs.db
 *.log
 .idea/
 .vscode/
+
+# Browser verification
+test-results/
+playwright-report/
+
+.gradle/
+reports/
+.e2e-work/

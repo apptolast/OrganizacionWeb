@@ -1,0 +1,22 @@
+{
+  "name": "organizationweb",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@10.21.0",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "build": "node scripts/project.mjs build",
+    "test": "node scripts/project.mjs test",
+    "lint": "node scripts/project.mjs lint",
+    "mutate": "node scripts/project.mjs mutate",
+    "test:e2e": "node scripts/e2e.mjs",
+    "test:e2e:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@axe-core/playwright": "4.13.0"
+  }
+}

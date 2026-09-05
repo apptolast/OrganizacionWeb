@@ -1,7 +1,7 @@
 Feature: Capturar un proyecto propio como idea persistente
   Como persona autenticada quiero guardar una idea de proyecto
   para organizarla después sin perderla ni confundir un envío con un guardado.
-  Contrato propuesto: pendiente de aprobación humana; no autoriza todavía TDD.
+  Contrato aprobado por el usuario el 5 de septiembre de 2026; TDD autorizado.
   En los ejemplos, ausente significa propiedad omitida y null es el valor JSON null.
   Las longitudes se cuentan en puntos de código Unicode.
 

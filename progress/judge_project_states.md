@@ -35,3 +35,5 @@ El coordinador inspeccionó el JSON completo Stryker: 284 Killed y 28 Survived, 
 La suite frontend final 28182 confirma 176 pruebas y lint. Se conserva la evidencia raíz de 328 pruebas backend y la integración sobre la misma fuente de producción; no se repiten build ni Gradle por añadir únicamente pruebas. Umbral de mutación 80 mantenido. Backend independiente APPROVED, 22 E2E y dos recorridos adicionales de motores, smoke con recuperación real, matriz UX y configuración revisados. Los fixtures propios están retirados.
 
 No quedan hallazgos bloqueantes de esta feature. El autor TDD puede marcar project_states como done. La publicación y CI del commit final se registrarán aparte; no se declara el MVP completo ni despliegue en el servidor del usuario.
+
+Publicado en `171be090c43aae40a77bcf1cb8bcce236d4c2b5e`. CI 33998753845 iniciada sobre ese commit; resultado todavía pendiente. La autenticación comienza después de este cierre local, con su contrato previo versionado.

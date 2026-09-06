@@ -585,15 +585,24 @@ it("@s34 recovers a movement with lost ACK by its retained request key without a
   ).toBe(base + "/changes/by-request/" + key);
 });
 
-it("@s9 requires explicit consent for an excess shown in the movement review", async () => {
+it("@s9 requires explicit consent when reviewed days mix excess and spare budget", async () => {
   const preview = {
     ...movePreview,
+    startAt: "2030-01-07T23:30:00Z",
+    endAt: "2030-01-08T00:30:00Z",
     days: [
       {
         date: "2030-01-07",
-        budgetMinutes: 60,
+        budgetMinutes: 120,
         plannedSeconds: 1800,
-        requestedSeconds: 3600,
+        requestedSeconds: 1800,
+        excessSeconds: 0,
+      },
+      {
+        date: "2030-01-08",
+        budgetMinutes: 30,
+        plannedSeconds: 1800,
+        requestedSeconds: 1800,
         excessSeconds: 1800,
       },
     ],
@@ -637,10 +646,10 @@ it("@s9 requires explicit consent for an excess shown in the movement review", a
     }),
   );
   fireEvent.change(await screen.findByLabelText("Inicio local"), {
-    target: { value: "2030-01-07T14:00" },
+    target: { value: "2030-01-08T00:30" },
   });
   fireEvent.change(screen.getByLabelText("Fin local"), {
-    target: { value: "2030-01-07T15:00" },
+    target: { value: "2030-01-08T01:30" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Revisar movimiento" }));
   const confirm = await screen.findByRole("button", {
@@ -653,7 +662,7 @@ it("@s9 requires explicit consent for an excess shown in the movement review", a
   );
   expect(
     screen.getByText(
-      /presupuesto 60 minutos, reservado 1800 segundos, solicitado 3600 segundos, exceso 1800 segundos/,
+      /presupuesto 30 minutos, reservado 1800 segundos, solicitado 1800 segundos, exceso 1800 segundos/,
     ),
   ).toBeInTheDocument();
   fireEvent.click(

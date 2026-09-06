@@ -272,12 +272,14 @@ it.each([401, 404])(
   },
 );
 
-it("@s36 retains confirmation after failure and retries current state", async () => {
+it("@s36 retains confirmation across two failed state reads and a third attempt", async () => {
   const pending = deferred<Response>();
+  const third = deferred<Response>();
   const fetch = vi
     .fn()
     .mockResolvedValueOnce(new Response(null, { status: 503 }))
-    .mockReturnValueOnce(pending.promise);
+    .mockReturnValueOnce(pending.promise)
+    .mockReturnValueOnce(third.promise);
   vi.stubGlobal("fetch", fetch);
   render(<BlockConfirmation block={block} onAccessFailure={onAccessFailure} />);
   expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -290,8 +292,17 @@ it("@s36 retains confirmation after failure and retries current state", async ()
   expect(screen.getByText("Consultando estado actual")).toHaveTextContent(
     "Consultando estado actual",
   );
+  await act(async () => pending.resolve(new Response(null, { status: 503 })));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Operación confirmada; estado actual sin comprobar",
+  );
+  expect(screen.getByText("Bloque guardado")).toBeVisible();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Reintentar estado actual" }),
+  );
+  expect(screen.getByText("Consultando estado actual")).toBeVisible();
   await act(async () =>
-    pending.resolve(
+    third.resolve(
       Response.json(
         { block, status: "planned", updatedAt: block.createdAt },
         { headers: { ETag: `"block:${block.id}:1"` } },
@@ -300,7 +311,12 @@ it("@s36 retains confirmation after failure and retries current state", async ()
   );
   expect(screen.getByText("Planificado")).toBeVisible();
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-  expect(fetch).toHaveBeenCalledTimes(2);
+  expect(fetch).toHaveBeenCalledTimes(3);
+  expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+    `${base}/${block.id}/state`,
+    `${base}/${block.id}/state`,
+    `${base}/${block.id}/state`,
+  ]);
   expect(onAccessFailure).not.toHaveBeenCalled();
 });
 

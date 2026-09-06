@@ -21,6 +21,59 @@ const props = {
   onRejected: vi.fn(),
   onAccessFailure: vi.fn(),
 };
+it("@s33 requires an explicit missing receipt after a failed check before resending the same movement", async () => {
+  const failedCheck = deferred<Response>();
+  const missingCheck = deferred<Response>();
+  const fetch = vi
+    .fn()
+    .mockResolvedValueOnce(new Response(null, { status: 503 }))
+    .mockReturnValueOnce(failedCheck.promise)
+    .mockReturnValueOnce(missingCheck.promise)
+    .mockReturnValueOnce(new Promise(() => {}));
+  vi.stubGlobal("fetch", fetch);
+  render(<ChangeSubmit {...props} movement={movement} />);
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar movimiento" }));
+  const check = await screen.findByRole("button", { name: "Comprobar cambio" });
+  const first = fetch.mock.calls[0][1] as RequestInit;
+  const key = new Headers(first.headers).get("Idempotency-Key");
+  fireEvent.click(check);
+  await act(async () =>
+    failedCheck.resolve(new Response(null, { status: 503 })),
+  );
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "No podemos confirmar el cambio",
+  );
+  expect(
+    screen.queryByRole("button", { name: "Reenviar el mismo cambio" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Confirmar movimiento" }),
+  ).not.toBeInTheDocument();
+  expect(fetch).toHaveBeenCalledTimes(2);
+  fireEvent.click(screen.getByRole("button", { name: "Comprobar cambio" }));
+  await act(async () =>
+    missingCheck.resolve(
+      Response.json(problem("BLOCK_CHANGE_NOT_FOUND", 404), { status: 404 }),
+    ),
+  );
+  const resend = await screen.findByRole("button", {
+    name: "Reenviar el mismo cambio",
+  });
+  expect(fetch).toHaveBeenCalledTimes(3);
+  expect(fetch.mock.calls.slice(1).map(([url]) => url)).toEqual([
+    `/api/v1/projects/${block.projectId}/tasks/${block.taskId}/blocks/changes/by-request/${key}`,
+    `/api/v1/projects/${block.projectId}/tasks/${block.taskId}/blocks/changes/by-request/${key}`,
+  ]);
+  fireEvent.click(resend);
+  expect(fetch).toHaveBeenCalledTimes(4);
+  const last = fetch.mock.calls[3][1] as RequestInit;
+  expect(fetch.mock.calls[3][0]).toBe(fetch.mock.calls[0][0]);
+  expect(last.method).toBe("POST");
+  expect(last.body).toBe(first.body);
+  expect(new Headers(last.headers)).toEqual(new Headers(first.headers));
+  expect(props.onConfirmed).not.toHaveBeenCalled();
+  expect(props.onRejected).not.toHaveBeenCalled();
+});
 it("@s33 @s38 announces work during sending and checking without removing focus or uncertainty", async () => {
   const sending = deferred<Response>();
   const checking = deferred<Response>();

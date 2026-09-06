@@ -3035,6 +3035,12 @@ it("@s36 creation followed by movement keeps only the latest historical confirma
     await screen.findByRole("button", { name: "Confirmar movimiento" }),
   );
   await screen.findByText("Cambio confirmado (hecho histórico)");
+  expect(
+    screen.queryByRole("region", { name: "Mover bloque" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Planificar bloque" }),
+  ).toBeVisible();
   expect(screen.queryByText("Bloque guardado")).not.toBeInTheDocument();
   await waitFor(() =>
     expect(

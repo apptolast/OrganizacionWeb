@@ -34,6 +34,18 @@ El primer E2E13 queda aislado en checkpoint8e91436, rama local codex/reschedule-
 
 Snapshot posterior para errores HTTP: core GREEN469422 (46 casos HTTP13) y lecturas GREEN066d26 (8PG) congelaron Java unos segundos. Root copió y comprobó SHA256 de176 archivos de producción9bb10f/38658b y creó checkpoint local d3ffecf en el árbol E2E. No se publica ni se integra ese snapshot completo: faltan los ajustes de tests/wiring de los autores y el cierre funcional. Al aprobar V13, resume_review tendrá exclusivamente BlockController.java, ApiErrors.java y nueva suite de errores13; core y lecturas liberaron esos archivos. Sólo su diff posterior se integrará, conservando avances de Store y recibos. Copia de respaldo y manifest en work/reschedule-error-snapshot-066d26; no incluye secretos, SQL, tests, configuración git ni build.
 
+## Corte posterior: integración y medición terminadas
+
+- Main publicado `9e9d916`, CI `34054091097` SUCCESS en `a9b21f`. Contiene documentación y concurrency 8 medida; frontend fuente/test iguales al corte validado antes del refuerzo nuevo.
+- La comparación de mutación también verifica el multiconjunto completo: `fcf722`, 1.416 firmas únicas por informe, SHA256 común `ec08f248847b1dc5016636edd0e3899a3df4574e935114de5c1c80fd943b8041` para firmas/estados ordenados. No hay omisiones ni duplicados.
+- V13 aprobada por root con 59 XML verdes (`ad831a`), commit aislado `f0fde3e`, cherry-pick backend `64d5174`. Regresión s20 previa al siguiente caso pasó sobre V13.
+- Handlers compartidos aprobados con 224 XML verdes (`fdcd0b`), commit aislado `92e83e6`. Sólo su diff se aplicó al WIP backend con comprobación previa y tres hashes idénticos (`2b9537`); no se copió Store ni el snapshot antiguo. BlockController pasa a ser propiedad del autor de recibos para el cursor compartido.
+- Atomicidad backend: las tres escrituras exigen una fila y se ha probado rollback por supresión y por fallo real del commit. Cancelación y movimiento concurrentes con la misma key devuelven 201/200; colisión de key entre bloques sin preferencia devuelve 201/409, ganador único y perdedor intacto. Presupuesto entre proyectos verde `f6785b`. Faltan filas restantes s21, solape creación/movimiento y s23; no se atribuyen a esos replays.
+- Recibos: 11 PG y cinco casos de aplicación verdes; HTTP ID/key, página20+1 y query desconocida verdes en `326d1f`. Extracción del decoder compartido con regresión 173 API11 + 3 HTTP13 `961758`. Autor continúa privacidad/errores/cursor repetido/terminal20; ningún cierre global.
+- Los seis refuerzos frontend están revisados en `review_reschedule_frontend_gaps.md`: 203 pruebas verdes del autor, cinco hashes comprobados por root `b628ea`, producción intacta. resume_review ejecuta replay focal de13 candidatos con reportes separados, umbral intacto y restauración exacta del config. Después se prevé delegarle las seis órdenes de concurrencia s23, reservadas por core. Core conserva s21/s22/s24; recibos conserva HTTP y cursor.
+
+Los commits de snapshot/E2E (`8e91436`, `d3ffecf`) siguen locales y no deben fusionarse como entrega completa. Para integrar E2E se usará sólo su paquete de archivos; backend e interfaz deben pasar el flujo real antes de cerrar13.
+
 ## Entrega
 
 Plan publicado en docs/mvp-delivery-plan.md, commit345543c: MVP funcionalidades1–18, previsión provisional36–72horas efectivas. No equivale a una garantía de fecha, consumo o ausencia absoluta de errores. Features19–30 siguen autorizadas para la entrega posterior.

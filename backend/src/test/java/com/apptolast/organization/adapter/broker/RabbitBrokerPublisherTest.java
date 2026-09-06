@@ -29,6 +29,57 @@ class RabbitBrokerPublisherTest {
   final ObjectMapper json = new ObjectMapper();
 
   @Test
+  void workSession_s26_routesOriginalElevenFieldsToDurableQuorumQueue() throws Exception {
+    var eventId = UUID.randomUUID();
+    var sessionId = UUID.randomUUID();
+    var start = Instant.parse("1969-12-31T23:59:59.123456Z");
+    var payload =
+        Map.<String, Object>ofEntries(
+            Map.entry("eventId", eventId.toString()),
+            Map.entry("aggregateId", sessionId.toString()),
+            Map.entry("ownerId", "owner"),
+            Map.entry("occurredAt", start.toString()),
+            Map.entry("schemaVersion", 1),
+            Map.entry("type", "WorkSessionStarted.v1"),
+            Map.entry("projectId", UUID.randomUUID().toString()),
+            Map.entry("taskId", UUID.randomUUID().toString()),
+            Map.entry("plannedMinutes", 25),
+            Map.entry("plannedEndAt", start.plusSeconds(1500).toString()),
+            Map.entry("zoneId", "Historical/Removed"));
+    var event =
+        new OutboxMessage(
+            eventId,
+            sessionId,
+            "owner",
+            start,
+            "WorkSessionStarted.v1",
+            1,
+            json.writeValueAsString(payload),
+            payload,
+            0);
+    assertThat(event.validationCode()).isNull();
+    assertThat(publisher().publish(event)).isEqualTo(DeliveryOutcome.ACCEPTED);
+    try (var connection = factory().newConnection();
+        var channel = connection.createChannel()) {
+      channel.queueDeclare(
+          "organization.work-session-started.v1",
+          true,
+          false,
+          false,
+          Map.of("x-queue-type", "quorum"));
+      var delivered = channel.basicGet("organization.work-session-started.v1", true);
+      assertThat(delivered).isNotNull();
+      assertThat(delivered.getBody())
+          .isEqualTo(event.json().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      assertThat(json.readTree(delivered.getBody()).size()).isEqualTo(11);
+      assertThat(delivered.getEnvelope().getRoutingKey()).isEqualTo("work-session.started.v1");
+      assertThat(delivered.getProps().getMessageId()).isEqualTo(eventId.toString());
+      assertThat(delivered.getProps().getDeliveryMode()).isEqualTo(2);
+      assertThat(delivered.getProps().getContentType()).isEqualTo("application/json");
+    }
+  }
+
+  @Test
   void reschedule_s26_routesOriginalThirteenFieldsToDurableQuorumQueue() throws Exception {
     var base = message();
     var payload = new java.util.HashMap<>(base.payload());

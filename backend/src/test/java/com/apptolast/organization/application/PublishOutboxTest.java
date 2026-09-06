@@ -12,6 +12,278 @@ import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 
 class PublishOutboxTest {
+  static OutboxMessage startedMessage() throws Exception {
+    var source = message(0);
+    var payload = new HashMap<>(source.payload());
+    payload.remove("name");
+    payload.put("type", "WorkSessionStarted.v1");
+    payload.put("projectId", UUID.randomUUID().toString());
+    payload.put("taskId", UUID.randomUUID().toString());
+    payload.put("plannedMinutes", 25);
+    payload.put("plannedEndAt", source.occurredAt().plusSeconds(1500).toString());
+    payload.put("zoneId", "Historical/Removed");
+    return startedWith(source, payload);
+  }
+
+  @Test
+  void workSession_s27_blocksOneMicrosecondWrongEnd() throws Exception {
+    var source = startedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("plannedEndAt", source.occurredAt().plusSeconds(1500).plusNanos(1000).toString());
+    assertStartedBlocked(startedWith(source, payload));
+  }
+
+  private void assertStartedBlocked(OutboxMessage event) {
+    var work = new Work(event);
+    new PublishOutbox(
+            work,
+            delivered -> {
+              throw new AssertionError("Invalid start published");
+            },
+            audit,
+            Clock.fixed(NOW, ZoneOffset.UTC))
+        .runCycle();
+    assertThat(work.persisted)
+        .containsExactly(
+            new PublicationAttempt(
+                event.eventId(), "blocked", event.attempts(), NOW, null, "INVALID_EVENT"));
+  }
+
+  @Test
+  void workSession_s27_blocksZeroDurationEvenWithMatchingEnd() throws Exception {
+    var source = startedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("plannedMinutes", 0);
+    payload.put("plannedEndAt", source.occurredAt().toString());
+    assertStartedBlocked(startedWith(source, payload));
+  }
+
+  @Test
+  void workSession_s27_blocksSubMicrosecondStartEvenWithMatchingEnd() throws Exception {
+    var source = startedMessage();
+    var start = Instant.parse("1969-12-31T23:59:59.123456789Z");
+    var payload = new HashMap<>(source.payload());
+    payload.put("occurredAt", start.toString());
+    payload.put("plannedEndAt", start.plusSeconds(1500).toString());
+    source =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            start,
+            source.type(),
+            1,
+            source.json(),
+            payload,
+            0);
+    assertStartedBlocked(startedWith(source, payload));
+  }
+
+  @Test
+  void workSession_s27_blocksYearZeroEvenWithMatchingEnd() throws Exception {
+    assertStartedBlocked(startedAt(Instant.parse("0000-12-31T23:50:00.123456Z"), 25));
+  }
+
+  @Test
+  void workSession_s27_blocksEndBeyondYear9999() throws Exception {
+    assertStartedBlocked(startedAt(Instant.parse("9999-12-31T23:50:00.123456Z"), 25));
+  }
+
+  @Test
+  void workSession_s27_blocksMalformedProjectIdentity() throws Exception {
+    var source = startedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("projectId", "1-2-3-4-5");
+    assertStartedBlocked(startedWith(source, payload));
+  }
+
+  @Test
+  void workSession_s27_blocksBlankHistoricalZone() throws Exception {
+    var source = startedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("zoneId", " ");
+    assertStartedBlocked(startedWith(source, payload));
+  }
+
+  @Test
+  void workSession_s27_requiresEventIdentityIndependentFromSession() throws Exception {
+    var source = startedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("eventId", source.aggregateId().toString());
+    source =
+        new OutboxMessage(
+            source.aggregateId(),
+            source.aggregateId(),
+            source.ownerId(),
+            source.occurredAt(),
+            source.type(),
+            1,
+            source.json(),
+            payload,
+            0);
+    assertStartedBlocked(startedWith(source, payload));
+  }
+
+  @Test
+  void workSession_s27_rejectsNanosecondTextEvenWhenZerosAreEquivalent() throws Exception {
+    var source = startedAt(Instant.parse("1969-12-31T23:59:59.123456Z"), 25);
+    var payload = new HashMap<>(source.payload());
+    payload.put("plannedEndAt", "1970-01-01T00:24:59.123456000Z");
+    assertStartedBlocked(startedWith(source, payload));
+  }
+
+  static OutboxMessage startedAt(Instant start, int minutes) throws Exception {
+    var source = startedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("occurredAt", start.toString());
+    payload.put("plannedMinutes", minutes);
+    payload.put("plannedEndAt", start.plusSeconds(minutes * 60L).toString());
+    source =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            start,
+            source.type(),
+            1,
+            source.json(),
+            payload,
+            0);
+    return startedWith(source, payload);
+  }
+
+  static OutboxMessage startedWith(OutboxMessage source, Map<String, Object> payload)
+      throws Exception {
+    return new OutboxMessage(
+        source.eventId(),
+        source.aggregateId(),
+        source.ownerId(),
+        source.occurredAt(),
+        "WorkSessionStarted.v1",
+        1,
+        new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(payload),
+        payload,
+        source.attempts());
+  }
+
+  @Test
+  void workSession_s26_publishesOriginalStartWithHistoricalZone() throws Exception {
+    assertStartedPublished(startedMessage());
+  }
+
+  private void assertStartedPublished(OutboxMessage event) {
+    var work = new Work(event);
+    var sent = new ArrayList<OutboxMessage>();
+    new PublishOutbox(
+            work,
+            delivered -> {
+              sent.add(delivered);
+              return DeliveryOutcome.ACCEPTED;
+            },
+            audit,
+            Clock.fixed(NOW, ZoneOffset.UTC))
+        .runCycle();
+    assertThat(sent).containsExactly(event);
+    assertThat(sent.getFirst()).isSameAs(event);
+    assertThat(work.persisted)
+        .containsExactly(new PublicationAttempt(event.eventId(), "published", 1, NOW, null, null));
+  }
+
+  @Test
+  void workSession_s26_acceptsOneMinuteAtYearOneWithMicroseconds() throws Exception {
+    assertStartedPublished(startedAt(Instant.parse("0001-01-01T00:00:00.123456Z"), 1));
+  }
+
+  @Test
+  void workSession_s26_accepts1440MinutesEndingAtLastMicrosecondOfYear9999() throws Exception {
+    assertStartedPublished(startedAt(Instant.parse("9999-12-30T23:59:59.999999Z"), 1440));
+  }
+
+  @Test
+  void workSession_s27_blocks1441MinutesWithCoherentEnd() throws Exception {
+    assertStartedBlocked(startedAt(Instant.parse("1969-12-31T23:59:59.123456Z"), 1441));
+  }
+
+  @Test
+  void workSession_s27_blocksExtraPrivateField() throws Exception {
+    var source = startedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("requestKey", UUID.randomUUID().toString());
+    assertStartedBlocked(startedWith(source, payload));
+  }
+
+  @Test
+  void workSession_s27_blocksStringDuration() throws Exception {
+    var source = startedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("plannedMinutes", "25");
+    assertStartedBlocked(startedWith(source, payload));
+  }
+
+  @Test
+  void workSession_s27_blocksNonStringTaskIdentity() throws Exception {
+    var source = startedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("taskId", List.of(payload.get("taskId")));
+    assertStartedBlocked(startedWith(source, payload));
+  }
+
+  @Test
+  void workSession_s27_retriesBrokerOutageWithoutChangingTheEvent() throws Exception {
+    assertStartedRetry(DeliveryOutcome.BROKER_UNAVAILABLE);
+  }
+
+  @Test
+  void workSession_s27_redeliversAfterLostConfirmWithSameIdentity() throws Exception {
+    assertStartedRetry(DeliveryOutcome.CONFIRM_TIMEOUT);
+  }
+
+  private void assertStartedRetry(DeliveryOutcome failure) throws Exception {
+    var event = startedMessage();
+    var work = new Work(event);
+    var sent = new ArrayList<OutboxMessage>();
+    new PublishOutbox(
+            work,
+            delivered -> {
+              sent.add(delivered);
+              return failure;
+            },
+            audit,
+            Clock.fixed(NOW, ZoneOffset.UTC))
+        .runCycle();
+    assertThat(work.persisted)
+        .containsExactly(
+            new PublicationAttempt(
+                event.eventId(), "retry", 1, NOW, NOW.plusSeconds(1), failure.name()));
+    var retry =
+        new OutboxMessage(
+            event.eventId(),
+            event.aggregateId(),
+            event.ownerId(),
+            event.occurredAt(),
+            event.type(),
+            1,
+            event.json(),
+            event.payload(),
+            1);
+    work.waiting.add(retry);
+    new PublishOutbox(
+            work,
+            delivered -> {
+              sent.add(delivered);
+              return DeliveryOutcome.ACCEPTED;
+            },
+            audit,
+            Clock.fixed(NOW.plusSeconds(1), ZoneOffset.UTC))
+        .runCycle();
+    assertThat(sent).containsExactly(event, retry);
+    assertThat(sent.get(1).json()).isEqualTo(event.json());
+    assertThat(work.persisted.getLast())
+        .isEqualTo(
+            new PublicationAttempt(
+                event.eventId(), "published", 2, NOW.plusSeconds(1), null, null));
+  }
+
   static OutboxMessage changedMessage(String kind) throws Exception {
     var source = blockMessage();
     var payload = new HashMap<>(source.payload());

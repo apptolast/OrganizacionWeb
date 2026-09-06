@@ -37,3 +37,13 @@ Son 55 rangos deduplicados, incluyendo la región nueva `src/today.tsx:124:0-124
 Se conservan threshold break80, coverageAnalysis perTest, concurrency2 y el ignorePatterns exacto del destino protegido. Los nuevos informes irán a `reports/mutation-today/replay.json` y `replay.html`. El JSON original preservado mantiene SHA256 `5cc335b97919aaa1bcd3cf4cf956af54ee55db3a02fdb23a060c77508f5c47a3`; el 80,23% bruto original no se ajusta por equivalencias. Referencias: fuente original f568f6e y fuente actual 5fe9afc, con refuerzos posteriores sólo en tests por sus autores.
 
 Soporte congelado para revisión e init de root. No se editaron fuentes de aplicación ni pruebas unitarias frontend, ni se ejecutó Stryker/PIT. No se leyó ni limpió contenido de rutas protegidas.
+
+## Selección final de dos identidades pendientes
+
+Scope aprobado por root tras replay: originales337/412, anteriores replay74/88. Target cerrado today-frontend-final, configuración stryker.today.final.config.json, únicamente rangos src/today.tsx:61:8-61:13 y src/today.tsx:111:30-111:34. El manifest today_frontend_final_selection.json conserva identidades completas del manifest previo, posiciones convertidas, hash de fuente y hash del replay precedente. No modifica informes anteriores.
+
+TDD soporte: test del target RED8b4262 (Invalid target) y GREEN2ebe1b; selección exacta RED3822f0 (config ausente) y GREENd17a9b. Matrices CLI y rechazo ampliadas, inicialmente GREEN. Verificación final2f2c4a:17/17 node tests, formato focal, node --check y diff --check EXIT0. Fuentes/tests unitarios frontend intactos por este autor.
+
+Política intacta:80/perTest/concurrency2/ignorePatterns protector exacto. Informes nuevos final.json/html separados. No se amplía selección para elevar score: si genera dos kills y el equivalente incidental336 superviviente, el bruto66,67% y fallo de umbral deberán mantenerse explícitos. Las campañas amplia80,23% y seguimiento94,69% tienen denominadores distintos; el juez valora conjuntamente la evidencia sin reescribir mediciones ni anticipar PASS final.
+
+Soporte congelado para revisión/init; no ejecutado Stryker. Espera refuerzo337 y judge antes de autorización de ejecución.

@@ -97,3 +97,19 @@ Pendiente judge de cambios y, sólo después de autorización, medición separad
 El juez señaló que ciclo5 esperaba el rechazo inicial, cuando failure ya vale true en ambas versiones. Se corrige la atribución:292 queda atendido reforzando la prueba existente @s21 `loads then confirms the empty day` con ausencia de alerta **antes** de resolver su GET deferred. No añade caso espejo ni modifica producción. Inicialmente GREEN1 2f0a3a; formato focal y regresión56/56 GREEN98844f, ESLint/tsc/diff-check sin errores al cierre de la sesión3855. Ciclo5 conserva347/426/471; mapa total sigue39 observables y29E,68 entradas.
 
 Root ratificó las29E UI/shared del informe independiente (mensaje de cierre:37dbdbf5/6b537e). Se mantiene cada identidad y razón en review_today_mutation_candidates.md; aprobación contractual no equivale a identidad visual universal de dots/espacios. Los39NE son objetivos cubiertos por oráculos, **no kills medidos**. Sin replay ejecutado por esta autoría. Freeze renovado tras este único refuerzo.
+
+## Ciclo13 — oráculo412 después del replay
+
+Replay independiente721bcf dejó107/113K y6S; root identificó337/412 como objetivos aún supervivientes y cuatro extras previamente E. No se altera ese informe ni se atribuye muerte nueva.
+
+El caso visibility del ciclo10 partía de idle: volver visible iniciaba GET/revision y reemplazaba el efecto/timer. Por ello no distinguía412. Ahora la misma parametrización inicia GET manual **antes** de ocultar; se comprueba que volver visible sigue con exactamente dos GET (coalescing), conservando el callback de visibilidad. El deadline fraccional dispara ese callback mientras la petición sigue pendiente y debe retirar agenda vieja, sin esperar una respuesta nueva. Sólo tres aserciones/acciones nuevas en prueba existente; producción intacta.
+
+Intento de edición7e0e92 detectó formato de salto de línea distinto y abortó antes de escribir; no fue ejecución de test ni RED. Patch posterior correcto. Inicialmente GREEN2 7e8bc1; formato focal y regresión56/56+ESLint+tsc+diff-check GREEN79f772. Freeze renovado;337 queda en auditoría del juez independiente. Sin replay por esta autoría, pendiente juez/selección root.
+
+## Ciclo14 — revocación antigua antes de cleanup337
+
+Juez backend f70468 confirmó337 NE: los callbacks timer/visibility tienen prioridad Default y la limpieza pasiva no es barrera síncrona. Se añade un único oráculo público @s28/@s30: GET manual pendiente, temporizador de medianoche avanzado sincrónicamente dentro de async act, entrega401 antigua y await de esa misma promesa antes de cerrar act. observeAccess no debe recibir revocación en esa primera microtarea; después se confirma nueva petición pendiente y agenda vieja retirada.
+
+Se eligió la variante401 autorizada frente JSON: el acceso se notifica inmediatamente tras await fetch, mientras JSON añade parse/validación y exigiría drenar pasos internos o una cantidad arbitraria de microtareas. No se accede a refs, no se llama refresh, no se fabrica logout ni se modifica producción. Listener global restaurado en finally.
+
+Inicialmente GREEN1 aad098, formato focal, regresión57/57+ESLint+tsc+diff-check GREEN4cd551. No se afirma RED337 ni kill hasta medición final independiente. Freeze renovado: los dos objetivos restantes tienen oráculos revisables, sin nueva campaña por esta autoría.

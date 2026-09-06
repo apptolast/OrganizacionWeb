@@ -12,6 +12,8 @@ E2E posteriores: históricos19/19c437d1; tres smokes de Hoy pasan en Chromium/Fi
 
 El corte anterior queda superado: foco corregido en5fe9afc,12ejecuciones Today verdes (4por motor), UX técnica independiente APPROVED2a09f8. Mutación original frontend418/521=80,23%,102S+1NC,0errores/timeouts. Se justificaron40 individualmente y reforzaron63 observables mediante17casosAPI+16UI y una aserción de carga. Revisiones independientes aprobadas. Init14639 EXIT0/a6e120:1353frontend,15 arnés y lint verdes; backend1415 sin cambios. Soporte replay63identidades+regiónfoco revisado8877d8, informes separados; se autoriza medición y se congelan fuentes/tests/config hasta terminar. No se declara done ni un score ajustado. Ver judge_today.md y documentos de seguimiento.
 
+Replay sobre1f7090e finalizó721bcf EXIT0 a15:56:46:107/113 Killed=94,69%,6Survived,0NoCoverage/Timeout/errors.67hashes intactos y original conservado. Root a63608 y mapping76bb72 coinciden:61/63 objetivos K;337 y412 siguenS. Cuatro extrasS corresponden a215/216/219/336 ya justificados. Región nueva de foco generó sólohandler89K, ningún mutante directo de aria-disabled. Freeze liberado: resume_review refuerza412 con GET manual pendiente antes de ocultar/volver; resume_backend revisa337 (aborto explícito frente a cleanup); resume_frontend conserva informe/mapping. No nueva campaña hasta revisión y selección. Feature12 continúa in_progress.
+
 ## Último cierre verificado
 
 - Init94736 EXIT0/8d8c38:1209 frontend,10 pruebas del arnés y lint verdes. Backend UP-TO-DATE sobre1365 pruebas previamente verificadas.

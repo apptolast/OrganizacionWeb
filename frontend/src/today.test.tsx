@@ -1019,10 +1019,13 @@ it.each(["boundary", "visibility"])(
     await act(async () => {});
     expect(screen.getByText("Proyecto personal")).toBeInTheDocument();
     if (entry === "visibility") {
+      fireEvent.click(screen.getByRole("button", { name: "Actualizar" }));
+      expect(fetch).toHaveBeenCalledTimes(2);
       vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
       fireEvent(document, new Event("visibilitychange"));
       vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
       fireEvent(document, new Event("visibilitychange"));
+      expect(fetch).toHaveBeenCalledTimes(2);
     }
     await act(async () => vi.advanceTimersByTimeAsync(999));
     expect(screen.queryByText("Proyecto personal")).not.toBeInTheDocument();
@@ -1054,4 +1057,39 @@ it("@s28 returning exactly at the day deadline retires a pending old-day request
   expect(fetch.mock.calls[1][1].signal.aborted).toBe(true);
   expect(fetch).toHaveBeenCalledTimes(3);
   expect(screen.queryByText("Proyecto personal")).not.toBeInTheDocument();
+});
+it("@s28 @s30 an obsolete 401 delivered in the deadline turn cannot revoke current access", async () => {
+  vi.useFakeTimers();
+  const old = deferred<Response>();
+  const fetch = vi
+    .fn()
+    .mockResolvedValueOnce(
+      Response.json({
+        ...agendaToday(),
+        serverNow: "2030-01-07T23:59:59Z",
+        currentBlockId: null,
+      }),
+    )
+    .mockReturnValueOnce(old.promise)
+    .mockReturnValue(new Promise(() => {}));
+  vi.stubGlobal("fetch", fetch);
+  const access = vi.fn();
+  observeAccess(access);
+  try {
+    render(<Today />);
+    await act(async () => {});
+    fireEvent.click(screen.getByRole("button", { name: "Actualizar" }));
+    expect(fetch).toHaveBeenCalledTimes(2);
+    await act(async () => {
+      vi.advanceTimersByTime(1000);
+      old.resolve(new Response(null, { status: 401 }));
+      await old.promise;
+      expect(access).not.toHaveBeenCalled();
+    });
+    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(screen.queryByText("Proyecto personal")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Cargando Hoy");
+  } finally {
+    observeAccess();
+  }
 });

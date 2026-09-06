@@ -1,0 +1,2103 @@
+{
+  "selected": [
+    {
+      "originalId": "225",
+      "replayId": "54",
+      "file": "src/today-api.ts",
+      "operator": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 127
+        },
+        "start": {
+          "column": 29,
+          "line": 127
+        }
+      },
+      "sourceExpression": "false",
+      "replacement": "true",
+      "status": "Killed"
+    },
+    {
+      "originalId": "127",
+      "replayId": "14",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 79
+        },
+        "start": {
+          "column": 5,
+          "line": 79
+        }
+      },
+      "sourceExpression": "typeof value.date !== \"string\"",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "171",
+      "replayId": "19",
+      "file": "src/today-api.ts",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 107
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null ||\n    value.remainingSeconds !== null ||\n    value.excessSeconds !== null ||\n    (value.zoneSource === \"UNCONFIGURED\"\n      ? value.availabilityZoneId !== null\n      : !text(value.availabilityZoneId))",
+      "replacement": "(value.zoneId !== \"UTC\" || value.budgetMinutes !== null || value.remainingSeconds !== null || value.excessSeconds !== null) && (value.zoneSource === \"UNCONFIGURED\" ? value.availabilityZoneId !== null : !text(value.availabilityZoneId))",
+      "status": "Killed"
+    },
+    {
+      "originalId": "172",
+      "replayId": "20",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 104
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null ||\n    value.remainingSeconds !== null ||\n    value.excessSeconds !== null",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "173",
+      "replayId": "21",
+      "file": "src/today-api.ts",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 104
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null ||\n    value.remainingSeconds !== null ||\n    value.excessSeconds !== null",
+      "replacement": "(value.zoneId !== \"UTC\" || value.budgetMinutes !== null || value.remainingSeconds !== null) && value.excessSeconds !== null",
+      "status": "Killed"
+    },
+    {
+      "originalId": "174",
+      "replayId": "22",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 103
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null ||\n    value.remainingSeconds !== null",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "175",
+      "replayId": "23",
+      "file": "src/today-api.ts",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 103
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null ||\n    value.remainingSeconds !== null",
+      "replacement": "(value.zoneId !== \"UTC\" || value.budgetMinutes !== null) && value.remainingSeconds !== null",
+      "status": "Killed"
+    },
+    {
+      "originalId": "176",
+      "replayId": "24",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 102
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "177",
+      "replayId": "25",
+      "file": "src/today-api.ts",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 102
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null",
+      "replacement": "value.zoneId !== \"UTC\" && value.budgetMinutes !== null",
+      "status": "Killed"
+    },
+    {
+      "originalId": "178",
+      "replayId": "26",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 101
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\"",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "181",
+      "replayId": "29",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 102
+        },
+        "start": {
+          "column": 5,
+          "line": 102
+        }
+      },
+      "sourceExpression": "value.budgetMinutes !== null",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "183",
+      "replayId": "31",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 103
+        },
+        "start": {
+          "column": 5,
+          "line": 103
+        }
+      },
+      "sourceExpression": "value.remainingSeconds !== null",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "185",
+      "replayId": "33",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 104
+        },
+        "start": {
+          "column": 5,
+          "line": 104
+        }
+      },
+      "sourceExpression": "value.excessSeconds !== null",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "192",
+      "replayId": "40",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 106
+        },
+        "start": {
+          "column": 9,
+          "line": 106
+        }
+      },
+      "sourceExpression": "value.availabilityZoneId !== null",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "211",
+      "replayId": "43",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 118
+        },
+        "start": {
+          "column": 10,
+          "line": 117
+        }
+      },
+      "sourceExpression": "Date.parse(previous.startAt) === Date.parse(block.startAt) &&\n          previous.id.toLowerCase() >= block.id.toLowerCase()",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "212",
+      "replayId": "44",
+      "file": "src/today-api.ts",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 118
+        },
+        "start": {
+          "column": 10,
+          "line": 117
+        }
+      },
+      "sourceExpression": "Date.parse(previous.startAt) === Date.parse(block.startAt) &&\n          previous.id.toLowerCase() >= block.id.toLowerCase()",
+      "replacement": "Date.parse(previous.startAt) === Date.parse(block.startAt) || previous.id.toLowerCase() >= block.id.toLowerCase()",
+      "status": "Killed"
+    },
+    {
+      "originalId": "213",
+      "replayId": "45",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 68,
+          "line": 117
+        },
+        "start": {
+          "column": 10,
+          "line": 117
+        }
+      },
+      "sourceExpression": "Date.parse(previous.startAt) === Date.parse(block.startAt)",
+      "replacement": "true",
+      "status": "Killed"
+    },
+    {
+      "originalId": "214",
+      "replayId": "46",
+      "file": "src/today-api.ts",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 68,
+          "line": 117
+        },
+        "start": {
+          "column": 10,
+          "line": 117
+        }
+      },
+      "sourceExpression": "Date.parse(previous.startAt) === Date.parse(block.startAt)",
+      "replacement": "Date.parse(previous.startAt) !== Date.parse(block.startAt)",
+      "status": "Killed"
+    },
+    {
+      "originalId": "217",
+      "replayId": "49",
+      "file": "src/today-api.ts",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 118
+        },
+        "start": {
+          "column": 11,
+          "line": 118
+        }
+      },
+      "sourceExpression": "previous.id.toLowerCase() >= block.id.toLowerCase()",
+      "replacement": "previous.id.toLowerCase() < block.id.toLowerCase()",
+      "status": "Killed"
+    },
+    {
+      "originalId": "218",
+      "replayId": "50",
+      "file": "src/today-api.ts",
+      "operator": "MethodExpression",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 118
+        },
+        "start": {
+          "column": 11,
+          "line": 118
+        }
+      },
+      "sourceExpression": "previous.id.toLowerCase()",
+      "replacement": "previous.id.toUpperCase()",
+      "status": "Killed"
+    },
+    {
+      "originalId": "224",
+      "replayId": "53",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 127
+        },
+        "start": {
+          "column": 9,
+          "line": 127
+        }
+      },
+      "sourceExpression": "ids.has(id)",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "226",
+      "replayId": "55",
+      "file": "src/today-api.ts",
+      "operator": "CallExpression",
+      "location": {
+        "end": {
+          "column": 17,
+          "line": 128
+        },
+        "start": {
+          "column": 5,
+          "line": 128
+        }
+      },
+      "sourceExpression": "ids.add(id);",
+      "replacement": ";",
+      "status": "Killed"
+    },
+    {
+      "originalId": "232",
+      "replayId": "57",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 133
+        },
+        "start": {
+          "column": 9,
+          "line": 133
+        }
+      },
+      "sourceExpression": "seconds <= 0",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "233",
+      "replayId": "58",
+      "file": "src/today-api.ts",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 133
+        },
+        "start": {
+          "column": 9,
+          "line": 133
+        }
+      },
+      "sourceExpression": "seconds <= 0",
+      "replacement": "seconds < 0",
+      "status": "Killed"
+    },
+    {
+      "originalId": "18",
+      "replayId": "0",
+      "file": "src/App.tsx",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 22
+        },
+        "start": {
+          "column": 32,
+          "line": 22
+        }
+      },
+      "sourceExpression": "\"/proyectos\"",
+      "replacement": "\"\"",
+      "status": "Killed"
+    },
+    {
+      "originalId": "28",
+      "replayId": "1",
+      "file": "src/App.tsx",
+      "operator": "Regex",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 35
+        },
+        "start": {
+          "column": 11,
+          "line": 35
+        }
+      },
+      "sourceExpression": "/^\\/proyectos\\/[^/?]+\\/editar$/",
+      "replacement": "/\\/proyectos\\/[^/?]+\\/editar$/",
+      "status": "Killed"
+    },
+    {
+      "originalId": "29",
+      "replayId": "2",
+      "file": "src/App.tsx",
+      "operator": "Regex",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 35
+        },
+        "start": {
+          "column": 11,
+          "line": 35
+        }
+      },
+      "sourceExpression": "/^\\/proyectos\\/[^/?]+\\/editar$/",
+      "replacement": "/^\\/proyectos\\/[^/?]+\\/editar/",
+      "status": "Killed"
+    },
+    {
+      "originalId": "32",
+      "replayId": "5",
+      "file": "src/App.tsx",
+      "operator": "Regex",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 37
+        },
+        "start": {
+          "column": 11,
+          "line": 37
+        }
+      },
+      "sourceExpression": "/^\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/",
+      "replacement": "/\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/",
+      "status": "Killed"
+    },
+    {
+      "originalId": "39",
+      "replayId": "12",
+      "file": "src/App.tsx",
+      "operator": "UnaryOperator",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 40
+        },
+        "start": {
+          "column": 40,
+          "line": 40
+        }
+      },
+      "sourceExpression": "-1",
+      "replacement": "+1",
+      "status": "Killed"
+    },
+    {
+      "originalId": "40",
+      "replayId": "13",
+      "file": "src/App.tsx",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 17,
+          "line": 43
+        },
+        "start": {
+          "column": 12,
+          "line": 43
+        }
+      },
+      "sourceExpression": "\" · \"",
+      "replacement": "\"\"",
+      "status": "Killed"
+    },
+    {
+      "originalId": "286",
+      "replayId": "60",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 13
+        },
+        "start": {
+          "column": 7,
+          "line": 13
+        }
+      },
+      "sourceExpression": "\" · \"",
+      "replacement": "\"\"",
+      "status": "Killed"
+    },
+    {
+      "originalId": "292",
+      "replayId": "61",
+      "file": "src/today.tsx",
+      "operator": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 28
+        },
+        "start": {
+          "column": 42,
+          "line": 28
+        }
+      },
+      "sourceExpression": "false",
+      "replacement": "true",
+      "status": "Killed"
+    },
+    {
+      "originalId": "309",
+      "replayId": "63",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 47
+        },
+        "start": {
+          "column": 13,
+          "line": 47
+        }
+      },
+      "sourceExpression": "!controller.signal.aborted",
+      "replacement": "true",
+      "status": "Killed"
+    },
+    {
+      "originalId": "315",
+      "replayId": "66",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 50
+        },
+        "start": {
+          "column": 13,
+          "line": 50
+        }
+      },
+      "sourceExpression": "!controller.signal.aborted",
+      "replacement": "true",
+      "status": "Killed"
+    },
+    {
+      "originalId": "329",
+      "replayId": "70",
+      "file": "src/today.tsx",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 58,
+          "line": 58
+        },
+        "start": {
+          "column": 18,
+          "line": 58
+        }
+      },
+      "sourceExpression": "performance.now() >= dayDeadline.current",
+      "replacement": "performance.now() > dayDeadline.current",
+      "status": "Killed"
+    },
+    {
+      "originalId": "331",
+      "replayId": "72",
+      "file": "src/today.tsx",
+      "operator": "AssignmentOperator",
+      "location": {
+        "end": {
+          "column": 23,
+          "line": 59
+        },
+        "start": {
+          "column": 5,
+          "line": 59
+        }
+      },
+      "sourceExpression": "force ||= rollover",
+      "replacement": "force &&= rollover",
+      "status": "Killed"
+    },
+    {
+      "originalId": "337",
+      "replayId": "74",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 14,
+          "line": 61
+        },
+        "start": {
+          "column": 9,
+          "line": 61
+        }
+      },
+      "sourceExpression": "force",
+      "replacement": "false",
+      "status": "Survived"
+    },
+    {
+      "originalId": "347",
+      "replayId": "75",
+      "file": "src/today.tsx",
+      "operator": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 68
+        },
+        "start": {
+          "column": 16,
+          "line": 68
+        }
+      },
+      "sourceExpression": "false",
+      "replacement": "true",
+      "status": "Killed"
+    },
+    {
+      "originalId": "366",
+      "replayId": "76",
+      "file": "src/today.tsx",
+      "operator": "BlockStatement",
+      "location": {
+        "end": {
+          "column": 6,
+          "line": 83
+        },
+        "start": {
+          "column": 18,
+          "line": 80
+        }
+      },
+      "sourceExpression": "{\n      document.removeEventListener(\"visibilitychange\", recover);\n      window.removeEventListener(\"focus\", recover);\n    }",
+      "replacement": "{}",
+      "status": "Killed"
+    },
+    {
+      "originalId": "368",
+      "replayId": "78",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 54,
+          "line": 81
+        },
+        "start": {
+          "column": 36,
+          "line": 81
+        }
+      },
+      "sourceExpression": "\"visibilitychange\"",
+      "replacement": "\"\"",
+      "status": "Killed"
+    },
+    {
+      "originalId": "370",
+      "replayId": "80",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 82
+        },
+        "start": {
+          "column": 34,
+          "line": 82
+        }
+      },
+      "sourceExpression": "\"focus\"",
+      "replacement": "\"\"",
+      "status": "Killed"
+    },
+    {
+      "originalId": "378",
+      "replayId": "81",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 59,
+          "line": 86
+        },
+        "start": {
+          "column": 22,
+          "line": 86
+        }
+      },
+      "sourceExpression": "document.visibilityState === \"hidden\"",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "380",
+      "replayId": "83",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 59,
+          "line": 86
+        },
+        "start": {
+          "column": 51,
+          "line": 86
+        }
+      },
+      "sourceExpression": "\"hidden\"",
+      "replacement": "\"\"",
+      "status": "Killed"
+    },
+    {
+      "originalId": "397",
+      "replayId": "84",
+      "file": "src/today.tsx",
+      "operator": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 104
+        },
+        "start": {
+          "column": 21,
+          "line": 104
+        }
+      },
+      "sourceExpression": "true",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "399",
+      "replayId": "86",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 65,
+          "line": 104
+        },
+        "start": {
+          "column": 27,
+          "line": 104
+        }
+      },
+      "sourceExpression": "next === Date.parse(snapshot.dayEndAt)",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "412",
+      "replayId": "88",
+      "file": "src/today.tsx",
+      "operator": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 111
+        },
+        "start": {
+          "column": 31,
+          "line": 111
+        }
+      },
+      "sourceExpression": "true",
+      "replacement": "false",
+      "status": "Survived"
+    },
+    {
+      "originalId": "426",
+      "replayId": "90",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 17,
+          "line": 133
+        },
+        "start": {
+          "column": 15,
+          "line": 133
+        }
+      },
+      "sourceExpression": "\"\"",
+      "replacement": "\"Stryker was here!\"",
+      "status": "Killed"
+    },
+    {
+      "originalId": "443",
+      "replayId": "91",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 50,
+          "line": 146
+        },
+        "start": {
+          "column": 12,
+          "line": 146
+        }
+      },
+      "sourceExpression": "snapshot.zoneSource !== \"AVAILABILITY\"",
+      "replacement": "true",
+      "status": "Killed"
+    },
+    {
+      "originalId": "445",
+      "replayId": "93",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 50,
+          "line": 146
+        },
+        "start": {
+          "column": 36,
+          "line": 146
+        }
+      },
+      "sourceExpression": "\"AVAILABILITY\"",
+      "replacement": "\"\"",
+      "status": "Killed"
+    },
+    {
+      "originalId": "452",
+      "replayId": "94",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 125,
+          "line": 150
+        },
+        "start": {
+          "column": 122,
+          "line": 150
+        }
+      },
+      "sourceExpression": "\" \"",
+      "replacement": "\"\"",
+      "status": "Killed"
+    },
+    {
+      "originalId": "465",
+      "replayId": "95",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 179
+        },
+        "start": {
+          "column": 16,
+          "line": 179
+        }
+      },
+      "sourceExpression": "snapshot.excessSeconds === null",
+      "replacement": "true",
+      "status": "Killed"
+    },
+    {
+      "originalId": "466",
+      "replayId": "96",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 179
+        },
+        "start": {
+          "column": 16,
+          "line": 179
+        }
+      },
+      "sourceExpression": "snapshot.excessSeconds === null",
+      "replacement": "false",
+      "status": "Killed"
+    },
+    {
+      "originalId": "467",
+      "replayId": "97",
+      "file": "src/today.tsx",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 179
+        },
+        "start": {
+          "column": 16,
+          "line": 179
+        }
+      },
+      "sourceExpression": "snapshot.excessSeconds === null",
+      "replacement": "snapshot.excessSeconds !== null",
+      "status": "Killed"
+    },
+    {
+      "originalId": "468",
+      "replayId": "98",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 32,
+          "line": 180
+        },
+        "start": {
+          "column": 19,
+          "line": 180
+        }
+      },
+      "sourceExpression": "\"Desconocido\"",
+      "replacement": "\"\"",
+      "status": "Killed"
+    },
+    {
+      "originalId": "469",
+      "replayId": "99",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 55,
+          "line": 181
+        },
+        "start": {
+          "column": 19,
+          "line": 181
+        }
+      },
+      "sourceExpression": "`${snapshot.excessSeconds / 60} min`",
+      "replacement": "``",
+      "status": "Killed"
+    },
+    {
+      "originalId": "470",
+      "replayId": "100",
+      "file": "src/today.tsx",
+      "operator": "ArithmeticOperator",
+      "location": {
+        "end": {
+          "column": 49,
+          "line": 181
+        },
+        "start": {
+          "column": 22,
+          "line": 181
+        }
+      },
+      "sourceExpression": "snapshot.excessSeconds / 60",
+      "replacement": "snapshot.excessSeconds * 60",
+      "status": "Killed"
+    },
+    {
+      "originalId": "471",
+      "replayId": "101",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 32,
+          "line": 187
+        },
+        "start": {
+          "column": 19,
+          "line": 187
+        }
+      },
+      "sourceExpression": "\"Sin bloques\"",
+      "replacement": "\"\"",
+      "status": "Killed"
+    },
+    {
+      "originalId": "479",
+      "replayId": "104",
+      "file": "src/today.tsx",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 206
+        },
+        "start": {
+          "column": 20,
+          "line": 204
+        }
+      },
+      "sourceExpression": "block.id === snapshot.currentBlockId && (\n                    <p>En horario planificado</p>\n                  )",
+      "replacement": "block.id === snapshot.currentBlockId || <p>En horario planificado</p>",
+      "status": "Killed"
+    },
+    {
+      "originalId": "481",
+      "replayId": "106",
+      "file": "src/today.tsx",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 56,
+          "line": 204
+        },
+        "start": {
+          "column": 20,
+          "line": 204
+        }
+      },
+      "sourceExpression": "block.id === snapshot.currentBlockId",
+      "replacement": "block.id !== snapshot.currentBlockId",
+      "status": "Killed"
+    },
+    {
+      "originalId": "484",
+      "replayId": "109",
+      "file": "src/today.tsx",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 209
+        },
+        "start": {
+          "column": 20,
+          "line": 207
+        }
+      },
+      "sourceExpression": "block.id === snapshot.nextBlockId && (\n                    <p>Próximo inicio planificado</p>\n                  )",
+      "replacement": "block.id === snapshot.nextBlockId || <p>Próximo inicio planificado</p>",
+      "status": "Killed"
+    },
+    {
+      "originalId": "486",
+      "replayId": "111",
+      "file": "src/today.tsx",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 53,
+          "line": 207
+        },
+        "start": {
+          "column": 20,
+          "line": 207
+        }
+      },
+      "sourceExpression": "block.id === snapshot.nextBlockId",
+      "replacement": "block.id !== snapshot.nextBlockId",
+      "status": "Killed"
+    },
+    {
+      "originalId": "491",
+      "replayId": "112",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 52,
+          "line": 215
+        },
+        "start": {
+          "column": 20,
+          "line": 215
+        }
+      },
+      "sourceExpression": "block.zoneId !== snapshot.zoneId",
+      "replacement": "true",
+      "status": "Killed"
+    },
+    {
+      "originalId": "536",
+      "replayId": "114",
+      "file": "src/workspace.tsx",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 55,
+          "line": 85
+        },
+        "start": {
+          "column": 33,
+          "line": 85
+        }
+      },
+      "sourceExpression": "\"Página no encontrada\"",
+      "replacement": "\"\"",
+      "status": "Killed"
+    }
+  ],
+  "additional": [
+    {
+      "replayId": "3",
+      "file": "src/App.tsx",
+      "operator": "Regex",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 35
+        },
+        "start": {
+          "column": 11,
+          "line": 35
+        }
+      },
+      "replacement": "/^\\/proyectos\\/[^/?]\\/editar$/",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "4",
+      "file": "src/App.tsx",
+      "operator": "Regex",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 35
+        },
+        "start": {
+          "column": 11,
+          "line": 35
+        }
+      },
+      "replacement": "/^\\/proyectos\\/[/?]+\\/editar$/",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "6",
+      "file": "src/App.tsx",
+      "operator": "Regex",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 37
+        },
+        "start": {
+          "column": 11,
+          "line": 37
+        }
+      },
+      "replacement": "/^\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?/",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "7",
+      "file": "src/App.tsx",
+      "operator": "Regex",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 37
+        },
+        "start": {
+          "column": 11,
+          "line": 37
+        }
+      },
+      "replacement": "/^\\/proyectos(?:\\?[^#]*|\\/[^/?]+)$/",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "8",
+      "file": "src/App.tsx",
+      "operator": "Regex",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 37
+        },
+        "start": {
+          "column": 11,
+          "line": 37
+        }
+      },
+      "replacement": "/^\\/proyectos(?:\\?[^#]|\\/[^/?]+)?$/",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "10",
+      "file": "src/App.tsx",
+      "operator": "Regex",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 37
+        },
+        "start": {
+          "column": 11,
+          "line": 37
+        }
+      },
+      "replacement": "/^\\/proyectos(?:\\?[^#]*|\\/[^/?])?$/",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "9",
+      "file": "src/App.tsx",
+      "operator": "Regex",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 37
+        },
+        "start": {
+          "column": 11,
+          "line": 37
+        }
+      },
+      "replacement": "/^\\/proyectos(?:\\?[#]*|\\/[^/?]+)?$/",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "11",
+      "file": "src/App.tsx",
+      "operator": "Regex",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 37
+        },
+        "start": {
+          "column": 11,
+          "line": 37
+        }
+      },
+      "replacement": "/^\\/proyectos(?:\\?[^#]*|\\/[/?]+)?$/",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "15",
+      "file": "src/today-api.ts",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 79
+        },
+        "start": {
+          "column": 5,
+          "line": 79
+        }
+      },
+      "replacement": "typeof value.date === \"string\"",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "16",
+      "file": "src/today-api.ts",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 79
+        },
+        "start": {
+          "column": 27,
+          "line": 79
+        }
+      },
+      "replacement": "\"\"",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "17",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 107
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "replacement": "true",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "18",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 107
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "replacement": "false",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "27",
+      "file": "src/today-api.ts",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 101
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "replacement": "value.zoneId === \"UTC\"",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "28",
+      "file": "src/today-api.ts",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 101
+        },
+        "start": {
+          "column": 22,
+          "line": 101
+        }
+      },
+      "replacement": "\"\"",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "30",
+      "file": "src/today-api.ts",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 102
+        },
+        "start": {
+          "column": 5,
+          "line": 102
+        }
+      },
+      "replacement": "value.budgetMinutes === null",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "32",
+      "file": "src/today-api.ts",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 103
+        },
+        "start": {
+          "column": 5,
+          "line": 103
+        }
+      },
+      "replacement": "value.remainingSeconds === null",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "34",
+      "file": "src/today-api.ts",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 104
+        },
+        "start": {
+          "column": 5,
+          "line": 104
+        }
+      },
+      "replacement": "value.excessSeconds === null",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "35",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 105
+        },
+        "start": {
+          "column": 6,
+          "line": 105
+        }
+      },
+      "replacement": "true",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "36",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 105
+        },
+        "start": {
+          "column": 6,
+          "line": 105
+        }
+      },
+      "replacement": "false",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "37",
+      "file": "src/today-api.ts",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 105
+        },
+        "start": {
+          "column": 6,
+          "line": 105
+        }
+      },
+      "replacement": "value.zoneSource !== \"UNCONFIGURED\"",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "38",
+      "file": "src/today-api.ts",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 105
+        },
+        "start": {
+          "column": 27,
+          "line": 105
+        }
+      },
+      "replacement": "\"\"",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "39",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 106
+        },
+        "start": {
+          "column": 9,
+          "line": 106
+        }
+      },
+      "replacement": "true",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "41",
+      "file": "src/today-api.ts",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 106
+        },
+        "start": {
+          "column": 9,
+          "line": 106
+        }
+      },
+      "replacement": "value.availabilityZoneId === null",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "42",
+      "file": "src/today-api.ts",
+      "operator": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 40,
+          "line": 107
+        },
+        "start": {
+          "column": 9,
+          "line": 107
+        }
+      },
+      "replacement": "text(value.availabilityZoneId)",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "47",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 118
+        },
+        "start": {
+          "column": 11,
+          "line": 118
+        }
+      },
+      "replacement": "true",
+      "status": "Survived",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "48",
+      "file": "src/today-api.ts",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 118
+        },
+        "start": {
+          "column": 11,
+          "line": 118
+        }
+      },
+      "replacement": "previous.id.toLowerCase() > block.id.toLowerCase()",
+      "status": "Survived",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "51",
+      "file": "src/today-api.ts",
+      "operator": "MethodExpression",
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 118
+        },
+        "start": {
+          "column": 40,
+          "line": 118
+        }
+      },
+      "replacement": "block.id.toUpperCase()",
+      "status": "Survived",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "52",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 127
+        },
+        "start": {
+          "column": 9,
+          "line": 127
+        }
+      },
+      "replacement": "true",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "56",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 133
+        },
+        "start": {
+          "column": 9,
+          "line": 133
+        }
+      },
+      "replacement": "true",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "59",
+      "file": "src/today-api.ts",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 133
+        },
+        "start": {
+          "column": 9,
+          "line": 133
+        }
+      },
+      "replacement": "seconds > 0",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "62",
+      "file": "src/today.tsx",
+      "operator": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 47
+        },
+        "start": {
+          "column": 13,
+          "line": 47
+        }
+      },
+      "replacement": "controller.signal.aborted",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "64",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 47
+        },
+        "start": {
+          "column": 13,
+          "line": 47
+        }
+      },
+      "replacement": "false",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "65",
+      "file": "src/today.tsx",
+      "operator": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 50
+        },
+        "start": {
+          "column": 13,
+          "line": 50
+        }
+      },
+      "replacement": "controller.signal.aborted",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "67",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 50
+        },
+        "start": {
+          "column": 13,
+          "line": 50
+        }
+      },
+      "replacement": "false",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "68",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 58,
+          "line": 58
+        },
+        "start": {
+          "column": 18,
+          "line": 58
+        }
+      },
+      "replacement": "true",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "69",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 58,
+          "line": 58
+        },
+        "start": {
+          "column": 18,
+          "line": 58
+        }
+      },
+      "replacement": "false",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "71",
+      "file": "src/today.tsx",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 58,
+          "line": 58
+        },
+        "start": {
+          "column": 18,
+          "line": 58
+        }
+      },
+      "replacement": "performance.now() < dayDeadline.current",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "73",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 14,
+          "line": 61
+        },
+        "start": {
+          "column": 9,
+          "line": 61
+        }
+      },
+      "replacement": "true",
+      "status": "Survived",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "82",
+      "file": "src/today.tsx",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 59,
+          "line": 86
+        },
+        "start": {
+          "column": 22,
+          "line": 86
+        }
+      },
+      "replacement": "document.visibilityState !== \"hidden\"",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "85",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 65,
+          "line": 104
+        },
+        "start": {
+          "column": 27,
+          "line": 104
+        }
+      },
+      "replacement": "true",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "87",
+      "file": "src/today.tsx",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 65,
+          "line": 104
+        },
+        "start": {
+          "column": 27,
+          "line": 104
+        }
+      },
+      "replacement": "next !== Date.parse(snapshot.dayEndAt)",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "89",
+      "file": "src/today.tsx",
+      "operator": "ArrowFunction",
+      "location": {
+        "end": {
+          "column": 77,
+          "line": 124
+        },
+        "start": {
+          "column": 62,
+          "line": 124
+        }
+      },
+      "replacement": "() => undefined",
+      "status": "Killed",
+      "newFocusRegion": true
+    },
+    {
+      "replayId": "92",
+      "file": "src/today.tsx",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 50,
+          "line": 146
+        },
+        "start": {
+          "column": 12,
+          "line": 146
+        }
+      },
+      "replacement": "snapshot.zoneSource === \"AVAILABILITY\"",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "102",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 206
+        },
+        "start": {
+          "column": 20,
+          "line": 204
+        }
+      },
+      "replacement": "true",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "103",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 206
+        },
+        "start": {
+          "column": 20,
+          "line": 204
+        }
+      },
+      "replacement": "false",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "105",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 56,
+          "line": 204
+        },
+        "start": {
+          "column": 20,
+          "line": 204
+        }
+      },
+      "replacement": "true",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "107",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 209
+        },
+        "start": {
+          "column": 20,
+          "line": 207
+        }
+      },
+      "replacement": "true",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "108",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 209
+        },
+        "start": {
+          "column": 20,
+          "line": 207
+        }
+      },
+      "replacement": "false",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "110",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 53,
+          "line": 207
+        },
+        "start": {
+          "column": 20,
+          "line": 207
+        }
+      },
+      "replacement": "true",
+      "status": "Killed",
+      "newFocusRegion": false
+    },
+    {
+      "replayId": "113",
+      "file": "src/today.tsx",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 52,
+          "line": 215
+        },
+        "start": {
+          "column": 20,
+          "line": 215
+        }
+      },
+      "replacement": "block.zoneId === snapshot.zoneId",
+      "status": "Killed",
+      "newFocusRegion": false
+    }
+  ]
+}

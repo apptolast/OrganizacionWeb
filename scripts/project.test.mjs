@@ -242,6 +242,8 @@ test("unknown or misplaced targets fail before starting any subprocess", () => {
     ["test", "today-backend"],
     ["install", "today-frontend"],
     ["mutate", "today-frontend-replay --config other.json"],
+    ["mutate", "today-frontend-final --config other.json"],
+    ["test", "today-frontend-final"],
     ["test", "today-frontend-replay"],
   ]) {
     const { calls, project } = capture();
@@ -365,6 +367,7 @@ test("harness placeholder and CLI deliver the selected target unchanged", () => 
     ["mutate", "today-backend"],
     ["mutate", "today-frontend"],
     ["mutate", "today-frontend-replay"],
+    ["mutate", "today-frontend-final"],
   ]) {
     const calls = [];
     commands.main(args, (...values) => calls.push(values));
@@ -409,4 +412,72 @@ test("CLI rejects extra arguments instead of silently discarding them", () => {
     /Expected task and optional target/,
   );
   assert.deepEqual(calls, []);
+});
+
+test("today final runs only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "today-frontend-final");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.today.final.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("today final selects only the two unresolved exact identities", () => {
+  const read = (p) => JSON.parse(readFileSync(resolve(root, p), "utf8"));
+  const config = read("frontend/stryker.today.final.config.json"),
+    manifest = read("progress/today_frontend_final_selection.json"),
+    prior = read("progress/today_frontend_replay_selection.json");
+  assert.deepEqual(
+    manifest.selection,
+    prior.selection.filter((x) => ["337", "412"].includes(x.originalId)),
+  );
+  assert.deepEqual(manifest.priorReplayIds, ["74", "88"]);
+  assert.deepEqual(config.mutate, [
+    "src/today.tsx:61:8-61:13",
+    "src/today.tsx:111:30-111:34",
+  ]);
+  assert.deepEqual(
+    config.mutate,
+    manifest.selection.map((x) => x.range),
+  );
+  assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
+  assert.equal(config.coverageAnalysis, "perTest");
+  assert.equal(config.concurrency, 2);
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  assert.equal(
+    config.jsonReporter.fileName,
+    "reports/mutation-today/final.json",
+  );
+  assert.equal(
+    config.htmlReporter.fileName,
+    "reports/mutation-today/final.html",
+  );
+  assert.equal(
+    manifest.sourceSha256,
+    createHash("sha256")
+      .update(readFileSync(resolve(root, "frontend/src/today.tsx")))
+      .digest("hex"),
+  );
+  for (const x of manifest.selection) {
+    const lines = readFileSync(resolve(root, "frontend", x.file), "utf8").split(
+      /\r?\n/,
+    );
+    assert.equal(
+      lines[x.mappedLocation.start.line - 1].slice(
+        x.mappedLocation.start.column,
+        x.mappedLocation.end.column,
+      ),
+      x.sourceExpression,
+    );
+  }
 });

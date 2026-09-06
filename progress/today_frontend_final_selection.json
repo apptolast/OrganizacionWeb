@@ -1,0 +1,67 @@
+{
+  "priorReport": "frontend/reports/mutation-today/replay.json",
+  "priorReportSha256": "b5b152fb890f79083935c6110b87a82f24eb9ee2681f8f7199f833e33f395dd7",
+  "coordinateConvention": "Original Stryker report columns are one-based; mapped selector columns are zero-based. Matched source characters must remain unchanged.",
+  "sourceSha256": "930495aee7f67e1101fc966c6c42db448788208b76fe228ac6eea63fd99a8d1c",
+  "priorReplayIds": ["74", "88"],
+  "selection": [
+    {
+      "originalId": "337",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 14,
+          "line": 61
+        },
+        "start": {
+          "column": 9,
+          "line": 61
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 61,
+          "column": 8
+        },
+        "end": {
+          "line": 61,
+          "column": 13
+        }
+      },
+      "sourceExpression": "force",
+      "replacement": "false",
+      "range": "src/today.tsx:61:8-61:13"
+    },
+    {
+      "originalId": "412",
+      "file": "src/today.tsx",
+      "operator": "BooleanLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 35,
+          "line": 111
+        },
+        "start": {
+          "column": 31,
+          "line": 111
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 111,
+          "column": 30
+        },
+        "end": {
+          "line": 111,
+          "column": 34
+        }
+      },
+      "sourceExpression": "true",
+      "replacement": "false",
+      "range": "src/today.tsx:111:30-111:34"
+    }
+  ]
+}

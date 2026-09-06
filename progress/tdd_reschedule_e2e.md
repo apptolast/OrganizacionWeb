@@ -75,3 +75,25 @@ La prueba aún no acredita UX global. Tras cerrar este ciclo, el recorrido respo
 - `schedule-block.spec.mjs` conserva la recuperación tras ACK real perdido y reinicio de backend, con invariantes de PostgreSQL. No usar `seedAgenda` para mover mediante UPDATE: el nuevo cambio debe entrar por endpoint13 real.
 
 Límites explícitos: axe no certifica contraste o comprensión en todos los estados; una captura no mide foco; viewport emulado no acredita teclado virtual, áreas seguras ni lector de pantalla real. La revisión humana de los30principios y la evidencia física se marcan según lo que se observe, sin convertir limitaciones en PASS.
+
+## Primer GREEN nominal tras integrar endpoints
+
+Snapshot de producción179 Java COPYDONE2bd776 (core29ad71/lecturasb9478c, manifest de root), copiado sólo como base aislada; no debe fusionarse como paquete completo. Suite s23 propia repetida6/6 GREEN980de6 antes del E2E.
+
+`node scripts/e2e.mjs e2e/reschedule.spec.mjs`: sesión35690/f011e7, EXIT0 **993392**; log6bbf1b confirma **1/1 PASS** en8,8s (recorrido5,7s). Stack PostgreSQL/API/web `organizationweb-e2e-17648` saludable y retirado por runner al terminar. Warning no bloqueante de NO_COLOR/FORCE_COLOR preservado. No mocks de respuestas felices ni cambios de fuente/tests.
+
+Ahora se alcanzan todos los oráculos del único recorrido nominal: creación original, preview/movimiento confirmado, cancelación, consulta de confirmación/estado/historia y comprobaciones SQL del test. El RED anterior b2b65e por preview500 queda en la historia; no se borra ni se presenta el nuevo corte como aquel snapshot.
+
+SHA256 del test sigue **0286BD931CD1F461981F086AEF895E4864F1CA2E786A09E1D1283374FD649E62**; log `progress/reschedule_nominal_snapshot.log`: **59095415500EC5EFA753000BB7D839F986A06CCF35AD99C2EB9AF9169A29FC15**. No nuevos casos añadidos. Esta ejecución no acredita matrizUX30 completa, ACK perdido/reinicio13, otros motores ni gate global13; las filas pendientes mantienen ese alcance.
+
+## Caso único s25: ACK de movimiento perdido, reinicio y cambio posterior
+
+Nuevo `e2e/reschedule-recovery.spec.mjs`. Preparación por endpoints reales; movimiento por UI. `route.fetch` recibe201 y JSON completo del backend antes de `route.abort`, por lo que se pierde sólo ACK. Cuenta una única escritura desde la UI y un recibo/evento reales antes del reinicio.
+
+Reutilización: extraído `restartBackend(request)` a `e2e/support/backend.mjs` desde el test11 existente. Conserva guardia de stack aislado, docker compose restart backend, inspect StartedAt distinto, PostgreSQL StartedAt/montajes iguales, poll de sesión y loginSession existente cuando sea necesario. No infraestructura ni autenticación duplicadas; nominal13 no cambia. Regresión antes del nuevo caso: sesión24898 EXIT0f778ae, **2/2** d7ccd1, incluyendo reinicio11 @s35 y recuperación11 @s24. El filtro textual seleccionó ambos casos lost; no se afirma que ejecutó sólo uno.
+
+Primer resultado13: sesión42000 **inicialmente GREEN c6e234**,1/1 PASS4f559f,12,2s de recorrido/13,9s total. Snapshot179 Java COPY2bd776. Backend64000 se reinició realmente; después cancelación real confirma revisión3. Fixture elimina sólo los dos eventos BlockChanged del outbox del stack aislado para representar retención; no modifica recibos/proyecciones. Recuperación UI por key200 y GET por id devuelven el recibo original revisión2 completo; UI muestra hecho histórico y estado actual Cancelado. Snapshot SQL de recibos/proyecciones/outbox idéntico antes/después de los GET; cero eventos BlockChanged retenidos. Sin segundo POST de movimiento.
+
+Prueba material `.e2e-work/reschedule-real/chromium/restart-proof.json`: StartedAt backend20:03:02.168995431Z→20:03:13.170213293Z, PostgreSQL20:02:58.436950851Z y volumen64000 conservados. Contiene key/recibos original y posterior/JSON recuperado, sin secretos. La sesión siguió autenticada en este corte; rama reauth no atribuida como ejercitada. Stack64000 retirado por runner. Warning NO_COLOR/FORCE_COLOR no bloqueante preservado.
+
+Formato: intento inicial desde raíz b81683 no encontró Prettier (dependencia instalada en frontend), no es fallo de producto. Comando corregido `pnpm --dir frontend exec prettier` sobre tres archivos exactos: write/check7c70cf GREEN. Node --check y diffcheck correctos. No cambio de fuentes ni otro caso añadido. No claims de UX30 completa ni otros motores.

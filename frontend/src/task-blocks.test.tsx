@@ -370,6 +370,9 @@ it("@s58 confirmar creación lleva foco al encabezado al desaparecer Guardar", a
   fireEvent.click(save);
   await screen.findByText("Bloque guardado");
   expect(
+    screen.getByText("Confirmación original de creación (hecho histórico)"),
+  ).toBeInTheDocument();
+  expect(
     screen.getByRole("heading", { name: "Bloques planificados" }),
   ).toHaveFocus();
 });
@@ -2951,4 +2954,149 @@ it("@s42 cambiar ocurrencia o zona invalida revisión aceptada antes de otra int
     endOffset: null,
     zoneId: "UTC",
   });
+});
+
+it("@s36 creation followed by movement keeps only the latest historical confirmation and current state", async () => {
+  window.history.replaceState(null, "", route);
+  let created = false;
+  let moved = false;
+  const next = {
+    ...block,
+    startAt: "2030-01-07T12:00:00Z",
+    endAt: "2030-01-07T13:00:00Z",
+  };
+  const receipt = {
+    id: "8c5dbd10-9ad5-4000-8000-000000000004",
+    blockId: block.id,
+    kind: "RESCHEDULED",
+    revision: `"block:${block.id}:2"`,
+    occurredAt: "2026-09-06T13:00:00Z",
+    before: block,
+    after: next,
+  };
+  fixture((url, options) => {
+    if (url === `${api}/blocks` && options?.method === "POST") {
+      created = true;
+      return Response.json(block, {
+        status: 201,
+        headers: { Location: `${api}/blocks/${block.id}` },
+      });
+    }
+    if (url === `${api}/blocks`)
+      return Response.json({
+        items: created ? [moved ? next : block] : [],
+        nextCursor: null,
+      });
+    if (url.endsWith("/state"))
+      return Response.json(
+        {
+          block: moved ? next : block,
+          status: "planned",
+          updatedAt: block.createdAt,
+        },
+        { headers: { ETag: `"block:${block.id}:${moved ? 2 : 1}"` } },
+      );
+    if (url.endsWith("/reschedule")) {
+      moved = true;
+      return Response.json(receipt, {
+        status: 201,
+        headers: { Location: `${api}/blocks/changes/${receipt.id}` },
+      });
+    }
+    if (url.endsWith("/preview"))
+      return Response.json(
+        url.includes(`/${block.id}/`)
+          ? { ...preview, startAt: next.startAt, endAt: next.endAt }
+          : preview,
+        { headers: { ETag: `"block:${block.id}:1"` } },
+      );
+    return undefined;
+  });
+  render(<App />);
+  await openEditor();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Guardar bloque" }),
+  );
+  await screen.findByRole("region", { name: "Estado actual del bloque" });
+  fireEvent.click(
+    await screen.findByRole("button", {
+      name: "Mover bloque: " + block.objective,
+    }),
+  );
+  fireEvent.change(await screen.findByLabelText("Inicio local"), {
+    target: { value: "2030-01-07T12:00" },
+  });
+  fireEvent.change(screen.getByLabelText("Fin local"), {
+    target: { value: "2030-01-07T13:00" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Revisar movimiento" }));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Confirmar movimiento" }),
+  );
+  await screen.findByText("Cambio confirmado (hecho histórico)");
+  expect(
+    screen.queryByRole("region", { name: "Mover bloque" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Planificar bloque" }),
+  ).toBeVisible();
+  expect(screen.queryByText("Bloque guardado")).not.toBeInTheDocument();
+  await waitFor(() =>
+    expect(
+      screen.getAllByRole("region", { name: "Estado actual del bloque" }),
+    ).toHaveLength(1),
+  );
+  expect(
+    within(
+      screen.getByRole("region", { name: "Estado actual del bloque" }),
+    ).getByText(/12:00/),
+  ).toBeInTheDocument();
+});
+
+it("@s37 a recovery state lookup removes the task context after RESOURCE_NOT_FOUND", async () => {
+  window.history.replaceState(null, "", route);
+  let reads = 0;
+  fixture((url) => {
+    if (url === `${api}/blocks`)
+      return Response.json({ items: [block], nextCursor: null });
+    if (url.endsWith("/state"))
+      return ++reads === 1
+        ? Response.json(
+            { block, status: "planned", updatedAt: block.createdAt },
+            { headers: { ETag: `"block:${block.id}:1"` } },
+          )
+        : problem("RESOURCE_NOT_FOUND", 404);
+    if (url.endsWith("/preview"))
+      return Response.json(preview, {
+        headers: { ETag: `"block:${block.id}:1"` },
+      });
+    if (url.endsWith("/reschedule")) return problem("BLOCK_CONFLICT", 412);
+    return undefined;
+  });
+  render(<App />);
+  fireEvent.click(
+    await screen.findByRole("button", {
+      name: "Mover bloque: " + block.objective,
+    }),
+  );
+  fireEvent.change(await screen.findByLabelText("Inicio local"), {
+    target: { value: "2030-01-07T10:00" },
+  });
+  fireEvent.change(screen.getByLabelText("Fin local"), {
+    target: { value: "2030-01-07T11:00" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Revisar movimiento" }));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Confirmar movimiento" }),
+  );
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Consultar estado actual" }),
+  );
+  await screen.findByText("Esta tarea no está disponible para tu cuenta.");
+  expect(screen.queryByLabelText("Inicio local")).not.toBeInTheDocument();
+  expect(screen.queryByText(block.objective)).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("heading", { name: task.title }),
+  ).not.toBeInTheDocument();
 });

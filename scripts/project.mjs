@@ -22,6 +22,7 @@ export function createProject(runner = run) {
       target !== "" &&
       (task !== "mutate" ||
         ![
+          "reschedule-frontend",
           "today-backend",
           "today-frontend",
           "today-frontend-replay",
@@ -51,6 +52,17 @@ export function createProject(runner = run) {
       mutate: "pitest",
     };
     if (!commands[task]) throw new Error(`Unknown task: ${task}`);
+    if (task === "mutate" && target === "reschedule-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.reschedule.config.json",
+      ]);
+      return;
+    }
     if (task === "mutate" && target === "today-backend") {
       backend("pitest", ["-PmutationScope=today"]);
       return;

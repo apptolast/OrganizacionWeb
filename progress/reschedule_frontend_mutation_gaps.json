@@ -1,0 +1,3612 @@
+[
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "419",
+    "status": "NoCoverage",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 54,
+        "line": 218
+      },
+      "start": {
+        "column": 21,
+        "line": 218
+      }
+    },
+    "source": "    throw new Error(\"Confirmación de cambio inválida\");",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "547",
+    "status": "NoCoverage",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 48,
+        "line": 302
+      },
+      "start": {
+        "column": 21,
+        "line": 302
+      }
+    },
+    "source": "    throw new Error(\"Recibo de bloque inválido\");",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "253",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 32,
+        "line": 53
+      },
+      "start": {
+        "column": 7,
+        "line": 53
+      }
+    },
+    "source": "  if (typeof value !== \"string\") return false;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "258",
+    "status": "Survived",
+    "mutator": "Regex",
+    "location": {
+      "end": {
+        "column": 85,
+        "line": 55
+      },
+      "start": {
+        "column": 5,
+        "line": 55
+      }
+    },
+    "source": "    /^\"block:([\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}):([1-9]\\d*)\"$/.exec(",
+    "replacement": "/^\"block:([\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}):([1-9]\\d*)\"/",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "306",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 54,
+        "line": 96
+      },
+      "start": {
+        "column": 21,
+        "line": 96
+      }
+    },
+    "source": "    throw new Error(\"Revisión de movimiento inválida\");",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "394",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 11,
+        "line": 194
+      },
+      "start": {
+        "column": 9,
+        "line": 187
+      }
+    },
+    "source": "      : isBlock(value.after, before.projectId, before.taskId) &&\n        sameBlock(value.after, {\n          ...before,\n          startAt: request.preview.startAt,\n          endAt: request.preview.endAt,\n          zoneId: request.preview.zoneId,\n          durationMinutes: request.preview.durationMinutes,\n        })) &&",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "396",
+    "status": "Survived",
+    "mutator": "LogicalOperator",
+    "location": {
+      "end": {
+        "column": 11,
+        "line": 194
+      },
+      "start": {
+        "column": 9,
+        "line": 187
+      }
+    },
+    "source": "      : isBlock(value.after, before.projectId, before.taskId) &&\n        sameBlock(value.after, {\n          ...before,\n          startAt: request.preview.startAt,\n          endAt: request.preview.endAt,\n          zoneId: request.preview.zoneId,\n          durationMinutes: request.preview.durationMinutes,\n        })) &&",
+    "replacement": "isBlock(value.after, before.projectId, before.taskId) || sameBlock(value.after, {\n  ...before,\n  startAt: request.preview.startAt,\n  endAt: request.preview.endAt,\n  zoneId: request.preview.zoneId,\n  durationMinutes: request.preview.durationMinutes\n})",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "397",
+    "status": "Survived",
+    "mutator": "ObjectLiteral",
+    "location": {
+      "end": {
+        "column": 10,
+        "line": 194
+      },
+      "start": {
+        "column": 32,
+        "line": 188
+      }
+    },
+    "source": "        sameBlock(value.after, {\n          ...before,\n          startAt: request.preview.startAt,\n          endAt: request.preview.endAt,\n          zoneId: request.preview.zoneId,\n          durationMinutes: request.preview.durationMinutes,\n        })) &&",
+    "replacement": "{}",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "417",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 37,
+        "line": 217
+      },
+      "start": {
+        "column": 7,
+        "line": 217
+      }
+    },
+    "source": "  if (!matchesChange(value, request))",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "442",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 28,
+        "line": 242
+      },
+      "start": {
+        "column": 5,
+        "line": 242
+      }
+    },
+    "source": "    value.items.length > 20 ||",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "443",
+    "status": "Survived",
+    "mutator": "EqualityOperator",
+    "location": {
+      "end": {
+        "column": 28,
+        "line": 242
+      },
+      "start": {
+        "column": 5,
+        "line": 242
+      }
+    },
+    "source": "    value.items.length > 20 ||",
+    "replacement": "value.items.length >= 20",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "459",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 24,
+        "line": 250
+      },
+      "start": {
+        "column": 5,
+        "line": 249
+      }
+    },
+    "source": "    new Set(page.items.map((item) => item.id.toLowerCase())).size !==\n      page.items.length ||",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "462",
+    "status": "Survived",
+    "mutator": "MethodExpression",
+    "location": {
+      "end": {
+        "column": 59,
+        "line": 249
+      },
+      "start": {
+        "column": 38,
+        "line": 249
+      }
+    },
+    "source": "    new Set(page.items.map((item) => item.id.toLowerCase())).size !==",
+    "replacement": "item.id.toUpperCase()",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "478",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 64,
+        "line": 256
+      },
+      "start": {
+        "column": 10,
+        "line": 256
+      }
+    },
+    "source": "        (timeKey(prior.occurredAt) === timeKey(item.occurredAt) &&",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "481",
+    "status": "Survived",
+    "mutator": "EqualityOperator",
+    "location": {
+      "end": {
+        "column": 58,
+        "line": 257
+      },
+      "start": {
+        "column": 11,
+        "line": 257
+      }
+    },
+    "source": "          prior.id.toLowerCase() <= item.id.toLowerCase())",
+    "replacement": "prior.id.toLowerCase() < item.id.toLowerCase()",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "483",
+    "status": "Survived",
+    "mutator": "MethodExpression",
+    "location": {
+      "end": {
+        "column": 33,
+        "line": 257
+      },
+      "start": {
+        "column": 11,
+        "line": 257
+      }
+    },
+    "source": "          prior.id.toLowerCase() <= item.id.toLowerCase())",
+    "replacement": "prior.id.toUpperCase()",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "484",
+    "status": "Survived",
+    "mutator": "MethodExpression",
+    "location": {
+      "end": {
+        "column": 58,
+        "line": 257
+      },
+      "start": {
+        "column": 37,
+        "line": 257
+      }
+    },
+    "source": "          prior.id.toLowerCase() <= item.id.toLowerCase())",
+    "replacement": "item.id.toUpperCase()",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "486",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 52,
+        "line": 261
+      },
+      "start": {
+        "column": 21,
+        "line": 261
+      }
+    },
+    "source": "    throw new Error(\"Historial de bloques inválido\");",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "531",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 53,
+        "line": 286
+      },
+      "start": {
+        "column": 5,
+        "line": 286
+      }
+    },
+    "source": "    value.after.createdAt === value.before.createdAt",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "539",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 30,
+        "line": 299
+      },
+      "start": {
+        "column": 7,
+        "line": 299
+      }
+    },
+    "source": "  if (response.status !== 200) throw response;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "542",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 67,
+        "line": 301
+      },
+      "start": {
+        "column": 7,
+        "line": 301
+      }
+    },
+    "source": "  if (!isChange(value, projectId, taskId) || !sameId(value.id, id))",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "543",
+    "status": "Survived",
+    "mutator": "LogicalOperator",
+    "location": {
+      "end": {
+        "column": 67,
+        "line": 301
+      },
+      "start": {
+        "column": 7,
+        "line": 301
+      }
+    },
+    "source": "  if (!isChange(value, projectId, taskId) || !sameId(value.id, id))",
+    "replacement": "!isChange(value, projectId, taskId) && !sameId(value.id, id)",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "555",
+    "status": "Survived",
+    "mutator": "ArrowFunction",
+    "location": {
+      "end": {
+        "column": 22,
+        "line": 329
+      },
+      "start": {
+        "column": 12,
+        "line": 329
+      }
+    },
+    "source": "    .catch(() => null);",
+    "replacement": "() => undefined",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "573",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 74,
+        "line": 334
+      },
+      "start": {
+        "column": 5,
+        "line": 334
+      }
+    },
+    "source": "    value.type !== \"urn:organization:problem:\" + value.code.toLowerCase() ||",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "577",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 34,
+        "line": 335
+      },
+      "start": {
+        "column": 5,
+        "line": 335
+      }
+    },
+    "source": "    value.status !== error.status ||",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "582",
+    "status": "Survived",
+    "mutator": "BlockStatement",
+    "location": {
+      "end": {
+        "column": 2,
+        "line": 348
+      },
+      "start": {
+        "column": 33,
+        "line": 343
+      }
+    },
+    "source": "function timeKey(value: string) {\n  return value.replace(\n    /(?:\\.(\\d+))?Z$/,\n    (_match, fraction: string = \"\") => \".\" + fraction.padEnd(6, \"0\") + \"Z\",\n  );\n}",
+    "replacement": "{}",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "583",
+    "status": "Survived",
+    "mutator": "Regex",
+    "location": {
+      "end": {
+        "column": 21,
+        "line": 345
+      },
+      "start": {
+        "column": 5,
+        "line": 345
+      }
+    },
+    "source": "    /(?:\\.(\\d+))?Z$/,",
+    "replacement": "/(?:\\.(\\d+))?Z/",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "580",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 75,
+        "line": 337
+      },
+      "start": {
+        "column": 5,
+        "line": 337
+      }
+    },
+    "source": "    changeErrors[value.code as keyof typeof changeErrors] !== error.status",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "584",
+    "status": "Survived",
+    "mutator": "Regex",
+    "location": {
+      "end": {
+        "column": 21,
+        "line": 345
+      },
+      "start": {
+        "column": 5,
+        "line": 345
+      }
+    },
+    "source": "    /(?:\\.(\\d+))?Z$/,",
+    "replacement": "/(?:\\.(\\d+))Z$/",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "585",
+    "status": "Survived",
+    "mutator": "Regex",
+    "location": {
+      "end": {
+        "column": 21,
+        "line": 345
+      },
+      "start": {
+        "column": 5,
+        "line": 345
+      }
+    },
+    "source": "    /(?:\\.(\\d+))?Z$/,",
+    "replacement": "/(?:\\.(\\d))?Z$/",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "586",
+    "status": "Survived",
+    "mutator": "Regex",
+    "location": {
+      "end": {
+        "column": 21,
+        "line": 345
+      },
+      "start": {
+        "column": 5,
+        "line": 345
+      }
+    },
+    "source": "    /(?:\\.(\\d+))?Z$/,",
+    "replacement": "/(?:\\.(\\D+))?Z$/",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "587",
+    "status": "Survived",
+    "mutator": "ArrowFunction",
+    "location": {
+      "end": {
+        "column": 75,
+        "line": 346
+      },
+      "start": {
+        "column": 5,
+        "line": 346
+      }
+    },
+    "source": "    (_match, fraction: string = \"\") => \".\" + fraction.padEnd(6, \"0\") + \"Z\",",
+    "replacement": "() => undefined",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "588",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 35,
+        "line": 346
+      },
+      "start": {
+        "column": 33,
+        "line": 346
+      }
+    },
+    "source": "    (_match, fraction: string = \"\") => \".\" + fraction.padEnd(6, \"0\") + \"Z\",",
+    "replacement": "\"Stryker was here!\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "589",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 43,
+        "line": 346
+      },
+      "start": {
+        "column": 40,
+        "line": 346
+      }
+    },
+    "source": "    (_match, fraction: string = \"\") => \".\" + fraction.padEnd(6, \"0\") + \"Z\",",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "590",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 68,
+        "line": 346
+      },
+      "start": {
+        "column": 65,
+        "line": 346
+      }
+    },
+    "source": "    (_match, fraction: string = \"\") => \".\" + fraction.padEnd(6, \"0\") + \"Z\",",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-api.ts",
+    "id": "591",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 75,
+        "line": 346
+      },
+      "start": {
+        "column": 72,
+        "line": 346
+      }
+    },
+    "source": "    (_match, fraction: string = \"\") => \".\" + fraction.padEnd(6, \"0\") + \"Z\",",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "933",
+    "status": "NoCoverage",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 80,
+        "line": 368
+      },
+      "start": {
+        "column": 51,
+        "line": 368
+      }
+    },
+    "source": "                  error.field !== \"startLocal\" && error.field !== \"startOffset\",",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "934",
+    "status": "NoCoverage",
+    "mutator": "EqualityOperator",
+    "location": {
+      "end": {
+        "column": 80,
+        "line": 368
+      },
+      "start": {
+        "column": 51,
+        "line": 368
+      }
+    },
+    "source": "                  error.field !== \"startLocal\" && error.field !== \"startOffset\",",
+    "replacement": "error.field === \"startOffset\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "935",
+    "status": "NoCoverage",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 80,
+        "line": 368
+      },
+      "start": {
+        "column": 67,
+        "line": 368
+      }
+    },
+    "source": "                  error.field !== \"startLocal\" && error.field !== \"startOffset\",",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "965",
+    "status": "NoCoverage",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 76,
+        "line": 396
+      },
+      "start": {
+        "column": 49,
+        "line": 396
+      }
+    },
+    "source": "                  error.field !== \"endLocal\" && error.field !== \"endOffset\",",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "966",
+    "status": "NoCoverage",
+    "mutator": "EqualityOperator",
+    "location": {
+      "end": {
+        "column": 76,
+        "line": 396
+      },
+      "start": {
+        "column": 49,
+        "line": 396
+      }
+    },
+    "source": "                  error.field !== \"endLocal\" && error.field !== \"endOffset\",",
+    "replacement": "error.field === \"endOffset\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "967",
+    "status": "NoCoverage",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 76,
+        "line": 396
+      },
+      "start": {
+        "column": 65,
+        "line": 396
+      }
+    },
+    "source": "                  error.field !== \"endLocal\" && error.field !== \"endOffset\",",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1140",
+    "status": "NoCoverage",
+    "mutator": "ArrowFunction",
+    "location": {
+      "end": {
+        "column": 21,
+        "line": 547
+      },
+      "start": {
+        "column": 36,
+        "line": 544
+      }
+    },
+    "source": "                  setOffsetChoices((previous) => ({\n                    ...previous,\n                    ...issue.validOffsets,\n                  }));",
+    "replacement": "() => undefined",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1141",
+    "status": "NoCoverage",
+    "mutator": "ObjectLiteral",
+    "location": {
+      "end": {
+        "column": 20,
+        "line": 547
+      },
+      "start": {
+        "column": 51,
+        "line": 544
+      }
+    },
+    "source": "                  setOffsetChoices((previous) => ({\n                    ...previous,\n                    ...issue.validOffsets,\n                  }));",
+    "replacement": "{}",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "599",
+    "status": "Survived",
+    "mutator": "OptionalChaining",
+    "location": {
+      "end": {
+        "column": 73,
+        "line": 41
+      },
+      "start": {
+        "column": 51,
+        "line": 41
+      }
+    },
+    "source": "    if (document.activeElement === document.body) heading.current?.focus();",
+    "replacement": "heading.current.focus",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "604",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 39,
+        "line": 47
+      },
+      "start": {
+        "column": 13,
+        "line": 47
+      }
+    },
+    "source": "        if (!controller.signal.aborted) setState(value);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "609",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 50
+      },
+      "start": {
+        "column": 13,
+        "line": 50
+      }
+    },
+    "source": "        if (controller.signal.aborted) return;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "611",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 52
+      },
+      "start": {
+        "column": 13,
+        "line": 52
+      }
+    },
+    "source": "        if (controller.signal.aborted) return;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "612",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 51,
+        "line": 53
+      },
+      "start": {
+        "column": 13,
+        "line": 53
+      }
+    },
+    "source": "        if (problem?.code === \"RESOURCE_NOT_FOUND\") onAccessFailure(404);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "620",
+    "status": "Survived",
+    "mutator": "ArrowFunction",
+    "location": {
+      "end": {
+        "column": 36,
+        "line": 56
+      },
+      "start": {
+        "column": 12,
+        "line": 56
+      }
+    },
+    "source": "    return () => controller.abort();",
+    "replacement": "() => undefined",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "628",
+    "status": "Survived",
+    "mutator": "UnaryOperator",
+    "location": {
+      "end": {
+        "column": 37,
+        "line": 61
+      },
+      "start": {
+        "column": 35,
+        "line": 61
+      }
+    },
+    "source": "      <h3 ref={heading} tabIndex={-1}>",
+    "replacement": "+1",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "633",
+    "status": "Survived",
+    "mutator": "ArrowFunction",
+    "location": {
+      "end": {
+        "column": 47,
+        "line": 70
+      },
+      "start": {
+        "column": 27,
+        "line": 70
+      }
+    },
+    "source": "              setRevision((value) => value + 1);",
+    "replacement": "() => undefined",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "634",
+    "status": "Survived",
+    "mutator": "ArithmeticOperator",
+    "location": {
+      "end": {
+        "column": 47,
+        "line": 70
+      },
+      "start": {
+        "column": 38,
+        "line": 70
+      }
+    },
+    "source": "              setRevision((value) => value + 1);",
+    "replacement": "value - 1",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "645",
+    "status": "Survived",
+    "mutator": "OptionalChaining",
+    "location": {
+      "end": {
+        "column": 56,
+        "line": 86
+      },
+      "start": {
+        "column": 34,
+        "line": 86
+      }
+    },
+    "source": "            focusRecovery={() => heading.current?.focus()}",
+    "replacement": "heading.current.focus",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "647",
+    "status": "Survived",
+    "mutator": "CallExpression",
+    "location": {
+      "end": {
+        "column": 37,
+        "line": 97
+      },
+      "start": {
+        "column": 17,
+        "line": 97
+      }
+    },
+    "source": "                setState(undefined);",
+    "replacement": ";",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "649",
+    "status": "Survived",
+    "mutator": "ArrowFunction",
+    "location": {
+      "end": {
+        "column": 49,
+        "line": 98
+      },
+      "start": {
+        "column": 29,
+        "line": 98
+      }
+    },
+    "source": "                setRevision((value) => value + 1);",
+    "replacement": "() => undefined",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "650",
+    "status": "Survived",
+    "mutator": "ArithmeticOperator",
+    "location": {
+      "end": {
+        "column": 49,
+        "line": 98
+      },
+      "start": {
+        "column": 40,
+        "line": 98
+      }
+    },
+    "source": "                setRevision((value) => value + 1);",
+    "replacement": "value - 1",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "652",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 53,
+        "line": 115
+      },
+      "start": {
+        "column": 13,
+        "line": 114
+      }
+    },
+    "source": "            document.activeElement === event.currentTarget ||\n            document.activeElement === document.body",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "657",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 53,
+        "line": 115
+      },
+      "start": {
+        "column": 13,
+        "line": 115
+      }
+    },
+    "source": "            document.activeElement === document.body",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "658",
+    "status": "Survived",
+    "mutator": "EqualityOperator",
+    "location": {
+      "end": {
+        "column": 53,
+        "line": 115
+      },
+      "start": {
+        "column": 13,
+        "line": 115
+      }
+    },
+    "source": "            document.activeElement === document.body",
+    "replacement": "document.activeElement !== document.body",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "669",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 67,
+        "line": 145
+      },
+      "start": {
+        "column": 27,
+        "line": 145
+      }
+    },
+    "source": "    if (currentLoading && document.activeElement === document.body)",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "668",
+    "status": "Survived",
+    "mutator": "LogicalOperator",
+    "location": {
+      "end": {
+        "column": 67,
+        "line": 145
+      },
+      "start": {
+        "column": 9,
+        "line": 145
+      }
+    },
+    "source": "    if (currentLoading && document.activeElement === document.body)",
+    "replacement": "currentLoading || document.activeElement === document.body",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "675",
+    "status": "Survived",
+    "mutator": "ArrowFunction",
+    "location": {
+      "end": {
+        "column": 56,
+        "line": 151
+      },
+      "start": {
+        "column": 13,
+        "line": 151
+      }
+    },
+    "source": "  useEffect(() => () => currentRequest.current?.abort(), []);",
+    "replacement": "() => undefined",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "676",
+    "status": "Survived",
+    "mutator": "ArrowFunction",
+    "location": {
+      "end": {
+        "column": 56,
+        "line": 151
+      },
+      "start": {
+        "column": 19,
+        "line": 151
+      }
+    },
+    "source": "  useEffect(() => () => currentRequest.current?.abort(), []);",
+    "replacement": "() => undefined",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "678",
+    "status": "Survived",
+    "mutator": "ArrayDeclaration",
+    "location": {
+      "end": {
+        "column": 60,
+        "line": 151
+      },
+      "start": {
+        "column": 58,
+        "line": 151
+      }
+    },
+    "source": "  useEffect(() => () => currentRequest.current?.abort(), []);",
+    "replacement": "[\"Stryker was here\"]",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "684",
+    "status": "Survived",
+    "mutator": "ArrayDeclaration",
+    "location": {
+      "end": {
+        "column": 60,
+        "line": 154
+      },
+      "start": {
+        "column": 58,
+        "line": 154
+      }
+    },
+    "source": "  useEffect(() => () => pendingPreview.current?.abort(), []);",
+    "replacement": "[\"Stryker was here\"]",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "685",
+    "status": "Survived",
+    "mutator": "BooleanLiteral",
+    "location": {
+      "end": {
+        "column": 59,
+        "line": 156
+      },
+      "start": {
+        "column": 54,
+        "line": 156
+      }
+    },
+    "source": "  const [previewFailed, setPreviewFailed] = useState(false);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "686",
+    "status": "Survived",
+    "mutator": "ArrayDeclaration",
+    "location": {
+      "end": {
+        "column": 71,
+        "line": 157
+      },
+      "start": {
+        "column": 69,
+        "line": 157
+      }
+    },
+    "source": "  const [fieldErrors, setFieldErrors] = useState<BlockFieldError[]>([]);",
+    "replacement": "[\"Stryker was here\"]",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "703",
+    "status": "Survived",
+    "mutator": "BooleanLiteral",
+    "location": {
+      "end": {
+        "column": 63,
+        "line": 169
+      },
+      "start": {
+        "column": 58,
+        "line": 169
+      }
+    },
+    "source": "  const [allowOverBudget, setAllowOverBudget] = useState(false);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "707",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 29,
+        "line": 173
+      },
+      "start": {
+        "column": 9,
+        "line": 173
+      }
+    },
+    "source": "    if (!eligible && !locked) pendingPreview.current?.abort();",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "709",
+    "status": "Survived",
+    "mutator": "LogicalOperator",
+    "location": {
+      "end": {
+        "column": 29,
+        "line": 173
+      },
+      "start": {
+        "column": 9,
+        "line": 173
+      }
+    },
+    "source": "    if (!eligible && !locked) pendingPreview.current?.abort();",
+    "replacement": "!eligible || !locked",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "712",
+    "status": "Survived",
+    "mutator": "OptionalChaining",
+    "location": {
+      "end": {
+        "column": 60,
+        "line": 173
+      },
+      "start": {
+        "column": 31,
+        "line": 173
+      }
+    },
+    "source": "    if (!eligible && !locked) pendingPreview.current?.abort();",
+    "replacement": "pendingPreview.current.abort",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "722",
+    "status": "Survived",
+    "mutator": "BooleanLiteral",
+    "location": {
+      "end": {
+        "column": 18,
+        "line": 177
+      },
+      "start": {
+        "column": 9,
+        "line": 177
+      }
+    },
+    "source": "    if (!eligible && !locked) {",
+    "replacement": "eligible",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "729",
+    "status": "Survived",
+    "mutator": "BooleanLiteral",
+    "location": {
+      "end": {
+        "column": 31,
+        "line": 180
+      },
+      "start": {
+        "column": 26,
+        "line": 180
+      }
+    },
+    "source": "      setAllowOverBudget(false);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "732",
+    "status": "Survived",
+    "mutator": "ArrayDeclaration",
+    "location": {
+      "end": {
+        "column": 50,
+        "line": 185
+      },
+      "start": {
+        "column": 48,
+        "line": 185
+      }
+    },
+    "source": "  const [zones, setZones] = useState<string[]>([]);",
+    "replacement": "[\"Stryker was here\"]",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "737",
+    "status": "Survived",
+    "mutator": "ArrayDeclaration",
+    "location": {
+      "end": {
+        "column": 58,
+        "line": 188
+      },
+      "start": {
+        "column": 56,
+        "line": 188
+      }
+    },
+    "source": "  useEffect(() => () => zonesRequest.current?.abort(), []);",
+    "replacement": "[\"Stryker was here\"]",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "746",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 39,
+        "line": 197
+      },
+      "start": {
+        "column": 13,
+        "line": 197
+      }
+    },
+    "source": "        if (!controller.signal.aborted) setZones(value);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "751",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 200
+      },
+      "start": {
+        "column": 13,
+        "line": 200
+      }
+    },
+    "source": "        if (controller.signal.aborted) return;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "764",
+    "status": "Survived",
+    "mutator": "BooleanLiteral",
+    "location": {
+      "end": {
+        "column": 29,
+        "line": 219
+      },
+      "start": {
+        "column": 24,
+        "line": 219
+      }
+    },
+    "source": "    setPreviewConflict(false);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "766",
+    "status": "Survived",
+    "mutator": "BooleanLiteral",
+    "location": {
+      "end": {
+        "column": 19,
+        "line": 220
+      },
+      "start": {
+        "column": 15,
+        "line": 220
+      }
+    },
+    "source": "    setLocked(true);",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "768",
+    "status": "Survived",
+    "mutator": "BooleanLiteral",
+    "location": {
+      "end": {
+        "column": 27,
+        "line": 221
+      },
+      "start": {
+        "column": 22,
+        "line": 221
+      }
+    },
+    "source": "    setCurrentFailed(false);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "773",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 232
+      },
+      "start": {
+        "column": 13,
+        "line": 232
+      }
+    },
+    "source": "        if (controller.signal.aborted) return;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "781",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 238
+      },
+      "start": {
+        "column": 13,
+        "line": 238
+      }
+    },
+    "source": "        if (controller.signal.aborted) return;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "783",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 240
+      },
+      "start": {
+        "column": 13,
+        "line": 240
+      }
+    },
+    "source": "        if (controller.signal.aborted) return;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "784",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 51,
+        "line": 241
+      },
+      "start": {
+        "column": 13,
+        "line": 241
+      }
+    },
+    "source": "        if (problem?.code === \"RESOURCE_NOT_FOUND\") onAccessFailure(404);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "793",
+    "status": "Survived",
+    "mutator": "BooleanLiteral",
+    "location": {
+      "end": {
+        "column": 32,
+        "line": 243
+      },
+      "start": {
+        "column": 27,
+        "line": 243
+      }
+    },
+    "source": "        setCurrentLoading(false);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "820",
+    "status": "Survived",
+    "mutator": "CallExpression",
+    "location": {
+      "end": {
+        "column": 29,
+        "line": 262
+      },
+      "start": {
+        "column": 5,
+        "line": 262
+      }
+    },
+    "source": "    setRejection(undefined);",
+    "replacement": ";",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "829",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 277
+      },
+      "start": {
+        "column": 13,
+        "line": 277
+      }
+    },
+    "source": "        if (controller.signal.aborted) return;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "831",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 279
+      },
+      "start": {
+        "column": 13,
+        "line": 279
+      }
+    },
+    "source": "        if (controller.signal.aborted) return;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "832",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 51,
+        "line": 280
+      },
+      "start": {
+        "column": 13,
+        "line": 280
+      }
+    },
+    "source": "        if (problem?.code === \"RESOURCE_NOT_FOUND\") onAccessFailure(404);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "838",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 47,
+        "line": 281
+      },
+      "start": {
+        "column": 13,
+        "line": 281
+      }
+    },
+    "source": "        if (problem?.code === \"BLOCK_CONFLICT\") setPreviewConflict(true);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "865",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 80,
+        "line": 293
+      },
+      "start": {
+        "column": 13,
+        "line": 293
+      }
+    },
+    "source": "        if (!controller.signal.aborted && pendingPreview.current === controller)",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "867",
+    "status": "Survived",
+    "mutator": "LogicalOperator",
+    "location": {
+      "end": {
+        "column": 80,
+        "line": 293
+      },
+      "start": {
+        "column": 13,
+        "line": 293
+      }
+    },
+    "source": "        if (!controller.signal.aborted && pendingPreview.current === controller)",
+    "replacement": "!controller.signal.aborted || pendingPreview.current === controller",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "869",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 80,
+        "line": 293
+      },
+      "start": {
+        "column": 43,
+        "line": 293
+      }
+    },
+    "source": "        if (!controller.signal.aborted && pendingPreview.current === controller)",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "874",
+    "status": "Survived",
+    "mutator": "CallExpression",
+    "location": {
+      "end": {
+        "column": 32,
+        "line": 302
+      },
+      "start": {
+        "column": 9,
+        "line": 302
+      }
+    },
+    "source": "        event.preventDefault();",
+    "replacement": ";",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "878",
+    "status": "Survived",
+    "mutator": "LogicalOperator",
+    "location": {
+      "end": {
+        "column": 8,
+        "line": 309
+      },
+      "start": {
+        "column": 8,
+        "line": 307
+      }
+    },
+    "source": "      {state.status === \"cancelled\" && (\n        <p role=\"status\">Este bloque está cancelado.</p>\n      )}",
+    "replacement": "state.status === \"cancelled\" || <p role=\"status\">Este bloque está cancelado.</p>",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "879",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 36,
+        "line": 307
+      },
+      "start": {
+        "column": 8,
+        "line": 307
+      }
+    },
+    "source": "      {state.status === \"cancelled\" && (",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "880",
+    "status": "Survived",
+    "mutator": "EqualityOperator",
+    "location": {
+      "end": {
+        "column": 36,
+        "line": 307
+      },
+      "start": {
+        "column": 8,
+        "line": 307
+      }
+    },
+    "source": "      {state.status === \"cancelled\" && (",
+    "replacement": "state.status !== \"cancelled\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "891",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 23,
+        "line": 324
+      },
+      "start": {
+        "column": 17,
+        "line": 324
+      }
+    },
+    "source": "            if (locked) return;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "897",
+    "status": "Survived",
+    "mutator": "ArrowFunction",
+    "location": {
+      "end": {
+        "column": 80,
+        "line": 330
+      },
+      "start": {
+        "column": 17,
+        "line": 329
+      }
+    },
+    "source": "                (error) =>\n                  ![\"zoneId\", \"startOffset\", \"endOffset\"].includes(error.field),",
+    "replacement": "() => undefined",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "901",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 44,
+        "line": 330
+      },
+      "start": {
+        "column": 31,
+        "line": 330
+      }
+    },
+    "source": "                  ![\"zoneId\", \"startOffset\", \"endOffset\"].includes(error.field),",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "902",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 57,
+        "line": 330
+      },
+      "start": {
+        "column": 46,
+        "line": 330
+      }
+    },
+    "source": "                  ![\"zoneId\", \"startOffset\", \"endOffset\"].includes(error.field),",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "921",
+    "status": "Survived",
+    "mutator": "CallExpression",
+    "location": {
+      "end": {
+        "column": 26,
+        "line": 363
+      },
+      "start": {
+        "column": 13,
+        "line": 363
+      }
+    },
+    "source": "            invalidate();",
+    "replacement": ";",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "926",
+    "status": "Survived",
+    "mutator": "ArrowFunction",
+    "location": {
+      "end": {
+        "column": 80,
+        "line": 368
+      },
+      "start": {
+        "column": 17,
+        "line": 367
+      }
+    },
+    "source": "                (error) =>\n                  error.field !== \"startLocal\" && error.field !== \"startOffset\",",
+    "replacement": "() => undefined",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "928",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 80,
+        "line": 368
+      },
+      "start": {
+        "column": 19,
+        "line": 368
+      }
+    },
+    "source": "                  error.field !== \"startLocal\" && error.field !== \"startOffset\",",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "941",
+    "status": "Survived",
+    "mutator": "ObjectLiteral",
+    "location": {
+      "end": {
+        "column": 14,
+        "line": 375
+      },
+      "start": {
+        "column": 45,
+        "line": 372
+      }
+    },
+    "source": "            setOffsetChoices((previous) => ({\n              ...previous,\n              startOffset: undefined,\n            }));",
+    "replacement": "{}",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "952",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 23,
+        "line": 390
+      },
+      "start": {
+        "column": 17,
+        "line": 390
+      }
+    },
+    "source": "            if (locked) return;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "960",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 76,
+        "line": 396
+      },
+      "start": {
+        "column": 19,
+        "line": 396
+      }
+    },
+    "source": "                  error.field !== \"endLocal\" && error.field !== \"endOffset\",",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "958",
+    "status": "Survived",
+    "mutator": "ArrowFunction",
+    "location": {
+      "end": {
+        "column": 76,
+        "line": 396
+      },
+      "start": {
+        "column": 17,
+        "line": 395
+      }
+    },
+    "source": "                (error) =>\n                  error.field !== \"endLocal\" && error.field !== \"endOffset\",",
+    "replacement": "() => undefined",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1024",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 45,
+        "line": 438
+      },
+      "start": {
+        "column": 8,
+        "line": 436
+      }
+    },
+    "source": "      {rejection &&\n        rejection.code !== \"BLOCK_UNCHANGED\" &&\n        rejection.code !== \"BUDGET_EXCEEDED\" && (",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1028",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 45,
+        "line": 437
+      },
+      "start": {
+        "column": 9,
+        "line": 437
+      }
+    },
+    "source": "        rejection.code !== \"BLOCK_UNCHANGED\" &&",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1030",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 45,
+        "line": 437
+      },
+      "start": {
+        "column": 28,
+        "line": 437
+      }
+    },
+    "source": "        rejection.code !== \"BLOCK_UNCHANGED\" &&",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1031",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 45,
+        "line": 438
+      },
+      "start": {
+        "column": 9,
+        "line": 438
+      }
+    },
+    "source": "        rejection.code !== \"BUDGET_EXCEEDED\" && (",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1033",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 45,
+        "line": 438
+      },
+      "start": {
+        "column": 28,
+        "line": 438
+      }
+    },
+    "source": "        rejection.code !== \"BUDGET_EXCEEDED\" && (",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1039",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 68,
+        "line": 447
+      },
+      "start": {
+        "column": 17,
+        "line": 447
+      }
+    },
+    "source": "              ? \"El bloque ha cambiado. Consulta su estado actual.\"",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1040",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 68,
+        "line": 448
+      },
+      "start": {
+        "column": 17,
+        "line": 448
+      }
+    },
+    "source": "              : \"No se pudo consultar el estado actual del bloque.\"}",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1054",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 44,
+        "line": 467
+      },
+      "start": {
+        "column": 42,
+        "line": 467
+      }
+    },
+    "source": "                value={offsets[field] ?? \"\"}",
+    "replacement": "\"Stryker was here!\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1057",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 68,
+        "line": 469
+      },
+      "start": {
+        "column": 47,
+        "line": 469
+      }
+    },
+    "source": "                  fieldErrors.some((error) => error.field === field)",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1061",
+    "status": "Survived",
+    "mutator": "MethodExpression",
+    "location": {
+      "end": {
+        "column": 69,
+        "line": 474
+      },
+      "start": {
+        "column": 19,
+        "line": 474
+      }
+    },
+    "source": "                  fieldErrors.some((error) => error.field === field)",
+    "replacement": "fieldErrors.every(error => error.field === field)",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1063",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 68,
+        "line": 474
+      },
+      "start": {
+        "column": 47,
+        "line": 474
+      }
+    },
+    "source": "                  fieldErrors.some((error) => error.field === field)",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1075",
+    "status": "Survived",
+    "mutator": "ArrowFunction",
+    "location": {
+      "end": {
+        "column": 69,
+        "line": 482
+      },
+      "start": {
+        "column": 37,
+        "line": 482
+      }
+    },
+    "source": "                    previous.filter((error) => error.field !== field),",
+    "replacement": "() => undefined",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1077",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 69,
+        "line": 482
+      },
+      "start": {
+        "column": 48,
+        "line": 482
+      }
+    },
+    "source": "                    previous.filter((error) => error.field !== field),",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1096",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 69,
+        "line": 499
+      },
+      "start": {
+        "column": 48,
+        "line": 499
+      }
+    },
+    "source": "                  {fieldErrors.find((error) => error.field === field)!.message}",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1104",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 505
+      },
+      "start": {
+        "column": 20,
+        "line": 505
+      }
+    },
+    "source": "      {preview && (eligible || locked) && (",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1106",
+    "status": "Survived",
+    "mutator": "ObjectLiteral",
+    "location": {
+      "end": {
+        "column": 62,
+        "line": 510
+      },
+      "start": {
+        "column": 32,
+        "line": 510
+      }
+    },
+    "source": "          <BlockDetails block={{ ...state.block, ...preview }} />",
+    "replacement": "{}",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1113",
+    "status": "Survived",
+    "mutator": "MethodExpression",
+    "location": {
+      "end": {
+        "column": 61,
+        "line": 519
+      },
+      "start": {
+        "column": 12,
+        "line": 519
+      }
+    },
+    "source": "          {preview.days.some((day) => day.excessSeconds > 0) && (",
+    "replacement": "preview.days.every(day => day.excessSeconds > 0)",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1115",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 60,
+        "line": 519
+      },
+      "start": {
+        "column": 39,
+        "line": 519
+      }
+    },
+    "source": "          {preview.days.some((day) => day.excessSeconds > 0) && (",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1117",
+    "status": "Survived",
+    "mutator": "EqualityOperator",
+    "location": {
+      "end": {
+        "column": 60,
+        "line": 519
+      },
+      "start": {
+        "column": 39,
+        "line": 519
+      }
+    },
+    "source": "          {preview.days.some((day) => day.excessSeconds > 0) && (",
+    "replacement": "day.excessSeconds >= 0",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1137",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 39,
+        "line": 543
+      },
+      "start": {
+        "column": 21,
+        "line": 543
+      }
+    },
+    "source": "                if (issue.validOffsets)",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1138",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 39,
+        "line": 543
+      },
+      "start": {
+        "column": 21,
+        "line": 543
+      }
+    },
+    "source": "                if (issue.validOffsets)",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1145",
+    "status": "Survived",
+    "mutator": "MethodExpression",
+    "location": {
+      "end": {
+        "column": 64,
+        "line": 554
+      },
+      "start": {
+        "column": 15,
+        "line": 554
+      }
+    },
+    "source": "              preview.days.some((day) => day.excessSeconds > 0) &&",
+    "replacement": "preview.days.every(day => day.excessSeconds > 0)",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1171",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 43,
+        "line": 586
+      },
+      "start": {
+        "column": 40,
+        "line": 586
+      }
+    },
+    "source": "    return `${part(\"year\").padStart(4, \"0\")}-${part(\"month\")}-${part(\"day\")}T${part(\"hour\")}:${part(\"minute\")}`;",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-block.tsx",
+    "id": "1176",
+    "status": "Survived",
+    "mutator": "BlockStatement",
+    "location": {
+      "end": {
+        "column": 4,
+        "line": 589
+      },
+      "start": {
+        "column": 11,
+        "line": 587
+      }
+    },
+    "source": "  } catch {\n    return \"\";\n  }",
+    "replacement": "{}",
+    "reason": null
+  },
+  {
+    "file": "src/block-confirmation.tsx",
+    "id": "3",
+    "status": "Survived",
+    "mutator": "BooleanLiteral",
+    "location": {
+      "end": {
+        "column": 34,
+        "line": 26
+      },
+      "start": {
+        "column": 29,
+        "line": 26
+      }
+    },
+    "source": "  const interacted = useRef(false);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/block-confirmation.tsx",
+    "id": "11",
+    "status": "Survived",
+    "mutator": "OptionalChaining",
+    "location": {
+      "end": {
+        "column": 29,
+        "line": 29
+      },
+      "start": {
+        "column": 7,
+        "line": 29
+      }
+    },
+    "source": "      heading.current?.focus();",
+    "replacement": "heading.current.focus",
+    "reason": null
+  },
+  {
+    "file": "src/block-confirmation.tsx",
+    "id": "17",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 39,
+        "line": 43
+      },
+      "start": {
+        "column": 13,
+        "line": 43
+      }
+    },
+    "source": "        if (!controller.signal.aborted) setState(result);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/block-confirmation.tsx",
+    "id": "22",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 46
+      },
+      "start": {
+        "column": 13,
+        "line": 46
+      }
+    },
+    "source": "        if (controller.signal.aborted) return;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/block-confirmation.tsx",
+    "id": "47",
+    "status": "Survived",
+    "mutator": "UnaryOperator",
+    "location": {
+      "end": {
+        "column": 41,
+        "line": 62
+      },
+      "start": {
+        "column": 39,
+        "line": 62
+      }
+    },
+    "source": "          <h3 ref={heading} tabIndex={-1}>",
+    "replacement": "+1",
+    "reason": null
+  },
+  {
+    "file": "src/block-confirmation.tsx",
+    "id": "48",
+    "status": "Survived",
+    "mutator": "UnaryOperator",
+    "location": {
+      "end": {
+        "column": 41,
+        "line": 82
+      },
+      "start": {
+        "column": 39,
+        "line": 82
+      }
+    },
+    "source": "          <h3 ref={heading} tabIndex={-1}>",
+    "replacement": "+1",
+    "reason": null
+  },
+  {
+    "file": "src/block-confirmation.tsx",
+    "id": "60",
+    "status": "Survived",
+    "mutator": "ArrowFunction",
+    "location": {
+      "end": {
+        "column": 47,
+        "line": 102
+      },
+      "start": {
+        "column": 27,
+        "line": 102
+      }
+    },
+    "source": "              setRevision((value) => value + 1);",
+    "replacement": "() => undefined",
+    "reason": null
+  },
+  {
+    "file": "src/block-confirmation.tsx",
+    "id": "61",
+    "status": "Survived",
+    "mutator": "ArithmeticOperator",
+    "location": {
+      "end": {
+        "column": 47,
+        "line": 102
+      },
+      "start": {
+        "column": 38,
+        "line": 102
+      }
+    },
+    "source": "              setRevision((value) => value + 1);",
+    "replacement": "value - 1",
+    "reason": null
+  },
+  {
+    "file": "src/change-submit.tsx",
+    "id": "80",
+    "status": "Survived",
+    "mutator": "BooleanLiteral",
+    "location": {
+      "end": {
+        "column": 34,
+        "line": 46
+      },
+      "start": {
+        "column": 29,
+        "line": 46
+      }
+    },
+    "source": "  const interacted = useRef(false);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/change-submit.tsx",
+    "id": "91",
+    "status": "Survived",
+    "mutator": "BooleanLiteral",
+    "location": {
+      "end": {
+        "column": 51,
+        "line": 54
+      },
+      "start": {
+        "column": 46,
+        "line": 54
+      }
+    },
+    "source": "  const [mayResend, setMayResend] = useState(false);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/change-submit.tsx",
+    "id": "98",
+    "status": "Survived",
+    "mutator": "ArrayDeclaration",
+    "location": {
+      "end": {
+        "column": 52,
+        "line": 57
+      },
+      "start": {
+        "column": 50,
+        "line": 57
+      }
+    },
+    "source": "  useEffect(() => () => active.current?.abort(), []);",
+    "replacement": "[\"Stryker was here\"]",
+    "reason": null
+  },
+  {
+    "file": "src/change-submit.tsx",
+    "id": "121",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 49,
+        "line": 77
+      },
+      "start": {
+        "column": 9,
+        "line": 77
+      }
+    },
+    "source": "        document.activeElement === document.body",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/change-submit.tsx",
+    "id": "127",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 36,
+        "line": 82
+      },
+      "start": {
+        "column": 11,
+        "line": 82
+      }
+    },
+    "source": "      if (controller.signal.aborted) return;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/change-submit.tsx",
+    "id": "135",
+    "status": "Survived",
+    "mutator": "OptionalChaining",
+    "location": {
+      "end": {
+        "column": 31,
+        "line": 86
+      },
+      "start": {
+        "column": 9,
+        "line": 86
+      }
+    },
+    "source": "        onAccessFailure?.(401);",
+    "replacement": "onAccessFailure(401)",
+    "reason": null
+  },
+  {
+    "file": "src/change-submit.tsx",
+    "id": "141",
+    "status": "Survived",
+    "mutator": "OptionalChaining",
+    "location": {
+      "end": {
+        "column": 78,
+        "line": 87
+      },
+      "start": {
+        "column": 56,
+        "line": 87
+      }
+    },
+    "source": "      else if (problem?.code === \"RESOURCE_NOT_FOUND\") onAccessFailure?.(404);",
+    "replacement": "onAccessFailure(404)",
+    "reason": null
+  },
+  {
+    "file": "src/change-submit.tsx",
+    "id": "171",
+    "status": "RuntimeError",
+    "mutator": "OptionalChaining",
+    "location": {
+      "end": {
+        "column": 30,
+        "line": 112
+      },
+      "start": {
+        "column": 9,
+        "line": 112
+      }
+    },
+    "source": "        onRejected?.(problem);",
+    "replacement": "onRejected(problem)",
+    "reason": "Test runner crashed. Tried twice to restart it without any luck. Last time the error message was: Error: TypeError: Cannot convert object to primitive value\nTypeError: Cannot convert object to primitive value\n    at String (<anonymous>)\n    at errorToString (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+util@10.0.0/node_modules/@stryker-mutator/util/dist/src/errors.js:22:12)\n    at Array.map (<anonymous>)\n    at VitestTestRunner.run (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+vitest-run_ad682ca84ee1a65181c9af1140987023/node_modules/@stryker-mutator/vitest-runner/dist/src/vitest-test-runner.js:182:18)\n    at VitestTestRunner.mutantRun (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+vitest-run_ad682ca84ee1a65181c9af1140987023/node_modules/@stryker-mutator/vitest-runner/dist/src/vitest-test-runner.js:129:30)\n    at ChildProcessTestRunnerWorker.mutantRun (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+core@10.0.0_@types+node@26.4.1/node_modules/@stryker-mutator/core/dist/src/test-runner/child-process-test-runner-worker.js:38:24)\n    at ChildProcessProxyWorker.handleCall (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+core@10.0.0_@types+node@26.4.1/node_modules/@stryker-mutator/core/dist/src/child-proxy/child-process-proxy-worker.js:87:28)\nError: TypeError: Cannot convert object to primitive value\nTypeError: Cannot convert object to primitive value\n    at String (<anonymous>)\n    at errorToString (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+util@10.0.0/node_modules/@stryker-mutator/util/dist/src/errors.js:22:12)\n    at Array.map (<anonymous>)\n    at VitestTestRunner.run (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+vitest-run_ad682ca84ee1a65181c9af1140987023/node_modules/@stryker-mutator/vitest-runner/dist/src/vitest-test-runner.js:182:18)\n    at VitestTestRunner.mutantRun (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+vitest-run_ad682ca84ee1a65181c9af1140987023/node_modules/@stryker-mutator/vitest-runner/dist/src/vitest-test-runner.js:129:30)\n    at ChildProcessTestRunnerWorker.mutantRun (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+core@10.0.0_@types+node@26.4.1/node_modules/@stryker-mutator/core/dist/src/test-runner/child-process-test-runner-worker.js:38:24)\n    at ChildProcessProxyWorker.handleCall (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+core@10.0.0_@types+node@26.4.1/node_modules/@stryker-mutator/core/dist/src/child-proxy/child-process-proxy-worker.js:87:28)\n    at ChildProcess.<anonymous> (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+core@10.0.0_@types+node@26.4.1/node_modules/@stryker-mutator/core/dist/src/child-proxy/child-process-proxy.js:123:33)\n    at ChildProcess.emit (node:events:518:28)\n    at emit (node:internal/child_process:949:14)\n    at process.processTicksAndRejections (node:internal/process/task_queues:91:21)"
+  },
+  {
+    "file": "src/change-submit.tsx",
+    "id": "183",
+    "status": "Survived",
+    "mutator": "LogicalOperator",
+    "location": {
+      "end": {
+        "column": 63,
+        "line": 118
+      },
+      "start": {
+        "column": 12,
+        "line": 118
+      }
+    },
+    "source": "          (check && problem?.code === \"BLOCK_CHANGE_NOT_FOUND\"),",
+    "replacement": "check || problem?.code === \"BLOCK_CHANGE_NOT_FOUND\"",
+    "reason": null
+  },
+  {
+    "file": "src/change-submit.tsx",
+    "id": "180",
+    "status": "RuntimeError",
+    "mutator": "OptionalChaining",
+    "location": {
+      "end": {
+        "column": 22,
+        "line": 117
+      },
+      "start": {
+        "column": 9,
+        "line": 117
+      }
+    },
+    "source": "        problem?.code === \"CSRF_INVALID\" ||",
+    "replacement": "problem.code",
+    "reason": "Test runner crashed. Tried twice to restart it without any luck. Last time the error message was: Error: TypeError: Cannot convert object to primitive value\nTypeError: Cannot convert object to primitive value\n    at String (<anonymous>)\n    at errorToString (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+util@10.0.0/node_modules/@stryker-mutator/util/dist/src/errors.js:22:12)\n    at Array.map (<anonymous>)\n    at VitestTestRunner.run (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+vitest-run_ad682ca84ee1a65181c9af1140987023/node_modules/@stryker-mutator/vitest-runner/dist/src/vitest-test-runner.js:182:18)\n    at VitestTestRunner.mutantRun (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+vitest-run_ad682ca84ee1a65181c9af1140987023/node_modules/@stryker-mutator/vitest-runner/dist/src/vitest-test-runner.js:129:30)\n    at ChildProcessTestRunnerWorker.mutantRun (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+core@10.0.0_@types+node@26.4.1/node_modules/@stryker-mutator/core/dist/src/test-runner/child-process-test-runner-worker.js:38:24)\n    at ChildProcessProxyWorker.handleCall (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+core@10.0.0_@types+node@26.4.1/node_modules/@stryker-mutator/core/dist/src/child-proxy/child-process-proxy-worker.js:87:28)\nError: TypeError: Cannot convert object to primitive value\nTypeError: Cannot convert object to primitive value\n    at String (<anonymous>)\n    at errorToString (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+util@10.0.0/node_modules/@stryker-mutator/util/dist/src/errors.js:22:12)\n    at Array.map (<anonymous>)\n    at VitestTestRunner.run (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+vitest-run_ad682ca84ee1a65181c9af1140987023/node_modules/@stryker-mutator/vitest-runner/dist/src/vitest-test-runner.js:182:18)\n    at VitestTestRunner.mutantRun (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+vitest-run_ad682ca84ee1a65181c9af1140987023/node_modules/@stryker-mutator/vitest-runner/dist/src/vitest-test-runner.js:129:30)\n    at ChildProcessTestRunnerWorker.mutantRun (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+core@10.0.0_@types+node@26.4.1/node_modules/@stryker-mutator/core/dist/src/test-runner/child-process-test-runner-worker.js:38:24)\n    at ChildProcessProxyWorker.handleCall (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+core@10.0.0_@types+node@26.4.1/node_modules/@stryker-mutator/core/dist/src/child-proxy/child-process-proxy-worker.js:87:28)\n    at ChildProcess.<anonymous> (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+core@10.0.0_@types+node@26.4.1/node_modules/@stryker-mutator/core/dist/src/child-proxy/child-process-proxy.js:123:33)\n    at ChildProcess.emit (node:events:518:28)\n    at emit (node:internal/child_process:949:14)\n    at process.processTicksAndRejections (node:internal/process/task_queues:91:21)"
+  },
+  {
+    "file": "src/change-submit.tsx",
+    "id": "184",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 63,
+        "line": 118
+      },
+      "start": {
+        "column": 21,
+        "line": 118
+      }
+    },
+    "source": "          (check && problem?.code === \"BLOCK_CHANGE_NOT_FOUND\"),",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/change-submit.tsx",
+    "id": "186",
+    "status": "Survived",
+    "mutator": "OptionalChaining",
+    "location": {
+      "end": {
+        "column": 34,
+        "line": 118
+      },
+      "start": {
+        "column": 21,
+        "line": 118
+      }
+    },
+    "source": "          (check && problem?.code === \"BLOCK_CHANGE_NOT_FOUND\"),",
+    "replacement": "problem.code",
+    "reason": null
+  },
+  {
+    "file": "src/change-submit.tsx",
+    "id": "189",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 121
+      },
+      "start": {
+        "column": 11,
+        "line": 121
+      }
+    },
+    "source": "      if (!controller.signal.aborted && active.current === controller) {",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/change-submit.tsx",
+    "id": "191",
+    "status": "Survived",
+    "mutator": "LogicalOperator",
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 121
+      },
+      "start": {
+        "column": 11,
+        "line": 121
+      }
+    },
+    "source": "      if (!controller.signal.aborted && active.current === controller) {",
+    "replacement": "!controller.signal.aborted || active.current === controller",
+    "reason": null
+  },
+  {
+    "file": "src/change-submit.tsx",
+    "id": "193",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 121
+      },
+      "start": {
+        "column": 41,
+        "line": 121
+      }
+    },
+    "source": "      if (!controller.signal.aborted && active.current === controller) {",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1183",
+    "status": "Survived",
+    "mutator": "BooleanLiteral",
+    "location": {
+      "end": {
+        "column": 34,
+        "line": 32
+      },
+      "start": {
+        "column": 29,
+        "line": 32
+      }
+    },
+    "source": "  const interacted = useRef(false);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1191",
+    "status": "Survived",
+    "mutator": "OptionalChaining",
+    "location": {
+      "end": {
+        "column": 29,
+        "line": 35
+      },
+      "start": {
+        "column": 7,
+        "line": 35
+      }
+    },
+    "source": "      heading.current?.focus();",
+    "replacement": "heading.current.focus",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1197",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 39,
+        "line": 41
+      },
+      "start": {
+        "column": 13,
+        "line": 41
+      }
+    },
+    "source": "        if (!controller.signal.aborted) setPage(result);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1202",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 44
+      },
+      "start": {
+        "column": 13,
+        "line": 44
+      }
+    },
+    "source": "        if (controller.signal.aborted) return;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1221",
+    "status": "Survived",
+    "mutator": "UnaryOperator",
+    "location": {
+      "end": {
+        "column": 37,
+        "line": 56
+      },
+      "start": {
+        "column": 35,
+        "line": 56
+      }
+    },
+    "source": "      <h2 ref={heading} tabIndex={-1}>",
+    "replacement": "+1",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1226",
+    "status": "Survived",
+    "mutator": "CallExpression",
+    "location": {
+      "end": {
+        "column": 34,
+        "line": 67
+      },
+      "start": {
+        "column": 15,
+        "line": 67
+      }
+    },
+    "source": "              setPage(undefined);",
+    "replacement": ";",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1228",
+    "status": "Survived",
+    "mutator": "ArrowFunction",
+    "location": {
+      "end": {
+        "column": 47,
+        "line": 68
+      },
+      "start": {
+        "column": 27,
+        "line": 68
+      }
+    },
+    "source": "              setRevision((value) => value + 1);",
+    "replacement": "() => undefined",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1229",
+    "status": "Survived",
+    "mutator": "ArithmeticOperator",
+    "location": {
+      "end": {
+        "column": 47,
+        "line": 68
+      },
+      "start": {
+        "column": 38,
+        "line": 68
+      }
+    },
+    "source": "              setRevision((value) => value + 1);",
+    "replacement": "value - 1",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1245",
+    "status": "Survived",
+    "mutator": "BooleanLiteral",
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 107
+      },
+      "start": {
+        "column": 34,
+        "line": 107
+      }
+    },
+    "source": "            interacted.current = true;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1246",
+    "status": "Survived",
+    "mutator": "CallExpression",
+    "location": {
+      "end": {
+        "column": 32,
+        "line": 108
+      },
+      "start": {
+        "column": 13,
+        "line": 108
+      }
+    },
+    "source": "            setPage(undefined);",
+    "replacement": ";",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1249",
+    "status": "Survived",
+    "mutator": "BooleanLiteral",
+    "location": {
+      "end": {
+        "column": 47,
+        "line": 126
+      },
+      "start": {
+        "column": 42,
+        "line": 126
+      }
+    },
+    "source": "  const [loading, setLoading] = useState(false);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1250",
+    "status": "Survived",
+    "mutator": "BooleanLiteral",
+    "location": {
+      "end": {
+        "column": 47,
+        "line": 127
+      },
+      "start": {
+        "column": 42,
+        "line": 127
+      }
+    },
+    "source": "  const [failure, setFailure] = useState(false);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1255",
+    "status": "Survived",
+    "mutator": "ArrayDeclaration",
+    "location": {
+      "end": {
+        "column": 53,
+        "line": 129
+      },
+      "start": {
+        "column": 51,
+        "line": 129
+      }
+    },
+    "source": "  useEffect(() => () => request.current?.abort(), []);",
+    "replacement": "[\"Stryker was here\"]",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1266",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 37,
+        "line": 144
+      },
+      "start": {
+        "column": 11,
+        "line": 144
+      }
+    },
+    "source": "      if (!controller.signal.aborted) setState(result);",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1271",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 36,
+        "line": 146
+      },
+      "start": {
+        "column": 11,
+        "line": 146
+      }
+    },
+    "source": "      if (controller.signal.aborted) return;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/reschedule-history.tsx",
+    "id": "1290",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 37,
+        "line": 154
+      },
+      "start": {
+        "column": 11,
+        "line": 154
+      }
+    },
+    "source": "      if (!controller.signal.aborted) {",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1327",
+    "status": "Survived",
+    "mutator": "ArithmeticOperator",
+    "location": {
+      "end": {
+        "column": 41,
+        "line": 52
+      },
+      "start": {
+        "column": 32,
+        "line": 52
+      }
+    },
+    "source": "    setListRevision((value) => value + 1);",
+    "replacement": "value - 1",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1340",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 64
+      },
+      "start": {
+        "column": 13,
+        "line": 64
+      }
+    },
+    "source": "        if (controller.signal.aborted) return;",
+    "replacement": "false",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1378",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 48,
+        "line": 99
+      },
+      "start": {
+        "column": 19,
+        "line": 99
+      }
+    },
+    "source": "                  projectStatus !== \"completed\" && (",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1380",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 48,
+        "line": 99
+      },
+      "start": {
+        "column": 37,
+        "line": 99
+      }
+    },
+    "source": "                  projectStatus !== \"completed\" && (",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1388",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 39,
+        "line": 107
+      },
+      "start": {
+        "column": 18,
+        "line": 107
+      }
+    },
+    "source": "                {!editing && !selected && (",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1389",
+    "status": "Survived",
+    "mutator": "LogicalOperator",
+    "location": {
+      "end": {
+        "column": 39,
+        "line": 107
+      },
+      "start": {
+        "column": 18,
+        "line": 107
+      }
+    },
+    "source": "                {!editing && !selected && (",
+    "replacement": "!editing || !selected",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1394",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 77,
+        "line": 109
+      },
+      "start": {
+        "column": 69,
+        "line": 109
+      }
+    },
+    "source": "                    onClick={() => setSelected({ id: item.id, mode: \"cancel\" })}",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1411",
+    "status": "Survived",
+    "mutator": "ArithmeticOperator",
+    "location": {
+      "end": {
+        "column": 43,
+        "line": 142
+      },
+      "start": {
+        "column": 16,
+        "line": 142
+      }
+    },
+    "source": "          key={selected.id + selected.mode}",
+    "replacement": "selected.id - selected.mode",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1422",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 42,
+        "line": 151
+      },
+      "start": {
+        "column": 13,
+        "line": 151
+      }
+    },
+    "source": "            projectStatus !== \"completed\"",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1424",
+    "status": "Survived",
+    "mutator": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 42,
+        "line": 151
+      },
+      "start": {
+        "column": 31,
+        "line": 151
+      }
+    },
+    "source": "            projectStatus !== \"completed\"",
+    "replacement": "\"\"",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1431",
+    "status": "Survived",
+    "mutator": "ArithmeticOperator",
+    "location": {
+      "end": {
+        "column": 57,
+        "line": 157
+      },
+      "start": {
+        "column": 45,
+        "line": 157
+      }
+    },
+    "source": "            setChangeRevision((revision) => revision + 1);",
+    "replacement": "revision - 1",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1432",
+    "status": "Survived",
+    "mutator": "CallExpression",
+    "location": {
+      "end": {
+        "column": 36,
+        "line": 158
+      },
+      "start": {
+        "column": 13,
+        "line": 158
+      }
+    },
+    "source": "            setSelected(undefined);",
+    "replacement": ";",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1433",
+    "status": "Survived",
+    "mutator": "CallExpression",
+    "location": {
+      "end": {
+        "column": 34,
+        "line": 159
+      },
+      "start": {
+        "column": 13,
+        "line": 159
+      }
+    },
+    "source": "            setCursor(undefined);",
+    "replacement": ";",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1436",
+    "status": "Survived",
+    "mutator": "OptionalChaining",
+    "location": {
+      "end": {
+        "column": 54,
+        "line": 162
+      },
+      "start": {
+        "column": 32,
+        "line": 162
+      }
+    },
+    "source": "          focusFallback={() => heading.current?.focus()}",
+    "replacement": "heading.current.focus",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1452",
+    "status": "Survived",
+    "mutator": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 18,
+        "line": 182
+      },
+      "start": {
+        "column": 8,
+        "line": 181
+      }
+    },
+    "source": "      {!editing &&\n        !selected &&",
+    "replacement": "true",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1453",
+    "status": "Survived",
+    "mutator": "LogicalOperator",
+    "location": {
+      "end": {
+        "column": 18,
+        "line": 182
+      },
+      "start": {
+        "column": 8,
+        "line": 181
+      }
+    },
+    "source": "      {!editing &&\n        !selected &&",
+    "replacement": "!editing || !selected",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1468",
+    "status": "Survived",
+    "mutator": "OptionalChaining",
+    "location": {
+      "end": {
+        "column": 54,
+        "line": 190
+      },
+      "start": {
+        "column": 32,
+        "line": 190
+      }
+    },
+    "source": "          focusFallback={() => heading.current?.focus()}",
+    "replacement": "heading.current.focus",
+    "reason": null
+  },
+  {
+    "file": "src/task-blocks.tsx",
+    "id": "1485",
+    "status": "Survived",
+    "mutator": "CallExpression",
+    "location": {
+      "end": {
+        "column": 34,
+        "line": 201
+      },
+      "start": {
+        "column": 13,
+        "line": 201
+      }
+    },
+    "source": "            setChange(undefined);",
+    "replacement": ";",
+    "reason": null
+  }
+]

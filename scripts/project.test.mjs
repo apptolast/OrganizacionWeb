@@ -26,6 +26,24 @@ test("today backend scope runs only its fixed PIT target", () => {
   ]);
 });
 
+test("reschedule frontend scope runs only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "reschedule-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.reschedule.config.json",
+      ],
+    ],
+  ]);
+});
+
 test("today frontend scope runs only its fixed Stryker configuration", () => {
   const { calls, project } = capture();
   project("mutate", "today-frontend");

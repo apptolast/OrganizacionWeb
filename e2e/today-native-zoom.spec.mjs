@@ -12,7 +12,7 @@ test("today: native Chromium zoom preserves a real long agenda at 200 percent @s
   baseURL,
 }, testInfo) => {
   sql(
-    "TRUNCATE planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
   );
   const { project, task } = await seedAgenda(request);
   sql(

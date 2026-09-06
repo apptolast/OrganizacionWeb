@@ -1,0 +1,55 @@
+{
+  "date": "2026-09-06",
+  "baseline": {
+    "path": "frontend/reports/mutation-reschedule-baseline-concurrency2/mutation.json",
+    "sha256": "d8f6d3de11c1aa5386ea92a9f1757f7247bd55eb96af393c928b0dc97a501971",
+    "concurrency": 2,
+    "seconds": 4743,
+    "total": 1416,
+    "killed": 1226,
+    "survived": 178,
+    "noCoverage": 10,
+    "runtimeError": 2,
+    "timeout": 0,
+    "runtimeErrorIds": [
+      "171",
+      "180"
+    ]
+  },
+  "benchmark": {
+    "path": "frontend/reports/mutation-reschedule-concurrency8/mutation.json",
+    "sha256": "4c08f12a36fbf60b4df6d106fe4eb12fc112efa2f99680a2c2bcc1bcb5a64920",
+    "concurrency": 8,
+    "seconds": 2653,
+    "total": 1416,
+    "killed": 1226,
+    "survived": 178,
+    "noCoverage": 10,
+    "runtimeError": 2,
+    "timeout": 0,
+    "runtimeErrorIds": [
+      "171",
+      "180"
+    ]
+  },
+  "secondsSaved": 2090,
+  "reductionPercent": 44.064937803078216,
+  "comparison": {
+    "evidence": "120492",
+    "uniqueMutantSignatures": 1416,
+    "classificationDifferences": 0,
+    "reportSourceDifferences": 0,
+    "sourceAndTestHashesChecked": 14,
+    "sourceAndTestHashDifferences": 0
+  },
+  "adoptedConfig": {
+    "path": "frontend/stryker.reschedule.config.json",
+    "sha256": "663c1009490c9e750f3a6a38c7107b85f5407748fe3ca9c78fa2109cfdc58fe2",
+    "concurrency": 8
+  },
+  "limitations": [
+    "Two unchanged runtime errors remain unresolved; neither is counted as killed or equivalent.",
+    "This is one measured frontend campaign, not a universal speedup or PIT validation.",
+    "Baseline and benchmark reports remain separate; the normal output directory may be reused by later campaigns."
+  ]
+}

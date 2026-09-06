@@ -29,6 +29,21 @@ it("@s1 @s4 reads state with exact BIGINT revision and no extra requests", async
     signal,
   });
 });
+it("@s31 rejects a valid state ETag followed by trailing garbage", async () => {
+  const fetch = vi
+    .fn()
+    .mockResolvedValue(
+      Response.json(
+        { block, status: "planned", updatedAt: block.createdAt },
+        { headers: { ETag: revision + "garbage" } },
+      ),
+    );
+  vi.stubGlobal("fetch", fetch);
+  await expect(
+    readBlockState(block.projectId, block.taskId, block.id),
+  ).rejects.toThrow();
+  expect(fetch).toHaveBeenCalledTimes(1);
+});
 it("@s31 rejects incompatible state bodies and revisions", async () => {
   const value = { block, status: "planned", updatedAt: block.createdAt };
   for (const [body, tag] of [
@@ -334,6 +349,32 @@ it("@s25 @s34 recovers the retained receipt by key without requiring GET Locatio
   expect(fetch).toHaveBeenCalledExactlyOnceWith(
     base + "/changes/by-request/" + key,
     { credentials: "same-origin", cache: "no-store", signal },
+  );
+});
+it("@s34 rejects recovery with a well-formed after whose objective differs from the retained movement", async () => {
+  const fetch = vi.fn().mockResolvedValue(
+    Response.json({
+      ...movement,
+      after: { ...destination, objective: "Otro objetivo válido" },
+    }),
+  );
+  vi.stubGlobal("fetch", fetch);
+  await expect(
+    checkBlockChange({
+      state,
+      key,
+      kind: "RESCHEDULED",
+      input: moveInput,
+      preview,
+    }),
+  ).rejects.toThrow();
+  expect(fetch).toHaveBeenCalledExactlyOnceWith(
+    base + "/changes/by-request/" + key,
+    {
+      credentials: "same-origin",
+      cache: "no-store",
+      signal: undefined,
+    },
   );
 });
 it("@s37 retains request snapshots across asynchronous POST and recovery", async () => {

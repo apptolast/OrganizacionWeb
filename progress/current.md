@@ -20,6 +20,12 @@ Actualización verificada: los seis hallazgos frontend se corrigieron y root apr
 
 CI remoto restaurado completamente: run34047746896 sobre mainae364e5 **SUCCESS**9b3b4e. Log5c33e1 confirma91E2E PASS en3,7min; init, build y publisher correctos. Root publicó formato538d55e y fixtures09fb970/mergeae364e5. La corrección incluye ambas tablas13 explícitas en once TRUNCATE efímeros, sin cambiar oráculos ni CASCADE; local91/91GREEN2ed762. No acredita endpoints13 aún incompletos ni despliegue productivo.
 
+Siguiente corte documental publicado en main407a534, sin cambios de producto. Consulta5e3da7 confirma cero PR abiertas. Move directo y publicador nuevos revisados APPROVED parcial en el árbol backend: review_reschedule_move.md y review_reschedule_publisher.md. Root comprobó205 XML verdes de publicador en0ef577. El comando ampliado de Move tuvo61 casos propios/compartidos verdes pero EXIT1 por18 fixtures de wiring; éstos se corrigieron enb9736d. No se confunden esos cortes con backend13 completo.
+
+Agentes actuales: resume_backend completa replay/intención, lecturas vigentes, constraints y carreras; resume_frontend ahora desarrolla puerto/adaptador/controlador separados de recibos e historial en el mismo árbol backend, con ventanas Gradle coordinadas. resume_review prepara primer E2E13 en nuevo worktree OrganizacionWeb-reschedule-e2e, rama codex/reschedule-e2e desde407a534; posee e2e/reschedule.spec.mjs y documentación, no producción. No integrar su RED previo a los endpoints como entrega verde.
+
+Stryker18743 sigue en ejecución sin resultado; fuentes/configuración del manifest de15archivos intactas, comprobadasbff8ce. No modificar esos archivos ni afirmar score antes de terminar.
+
 ## Entrega
 
 Plan publicado en docs/mvp-delivery-plan.md, commit345543c: MVP funcionalidades1–18, previsión provisional36–72horas efectivas. No equivale a una garantía de fecha, consumo o ausencia absoluta de errores. Features19–30 siguen autorizadas para la entrega posterior.

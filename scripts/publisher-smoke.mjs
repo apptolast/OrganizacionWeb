@@ -2,7 +2,8 @@ import { request as playwrightRequest } from "@playwright/test";
 import { loginSession, csrfHeaders } from "./session-client.mjs";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
+import { createServer as createHttpServer } from "node:http";
 import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { createServer } from "node:net";
 import { resolve, join, relative, isAbsolute } from "node:path";
@@ -116,6 +117,7 @@ function outbox(id, type = "ProjectCreated.v1", taskId) {
       "TaskCreated.v1",
       "SubtaskCreated.v1",
       "TaskStatusChanged.v1",
+      "WorkSessionStarted.v1",
     ].includes(type),
   );
   assert.match(id, /^[0-9a-f-]{36}$/i);
@@ -189,6 +191,13 @@ function assertMessage(row, received) {
     "TaskCreated.v1": ["taskId", "title"],
     "SubtaskCreated.v1": ["taskId", "parentTaskId", "title"],
     "TaskStatusChanged.v1": ["taskId", "fromStatus", "toStatus"],
+    "WorkSessionStarted.v1": [
+      "projectId",
+      "taskId",
+      "plannedMinutes",
+      "plannedEndAt",
+      "zoneId",
+    ],
   }[row.event_type];
   assert.ok(specificFields, "Only approved event schemas are accepted");
   assert.deepEqual(
@@ -771,6 +780,197 @@ try {
   assert.equal(restartedState.headers().etag, completedResponse.headers().etag);
   console.log(
     "PASS complete @s11: persisted session, task snapshot and history survive backend restart",
+  );
+  // One request relay drops the actual HTTP response after the API has completed it.
+  docker(["stop", "rabbitmq"], undefined, 30000);
+  const workKey = randomUUID();
+  const workPath = `/api/v1/projects/${created.id}/tasks/${task.id}/work-sessions`;
+  const workHeaders = {
+    ...(await csrfHeaders(application)),
+    Origin: origin,
+    "Idempotency-Key": workKey,
+  };
+  let upstreamStatus;
+  const relay = createHttpServer(async (incoming, outgoing) => {
+    try {
+      const chunks = [];
+      for await (const chunk of incoming) chunks.push(chunk);
+      const upstream = await fetch(`${origin}${workPath}`, {
+        method: "POST",
+        headers: { ...incoming.headers, host: new URL(origin).host },
+        body: Buffer.concat(chunks),
+        redirect: "manual",
+        signal: AbortSignal.timeout(4500),
+      });
+      upstreamStatus = upstream.status;
+      await upstream.arrayBuffer();
+    } catch {
+      upstreamStatus = undefined;
+    } finally {
+      outgoing.destroy();
+    }
+  });
+  await new Promise((done) => relay.listen(0, "127.0.0.1", done));
+  try {
+    await assert.rejects(() =>
+      application.post(`http://127.0.0.1:${relay.address().port}${workPath}`, {
+        headers: workHeaders,
+        data: { plannedMinutes: 25 },
+        maxRetries: 0,
+        timeout: 6000,
+      }),
+    );
+    assert.equal(
+      upstreamStatus,
+      201,
+      "API committed before relay discarded its response",
+    );
+  } finally {
+    await new Promise((done) => relay.close(done));
+  }
+  const workLookup = `/api/v1/work-sessions/by-request/${workKey}`;
+  const recoveredStartResponse = await application.get(workLookup);
+  assert.equal(recoveredStartResponse.status(), 200);
+  const recoveredStart = await recoveredStartResponse.json();
+  assert.deepEqual(
+    Object.keys(recoveredStart).sort(),
+    [
+      "id",
+      "projectId",
+      "taskId",
+      "startedAt",
+      "plannedMinutes",
+      "plannedEndAt",
+      "zoneId",
+    ].sort(),
+  );
+  assert.equal(recoveredStart.projectId, created.id);
+  assert.equal(recoveredStart.taskId, task.id);
+  assert.equal(recoveredStart.plannedMinutes, 25);
+  assert.match(
+    recoveredStart.startedAt,
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?Z$/,
+  );
+  assert.match(
+    recoveredStart.plannedEndAt,
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?Z$/,
+  );
+  assert.equal(
+    Date.parse(recoveredStart.plannedEndAt) -
+      Date.parse(recoveredStart.startedAt),
+    25 * 60 * 1000,
+  );
+  function workCounts() {
+    assert.match(recoveredStart.id, /^[0-9a-f-]{36}$/i);
+    return JSON.parse(
+      docker([
+        "exec",
+        "-T",
+        "postgres",
+        "psql",
+        "-U",
+        env.DB_USERNAME,
+        "-d",
+        "organization",
+        "-At",
+        "-c",
+        `SELECT json_build_object('sessions',(SELECT count(*) FROM work_sessions WHERE owner_id=(SELECT owner_id FROM work_sessions WHERE id='${recoveredStart.id}')),'events',(SELECT count(*) FROM outbox_events WHERE aggregate_id='${recoveredStart.id}' AND event_type='WorkSessionStarted.v1'))`,
+      ]),
+    );
+  }
+  assert.deepEqual(workCounts(), { sessions: 1, events: 1 });
+  const workPending = await eventually(
+    "start work broker failure preserves original event",
+    () => {
+      const row = outbox(recoveredStart.id, "WorkSessionStarted.v1");
+      return row?.status === "pending" && row.attempts >= 1 ? row : false;
+    },
+    30,
+  );
+  assert.equal(workPending.last_error_code, "BROKER_UNAVAILABLE");
+  assert.equal(workPending.published_at, null);
+  assert.equal(workPending.payload.aggregateId, recoveredStart.id);
+  assert.notEqual(workPending.payload.eventId, recoveredStart.id);
+  assert.equal(workPending.payload.ownerId, env.APP_AUTH_USERNAME);
+  assert.equal(workPending.payload.projectId, created.id);
+  assert.equal(workPending.payload.taskId, task.id);
+  assert.equal(workPending.payload.plannedMinutes, 25);
+  assert.equal(workPending.payload.schemaVersion, 1);
+  assert.equal(workPending.payload.type, "WorkSessionStarted.v1");
+  assert.equal(workPending.payload.occurredAt, recoveredStart.startedAt);
+  assert.equal(workPending.payload.plannedEndAt, recoveredStart.plannedEndAt);
+  assert.equal(workPending.payload.zoneId, recoveredStart.zoneId);
+  docker(["start", "rabbitmq"], undefined, 30000);
+  const workPublished = await eventually(
+    "start work original event published after broker recovery",
+    () => {
+      const row = outbox(recoveredStart.id, "WorkSessionStarted.v1");
+      return row?.status === "published" ? row : false;
+    },
+  );
+  assert.equal(workPublished.event_id, workPending.event_id);
+  assert.deepEqual(workPublished.payload, workPending.payload);
+  assert.ok(workPublished.attempts > workPending.attempts);
+  const workQueue = "organization.work-session-started.v1";
+  const workMessages = await eventually(
+    "ninth route receives original WorkSessionStarted",
+    () => {
+      const receivedWork = management(`queues/organization/${workQueue}/get`, {
+        count: 100,
+        ackmode: "ack_requeue_true",
+        encoding: "auto",
+        truncate: 1000000,
+      });
+      return receivedWork.some(
+        (item) => item.properties.message_id === workPublished.event_id,
+      )
+        ? receivedWork
+        : false;
+    },
+  );
+  assertMessage(workPublished, workMessages);
+  const workTopology = management(`queues/organization/${workQueue}`);
+  assert.equal(workTopology.durable, true);
+  assert.equal(workTopology.type, "quorum");
+  assert.ok(
+    management(
+      `bindings/organization/e/organization.events/q/${workQueue}`,
+    ).some((binding) => binding.routing_key === "work-session.started.v1"),
+  );
+  assert.match(workPublished.event_id, /^[0-9a-f-]{36}$/i);
+  docker([
+    "exec",
+    "-T",
+    "postgres",
+    "psql",
+    "-U",
+    env.DB_USERNAME,
+    "-d",
+    "organization",
+    "-At",
+    "-c",
+    `DELETE FROM outbox_events WHERE event_id='${workPublished.event_id}' AND status='published'`,
+  ]);
+  assert.equal(outbox(recoveredStart.id, "WorkSessionStarted.v1"), undefined);
+  docker(["restart", "backend"], undefined, 30000);
+  await eventually(
+    "start work receipt survives backend restart without outbox",
+    async () => {
+      const response = await application
+        .get(workLookup, { timeout: 2000 })
+        .catch(() => null);
+      if (!response || response.status() !== 200) return false;
+      assert.deepEqual(await response.json(), recoveredStart);
+      return true;
+    },
+  );
+  const workActive = await application.get("/api/v1/work-sessions/active");
+  assert.equal(workActive.status(), 200);
+  assert.deepEqual(await workActive.json(), { session: recoveredStart });
+  assert.deepEqual(workCounts(), { sessions: 1, events: 0 });
+  assert.equal(outbox(recoveredStart.id, "WorkSessionStarted.v1"), undefined);
+  console.log(
+    "PASS start_work_session @s25/@s26: lost HTTP response, owner/key recovery, real Rabbit retry/publication, restart without published outbox",
   );
 } catch (error) {
   console.error(

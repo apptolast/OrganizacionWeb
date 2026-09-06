@@ -560,7 +560,7 @@ La zona efectiva es la guardada en disponibilidad si el servidor puede resolverl
 
 | Campo | Contrato |
 | --- | --- |
-| serverNow | Instante UTC del reloj de servidor capturado una vez para esta respuesta. |
+| serverNow | Instante UTC capturado una vez y truncado a microsegundos, conforme al formato heredado de feature11; todos los cálculos usan esa misma captura normalizada. |
 | date | Fecha local ISO YYYY-MM-DD del día efectivo. |
 | zoneId | ID resoluble de la zona efectiva; UTC en los fallback. |
 | zoneSource | AVAILABILITY, UNCONFIGURED o UNAVAILABLE. |
@@ -599,7 +599,7 @@ Cada snapshot muestra «Según actualización de …» con la hora del servidor.
 
 ### Migración de navegación y accesibilidad
 
-La captura de proyecto se mueve a `/proyectos/nuevo`, que debe resolverse antes del matcher genérico de proyectos. Los dos enlaces de creación de la lista/vacío y las pruebas que usaban `/` para capturar pasan a esa ruta. Se conservan `/proyectos`, su paginación, detalle y edición de proyecto, detalle de tarea y `/disponibilidad`, incluida la entrada directa y retorno de autenticación existentes. Las rutas no reconocidas muestran un mensaje de página no encontrada con enlaces Hoy/Proyectos; no presentan accidentalmente el formulario de creación. El reinicio de ruta a `/` al cerrar sesión sigue siendo válido y lleva a Hoy tras el acceso posterior.
+La captura de proyecto se mueve a `/proyectos/nuevo`, que debe resolverse antes del matcher genérico de proyectos. Los dos enlaces de creación de la lista/vacío y las pruebas que usaban `/` para capturar pasan a esa ruta. Se conservan `/proyectos`, su paginación, detalle y edición de proyecto, detalle de tarea y `/disponibilidad`, incluida la entrada directa y retorno de autenticación existentes. Con una sesión ya autenticada en el sondeo inicial, las rutas locales no reconocidas se conservan y muestran página no encontrada con enlaces Hoy/Proyectos, sin consulta inventada ni formulario de creación. Después de un login desde estado anónimo se mantiene el guard existente: un retorno desconocido o inseguro se descarta hacia Hoy; esta migración no amplía los destinos admitidos de retorno. El reinicio de ruta a `/` al cerrar sesión sigue siendo válido y lleva a Hoy tras el acceso posterior.
 
 Workspace distingue Hoy, Proyectos y Disponibilidad: enlaces, breadcrumb y aria-current corresponden a la ruta efectiva, con una sola entrada activa. El skip link sigue llegando al contenido principal enfocable; se permite conservar el ID legacy `proyectos` en ese contenido para evitar un renombrado transversal. Carga, error y actualización se anuncian accesiblemente sin robar foco; «Actualizar»/«Reintentar» y enlaces son operables con teclado. Agenda vertical legible en móvil y sin scroll horizontal accidental, con la matriz de 30 principios y evidencia responsive de docs/ux-requirements.md aplicadas a este flujo; no se afirma cumplimiento global sólo por axe.
 

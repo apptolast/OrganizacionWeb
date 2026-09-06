@@ -41,6 +41,7 @@ pitest {
     val taskStatusOnly = scope == "complete_reopen_task"
     val availabilityOnly = scope == "availability"
     val scheduleBlockOnly = scope == "schedule_block"
+    val todayOnly = scope == "today"
     val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
     val authenticationClasses = setOf(
         "com.apptolast.organization.adapter.http.SessionController",
@@ -158,24 +159,43 @@ pitest {
         "com.apptolast.organization.adapter.persistence.OutboxWorkTest",
         "com.apptolast.organization.adapter.persistence.OutboxRecoveryTest"
     )
+    val todayAdapters = setOf(
+        "com.apptolast.organization.adapter.http.TodayController",
+        "com.apptolast.organization.adapter.persistence.PostgresTodayQueries"
+    )
+    val todayClasses = todayAdapters + setOf(
+        "com.apptolast.organization.domain.TodayWindow*",
+        "com.apptolast.organization.domain.TodayItem",
+        "com.apptolast.organization.application.ReadToday",
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration"
+    )
+    val todayTests = setOf(
+        "com.apptolast.organization.domain.TodayWindowTest",
+        "com.apptolast.organization.adapter.TodayApiTest",
+        "com.apptolast.organization.adapter.config.ApplicationWiringTest",
+        "com.apptolast.organization.adapter.config.ProjectStateConfigurationTest"
+    )
     targetClasses.set(when {
+        todayOnly -> todayClasses
         scheduleBlockOnly -> scheduleBlockClasses
         availabilityOnly -> availabilityClasses
         authenticationOnly -> authenticationClasses
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters
     })
     targetTests.set(when {
+        todayOnly -> todayTests
         scheduleBlockOnly -> scheduleBlockTests
         availabilityOnly -> availabilityTests + taskStatusAdapterTests + taskAdapterTests.filter { !it.contains("broker") }
         authenticationOnly -> authenticationTests
         taskStatusOnly -> taskTests + taskStatusAdapterTests
         splitOnly -> taskTests
         taskOnly -> taskTests
-        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests
+        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests
     })
+    if (todayOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-today"))
     if (availabilityOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-availability"))
     if (scheduleBlockOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-schedule-block"))
     if (taskStatusOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-complete-reopen-task"))

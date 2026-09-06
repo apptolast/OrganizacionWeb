@@ -95,7 +95,7 @@ public final class PostgresBlockStore implements BlockPlanning, BlockCommit, Blo
     this.availability = availability;
   }
 
-  private static final org.springframework.jdbc.core.RowMapper<PlannedBlock> MAPPER =
+  static final org.springframework.jdbc.core.RowMapper<PlannedBlock> MAPPER =
       (row, n) -> {
         var request =
             new BlockRequest(

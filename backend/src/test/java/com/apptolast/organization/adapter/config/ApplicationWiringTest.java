@@ -49,6 +49,7 @@ class ApplicationWiringTest {
             .withBean(ZoneCatalog.class, () -> () -> Set.of("UTC"));
     for (var port :
         List.of(
+            TodayQueries.class,
             BlockQueries.class,
             BlockPlanning.class,
             BlockCommit.class,
@@ -68,6 +69,20 @@ class ApplicationWiringTest {
       runner = addPort(runner, port);
     }
     return runner;
+  }
+
+  @Test
+  void today_s1_readingBeanReachesItsPortInFreshContext() {
+    freshContext()
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              assertThatThrownBy(() -> context.getBean(ReadTodayUseCase.class).get("owner"))
+                  .isInstanceOf(PortReached.class)
+                  .satisfies(
+                      error ->
+                          assertThat(((PortReached) error).port).isEqualTo(TodayQueries.class));
+            });
   }
 
   @Test

@@ -113,4 +113,12 @@ public class ApplicationConfiguration {
       Clock clock) {
     return new com.apptolast.organization.application.SaveAvailability(store, catalog, clock);
   }
+
+  @org.springframework.context.annotation.Bean
+  com.apptolast.organization.application.ReadToday readToday(
+      com.apptolast.organization.application.TodayQueries queries,
+      Clock clock,
+      com.apptolast.organization.application.ZoneCatalog catalog) {
+    return new com.apptolast.organization.application.ReadToday(queries, clock, catalog);
+  }
 }

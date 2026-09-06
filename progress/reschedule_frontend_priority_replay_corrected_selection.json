@@ -1,0 +1,405 @@
+{
+  "createdAt": "2026-09-06T19:37:36.228Z",
+  "originalReport": "frontend/reports/mutation-reschedule/mutation.json",
+  "beforeSha256": {
+    "frontend/src/reschedule-api.ts": "d4ea806c882f8372b1e5bcd10bf0992836e9d578fbc22fb75b3a533056cfaab7",
+    "frontend/src/reschedule-block.tsx": "f923bbeead7efce5fc2ed40df994b8149b3d8b22b6a99c22752f762ab0242972",
+    "frontend/src/block-confirmation.tsx": "6a882f6a46ff3b718d30676ba39e0838c820806c0a8c14664e94a876dcc8f73e",
+    "frontend/src/block-details.tsx": "73e9d94d56036f08cde58b8fe2f7ce1c102e7d002d49cb846cf0528de0846c85",
+    "frontend/src/change-submit.tsx": "e12b6c1f5abb4777976ef3792520d4365d53b8a4f5c8e3f06d1ae057a692fb02",
+    "frontend/src/reschedule-history.tsx": "7c2e037f9573395d651c259a7e4bb8b83e1d0f63dc85d17ffa05ee8050c52c56",
+    "frontend/src/task-blocks.tsx": "ec2d7ac254dd1d96410fc4618c7d5aedcad51b02ce049160113ef8206d5fd5a3",
+    "frontend/src/block-confirmation.test.tsx": "ffdbacd6bfc05cd2fd2e0989d3c400e3f6d8ec953e8147a8e38be73b0ff16d04",
+    "frontend/src/change-submit.test.tsx": "747762538bb03a45ae06bac2c615d4239de4c01f072d671c3aecdf7ad179a603",
+    "frontend/src/reschedule-api.test.ts": "538c4ad5b4276ad385564b0bc66dc9aa4d3ba0ab036a4055ace112121edc9d4d",
+    "frontend/src/reschedule-block.test.tsx": "c819523559aebdd9cd47b93fc0a6d85bd45007e7aa746f883b767bcf6fe4e0bc",
+    "frontend/src/task-blocks.test.tsx": "45872a72bf05bdadcd0cf9046851c025f8b06978f9538f66f8873cc3598a5d8b",
+    "frontend/stryker.reschedule.config.json": "663c1009490c9e750f3a6a38c7107b85f5407748fe3ca9c78fa2109cfdc58fe2",
+    "frontend/reports/mutation-reschedule/mutation.json": "d8f6d3de11c1aa5386ea92a9f1757f7247bd55eb96af393c928b0dc97a501971",
+    "frontend/reports/mutation-reschedule/mutation.html": "bd05e2b74260b850b806489daf9a176565538981a62b5ddb972e1d50beeb71ab",
+    "frontend/reports/mutation-reschedule-concurrency8/mutation.json": "4c08f12a36fbf60b4df6d106fe4eb12fc112efa2f99680a2c2bcc1bcb5a64920",
+    "frontend/reports/mutation-reschedule-concurrency8/mutation.html": "f9b2ac21775afde49ca99de58c29c6242a84f3447e39ffeeddb17112d8739399"
+  },
+  "originalConfigBase64": "ewogICIkc2NoZW1hIjogIi4vbm9kZV9tb2R1bGVzL0BzdHJ5a2VyLW11dGF0b3IvY29yZS9zY2hlbWEvc3RyeWtlci1zY2hlbWEuanNvbiIsCiAgInRlc3RSdW5uZXIiOiAidml0ZXN0IiwKICAicGx1Z2lucyI6IFsiQHN0cnlrZXItbXV0YXRvci92aXRlc3QtcnVubmVyIl0sCiAgImlnbm9yZVBhdHRlcm5zIjogWyIuc3RyeWtlci10bXAtYXZhaWxhYmlsaXR5LXJlcGxheSJdLAogICJtdXRhdGUiOiBbCiAgICAic3JjL3Jlc2NoZWR1bGUtYXBpLnRzIiwKICAgICJzcmMvcmVzY2hlZHVsZS1ibG9jay50c3giLAogICAgInNyYy9yZXNjaGVkdWxlLWhpc3RvcnkudHN4IiwKICAgICJzcmMvYmxvY2stY29uZmlybWF0aW9uLnRzeCIsCiAgICAic3JjL2NoYW5nZS1zdWJtaXQudHN4IiwKICAgICJzcmMvYmxvY2stZGV0YWlscy50c3giLAogICAgInNyYy90YXNrLWJsb2Nrcy50c3g6MjI6MC0yMjM6MSIKICBdLAogICJyZXBvcnRlcnMiOiBbImNsZWFyLXRleHQiLCAianNvbiIsICJodG1sIl0sCiAgInRocmVzaG9sZHMiOiB7CiAgICAiaGlnaCI6IDkwLAogICAgImxvdyI6IDgwLAogICAgImJyZWFrIjogODAKICB9LAogICJjb25jdXJyZW5jeSI6IDgsCiAgImNvdmVyYWdlQW5hbHlzaXMiOiAicGVyVGVzdCIsCiAgInZpdGVzdCI6IHsKICAgICJjb25maWdGaWxlIjogInZpdGUuY29uZmlnLnRzIgogIH0sCiAgImpzb25SZXBvcnRlciI6IHsKICAgICJmaWxlTmFtZSI6ICJyZXBvcnRzL211dGF0aW9uLXJlc2NoZWR1bGUvbXV0YXRpb24uanNvbiIKICB9LAogICJodG1sUmVwb3J0ZXIiOiB7CiAgICAiZmlsZU5hbWUiOiAicmVwb3J0cy9tdXRhdGlvbi1yZXNjaGVkdWxlL211dGF0aW9uLmh0bWwiCiAgfQp9Cg==",
+  "selection": [
+    {
+      "originalId": "258",
+      "file": "src/reschedule-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "Regex",
+      "replacement": "/^\"block:([\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}):([1-9]\\d*)\"/",
+      "location": {
+        "end": {
+          "column": 85,
+          "line": 55
+        },
+        "start": {
+          "column": 5,
+          "line": 55
+        }
+      },
+      "sourceSha256": "d4ea806c882f8372b1e5bcd10bf0992836e9d578fbc22fb75b3a533056cfaab7",
+      "range": "src/reschedule-api.ts:55:4-55:84",
+      "interpretedLocation": {
+        "start": {
+          "line": 54,
+          "column": 4
+        },
+        "end": {
+          "line": 54,
+          "column": 84
+        }
+      }
+    },
+    {
+      "originalId": "394",
+      "file": "src/reschedule-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "location": {
+        "end": {
+          "column": 11,
+          "line": 194
+        },
+        "start": {
+          "column": 9,
+          "line": 187
+        }
+      },
+      "sourceSha256": "d4ea806c882f8372b1e5bcd10bf0992836e9d578fbc22fb75b3a533056cfaab7",
+      "range": "src/reschedule-api.ts:187:8-194:10",
+      "interpretedLocation": {
+        "start": {
+          "line": 186,
+          "column": 8
+        },
+        "end": {
+          "line": 193,
+          "column": 10
+        }
+      }
+    },
+    {
+      "originalId": "396",
+      "file": "src/reschedule-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "LogicalOperator",
+      "replacement": "isBlock(value.after, before.projectId, before.taskId) || sameBlock(value.after, {\n  ...before,\n  startAt: request.preview.startAt,\n  endAt: request.preview.endAt,\n  zoneId: request.preview.zoneId,\n  durationMinutes: request.preview.durationMinutes\n})",
+      "location": {
+        "end": {
+          "column": 11,
+          "line": 194
+        },
+        "start": {
+          "column": 9,
+          "line": 187
+        }
+      },
+      "sourceSha256": "d4ea806c882f8372b1e5bcd10bf0992836e9d578fbc22fb75b3a533056cfaab7",
+      "range": "src/reschedule-api.ts:187:8-194:10",
+      "interpretedLocation": {
+        "start": {
+          "line": 186,
+          "column": 8
+        },
+        "end": {
+          "line": 193,
+          "column": 10
+        }
+      }
+    },
+    {
+      "originalId": "397",
+      "file": "src/reschedule-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "ObjectLiteral",
+      "replacement": "{}",
+      "location": {
+        "end": {
+          "column": 10,
+          "line": 194
+        },
+        "start": {
+          "column": 32,
+          "line": 188
+        }
+      },
+      "sourceSha256": "d4ea806c882f8372b1e5bcd10bf0992836e9d578fbc22fb75b3a533056cfaab7",
+      "range": "src/reschedule-api.ts:188:31-194:9",
+      "interpretedLocation": {
+        "start": {
+          "line": 187,
+          "column": 31
+        },
+        "end": {
+          "line": 193,
+          "column": 9
+        }
+      }
+    },
+    {
+      "originalId": "417",
+      "file": "src/reschedule-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 217
+        },
+        "start": {
+          "column": 7,
+          "line": 217
+        }
+      },
+      "sourceSha256": "d4ea806c882f8372b1e5bcd10bf0992836e9d578fbc22fb75b3a533056cfaab7",
+      "range": "src/reschedule-api.ts:217:6-217:36",
+      "interpretedLocation": {
+        "start": {
+          "line": 216,
+          "column": 6
+        },
+        "end": {
+          "line": 216,
+          "column": 36
+        }
+      }
+    },
+    {
+      "originalId": "703",
+      "file": "src/reschedule-block.tsx",
+      "originalStatus": "Survived",
+      "mutatorName": "BooleanLiteral",
+      "replacement": "true",
+      "location": {
+        "end": {
+          "column": 63,
+          "line": 169
+        },
+        "start": {
+          "column": 58,
+          "line": 169
+        }
+      },
+      "sourceSha256": "f923bbeead7efce5fc2ed40df994b8149b3d8b22b6a99c22752f762ab0242972",
+      "range": "src/reschedule-block.tsx:169:57-169:62",
+      "interpretedLocation": {
+        "start": {
+          "line": 168,
+          "column": 57
+        },
+        "end": {
+          "line": 168,
+          "column": 62
+        }
+      }
+    },
+    {
+      "originalId": "1113",
+      "file": "src/reschedule-block.tsx",
+      "originalStatus": "Survived",
+      "mutatorName": "MethodExpression",
+      "replacement": "preview.days.every(day => day.excessSeconds > 0)",
+      "location": {
+        "end": {
+          "column": 61,
+          "line": 519
+        },
+        "start": {
+          "column": 12,
+          "line": 519
+        }
+      },
+      "sourceSha256": "f923bbeead7efce5fc2ed40df994b8149b3d8b22b6a99c22752f762ab0242972",
+      "range": "src/reschedule-block.tsx:519:11-519:60",
+      "interpretedLocation": {
+        "start": {
+          "line": 518,
+          "column": 11
+        },
+        "end": {
+          "line": 518,
+          "column": 60
+        }
+      }
+    },
+    {
+      "originalId": "1145",
+      "file": "src/reschedule-block.tsx",
+      "originalStatus": "Survived",
+      "mutatorName": "MethodExpression",
+      "replacement": "preview.days.every(day => day.excessSeconds > 0)",
+      "location": {
+        "end": {
+          "column": 64,
+          "line": 554
+        },
+        "start": {
+          "column": 15,
+          "line": 554
+        }
+      },
+      "sourceSha256": "f923bbeead7efce5fc2ed40df994b8149b3d8b22b6a99c22752f762ab0242972",
+      "range": "src/reschedule-block.tsx:554:14-554:63",
+      "interpretedLocation": {
+        "start": {
+          "line": 553,
+          "column": 14
+        },
+        "end": {
+          "line": 553,
+          "column": 63
+        }
+      }
+    },
+    {
+      "originalId": "60",
+      "file": "src/block-confirmation.tsx",
+      "originalStatus": "Survived",
+      "mutatorName": "ArrowFunction",
+      "replacement": "() => undefined",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 102
+        },
+        "start": {
+          "column": 27,
+          "line": 102
+        }
+      },
+      "sourceSha256": "6a882f6a46ff3b718d30676ba39e0838c820806c0a8c14664e94a876dcc8f73e",
+      "range": "src/block-confirmation.tsx:102:26-102:46",
+      "interpretedLocation": {
+        "start": {
+          "line": 101,
+          "column": 26
+        },
+        "end": {
+          "line": 101,
+          "column": 46
+        }
+      }
+    },
+    {
+      "originalId": "183",
+      "file": "src/change-submit.tsx",
+      "originalStatus": "Survived",
+      "mutatorName": "LogicalOperator",
+      "replacement": "check || problem?.code === \"BLOCK_CHANGE_NOT_FOUND\"",
+      "location": {
+        "end": {
+          "column": 63,
+          "line": 118
+        },
+        "start": {
+          "column": 12,
+          "line": 118
+        }
+      },
+      "sourceSha256": "e12b6c1f5abb4777976ef3792520d4365d53b8a4f5c8e3f06d1ae057a692fb02",
+      "range": "src/change-submit.tsx:118:11-118:62",
+      "interpretedLocation": {
+        "start": {
+          "line": 117,
+          "column": 11
+        },
+        "end": {
+          "line": 117,
+          "column": 62
+        }
+      }
+    },
+    {
+      "originalId": "184",
+      "file": "src/change-submit.tsx",
+      "originalStatus": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "location": {
+        "end": {
+          "column": 63,
+          "line": 118
+        },
+        "start": {
+          "column": 21,
+          "line": 118
+        }
+      },
+      "sourceSha256": "e12b6c1f5abb4777976ef3792520d4365d53b8a4f5c8e3f06d1ae057a692fb02",
+      "range": "src/change-submit.tsx:118:20-118:62",
+      "interpretedLocation": {
+        "start": {
+          "line": 117,
+          "column": 20
+        },
+        "end": {
+          "line": 117,
+          "column": 62
+        }
+      }
+    },
+    {
+      "originalId": "186",
+      "file": "src/change-submit.tsx",
+      "originalStatus": "Survived",
+      "mutatorName": "OptionalChaining",
+      "replacement": "problem.code",
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 118
+        },
+        "start": {
+          "column": 21,
+          "line": 118
+        }
+      },
+      "sourceSha256": "e12b6c1f5abb4777976ef3792520d4365d53b8a4f5c8e3f06d1ae057a692fb02",
+      "range": "src/change-submit.tsx:118:20-118:33",
+      "interpretedLocation": {
+        "start": {
+          "line": 117,
+          "column": 20
+        },
+        "end": {
+          "line": 117,
+          "column": 33
+        }
+      }
+    },
+    {
+      "originalId": "1432",
+      "file": "src/task-blocks.tsx",
+      "originalStatus": "Survived",
+      "mutatorName": "CallExpression",
+      "replacement": ";",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 158
+        },
+        "start": {
+          "column": 13,
+          "line": 158
+        }
+      },
+      "sourceSha256": "ec2d7ac254dd1d96410fc4618c7d5aedcad51b02ce049160113ef8206d5fd5a3",
+      "range": "src/task-blocks.tsx:158:12-158:35",
+      "interpretedLocation": {
+        "start": {
+          "line": 157,
+          "column": 12
+        },
+        "end": {
+          "line": 157,
+          "column": 35
+        }
+      }
+    }
+  ],
+  "attempt": "corrected-zero-based-columns",
+  "previousManifest": "progress/reschedule_frontend_priority_replay_selection.json"
+}

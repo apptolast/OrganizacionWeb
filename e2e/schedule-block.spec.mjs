@@ -1,3 +1,4 @@
+import { configure, openEditor } from "./support/blocks.mjs";
 import { test, expect } from "./support/authenticated-test.mjs";
 import { create, sql } from "./support/projects.mjs";
 import { saveTask } from "./support/tasks.mjs";
@@ -5,15 +6,6 @@ import { csrfHeaders, loginSession } from "../scripts/session-client.mjs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 
-const days = [
-  "MONDAY",
-  "TUESDAY",
-  "WEDNESDAY",
-  "THURSDAY",
-  "FRIDAY",
-  "SATURDAY",
-  "SUNDAY",
-];
 const blocksPath = (project, task) =>
   `/api/v1/projects/${project.id}/tasks/${task.id}/blocks`;
 const taskRoute = (project, task) =>
@@ -35,43 +27,6 @@ test.beforeEach(() =>
     "TRUNCATE block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
   ),
 );
-
-async function configure(request, minutes = 120, zoneId = "UTC") {
-  const current = await request.get("/api/v1/me/availability");
-  expect(current.status()).toBe(200);
-  const response = await request.put("/api/v1/me/availability", {
-    headers: {
-      ...(await csrfHeaders(request)),
-      "If-Match": current.headers().etag,
-    },
-    data: {
-      zoneId,
-      dailyMinutes: Object.fromEntries(days.map((day) => [day, minutes])),
-    },
-  });
-  expect(response.status()).toBe(200);
-  return response.headers().etag;
-}
-
-async function openEditor(
-  page,
-  project,
-  task,
-  objective = "Preparar un borrador revisable 🧭",
-  startLocal = "2030-01-07T10:00",
-  endLocal = "2030-01-07T11:00",
-) {
-  await page.goto(taskRoute(project, task));
-  await page
-    .getByRole("button", { name: "Planificar bloque", exact: true })
-    .click();
-  await expect(page.getByLabel("Zona del bloque", { exact: true })).toHaveValue(
-    "UTC",
-  );
-  await page.getByLabel("Objetivo del bloque", { exact: true }).fill(objective);
-  await page.getByLabel("Inicio del bloque", { exact: true }).fill(startLocal);
-  await page.getByLabel("Fin del bloque", { exact: true }).fill(endLocal);
-}
 
 async function capture(page, state) {
   const engine = page.context().browser().browserType().name();

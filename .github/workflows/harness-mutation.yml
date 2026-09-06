@@ -1,0 +1,49 @@
+name: Prueba de mutación
+
+# Campaña completa de mutación: `harness verify` es init más la mutación de
+# `harness.config.json`. Es cara en CPU por diseño (reejecuta la suite por cada
+# mutante), así que corre de noche y a petición, no en cada push.
+#
+# Esto NO relaja la puerta de cierre del proceso: `docs/verification.md` y
+# `CHECKPOINTS.md` C7 siguen exigiendo mutación por encima del umbral antes de
+# marcar una feature `done`, ejecutada por `mutation_tester` sobre el alcance de
+# esa feature. Este workflow es la red de seguridad periódica sobre todo el
+# repositorio, no el sustituto de aquella.
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Grupo propio y sin cancelación: una campaña nocturna no debe morir porque
+# alguien empuje a main mientras corre.
+concurrency:
+  group: mutation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.21.0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            frontend/pnpm-lock.yaml
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+      - uses: gradle/actions/setup-gradle@v4
+      - run: node scripts/project.mjs install
+      - run: node .harness/harness.mjs verify

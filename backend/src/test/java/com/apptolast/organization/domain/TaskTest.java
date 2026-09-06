@@ -112,7 +112,7 @@ class TaskTest {
                     "",
                     null,
                     defect.equals("status")
-                        ? "completed"
+                        ? "active"
                         : defect.equals("nullStatus") ? null : "pending",
                     defect.equals("createdAt") ? null : Instant.EPOCH,
                     defect.equals("updatedAt")

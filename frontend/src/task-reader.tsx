@@ -4,6 +4,7 @@ import { RouteLink } from "./navigation";
 import { readProjects, type ProjectSnapshot } from "./read-projects-api";
 import { ProjectTasks } from "./project-tasks";
 import { TaskParent } from "./task-parent";
+import { TaskState } from "./task-state";
 import { ProjectStatusControl } from "./project-status-control";
 export function TaskReader({
   projectId,
@@ -103,7 +104,11 @@ export function TaskReader({
             {task.title}
           </h1>
           <p>{task.completionCriterion}</p>
-          <span className="idea-badge">Pendiente</span>
+          <TaskState
+            projectId={task.projectId}
+            id={task.id}
+            onAccessFailure={setFailure}
+          />
           <p>
             {task.estimatedMinutes === null
               ? "Sin estimación"

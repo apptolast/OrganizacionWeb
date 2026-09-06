@@ -13,7 +13,7 @@ const fields = [
   "createdAt",
   "updatedAt",
 ].sort();
-test.beforeEach(() => sql("TRUNCATE tasks,outbox_events,projects"));
+test.beforeEach(() => sql("TRUNCATE task_status_history, tasks,outbox_events,projects"));
 async function createTask(request, projectId, title, extra = {}) {
   const response = await request.post(`/api/v1/projects/${projectId}/tasks`, {
     headers: await csrfHeaders(request),

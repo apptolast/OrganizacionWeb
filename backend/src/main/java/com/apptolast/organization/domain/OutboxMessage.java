@@ -23,8 +23,10 @@ public record OutboxMessage(
             && !"ProjectUpdated.v1".equals(type)
             && !"ProjectStatusChanged.v1".equals(type)
             && !"TaskCreated.v1".equals(type)
-            && !"SubtaskCreated.v1".equals(type))
+            && !"SubtaskCreated.v1".equals(type)
+            && !"TaskStatusChanged.v1".equals(type))
         || schemaVersion != 1) return "UNSUPPORTED_EVENT";
+    boolean taskStatusChanged = "TaskStatusChanged.v1".equals(type);
     boolean statusChanged = "ProjectStatusChanged.v1".equals(type);
     boolean subtaskCreated = "SubtaskCreated.v1".equals(type);
     boolean taskCreated = "TaskCreated.v1".equals(type) || subtaskCreated;
@@ -39,7 +41,7 @@ public record OutboxMessage(
                 "type",
                 "taskId",
                 "title")
-            : statusChanged
+            : (statusChanged || taskStatusChanged)
                 ? java.util.Set.of(
                     "eventId",
                     "aggregateId",
@@ -57,6 +59,10 @@ public record OutboxMessage(
                     "schemaVersion",
                     "name",
                     "type");
+    if (taskStatusChanged) {
+      expected = new java.util.HashSet<>(expected);
+      expected.add("taskId");
+    }
     if (subtaskCreated) {
       expected = new java.util.HashSet<>(expected);
       expected.add("parentTaskId");
@@ -73,7 +79,7 @@ public record OutboxMessage(
     } catch (java.time.format.DateTimeParseException error) {
       return "INVALID_EVENT";
     }
-    if (taskCreated
+    if ((taskCreated || taskStatusChanged)
         && (!(payload.get("taskId") instanceof String taskId)
             || !taskId.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")))
       return "INVALID_EVENT";
@@ -82,6 +88,15 @@ public record OutboxMessage(
             || !parentId.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
             || UUID.fromString(parentId).equals(UUID.fromString((String) payload.get("taskId")))))
       return "INVALID_EVENT";
+    if (taskStatusChanged) {
+      return payload.get("fromStatus") instanceof String from
+              && payload.get("toStatus") instanceof String to
+              && java.util.Set.of("pending", "completed").contains(from)
+              && java.util.Set.of("pending", "completed").contains(to)
+              && !from.equals(to)
+          ? null
+          : "INVALID_EVENT";
+    }
     if (statusChanged) {
       return payload.get("fromStatus") instanceof String from
               && payload.get("toStatus") instanceof String to

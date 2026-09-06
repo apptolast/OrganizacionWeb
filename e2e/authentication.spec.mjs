@@ -3,7 +3,7 @@ import { create, sql } from "./support/projects.mjs";
 import { loginSession, csrfHeaders } from "../scripts/session-client.mjs";
 import AxeBuilder from "@axe-core/playwright";
 
-test.beforeEach(() => sql("TRUNCATE tasks, outbox_events, projects"));
+test.beforeEach(() => sql("TRUNCATE task_status_history, tasks, outbox_events, projects"));
 
 test("authentication: recovering CSRF never repeats a rejected write @s9 @s17", async ({
   page,

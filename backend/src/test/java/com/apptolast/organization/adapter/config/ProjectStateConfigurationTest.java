@@ -26,6 +26,12 @@ class ProjectStateConfigurationTest {
             .withBean(SubtaskCommit.class, () -> org.mockito.Mockito.mock(SubtaskCommit.class))
             .withBean(SubtaskQueries.class, () -> org.mockito.Mockito.mock(SubtaskQueries.class))
             .withBean(TaskQueries.class, () -> org.mockito.Mockito.mock(TaskQueries.class))
+            .withBean(
+                TaskStatusQueries.class, () -> org.mockito.Mockito.mock(TaskStatusQueries.class))
+            .withBean(
+                TaskHistoryQueries.class, () -> org.mockito.Mockito.mock(TaskHistoryQueries.class))
+            .withBean(
+                TaskStatusEditing.class, () -> org.mockito.Mockito.mock(TaskStatusEditing.class))
             .withBean(ProjectStatusEditing.class, () -> store);
     if (!value.equals("absent"))
       runner = runner.withPropertyValues("app.max-active-projects=" + value);

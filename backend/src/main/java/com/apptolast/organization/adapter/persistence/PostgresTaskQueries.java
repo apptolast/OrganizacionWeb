@@ -17,7 +17,7 @@ public final class PostgresTaskQueries implements TaskQueries, SubtaskQueries {
     this.jdbc = jdbc;
   }
 
-  private static final RowMapper<Task> MAPPER =
+  static final RowMapper<Task> MAPPER =
       (row, n) ->
           new Task(
               row.getObject("id", UUID.class),

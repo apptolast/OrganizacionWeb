@@ -97,10 +97,10 @@
       "id": 9,
       "name": "complete_reopen_task",
       "title": "Completar y reabrir tarea",
-      "description": "Completar y reabrir tarea: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "description": "Completar y reabrir tareas con versión propia, historial duradero y evento atómico; 36 escenarios implementados y cierre local aprobado por el juez independiente.",
       "acceptance": [],
       "sdd": true,
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": 10,

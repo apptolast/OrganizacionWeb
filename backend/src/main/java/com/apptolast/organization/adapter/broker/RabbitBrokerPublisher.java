@@ -46,18 +46,23 @@ public final class RabbitBrokerPublisher implements BrokerPublisher {
           case "ProjectStatusChanged.v1" -> "status-changed";
           case "TaskCreated.v1" -> "task-created";
           case "SubtaskCreated.v1" -> "subtask-created";
+          case "TaskStatusChanged.v1" -> "task-status-changed";
           default -> throw new IllegalArgumentException("Unsupported event type");
         };
     String queue =
-        kind.equals("subtask-created")
-            ? "organization.subtask-created.v1"
-            : kind.equals("task-created")
-                ? "organization.task-created.v1"
-                : "organization.project-" + kind + ".v1";
+        kind.equals("task-status-changed")
+            ? "organization.task-status-changed.v1"
+            : kind.equals("subtask-created")
+                ? "organization.subtask-created.v1"
+                : kind.equals("task-created")
+                    ? "organization.task-created.v1"
+                    : "organization.project-" + kind + ".v1";
     String routing =
-        kind.equals("subtask-created")
-            ? "subtask.created.v1"
-            : kind.equals("task-created") ? "task.created.v1" : "project." + kind + ".v1";
+        kind.equals("task-status-changed")
+            ? "task.status-changed.v1"
+            : kind.equals("subtask-created")
+                ? "subtask.created.v1"
+                : kind.equals("task-created") ? "task.created.v1" : "project." + kind + ".v1";
     com.rabbitmq.client.Connection connection = null;
     try {
       connection = factory.newConnection();

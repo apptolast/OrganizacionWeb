@@ -38,6 +38,7 @@ pitest {
     val authenticationOnly = scope == "authentication"
     val taskOnly = scope == "create_task"
     val splitOnly = scope == "split_task"
+    val taskStatusOnly = scope == "complete_reopen_task"
     val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
     val authenticationClasses = setOf(
         "com.apptolast.organization.adapter.http.SessionController",
@@ -74,19 +75,53 @@ pitest {
         "com.apptolast.organization.application.ReadSubtasks",
         "com.apptolast.organization.application.SubtaskCreated"
     )
+    val taskStatusAdapters = setOf(
+        "com.apptolast.organization.adapter.http.ApiErrors",
+        "com.apptolast.organization.adapter.http.TaskStatusController",
+        "com.apptolast.organization.adapter.http.TaskHistoryController",
+        "com.apptolast.organization.adapter.persistence.PostgresTaskStatusStore",
+        "com.apptolast.organization.adapter.persistence.PostgresTaskHistoryQueries"
+    )
+    val taskStatusClasses = taskStatusAdapters + setOf(
+        "com.apptolast.organization.domain.Task",
+        "com.apptolast.organization.domain.TaskSnapshot",
+        "com.apptolast.organization.domain.TaskRevision",
+        "com.apptolast.organization.domain.TaskHistoryEntry",
+        "com.apptolast.organization.domain.TaskHistoryPosition",
+        "com.apptolast.organization.domain.TaskHistoryPage",
+        "com.apptolast.organization.domain.OutboxMessage",
+        "com.apptolast.organization.application.ChangeTaskStatus",
+        "com.apptolast.organization.application.ReadTaskStatus",
+        "com.apptolast.organization.application.ReadTaskHistory",
+        "com.apptolast.organization.application.TaskStatusChange",
+        "com.apptolast.organization.application.TaskStatusChanged",
+        "com.apptolast.organization.adapter.persistence.PostgresTaskQueries",
+        "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher"
+    )
+    val taskStatusAdapterTests = setOf(
+        "com.apptolast.organization.adapter.TaskStatusApiTest",
+        "com.apptolast.organization.adapter.TaskHistoryApiTest",
+        "com.apptolast.organization.adapter.ProjectApiTest",
+        "com.apptolast.organization.adapter.ReadProjectsApiTest",
+        "com.apptolast.organization.adapter.EditProjectsApiTest",
+        "com.apptolast.organization.adapter.ProjectStatesApiTest"
+    )
     val taskTests = core + taskAdapterTests
     targetClasses.set(when {
         authenticationOnly -> authenticationClasses
+        taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters
     })
     targetTests.set(when {
         authenticationOnly -> authenticationTests
+        taskStatusOnly -> taskTests + taskStatusAdapterTests
         splitOnly -> taskTests
         taskOnly -> taskTests
-        else -> core + authenticationTests + taskAdapterTests
+        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests
     })
+    if (taskStatusOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-complete-reopen-task"))
     if (authenticationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-authentication"))
     if (splitOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-split-task"))
     if (taskOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-create-task"))

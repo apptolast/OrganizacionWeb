@@ -24,7 +24,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
@@ -36,8 +35,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @AutoConfigureMockMvc
 @Testcontainers
 class ProjectApiTest {
-  @Container
   static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17.9-alpine");
+
+  // Spring caches its context across PIT iterations; retain the same JDBC endpoint per JVM.
+  // Testcontainers Ryuk still owns cleanup when this test JVM exits.
+  static {
+    postgres.start();
+  }
 
   @DynamicPropertySource
   static void database(DynamicPropertyRegistry registry) {
@@ -61,7 +65,7 @@ class ProjectApiTest {
 
   @BeforeEach
   void clear() {
-    jdbc.execute("TRUNCATE outbox_events, projects CASCADE");
+    jdbc.execute("TRUNCATE task_status_history, tasks, outbox_events, projects");
   }
 
   @org.junit.jupiter.params.ParameterizedTest

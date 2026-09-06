@@ -65,4 +65,22 @@ public class ApplicationConfiguration {
       com.apptolast.organization.application.SubtaskQueries queries) {
     return new com.apptolast.organization.application.ReadSubtasks(queries);
   }
+
+  @Bean
+  com.apptolast.organization.application.ReadTaskStatus readTaskStatus(
+      com.apptolast.organization.application.TaskStatusQueries queries) {
+    return new com.apptolast.organization.application.ReadTaskStatus(queries);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ChangeTaskStatus changeTaskStatus(
+      com.apptolast.organization.application.TaskStatusEditing store, Clock clock) {
+    return new com.apptolast.organization.application.ChangeTaskStatus(store, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReadTaskHistory readTaskHistory(
+      com.apptolast.organization.application.TaskHistoryQueries queries) {
+    return new com.apptolast.organization.application.ReadTaskHistory(queries);
+  }
 }

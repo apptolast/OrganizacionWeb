@@ -57,7 +57,7 @@ class OutboxWorkTest {
 
   @BeforeEach
   void clear() {
-    jdbc.execute("TRUNCATE outbox_events, projects CASCADE");
+    jdbc.execute("TRUNCATE task_status_history, tasks, outbox_events, projects");
   }
 
   ProjectCreated seed() {

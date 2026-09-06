@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "mutate": [
+    "src/tasks-api.ts:87:0-87:200",
+    "src/task-history.tsx:78:0-78:200",
+    "src/task-state.tsx:119:0-119:200"
+  ],
+  "reporters": ["clear-text", "json", "html"],
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 80
+  },
+  "concurrency": 2,
+  "coverageAnalysis": "perTest",
+  "vitest": {
+    "configFile": "vite.config.ts"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation-complete-reopen-task/timeout-replay.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation-complete-reopen-task/timeout-replay.html"
+  }
+}

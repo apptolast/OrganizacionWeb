@@ -5,7 +5,7 @@ export type Task = {
   title: string;
   completionCriterion: string;
   estimatedMinutes: number | null;
-  status: "pending";
+  status: "pending" | "completed";
   createdAt: string;
   updatedAt: string;
 };
@@ -84,7 +84,7 @@ function isTask(value: unknown, projectId: string): value is Task {
         Number.isInteger(data.estimatedMinutes) &&
         data.estimatedMinutes >= 1 &&
         data.estimatedMinutes <= 1440)) &&
-    data.status === "pending" &&
+    (data.status === "pending" || data.status === "completed") &&
     typeof data.createdAt === "string" &&
     Number.isFinite(Date.parse(data.createdAt)) &&
     typeof data.updatedAt === "string" &&
@@ -112,6 +112,7 @@ export async function createTask(
   const data: unknown = await response.json();
   if (
     !isTask(data, projectId) ||
+    data.status !== "pending" ||
     data.createdAt !== data.updatedAt ||
     (parentTaskId && sameId(data.id, parentTaskId))
   )

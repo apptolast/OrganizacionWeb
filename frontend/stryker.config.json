@@ -22,7 +22,10 @@
     "src/project-tasks.tsx",
     "src/task-reader.tsx",
     "src/task-parent.tsx",
-    "src/App.tsx:10:0-14:200"
+    "src/App.tsx:10:0-14:200",
+    "src/task-state.tsx",
+    "src/task-history.tsx",
+    "src/task-status-api.ts"
   ],
   "reporters": ["clear-text", "json", "html"],
   "thresholds": {

@@ -1,0 +1,41 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "mutate": [
+    "src/task-history.tsx:30:0-30:200",
+    "src/task-history.tsx:33:0-33:200",
+    "src/task-history.tsx:53:0-53:200",
+    "src/task-history.tsx:56:0-56:200",
+    "src/task-history.tsx:92:0-92:200",
+    "src/task-history.tsx:102:0-102:200",
+    "src/task-history.tsx:108:0-108:200",
+    "src/task-state.tsx:20:0-20:200",
+    "src/task-state.tsx:39:0-39:200",
+    "src/task-state.tsx:55:0-55:200",
+    "src/task-state.tsx:57:0-57:200",
+    "src/task-state.tsx:74:0-74:200",
+    "src/task-state.tsx:77:0-77:200",
+    "src/task-state.tsx:103:0-103:200",
+    "src/task-status-api.ts:50:0-52:200",
+    "src/task-status-api.ts:122:0-122:200",
+    "src/task-status-api.ts:132:0-136:200"
+  ],
+  "reporters": ["clear-text", "json", "html"],
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 80
+  },
+  "concurrency": 2,
+  "coverageAnalysis": "perTest",
+  "vitest": {
+    "configFile": "vite.config.ts"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation-complete-reopen-task/replay.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation-complete-reopen-task/replay.html"
+  }
+}

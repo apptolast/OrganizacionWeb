@@ -16,7 +16,7 @@ public record Task(
   public Task {
     if (id == null
         || projectId == null
-        || !"pending".equals(status)
+        || !("pending".equals(status) || "completed".equals(status))
         || createdAt == null
         || updatedAt == null
         || updatedAt.isBefore(createdAt))

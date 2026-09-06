@@ -44,6 +44,8 @@ const task = {
 const route = `/proyectos/${project.id}/tareas/${task.id}`;
 function detailFetch(...responses: Array<Response | Promise<Response>>) {
   return vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
+    const stateResponse = taskStateRead(String(url));
+    if (stateResponse) return stateResponse;
     if (url === `/api/v1/projects/${project.id}`)
       return Response.json(project, { headers: { ETag: '"version"' } });
     if (String(url).endsWith("/subtasks"))
@@ -63,6 +65,8 @@ function contextFetch(
     .spyOn(globalThis, "fetch")
     .mockImplementation(async (input, options) => {
       const url = String(input);
+      const stateResponse = taskStateRead(url);
+      if (stateResponse) return stateResponse;
       const custom = override(url, options);
       if (custom) return custom;
       if (url === "/api/session") return Response.json(authenticated);
@@ -793,6 +797,8 @@ it("@s26 conserva el borrador cuando falla la recarga del proyecto y permite rec
   window.history.replaceState(null, "", route);
   let reads = 0;
   vi.spyOn(globalThis, "fetch").mockImplementation(async (url, options) => {
+    const stateResponse = taskStateRead(String(url));
+    if (stateResponse) return stateResponse;
     if (options?.method === "PUT")
       return Response.json({ code: "PROJECT_CONFLICT" }, { status: 412 });
     if (url === `/api/v1/projects/${project.id}`)
@@ -825,6 +831,8 @@ it("@s26 conserva el borrador al recargar un conflicto del estado del proyecto",
   window.history.replaceState(null, "", route);
   let reads = 0;
   vi.spyOn(globalThis, "fetch").mockImplementation(async (url, options) => {
+    const stateResponse = taskStateRead(String(url));
+    if (stateResponse) return stateResponse;
     if (options?.method === "PUT")
       return Response.json({ code: "PROJECT_CONFLICT" }, { status: 412 });
     if (url === `/api/v1/projects/${project.id}`)
@@ -854,6 +862,8 @@ it("@s23 conserva la ruta de tarea tras iniciar sesión", async () => {
   window.history.replaceState(null, "", route);
   let logged = false;
   vi.spyOn(globalThis, "fetch").mockImplementation(async (url, options) => {
+    const stateResponse = taskStateRead(String(url));
+    if (stateResponse) return stateResponse;
     if (url === "/api/session" && options?.method === "POST") {
       logged = true;
       return new Response(null, { status: 204 });
@@ -910,6 +920,8 @@ it("@s28 @s29 confirma una sola creación aunque falle la recarga de hijos", asy
   const fetcher = vi
     .spyOn(globalThis, "fetch")
     .mockImplementation(async (url, options) => {
+      const stateResponse = taskStateRead(String(url));
+      if (stateResponse) return stateResponse;
       if (options?.method === "POST") {
         posted = true;
         return new Promise((resolve) => {
@@ -956,6 +968,8 @@ it.each(["success", "failure"])(
     let reject!: (error: Error) => void;
     let reads = 0;
     vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
+      const stateResponse = taskStateRead(String(url));
+      if (stateResponse) return stateResponse;
       if (url === `/api/v1/projects/${project.id}`)
         return Response.json(project, { headers: { ETag: '"version"' } });
       if (String(url).endsWith("/parent")) {
@@ -1002,6 +1016,8 @@ it.each(["success", "failure"])(
     let reject!: (error: Error) => void;
     let reads = 0;
     vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
+      const stateResponse = taskStateRead(String(url));
+      if (stateResponse) return stateResponse;
       if (url === `/api/v1/projects/${project.id}`)
         return Response.json(project, { headers: { ETag: '"version"' } });
       if (String(url).endsWith("/parent"))
@@ -1043,6 +1059,8 @@ it("@s23 pagina hijos y recupera recientes después de un error independiente", 
   const fetcher = vi
     .spyOn(globalThis, "fetch")
     .mockImplementation(async (url) => {
+      const stateResponse = taskStateRead(String(url));
+      if (stateResponse) return stateResponse;
       if (url === `/api/v1/projects/${project.id}`)
         return Response.json(project, { headers: { ETag: '"version"' } });
       if (String(url).endsWith("/parent"))
@@ -1081,6 +1099,8 @@ it("@s36 permite reabrir el proyecto desde el contexto de la tarea", async () =>
   const fetcher = vi
     .spyOn(globalThis, "fetch")
     .mockImplementation(async (url, options) => {
+      const stateResponse = taskStateRead(String(url));
+      if (stateResponse) return stateResponse;
       if (options?.method === "PUT")
         return Response.json(
           { ...project, status: "paused" },
@@ -1124,6 +1144,8 @@ it("@s25 crea una subtarea sin modificar la estimación del padre", async () => 
   const fetcher = vi
     .spyOn(globalThis, "fetch")
     .mockImplementation(async (url, options) => {
+      const stateResponse = taskStateRead(String(url));
+      if (stateResponse) return stateResponse;
       if (options?.method === "POST") {
         saved = true;
         return Response.json(child, { status: 201 });
@@ -1177,6 +1199,8 @@ it("@s23 carga sólo los hijos directos junto al proyecto confirmado", async () 
   const fetcher = vi
     .spyOn(globalThis, "fetch")
     .mockImplementation(async (url) => {
+      const stateResponse = taskStateRead(String(url));
+      if (stateResponse) return stateResponse;
       if (url === `/api/v1/projects/${project.id}`)
         return Response.json(project, { headers: { ETag: '"version"' } });
       if (String(url).endsWith("/parent"))
@@ -1289,7 +1313,7 @@ it("@s23 carga directamente el detalle confirmado y conserva enlace al proyecto"
   ).toBeVisible();
   expect(screen.getByText(task.completionCriterion)).toBeVisible();
   expect(screen.getByText("Estimación: 30 min")).toBeVisible();
-  expect(screen.getByText("Pendiente")).toBeVisible();
+  expect(await screen.findByText("Pendiente")).toBeVisible();
   expect(
     screen.getByRole("link", { name: "Volver al proyecto" }),
   ).toHaveAttribute("href", `/proyectos/${project.id}`);
@@ -1311,3 +1335,14 @@ it("@s23 permite abrir el detalle desde la lista plana del proyecto", async () =
     route,
   );
 });
+
+function taskStateRead(url: string) {
+  const match = /\/tasks\/([^/]+)\/status$/.exec(url);
+  if (match)
+    return Response.json(
+      { status: "pending", completedAt: null, updatedAt: task.updatedAt },
+      { headers: { ETag: `"task:${match[1].toLowerCase()}:0"` } },
+    );
+  if (/\/tasks\/[^/]+\/history(?:\?|$)/.test(url))
+    return Response.json({ items: [], nextCursor: null });
+}

@@ -100,7 +100,9 @@ export function ProjectTasks({
                 </RouteLink>
               </h3>
               <p>{task.completionCriterion}</p>
-              <span className="idea-badge">Pendiente</span>
+              <span className="idea-badge">
+                {task.status === "pending" ? "Pendiente" : "Completada"}
+              </span>
               <p>
                 {task.estimatedMinutes === null
                   ? "Sin estimación"

@@ -545,4 +545,77 @@ class PublishOutboxTest {
         .extracting(PublicationAttempt::code)
         .isEqualTo("INVALID_EVENT");
   }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {
+        "type",
+        "version",
+        "extra",
+        "taskPartial",
+        "taskType",
+        "fromUnknown",
+        "toUnknown",
+        "same",
+        "missing:eventId",
+        "missing:aggregateId",
+        "missing:ownerId",
+        "missing:occurredAt",
+        "missing:schemaVersion",
+        "missing:type",
+        "missing:taskId",
+        "missing:fromStatus",
+        "missing:toStatus"
+      })
+  void taskStatus_s32_blocksEveryIncompatibleEnvelopeWithoutSending(String defect) {
+    var source = message(0);
+    var payload = new HashMap<>(source.payload());
+    payload.remove("name");
+    payload.put("type", "TaskStatusChanged.v1");
+    payload.put("taskId", UUID.randomUUID().toString());
+    payload.put("fromStatus", "pending");
+    payload.put("toStatus", "completed");
+    if (defect.startsWith("missing:")) payload.remove(defect.substring(8));
+    else
+      switch (defect) {
+        case "extra" -> payload.put("title", "private");
+        case "taskPartial" -> payload.put("taskId", "1-1-1-1-1");
+        case "taskType" -> payload.put("taskId", 42);
+        case "fromUnknown" -> payload.put("fromStatus", "unknown");
+        case "toUnknown" -> payload.put("toStatus", "unknown");
+        case "same" -> payload.put("toStatus", "pending");
+        default -> {}
+      }
+    var event =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            source.occurredAt(),
+            defect.equals("type") ? "TaskStatusChanged.v2" : "TaskStatusChanged.v1",
+            defect.equals("version") ? 2 : 1,
+            source.json(),
+            payload,
+            0);
+    var work = new Work(event);
+    new PublishOutbox(
+            work,
+            delivered -> {
+              throw new AssertionError("Invalid status event sent");
+            },
+            audit,
+            Clock.fixed(NOW, ZoneOffset.UTC))
+        .runCycle();
+    assertThat(work.persisted)
+        .containsExactly(
+            new PublicationAttempt(
+                event.eventId(),
+                "blocked",
+                0,
+                NOW,
+                null,
+                defect.equals("type") || defect.equals("version")
+                    ? "UNSUPPORTED_EVENT"
+                    : "INVALID_EVENT"));
+  }
 }

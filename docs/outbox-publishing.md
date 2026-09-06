@@ -61,6 +61,7 @@ La ejecución local opcional se documenta en el README del repositorio. El despl
 | ProjectStatusChanged.v1 | project.status-changed.v1 | organization.project-status-changed.v1 |
 | TaskCreated.v1 | task.created.v1 | organization.task-created.v1 |
 | SubtaskCreated.v1 | subtask.created.v1 | organization.subtask-created.v1 |
+| TaskStatusChanged.v1 | task.status-changed.v1 | organization.task-status-changed.v1 |
 
 TaskCreated conserva aggregateId del proyecto y taskId de la tarea nueva. Su payload incluye título, pero excluye criterio y estimación. Crear una tarea confirma tarea y evento en la misma transacción, sin cambiar la representación o versión del proyecto. El estado final de validación se registra en create_task dentro del roadmap.
 
@@ -73,3 +74,11 @@ El contrato aprobado de split_task añade SubtaskCreated.v1, ruta `subtask.creat
 El payload cerrado contiene eventId, aggregateId, ownerId, occurredAt, schemaVersion, type, taskId, parentTaskId y title. aggregateId sigue siendo el proyecto; taskId identifica la nueva subtarea y parentTaskId su padre directo. No incluye criterio ni estimación. La creación histórica de raíces conserva TaskCreated.v1; crear una subtarea genera únicamente SubtaskCreated.v1. La relación, la tarea y el evento se confirman en la misma transacción.
 
 Los hijos pueden publicarse antes que sus padres por los reintentos independientes. Los futuros consumidores deben tolerar referencias todavía no recibidas, además de deduplicar por eventId. La estructura del árbol se consulta mediante la API, sin inferirla del orden de llegada de mensajes.
+
+## Completar y reabrir tareas
+
+El contrato complete_reopen_task incorpora TaskStatusChanged.v1. El corte está verificado localmente, con seis rutas y recuperación tras caída/reinicio del broker; no supone un despliegue en producción.
+
+El evento contiene exactamente eventId, aggregateId, ownerId, occurredAt, schemaVersion, type, taskId, fromStatus y toStatus. aggregateId identifica el proyecto. Sólo una transición real entre pending y completed crea un evento; repetir el estado con la versión vigente conserva fechas y no genera otra transición. Una versión obsoleta se rechaza incluso si la intención ya está satisfecha.
+
+Estado, historial y outbox se guardan en una transacción PostgreSQL. El historial tiene persistencia propia y retención indefinida; retirar registros del outbox no elimina lo que el usuario completó o reabrió. La API lo ordena por versión de tarea, incluso cuando dos transiciones tienen la misma fecha. Este orden no se deduce de RabbitMQ: el evento no incluye versión de tarea y el publicador no garantiza orden por agregado.

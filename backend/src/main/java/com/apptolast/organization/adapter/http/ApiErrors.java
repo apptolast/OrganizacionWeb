@@ -77,6 +77,13 @@ public final class ApiErrors {
         .body(problem(404, "PROJECT_NOT_FOUND", "Proyecto no encontrado"));
   }
 
+  @ExceptionHandler(com.apptolast.organization.application.TaskConflictException.class)
+  ResponseEntity<Map<String, Object>> taskConflict() {
+    return ResponseEntity.status(412)
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+        .body(problem(412, "TASK_CONFLICT", "La tarea tiene una versión más reciente."));
+  }
+
   @ExceptionHandler(com.apptolast.organization.application.ProjectConflictException.class)
   ResponseEntity<Map<String, Object>> conflict() {
     return ResponseEntity.status(412)

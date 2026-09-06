@@ -115,10 +115,15 @@ function outbox(id, type = "ProjectCreated.v1", taskId) {
       "ProjectStatusChanged.v1",
       "TaskCreated.v1",
       "SubtaskCreated.v1",
+      "TaskStatusChanged.v1",
     ].includes(type),
   );
   assert.match(id, /^[0-9a-f-]{36}$/i);
-  const taskEvent = ["TaskCreated.v1", "SubtaskCreated.v1"].includes(type);
+  const taskEvent = [
+    "TaskCreated.v1",
+    "SubtaskCreated.v1",
+    "TaskStatusChanged.v1",
+  ].includes(type);
   if (taskEvent) assert.match(taskId, /^[0-9a-f-]{36}$/i);
   const taskFilter = taskEvent ? ` AND payload->>'taskId'='${taskId}'` : "";
   const value = docker([
@@ -183,6 +188,7 @@ function assertMessage(row, received) {
     "ProjectStatusChanged.v1": ["fromStatus", "toStatus"],
     "TaskCreated.v1": ["taskId", "title"],
     "SubtaskCreated.v1": ["taskId", "parentTaskId", "title"],
+    "TaskStatusChanged.v1": ["taskId", "fromStatus", "toStatus"],
   }[row.event_type];
   assert.ok(specificFields, "Only approved event schemas are accepted");
   assert.deepEqual(
@@ -392,6 +398,49 @@ try {
   assert.equal(childPending.payload.parentTaskId, task.id);
   assert.notEqual(child.id, task.id);
   assert.equal(outbox(created.id, "TaskCreated.v1", child.id), undefined);
+  const taskStatePath = `/api/v1/projects/${created.id}/tasks/${child.id}/status`;
+  const stateBefore = await application.get(taskStatePath);
+  assert.equal(stateBefore.status(), 200);
+  const completedResponse = await application.put(taskStatePath, {
+    headers: {
+      ...(await csrfHeaders(application)),
+      Origin: origin,
+      "If-Match": stateBefore.headers().etag,
+    },
+    data: { status: "completed" },
+    timeout: 4500,
+  });
+  assert.equal(
+    completedResponse.status(),
+    200,
+    "Task transition must commit with broker stopped",
+  );
+  const completedState = await completedResponse.json();
+  assert.equal(completedState.status, "completed");
+  assert.equal(completedState.completedAt, completedState.updatedAt);
+  const historyResponse = await application.get(
+    `/api/v1/projects/${created.id}/tasks/${child.id}/history`,
+  );
+  assert.equal(historyResponse.status(), 200);
+  const taskHistory = await historyResponse.json();
+  assert.equal(taskHistory.items.length, 1);
+  assert.equal(taskHistory.items[0].toStatus, "completed");
+  assert.equal(taskHistory.items[0].occurredAt, completedState.updatedAt);
+  const taskStatePending = await eventually(
+    "complete @s19 pending task transition with broker stopped",
+    () => {
+      const row = outbox(created.id, "TaskStatusChanged.v1", child.id);
+      return row?.status === "pending" && row.attempts >= 1 ? row : false;
+    },
+    30,
+  );
+  assert.equal(taskStatePending.last_error_code, "BROKER_UNAVAILABLE");
+  assert.equal(taskStatePending.published_at, null);
+  assert.equal(taskStatePending.payload.aggregateId, created.id);
+  assert.equal(taskStatePending.payload.taskId, child.id);
+  assert.equal(taskStatePending.payload.fromStatus, "pending");
+  assert.equal(taskStatePending.payload.toStatus, "completed");
+  assert.equal(taskStatePending.payload.occurredAt, completedState.updatedAt);
   docker(["start", "rabbitmq"], undefined, 30000);
   const recovered = await eventually(
     "@s9 background publisher recovers automatically",
@@ -587,6 +636,53 @@ try {
   console.log(
     "PASS split @s21/@s37: HTTP 201 while broker stopped; original nine-field SubtaskCreated recovered",
   );
+  const taskStatePublished = await eventually(
+    "complete @s20 original transition publishes after recovery",
+    () => {
+      const row = outbox(created.id, "TaskStatusChanged.v1", child.id);
+      return row?.status === "published" ? row : false;
+    },
+    120,
+  );
+  assert.equal(taskStatePublished.event_id, taskStatePending.event_id);
+  assert.deepEqual(taskStatePublished.payload, taskStatePending.payload);
+  assert.ok(taskStatePublished.attempts > taskStatePending.attempts);
+  async function receiveTaskState() {
+    return eventually(
+      "TaskStatusChanged original message receipt",
+      () => {
+        const messages = management(
+          "queues/organization/organization.task-status-changed.v1/get",
+          {
+            count: 100,
+            ackmode: "ack_requeue_true",
+            encoding: "auto",
+            truncate: 1000000,
+          },
+        );
+        return messages.some(
+          (item) => item.properties.message_id === taskStatePublished.event_id,
+        )
+          ? messages
+          : false;
+      },
+      30,
+    );
+  }
+  assertMessage(taskStatePublished, await receiveTaskState());
+  const taskStateQueue = management(
+    "queues/organization/organization.task-status-changed.v1",
+  );
+  assert.equal(taskStateQueue.durable, true);
+  assert.equal(taskStateQueue.type, "quorum");
+  assert.ok(
+    management(
+      "bindings/organization/e/organization.events/q/organization.task-status-changed.v1",
+    ).some((binding) => binding.routing_key === "task.status-changed.v1"),
+  );
+  console.log(
+    "PASS complete @s19/@s20: broker stopped, HTTP 200 with durable history, original nine-field TaskStatusChanged recovered",
+  );
   docker(["stop", "backend"], undefined, 30000);
   docker(["restart", "rabbitmq"], undefined, 30000);
   const retained = await receiveOriginals(
@@ -600,6 +696,11 @@ try {
   assert.deepEqual(
     outbox(created.id, "SubtaskCreated.v1", child.id),
     childPublished,
+  );
+  assertMessage(taskStatePublished, await receiveTaskState());
+  assert.deepEqual(
+    outbox(created.id, "TaskStatusChanged.v1", child.id),
+    taskStatePublished,
   );
   const retainedTasks = await eventually(
     "TaskCreated retained after same-volume Rabbit restart",
@@ -648,6 +749,28 @@ try {
   assert.deepEqual(outbox(duringOutage.id), recovered);
   console.log(
     "PASS @s14/@s20: same-volume Rabbit restart retains messages and durable quorum topology with worker stopped",
+  );
+  docker(["start", "backend"], undefined, 30000);
+  await eventually(
+    "Task history after backend restart",
+    async () => {
+      const response = await application
+        .get(`/api/v1/projects/${created.id}/tasks/${child.id}/history`, {
+          timeout: 2000,
+        })
+        .catch(() => null);
+      if (!response || response.status() !== 200) return false;
+      assert.deepEqual(await response.json(), taskHistory);
+      return true;
+    },
+    90,
+  );
+  const restartedState = await application.get(taskStatePath);
+  assert.equal(restartedState.status(), 200);
+  assert.deepEqual(await restartedState.json(), completedState);
+  assert.equal(restartedState.headers().etag, completedResponse.headers().etag);
+  console.log(
+    "PASS complete @s11: persisted session, task snapshot and history survive backend restart",
   );
 } catch (error) {
   console.error(

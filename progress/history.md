@@ -84,3 +84,14 @@
 - Integración final: 22 E2E, dos recorridos adicionales Firefox/WebKit y smoke con salida 0; fixture aislado limpiado. Evidencia responsive, zoom y matriz UX documentada con límites explícitos. No se certifican dispositivos físicos ni evaluación humana universal.
 - Juez conjunto APPROVED en progress/judge_project_states.md. Resultado: feature 5 done localmente por señal del coordinador. Commit/push y CI de esta entrega pendientes al registrar el cierre; no se declara despliegue en el servidor ni finalización del MVP.
 - Continuidad: feature 6 authentication queda spec_ready con contrato aprobado en febc9d1. La propuesta contrasta APIs y esquema de Spring Security 6.5.8 / Spring Session JDBC 3.5.5, sin producción iniciada. Espera activación del coordinador posterior al commit/push de estados.
+
+## 2026-09-06 — feature `authentication`
+
+- Contrato aprobado bajo la autorización global, TDD y arquitectura conservados. Ponytail full y Caveman lite activos.
+- Spring Security y Spring Session JDBC sustituyen Basic por formulario, cookie de sesión y CSRF. Login rota sesión/token; logout elimina la sesión. Cookies HttpOnly/Lax con Path /api y Secure en HTTPS. HTTP sólo se admite en loopback según origen configurado.
+- HTTP real con PostgreSQL demuestra fallos de guardado de login y eliminación de logout: respuesta 503 SESSION_UNAVAILABLE, sin éxito ficticio ni cookie provisional. El logout fallido conserva la cookie para reintentar. La lectura inaccesible no se representa como anonimato confirmado.
+- Verificación raíz: 384 pruebas backend y 241 frontend, lint verdes. Refuerzos posteriores del frontend: suite final de 260 pruebas y lint verdes. Las API históricas conservan sus contratos usando sesiones y CSRF; no se atribuye una repetición backend tras cambios exclusivos de pruebas frontend.
+- Mutación pertinente: PIT de cuatro adaptadores propios 41/44 (93,18 %), tres equivalencias aceptadas independientemente por coincidir con defaults oficiales del serializador. El scope predeterminado incluye esos adaptadores. Stryker global 302/355, replays 79/79 y 1/1 verificados como informes independientes; no se suman denominadores.
+- Integración final: 27/27 E2E y publisher con salida 0. Pruebas de navegador, persistencia, expiración, CSRF, origen y evidencia UX constan en los informes; no se afirma cobertura universal de dispositivos físicos.
+- Juez conjunto APPROVED en progress/judge_authentication.md. Authentication queda done localmente por señal del coordinador. Commit y CI de esta entrega pendientes al cerrar; no se declara despliegue en servidor ni MVP completo.
+- Continuidad: create_task conserva sólo propuesta y borrador de contrato revisado, sin activación ni producción. El coordinador determina el siguiente inicio dentro de la autorización persistente.

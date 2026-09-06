@@ -1,3 +1,4 @@
+import { apiRequest } from "./api-client";
 import type { Project } from "./projects-api";
 import { isProjectDetail } from "./read-projects-api";
 import type { ProjectStatus } from "./project-status";
@@ -11,7 +12,7 @@ export async function editRequest(
   input?: { name: string; description: string } | { status: ProjectStatus },
   etag?: string,
 ): Promise<EditSnapshot> {
-  const response = await fetch(
+  const response = await apiRequest(
     "/api/v1/projects" +
       detailRoute.slice("/proyectos".length) +
       (input && "status" in input ? "/status" : ""),

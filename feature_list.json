@@ -31,7 +31,9 @@
       "name": "publish_outbox",
       "title": "Publicar outbox a RabbitMQ",
       "description": "Publicar eventos ya confirmados con publisher confirms y recuperación al menos una vez; contrato aprobado en features/publish_outbox.feature.",
-      "acceptance": ["Cumplir @s1–@s23 de features/publish_outbox.feature tras aprobación humana explícita."],
+      "acceptance": [
+        "Cumplir @s1–@s23 de features/publish_outbox.feature tras aprobación humana explícita."
+      ],
       "sdd": true,
       "status": "done"
     },
@@ -40,7 +42,9 @@
       "name": "read_projects",
       "title": "Consultar proyectos propios",
       "description": "Lista paginada y detalle propios persistentes; contrato aprobado en features/read_projects.feature.",
-      "acceptance": ["Cumplir @s1–@s32 de features/read_projects.feature tras aprobación humana explícita."],
+      "acceptance": [
+        "Cumplir @s1–@s32 de features/read_projects.feature tras aprobación humana explícita."
+      ],
       "sdd": true,
       "status": "done"
     },
@@ -69,7 +73,7 @@
       "description": "Sesión privada revocable: contrato aprobado en features/authentication.feature; producción pendiente de activación del coordinador.",
       "acceptance": [],
       "sdd": true,
-      "status": "spec_ready"
+      "status": "done"
     },
     {
       "id": 7,

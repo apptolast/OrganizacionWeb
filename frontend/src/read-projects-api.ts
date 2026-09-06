@@ -1,3 +1,4 @@
+import { apiRequest } from "./api-client";
 import type { Project } from "./projects-api";
 import { isProjectStatus } from "./project-status";
 export type ProjectSummary = Pick<
@@ -37,7 +38,7 @@ export async function readProjects(
   route: string,
   signal: AbortSignal,
 ): Promise<ProjectPage | ProjectSnapshot> {
-  const response = await fetch(
+  const response = await apiRequest(
     "/api/v1/projects" + route.slice("/proyectos".length),
     { credentials: "same-origin", cache: "no-store", signal },
   );

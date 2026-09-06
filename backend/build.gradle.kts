@@ -14,6 +14,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("org.springframework.session:spring-session-jdbc")
     implementation("com.rabbitmq:amqp-client")
     implementation("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
@@ -33,8 +34,21 @@ tasks.test {
 pitest {
     pitestVersion.set("1.22.0")
     junit5PluginVersion.set("1.2.3")
-    targetClasses.set(setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*"))
-    targetTests.set(setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*"))
+    val authenticationOnly = providers.gradleProperty("mutationScope").orNull == "authentication"
+    val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
+    val authenticationClasses = setOf(
+        "com.apptolast.organization.adapter.http.SessionController",
+        "com.apptolast.organization.adapter.http.SessionAccessDeniedHandler",
+        "com.apptolast.organization.adapter.http.SessionFailureFilter",
+        "com.apptolast.organization.adapter.config.SessionCookiePolicy"
+    )
+    val authenticationTests = setOf(
+        "com.apptolast.organization.adapter.http.Session*Test",
+        "com.apptolast.organization.adapter.config.SessionCookiePolicyTest"
+    )
+    targetClasses.set(if (authenticationOnly) authenticationClasses else core + authenticationClasses)
+    targetTests.set(if (authenticationOnly) authenticationTests else core + authenticationTests)
+    if (authenticationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-authentication"))
     // PIT's default FRECORD also removes hand-written compact constructors.
     features.set(setOf("-FRECORD"))
     excludedMethods.set(setOf("equals", "hashCode", "toString"))

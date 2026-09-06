@@ -28,6 +28,7 @@ const env = {
   APP_AUTH_USERNAME: "e2e-user",
   APP_AUTH_PASSWORD: "e2e-only-password",
   WEB_PORT: "18080",
+  APP_PUBLIC_ORIGIN: "http://127.0.0.1:18080",
   APP_MAX_ACTIVE_PROJECTS: "3",
   E2E_COMPOSE_PROJECT: project,
   E2E_ENV_FILE: environmentFile,
@@ -42,13 +43,9 @@ try {
   for (let attempt = 0; attempt < 90; attempt++) {
     try {
       const response = await fetch("http://127.0.0.1:18080/api/session", {
-        headers: {
-          Authorization:
-            "Basic " +
-            Buffer.from("e2e-user:e2e-only-password").toString("base64"),
-        },
+        signal: AbortSignal.timeout(2000),
       });
-      if (response.status === 204) {
+      if (response.status === 200) {
         ready = true;
         break;
       }

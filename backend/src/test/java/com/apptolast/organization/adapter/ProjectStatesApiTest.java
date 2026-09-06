@@ -1,7 +1,8 @@
 package com.apptolast.organization.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -88,7 +89,8 @@ class ProjectStatesApiTest {
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put(
                     "/api/v1/projects/" + id + "/status")
-                .with(httpBasic("persona-a", "test-only-secret"))
+                .with(user("persona-a"))
+                .with(csrf().asHeader())
                 .header("If-Match", "\"" + id + ":0\"")
                 .contentType("application/json")
                 .content("{\"status\":\"active\"}"))
@@ -120,7 +122,8 @@ class ProjectStatesApiTest {
       java.util.UUID id, long version, String state) {
     return org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put(
             "/api/v1/projects/" + id + "/status")
-        .with(httpBasic("persona-a", "test-only-secret"))
+        .with(user("persona-a"))
+        .with(csrf().asHeader())
         .header("If-Match", "\"" + id + ":" + version + "\"")
         .contentType("application/json")
         .content("{\"status\":\"" + state + "\"}");
@@ -210,14 +213,16 @@ class ProjectStatesApiTest {
     for (String path : java.util.List.of("/api/v1/projects/" + id, "/api/v1/projects"))
       mvc.perform(
               org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(path)
-                  .with(httpBasic("persona-a", "test-only-secret")))
+                  .with(user("persona-a"))
+                  .with(csrf().asHeader()))
           .andExpect(status().isOk())
           .andExpect(
               jsonPath(path.endsWith(id.toString()) ? "$.status" : "$.items[0].status").value(to));
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put(
                     "/api/v1/projects/" + id)
-                .with(httpBasic("persona-a", "test-only-secret"))
+                .with(user("persona-a"))
+                .with(csrf().asHeader())
                 .header("If-Match", "\"" + id + ":1\"")
                 .contentType("application/json")
                 .content("{\"name\":\"Edited\",\"description\":\"Text\"}"))
@@ -295,7 +300,7 @@ class ProjectStatesApiTest {
                 "/api/v1/projects/" + requested + "/status")
             .contentType(defect.equals("media") ? "text/plain" : "application/json")
             .content(body);
-    if (!defect.equals("noauth")) request.with(httpBasic("persona-a", "test-only-secret"));
+    if (!defect.equals("noauth")) request.with(user("persona-a")).with(csrf().asHeader());
     if (!defect.equals("missingTag")) request.header("If-Match", tag);
     if (defect.equals("repeat")) request.header("If-Match", tag);
     if (defect.equals("origin")) request.header("Origin", "https://evil.example");
@@ -408,7 +413,8 @@ class ProjectStatesApiTest {
     var text =
         org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put(
                 "/api/v1/projects/" + id)
-            .with(httpBasic("persona-a", "test-only-secret"))
+            .with(user("persona-a"))
+            .with(csrf().asHeader())
             .header("If-Match", "\"" + id + ":0\"")
             .contentType("application/json")
             .content("{\"name\":\"Edited\",\"description\":\"Text\"}");

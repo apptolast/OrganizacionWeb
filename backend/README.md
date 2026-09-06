@@ -6,7 +6,7 @@ Java 25, Spring Boot 3.5.11, Gradle Kotlin DSL 9.3.1. `./gradlew` en Linux/macOS
 | --- | --- |
 | `./gradlew test` | Dominio, aplicación, ArchUnit y contrato HTTP con PostgreSQL real de Testcontainers (Docker necesario) |
 | `./gradlew spotlessCheck` | Formato Java |
-| `./gradlew pitest` | Mutación de dominio/aplicación, umbral 80 % |
+| `./gradlew pitest` | Mutación de dominio, aplicación y adaptadores propios de sesión, umbral 80 % |
 | `./gradlew bootJar` | JAR ejecutable en `build/libs/organization-api-0.1.0.jar` |
 | `./gradlew bootRun` | API en puerto 8080 con variables de entorno configuradas |
 
@@ -21,9 +21,11 @@ Java 25, Spring Boot 3.5.11, Gradle Kotlin DSL 9.3.1. `./gradlew` en Linux/macOS
 | `APP_AUTH_PASSWORD` | Contraseña bootstrap; sin valor predeterminado, vacío/espacios rechazados |
 | `APP_PUBLIC_ORIGIN` | Origen exacto de la web, p. ej. `https://organizacion.example.com` (sin ruta ni barra final) |
 
-Las solicitudes de navegador con `Origin` requieren coincidencia exacta con `APP_PUBLIC_ORIGIN`; sin configurar se rechazan. Los clientes API sin `Origin` siguen necesitando HTTP Basic válido. No se activa CORS. El adaptador solo acepta JSON, evitando escrituras mediante formularios de otro origen. En servidor, el proxy debe proporcionar HTTPS y no publicar directamente el puerto interno del backend.
+Las solicitudes con `Origin` requieren coincidencia exacta con `APP_PUBLIC_ORIGIN`. Se admite HTTPS y HTTP loopback para desarrollo local. No se activa CORS ni HTTP Basic. El proxy debe proporcionar HTTPS en el servidor.
 
-`GET /api/session` devuelve 204 con credenciales verificadas y 401 con desafío HTTP Basic en otro caso. Sirve para que el proxy solicite autenticación antes de mostrar la web; no representa una sesión persistente ni una funcionalidad de inicio/cierre de sesión completa.
+`GET /api/session` es público y devuelve `authenticated`, `username`, `csrfToken` y `csrfHeaderName`, con `Cache-Control: no-store`. `POST /api/session` recibe un formulario con `username` y `password`, más el token en `X-CSRF-TOKEN`; responde 204 y rota la sesión. Se consulta un token nuevo después del login. `POST /api/session/logout` requiere ese token y elimina la sesión.
+
+Spring Session JDBC guarda la sesión durante 30 minutos de inactividad mediante V6. La cookie SESSION usa Path `/api`, HttpOnly y SameSite=Lax; Secure depende del origen HTTPS configurado. Un fallo al guardar o eliminar la sesión devuelve 503 `SESSION_UNAVAILABLE`. El logout no confirmado conserva la cookie anterior para permitir un reintento.
 
 ## Contrato
 
@@ -41,7 +43,7 @@ Flyway aplica `V1__projects_and_outbox.sql` y la migración aditiva `V2__outbox_
 
 Los tests de atomicidad provocan fallos PostgreSQL reales mediante triggers temporales en ambas tablas y verifican cero escrituras. No sustituyen PostgreSQL por H2. La integración de la raíz verifica también recarga de página y reinicio del backend conservando los mismos registros.
 
-PIT desactiva `FRECORD`, porque el filtro predeterminado excluye también la validación escrita en el constructor compacto del record. Solo se excluyen `equals`, `hashCode` y `toString` generados por el compilador. El informe deja explícito el alcance dominio/aplicación; los adaptadores se validan mediante integración HTTP/PostgreSQL y E2E.
+PIT desactiva `FRECORD`, porque el filtro predeterminado excluye también la validación escrita en el constructor compacto del record. Solo se excluyen `equals`, `hashCode` y `toString` generados por el compilador. El informe predeterminado incluye dominio, aplicación y los cuatro adaptadores propios de sesión. `./gradlew -PmutationScope=authentication pitest` mide estos últimos en `build/reports/pitest-authentication`. La integración de Spring se comprueba mediante HTTP real, PostgreSQL y E2E.
 
 ## Publicador outbox
 

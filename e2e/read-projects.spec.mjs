@@ -1,4 +1,5 @@
-import { test, expect } from "@playwright/test";
+import { loginSession } from "../scripts/session-client.mjs";
+import { test, expect } from "./support/authenticated-test.mjs";
 import { sql, create } from "./support/projects.mjs";
 import AxeBuilder from "@axe-core/playwright";
 
@@ -60,11 +61,15 @@ test("read_projects: touch navigation works without hover @s26", async ({
 }) => {
   const project = await create(request, "Proyecto táctil");
   const context = await browser.newContext({
+    baseURL: process.env.E2E_BASE_URL ?? "http://127.0.0.1:18080",
     viewport: { width: 390, height: 700 },
     hasTouch: true,
-    httpCredentials: { username: "e2e-user", password: "e2e-only-password" },
   });
   try {
+    await loginSession(context.request, {
+      username: "e2e-user",
+      password: "e2e-only-password",
+    });
     const page = await context.newPage();
     await page.goto(
       `${process.env.E2E_BASE_URL ?? "http://127.0.0.1:18080"}/proyectos`,
@@ -274,23 +279,14 @@ test("read_projects: honest loading, recoverable errors and expired authenticati
     await page.getByRole("button", { name: "Reintentar", exact: true }).click();
     await expect(projectContent).toBeVisible();
     await expect(page.getByRole("alert")).toHaveCount(0);
-    await page.route(api, (route) =>
-      route.fulfill({
-        status: 401,
-        contentType: "application/problem+json",
-        body: JSON.stringify({
-          status: 401,
-          code: "UNAUTHENTICATED",
-          message: "Autenticación requerida",
-        }),
-      }),
-    );
+    sql("DELETE FROM spring_session WHERE principal_name='e2e-user'");
     await page.reload();
-    await expect(
-      page.getByText("Autenticación requerida", { exact: true }),
-    ).toBeVisible();
+    await expect(page.getByLabel("Usuario", { exact: true })).toBeVisible();
     await expect(projectContent).toHaveCount(0);
-    await page.unroute(api);
+    await loginSession(request, {
+      username: "e2e-user",
+      password: "e2e-only-password",
+    });
   }
 });
 

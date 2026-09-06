@@ -1,4 +1,5 @@
-import { test, expect } from "@playwright/test";
+import { loginSession, csrfHeaders } from "../scripts/session-client.mjs";
+import { test, expect } from "./support/authenticated-test.mjs";
 import { sql, create, stored } from "./support/projects.mjs";
 import AxeBuilder from "@axe-core/playwright";
 
@@ -8,7 +9,7 @@ async function changeStatus(request, id, status, etag) {
   const tag =
     etag ?? (await request.get(`/api/v1/projects/${id}`)).headers().etag;
   return request.put(`/api/v1/projects/${id}/status`, {
-    headers: { "If-Match": tag },
+    headers: { ...(await csrfHeaders(request)), "If-Match": tag },
     data: { status },
   });
 }
@@ -422,9 +423,12 @@ test("project_states: controls reflow at breakpoint edges and retain keyboard an
     baseURL: testInfo.project.use.baseURL,
     viewport: { width: 390, height: 844 },
     hasTouch: true,
-    httpCredentials: { username: "e2e-user", password: "e2e-only-password" },
   });
   try {
+    await loginSession(touchContext.request, {
+      username: "e2e-user",
+      password: "e2e-only-password",
+    });
     const touch = await touchContext.newPage();
     await touch.goto(`/proyectos/${project.id}`);
     await touch.getByRole("button", { name: "Retomar", exact: true }).tap();

@@ -1,3 +1,4 @@
+import { apiRequest } from "./api-client";
 import type { ProjectStatus } from "./project-status";
 export type Project = {
   id: string;
@@ -29,13 +30,17 @@ function isProject(value: unknown): value is Project {
     Number.isFinite(Date.parse(value.createdAt as string))
   );
 }
-export async function createProject(input: {
-  name: string;
-  description: string;
-}): Promise<CreateResult> {
+export async function createProject(
+  input: {
+    name: string;
+    description: string;
+  },
+  signal?: AbortSignal,
+): Promise<CreateResult> {
   try {
-    const response = await fetch("/api/v1/projects", {
+    const response = await apiRequest("/api/v1/projects", {
       method: "POST",
+      ...(signal ? { signal } : {}),
       credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),

@@ -1,12 +1,13 @@
+import type { ReactNode } from "react";
 import { useCreateProject } from "./use-create-project";
 import { ProjectReader } from "./project-reader";
 import { useRoute, isProjectRoute } from "./navigation";
 import { Workspace } from "./workspace";
 import { ProjectEditor } from "./project-editor";
-export function App() {
+export function App({ sessionControls }: { sessionControls?: ReactNode }) {
   const route = useRoute();
   return (
-    <Workspace>
+    <Workspace sessionControls={sessionControls}>
       {route.endsWith("/editar") ? (
         <ProjectEditor key={route} route={route} />
       ) : isProjectRoute(route) ? (

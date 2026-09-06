@@ -1,4 +1,5 @@
-import { test, expect } from "@playwright/test";
+import { loginSession, csrfHeaders } from "../scripts/session-client.mjs";
+import { test, expect } from "./support/authenticated-test.mjs";
 import { sql, create, stored } from "./support/projects.mjs";
 import AxeBuilder from "@axe-core/playwright";
 
@@ -136,7 +137,10 @@ test("edit_project: real update persists its event and unchanged save writes not
     occurredAt: updated.updatedAt,
   });
   const unchanged = await request.put(`/api/v1/projects/${original.id}`, {
-    headers: { "If-Match": response.headers().etag },
+    headers: {
+      ...(await csrfHeaders(request)),
+      "If-Match": response.headers().etag,
+    },
     data: { name: updated.name, description: updated.description },
   });
   expect(unchanged.status()).toBe(200);
@@ -258,6 +262,11 @@ test("edit_project: failed saves preserve drafts and loss of access clears them 
   const before = stored(project.id);
   const api = `**/api/v1/projects/${project.id}`;
   for (const status of [400, 503, 500, 0, 401, 404]) {
+    if (status === 404)
+      await loginSession(request, {
+        username: "e2e-user",
+        password: "e2e-only-password",
+      });
     await page.goto(`/proyectos/${project.id}/editar`);
     await expect(page.getByLabel(/Nombre del proyecto/)).toHaveValue(
       project.name,
@@ -266,6 +275,8 @@ test("edit_project: failed saves preserve drafts and loss of access clears them 
     await page
       .getByLabel(/Descripción/)
       .fill("Conservar contenido hasta decidir");
+    if (status === 401)
+      sql("DELETE FROM spring_session WHERE principal_name='e2e-user'");
     await page.route(api, (route) => {
       if (route.request().method() !== "PUT") return route.continue();
       if (status === 0) return route.abort("failed");
@@ -286,20 +297,20 @@ test("edit_project: failed saves preserve drafts and loss of access clears them 
     await page
       .getByRole("button", { name: "Guardar cambios", exact: true })
       .click();
-    await expect(page.getByRole("alert")).toBeVisible();
+    if (status !== 401) await expect(page.getByRole("alert")).toBeVisible();
     await expect(
       page.getByText("Proyecto actualizado", { exact: true }),
     ).toHaveCount(0);
     if (status === 401 || status === 404) {
-      await expect(
-        page.getByRole("heading", {
-          name:
-            status === 401
-              ? "Autenticación requerida"
-              : "Proyecto no encontrado",
-          exact: true,
-        }),
-      ).toBeVisible();
+      if (status === 401)
+        await expect(page.getByLabel("Usuario", { exact: true })).toBeVisible();
+      else
+        await expect(
+          page.getByRole("heading", {
+            name: "Proyecto no encontrado",
+            exact: true,
+          }),
+        ).toBeVisible();
       await expect(page.getByLabel(/Nombre del proyecto/)).toHaveCount(0);
       await expect(
         page.getByText("Borrador sin confirmar", { exact: true }),
@@ -422,9 +433,12 @@ test("edit_project: accessible form reflows across widths and breakpoint edges a
     baseURL: testInfo.project.use.baseURL,
     viewport: { width: 390, height: 844 },
     hasTouch: true,
-    httpCredentials: { username: "e2e-user", password: "e2e-only-password" },
   });
   try {
+    await loginSession(touchContext.request, {
+      username: "e2e-user",
+      password: "e2e-only-password",
+    });
     const touch = await touchContext.newPage();
     await touch.goto(`/proyectos/${project.id}/editar`);
     await expect(touch.getByLabel(/Nombre del proyecto/)).toHaveValue(

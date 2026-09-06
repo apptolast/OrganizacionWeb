@@ -29,6 +29,7 @@ describe("crear proyecto", () => {
     await user.click(screen.getByRole("button", { name: "Crear proyecto" }));
     expect(fetchMock).toHaveBeenCalledWith("/api/v1/projects", {
       method: "POST",
+      signal: expect.any(AbortSignal),
       credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: "  Idea  ", description: "Avanzar" }),

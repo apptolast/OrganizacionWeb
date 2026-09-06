@@ -1057,3 +1057,90 @@ button {
     white-space: normal;
   }
 }
+
+.session-screen {
+  width: 100%;
+  max-width: none;
+  min-height: 100svh;
+  padding: clamp(24px, 5vw, 60px) 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background:
+    radial-gradient(ellipse at top left, #e8eee1, transparent 65%), #f8f9f5;
+  .brand {
+    margin: 0 0 40px;
+    font-size: 18px;
+  }
+  .session-card {
+    width: min(100%, 470px);
+    padding: clamp(24px, 5vw, 44px);
+    border: 1px solid $line;
+    background: #fffefa;
+    border-radius: 18px;
+    box-shadow: 0 12px 40px #23392f08;
+    h1 {
+      margin: 12px 0 18px;
+      font-size: clamp(30px, 5vw, 40px);
+      line-height: 1.15;
+      letter-spacing: -1px;
+    }
+    .session-intro {
+      color: $muted;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+    button {
+      width: 100%;
+    }
+    [role="alert"],
+    [role="status"] {
+      line-height: 1.65;
+      overflow-wrap: anywhere;
+    }
+  }
+  .session-footer {
+    max-width: 400px;
+    text-align: center;
+    color: $muted;
+    font-size: 12px;
+    line-height: 1.7;
+    margin-top: 28px;
+  }
+}
+.topbar .session-logout {
+  min-height: 44px;
+  padding: 10px 15px;
+  background: transparent;
+  color: $forest;
+  border: 1px solid #b7c1b1;
+  font-size: 12px;
+  box-shadow: none;
+}
+@media (max-width: 600px) {
+  .topbar:has(.session-logout) {
+    flex-wrap: wrap;
+    gap: 12px;
+    height: auto;
+    padding-block: 16px;
+  }
+  .topbar:has(.session-logout) .space-badge {
+    display: none;
+  }
+}
+
+.access-recovery {
+  padding: 18px max(20px, calc((100vw - 1000px) / 2));
+  background: #fff4dd;
+  border-bottom: 1px solid #c8b991;
+  color: #51472e;
+  p {
+    line-height: 1.65;
+    margin: 0 0 12px;
+  }
+}
+.session-recovery {
+  max-width: 470px;
+  line-height: 1.65;
+  margin-top: 20px;
+}

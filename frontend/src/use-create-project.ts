@@ -1,6 +1,14 @@
-import { useState, useRef, useLayoutEffect, type FormEvent } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  type FormEvent,
+} from "react";
 import { createProject, type Project, type FieldError } from "./projects-api";
 export function useCreateProject() {
+  const request = useRef<AbortController | null>(null);
+  useEffect(() => () => request.current?.abort(), []);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
@@ -29,7 +37,13 @@ export function useCreateProject() {
     setErrors([]);
     setFailure("");
     setProject(undefined);
-    const result = await createProject({ name, description });
+    const controller = new AbortController();
+    request.current = controller;
+    const result = await createProject(
+      { name, description },
+      controller.signal,
+    );
+    if (controller.signal.aborted) return;
     if (result.kind === "created") setProject(result.project);
     else {
       setFailure(result.message);

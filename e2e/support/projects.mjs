@@ -1,3 +1,4 @@
+import { csrfHeaders } from "../../scripts/session-client.mjs";
 import { expect } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 export function sql(statement) {
@@ -37,6 +38,7 @@ export async function create(
   description = "Descripción conservada",
 ) {
   const response = await request.post("/api/v1/projects", {
+    headers: await csrfHeaders(request),
     data: { name, description },
   });
   expect(response.status()).toBe(201);

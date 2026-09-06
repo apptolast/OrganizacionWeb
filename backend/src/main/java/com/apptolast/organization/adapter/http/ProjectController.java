@@ -37,11 +37,6 @@ public final class ProjectController {
     return ResponseEntity.created(URI.create("/api/v1/projects/" + project.id())).body(project);
   }
 
-  @GetMapping("/api/session")
-  public ResponseEntity<Void> session() {
-    return ResponseEntity.noContent().build();
-  }
-
   private String string(JsonNode request, String field) {
     JsonNode value = request.get(field);
     if (value == null || value.isNull()) return null;

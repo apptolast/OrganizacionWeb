@@ -1,7 +1,8 @@
 package com.apptolast.organization.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -71,7 +72,8 @@ class ReadProjectsApiTest {
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                     "/api/v1/projects")
-                .with(httpBasic("persona-a", "test-only-secret")))
+                .with(user("persona-a"))
+                .with(csrf().asHeader()))
         .andExpect(status().isOk())
         .andExpect(
             header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")))
@@ -101,7 +103,8 @@ class ReadProjectsApiTest {
         mvc.perform(
                 org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                         "/api/v1/projects")
-                    .with(httpBasic("persona-a", "test-only-secret")))
+                    .with(user("persona-a"))
+                    .with(csrf().asHeader()))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse();
@@ -122,7 +125,8 @@ class ReadProjectsApiTest {
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                     "/api/v1/projects/" + id)
-                .with(httpBasic("persona-a", "test-only-secret")))
+                .with(user("persona-a"))
+                .with(csrf().asHeader()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(id.toString()))
         .andExpect(jsonPath("$.ownerId").value("persona-a"))
@@ -142,7 +146,8 @@ class ReadProjectsApiTest {
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                     "/api/v1/projects/" + id)
-                .with(httpBasic("persona-a", "test-only-secret")))
+                .with(user("persona-a"))
+                .with(csrf().asHeader()))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.code").value("PROJECT_NOT_FOUND"))
         .andExpect(jsonPath("$.title").value("Proyecto no encontrado"))
@@ -161,7 +166,8 @@ class ReadProjectsApiTest {
             mvc.perform(
                     org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                             "/api/v1/projects")
-                        .with(httpBasic("persona-a", "test-only-secret")))
+                        .with(user("persona-a"))
+                        .with(csrf().asHeader()))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -187,7 +193,8 @@ class ReadProjectsApiTest {
         mvc.perform(
                 org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                         "/api/v1/projects")
-                    .with(httpBasic("persona-a", "test-only-secret")))
+                    .with(user("persona-a"))
+                    .with(csrf().asHeader()))
             .andReturn()
             .getResponse()
             .getContentAsString();
@@ -202,7 +209,8 @@ class ReadProjectsApiTest {
                     org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                             "/api/v1/projects")
                         .param("cursor", cursor)
-                        .with(httpBasic("persona-a", "test-only-secret")))
+                        .with(user("persona-a"))
+                        .with(csrf().asHeader()))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -251,7 +259,8 @@ class ReadProjectsApiTest {
     var request =
         org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/projects")
             .param("cursor", cursor)
-            .with(httpBasic("persona-a", "test-only-secret"));
+            .with(user("persona-a"))
+            .with(csrf().asHeader());
     if (defect.equals("repeated")) request.param("cursor", cursor);
     if (defect.equals("query")) request.param("limit", "10");
     mvc.perform(request)
@@ -267,7 +276,8 @@ class ReadProjectsApiTest {
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                     "/api/v1/projects/" + id)
-                .with(httpBasic("persona-a", "test-only-secret")))
+                .with(user("persona-a"))
+                .with(csrf().asHeader()))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
         .andExpect(jsonPath("$.errors[0].field").value("id"));
@@ -282,7 +292,8 @@ class ReadProjectsApiTest {
       mvc.perform(
               org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                       "/api/v1/projects" + (detail ? "/" + id : ""))
-                  .with(httpBasic("persona-a", "test-only-secret")))
+                  .with(user("persona-a"))
+                  .with(csrf().asHeader()))
           .andExpect(status().isServiceUnavailable())
           .andExpect(jsonPath("$.code").value("STORAGE_UNAVAILABLE"))
           .andExpect(jsonPath("$.items").doesNotExist())
@@ -328,7 +339,8 @@ class ReadProjectsApiTest {
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                     "/api/v1/projects" + (detail ? "/" + id : ""))
-                .with(httpBasic("persona-a", "test-only-secret")))
+                .with(user("persona-a"))
+                .with(csrf().asHeader()))
         .andExpect(status().isInternalServerError())
         .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
         .andExpect(jsonPath("$.correlationId").isString())
@@ -353,7 +365,8 @@ class ReadProjectsApiTest {
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                     "/api/v1/projects")
                 .param("cursor", cursor)
-                .with(httpBasic("persona-a", "test-only-secret")))
+                .with(user("persona-a"))
+                .with(csrf().asHeader()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.items.length()").value(1))
         .andExpect(jsonPath("$.items[0].id").value(own.toString()))
@@ -370,7 +383,8 @@ class ReadProjectsApiTest {
                 post("/api/v1/projects")
                     .contentType("application/json")
                     .content("{\"name\":\"Immutable read\"}")
-                    .with(httpBasic("persona-a", "test-only-secret")))
+                    .with(user("persona-a"))
+                    .with(csrf().asHeader()))
             .andExpect(status().isCreated())
             .andReturn()
             .getResponse();
@@ -380,12 +394,14 @@ class ReadProjectsApiTest {
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                     "/api/v1/projects")
-                .with(httpBasic("persona-a", "test-only-secret")))
+                .with(user("persona-a"))
+                .with(csrf().asHeader()))
         .andExpect(status().isOk());
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                     "/api/v1/projects/" + id)
-                .with(httpBasic("persona-a", "test-only-secret")))
+                .with(user("persona-a"))
+                .with(csrf().asHeader()))
         .andExpect(status().isOk());
     assertThat(jdbc.queryForList("SELECT * FROM projects")).isEqualTo(projects);
     assertThat(jdbc.queryForList("SELECT * FROM outbox_events")).isEqualTo(outbox);
@@ -413,7 +429,8 @@ class ReadProjectsApiTest {
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                     "/api/v1/projects")
                 .param("cursor", cursor)
-                .with(httpBasic("persona-a", "test-only-secret")))
+                .with(user("persona-a"))
+                .with(csrf().asHeader()))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
         .andExpect(jsonPath("$.errors[0].field").value("cursor"));
@@ -435,7 +452,8 @@ class ReadProjectsApiTest {
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                     "/api/v1/projects")
                 .param("cursor", cursor)
-                .with(httpBasic("persona-a", "test-only-secret")))
+                .with(user("persona-a"))
+                .with(csrf().asHeader()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.items").isEmpty());
   }

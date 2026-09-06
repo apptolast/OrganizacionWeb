@@ -32,28 +32,57 @@ public class SecurityConfiguration {
       com.fasterxml.jackson.databind.ObjectMapper json,
       @Value("${app.public-origin}") String publicOrigin)
       throws Exception {
-    // Browser writes require JSON and an explicitly trusted Origin; no CORS is enabled.
-    return http.csrf(csrf -> csrf.disable())
-        .addFilterAfter(
+    org.springframework.security.web.AuthenticationEntryPoint unauthorized =
+        (request, response, error) -> {
+          response.setStatus(401);
+          response.setContentType("application/problem+json");
+          json.writeValue(
+              response.getOutputStream(),
+              com.apptolast.organization.adapter.http.ApiErrors.problem(
+                  401, "UNAUTHENTICATED", "Identifícate para continuar."));
+        };
+    // Browser writes retain their trusted Origin requirement; no CORS is enabled.
+    return http.csrf(org.springframework.security.config.Customizer.withDefaults())
+        .addFilterBefore(
             new com.apptolast.organization.adapter.http.OriginGuard(publicOrigin, json),
-            org.springframework.security.web.authentication.www.BasicAuthenticationFilter.class)
+            org.springframework.security.web.csrf.CsrfFilter.class)
         .sessionManagement(
-            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-        .httpBasic(
-            basic ->
-                basic.authenticationEntryPoint(
-                    (request, response, error) -> {
-                      response.setStatus(401);
-                      response.setHeader(
-                          "WWW-Authenticate", "Basic realm=\"OrganizationWeb\", charset=\"UTF-8\"");
-                      response.setContentType("application/problem+json");
-
-                      json.writeValue(
-                          response.getOutputStream(),
-                          com.apptolast.organization.adapter.http.ApiErrors.problem(
-                              401, "UNAUTHENTICATED", "Identifícate para continuar."));
-                    }))
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+        .authorizeHttpRequests(
+            auth ->
+                auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/session")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .requestCache(cache -> cache.disable())
+        .formLogin(
+            form ->
+                form.loginProcessingUrl("/api/session")
+                    .successHandler((request, response, authentication) -> response.setStatus(204))
+                    .failureHandler(
+                        (request, response, error) ->
+                            unauthorized.commence(request, response, error))
+                    .permitAll())
+        .logout(
+            logout ->
+                logout
+                    .logoutUrl("/api/session/logout")
+                    .logoutSuccessHandler(
+                        (request, response, authentication) -> response.setStatus(204)))
+        .httpBasic(basic -> basic.disable())
+        .exceptionHandling(
+            errors ->
+                errors
+                    .authenticationEntryPoint(unauthorized)
+                    .accessDeniedHandler(
+                        new com.apptolast.organization.adapter.http.SessionAccessDeniedHandler(
+                            json)))
         .build();
+  }
+
+  @Bean
+  org.springframework.session.web.http.DefaultCookieSerializer sessionCookie(
+      @Value("${app.public-origin}") String origin) {
+    return SessionCookiePolicy.create(origin);
   }
 }

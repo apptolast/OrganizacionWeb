@@ -1,3 +1,5 @@
+import { request as playwrightRequest } from "@playwright/test";
+import { loginSession, csrfHeaders } from "./session-client.mjs";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
@@ -24,6 +26,7 @@ const fixture = {
   RABBITMQ_USERNAME: `smoke-${nonce}`,
   RABBITMQ_PASSWORD: randomBytes(24).toString("hex"),
   WEB_PORT: String(port),
+  APP_PUBLIC_ORIGIN: `http://127.0.0.1:${port}`,
   APP_MAX_ACTIVE_PROJECTS: "3",
 };
 const env = { ...process.env, ...fixture };
@@ -89,25 +92,16 @@ async function eventually(label, operation, seconds = 90) {
   } while (Date.now() < deadline);
   throw new Error(`Timed out: ${label}`);
 }
-const authorization =
-  "Basic " +
-  Buffer.from(`${env.APP_AUTH_USERNAME}:${env.APP_AUTH_PASSWORD}`).toString(
-    "base64",
-  );
 const origin = `http://127.0.0.1:${port}`;
+let application;
 async function createProject(name) {
-  const response = await fetch(`${origin}/api/v1/projects`, {
-    method: "POST",
-    headers: {
-      Authorization: authorization,
-      Origin: origin,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ name, description: "smoke-private-description" }),
-    signal: AbortSignal.timeout(4500),
+  const response = await application.post("/api/v1/projects", {
+    headers: { ...(await csrfHeaders(application)), Origin: origin },
+    data: { name, description: "smoke-private-description" },
+    timeout: 4500,
   });
   assert.equal(
-    response.status,
+    response.status(),
     201,
     "API must confirm creation independently of broker",
   );
@@ -202,19 +196,23 @@ try {
     undefined,
     300000,
   );
+  application = await playwrightRequest.newContext({
+    baseURL: origin,
+    timeout: 4500,
+  });
   await eventually("API readiness", async () => {
     try {
       return (
-        (
-          await fetch(`${origin}/api/session`, {
-            headers: { Authorization: authorization },
-            signal: AbortSignal.timeout(2000),
-          })
-        ).status === 204
+        (await application.get("/api/session", { timeout: 2000 })).status() ===
+        200
       );
     } catch {
       return false;
     }
+  });
+  await loginSession(application, {
+    username: env.APP_AUTH_USERNAME,
+    password: env.APP_AUTH_PASSWORD,
   });
   const created = await createProject("Smoke publicación real");
   const published = await eventually(
@@ -245,27 +243,22 @@ try {
   );
   assert.equal(pending.published_at, null);
   assert.equal(pending.last_error_code, "BROKER_UNAVAILABLE");
-  const detail = await fetch(`${origin}/api/v1/projects/${created.id}`, {
-    headers: { Authorization: authorization },
-    signal: AbortSignal.timeout(4500),
-  });
-  assert.equal(detail.status, 200);
-  const edited = await fetch(`${origin}/api/v1/projects/${created.id}`, {
-    method: "PUT",
+  const detail = await application.get(`/api/v1/projects/${created.id}`);
+  assert.equal(detail.status(), 200);
+  const edited = await application.put(`/api/v1/projects/${created.id}`, {
     headers: {
-      Authorization: authorization,
+      ...(await csrfHeaders(application)),
       Origin: origin,
-      "Content-Type": "application/json",
-      "If-Match": detail.headers.get("ETag"),
+      "If-Match": detail.headers().etag,
     },
-    body: JSON.stringify({
+    data: {
       name: "Smoke edición durante caída",
       description: "smoke-private-description",
-    }),
-    signal: AbortSignal.timeout(4500),
+    },
+    timeout: 4500,
   });
   assert.equal(
-    edited.status,
+    edited.status(),
     200,
     "Edit API must confirm independently of broker",
   );
@@ -279,22 +272,20 @@ try {
   );
   assert.equal(updatedPending.published_at, null);
   assert.equal(updatedPending.last_error_code, "BROKER_UNAVAILABLE");
-  const stateChanged = await fetch(
-    `${origin}/api/v1/projects/${created.id}/status`,
+  const stateChanged = await application.put(
+    `/api/v1/projects/${created.id}/status`,
     {
-      method: "PUT",
       headers: {
-        Authorization: authorization,
+        ...(await csrfHeaders(application)),
         Origin: origin,
-        "Content-Type": "application/json",
-        "If-Match": edited.headers.get("ETag"),
+        "If-Match": edited.headers().etag,
       },
-      body: JSON.stringify({ status: "active" }),
-      signal: AbortSignal.timeout(4500),
+      data: { status: "active" },
+      timeout: 4500,
     },
   );
   assert.equal(
-    stateChanged.status,
+    stateChanged.status(),
     200,
     "State API must confirm independently of broker",
   );
@@ -446,9 +437,17 @@ try {
     "PASS @s14/@s20: same-volume Rabbit restart retains messages and durable quorum topology with worker stopped",
   );
 } catch (error) {
-  console.error(error.message);
+  console.error(
+    error instanceof assert.AssertionError
+      ? error.message
+      : "Publisher smoke failed; transport details withheld to protect session credentials",
+  );
   process.exitCode = 1;
 } finally {
+  if (application)
+    await application.dispose().catch(() => {
+      process.exitCode = 1;
+    });
   try {
     docker(["down", "--volumes", "--remove-orphans"], undefined, 90000);
   } catch (error) {

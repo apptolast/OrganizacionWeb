@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/authenticated-test.mjs";
 test("real browser saves an idea through the same-origin API @s1 @s22", async ({
   page,
 }) => {
@@ -109,7 +109,14 @@ test("project and outbox survive reload and backend restart @s16 @s19 @s20", asy
       },
       { timeout: 60_000 },
     )
-    .toBe(204);
+    .toBe(200);
+  expect((await (await request.get("/api/session")).json()).authenticated).toBe(
+    true,
+  );
+  await page.goto(`/proyectos/${project.id}`);
+  await expect(
+    page.getByRole("heading", { name: "Persistencia", exact: true }),
+  ).toBeVisible();
   expect(stored(project.id)).toEqual(before);
 });
 
@@ -195,7 +202,17 @@ for (const [width, zoom] of [
         (element) => element.getBoundingClientRect().bottom,
       ),
     ).toBeLessThanOrEqual(0);
-    await page.keyboard.press("Tab");
+    // The session gate focuses the destination heading after access is checked.
+    // Reach the skip link by keyboard from that meaningful initial focus.
+    for (
+      let step = 0;
+      step < 12 &&
+      !(await skipLink.evaluate(
+        (element) => element === document.activeElement,
+      ));
+      step++
+    )
+      await page.keyboard.press("Shift+Tab");
     await expect(skipLink).toBeFocused();
     expect(
       await skipLink.evaluate((element) => element.getBoundingClientRect().top),

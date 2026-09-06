@@ -1,7 +1,8 @@
 package com.apptolast.organization.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -88,7 +89,8 @@ class EditProjectsApiTest {
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                     "/api/v1/projects/" + id)
-                .with(httpBasic("persona-a", "test-only-secret")))
+                .with(user("persona-a"))
+                .with(csrf().asHeader()))
         .andExpect(status().isOk())
         .andExpect(header().string("ETag", "\"" + id + ":0\""))
         .andExpect(jsonPath("$.name").value("Original"))
@@ -101,7 +103,8 @@ class EditProjectsApiTest {
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put(
                     "/api/v1/projects/" + id)
-                .with(httpBasic("persona-a", "test-only-secret"))
+                .with(user("persona-a"))
+                .with(csrf().asHeader())
                 .header("If-Match", "\"" + id + ":0\"")
                 .contentType("application/json")
                 .content("{\"name\":\"  Changed 😀  \",\"description\":\"<b>literal</b>\"}"))
@@ -134,7 +137,8 @@ class EditProjectsApiTest {
       java.util.UUID id, String tag, String body) {
     return org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put(
             "/api/v1/projects/" + id)
-        .with(httpBasic("persona-a", "test-only-secret"))
+        .with(user("persona-a"))
+        .with(csrf().asHeader())
         .header("If-Match", tag)
         .contentType("application/json")
         .content(body);
@@ -162,7 +166,8 @@ class EditProjectsApiTest {
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put(
                     "/api/v1/projects/" + id)
-                .with(httpBasic("persona-a", "test-only-secret"))
+                .with(user("persona-a"))
+                .with(csrf().asHeader())
                 .contentType("application/json")
                 .content("{\"name\":\"Original\",\"description\":\"Description\"}"))
         .andExpect(status().is(428))
@@ -295,7 +300,8 @@ class EditProjectsApiTest {
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put(
                     "/api/v1/projects/" + id)
-                .with(httpBasic("persona-a", "test-only-secret"))
+                .with(user("persona-a"))
+                .with(csrf().asHeader())
                 .header("If-Match", "\"00000000-0000-0000-0000-000000000000:0\"")
                 .contentType("application/json")
                 .content("{\"name\":\"Changed\",\"description\":\"\"}"))
@@ -362,8 +368,8 @@ class EditProjectsApiTest {
             .header("If-Match", "\"" + id + ":0\"")
             .contentType(defect.equals("media") ? "text/plain" : "application/json")
             .content("{\"name\":\"Changed\",\"description\":\"\"}");
-    if (!defect.equals("missing"))
-      request.with(httpBasic("persona-a", defect.equals("wrong") ? "wrong" : "test-only-secret"));
+    if (!defect.equals("missing") && !defect.equals("wrong"))
+      request.with(user("persona-a")).with(csrf().asHeader());
     if (defect.equals("origin")) request.header("Origin", "https://evil.example");
     mvc.perform(request)
         .andExpect(status().is(expected))
@@ -455,7 +461,8 @@ class EditProjectsApiTest {
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
                     "/api/v1/projects/" + id)
-                .with(httpBasic("persona-a", "test-only-secret")))
+                .with(user("persona-a"))
+                .with(csrf().asHeader()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.name").value("Original"))
         .andExpect(header().string("ETag", "\"" + id + ":0\""));

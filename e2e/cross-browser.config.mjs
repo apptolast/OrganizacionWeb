@@ -8,8 +8,9 @@ export default defineConfig({
     "read-projects.spec.mjs",
     "edit-project.spec.mjs",
     "project-states.spec.mjs",
+    "authentication.spec.mjs",
   ],
-  grep: /real creation survives|real update persists|explicit transitions persist/,
+  grep: /real creation survives|real update persists|explicit transitions persist|public access screen/,
   projects: [
     { name: "firefox", use: { browserName: "firefox" } },
     { name: "webkit", use: { browserName: "webkit" } },

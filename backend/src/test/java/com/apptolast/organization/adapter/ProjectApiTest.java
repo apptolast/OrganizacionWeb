@@ -1,7 +1,9 @@
 package com.apptolast.organization.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -80,7 +82,8 @@ class ProjectApiTest {
             : "{\"name\":\"Idea\",\"description\":" + value + "}";
     mvc.perform(
             post("/api/v1/projects")
-                .with(httpBasic("persona-a", "test-only-secret"))
+                .with(user("persona-a"))
+                .with(csrf().asHeader())
                 .contentType("application/json")
                 .content(body))
         .andExpect(status().isBadRequest())
@@ -95,7 +98,8 @@ class ProjectApiTest {
   void s12_rejectsUnknownFields(String field) throws Exception {
     mvc.perform(
             post("/api/v1/projects")
-                .with(httpBasic("persona-a", "test-only-secret"))
+                .with(user("persona-a"))
+                .with(csrf().asHeader())
                 .contentType("application/json")
                 .content("{\"name\":\"Idea\",\"" + field + "\":\"persona-b\"}"))
         .andExpect(status().isBadRequest())
@@ -109,7 +113,8 @@ class ProjectApiTest {
   void s14_rejectsTrailingJsonDocumentWithoutWrites() throws Exception {
     mvc.perform(
             post("/api/v1/projects")
-                .with(httpBasic("persona-a", "test-only-secret"))
+                .with(user("persona-a"))
+                .with(csrf().asHeader())
                 .contentType("application/json")
                 .content("{\"name\":\"Idea\"}{\"extra\":true}"))
         .andExpect(status().isBadRequest())
@@ -122,7 +127,8 @@ class ProjectApiTest {
   void s14_malformedJsonProblem() throws Exception {
     mvc.perform(
             post("/api/v1/projects")
-                .with(httpBasic("persona-a", "test-only-secret"))
+                .with(user("persona-a"))
+                .with(csrf().asHeader())
                 .contentType("application/json")
                 .content("{\"name\":"))
         .andExpect(status().isBadRequest())
@@ -144,7 +150,8 @@ class ProjectApiTest {
     try {
       mvc.perform(
               post("/api/v1/projects")
-                  .with(httpBasic("persona-a", "test-only-secret"))
+                  .with(user("persona-a"))
+                  .with(csrf().asHeader())
                   .contentType("application/json")
                   .content("{\"name\":\"Idea\"}"))
           .andExpect(status().isServiceUnavailable())
@@ -168,7 +175,8 @@ class ProjectApiTest {
       var response =
           mvc.perform(
                   post("/api/v1/projects")
-                      .with(httpBasic("persona-a", "test-only-secret"))
+                      .with(user("persona-a"))
+                      .with(csrf().asHeader())
                       .contentType("application/json")
                       .content("{\"name\":\"Idea\"}"))
               .andExpect(status().isInternalServerError())
@@ -191,7 +199,8 @@ class ProjectApiTest {
   void s15_rejectsUnsupportedContentType() throws Exception {
     mvc.perform(
             post("/api/v1/projects")
-                .with(httpBasic("persona-a", "test-only-secret"))
+                .with(user("persona-a"))
+                .with(csrf().asHeader())
                 .contentType("text/plain")
                 .content("Idea"))
         .andExpect(status().isUnsupportedMediaType());
@@ -209,31 +218,34 @@ class ProjectApiTest {
     if (invalid) request.with(httpBasic("persona-a", "incorrect"));
     mvc.perform(request)
         .andExpect(status().isUnauthorized())
-        .andExpect(header().exists("WWW-Authenticate"))
+        .andExpect(header().doesNotExist("WWW-Authenticate"))
         .andExpect(content().contentType("application/problem+json"))
         .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
     assertEmpty();
   }
 
   @Test
-  void bootstrapSessionOnlyConfirmsVerifiedCredentials() throws Exception {
+  void sessionReportsIdentityWithoutBasicChallenge() throws Exception {
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/session"))
-        .andExpect(status().isUnauthorized())
-        .andExpect(header().exists("WWW-Authenticate"));
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.authenticated").value(false))
+        .andExpect(header().doesNotExist("WWW-Authenticate"));
     mvc.perform(
             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/session")
-                .with(httpBasic("persona-a", "test-only-secret")))
-        .andExpect(status().isNoContent())
-        .andExpect(content().string(""));
+                .with(user("persona-a")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.authenticated").value(true))
+        .andExpect(jsonPath("$.username").value("persona-a"));
     assertEmpty();
   }
 
   @Test
-  void rejectsCrossOriginBasicAuthenticatedWrites() throws Exception {
+  void rejectsCrossOriginAuthenticatedWrites() throws Exception {
     mvc.perform(
             post("/api/v1/projects")
-                .with(httpBasic("persona-a", "test-only-secret"))
+                .with(user("persona-a"))
+                .with(csrf().asHeader())
                 .header("Origin", "https://hostile.example")
                 .contentType("application/json")
                 .content("{\"name\":\"Idea\"}"))
@@ -265,7 +277,8 @@ class ProjectApiTest {
     var response =
         mvc.perform(
                 post("/api/v1/projects")
-                    .with(httpBasic("persona-a", "test-only-secret"))
+                    .with(user("persona-a"))
+                    .with(csrf().asHeader())
                     .header("Origin", "https://organization.example")
                     .contentType("application/json")
                     .content(body))
@@ -281,7 +294,8 @@ class ProjectApiTest {
   void s5_missingNullAndUnicodeBlankAreRequired(String body) throws Exception {
     mvc.perform(
             post("/api/v1/projects")
-                .with(httpBasic("persona-a", "test-only-secret"))
+                .with(user("persona-a"))
+                .with(csrf().asHeader())
                 .contentType("application/json")
                 .content(body))
         .andExpect(status().isBadRequest())
@@ -335,7 +349,8 @@ class ProjectApiTest {
             .put(field, field.equals("name") ? " " + value + " " : value);
     mvc.perform(
             post("/api/v1/projects")
-                .with(httpBasic("persona-a", "test-only-secret"))
+                .with(user("persona-a"))
+                .with(csrf().asHeader())
                 .contentType("application/json")
                 .content(body.toString()))
         .andExpect(status().isBadRequest())
@@ -372,7 +387,8 @@ class ProjectApiTest {
   void s5_s21_validationUsesSpanishProblemDetails() throws Exception {
     mvc.perform(
             post("/api/v1/projects")
-                .with(httpBasic("persona-a", "test-only-secret"))
+                .with(user("persona-a"))
+                .with(csrf().asHeader())
                 .contentType("application/json")
                 .content("{\"name\":\"\"}"))
         .andExpect(status().isBadRequest())
@@ -396,7 +412,8 @@ class ProjectApiTest {
     var response =
         mvc.perform(
                 post("/api/v1/projects")
-                    .with(httpBasic("persona-a", "test-only-secret"))
+                    .with(user("persona-a"))
+                    .with(csrf().asHeader())
                     .contentType("application/json")
                     .content("{\"name\":\"  Idea  \",\"description\":\"Contenido privado\"}"))
             .andExpect(status().isCreated())

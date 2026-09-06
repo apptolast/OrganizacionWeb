@@ -1,6 +1,12 @@
 import type { ReactNode } from "react";
 import { RouteLink } from "./navigation";
-export function Workspace({ children }: { children: ReactNode }) {
+export function Workspace({
+  children,
+  sessionControls,
+}: {
+  children: ReactNode;
+  sessionControls?: ReactNode;
+}) {
   return (
     <div className="workspace">
       <a className="skip-link" href="#proyectos">
@@ -56,6 +62,7 @@ export function Workspace({ children }: { children: ReactNode }) {
           <span className="space-badge">
             <span aria-hidden="true">●</span> Un paso cada día
           </span>
+          {sessionControls}
         </header>
         {children}
       </div>

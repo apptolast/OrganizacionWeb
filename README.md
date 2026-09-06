@@ -18,11 +18,13 @@ Requisitos: Docker con Compose. Crear `.env` a partir de `.env.example` y comple
 docker compose up --build -d
 ```
 
-Abrir http://127.0.0.1:8080 (o WEB_PORT configurado). El acceso inicial usa autenticación HTTP Basic. La web y API comparten origen; PostgreSQL no publica puerto al host. Los datos quedan en un volumen persistente.
+Abrir http://127.0.0.1:8080 (o WEB_PORT configurado). El acceso utiliza el formulario de usuario y contraseña configurados. La sesión se guarda en PostgreSQL, caduca tras treinta minutos de inactividad y puede cerrarse desde la web. La web y API comparten origen; PostgreSQL no publica puerto al host. Los datos quedan en un volumen persistente.
 
 ```sh
 docker compose down
 ```
+
+Para HTTPS, configura `APP_PUBLIC_ORIGIN` con el origen público exacto, sin ruta ni barra final. La cookie utiliza Secure en HTTPS; HTTP sólo se admite para desarrollo en loopback. No se aceptan cabeceras del cliente para decidir esa política.
 
 Ese comando conserva datos. No añadir `--volumes` si se quieren conservar proyectos.
 

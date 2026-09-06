@@ -10,6 +10,8 @@ Rutas: `/` conserva el formulario de creación; `/proyectos` muestra la lista pr
 
 Completar y reabrir tareas está implementado y verificado localmente. Cada transición conserva su fecha en un historial paginado independiente del outbox. Los cambios simultáneos usan una versión propia de la tarea; ante conflicto, la web permite consultar deliberadamente el estado vigente. No se completa automáticamente el proyecto ni los descendientes. El cierre de calidad se registra en `complete_reopen_task` dentro del roadmap.
 
+La disponibilidad personal está implementada y verificada localmente en `/disponibilidad`. Permite elegir zona horaria y minutos disponibles para cada día, incluido cero para descansar. Conserva la preferencia en PostgreSQL y protege cambios simultáneos. Estos presupuestos no reservan franjas ni acreditan trabajo realizado; la planificación de bloques sigue pendiente. El cierre y sus pruebas están en [el dictamen de disponibilidad](progress/judge_availability.md).
+
 El límite inicial es de tres proyectos activos por propietario. `APP_MAX_ACTIVE_PROJECTS` permite elegir de 1 a 10 en `.env`; todas las réplicas deben usar el mismo valor. Al alcanzar el límite, el propietario decide qué pausar. Reducirlo no pausa proyectos automáticamente y dos activaciones simultáneas no pueden ocupar la misma última plaza.
 
 ## Ejecutar localmente

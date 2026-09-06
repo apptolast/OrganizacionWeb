@@ -1,0 +1,54 @@
+{
+  "before": "042c68f09aba85b895e0d39a91646e6dffc141ff2c78e2e30cbfc9f4d7f62afa",
+  "after": "042c68f09aba85b895e0d39a91646e6dffc141ff2c78e2e30cbfc9f4d7f62afa",
+  "unchanged": true,
+  "scratch": "frontend/.stryker-tmp/runtime-diagnostic-bm5PVS",
+  "results": [
+    {
+      "id": "baseline",
+      "exit": 0,
+      "pattern": "recupera catálogo fallido|rechaza presupuesto incompleto",
+      "log": ".e2e-work/availability-runtime-baseline.log",
+      "lines": [
+        " Test Files  1 passed (1)",
+        "      Tests  6 passed | 74 skipped (80)"
+      ]
+    },
+    {
+      "id": "431",
+      "exit": 1,
+      "pattern": "recupera catálogo fallido",
+      "log": ".e2e-work/availability-runtime-431.log",
+      "lines": [
+        " Test Files  1 passed (1)",
+        "      Tests  2 passed | 78 skipped (80)",
+        "     Errors  2 errors",
+        "⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯",
+        "⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯",
+        "TypeError: Cannot read properties of undefined (reading 'includes')",
+        "⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯",
+        "TypeError: Cannot read properties of undefined (reading 'includes')"
+      ]
+    },
+    {
+      "id": "446",
+      "exit": 1,
+      "pattern": "rechaza presupuesto incompleto",
+      "log": ".e2e-work/availability-runtime-446.log",
+      "lines": [
+        " Test Files  1 passed (1)",
+        "      Tests  4 passed | 76 skipped (80)",
+        "     Errors  4 errors",
+        "⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯",
+        "⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯",
+        "SyntaxError: Invalid selector ",
+        "⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯",
+        "SyntaxError: Invalid selector ",
+        "⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯",
+        "SyntaxError: Invalid selector ",
+        "⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯",
+        "SyntaxError: Invalid selector "
+      ]
+    }
+  ]
+}

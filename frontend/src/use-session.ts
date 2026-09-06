@@ -184,6 +184,7 @@ function isPrivateRoute(path: string, search: string) {
   return (
     !search &&
     (path === "/" ||
+      path === "/disponibilidad" ||
       /^\/proyectos\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\/editar|\/tareas\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?$/i.test(
         path,
       ))

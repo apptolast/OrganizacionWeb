@@ -99,8 +99,13 @@ nav a {
   font-weight: 650;
   border-radius: 9px;
   padding: 15px;
-  background: #dfe8d9;
+  background: transparent;
+  border-inline-start: 3px solid transparent;
   color: $forest;
+  &[aria-current="page"] {
+    background: #dfe8d9;
+    border-inline-start-color: $forest;
+  }
   &:hover {
     background: #d0dfc9;
   }
@@ -1330,5 +1335,151 @@ button {
   .task-history button {
     width: 100%;
     margin-right: 0;
+  }
+}
+.availability {
+  max-width: 1120px;
+  .page-intro {
+    margin-bottom: 22px;
+  }
+  .availability-warning {
+    color: #5a6557;
+    font-size: 12px;
+    line-height: 1.6;
+    margin: 0 0 20px;
+  }
+  .availability-form {
+    padding-bottom: 28px;
+  }
+  .availability-form-heading {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  h2 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .availability-badge {
+    border-radius: 30px;
+    margin: 0;
+    padding: 7px 12px;
+    background: #eef3e9;
+    color: #3e593b;
+    font-size: 12px;
+  }
+  .availability-hint {
+    font-size: 13px;
+    color: #53634e;
+    margin: 0 0 28px;
+  }
+  select {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    border: 1px solid #b7c1b1;
+    border-radius: 8px;
+    background: #fdfefb;
+    color: $ink;
+    padding: 12px;
+    font: inherit;
+    font-size: 16px;
+  }
+  select[aria-invalid="true"] {
+    border-color: #a23d36;
+  }
+  select:disabled,
+  input:disabled {
+    background: #f1f3ef;
+    color: #52604e;
+    cursor: wait;
+  }
+  .availability-days {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .availability-days .field {
+    margin: 0;
+    padding: 14px;
+    background: #f7f9f3;
+    border: 1px solid #e1e7db;
+    border-radius: 10px;
+    min-width: 0;
+  }
+  .availability-days label {
+    display: block;
+    line-height: 1.5;
+  }
+  .availability-days input {
+    min-height: 48px;
+    padding-inline: 10px;
+  }
+  .availability-total {
+    padding: 18px 0;
+    margin: 18px 0;
+    border-block: 1px solid #e1e7db;
+  }
+  .availability-total p {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+  .availability-total p + p {
+    color: #53634e;
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 400;
+  }
+  .availability-cancel {
+    margin-top: 18px;
+  }
+  [role="alert"] {
+    margin: 18px 0;
+    padding: 16px;
+    border-inline-start: 3px solid #95502d;
+    background: #faf4e9;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  [role="status"] {
+    line-height: 1.6;
+    font-size: 14px;
+    color: #385b40;
+  }
+}
+@media (max-width: 1000px) {
+  .availability .availability-days {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .sidebar {
+    flex-wrap: wrap;
+  }
+  .sidebar nav {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+  .sidebar nav a {
+    flex: 1;
+    min-width: 0;
+  }
+}
+@media (max-width: 420px) {
+  .availability .availability-days {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .availability .availability-days .field {
+    padding: 12px;
   }
 }

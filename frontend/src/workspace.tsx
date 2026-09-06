@@ -3,9 +3,11 @@ import { RouteLink } from "./navigation";
 export function Workspace({
   children,
   sessionControls,
+  availability,
 }: {
   children: ReactNode;
   sessionControls?: ReactNode;
+  availability: boolean;
 }) {
   return (
     <div className="workspace">
@@ -23,9 +25,19 @@ export function Workspace({
         </div>
         <p className="sidebar-label">TU ESPACIO</p>
         <nav aria-label="Principal">
-          <RouteLink href="/proyectos" aria-current="page">
+          <RouteLink
+            href="/proyectos"
+            aria-current={availability ? undefined : "page"}
+          >
             <span aria-hidden="true">▦</span> Proyectos{" "}
-            <span className="nav-dot" aria-hidden="true" />
+            {!availability && <span className="nav-dot" aria-hidden="true" />}
+          </RouteLink>
+          <RouteLink
+            href="/disponibilidad"
+            aria-current={availability ? "page" : undefined}
+          >
+            <span aria-hidden="true">◷</span> Disponibilidad
+            {availability && <span className="nav-dot" aria-hidden="true" />}
           </RouteLink>
         </nav>
         <div className="sidebar-note">
@@ -57,7 +69,7 @@ export function Workspace({
             <span className="breadcrumb-separator" aria-hidden="true">
               /
             </span>{" "}
-            <strong>Proyectos</strong>
+            <strong>{availability ? "Disponibilidad" : "Proyectos"}</strong>
           </span>
           <span className="space-badge">
             <span aria-hidden="true">●</span> Un paso cada día

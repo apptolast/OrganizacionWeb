@@ -1,0 +1,25 @@
+# Coordinación y revisión — availability
+
+Contrato aprobado 3f9a293: 47 escenarios y 237 casos. Baseline compartido antes de escribir producción: init 27065 EXIT 0, lint global verde, 798 pruebas backend (XML sumado por raíz: cero fallos, errores u omisiones) y 647 frontend en 17 archivos. Este baseline incluye el último refuerzo de feature 9; no se sustituye retrospectivamente su evidencia histórica.
+
+Sólo feature 10 activa. Backend es propietario de backend/** y metadatos; frontend de UI/hook/SCSS/navegación y sus pruebas; integración del cliente availability-api y sus pruebas, luego E2E/UX y revisión backend independiente. Raíz revisa API de integración, coordina gates y conserva git. No se ejecutará mutación antes del judge ni imágenes E2E antes del freeze.
+
+Ponytail full y Caveman lite activos: controles nativos, puertos y cliente existentes, sin dependencias especulativas. Se mantiene TDD y evidencia por variante. No hay evento personal, nueva guardia global de navegación ni despliegue productivo. La CI 34010190766 de e1afc11 sigue separada de este contrato local.
+
+Cliente API congelado y aprobado en `progress/review_availability_api.md`: lectura independiente y reejecución focal 147/147. UI y backend siguen en TDD; esta aprobación parcial no habilita todavía la mutación ni cierra la feature.
+
+Revisión de E2E preparados, todavía sin ejecutar: se pidió corregir etiquetas que no correspondían a los escenarios del contrato. También se detectó que la entrada real `1e` sólo se observaba en el total y se reemplazaba antes de intentar guardar. El escenario s38 requiere activar Guardar con esa entrada, comprobar que no hay PUT y verificar error/foco. Hallazgos enviados al autor de integración antes de la ejecución; no constituyen resultados de pruebas.
+
+Freeze conjunto e init 8318 EXIT 0: lint global verde; 984 pruebas backend (XML sumado, cero fallos/errores/omisiones) y 841 frontend en 19 archivos. La revisión independiente backend es APPROVED para verificación y la de frontend también, con riesgo visual concreto pendiente de contraste entre 701 y 760 y ampliación de bordes por los nuevos breakpoints. Se autorizan PIT focal, Stryker focal e integración de navegador sobre este corte; ninguna autorización declara done. Los perfiles globales conservan disponibilidad para CI.
+
+La revisión automática rechazó un comando PowerShell/Python para escribir la propuesta futura `progress/proposal_schedule_block_time.md`: `exec_command failed: CreateProcess`, `rejected: blocked by policy`, sin causa más específica y con parte del comando truncada. El coordinador interrumpió la propuesta y prohibió intentos equivalentes por otra herramienta. El autor confirmó que no hubo escritura, movimiento ni intento posterior. La propuesta no es requisito de disponibilidad; permanece sin archivo y no se elude el bloqueo. El usuario fue informado. Este hecho es distinto del bloqueo previo de los dos temporales ignorados.
+
+Verificación posterior: PIT original 130/130 KILLED, comprobado por lectura independiente del XML. Integración original 48/48; tras corregir el breakpoint SCSS, comprobaciones focales de matriz y navegación 2/2, y recorrido acotado Firefox/WebKit 2/2. El coordinador inspeccionó las capturas finales de escritorio, móvil y zoom nativo: etiquetas y controles legibles, sin solapes visibles. No se suman estas ejecuciones como si fueran una única suite, ni se atribuye la matriz completa a Firefox/WebKit. Stryker original continúa; el error 400 con mensaje vacío o de espacios sigue pendiente de corrección posterior al informe.
+
+La CI de feature 9, run 34010190766, terminó completed/cancelled según consulta remota del 6 de septiembre a las 04:58 UTC aproximadamente. Se encarga diagnóstico del motivo y fase afectada; no se presenta esta ejecución como verde ni se atribuye a disponibilidad.
+
+Diagnóstico CI cerrado: anotación remota confirma límite de 60 minutos durante Stryker. Cambio mínimo revisado y commit local 704ff0f: techo de 120 minutos, mismos controles y umbral; informe `review_ci_timeout.md`. La siguiente ejecución aún debe demostrar su resultado.
+
+Corte final de código: dos correcciones de UI posteriores al original, mensaje 400 sin contenido y restauración del control nativo al enviar con Enter, ambas con TDD, review y navegador real. Bundle CpU8JHCd, CSS Codz1mIb. Init final 11298 EXIT 0, salida 4a45d9: lint global verde y frontend 875/875 en 19 archivos (07:25:41 Madrid). Backend test quedó UP-TO-DATE, conservando los 984 resultados verificados del corte previo sin cambios; no se afirma una nueva ejecución física de esos tests.
+
+El original Stryker terminó EXIT 0: 517 Killed, 115 Survived, 3 NoCoverage y 2 RuntimeError; score 81,42 % sobre 635 puntuables. Raíz leyó el JSON y confirmó participación de 47 pruebas UI y 147 API del original. API31 quedó detectado con una prueba nueva y replay 3/3; seis equivalencias API justificadas por separado. La revisión independiente clasificó los 113 IDs UI/workspace no eliminados. Tras revisar refuerzos y pasar init final, raíz autoriza replay focal de diferencias reales y nueva lógica; no se declara todavía done.

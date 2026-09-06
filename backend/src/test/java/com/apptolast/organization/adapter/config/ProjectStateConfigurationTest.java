@@ -19,6 +19,13 @@ class ProjectStateConfigurationTest {
     var runner =
         new ApplicationContextRunner()
             .withUserConfiguration(ApplicationConfiguration.class)
+            .withBean(
+                AvailabilityQueries.class,
+                () -> org.mockito.Mockito.mock(AvailabilityQueries.class))
+            .withBean(
+                AvailabilityEditing.class,
+                () -> org.mockito.Mockito.mock(AvailabilityEditing.class))
+            .withBean(ZoneCatalog.class, () -> org.mockito.Mockito.mock(ZoneCatalog.class))
             .withBean(ProjectCommit.class, () -> org.mockito.Mockito.mock(ProjectCommit.class))
             .withBean(ProjectQueries.class, () -> org.mockito.Mockito.mock(ProjectQueries.class))
             .withBean(ProjectEditing.class, () -> org.mockito.Mockito.mock(ProjectEditing.class))

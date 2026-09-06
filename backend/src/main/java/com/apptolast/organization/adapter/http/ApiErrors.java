@@ -77,6 +77,15 @@ public final class ApiErrors {
         .body(problem(404, "PROJECT_NOT_FOUND", "Proyecto no encontrado"));
   }
 
+  @ExceptionHandler(com.apptolast.organization.application.AvailabilityConflictException.class)
+  ResponseEntity<Map<String, Object>> availabilityConflict() {
+    return ResponseEntity.status(412)
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+        .body(
+            problem(
+                412, "AVAILABILITY_CONFLICT", "La disponibilidad tiene una versión más reciente."));
+  }
+
   @ExceptionHandler(com.apptolast.organization.application.TaskConflictException.class)
   ResponseEntity<Map<String, Object>> taskConflict() {
     return ResponseEntity.status(412)

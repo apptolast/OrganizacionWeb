@@ -66,3 +66,44 @@ Las decisiones siguientes concretan el corte propuesto; no son aprobación de im
 - El contrato añadirá los GET HTTP 200 incompatibles descritos arriba y el PUT con cuerpo válido pero valores distintos de la intención enviada. Ninguno constituye una confirmación ni permite inventar ausencia, zona, fechas o presupuesto.
 
 Con estas resoluciones desaparece la divergencia de los dos flujos de conflicto y queda acotado el coste de navegación. Permanecen las precisiones de forma/catálogo, controles nativos y evidencia UX de esta revisión. **No se modifica el borrador aprobado de otra feature, no se activan escenarios ni se inicia producción de disponibilidad.**
+
+---
+
+# Revisión de disponibilidad frontend
+
+Estado: revisión parcial, pendiente de freeze y comprobación final. No autoriza todavía Stryker ni cierre.
+
+El coordinador leyó la vista, cambios de navegación/sesión, cliente común y casos UI de guardado, recuperación y cancelación. El cliente específico tiene aprobación independiente en `review_availability_api.md`. Las fuentes UI siguen en TDD; no se presentan sus estados transitorios como producto terminado.
+
+## Hallazgos enviados antes del freeze
+
+1. Recuperar acceso tras un rechazo conocido `403 CSRF_INVALID` debe permitir un segundo envío manual de los mismos valores, usando el token renovado y sin descartar el borrador. El corte observado agrupaba ese rechazo con resultados inciertos y exigía recargar preferencias; la prueba incluso fijaba Guardar deshabilitado después de recuperar acceso. Se pidió corregir esa expectativa y el comportamiento mediante TDD. Se reutiliza la recuperación de sesión existente; no se reenvía automáticamente el PUT. `412`, `503`, red y confirmación inválida mantienen su recarga obligatoria.
+2. La navegación incorpora una segunda sección, pero heredaba el fondo activo en todos los enlaces y el punto fijo en Proyectos. Se pidió distinguir la sección actual mediante `aria-current` y un indicador que no dependa sólo del color, dentro del acabado SCSS ya pendiente.
+3. La configuración global de Stryker aún necesita incorporar disponibilidad y revisar el rango fijo de App al desplazarse las líneas. El perfil focal y el global deben cubrir los cambios nuevos sin perder los anteriores. Es preparación de la verificación, no una ejecución autorizada.
+
+La revisión final comprobará las correcciones, el código congelado, trazabilidad completa, resultados de pruebas y evidencia de navegador. No se atribuye un resultado global a la lectura parcial.
+
+## Seguimiento de correcciones
+
+La lectura posterior confirma que el rechazo CSRF usa `isCsrfFailure`, conserva las guardas de aborto después del await y permite un segundo envío manual. La prueba exige mismo cuerpo, mismo ETag, token renovado, sólo dos escrituras iniciadas por el usuario y ninguna lectura adicional de preferencias. El autor registra RED/GREEN; el coordinador aún no reejecuta la vista completa, pendiente del freeze. La navegación ya añade borde e indicador a la sección activa y retira el punto de la sección inactiva; queda su comprobación visual en navegador.
+
+## Dictamen sobre el corte congelado
+
+APPROVED para verificación por mutación e integración. El coordinador revisó la vista congelada, cliente, cambios compartidos, pruebas y mapas, además de corregir los hallazgos anteriores. Init global 8318 terminó EXIT 0: lint verde, 984 pruebas backend y 841 frontend en 19 archivos. El total backend se sumó de los XML, sin fallos, errores ni omisiones. La ejecución incluye las 47 pruebas UI y 147 del cliente específico; no se suman de nuevo al total global.
+
+Los perfiles Stryker focal y global incluyen disponibilidad y las líneas finales de App, Workspace y retorno privado. Se conserva el único observador de ruta en App. El formulario separa snapshot, borrador y catálogo; bloquea envíos inciertos hasta recarga válida, conserva cambios frente a fallos y cancela peticiones al desmontarse. La recuperación de CSRF queda diferenciada y el foco se restaura sin desplazar el destino elegido durante la espera.
+
+Este dictamen no cierra la función. La revisión de navegador debe comprobar los nuevos breakpoints 420, 760 y 1000 además de la matriz anterior. Se señaló un riesgo concreto entre 701 y 760: la navegación pasa a fila mientras el sidebar aún conserva su ancho lateral. Integración comprobará texto y posibles solapes, además de cajas, axe y desbordamiento. Si aparece el fallo, deberá corregirse y verificarse antes del cierre. Reinicio, zoom, matriz UX y mutación siguen pendientes de sus resultados reales.
+
+## Hallazgos durante la verificación, pendientes del cierre
+
+- Integración confirmó el solape entre 701 y 760. El coordinador inspeccionó las capturas de 701 y 761: en la primera, Disponibilidad sale del enlace e invade el contenido principal; en la segunda, ambos enlaces son legibles dentro del sidebar. Se autorizó una corrección exclusiva de SCSS tras una comprobación focal RED, sin modificar los archivos TypeScript ni pruebas que Stryker está usando. El bundle visual final tendrá su propia verificación.
+- Un error HTTP 400 con `dailyMinutes.MONDAY` y mensaje vacío crea una clave en fieldErrors y evita el aviso general, pero el JSX tampoco muestra el error vacío. Se solicitó tratar mensajes vacíos o de espacios como error general recuperable o sustituirlos por texto local útil. Este cambio de lógica y su test esperan al informe original de Stryker para conservar la evidencia de esa campaña. Debe resolverse antes del cierre, aunque no lo detecte una mutación.
+
+La corrección de navegación queda verificada: SCSS usa ahora 700 como punto de cambio a fila. Integración registra matriz y navegación 2/2 en el bundle final; el coordinador inspeccionó además la captura corregida de 701 píxeles, con ambos enlaces dentro del sidebar y sin invadir el contenido. Las capturas finales de escritorio, móvil y zoom también se revisaron visualmente. El hallazgo del mensaje 400 continúa abierto; esta comprobación visual no lo sustituye.
+
+Corrección 400 revisada y aprobada: la única modificación lógica exige `entry.message.trim().length > 0` antes de reconocer el mensaje, conservando intacto cualquier texto válido. Dos casos RED/GREEN verifican vacío y espacios, alerta útil, borrador intacto y ausencia de reenvío. Integración ejecutó además un recorrido Chromium con ambos casos contra backend real, recuperación deliberada y nuevo guardado válido: 1/1, bundle CIX_-ttO y CSS Codz1mIb. El coordinador leyó ese escenario y su evidencia; la navegación principal permanece en cero al enviar. El comportamiento queda corregido; su replay de mutación y los refuerzos generales aún deben completar el cierre.
+
+Nuevo hallazgo de teclado, antes del cierre: el autor señaló que submitFocus sólo conserva botones. Integración confirmó mediante Enter real desde minutes-MONDAY que una respuesta de éxito y una 503 dejan el foco en BODY; un error 400 de campo sí lo devuelve al input. Evidencia original en `evidence_availability_enter_focus.json`, sesión 96423, imagen CIX_-ttO. El coordinador leyó la evidencia y autorizó TDD y una corrección mínima para restaurar el control de origen sin robar el foco elegido fuera del formulario. Este hallazgo permanece abierto hasta review y verificación de la nueva fuente; no se considera resuelto por las capturas anteriores.
+
+Corrección de Enter aprobada: submitFocus conserva ahora button/input/select, los tres controles nativos del formulario; reutiliza los efectos de restauración y no añade otra abstracción. El coordinador revisó fuente y pruebas. La simulación de foco BODY en jsdom reproduce el comportamiento observado en Chromium, no pretende demostrar por sí sola el comportamiento nativo. Integración verificó después Enter real en éxito, 503, 400 y cambio deliberado de foco por Tab: 2/2 focales, incluida regresión del mensaje 400 vacío, sesión 5043 y bundle CpU8JHCd. CSS Codz1mIb intacto. Los hallazgos de producción están resueltos; quedan revisión de refuerzos y replay de mutación para la aprobación final.

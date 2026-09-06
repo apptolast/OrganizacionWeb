@@ -1,0 +1,61 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "mutate": [
+    "src/availability.tsx:38:0-38:200",
+    "src/availability.tsx:51:0-51:200",
+    "src/availability.tsx:53:0-53:200",
+    "src/availability.tsx:57:0-57:200",
+    "src/availability.tsx:74:0-75:200",
+    "src/availability.tsx:78:0-78:200",
+    "src/availability.tsx:83:0-83:200",
+    "src/availability.tsx:93:0-96:200",
+    "src/availability.tsx:117:0-117:200",
+    "src/availability.tsx:123:0-123:200",
+    "src/availability.tsx:148:0-148:200",
+    "src/availability.tsx:151:0-151:200",
+    "src/availability.tsx:156:0-156:200",
+    "src/availability.tsx:158:0-158:200",
+    "src/availability.tsx:176:0-182:200",
+    "src/availability.tsx:198:0-199:200",
+    "src/availability.tsx:211:0-211:200",
+    "src/availability.tsx:214:0-214:200",
+    "src/availability.tsx:220:0-223:200",
+    "src/availability.tsx:227:0-233:200",
+    "src/availability.tsx:237:0-237:200",
+    "src/availability.tsx:244:0-244:200",
+    "src/availability.tsx:251:0-251:200",
+    "src/availability.tsx:289:0-290:200",
+    "src/availability.tsx:303:0-303:200",
+    "src/availability.tsx:311:0-311:200",
+    "src/availability.tsx:313:0-313:200",
+    "src/availability.tsx:322:0-326:200",
+    "src/availability.tsx:341:0-341:200",
+    "src/availability.tsx:352:0-356:200",
+    "src/availability.tsx:391:0-391:200",
+    "src/availability.tsx:393:0-393:200",
+    "src/availability.tsx:402:0-407:200",
+    "src/availability.tsx:418:0-419:200",
+    "src/workspace.tsx:30:0-30:200",
+    "src/workspace.tsx:72:0-72:200"
+  ],
+  "reporters": ["clear-text", "json", "html"],
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 80
+  },
+  "concurrency": 2,
+  "coverageAnalysis": "perTest",
+  "vitest": {
+    "configFile": "vite.config.ts"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation-availability/replay.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation-availability/replay.html"
+  },
+  "tempDirName": ".stryker-tmp-availability-replay"
+}

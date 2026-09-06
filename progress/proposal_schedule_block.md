@@ -1,0 +1,19 @@
+# Preparación documental — planificar bloque
+
+Feature 11 permanece pending. Disponibilidad (10) es la única implementación activa. Esta propuesta identifica decisiones para el siguiente contrato; no aprueba escenarios ni inicia código.
+
+El recorrido que pidió el usuario necesita tarea, objetivo, fecha y hora de inicio y fin visibles. Un bloque reserva tiempo; no acredita trabajo, no completa tareas y no altera su estimación. Hoy (12), replanificar (13) y sesiones reales (14–17) tienen contratos posteriores. No incorporar recurrencia, recordatorios, calendario externo o arrastrar elementos antes de necesitar esas funciones.
+
+La disponibilidad distingue presupuesto de ventana: 90 minutos no significa que cualquier franja esté libre. El contrato de bloques debe decidir si el presupuesto es límite estricto o aviso, cómo se comprueban solapamientos del mismo usuario entre proyectos y qué ocurre con un día de descanso. Reducir capacidad después de reservar no puede borrar o desplazar bloques existentes: feature 10 ya conserva esos instantes. Debe mostrar exceso existente y definir qué nuevas reservas permite.
+
+Se ha consultado al usuario cómo tratar una reserva que exceda el presupuesto diario: avisar y permitirla sólo mediante decisión explícita (opción propuesta), impedirla hasta ampliar disponibilidad o mostrar el exceso sin impedirla. La respuesta sigue pendiente; la consulta no detiene la implementación de disponibilidad ni aprueba el contrato de bloques.
+
+Guardar una hora local exige resolverla con zona y reglas del backend. No desplazar silenciosamente una hora inexistente por cambio horario ni escoger sin informar una de dos horas repetidas. El futuro contrato deberá definir la elección de offset, representar el instante resultante y conservar la zona elegida. La duración real puede diferir del salto del reloj local. Una preferencia de zona nueva no modifica el instante de bloques previos; hay que decidir con qué zona se proyectan al comprobar el presupuesto de cada día.
+
+Antes de implementar, fijar límites de duración, precisión de minutos, reservas en el pasado y cruce de medianoche. Si se admite cruzar días, distribuir tiempo por cada fecha local sin duplicarlo; si el primer corte exige un solo día, comunicar ese límite y no presentarlo como soporte general. No deducir ninguna de estas decisiones únicamente del máximo de 1440 minutos de las preferencias.
+
+La creación concurrente necesita comprobar preferencia, capacidad y solapamiento en la misma transacción, también entre tareas de proyectos distintos. La fila de disponibilidad propia puede servir como coordinación de escrituras del usuario, pero deberá revisarse el orden de bloqueos respecto a proyecto, tarea y futuro bloque. No introducir un bloqueo global de todos los usuarios. Debe distinguirse conflicto concurrente, propiedad, tarea/proyecto que ya no admite trabajo y almacenamiento indisponible.
+
+Un evento de bloque planificado puede conservar aggregateId del proyecto y referencias de bloque/tarea; a diferencia de las preferencias personales, encaja en la outbox existente. Decidir esquema cerrado y datos mínimos del evento, con creación atómica y recuperación del publicador. No alterar las seis rutas actuales ni prometer orden de entrega causal por proyecto.
+
+La confirmación debe permitir reconocer qué se guardó y recuperar un resultado incierto sin POST automático. Definir lectura de la reserva propia suficiente para verificarla tras recarga, sin absorber toda la agenda Hoy. La UI debe explicar fecha, zona, duración y capacidad antes de confirmar; usar controles nativos y el formulario existente cuando encajen. Validar con PostgreSQL real, reloj inyectable, teclado, errores conservando borrador y la matriz UX habitual, sin convertir cada comparación numérica en infraestructura nueva.

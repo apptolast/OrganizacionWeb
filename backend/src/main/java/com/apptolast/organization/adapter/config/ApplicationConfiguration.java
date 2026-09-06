@@ -83,4 +83,19 @@ public class ApplicationConfiguration {
       com.apptolast.organization.application.TaskHistoryQueries queries) {
     return new com.apptolast.organization.application.ReadTaskHistory(queries);
   }
+
+  @Bean
+  com.apptolast.organization.application.ReadAvailability readAvailability(
+      com.apptolast.organization.application.AvailabilityQueries queries,
+      com.apptolast.organization.application.ZoneCatalog catalog) {
+    return new com.apptolast.organization.application.ReadAvailability(queries, catalog);
+  }
+
+  @Bean
+  com.apptolast.organization.application.SaveAvailability saveAvailability(
+      com.apptolast.organization.application.AvailabilityEditing store,
+      com.apptolast.organization.application.ZoneCatalog catalog,
+      Clock clock) {
+    return new com.apptolast.organization.application.SaveAvailability(store, catalog, clock);
+  }
 }

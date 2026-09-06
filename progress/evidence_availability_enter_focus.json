@@ -1,0 +1,61 @@
+[
+  {
+    "outcome": "success",
+    "before": {
+      "tag": "INPUT",
+      "id": "minutes-MONDAY",
+      "text": "",
+      "disabled": false
+    },
+    "during": {
+      "tag": "BODY",
+      "id": "",
+      "text": "\n    La protección de tu sesión necesita renovarse. Recupera el acceso y decide si vuelves a enviar "
+    },
+    "after": {
+      "tag": "BODY",
+      "id": "",
+      "text": "\n    La protección de tu sesión necesita renovarse. Recupera el acceso y decide si vuelves a enviar "
+    }
+  },
+  {
+    "outcome": "503",
+    "before": {
+      "tag": "INPUT",
+      "id": "minutes-MONDAY",
+      "text": "",
+      "disabled": false
+    },
+    "during": {
+      "tag": "INPUT",
+      "id": "minutes-MONDAY",
+      "text": "",
+      "disabled": true
+    },
+    "after": {
+      "tag": "BODY",
+      "id": "",
+      "text": "\n    La protección de tu sesión necesita renovarse. Recupera el acceso y decide si vuelves a enviar "
+    }
+  },
+  {
+    "outcome": "400",
+    "before": {
+      "tag": "INPUT",
+      "id": "minutes-MONDAY",
+      "text": "",
+      "disabled": false
+    },
+    "during": {
+      "tag": "BODY",
+      "id": "",
+      "text": "\n    La protección de tu sesión necesita renovarse. Recupera el acceso y decide si vuelves a enviar "
+    },
+    "after": {
+      "tag": "INPUT",
+      "id": "minutes-MONDAY",
+      "text": "",
+      "disabled": false
+    }
+  }
+]

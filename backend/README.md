@@ -120,3 +120,15 @@ V9 añade versión y fecha de finalización a tasks y crea task_status_history c
 TaskStatusChanged.v1 contiene nueve campos: eventId, aggregateId, ownerId, occurredAt, schemaVersion, type, taskId, fromStatus y toStatus. aggregateId sigue siendo el proyecto; eventId coincide con la entrada de historia. El publicador exige una transición real entre los dos estados y publica JSON original por task.status-changed.v1 a organization.task-status-changed.v1, con cola quorum durable y las garantías existentes. Las cinco rutas previas permanecen disponibles.
 
 `./gradlew -PmutationScope=complete_reopen_task pitest` selecciona el alcance de estado/historia, los adaptadores propios y compartidos afectados y ApiErrors. Informe separado en `build/reports/pitest-complete-reopen-task`; el perfil CI predeterminado incluye los adaptadores nuevos. Evidencia y límites en `progress/mutation_complete_reopen_task_backend.md`.
+
+## Disponibilidad personal
+
+`GET /api/v1/me/availability/zones` devuelve `{items}` con el catálogo ordenado de zonas del backend, incluido UTC. `GET /api/v1/me/availability` devuelve exactamente configured, zoneId, dailyMinutes y updatedAt, con ETag del mismo snapshot. Una preferencia ausente devuelve configured=false, los otros tres campos null y el ETag `"availability:unconfigured"`; leer no crea una fila.
+
+`PUT /api/v1/me/availability` exige If-Match y exactamente zoneId y dailyMinutes. El mapa contiene MONDAY a SUNDAY, cada valor como entero JSON de 0 a 1440. La zona debe pertenecer al catálogo vigente. El presupuesto semanal se deriva de esos siete valores y no se guarda por separado. No se aceptan parámetros de consulta. Sesión, origen, CSRF y respuestas no-store conservan la política privada existente.
+
+La revisión configurada tiene formato `"availability:<uuid>:<versión>"`; no sirve para seleccionar a otro propietario. Falta de If-Match produce 428, formato incorrecto 400 y revisión distinta del snapshot propio 412 AVAILABILITY_CONFLICT. Un no-op conserva cuerpo, fechas y revisión. La primera escritura crea versión cero; un cambio real la incrementa y conserva una fecha que no retrocede.
+
+V10 crea availability_preferences con propietario único, siete columnas acotadas y versión no negativa. PostgresAvailabilityStore serializa cambios de la fila propia y resuelve la carrera de primera inserción como éxito/conflicto. Las confirmaciones se devuelven después del commit. Los fallos de almacenamiento anteriores al commit revierten la transacción y producen 503; perder la confirmación después del commit puede dejar un resultado incierto que exige consultar el estado guardado. No se escribe en proyectos, tareas ni outbox y no se incorpora un evento personal.
+
+`./gradlew -PmutationScope=availability pitest` ejecuta el perfil focal, con informe en `build/reports/pitest-availability`. El perfil global también incorpora este alcance. Evidencia backend en `progress/mutation_availability_backend.md`; el cierre de la función completa depende además de la revisión frontend e integración.

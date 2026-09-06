@@ -5,12 +5,16 @@ import { useRoute, isProjectRoute } from "./navigation";
 import { Workspace } from "./workspace";
 import { ProjectEditor } from "./project-editor";
 import { TaskReader } from "./task-reader";
+import { Availability } from "./availability";
 export function App({ sessionControls }: { sessionControls?: ReactNode }) {
   const route = useRoute();
+  const availability = route === "/disponibilidad";
   const taskRoute = /^\/proyectos\/([^/]+)\/tareas\/([^/?]+)$/.exec(route);
   return (
-    <Workspace sessionControls={sessionControls}>
-      {taskRoute ? (
+    <Workspace sessionControls={sessionControls} availability={availability}>
+      {availability ? (
+        <Availability />
+      ) : taskRoute ? (
         <TaskReader key={route} projectId={taskRoute[1]} id={taskRoute[2]} />
       ) : route.endsWith("/editar") ? (
         <ProjectEditor key={route} route={route} />

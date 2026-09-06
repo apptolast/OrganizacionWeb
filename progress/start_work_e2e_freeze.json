@@ -1,0 +1,21 @@
+{
+  "capturedAt": "2026-09-06T23:56:05.846Z",
+  "files": [
+    {
+      "path": "e2e/start-work-session.spec.mjs",
+      "sha256": "4ccd0aa12205e8ca681a7cbd950fc3771eb1bded26624fe9a6cb599ccdc121bc"
+    },
+    {
+      "path": "e2e/start-work-session-ux.spec.mjs",
+      "sha256": "1fe80357fc4e577bde4f85aaa7bf6d3266f730ee895009db24e909db19968db0"
+    },
+    {
+      "path": "e2e/start-work-session-text.spec.mjs",
+      "sha256": "8db2d16e3707b475c0ebe33076507c0783faf022767bc2195749cef5b25a7b95"
+    },
+    {
+      "path": "e2e/start-work-session-native-zoom.spec.mjs",
+      "sha256": "bee048190392401d25bb5dee48de62594f9fdf53ebe3f9e5ffa2b869d84aca78"
+    }
+  ]
+}

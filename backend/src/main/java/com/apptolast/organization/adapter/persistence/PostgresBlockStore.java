@@ -9,37 +9,86 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Component
-public final class PostgresBlockStore implements BlockPlanning, BlockCommit, BlockQueries, BlockEditing {
-  public BlockChangeConfirmation cancel(String owner,UUID project,UUID task,UUID id,UUID key,Function<BlockState,BlockMutation> operation) {
-    return execute(status -> {
-      // Reuse the ownership/context locks before the owner mutex and original block row.
-      detail(owner,project,task,id);
-      var prior=changeReplay(task,key);
-      if(prior.isPresent()) return new BlockChangeConfirmation(prior.get(),true);
-      jdbc.queryForList("SELECT id FROM availability_preferences WHERE owner_id=? FOR UPDATE",owner);
-      jdbc.queryForList("SELECT id FROM planned_blocks WHERE id=? FOR UPDATE",id);
-      var mutation=operation.apply(state(owner,project,task,id));
-      var next=mutation.state();
-      jdbc.update("INSERT INTO block_projections(block_id,version,status,updated_at) VALUES (?,?,?,?) ON CONFLICT(block_id) DO UPDATE SET version=excluded.version,status=excluded.status,updated_at=excluded.updated_at",id,next.version(),next.status(),java.sql.Timestamp.from(next.updatedAt()));
-      var receipt=mutation.receipt();
-      var event=mutation.event();
-      try {
-        jdbc.update("INSERT INTO block_changes(id,project_id,task_id,block_id,request_key,kind,version,occurred_at,receipt) VALUES (?,?,?,?,?,?,?,?,?::jsonb)",receipt.id(),project,task,id,key,receipt.kind(),receipt.version(),java.sql.Timestamp.from(receipt.occurredAt()),json.writeValueAsString(receipt));
-        jdbc.update("INSERT INTO outbox_events(event_id,aggregate_id,owner_id,event_type,schema_version,occurred_at,payload) VALUES (?,?,?,?,?,?,?::jsonb)",event.eventId(),project,owner,event.type(),event.schemaVersion(),java.sql.Timestamp.from(event.occurredAt()),json.writeValueAsString(event));
-      } catch(com.fasterxml.jackson.core.JsonProcessingException error) { throw new IllegalStateException("Event serialization failed",error); }
-      return new BlockChangeConfirmation(receipt,false);
-    });
+public final class PostgresBlockStore
+    implements BlockPlanning, BlockCommit, BlockQueries, BlockEditing {
+  public BlockChangeConfirmation cancel(
+      String owner,
+      UUID project,
+      UUID task,
+      UUID id,
+      UUID key,
+      Function<BlockState, BlockMutation> operation) {
+    return execute(
+        status -> {
+          // Reuse the ownership/context locks before the owner mutex and original block row.
+          detail(owner, project, task, id);
+          var prior = changeReplay(task, key);
+          if (prior.isPresent()) return new BlockChangeConfirmation(prior.get(), true);
+          jdbc.queryForList(
+              "SELECT id FROM availability_preferences WHERE owner_id=? FOR UPDATE", owner);
+          jdbc.queryForList("SELECT id FROM planned_blocks WHERE id=? FOR UPDATE", id);
+          var mutation = operation.apply(state(owner, project, task, id));
+          var next = mutation.state();
+          jdbc.update(
+              "INSERT INTO block_projections(block_id,version,status,updated_at) VALUES (?,?,?,?) ON CONFLICT(block_id) DO UPDATE SET version=excluded.version,status=excluded.status,updated_at=excluded.updated_at",
+              id,
+              next.version(),
+              next.status(),
+              java.sql.Timestamp.from(next.updatedAt()));
+          var receipt = mutation.receipt();
+          var event = mutation.event();
+          try {
+            jdbc.update(
+                "INSERT INTO block_changes(id,project_id,task_id,block_id,request_key,kind,version,occurred_at,receipt) VALUES (?,?,?,?,?,?,?,?,?::jsonb)",
+                receipt.id(),
+                project,
+                task,
+                id,
+                key,
+                receipt.kind(),
+                receipt.version(),
+                java.sql.Timestamp.from(receipt.occurredAt()),
+                json.writeValueAsString(receipt));
+            jdbc.update(
+                "INSERT INTO outbox_events(event_id,aggregate_id,owner_id,event_type,schema_version,occurred_at,payload) VALUES (?,?,?,?,?,?,?::jsonb)",
+                event.eventId(),
+                project,
+                owner,
+                event.type(),
+                event.schemaVersion(),
+                java.sql.Timestamp.from(event.occurredAt()),
+                json.writeValueAsString(event));
+          } catch (com.fasterxml.jackson.core.JsonProcessingException error) {
+            throw new IllegalStateException("Event serialization failed", error);
+          }
+          return new BlockChangeConfirmation(receipt, false);
+        });
   }
-  private Optional<BlockChangeReceipt> changeReplay(UUID task,UUID key) {
-    return jdbc.query("SELECT receipt::text FROM block_changes WHERE task_id=? AND request_key=?", (row,n) -> {
-      try { return json.readValue(row.getString(1),BlockChangeReceipt.class); }
-      catch(com.fasterxml.jackson.core.JsonProcessingException error) { throw new IllegalStateException("Stored receipt is invalid",error); }
-    },task,key).stream().findFirst();
+
+  private Optional<BlockChangeReceipt> changeReplay(UUID task, UUID key) {
+    return jdbc
+        .query(
+            "SELECT receipt::text FROM block_changes WHERE task_id=? AND request_key=?",
+            (row, n) -> {
+              try {
+                return json.readValue(row.getString(1), BlockChangeReceipt.class);
+              } catch (com.fasterxml.jackson.core.JsonProcessingException error) {
+                throw new IllegalStateException("Stored receipt is invalid", error);
+              }
+            },
+            task,
+            key)
+        .stream()
+        .findFirst();
   }
+
   public BlockState state(String owner, UUID project, UUID task, UUID id) {
-    return execute(status -> {
-      var block = detail(owner,project,task,id);
-      return jdbc.query("""
+    return execute(
+        status -> {
+          var block = detail(owner, project, task, id);
+          return jdbc
+              .query(
+                  """
           SELECT b.id,b.project_id,b.task_id,b.objective,b.allow_over_budget,b.created_at,
                  coalesce(p.start_local,b.start_local) AS start_local,
                  coalesce(p.end_local,b.end_local) AS end_local,
@@ -51,10 +100,20 @@ public final class PostgresBlockStore implements BlockPlanning, BlockCommit, Blo
                  coalesce(p.duration_minutes,b.duration_minutes) AS duration_minutes,
                  p.version,p.status,p.updated_at
           FROM planned_blocks b JOIN block_projections p ON p.block_id=b.id WHERE b.id=?
-          """, (row,n) -> new BlockState(MAPPER.mapRow(row,n),row.getLong("version"),row.getString("status"),row.getTimestamp("updated_at").toInstant()),id)
-        .stream().findFirst().orElseGet(() -> BlockState.initial(block));
-    });
+          """,
+                  (row, n) ->
+                      new BlockState(
+                          MAPPER.mapRow(row, n),
+                          row.getLong("version"),
+                          row.getString("status"),
+                          row.getTimestamp("updated_at").toInstant()),
+                  id)
+              .stream()
+              .findFirst()
+              .orElseGet(() -> BlockState.initial(block));
+        });
   }
+
   private final JdbcTemplate jdbc;
   private final TransactionTemplate transaction;
   private final PostgresAvailabilityStore availability;

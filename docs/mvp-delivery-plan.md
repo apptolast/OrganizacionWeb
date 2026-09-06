@@ -39,6 +39,8 @@ Para el conjunto del roadmap, la orientación anterior de 1–3 semanas es de ba
 
 El usuario detuvo Claude Code y autorizó a Codex a resolver y fusionar. Ya no se espera una confirmación externa de reparto. Los agentes internos mantienen propiedad por archivo y revisión independiente.
 
+Actualización comprobada durante la sesión: PR1, PR2 y PR4 fueron fusionadas desde otra sesión antes del cierre de sus verificaciones; PR3 está cerrada y su rama conservada. La consulta f2e4b9 registra main77c7c1d. Por tanto, la secuencia anterior queda como criterio de integración previsto, no como una afirmación de que esas puertas se cumplieron. Los checkpoints fusionados siguen incompletos. Codex continúa sus correcciones en ramas nuevas y verificará el conjunto antes de declarar Replanificar terminada o desplegar.
+
 ## Qué significa funcional para esta entrega
 
 Todos los recorridos incluidos en el MVP deben funcionar contra el backend y la base de datos reales: persistencia tras reinicio, acceso privado, recuperación de errores, planificación separada del tiempo trabajado y ausencia de duplicados al reintentar. Deben pasar los contratos aprobados, revisión, pruebas y umbral de mutación, además de los criterios responsive y de accesibilidad documentados. El despliegue debe comprobarse en el servidor con configuración de secretos, HTTPS y procedimiento de respaldo/restauración verificado.

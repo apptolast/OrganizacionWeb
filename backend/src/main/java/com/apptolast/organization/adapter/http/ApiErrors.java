@@ -16,6 +16,7 @@ public final class ApiErrors {
         .contentType(MediaType.APPLICATION_PROBLEM_JSON)
         .body(problem(404, "BLOCK_NOT_FOUND", "No se ha encontrado el bloque."));
   }
+
   @ExceptionHandler(com.apptolast.organization.application.StorageUnavailableException.class)
   ResponseEntity<Map<String, Object>> storage() {
     return ResponseEntity.status(503)

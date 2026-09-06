@@ -16,73 +16,6 @@ public final class BlockController {
   private final ObjectMapper json;
   private final com.apptolast.organization.application.ReadBlocksUseCase read;
 
-  @ExceptionHandler(com.apptolast.organization.application.BlockOverlapException.class)
-  org.springframework.http.ResponseEntity<Map<String, Object>> overlap(
-      com.apptolast.organization.application.BlockOverlapException error) {
-    var conflict = error.conflict();
-    var body =
-        ApiErrors.problem(
-            409, "BLOCK_OVERLAP", "El intervalo coincide con otro bloque planificado.");
-    body.put(
-        "conflict",
-        Map.of(
-            "id", conflict.id(), "projectId", conflict.projectId(), "taskId", conflict.taskId()));
-    return org.springframework.http.ResponseEntity.status(409)
-        .contentType(org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON)
-        .body(body);
-  }
-
-  @ExceptionHandler(com.apptolast.organization.application.BlockBudgetExceededException.class)
-  org.springframework.http.ResponseEntity<Map<String, Object>> budget(
-      com.apptolast.organization.application.BlockBudgetExceededException error) {
-    var body =
-        ApiErrors.problem(
-            409,
-            "BUDGET_EXCEEDED",
-            "Revisa el presupuesto y confirma si quieres superar su límite.");
-    body.put("budgetZoneId", error.budgetZoneId());
-    body.put("days", error.days());
-    return org.springframework.http.ResponseEntity.status(409)
-        .contentType(org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON)
-        .body(body);
-  }
-
-  @ExceptionHandler(BlockOffsetException.class)
-  org.springframework.http.ResponseEntity<Map<String, Object>> offsets(BlockOffsetException error) {
-    var body = ApiErrors.problem(400, "VALIDATION_ERROR", error.getMessage());
-    body.put("errors", List.of(error.error()));
-    body.put(
-        "validOffsets",
-        Map.of(
-            error.error().field(), error.validOffsets().stream().map(ZoneOffset::getId).toList()));
-    return org.springframework.http.ResponseEntity.badRequest()
-        .contentType(org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON)
-        .body(body);
-  }
-
-  @ExceptionHandler({
-    com.apptolast.organization.application.AvailabilityRequiredException.class,
-    com.apptolast.organization.application.TaskCompletedException.class,
-    com.apptolast.organization.application.AvailabilityZoneUnavailableException.class
-  })
-  org.springframework.http.ResponseEntity<Map<String, Object>> unavailable(RuntimeException error) {
-    String code;
-    String message;
-    if (error instanceof com.apptolast.organization.application.AvailabilityRequiredException) {
-      code = "AVAILABILITY_REQUIRED";
-      message = "Configura tu disponibilidad antes de planificar.";
-    } else if (error instanceof com.apptolast.organization.application.TaskCompletedException) {
-      code = "TASK_COMPLETED";
-      message = "Reabre la tarea antes de planificar un bloque.";
-    } else {
-      code = "AVAILABILITY_ZONE_UNAVAILABLE";
-      message = "Actualiza la zona de tu disponibilidad antes de planificar.";
-    }
-    return org.springframework.http.ResponseEntity.status(409)
-        .contentType(org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON)
-        .body(ApiErrors.problem(409, code, message));
-  }
-
   public record PageResponse(List<BlockResponse> items, String nextCursor) {}
 
   @GetMapping
@@ -124,37 +57,8 @@ public final class BlockController {
   }
 
   private BlockPosition cursor(String value, UUID project, UUID task) {
-    try {
-      if (value == null || !value.matches("[A-Za-z0-9_-]+"))
-        throw invalid("cursor", "INVALID_VALUE");
-      var bytes = Base64.getUrlDecoder().decode(value);
-      if (!Base64.getUrlEncoder().withoutPadding().encodeToString(bytes).equals(value))
-        throw invalid("cursor", "INVALID_VALUE");
-      var body =
-          json.reader()
-              .with(
-                  com.fasterxml.jackson.databind.DeserializationFeature
-                      .FAIL_ON_READING_DUP_TREE_KEY)
-              .with(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
-              .readTree(bytes);
-      if (body == null || !body.isObject() || body.size() != 5)
-        throw invalid("cursor", "INVALID_VALUE");
-      for (var field : List.of("collection", "projectId", "taskId", "createdAt", "id"))
-        if (!body.has(field) || !body.get(field).isTextual())
-          throw invalid("cursor", "INVALID_VALUE");
-      if (!body.get("collection").textValue().equals("blocks")
-          || !body.get("projectId").textValue().equals(project.toString())
-          || !body.get("taskId").textValue().equals(task.toString()))
-        throw invalid("cursor", "INVALID_VALUE");
-      var timestamp = body.get("createdAt").textValue();
-      var time = Instant.parse(timestamp);
-      var year = time.atOffset(ZoneOffset.UTC).getYear();
-      if (!timestamp.endsWith("Z") || time.getNano() % 1000 != 0 || year < 1 || year > 9999)
-        throw invalid("cursor", "INVALID_VALUE");
-      return new BlockPosition(time, identifier(body.get("id").textValue(), "cursor"));
-    } catch (Exception error) {
-      throw invalid("cursor", "INVALID_VALUE");
-    }
+    var position = BlockCursor.decode(json, value, project, task, "blocks", "createdAt");
+    return new BlockPosition(position.time(), position.id());
   }
 
   public BlockController(
@@ -344,7 +248,7 @@ public final class BlockController {
         allowOverBudget);
   }
 
-  private static AvailabilityRevision revision(List<String> values) {
+  static AvailabilityRevision revision(List<String> values) {
     if (values.size() != 1
         || !values
             .getFirst()
@@ -384,7 +288,7 @@ public final class BlockController {
     return UUID.fromString(value);
   }
 
-  private static ZoneOffset offset(
+  static ZoneOffset offset(
       com.fasterxml.jackson.databind.JsonNode body, String field, boolean nullable) {
     var value = string(body, field, nullable);
     if (value == null) return null;
@@ -397,7 +301,7 @@ public final class BlockController {
     }
   }
 
-  private static LocalDateTime local(com.fasterxml.jackson.databind.JsonNode body, String field) {
+  static LocalDateTime local(com.fasterxml.jackson.databind.JsonNode body, String field) {
     var value = string(body, field, false);
     if (!value.matches("[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}"))
       throw invalid(field, "INVALID_FORMAT");
@@ -408,7 +312,7 @@ public final class BlockController {
     }
   }
 
-  private static String string(
+  static String string(
       com.fasterxml.jackson.databind.JsonNode body, String field, boolean nullable) {
     var value = body.get(field);
     if (value == null || (value.isNull() && !nullable)) throw invalid(field, "REQUIRED");

@@ -34,7 +34,15 @@ public final class PostgresTodayQueries implements TodayQueries {
             var day = window.apply(availability.find(owner));
             var items =
                 jdbc.query(
-                    "SELECT b.*,p.name AS project_name,t.title AS task_title FROM planned_blocks b JOIN projects p ON p.id=b.project_id JOIN tasks t ON t.project_id=b.project_id AND t.id=b.task_id WHERE p.owner_id=? AND b.start_at<? AND b.end_at>? ORDER BY b.start_at,b.id",
+                    "SELECT "
+                        + PostgresBlockStore.CURRENT_COLUMNS
+                        + ",owner_project.name AS project_name,t.title AS task_title FROM"
+                        + " planned_blocks b LEFT JOIN block_projections p ON p.block_id=b.id JOIN"
+                        + " projects owner_project ON owner_project.id=b.project_id JOIN tasks t ON"
+                        + " t.project_id=b.project_id AND t.id=b.task_id WHERE"
+                        + " owner_project.owner_id=? AND coalesce(p.status,'planned')='planned' AND"
+                        + " coalesce(p.start_at,b.start_at)<? AND coalesce(p.end_at,b.end_at)>?"
+                        + " ORDER BY coalesce(p.start_at,b.start_at),b.id",
                     (row, n) ->
                         new TodayItem(
                             PostgresBlockStore.MAPPER.mapRow(row, n),

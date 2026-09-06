@@ -9,6 +9,20 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  com.apptolast.organization.application.ReadBlockChangesUseCase readBlockChanges(
+      com.apptolast.organization.application.BlockChangeQueries queries) {
+    return new com.apptolast.organization.application.ReadBlockChanges(queries);
+  }
+
+  @Bean
+  com.apptolast.organization.application.MoveBlock moveBlock(
+      com.apptolast.organization.application.BlockMoving store,
+      com.apptolast.organization.application.ZoneCatalog catalog,
+      Clock clock) {
+    return new com.apptolast.organization.application.MoveBlock(store, catalog, clock);
+  }
+
+  @Bean
   com.apptolast.organization.application.CancelBlock cancelBlock(
       com.apptolast.organization.application.BlockEditing store, Clock clock) {
     return new com.apptolast.organization.application.CancelBlock(store, clock);

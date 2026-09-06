@@ -25,10 +25,12 @@ public record OutboxMessage(
             && !"TaskCreated.v1".equals(type)
             && !"SubtaskCreated.v1".equals(type)
             && !"TaskStatusChanged.v1".equals(type)
-            && !"BlockPlanned.v1".equals(type))
+            && !"BlockPlanned.v1".equals(type)
+            && !"BlockChanged.v1".equals(type))
         || schemaVersion != 1) return "UNSUPPORTED_EVENT";
     boolean taskStatusChanged = "TaskStatusChanged.v1".equals(type);
     boolean blockPlanned = "BlockPlanned.v1".equals(type);
+    boolean blockChanged = "BlockChanged.v1".equals(type);
     boolean statusChanged = "ProjectStatusChanged.v1".equals(type);
     boolean subtaskCreated = "SubtaskCreated.v1".equals(type);
     boolean taskCreated = "TaskCreated.v1".equals(type) || subtaskCreated;
@@ -84,6 +86,22 @@ public record OutboxMessage(
               "endAt",
               "zoneId",
               "durationMinutes");
+    if (blockChanged)
+      expected =
+          java.util.Set.of(
+              "eventId",
+              "aggregateId",
+              "ownerId",
+              "occurredAt",
+              "schemaVersion",
+              "type",
+              "changeId",
+              "blockId",
+              "taskId",
+              "kind",
+              "revision",
+              "before",
+              "after");
     if (!expected.equals(payload.keySet())
         || !eventId.toString().equals(payload.get("eventId"))
         || !aggregateId.toString().equals(payload.get("aggregateId"))
@@ -95,6 +113,26 @@ public record OutboxMessage(
       if (!occurredAt.equals(Instant.parse(timestamp))) return "INVALID_EVENT";
     } catch (java.time.format.DateTimeParseException error) {
       return "INVALID_EVENT";
+    }
+    if (blockChanged) {
+      for (var field : java.util.List.of("changeId", "blockId", "taskId")) {
+        if (!(payload.get(field) instanceof String id)
+            || !id.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))
+          return "INVALID_EVENT";
+      }
+      if (eventId.equals(UUID.fromString((String) payload.get("changeId")))) return "INVALID_EVENT";
+      var revision = payload.get("revision");
+      if (!(revision instanceof Integer || revision instanceof Long)
+          || ((Number) revision).longValue() < 1) return "INVALID_EVENT";
+      if (!(payload.get("kind") instanceof String kind)
+          || !(kind.equals("RESCHEDULED") || kind.equals("CANCELLED"))
+          || (kind.equals("CANCELLED")
+              ? payload.get("after") != null
+              : payload.get("after") == null)) return "INVALID_EVENT";
+      return validChangedInterval(payload.get("before"))
+              && (kind.equals("CANCELLED") || validChangedInterval(payload.get("after")))
+          ? null
+          : "INVALID_EVENT";
     }
     if (blockPlanned) {
       if (!(payload.get("blockId") instanceof String blockId)
@@ -151,5 +189,28 @@ public record OutboxMessage(
         || name.codePointCount(0, name.length()) > (taskCreated ? 160 : 120)
         || !name.equals(name.replaceAll("(?U)^\\s+|\\s+$", ""))) return "INVALID_EVENT";
     return null;
+  }
+
+  private static boolean validChangedInterval(Object value) {
+    if (!(value instanceof Map<?, ?> interval)
+        || !interval
+            .keySet()
+            .equals(java.util.Set.of("startAt", "endAt", "zoneId", "durationMinutes"))
+        || !(interval.get("zoneId") instanceof String zone)
+        || zone.isBlank()
+        || !(interval.get("startAt") instanceof String start)
+        || !(interval.get("endAt") instanceof String end)
+        || !(interval.get("durationMinutes") instanceof Integer minutes)) return false;
+    try {
+      new ResolvedBlockTime(
+          Instant.parse(start),
+          Instant.parse(end),
+          java.time.ZoneOffset.UTC,
+          java.time.ZoneOffset.UTC,
+          minutes);
+      return true;
+    } catch (java.time.DateTimeException | IllegalArgumentException error) {
+      return false;
+    }
   }
 }

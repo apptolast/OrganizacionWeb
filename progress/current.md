@@ -54,4 +54,24 @@ Los documentos previos de esta pista se conservan en frontend-before-sole-takeov
 
 ## Límites
 
+## Corte de integración posterior
+
+Main fc31969 tiene CI 34055744993 SUCCESS. La consulta remota 27bee7 confirma
+cero PR abiertas; el usuario confirmó que realiza las fusiones desde GitHub.
+Checkpoint backend local 81a4073: implementación y 447 pruebas focales verdes,
+con revisión independiente documentada en review_reschedule_backend_integration.md.
+El merge de main está en resolución; se conservan frontend de main y backend
+validado. Ningún snapshot Java aislado se integrará como paquete completo.
+
+El replay frontend corrigió la selección de columnas y comprobó los 13 mutantes
+solicitados: 11 detectados, uno equivalente por inspección y un error de
+herramienta; informe original preservado. Evidencia local 80f42be pendiente de
+incorporar. Nominal E2E y recuperación tras reinicio real pasan en el árbol
+aislado. UX tiene 31 anchuras y ampliaciones de texto y zoom nativo al 200 %;
+faltan controles condicionales, otros motores y cierre del dictamen.
+
+Siguiente puerta: incorporar pruebas E2E y soporte PIT, init común y mutación
+backend. Feature13 permanece in_progress. La propuesta14 sólo prepara decisiones;
+no inicia otra implementación. No hay despliegue productivo acreditado.
+
 No leer ni limpiar .e2e-work/read-review*, frontend/.stryker-tmp-availability-replay ni progress/proposal_schedule_block_time.md; tampoco borrar ascendientes. No force-push, limpieza global o despliegue supuesto. Mantener fallos históricos explícitos y cada evidencia vinculada a su corte.

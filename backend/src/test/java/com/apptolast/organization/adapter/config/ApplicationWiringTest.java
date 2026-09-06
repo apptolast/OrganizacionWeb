@@ -49,6 +49,8 @@ class ApplicationWiringTest {
             .withBean(ZoneCatalog.class, () -> () -> Set.of("UTC"));
     for (var port :
         List.of(
+            BlockMoving.class,
+            BlockChangeQueries.class,
             BlockEditing.class,
             TodayQueries.class,
             BlockQueries.class,
@@ -70,6 +72,25 @@ class ApplicationWiringTest {
       runner = addPort(runner, port);
     }
     return runner;
+  }
+
+  @Test
+  void reschedule_s12_cancelBeanReachesItsPortInFreshContext() {
+    freshContext()
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              assertThatThrownBy(
+                      () ->
+                          context
+                              .getBean(CancelBlockUseCase.class)
+                              .cancel(
+                                  "owner", PROJECT, TASK, UUID.randomUUID(), UUID.randomUUID(), 1))
+                  .isInstanceOf(PortReached.class)
+                  .satisfies(
+                      error ->
+                          assertThat(((PortReached) error).port).isEqualTo(BlockEditing.class));
+            });
   }
 
   @Test

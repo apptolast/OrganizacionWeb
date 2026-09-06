@@ -11,8 +11,8 @@ El corte de entrega corresponde a las funcionalidades 1–18 del roadmap. Las fu
 ## Estado comprobado
 
 - Funcionalidades 1–12 cerradas localmente conforme a sus dictámenes y límites registrados. Esto no equivale a despliegue productivo.
-- Funcionalidad 13, Replanificar, en desarrollo. Revisión de composición del frontend corregida y aprobada; mutación terminada con 86,70 %, cero timeouts y dos errores de herramienta registrados. La configuración de ocho procesos reproduce la misma clasificación y reduce esta campaña de 79 a 44 minutos. Movimiento, cancelación, actualización de Hoy y reversión de transacciones pasan pruebas con PostgreSQL; migración aditiva revisada con 59 pruebas verdes. Siguen pendientes el cierre de concurrencia, las consultas HTTP de recibos, la integración final y el recorrido completo en navegador.
-- CI completo de `main` verde sobre `ae364e5`, ejecución `34047746896`, con 91 pruebas E2E aprobadas. Es regresión del conjunto integrado; no acredita los escenarios nuevos de Replanificar aún en desarrollo.
+- Funcionalidad 13, Replanificar, en integración. Backend congelado con 447 pruebas focales verdes: movimiento, cancelación, recibos, concurrencia, presupuesto y atomicidad. Frontend revisado y mutación global 86,70 %, con dos errores de herramienta registrados; refuerzos posteriores y replay focal documentados. Pasan en el árbol aislado el recorrido nominal, recuperación tras reinicio real, geometría en 31 anchuras, texto y zoom nativo al 200 %, y selección DST con consentimiento de exceso por teclado. Pendientes: init del corte común, mutación backend, regresión E2E integrada y cierre UX en otros motores.
+- CI completo de `main` verde sobre `fc31969`, ejecución `34055744993`. El corte anterior `ae364e5` documentó 91 pruebas E2E. Ninguno acredita los paquetes backend y E2E13 que todavía se están integrando localmente.
 - Funcionalidades 14–18 pendientes de contrato detallado e implementación.
 - Ningún despliegue productivo acreditado todavía.
 
@@ -39,6 +39,7 @@ Para el conjunto del roadmap, la orientación anterior de 1–3 semanas es de ba
 - PR3: cerrada como referencia alternativa incompleta; rama y commit `d0e83bb` conservados.
 - PR5: frontend completado y fusionado por el usuario en `53ed311`.
 - Correcciones posteriores de formato y fixtures E2E integradas en `ae364e5`; CI completo verde sobre ese commit.
+- Consulta remota posterior `27bee7`: cero PR abiertas y main `fc31969`. La integración local `1332eb7` conserva backend revisado y frontend de main; incorpora únicamente los paquetes E2E aprobados, sin fusionar snapshots Java provisionales.
 
 El usuario confirmó que él realiza squash and merge desde GitHub y que Claude está detenido. Las cancelaciones de CI anteriores coincidían con nuevas fusiones; ya no hay una duda de coordinación pendiente. Los agentes internos mantienen propiedad por archivo y revisión independiente. Las fusiones no sustituyen el cierre funcional: se sigue desarrollando y verificando el backend de Replanificar antes de dar por terminada la funcionalidad 13 o desplegar.
 

@@ -1,12 +1,12 @@
 # Preparación E2E13 — 2026-09-06
 
-Plan de integración, **sin pruebas ejecutadas ni archivos E2E modificados**. Requiere publicación del backend13 de Claude Code, integración del panel y cesión del turno E2E. No se fabrican respuestas felices para adelantar esa dependencia.
+Plan de integración, **sin atribuir pruebas ejecutadas a este documento**. Claude Code está detenido; el núcleo backend13 lo completan autores Codex en su árbol aislado. El panel ya está integrado y el turno E2E se ha cedido en `OrganizacionWeb-reschedule-e2e`, corte `407a534`. Falta integrar el backend completo en ese árbol. No se fabrican respuestas felices para adelantar esa dependencia; la evidencia nueva se registrará en `progress/tdd_reschedule_e2e.md`.
 
 ## Reutilización concreta
 
 - `e2e/support/authenticated-test.mjs`: sesión automática y `request` del mismo contexto del navegador. `scripts/session-client.mjs`: `csrfHeaders` y `loginSession`, también tras reinicio. No duplicar login ni CSRF.
 - `e2e/support/projects.mjs`: `create` por API y `sql` limitado al proyecto Docker E2E. `support/tasks.mjs`: `saveTask` por API. Crear el bloque por el editor/API reales; SQL sirve para comprobar persistencia, no para fabricar recibos de éxito.
-- `schedule-block.spec.mjs:39,56`: `configure` obtiene la revisión real de disponibilidad y `openEditor` prepara creación con locales UTC. Son funciones locales, **no exports reutilizables todavía**: si se comparten, extraer sólo estas pequeñas funciones durante el turno autorizado, conservando el test11. Usar fechas UTC futuras ya empleadas y el fixture Madrid2030 de `:388` para DST; no añadir otro resolvedor TZDB.
+- `support/blocks.mjs`: `configure` obtiene la revisión real de disponibilidad y `openEditor` prepara creación con locales UTC. Se extrajeron las dos funciones durante el turno autorizado, conservando los oráculos11; el recorrido heredado que usa ambas pasó551ece. Evidencia en `tdd_reschedule_e2e.md`. Usar fechas UTC futuras ya empleadas y el fixture Madrid2030 existente para DST; no añadir otro resolvedor TZDB.
 - `support/today.mjs:seedAgenda`: reserva real y alineación SQL con `serverNow` para comprobar Hoy. Su UPDATE temporal es preparación explícita del fixture, no prueba de movimiento. No usar ese UPDATE como sustituto del endpoint13 ni asumir que también actualiza proyecciones nuevas.
 - `scripts/e2e.mjs`: stack API/web/PostgreSQL aislado, readiness, variables del fixture y retirada propia. Puerto18080 compartido: ejecuciones seriales. No requiere runner nuevo.
 
@@ -27,7 +27,7 @@ Tras crear el archivo autorizado: `node scripts/e2e.mjs e2e/reschedule.spec.mjs`
 
 Sólo existe `playwright.config.mjs` en raíz. Para los mismos casos: `--browser firefox` / `--browser webkit` mediante la CLI existente cuando esos navegadores estén instalados. No inventar una configuración cross-browser inexistente. El zoom nativo tiene patrón separado en `today-native-zoom.spec.mjs`, con Chromium headful, extensión y comprobación `getZoom`/DPR; Linux necesita DISPLAY/Xvfb. No reemplazarlo por CSS zoom ni atribuir el zoom de Hoy al panel13.
 
-Antes del primer run, revisar el esquema publicado: los TRUNCATE de11/12 no incluyen las futuras FK/proyecciones/recibos13. Ajustar fixtures según los nombres reales; no adivinar tablas ni usar CASCADE indiscriminado. Las queries SQL de comprobación deben distinguir creación inmutable, estado vigente y recibos históricos. Faltan backend13 disponible, selectores finales del panel y oráculos de recibos/eventos/cursor integrados.
+Las once sentencias TRUNCATE heredadas ya incluyen explícitamente `block_changes, block_projections` en main `ae364e5`; la corrección tiene regresión real 91/91 documentada aparte en `progress/tdd_e2e_schema_fixture.md`. El fixture nuevo conservará esa lista explícita, sin CASCADE. Las queries SQL de comprobación deben distinguir creación inmutable, estado vigente y recibos históricos. Falta integrar el backend13 completo y ejecutar los nuevos oráculos de recibos/eventos/cursor.
 
 @s40 exige las **30 filas** de `docs/ux-requirements.md`, con estructura documental ya usada en `progress/tdd_today_e2e.md`: criterio del nuevo recorrido, evidencia y resultado/límite. Medir320–2560 y bordes, 44px, teclado/foco, texto ampliado, feedback<400ms, axe y cada motor por separado. Los helpers de geometría actuales no están exportados: extraer sólo lo que vaya a compartir el nuevo test y ampliar la selección a input/select y áreas de labels pertinentes. No heredar automáticamente los PASS anteriores ni declarar dispositivos físicos, teclado virtual, lector real o facilidad de uso humana verificados por emulación.
 

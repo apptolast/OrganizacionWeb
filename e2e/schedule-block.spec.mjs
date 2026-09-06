@@ -1,19 +1,11 @@
+import { restartBackend } from "./support/backend.mjs";
+import { configure, openEditor } from "./support/blocks.mjs";
 import { test, expect } from "./support/authenticated-test.mjs";
 import { create, sql } from "./support/projects.mjs";
 import { saveTask } from "./support/tasks.mjs";
-import { csrfHeaders, loginSession } from "../scripts/session-client.mjs";
+import { csrfHeaders } from "../scripts/session-client.mjs";
 import { mkdir, writeFile } from "node:fs/promises";
-import { execFileSync } from "node:child_process";
 
-const days = [
-  "MONDAY",
-  "TUESDAY",
-  "WEDNESDAY",
-  "THURSDAY",
-  "FRIDAY",
-  "SATURDAY",
-  "SUNDAY",
-];
 const blocksPath = (project, task) =>
   `/api/v1/projects/${project.id}/tasks/${task.id}/blocks`;
 const taskRoute = (project, task) =>
@@ -35,43 +27,6 @@ test.beforeEach(() =>
     "TRUNCATE block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
   ),
 );
-
-async function configure(request, minutes = 120, zoneId = "UTC") {
-  const current = await request.get("/api/v1/me/availability");
-  expect(current.status()).toBe(200);
-  const response = await request.put("/api/v1/me/availability", {
-    headers: {
-      ...(await csrfHeaders(request)),
-      "If-Match": current.headers().etag,
-    },
-    data: {
-      zoneId,
-      dailyMinutes: Object.fromEntries(days.map((day) => [day, minutes])),
-    },
-  });
-  expect(response.status()).toBe(200);
-  return response.headers().etag;
-}
-
-async function openEditor(
-  page,
-  project,
-  task,
-  objective = "Preparar un borrador revisable 🧭",
-  startLocal = "2030-01-07T10:00",
-  endLocal = "2030-01-07T11:00",
-) {
-  await page.goto(taskRoute(project, task));
-  await page
-    .getByRole("button", { name: "Planificar bloque", exact: true })
-    .click();
-  await expect(page.getByLabel("Zona del bloque", { exact: true })).toHaveValue(
-    "UTC",
-  );
-  await page.getByLabel("Objetivo del bloque", { exact: true }).fill(objective);
-  await page.getByLabel("Inicio del bloque", { exact: true }).fill(startLocal);
-  await page.getByLabel("Fin del bloque", { exact: true }).fill(endLocal);
-}
 
 async function capture(page, state) {
   const engine = page.context().browser().browserType().name();
@@ -740,34 +695,6 @@ test("schedule_block: lost acknowledgement recovers persisted block after real b
   request,
 }) => {
   test.setTimeout(90_000);
-  const fixture = process.env.E2E_COMPOSE_PROJECT;
-  if (
-    !/^organizationweb-e2e-\d+$/.test(fixture ?? "") ||
-    !process.env.E2E_ENV_FILE
-  )
-    throw new Error("Restart requires the isolated E2E fixture");
-  const compose = (...args) =>
-    execFileSync(
-      "docker",
-      [
-        "compose",
-        "--env-file",
-        process.env.E2E_ENV_FILE,
-        "-p",
-        fixture,
-        "-f",
-        "docker-compose.yml",
-        ...args,
-      ],
-      { encoding: "utf8", timeout: 30_000 },
-    ).trim();
-  const inspect = (id) =>
-    JSON.parse(
-      execFileSync("docker", ["inspect", id], {
-        encoding: "utf8",
-        timeout: 10_000,
-      }),
-    )[0];
   await configure(request);
   const project = await create(
     request,
@@ -812,37 +739,15 @@ test("schedule_block: lost acknowledgement recovers persisted block after real b
       "SELECT count(*) FROM outbox_events WHERE event_type='BlockPlanned.v1'",
     ),
   ).toBe("1");
-  const backendId = compose("ps", "-q", "backend");
-  const databaseId = compose("ps", "-q", "postgres");
-  const beforeBackend = inspect(backendId);
-  const beforeDatabase = inspect(databaseId);
-  compose("restart", "backend");
-  await expect
-    .poll(
-      async () => {
-        try {
-          return (
-            await request.get("/api/session", { timeout: 2000 })
-          ).status();
-        } catch {
-          return 0;
-        }
-      },
-      { timeout: 45_000, intervals: [500, 1000] },
-    )
-    .toBe(200);
-  const afterBackend = inspect(backendId);
-  const afterDatabase = inspect(databaseId);
-  expect(afterBackend.State.Running).toBe(true);
-  expect(afterBackend.State.StartedAt).not.toBe(beforeBackend.State.StartedAt);
-  expect(afterDatabase.State.StartedAt).toBe(beforeDatabase.State.StartedAt);
-  expect(afterDatabase.Mounts).toEqual(beforeDatabase.Mounts);
-  const session = await (await request.get("/api/session")).json();
-  if (!session.authenticated)
-    await loginSession(request, {
-      username: "e2e-user",
-      password: "e2e-only-password",
-    });
+  const {
+    fixture,
+    backendId,
+    databaseId,
+    beforeBackend,
+    afterBackend,
+    afterDatabase,
+    session,
+  } = await restartBackend(request);
   const recoveryResponse = page.waitForResponse((response) =>
     response.url().endsWith(`${endpoint}/by-request/${key}`),
   );

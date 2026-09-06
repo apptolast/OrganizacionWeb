@@ -499,3 +499,39 @@ test("today final selects only the two unresolved exact identities", () => {
     );
   }
 });
+
+test("reschedule backend invokes only its fixed PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "reschedule-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=reschedule"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
+test("reschedule backend rejects shell suffix before execution", () => {
+  const { calls, project } = capture();
+  assert.throws(
+    () => project("mutate", "reschedule-backend;echo unsafe"),
+    /Invalid target/,
+  );
+  assert.deepEqual(calls, []);
+});
+
+test("reschedule backend rejects extra Gradle flags before execution", () => {
+  const { calls, project } = capture();
+  assert.throws(
+    () => project("mutate", "reschedule-backend -PmutationScope=other"),
+    /Invalid target/,
+  );
+  assert.deepEqual(calls, []);
+});
+
+test("reschedule backend rejects non-mutation task before execution", () => {
+  const { calls, project } = capture();
+  assert.throws(() => project("test", "reschedule-backend"), /Invalid target/);
+  assert.deepEqual(calls, []);
+});

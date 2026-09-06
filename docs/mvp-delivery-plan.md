@@ -12,8 +12,8 @@ El corte de entrega corresponde a las funcionalidades 1–18 del roadmap. Las fu
 
 - Funcionalidades 1–13 cerradas conforme a sus dictámenes y límites registrados. Esto no equivale a despliegue productivo.
 - Replanificar: init integrado con1617 pruebas backend,1498 frontend y22 scripts verdes;98 E2E y9 comprobaciones del publicador aprobadas. Mutación backend98,9446 % (750/758), cero errores/timeouts; frontend86,70 % global con dos errores de herramienta registrados. Recuperación tras reinicio, concurrencia, privacidad, presupuesto y UX cuentan con dictámenes finales; los residuales y límites físicos se conservan explícitos.
-- CI de la PR6 verde sobre `1c467e5`, ejecución `34058642729`. Main anterior `fc31969` también tenía CI verde. Dictamen final en `progress/judge_reschedule_final.md` autoriza cierre e integración.
-- Funcionalidades 14–18 pendientes de contrato detallado e implementación.
+- PR6 fusionada por el usuario en `9623990`; evidencia de cierre publicada en main `d997421`, con CI `34060054467` SUCCESS. Dictamen final en `progress/judge_reschedule_final.md`.
+- Funcionalidad 14 en implementación tras aprobar especificación y contrato de 42 escenarios; funcionalidades 15–18 pendientes de contrato detallado e implementación.
 - Ningún despliegue productivo acreditado todavía.
 
 ## Trabajo restante y estimación
@@ -40,7 +40,7 @@ Para el conjunto del roadmap, la orientación anterior de 1–3 semanas es de ba
 - PR5: frontend completado y fusionado por el usuario en `53ed311`.
 - Correcciones posteriores de formato y fixtures E2E integradas en `ae364e5`; CI completo verde sobre ese commit.
 - Consulta remota posterior `27bee7`: cero PR abiertas y main `fc31969`. La integración local `1332eb7` conserva backend revisado y frontend de main; incorpora únicamente los paquetes E2E aprobados, sin fusionar snapshots Java provisionales.
-- PR6 reúne la integración final de Replanificar. Código validado `1c467e5`, CI34058642729 SUCCESS y dictamen final aprobado después de la campaña PIT. Los metadatos de cierre y la evidencia acompañan la entrega.
+- PR6 integrada mediante squash por el usuario en `9623990`. El cierre documental se publicó en `d997421`; CI34060054467 SUCCESS. La última consulta posterior confirmó cero PR abiertas. Feature14 continúa en una rama nueva desde ese main validado.
 
 El usuario confirmó que él realiza squash and merge desde GitHub y que Claude está detenido. Las cancelaciones de CI anteriores coincidían con nuevas fusiones; ya no hay una duda de coordinación pendiente. Los agentes internos mantienen propiedad por archivo y revisión independiente. Replanificar queda cerrada por sus pruebas y dictámenes, no por el mero hecho de fusionar una rama. El despliegue del MVP sigue pendiente del ciclo de trabajo real y la preparación del servidor.
 

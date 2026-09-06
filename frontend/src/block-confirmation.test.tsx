@@ -246,26 +246,22 @@ it.each([401, 404])(
   async (status) => {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(
-          Response.json(
-            {
-              type:
-                "urn:organization:problem:" +
-                (status === 401
-                  ? "authentication_required"
-                  : "resource_not_found"),
-              title: "No disponible",
-              status,
-              code:
-                status === 401
-                  ? "AUTHENTICATION_REQUIRED"
-                  : "RESOURCE_NOT_FOUND",
-            },
-            { status },
-          ),
+      vi.fn().mockResolvedValue(
+        Response.json(
+          {
+            type:
+              "urn:organization:problem:" +
+              (status === 401
+                ? "authentication_required"
+                : "resource_not_found"),
+            title: "No disponible",
+            status,
+            code:
+              status === 401 ? "AUTHENTICATION_REQUIRED" : "RESOURCE_NOT_FOUND",
+          },
+          { status },
         ),
+      ),
     );
     render(
       <BlockConfirmation block={block} onAccessFailure={onAccessFailure} />,
@@ -359,22 +355,20 @@ it.each(["RESCHEDULED", "CANCELLED"] as const)(
             endAt: "2030-01-08T16:00:00Z",
             durationMinutes: 120,
           };
-    const fetch = vi
-      .fn()
-      .mockResolvedValue(
-        Response.json(
-          {
-            block: current,
-            status: "cancelled",
-            updatedAt: receipt.occurredAt,
+    const fetch = vi.fn().mockResolvedValue(
+      Response.json(
+        {
+          block: current,
+          status: "cancelled",
+          updatedAt: receipt.occurredAt,
+        },
+        {
+          headers: {
+            ETag: `"block:${block.id}:${kind === "CANCELLED" ? 2 : 4}"`,
           },
-          {
-            headers: {
-              ETag: `"block:${block.id}:${kind === "CANCELLED" ? 2 : 4}"`,
-            },
-          },
-        ),
-      );
+        },
+      ),
+    );
     vi.stubGlobal("fetch", fetch);
     render(
       <BlockConfirmation

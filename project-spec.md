@@ -328,9 +328,9 @@ La web comprueba sesión antes de montar datos privados, anuncia espera, bloquea
 
 Nginx sirve documentos/assets públicos y protege datos mediante la API; retirar auth_request de la SPA. Migrar scripts y E2E al login real usando APIRequestContext ya instalado para cookies. Conservar pruebas de propietarios preparadas mediante soporte de Spring y probar seguridad real por separado. Regresión de proyectos/eventos y matriz UX completa, con zoom nativo y límites explícitos de dispositivos, antes de cerrar esta feature. Sin registro público, recuperación por correo, SSO ni cuentas adicionales en este corte.
 
-## Feature 7: crear y recuperar tareas de proyecto — preparación
+## Feature 7: crear y recuperar tareas de proyecto — contrato aprobado
 
-Esta sección prepara el siguiente corte bajo la autorización global. Authentication sigue siendo la única implementación activa hasta su cierre. El borrador está en progress/contract_create_task_draft.feature; no se activa por estar escrito aquí.
+Authentication está cerrada localmente y publicada en 0913d75. El contrato de la siguiente feature está en features/create_task.feature, revisado por el coordinador y aprobado bajo la autorización global del usuario. Su implementación se activa de forma exclusiva tras este contrato.
 
 Una tarea es una unidad pequeña y verificable dentro de un proyecto propio. Campos de entrada: title obligatorio de 1 a 160 puntos de código tras recortar Unicode White_Space; completionCriterion opcional, null o ausente se normaliza a cadena vacía, máximo 2000 puntos de código conservando el contenido; estimatedMinutes opcional, null o ausente se conserva como null y cualquier valor presente debe ser entero entre 1 y 1440. La estimación no representa tiempo trabajado. El JSON es estricto: no permite campos de sistema o desconocidos, duplicados ni documentos concatenados.
 

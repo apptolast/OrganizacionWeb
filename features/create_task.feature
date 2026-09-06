@@ -1,6 +1,6 @@
-@create_task @draft
+@create_task @approved
 Feature: Guardar y recuperar tareas pequeñas dentro de un proyecto propio
-  Borrador para revisión del coordinador; no activa implementación.
+  Contrato aprobado bajo la autorización global del usuario, tras cierre local de authentication.
   Las longitudes son puntos de código Unicode. Ausente significa propiedad omitida.
   Los errores usan application/problem+json y los códigos públicos indicados.
 

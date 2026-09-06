@@ -1,5 +1,11 @@
 # Coordinación Codex / Claude Code — feature13
 
+## Instrucción vigente: Codex asume todo
+
+El6 de septiembre de2026 el usuario indicó: «he parado el claude, continua tu todo solo», y después pidió resolver las PR, fusionar y preparar estimación/plan del MVP. Esto sustituye el reparto anterior: Codex asume backend, frontend, CI e integración. Los turnos pendientes ya no requieren acuse de Claude Code. Se conservan los checkpoints como evidencia, sin mezclar implementaciones duplicadas ni descartar trabajo. La inspección remota1ad72f/67a721 muestra PR1 frontend, PR2 backend03ad92e, PR3 cliente alternativo d0e83bb y PR4 navegación607d2b6; no hay un backend nuevo publicado por Claude Code en esas ramas. Codex continuará el backend conservado, verificando su estado antes de integrarlo.
+
+Orden de resolución: verificar y fusionar corrección de navegación/CI (PR4); completar backend13 (PR2); integrar frontend13 (PR1) con pruebas reales, revisión y mutación; cerrar PR3 como referencia redundante conservando rama/commit, sin fusionar un segundo cliente. Las notas posteriores de reparto y espera quedan como historia, no como bloqueo vigente. Una PR abierta o convertida a ready no sustituye las comprobaciones de cierre.
+
 El usuario indicó a Codex el6 de septiembre de2026: «Paralelamente tanto tu como Claude sin pisaros». Se detectó trabajo simultáneo sobre reschedule al recibir706a0bc mientras Codex preparaba cf5e3e3. No se debe reemplazar la implementación del otro equipo ni forzar main.
 
 ## Reparto comunicado por Codex

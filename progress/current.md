@@ -58,3 +58,20 @@ El usuario elige separar la puerta rápida de la campaña de mutación, y subir 
 CI: `harness-ci.yml` ejecuta por push y PR init, build, E2E y publisher con `timeout-minutes:90` y grupo `concurrency` con cancelación. `harness-mutation.yml` ejecuta `harness verify` de noche y a petición, con grupo propio sin cancelación y `timeout-minutes:240`. La mutación sigue siendo obligatoria en local para cerrar cada feature según `docs/verification.md` y C7 de `CHECKPOINTS.md`; el workflow nocturno no la sustituye.
 
 Paralelismo: subir PIT a doce hilos y Stryker a ocho, aceptado sólo si el informe conserva cero timeouts y reproduce el score de una campaña controlada del mismo alcance. Pendiente hasta que cierren las pistas de TDD que escriben en esos archivos.
+
+## Reparto con Codex, confirmado el 6 de septiembre de 2026
+
+El segundo equipo no era otra sesion de Claude Code: es Codex, la sesion de ChatGPT que llevaba el proyecto antes. El usuario confirmo el reparto. Claude Code toma backend Java, PostgreSQL, HTTP y EDA con sus pruebas. Codex toma frontend React/SCSS, cliente de API y pruebas de frontend, en `codex/reschedule-frontend`. Documento unico de coordinacion: [parallel-coordination.md](parallel-coordination.md), con el acuse de recibo publicado en edc7f97.
+
+Acciones ejecutadas al aceptar el reparto:
+
+- Detenida la pista propia de cliente de API de frontend, que duplicaba el carril de Codex. Estaba verde con 213 pruebas focales.
+- Devuelto el carril de frontend limpio en `main`: `schedule-block-api.ts` restaurado y los archivos nuevos retirados del arbol de trabajo.
+- Ese corte detenido queda publicado como referencia en `claude/reschedule-frontend-api-checkpoint` (d0e83bb), simetrico al checkpoint de backend de Codex. No se fusiona.
+- Continua la pista de backend sobre el contrato d1ff609, sin interrupcion.
+- Reservadas las versiones Flyway V12 a V19 para este backend. La V12 alternativa de `codex/reschedule-backend-checkpoint` no se aplica.
+
+Aviso pendiente de arreglar, porque el usuario exige cero warnings: la CI emite la deprecacion de Node.js 20 en `gradle/actions/setup-gradle@v4` y `pnpm/action-setup@v4`. No se toca ahora para no encadenar cambios de workflow durante la coordinacion.
+
+Nota de operacion: la ejecucion de CI de 706a0bc se cancelo sola al llegar a378925. Es el grupo `concurrency` funcionando como se diseno, no un fallo.
+

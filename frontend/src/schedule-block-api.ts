@@ -275,7 +275,7 @@ export function uuid(value: unknown): value is string {
     /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(value)
   );
 }
-function sameId(value: unknown, expected: string) {
+export function sameId(value: unknown, expected: string) {
   return uuid(value) && value.toLowerCase() === expected.toLowerCase();
 }
 export function isBlock(
@@ -436,7 +436,10 @@ function availabilityTag(value: unknown) {
     );
   return Boolean(match && BigInt(match[1]) <= 9223372036854775807n);
 }
-function isPreview(value: unknown, input: BlockInput): value is BlockPreview {
+export function isPreview(
+  value: unknown,
+  input: BlockInput,
+): value is BlockPreview {
   return (
     exact(
       value,

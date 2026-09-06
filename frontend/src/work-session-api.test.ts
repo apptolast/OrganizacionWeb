@@ -5,6 +5,7 @@ import {
   startWorkSession,
   readWorkSession,
   recoverWorkSession,
+  readWorkSessionError,
 } from "./work-session-api";
 
 const receipt = {
@@ -17,6 +18,68 @@ const receipt = {
   zoneId: "Europe/Madrid",
 };
 const key = "42345678-1234-1234-1234-123456789abc";
+it("@s35 does not recognize an active conflict with an extra private field", async () => {
+  const response = Response.json(
+    {
+      type: "urn:organization:problem:work_session_already_active",
+      title: "Activa",
+      status: 409,
+      code: "WORK_SESSION_ALREADY_ACTIVE",
+      sessionId: receipt.id,
+      ownerId: "other",
+    },
+    { status: 409 },
+  );
+  await expect(readWorkSessionError(response)).resolves.toBeNull();
+  expect(response.bodyUsed).toBe(false);
+});
+it("@s31 preserves exact historical microseconds across the Unix epoch", async () => {
+  const historical = {
+    ...receipt,
+    startedAt: "1969-12-31T23:50:00.000001Z",
+    plannedEndAt: "1970-01-01T00:15:00.000001Z",
+  };
+  respond(historical);
+  await expect(
+    startWorkSession(
+      receipt.projectId.toUpperCase(),
+      receipt.taskId.toUpperCase(),
+      25,
+      key,
+    ),
+  ).resolves.toEqual(historical);
+});
+it("@s30 rejects a normalized but nonexistent calendar day", async () => {
+  respond({
+    ...receipt,
+    startedAt: "2026-02-30T10:00:00Z",
+    plannedEndAt: "2026-02-30T10:25:00Z",
+  });
+  await expect(
+    startWorkSession(receipt.projectId, receipt.taskId, 25, key),
+  ).rejects.toThrow("Inicio de trabajo inválido");
+});
+it("@s30 rejects a duration beyond 1440 with a coherent end", async () => {
+  respond({
+    ...receipt,
+    plannedMinutes: 1441,
+    plannedEndAt: "2026-09-07T10:01:00.123456Z",
+  });
+  await expect(
+    startWorkSession(receipt.projectId, receipt.taskId, 1441, key),
+  ).rejects.toThrow("Inicio de trabajo inválido");
+});
+it("@s33 recognizes a closed missing receipt problem without consuming its response", async () => {
+  const problem = {
+    type: "urn:organization:problem:work_session_not_found",
+    title: "No se ha encontrado la sesión de trabajo.",
+    status: 404,
+    code: "WORK_SESSION_NOT_FOUND",
+  };
+  const response = Response.json(problem, { status: 404 });
+  await expect(readWorkSessionError(response)).resolves.toEqual(problem);
+  expect(response.bodyUsed).toBe(false);
+});
 it("@s24 preserves the original 503 response from ID lookup", async () => {
   const response = Response.json(
     { code: "STORAGE_UNAVAILABLE" },

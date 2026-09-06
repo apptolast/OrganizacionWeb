@@ -113,6 +113,8 @@ function fixture(
     .spyOn(globalThis, "fetch")
     .mockImplementation(async (input, options) => {
       const url = String(input);
+      if (url === "/api/v1/work-sessions/active")
+        return Response.json({ session: null });
       const response = override(url, options);
       if (response) return response;
       if (url === "/api/v1/me/availability/zones")

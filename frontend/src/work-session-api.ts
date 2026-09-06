@@ -6,6 +6,7 @@ import {
   uuid,
   text,
   integer,
+  readBlockError,
 } from "./schedule-block-api";
 
 export type SessionStart = {
@@ -17,6 +18,50 @@ export type SessionStart = {
   plannedEndAt: string;
   zoneId: string;
 };
+
+export async function readWorkSessionError(error: unknown) {
+  const inherited = await readBlockError(error);
+  if (inherited) return inherited;
+  if (!(error instanceof Response) || error.bodyUsed) return null;
+  const value: unknown = await error
+    .clone()
+    .json()
+    .catch(() => null);
+  if (
+    exact(value, "type title status code sessionId") &&
+    value.code === "WORK_SESSION_ALREADY_ACTIVE" &&
+    value.type === "urn:organization:problem:work_session_already_active" &&
+    value.status === 409 &&
+    error.status === 409 &&
+    text(value.title) &&
+    uuid(value.sessionId)
+  )
+    return value as {
+      type: string;
+      title: string;
+      status: number;
+      code: "WORK_SESSION_ALREADY_ACTIVE";
+      sessionId: string;
+    };
+  if (
+    !exact(value, "type title status code") ||
+    !text(value.title) ||
+    !text(value.code) ||
+    value.type !== "urn:organization:problem:" + value.code.toLowerCase() ||
+    value.status !== error.status ||
+    !(
+      (value.code === "WORK_SESSION_NOT_FOUND" && error.status === 404) ||
+      (value.code === "WORK_SESSION_TIME_OUT_OF_RANGE" && error.status === 409)
+    )
+  )
+    return null;
+  return value as {
+    type: string;
+    title: string;
+    status: number;
+    code: "WORK_SESSION_NOT_FOUND" | "WORK_SESSION_TIME_OUT_OF_RANGE";
+  };
+}
 
 export async function recoverWorkSession(
   projectId: string,

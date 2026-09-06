@@ -44,7 +44,8 @@ class AuthenticationHttpTest {
   @BeforeEach
   void browser() {
     jdbc.execute("TRUNCATE spring_session CASCADE");
-    jdbc.execute("TRUNCATE block_changes,block_projections,planned_blocks, task_status_history, tasks, outbox_events, projects");
+    jdbc.execute(
+        "TRUNCATE block_changes,block_projections,planned_blocks, task_status_history, tasks, outbox_events, projects");
     cookies = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
     client =
         HttpClient.newBuilder()

@@ -1,0 +1,130 @@
+[
+  {
+    "name": "com.apptolast.organization.domain.BlockStateTest",
+    "tests": 7,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "CC8BCC13282CFAE82068C63854C7624E04874579FF06FDADD16606AA487D0A70"
+  },
+  {
+    "name": "com.apptolast.organization.domain.BlockRequestTest",
+    "tests": 14,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "5613B3538756AA71ADAA9D9B8EAD8408991FE99F41F756D9A48C976CE6B8621C"
+  },
+  {
+    "name": "com.apptolast.organization.domain.BlockMoveRequestTest",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "8C68E6BB3E4CBE026528910042F4641583E71172FFD70B02717F40691C9BF30C"
+  },
+  {
+    "name": "com.apptolast.organization.application.ReadBlockChangesTest",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "05798E1F41224EDEC288FA71B1F49DC1FAABB08A836D352D9773F48BD599E6AD"
+  },
+  {
+    "name": "com.apptolast.organization.application.PlanBlockTest",
+    "tests": 24,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "816136F4FA356EBE8656EFE1FCFB6C91F34551ED8CE5AFD860E70B3E9AB34D12"
+  },
+  {
+    "name": "com.apptolast.organization.application.MoveBlockTest",
+    "tests": 17,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "6AF6E744303DAD666D8EE5D6D898FE583359B72BABAD733031676F5924D603C1"
+  },
+  {
+    "name": "com.apptolast.organization.adapter.TodayApiTest",
+    "tests": 27,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "2AAE4D00163EEA806BD3ACFBAED1938301A8985AEB2A6EE10F0DD1468795DE3E"
+  },
+  {
+    "name": "com.apptolast.organization.adapter.ScheduleBlockApiTest",
+    "tests": 173,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "C5515D88833477E12178E2512B8636C9C2AF34A9D55794BCF3F3666C2BE6412E"
+  },
+  {
+    "name": "com.apptolast.organization.adapter.RescheduleErrorsApiTest",
+    "tests": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "A70A18BA22C96E04251D23F157EA2F2385BD2A66967B15FBF2C66C74125C4246"
+  },
+  {
+    "name": "com.apptolast.organization.adapter.RescheduleApiTest",
+    "tests": 70,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "5705D97CDCC290803D6AF74683127ACC6EB79A1FAA601B3BB8E9ED11326D9A62"
+  },
+  {
+    "name": "com.apptolast.organization.adapter.persistence.ScheduleBlockPersistenceTest",
+    "tests": 38,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "B14EF6A749899E8963C53FE449A99C54E4D06D9CA232798295FA8AE0E9062A8E"
+  },
+  {
+    "name": "com.apptolast.organization.adapter.persistence.RescheduleCoordinationTest",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "BE3787E38672BF41561278EF859B7A9B55B5C06B9B4E646866B20BCD3EC85C08"
+  },
+  {
+    "name": "com.apptolast.organization.adapter.persistence.BlockChangeQueriesPersistenceTest",
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "B30299A0A1B38E84CA3008CDF7396E9B46B71A8F7B1CADC287E808076CBE790F"
+  },
+  {
+    "name": "com.apptolast.organization.adapter.config.ProjectStateConfigurationTest",
+    "tests": 7,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "3F820D1C4657F5138BB0D898C8E4194FB94A384DAA363503BB55934E812CFE65"
+  },
+  {
+    "name": "com.apptolast.organization.adapter.config.ApplicationWiringTest",
+    "tests": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "F4C574933A0B2B0A7223AB419C0919A91C63226827B5F72A1F1E3F24D25530EE"
+  },
+  {
+    "name": "com.apptolast.organization.adapter.BlockChangesApiTest",
+    "tests": 17,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xmlSha256": "932E5091DF4EEA21D717C9ECAFF882865429EE3F8202BF95B3D82EB6488BA081"
+  }
+]

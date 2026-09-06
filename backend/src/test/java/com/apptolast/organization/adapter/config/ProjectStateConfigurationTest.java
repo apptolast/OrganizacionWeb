@@ -19,6 +19,9 @@ class ProjectStateConfigurationTest {
     var runner =
         new ApplicationContextRunner()
             .withUserConfiguration(ApplicationConfiguration.class)
+            .withBean(BlockMoving.class, () -> org.mockito.Mockito.mock(BlockMoving.class))
+            .withBean(
+                BlockChangeQueries.class, () -> org.mockito.Mockito.mock(BlockChangeQueries.class))
             .withBean(BlockEditing.class, () -> org.mockito.Mockito.mock(BlockEditing.class))
             .withBean(TodayQueries.class, () -> org.mockito.Mockito.mock(TodayQueries.class))
             .withBean(BlockQueries.class, () -> org.mockito.Mockito.mock(BlockQueries.class))

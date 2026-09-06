@@ -21,6 +21,10 @@ public record BlockRequest(
       throw new ValidationException(
           java.util.List.of(
               new FieldError("objective", "TOO_LONG", "El objetivo admite hasta 500 caracteres.")));
+    validateDestination(startLocal, endLocal, zoneId);
+  }
+
+  static void validateDestination(LocalDateTime startLocal, LocalDateTime endLocal, String zoneId) {
     validateLocal(startLocal, "startLocal");
     validateLocal(endLocal, "endLocal");
     if (zoneId == null || zoneId.isBlank())

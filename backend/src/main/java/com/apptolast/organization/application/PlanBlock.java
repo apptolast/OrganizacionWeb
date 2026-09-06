@@ -29,7 +29,9 @@ public final class PlanBlock implements PlanBlockUseCase {
                 context,
                 context.availability().orElseThrow(AvailabilityRequiredException::new),
                 request,
-                clock.instant()));
+                clock.instant(),
+                catalog,
+                null));
   }
 
   public BlockCreation create(
@@ -51,7 +53,7 @@ public final class PlanBlock implements PlanBlockUseCase {
               || availability.version() != expected.version())
             throw new AvailabilityConflictException();
           var observed = clock.instant();
-          var preview = evaluate(context, availability, request, observed);
+          var preview = evaluate(context, availability, request, observed, catalog, null);
           if (!request.allowOverBudget()
               && preview.days().stream().anyMatch(day -> day.excessSeconds() > 0))
             throw new BlockBudgetExceededException(availability.zoneId(), preview.days());
@@ -76,8 +78,13 @@ public final class PlanBlock implements PlanBlockUseCase {
         });
   }
 
-  private BlockPreview evaluate(
-      BlockPlanningContext context, Availability availability, BlockRequest request, Instant now) {
+  static BlockPreview evaluate(
+      BlockPlanningContext context,
+      Availability availability,
+      BlockRequest request,
+      Instant now,
+      ZoneCatalog catalog,
+      PlannedBlock previous) {
     if (context.projectStatus().equals("completed")) throw new ProjectCompletedException();
     if (context.taskStatus().equals("completed")) throw new TaskCompletedException();
     try {
@@ -86,6 +93,11 @@ public final class PlanBlock implements PlanBlockUseCase {
       throw new AvailabilityZoneUnavailableException();
     }
     var time = ResolvedBlockTime.resolve(request, catalog.zones(), now);
+    if (previous != null
+        && previous.time().startAt().equals(time.startAt())
+        && previous.time().endAt().equals(time.endAt())
+        && previous.request().zoneId().equals(request.zoneId()))
+      throw new BlockStateException("BLOCK_UNCHANGED");
     context.blocks().stream()
         .filter(
             block ->

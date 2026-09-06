@@ -12,6 +12,230 @@ import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 
 class PublishOutboxTest {
+  static OutboxMessage changedMessage(String kind) throws Exception {
+    var source = blockMessage();
+    var payload = new HashMap<>(source.payload());
+    var before = new HashMap<String, Object>();
+    for (var field : List.of("startAt", "endAt", "zoneId", "durationMinutes")) {
+      before.put(field, payload.remove(field));
+    }
+    payload.put("type", "BlockChanged.v1");
+    payload.put("changeId", UUID.randomUUID().toString());
+    payload.put("kind", kind);
+    payload.put("revision", 2);
+    payload.put("before", before);
+    payload.put(
+        "after",
+        kind.equals("CANCELLED")
+            ? null
+            : Map.of(
+                "startAt",
+                "2030-01-07T12:00:00Z",
+                "endAt",
+                "2030-01-07T13:00:00Z",
+                "zoneId",
+                "Historical/Removed",
+                "durationMinutes",
+                60));
+    return changedWith(source, payload);
+  }
+
+  static OutboxMessage changedWith(OutboxMessage source, Map<String, Object> payload)
+      throws Exception {
+    return new OutboxMessage(
+        source.eventId(),
+        source.aggregateId(),
+        source.ownerId(),
+        source.occurredAt(),
+        "BlockChanged.v1",
+        1,
+        new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(payload),
+        payload,
+        0);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(strings = {"CANCELLED", "RESCHEDULED"})
+  void s26_changedEventPreservesOriginalEnvelope(String kind) throws Exception {
+    var event = changedMessage(kind);
+    var work = new Work(event);
+    var sent = new ArrayList<OutboxMessage>();
+    new PublishOutbox(
+            work,
+            delivered -> {
+              sent.add(delivered);
+              return DeliveryOutcome.ACCEPTED;
+            },
+            audit,
+            Clock.fixed(NOW, ZoneOffset.UTC))
+        .runCycle();
+    assertThat(sent).containsExactly(event);
+    assertThat(sent.getFirst()).isSameAs(event);
+    assertThat(work.persisted)
+        .containsExactly(new PublicationAttempt(event.eventId(), "published", 1, NOW, null, null));
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"zero", "negative", "decimal", "string", "overflow", "null"})
+  void s27_changedRevisionMustBePositiveBigint(String defect) throws Exception {
+    var source = changedMessage("CANCELLED");
+    var payload = new HashMap<>(source.payload());
+    payload.put(
+        "revision",
+        switch (defect) {
+          case "zero" -> 0;
+          case "negative" -> -1L;
+          case "decimal" -> 2.5;
+          case "string" -> "2";
+          case "overflow" -> new java.math.BigInteger("9223372036854775808");
+          default -> null;
+        });
+    assertChangedBlocked(changedWith(source, payload));
+  }
+
+  void assertChangedBlocked(OutboxMessage event) {
+    var work = new Work(event);
+    var sent = new ArrayList<OutboxMessage>();
+    new PublishOutbox(
+            work,
+            delivered -> {
+              sent.add(delivered);
+              return DeliveryOutcome.ACCEPTED;
+            },
+            audit,
+            Clock.fixed(NOW, ZoneOffset.UTC))
+        .runCycle();
+    assertThat(sent).isEmpty();
+    assertThat(work.persisted)
+        .containsExactly(
+            new PublicationAttempt(event.eventId(), "blocked", 0, NOW, null, "INVALID_EVENT"));
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(longs = {1, Long.MAX_VALUE})
+  void s26_acceptsBigintRevisionBoundaries(long revision) throws Exception {
+    var source = changedMessage("RESCHEDULED");
+    var payload = new HashMap<>(source.payload());
+    payload.put("revision", revision);
+    assertThat(changedWith(source, payload).validationCode()).isNull();
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"unknown", "kindType", "movedNull", "cancelledObject"})
+  void s27_changedKindMatchesAfter(String defect) throws Exception {
+    var source = changedMessage("CANCELLED");
+    var payload = new HashMap<>(source.payload());
+    switch (defect) {
+      case "unknown" -> payload.put("kind", "UPDATED");
+      case "kindType" -> payload.put("kind", 1);
+      case "movedNull" -> payload.put("kind", "RESCHEDULED");
+      default -> payload.put("after", payload.get("before"));
+    }
+    assertChangedBlocked(changedWith(source, payload));
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"changeId", "blockId", "taskId", "sameEvent"})
+  void s27_changedIdentityIsCanonicalAndEventIsDistinct(String defect) throws Exception {
+    var source = changedMessage("RESCHEDULED");
+    var payload = new HashMap<>(source.payload());
+    if (defect.equals("sameEvent"))
+      payload.put("changeId", source.eventId().toString().toUpperCase(Locale.ROOT));
+    else payload.put(defect, "1-1-1-1-1");
+    assertChangedBlocked(changedWith(source, payload));
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "before,null", "after,type", "before,missing", "after,extra",
+    "before,zone", "after,start", "before,end", "after,minutes"
+  })
+  void s27_changedIntervalsHaveClosedTypedShape(String field, String defect) throws Exception {
+    var source = changedMessage("RESCHEDULED");
+    var payload = new HashMap<>(source.payload());
+    var interval = new HashMap<Object, Object>((Map<?, ?>) payload.get(field));
+    switch (defect) {
+      case "missing" -> interval.remove("zoneId");
+      case "extra" -> interval.put("objective", "private");
+      case "zone" -> interval.put("zoneId", " ");
+      case "start" -> interval.put("startAt", 42);
+      case "end" -> interval.put("endAt", null);
+      case "minutes" -> interval.put("durationMinutes", "60");
+      default -> {}
+    }
+    payload.put(field, defect.equals("null") ? null : defect.equals("type") ? List.of() : interval);
+    assertChangedBlocked(changedWith(source, payload));
+  }
+
+  @Test
+  void s27_changedBeforeDurationMustMatchInstants() throws Exception {
+    var source = changedMessage("CANCELLED");
+    var payload = new HashMap<>(source.payload());
+    var before = new HashMap<Object, Object>((Map<?, ?>) payload.get("before"));
+    before.put("durationMinutes", 59);
+    payload.put("before", before);
+    assertChangedBlocked(changedWith(source, payload));
+  }
+
+  @Test
+  void s27_changedAfterMustContainParseableInstants() throws Exception {
+    var source = changedMessage("RESCHEDULED");
+    var payload = new HashMap<>(source.payload());
+    var after = new HashMap<Object, Object>((Map<?, ?>) payload.get("after"));
+    after.put("startAt", "invalid");
+    payload.put("after", after);
+    assertChangedBlocked(changedWith(source, payload));
+  }
+
+  @Test
+  void s27_changedEventNeverPublishesPrivateExtraField() throws Exception {
+    var source = changedMessage("CANCELLED");
+    var payload = new HashMap<>(source.payload());
+    payload.put("objective", "private objective");
+    assertChangedBlocked(changedWith(source, payload));
+  }
+
+  @Test
+  void s27_changedUnsupportedVersionIsBlockedWithoutDelivery() throws Exception {
+    var source = changedMessage("CANCELLED");
+    var payload = new HashMap<>(source.payload());
+    payload.put("schemaVersion", 2);
+    var event =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            source.occurredAt(),
+            source.type(),
+            2,
+            new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(payload),
+            payload,
+            0);
+    var work = new Work(event);
+    new PublishOutbox(
+            work,
+            delivered -> {
+              throw new AssertionError("Unsupported event published");
+            },
+            audit,
+            Clock.fixed(NOW, ZoneOffset.UTC))
+        .runCycle();
+    assertThat(work.persisted)
+        .containsExactly(
+            new PublicationAttempt(event.eventId(), "blocked", 0, NOW, null, "UNSUPPORTED_EVENT"));
+  }
+
+  @Test
+  void s27_cancelledEventRequiresExplicitNullAfter() throws Exception {
+    var source = changedMessage("CANCELLED");
+    var payload = new HashMap<>(source.payload());
+    payload.remove("after");
+    assertChangedBlocked(changedWith(source, payload));
+  }
+
   @Test
   void taskStatus_s37_publishesValidTransitionWithOriginalEnvelope() throws Exception {
     var source = message(0);

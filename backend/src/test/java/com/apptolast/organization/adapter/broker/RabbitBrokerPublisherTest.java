@@ -29,6 +29,70 @@ class RabbitBrokerPublisherTest {
   final ObjectMapper json = new ObjectMapper();
 
   @Test
+  void reschedule_s26_routesOriginalThirteenFieldsToDurableQuorumQueue() throws Exception {
+    var base = message();
+    var payload = new java.util.HashMap<>(base.payload());
+    payload.remove("name");
+    payload.put("type", "BlockChanged.v1");
+    payload.put("changeId", UUID.randomUUID().toString());
+    payload.put("blockId", UUID.randomUUID().toString());
+    payload.put("taskId", UUID.randomUUID().toString());
+    payload.put("kind", "RESCHEDULED");
+    payload.put("revision", 2L);
+    payload.put(
+        "before",
+        Map.of(
+            "startAt",
+            "2030-01-07T10:00:00Z",
+            "endAt",
+            "2030-01-07T11:00:00Z",
+            "zoneId",
+            "Historical/Removed",
+            "durationMinutes",
+            60));
+    payload.put(
+        "after",
+        Map.of(
+            "startAt",
+            "2030-01-07T12:00:00Z",
+            "endAt",
+            "2030-01-07T13:00:00Z",
+            "zoneId",
+            "Historical/Removed",
+            "durationMinutes",
+            60));
+    var event =
+        new OutboxMessage(
+            base.eventId(),
+            base.aggregateId(),
+            base.ownerId(),
+            base.occurredAt(),
+            "BlockChanged.v1",
+            1,
+            json.writeValueAsString(payload),
+            payload,
+            0);
+    assertThat(publisher().publish(event)).isEqualTo(DeliveryOutcome.ACCEPTED);
+    try (var connection = factory().newConnection();
+        var channel = connection.createChannel()) {
+      channel.queueDeclare(
+          "organization.block-changed.v1", true, false, false, Map.of("x-queue-type", "quorum"));
+      var delivered = channel.basicGet("organization.block-changed.v1", true);
+      assertThat(delivered).isNotNull();
+      assertThat(delivered.getBody())
+          .isEqualTo(event.json().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      var body = json.readTree(delivered.getBody());
+      assertThat(body.size()).isEqualTo(13);
+      assertThat(body.get("before").size()).isEqualTo(4);
+      assertThat(body.get("after").size()).isEqualTo(4);
+      assertThat(delivered.getEnvelope().getRoutingKey()).isEqualTo("block.changed.v1");
+      assertThat(delivered.getProps().getMessageId()).isEqualTo(event.eventId().toString());
+      assertThat(delivered.getProps().getDeliveryMode()).isEqualTo(2);
+      assertThat(delivered.getProps().getContentType()).isEqualTo("application/json");
+    }
+  }
+
+  @Test
   void block_s36_routesOriginalTwelveFieldsToDurableQuorumQueue() throws Exception {
     var base = message();
     var payload = new java.util.HashMap<>(base.payload());

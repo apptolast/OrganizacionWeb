@@ -66,3 +66,41 @@ mutación, backend, metadata ni commits por este autor.
 SHA256 del freeze2ef490:
 - work-session-api.ts: BD7AE7AA7D266A43DAD2D16B955AACF89DB6A0036135862B0E0162A4F6ED8F05
 - work-session-api.test.ts: 29773D38B9AB3B43DCE876A23C02A9204C1C7F0DFD7054477DFDA25507D04CE6
+
+## Corte3 — recuperación por ID y key
+
+Reanudación autorizada sobre6578c9e, sólo los dos archivos propios y este
+append. Se añaden10 tests de uno en uno; no hay matriz nueva ni trabajo UI.
+GET por ID valida la identidad solicitada; GET by-request valida proyecto,
+tarea y duración de la intención conocida. Ambos reutilizan isSessionStart,
+mantienen AbortSignal/cache/credentials y no exigen Location de POST.
+
+| Ciclo | Caso | RED | GREEN |
+| --- | --- | --- | --- |
+| 18 | @s21 GET ID nominal sin Location | c3dc43, función ausente | ca2eaf,18 |
+| 19 | @s21 ID distinto | 87c6e1, acepta otro recibo | 584e6e,19 |
+| 20 | @s22 conservar Response404 de ID | 1fbfff, sustituía por Error de DTO | 1ad554,20 |
+| 21 | @s21 GET key nominal sin Location | 091925, función ausente | 4e6ca5,21 |
+| 22 | @s30 proyecto distinto por key | 5be79b, acepta otro contexto | 201305,22 |
+| 23 | @s30 tarea distinta por key | ba69e8, acepta otra tarea | d0e1ae,23 |
+| 24 | @s30 duración distinta pero DTO coherente | 8b8ff4, acepta otra intención | c81e91,24 |
+| 25 | @s24 conservar Response503 de key | d6a32c, sustituía por Error de DTO | f8caaa,25 |
+| 26 | @s22 conservar Response404 de key | inicialmente GREEN | a861bd,26 |
+| 27 | @s24 conservar Response503 de ID | inicialmente GREEN | d3e988,27 |
+
+Los dos últimos casos reutilizan la guarda de estado previamente exigida,
+sin modificar producción para fabricar un RED. Los rechazos de DTO reutilizan
+el validador completo, sin cambios a su lógica ni al cliente HTTP compartido.
+
+Cierre: formato focal e28238,27/27 Vitest GREEN23584f en3,97s, ESLint focal
+c072b1 EXIT0 y TypeScript72b938 EXIT0. Comandos `pnpm exec vitest run
+src/work-session-api.test.ts`, `pnpm exec eslint src/work-session-api.ts
+src/work-session-api.test.ts`, `pnpm exec tsc --noEmit`, desde frontend.
+Retornos explícitos Promise<SessionStart> añadidos en refactor GREEN.
+Freeze de fuente/test al terminar; no suites globales, Stryker, backend,
+metadata ni Git. Este corte no acredita UI, reinicio real ni todas las
+variantes de validación/abortos, que siguen pendientes de fases posteriores.
+
+SHA256 del freeze08f499:
+- work-session-api.ts: 84A8F87112F2297986BA0A694F134FDF4E6EB65BA9C2EDB4828B08D61678CCB4
+- work-session-api.test.ts: 1CE83520286C3956F98F5FD5B3D02560FCC08F21EB0BE42D16A0F3A008A2B2C7

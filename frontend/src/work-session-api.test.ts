@@ -1,6 +1,11 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { setCsrfToken } from "./api-client";
-import { readActiveWorkSession, startWorkSession } from "./work-session-api";
+import {
+  readActiveWorkSession,
+  startWorkSession,
+  readWorkSession,
+  recoverWorkSession,
+} from "./work-session-api";
 
 const receipt = {
   id: "12345678-1234-1234-1234-123456789abc",
@@ -12,6 +17,103 @@ const receipt = {
   zoneId: "Europe/Madrid",
 };
 const key = "42345678-1234-1234-1234-123456789abc";
+it("@s24 preserves the original 503 response from ID lookup", async () => {
+  const response = Response.json(
+    { code: "STORAGE_UNAVAILABLE" },
+    { status: 503 },
+  );
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
+  await expect(readWorkSession(receipt.id)).rejects.toBe(response);
+});
+it("@s22 preserves the original 404 response from key recovery", async () => {
+  const response = Response.json(
+    { code: "WORK_SESSION_NOT_FOUND" },
+    { status: 404 },
+  );
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
+  await expect(
+    recoverWorkSession(receipt.projectId, receipt.taskId, 25, key),
+  ).rejects.toBe(response);
+});
+it("@s24 preserves the original 503 response from key recovery", async () => {
+  const response = Response.json(
+    { code: "STORAGE_UNAVAILABLE" },
+    { status: 503 },
+  );
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
+  await expect(
+    recoverWorkSession(receipt.projectId, receipt.taskId, 25, key),
+  ).rejects.toBe(response);
+});
+it("@s30 rejects a coherent recovered receipt for a different duration", async () => {
+  respond(
+    {
+      ...receipt,
+      plannedMinutes: 30,
+      plannedEndAt: "2026-09-06T10:30:00.123456Z",
+    },
+    200,
+  );
+  await expect(
+    recoverWorkSession(receipt.projectId, receipt.taskId, 25, key),
+  ).rejects.toThrow("Inicio de trabajo inválido");
+});
+it("@s30 rejects a recovered receipt from a different task", async () => {
+  respond({ ...receipt, taskId: key }, 200);
+  await expect(
+    recoverWorkSession(receipt.projectId, receipt.taskId, 25, key),
+  ).rejects.toThrow("Inicio de trabajo inválido");
+});
+it("@s30 rejects a recovered receipt from a different project", async () => {
+  respond({ ...receipt, projectId: key }, 200);
+  await expect(
+    recoverWorkSession(receipt.projectId, receipt.taskId, 25, key),
+  ).rejects.toThrow("Inicio de trabajo inválido");
+});
+it("@s21 recovers the receipt by key with its known intention and no Location", async () => {
+  const fetcher = vi.fn().mockResolvedValue(Response.json(receipt));
+  vi.stubGlobal("fetch", fetcher);
+  const signal = new AbortController().signal;
+  await expect(
+    recoverWorkSession(receipt.projectId, receipt.taskId, 25, key, signal),
+  ).resolves.toEqual(receipt);
+  expect(fetcher).toHaveBeenCalledExactlyOnceWith(
+    `/api/v1/work-sessions/by-request/${key}`,
+    {
+      credentials: "same-origin",
+      cache: "no-store",
+      signal,
+    },
+  );
+});
+it("@s22 preserves the original 404 response from ID lookup", async () => {
+  const response = Response.json(
+    { code: "WORK_SESSION_NOT_FOUND" },
+    { status: 404 },
+  );
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
+  await expect(readWorkSession(receipt.id)).rejects.toBe(response);
+});
+it("@s21 rejects a different identity returned by the ID lookup", async () => {
+  respond({ ...receipt, id: key }, 200);
+  await expect(readWorkSession(receipt.id)).rejects.toThrow(
+    "Inicio de trabajo inválido",
+  );
+});
+it("@s21 reads an original receipt by ID without requiring Location", async () => {
+  const fetcher = vi.fn().mockResolvedValue(Response.json(receipt));
+  vi.stubGlobal("fetch", fetcher);
+  const signal = new AbortController().signal;
+  await expect(readWorkSession(receipt.id, signal)).resolves.toEqual(receipt);
+  expect(fetcher).toHaveBeenCalledExactlyOnceWith(
+    `/api/v1/work-sessions/${receipt.id}`,
+    {
+      credentials: "same-origin",
+      cache: "no-store",
+      signal,
+    },
+  );
+});
 it("@s42 rejects an incompatible active receipt using the same exact temporal contract", async () => {
   respond(
     { session: { ...receipt, plannedEndAt: "2026-09-06T10:25:00.123457Z" } },

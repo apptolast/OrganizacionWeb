@@ -18,6 +18,49 @@ export type SessionStart = {
   zoneId: string;
 };
 
+export async function recoverWorkSession(
+  projectId: string,
+  taskId: string,
+  plannedMinutes: number,
+  requestKey: string,
+  signal?: AbortSignal,
+): Promise<SessionStart> {
+  const response = await apiRequest(
+    `/api/v1/work-sessions/by-request/${requestKey}`,
+    {
+      credentials: "same-origin",
+      cache: "no-store",
+      signal,
+    },
+  );
+  if (response.status !== 200) throw response;
+  const value: unknown = await response.json();
+  if (
+    !isSessionStart(value) ||
+    !sameId(value.projectId, projectId) ||
+    !sameId(value.taskId, taskId) ||
+    value.plannedMinutes !== plannedMinutes
+  )
+    throw new Error("Inicio de trabajo inválido");
+  return value;
+}
+
+export async function readWorkSession(
+  id: string,
+  signal?: AbortSignal,
+): Promise<SessionStart> {
+  const response = await apiRequest(`/api/v1/work-sessions/${id}`, {
+    credentials: "same-origin",
+    cache: "no-store",
+    signal,
+  });
+  if (response.status !== 200) throw response;
+  const value: unknown = await response.json();
+  if (!isSessionStart(value) || !sameId(value.id, id))
+    throw new Error("Inicio de trabajo inválido");
+  return value;
+}
+
 export async function startWorkSession(
   projectId: string,
   taskId: string,

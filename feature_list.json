@@ -132,7 +132,7 @@
       "id": 12,
       "name": "today",
       "title": "Consultar Hoy",
-      "description": "Hoy: contrato aprobado bajo autorización global,38 escenarios y105 casos representativos. Snapshot propio read-only, agenda, capacidad y actualización; TDD en curso.",
+      "description": "Agenda personal del día con lectura privada consistente, presupuesto de tiempo planificado y actualización segura. Contrato de 38 escenarios y 105 casos cerrado con revisión independiente, pruebas y mutación; dictamen en progress/judge_today.md.",
       "acceptance": [
         "Contrato features/today.feature: lectura coherente y privada con esquema cerrado15 y item block9+nombres.",
         "Día por zona efectiva, fallback UTC con presupuesto null, intersecciones reales, current/next/cierre sin acreditar trabajo.",
@@ -140,7 +140,7 @@
         "Hoy en raíz, captura en /proyectos/nuevo y conservación de rutas, navegación y criterios UX existentes."
       ],
       "sdd": true,
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 13,

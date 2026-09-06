@@ -175,3 +175,54 @@ El coordinador confirmó CI 34001003734 SUCCESS sobre 0913d758e0225efbeb0c32e6ee
 - CI de3671b94 terminó cancelled por timeout120min durante Stryker. Ampliación puntual a240min revisada, sin reducir puertas. CI2133120/run34030806009 sigue **en curso al registrar el cierre**; no se certifica success remoto ni eficacia final del timeout240. Commits/push del cierre quedan a cargo del coordinador.
 - Se conservan las restricciones de rutas y acciones previamente rechazadas. No se leen, limpian ni eliminan ascendientes de proposal_schedule_block_time.md, .e2e-work/read-review* ni frontend/.stryker-tmp-availability-replay; no se afirma limpieza completa. Patrones protectores de contexto/copia permanecen activos, comprobados sin acceder al contenido protegido.
 - Continuidad: feature12 `today` permanece **pending** bajo autorización persistente. No se activa ni se redacta nueva especificación en este cierre. Features1–11 terminadas;12–30 pendientes.
+
+## 2026-09-06 — feature today: registro de sesión previo al cierre
+
+# Sesión actual
+
+## Feature activa
+
+Feature12 `today` in_progress. Contrato de38 escenarios y105 casos revisado (e6781d y ajustes1a8e28) bajo autorización global, antes de TDD. Especificación86dc6c. Se inicia implementación acotada de API y pantalla, con fuentes separadas por autor y revisión posterior. Feature11 conserva cierre done APPROVED6b937b y evidencia histórica.
+
+Backend implementado, revisado independientemente y subido en5cc80a9 (push4ea98f). Init35422 EXIT0/292711:1415 backend,1317 frontend,13 pruebas del arnés y lint verdes. Este corte precede a la última corrección UI de retorno visible con GET pendiente. Frontend permanece en revisión; E2E reales vacío y agenda pasan por separado. Capturas320/1440 revisadas por root; matriz UX completa y mutación pendientes. Ver progress/judge_today.md para alcance y evidencias, sin atribuir cierre a estas mediciones parciales.
+
+Checkpoint posterior f568f6e publicado (43e507): frontend final de fronteras temporales, regresión1319/1319 y lint9698e6. PIT backend80/80 Killed confirmado por root1b93c3. Stryker frontend sesión83950 mide521mutantes sobre este corte; baseline657GREEN, todavía sin resultado. No modificar fuentes/tests/config durante esa campaña.
+
+E2E posteriores: históricos19/19c437d1; tres smokes de Hoy pasan en Chromium/Firefox/WebKit; zoom nativo200%1/1c492dc. UXFirefox/WebKit completó155medidas y cinco axe por motor, pero mantiene EXIT1 por defecto real de foco: disabled de Actualizar envía el foco a BODY al pulsar Enter (cc49ad). Autor resume_review tiene diseñado cambiar a aria-disabled preservando guard de petición; espera terminar Stryker antes de editar. Resume_frontend espera ese fix para ejecutar los cuatro tests Today en tres motores, sin repetir los históricos/zoom si sólo cambia esa semántica. Root revisó PNG de zoom44224 y capturas9324. Matriz30 y límites físicos/humanos en tdd_today_e2e.md. Feature12 no está cerrada.
+
+El corte anterior queda superado: foco corregido en5fe9afc,12ejecuciones Today verdes (4por motor), UX técnica independiente APPROVED2a09f8. Mutación original frontend418/521=80,23%,102S+1NC,0errores/timeouts. Se justificaron40 individualmente y reforzaron63 observables mediante17casosAPI+16UI y una aserción de carga. Revisiones independientes aprobadas. Init14639 EXIT0/a6e120:1353frontend,15 arnés y lint verdes; backend1415 sin cambios. Soporte replay63identidades+regiónfoco revisado8877d8, informes separados; se autoriza medición y se congelan fuentes/tests/config hasta terminar. No se declara done ni un score ajustado. Ver judge_today.md y documentos de seguimiento.
+
+Replay sobre1f7090e finalizó721bcf EXIT0 a15:56:46:107/113 Killed=94,69%,6Survived,0NoCoverage/Timeout/errors.67hashes intactos y original conservado. Root a63608 y mapping76bb72 coinciden:61/63 objetivos K;337 y412 siguenS. Cuatro extrasS corresponden a215/216/219/336 ya justificados. Región nueva de foco generó sólohandler89K, ningún mutante directo de aria-disabled. Freeze liberado: resume_review refuerza412 con GET manual pendiente antes de ocultar/volver; resume_backend revisa337 (aborto explícito frente a cleanup); resume_frontend conserva informe/mapping. No nueva campaña hasta revisión y selección. Feature12 continúa in_progress.
+
+## Último cierre verificado
+
+- Init94736 EXIT0/8d8c38:1209 frontend,10 pruebas del arnés y lint verdes. Backend UP-TO-DATE sobre1365 pruebas previamente verificadas.
+- PIT453/454; frontend original85,38 %, primer replay89,83 % y campaña final55/55 Killed con29/29 objetivos exactos47a669. Son mediciones separadas. RuntimeError945 histórico aceptado explícitamente como límite del adaptador, nunca contado como Killed ni presentado como reparado.
+- Build391add y E2E72ed46 (7/7, incluido reinicio real) conservan la misma producción vigente56ced31. Evidencia multi-navegador y UX con límites en las bitácoras.
+
+## Continuidad
+
+Feature12 `today`: in_progress, TDD autorizado tras contrato aprobado. Features1–11 done;13–30 pending. Autorización global del usuario vigente: no se repite permiso por feature, se conservan contrato previo, TDD y revisión. El avance de esta feature no declara MVP completo ni despliegue.
+
+## Pendiente remoto y límites
+
+CI2133120/run34030806009 sigue en curso al registrar el cierre. El job anterior terminó por timeout120min; la ampliación240min no se certifica como success remoto. Commits/push de estos metadatos a cargo del coordinador.
+
+Consulta remota e35040: CI56ced31/run34028599117 terminó success;2133120,540381e y a127747 seguían in_progress. Este éxito pertenece al commit indicado, no al backend nuevo ni a la feature12 completa.
+
+Ponytail full y Caveman lite vigentes. Se conservan rutas/acciones protegidas y temporales cuya limpieza fue rechazada: no leer ni limpiar proposal_schedule_block_time.md, .e2e-work/read-review* o frontend/.stryker-tmp-availability-replay, ni eliminar sus ascendientes. No se afirma limpieza completa ni se repiten acciones rechazadas. Sin resets, automaciones o despliegue productivo.
+
+Aclaración técnica de integración30942d/d60c5a: Clock.systemUTC puede dar nanosegundos y el formato heredado admite hasta microsegundos. serverNow se normaliza una vez a microsegundos; el contrato no amplía DTO11. Backend incorpora test de reloj de9 decimales. Continúa TDD; no es prueba E2E ni cierre.
+
+
+## 2026-09-06 — feature `today`: cierre aprobado
+
+- Feature12 queda **done localmente** por dictamen global final APPROVED en [judge_today.md](judge_today.md), con revisión independiente67b67b. Contrato aprobado38 escenarios/105 casos; autorización global, Ponytail full/Caveman lite, TDD y jueces independientes conservados. Features1–12 done;13–30 pending. No se declara MVP completo, despliegue ni éxito de CI remoto.
+- Hoy es la entrada de la web; captura en /proyectos/nuevo y deep links conservados. Agenda propia con nombres/objetivos/instantes, día por zona de disponibilidad o fallback UTC explicado, presupuesto y exceso planificados, actual/próximo y cierre real. Lectura consistente read-only sin eventos ni acreditación de trabajo; preserva bloques históricos de tareas/proyectos completados.
+- Actualización manual, visibilidad/foco coalescidos y frontera única; retirada del día vencido, aborto/generaciones y logout protegen privacidad. Los defectos reales de pérdida de deadline y foco se corrigieron con evidencia determinista y navegador. Los refuerzos posteriores sólo cambiaron tests, sin retocar producción para mutantes.
+- Init78050 EXIT0/0ba43b:1354 frontend en23 archivos,17 pruebas del arnés y lint verdes. Backend1415 conserva evidencia vigente sin cambios; no se presenta UP-TO-DATE como nueva ejecución física. El cierre independiente confirmó71 hashes intactos; metadatos de cierre no requieren rerun.
+- PIT backend80/80 Killed. Frontend original418/521=80,23%,102Survived+1NoCoverage y cero errores/timeouts; seguimiento107/113=94,69%,6Survived y cero NoCoverage/errores/timeouts. Ambas campañas amplias superan80 por separado. Informes originales y40 equivalencias individuales aprobadas permanecen intactos.
+- Diagnóstico final ea3333 conserva **FAIL bruto2/3=66,67%, EXIT1**: objetivos337/412 Killed confirmados b40220, extra336 Survived y justificado previamente. No se descuenta ni se presenta el comando como PASS; no hay score combinado. Este diagnóstico resuelve las últimas identidades dentro del criterio independiente fijado antes del resultado, sin sustituir las dos puertas amplias aprobadas. Los63 objetivos originales quedan detectados en las campañas trazadas.
+- E2E Hoy: Chromium4/4 6b8014, Firefox4/4 862700, WebKit4/4 d7349f. Regresión histórica19/19 c437d1 y zoom nativo200%1/1 c492dc se conservan como ejecuciones separadas. Cada motor acredita155 medidas (31 anchos/cinco estados), cinco axe y feedback2,9/6/4ms; matriz30 UX aprobada. No certifica dispositivos físicos, lector real ni comprensión/usabilidad humana universal.
+- README y roadmap reflejan validación local cerrada. Commits/push quedan a cargo del coordinador; no se certifica CI remoto de565c5be. Restricciones de rutas y acciones previamente rechazadas permanecen vigentes; no se leen ni limpian rutas protegidas o ascendientes, ni se afirma limpieza completa.
+- Continuidad: feature13 `reschedule` queda pending; este cierre no redacta su especificación ni activa implementación.

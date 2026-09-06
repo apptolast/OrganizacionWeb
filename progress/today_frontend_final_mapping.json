@@ -1,0 +1,70 @@
+{
+  "selected": [
+    {
+      "originalId": "337",
+      "priorReplayId": "74",
+      "finalId": "1",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 14,
+          "line": 61
+        },
+        "start": {
+          "column": 9,
+          "line": 61
+        }
+      },
+      "operator": "ConditionalExpression",
+      "sourceExpression": "force",
+      "replacement": "false",
+      "killedBy": [
+        "595"
+      ],
+      "statusReason": "expected \"vi.fn()\" to not be called at all, but actually been called 1 times\n\nReceived:\n\n  1st vi.fn() call:\n\n    Array [\n      401,\n    ]\n\n\nNumber of calls: 1\n"
+    },
+    {
+      "originalId": "412",
+      "priorReplayId": "88",
+      "finalId": "2",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 111
+        },
+        "start": {
+          "column": 31,
+          "line": 111
+        }
+      },
+      "operator": "BooleanLiteral",
+      "sourceExpression": "true",
+      "replacement": "false",
+      "killedBy": [
+        "593"
+      ],
+      "statusReason": "expect(element).not.toBeInTheDocument()\n\nexpected document not to contain element, found <p>\n  Proyecto personal\n</p> instead"
+    }
+  ],
+  "additional": [
+    {
+      "originalId": "336",
+      "finalId": "0",
+      "status": "Survived",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 14,
+          "line": 61
+        },
+        "start": {
+          "column": 9,
+          "line": 61
+        }
+      },
+      "replacement": "true",
+      "classification": "Previously approved contextual equivalent, retained in raw denominator"
+    }
+  ]
+}

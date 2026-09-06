@@ -29,19 +29,3 @@ Siguientes: status HTTP/privacidad, preview, recibos y recuperación, historial;
 ## Corte cliente para revisión independiente
 
 Formato focal y eslint/tsc sin errores b139b1. Regresión cliente nuevo19 + cliente11 existente250:269/269 GREEN0f2e3a. Sólo exports sameId/isPreview en schedule-block-api.ts; su lógica no cambia. API13 queda estable para revisión mientras sigue TDD UI. No significa feature completa ni cobertura de persistencia/E2E. Las matrices internas son grupos de variantes de un test, no se cuentan como ejecuciones adicionales. Todavía faltan oráculos públicos de UI/guardas y posteriores límites que señale revisión.
-
-## Primer corte UI y pausa coordinada
-
-20. @s28 abrir un panel inline desde una consulta deliberada de state; valores locales de Madrid independientes del navegador y cerrar sin POST. RED2bfc4d, GREENf5ba46 (1testUI).
-21. @s31 lectura de state fallida no habilita editor, recuperación explícita. REDac3270 (incluyó rechazo no capturado en montaje aún mínimo), GREEN0f0bc9 (2testsUI).
-22. @s12/@s36/@s38 cancelar reserva de tarea/proyecto completed sin disponibilidad; retirar fila, confirmar hecho histórico y enfocar encabezado si desaparece origen. RED7d411c, GREEN7c3ed0 (3testsUI).
-
-Refactor en verde: BlockDetails y BlockTime movidos sin cambiar lógica a block-details.tsx para reutilización. Primera regresión74e138 EXIT1:52fallos/35pass y47errores debidos al import BlockTime omitido en el editor11. Diagnóstico69b221 y corrección de importf7524c. Regresión nueva5a2120 EXIT0:87/87 (84UI11+3UI13),31,93s. No se oculta la ejecución fallida ni se modifica ningún test11 para hacer pasar ese refactor.
-
-Static checks: tsc9c8ee9 EXIT0. ESLint8c56ad señaló sólo import act no usado en testnuevo; retirado, eslint y Prettier focalesf8bf9f EXIT0. No se repiten tests por eliminar import sin uso.
-
-Pausa solicitada por root al detectar otro equipo trabajando backend13. El usuario autorizó paralelo sin pisarse; root prepara rama Codexfrontend. Corte local estable, sin procesos de pruebas vivos al entregarlo. No se han hecho commits/push/cleanup desde este autor. API aprobada queda intacta desde corte269GREEN; nueva UI aún parcial y NO aprobada globalmente.
-
-Archivos UI del corte: src/task-blocks.tsx (acciones y confirmación), src/reschedule-block.tsx (panel inicial/mínima cancelación), src/reschedule-block.test.tsx (3tests), src/block-details.tsx (extracción). No hay SCSS nuevo todavía.
-
-Pendientes reales tras reanudación: preview/formulario completo de movimiento y selector/zonas no reconocidas; recuperación/errores y CSRF de cancelación/movimiento; vigencia state después de recibo y confirmación histórica11; historial inline; elegibilidad/estado cancelled y guardas de generación/ruta/401; foco/teclado/UIUX. En particular cancelación mínima todavía no captura errores ni conserva key ante incertidumbre: no se presenta como final ni debe publicarse producto por este WIP. No queda testRED activo tras el corte; siguiente comportamiento necesita su propio RED.

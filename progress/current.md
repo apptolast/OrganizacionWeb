@@ -25,3 +25,11 @@ Plan actualizado en 170ca76: 30–60 horas sigue siendo hipótesis de baja confi
 Cliente 9e67299: GET por ID/key añade diez casos, 27/27 verdes en 23584f, con tipos, lint y formato. Dictamen review_start_work_recovery_client.md APPROVED parcial; root leyó el diff completo en 2b53db. Backend 53b37de: rango 1–1440 y completed proyecto/tarea, ocho pruebas de núcleo verdes e55cd8; dictamen review_start_work_guards.md APPROVED parcial, root386a6a. Regresión PG existente d4b176 1/1 sobre el núcleo actualizado, XML confirmado por root888dd5. Los nueve casos backend se ejecutaron en dos corridas focales, no en una suite global nueva.
 
 Ambos autores terminaron y dejaron el corte congelado, sin procesos activos. Conservados incidentes e inicialmente GREEN en bitácoras. Feature14 continúa in_progress; no nuevos endpoints, UI ni publicación, no merge de esta rama ni despliegue. No trasladar la aprobación de checkpoints a una aprobación final de feature14.
+
+## Ejecución paralela solicitada por el usuario — 7 de septiembre
+
+Tres autores activos para completar feature14 sin detenerse por cada microcheckpoint: resume_backend termina núcleo/persistencia/HTTP en este árbol; resume_frontend termina cliente/UI en este árbol con archivos separados; resume_review actúa ahora como autor del publicador en el worktree aislado OrganizacionWeb-session-publisher, branch codex/work-session-publisher desde020f7ff. Root coordina y revisa; habrá revisión cruzada independiente después del freeze. No hay autoaprobación del autor del publicador.
+
+Publicación posee únicamente OutboxMessage, PublishOutbox, RabbitBrokerPublisher y tests asociados; backend no toca esos archivos. Frontend no toca backend. Gradle corre con salidas separadas entre los dos worktrees. El equipo dispone de24procesadores lógicos y63,4GiB RAM; no se observó presión de memoria en la comprobación3677e8. Se evita repetir suites globales por cada test y se conservan ciclos individuales y regresiones pertinentes.
+
+Acceso al servidor intentado sin escritura: autenticación SSH rechazada por clave (468624). Solicitud de alias/clave configurada pendiente del usuario; dominio también pendiente. No detiene implementación local ni constituye medición de recursos del servidor. Detalles en docs/deployment-readiness.md.

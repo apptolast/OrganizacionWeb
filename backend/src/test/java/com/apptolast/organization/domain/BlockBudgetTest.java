@@ -196,4 +196,15 @@ class BlockBudgetTest {
     org.assertj.core.api.Assertions.assertThatThrownBy(() -> preview.days().clear())
         .isInstanceOf(UnsupportedOperationException.class);
   }
+
+  @Test
+  void s10_acceptsBudgetInFirstPublicYear() {
+    assertThat(
+            BlockBudget.calculate(
+                preference("UTC", 120),
+                Instant.parse("0001-01-01T10:00:00Z"),
+                Instant.parse("0001-01-01T11:00:00Z"),
+                List.of()))
+        .containsExactly(new BudgetDay(LocalDate.of(1, 1, 1), 120, 0, 3600, 0));
+  }
 }

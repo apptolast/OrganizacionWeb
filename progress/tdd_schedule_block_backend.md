@@ -142,3 +142,41 @@ Las pruebas UI @s38–@s61 y los tres motores pertenecen a la entrega frontend. 
 - Con autorización, una tarea temporal de inspección en build/tmp/verify-schedule-block-pit.gradle valida únicamente configuración resuelta, sin depender de pitest/test ni lanzar procesos de pruebas. RED fd3847 por propiedad de runtime ausente.
 - Ajuste mínimo: jvmArgs añade provider lazy con el mismo sourceSets.test.runtimeClasspath.asPath usado por tasks.test y conserva api.version. Scope schedule_block incluye ApplicationConfiguration completa y ProjectStateConfigurationTest, manteniendo OutboxRecoveryTest completo y threshold80.
 - Inspección GREEN 643eae: PIT_CONFIG_VALID=true, 104 entradas de runtime, recoveryIncluded=true, threshold80=true. Sólo se ejecutó verifyScheduleBlockPitRuntime; **no se ejecutaron PIT, Stryker ni mutantes**. No cambia producción ni pruebas. Configuración congelada para revisión del coordinador.
+
+### Ciclos 75–78 — cobertura posterior a primera mutación
+- Cambio de rol a tdd_craftsman por coordinador después de PASS 414/454. XML original preservado en backend/build/reports/pitest-schedule-block-initial/mutations.xml; SHA-256 idéntico 96F761C70A650A15B31EA6C7717CCE06B251EA278E48EA4815D35B8051495C68. No se ejecuta nueva mutación todavía.
+- 75: BlockBudgetTest.s10_acceptsBudgetInFirstPublicYear inicialmente GREEN97a517; año local0001 con BudgetDay exacto. Cubre los límites <1 observados en primera medición. El candidato seconds>0→>=0 conserva análisis de equivalencia del coordinador; no se fabrica una entrada fuera del contrato ni se excluye del rawscore.
+- 76: ScheduleBlockApiTest.s27_acceptsCursorAtPublicYearBoundaries, dos casos0001/9999 inicialmente GREEN90988b. Cursor contextual válido acepta200 y no produce escrituras.
+- 77: ScheduleBlockApiTest.s25_exactlyTwentyBlocksIsTerminalPage inicialmente GREEN227a3c; veinte creaciones reales, veinte items y nextCursor null, conteos SQL/outbox exactos.
+- 78: ApplicationWiringTest.s26_blockReadingBeanReachesItsPortInFreshContext inicialmente GREEN7f43a6. ApplicationContextRunner fresco por ejecución, resolución por ReadBlocksUseCase y operación real list; puerto controlado lanza señal tipada que debe propagarse desde BlockQueries. No basta hasNotFailed ni se depende de caché Spring. Producción intacta.
+- Ventanas Gradle de publicador ejecutadas serialmente por este autor; los ciclos/fixtures de su autor se registran en su bitácora. Ningún Spotless global mientras edita el otro autor.
+
+### Ciclos 79–91 — wiring por operación y contexto nuevo
+
+Cada variante se añadió y ejecutó antes de añadir la siguiente; todas fueron inicialmente GREEN. Se reutiliza freshContext con puertos controlados, se resuelve por interfaz de entrada y se invoca una operación con argumentos válidos. La señal PortReached debe identificar el puerto esperado, por lo que no basta que Spring arranque ni que exista un nombre de bean. No se cambia producción ni se atribuye un nuevo RED a estos casos.
+
+| Ciclo | Operación nueva | Evidencia GREEN |
+| --- | --- | --- |
+| 79 | PlanBlock.preview | 164d81 |
+| 80 | ReadProjects.list | 267bcc |
+| 81 | ReadTasks.list | 48bd1c |
+| 82 | ReadSubtasks.list | e08108 |
+| 83 | ReadTaskStatus.status | f80779 |
+| 84 | ReadTaskHistory.list | 77deb7 |
+| 85 | ReadAvailability.get | ed6e2f |
+| 86 | CreateProject.execute | 078372 |
+| 87 | CreateTask.execute | 39094d |
+| 88 | CreateSubtask.execute | bb483f |
+| 89 | EditProject.execute | 0e7393 |
+| 90 | ChangeTaskStatus.execute | 3c413a |
+| 91 | SaveAvailability.execute | a21add |
+
+Junto a ReadBlocks del ciclo78, quedan cubiertas las14 factories supervivientes. Los dos métodos parametrizados evitan14copias de configuración. Ninguna prueba de negocio existente se relaja ni se sustituye.
+
+Configuración solicitada por coordinador: añadir ApplicationWiringTest y RabbitBrokerFailuresTest a targetTests schedule_block. targetClasses permanece intacto respecto a la primera medición (sin exclusiones nuevas ni cambio de umbral), runtime outbox conservado. Se corrigen únicamente líneas vacías finales de build.gradle.kts. Autorpublicador confirma freeze Java para formato global y regresión afectada; no se ejecuta PIT en este tramo.
+
+### Ciclo 92 — formato, regresión afectada y freeze
+- Freeze del publicador autorizado por su autor antes de Spotless global. Ejecución: `gradlew.bat spotlessApply test --tests '*ScheduleBlockApiTest' --tests '*BlockBudgetTest' --tests '*ApplicationWiringTest' --tests '*ProjectStateConfigurationTest' --tests '*PublishOutboxTest' --tests '*RabbitBrokerFailuresTest' --no-daemon`.
+- GREEN6f086d, EXIT0,39s. XML comprobados813b55: **323 pruebas, cero fallos/errores/omitidas** (HTTP173, Budget17, Wiring14, Config7, PublishOutbox103, RabbitFailures9).
+- git diff --check de los archivos propios sin errores (2813ef). No diferencias de src/main frente al checkpoint; targetClasses y threshold80 intactos. Nuevo test de wiring y RabbitBrokerFailuresTest incluidos en targetTests para siguiente medición. XML inicial preservado sin cambios.
+- Entrega congelada a review independiente. Todos los casos añadidos fueron inicialmente verdes y se documentan así; no se ejecutó PIT nuevo ni se declaran muertos los supervivientes sin medirlos. No done ni commit por este autor.

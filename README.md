@@ -10,7 +10,9 @@ Rutas: `/` conserva el formulario de creación; `/proyectos` muestra la lista pr
 
 Completar y reabrir tareas está implementado y verificado localmente. Cada transición conserva su fecha en un historial paginado independiente del outbox. Los cambios simultáneos usan una versión propia de la tarea; ante conflicto, la web permite consultar deliberadamente el estado vigente. No se completa automáticamente el proyecto ni los descendientes. El cierre de calidad se registra en `complete_reopen_task` dentro del roadmap.
 
-La disponibilidad personal está implementada y verificada localmente en `/disponibilidad`. Permite elegir zona horaria y minutos disponibles para cada día, incluido cero para descansar. Conserva la preferencia en PostgreSQL y protege cambios simultáneos. Estos presupuestos no reservan franjas ni acreditan trabajo realizado; la planificación de bloques sigue pendiente. El cierre y sus pruebas están en [el dictamen de disponibilidad](progress/judge_availability.md).
+La disponibilidad personal está implementada y verificada localmente en `/disponibilidad`. Permite elegir zona horaria y minutos disponibles para cada día, incluido cero para descansar. Conserva la preferencia en PostgreSQL y protege cambios simultáneos. Estos presupuestos no reservan franjas ni acreditan trabajo realizado. El cierre y sus pruebas están en [el dictamen de disponibilidad](progress/judge_availability.md).
+
+Los bloques horarios están implementados en el detalle de una tarea pendiente: configura la disponibilidad, abre **Planificar bloque**, indica objetivo, inicio, fin y zona, y revisa antes de guardar. La revisión muestra el presupuesto diario y exige aceptar explícitamente cualquier exceso. Las reservas propias no pueden solaparse, incluso entre proyectos. Si se pierde la respuesta al guardar, **Comprobar guardado** recupera el resultado sin crear otro bloque. Los bloques conservan sus instantes al cambiar preferencias o completar tareas; todavía no registran trabajo realizado ni ofrecen temporizador. La revisión y las pruebas normales están aprobadas; la mutación de esta entrega sigue en curso. Consulta [su estado de calidad](progress/judge_schedule_block.md) y el roadmap antes de considerarla cerrada.
 
 El límite inicial es de tres proyectos activos por propietario. `APP_MAX_ACTIVE_PROJECTS` permite elegir de 1 a 10 en `.env`; todas las réplicas deben usar el mismo valor. Al alcanzar el límite, el propietario decide qué pausar. Reducirlo no pausa proyectos automáticamente y dos activaciones simultáneas no pueden ocupar la misma última plaza.
 
@@ -42,7 +44,7 @@ El Compose base mantiene el publicador desactivado. Para habilitar RabbitMQ, com
 docker compose -f docker-compose.yml -f deploy/compose.publisher.yml up --build -d --wait
 ```
 
-El broker usa colas quorum durables para ProjectCreated, ProjectUpdated, ProjectStatusChanged, TaskCreated, SubtaskCreated y TaskStatusChanged y un volumen persistente. AMQP y su administración permanecen en la red interna de Docker. La API puede crear, editar y cambiar el estado de proyectos, así como crear y cambiar el estado de tareas, aunque el broker esté caído; el outbox conserva los eventos y reintenta con espera creciente hasta 60 segundos. La entrega es al menos una vez: un consumidor debe deduplicar por `eventId`.
+El broker usa colas quorum durables para ProjectCreated, ProjectUpdated, ProjectStatusChanged, TaskCreated, SubtaskCreated, TaskStatusChanged y BlockPlanned, con un volumen persistente. AMQP y su administración permanecen en la red interna de Docker. La API puede guardar proyectos, tareas y bloques aunque el broker esté caído; el outbox conserva los eventos y reintenta con espera creciente hasta 60 segundos. La entrega es al menos una vez: un consumidor debe deduplicar por `eventId`.
 
 Para detener esta instancia conservando sus datos, utiliza los mismos dos argumentos `-f` con `down`, sin `--volumes`. Las credenciales de RabbitMQ inicializan el volumen la primera vez; modificar `.env` no rota un usuario existente.
 
@@ -68,6 +70,15 @@ El arnés SDD conserva sus comandos:
 node .harness/harness.mjs init
 node .harness/harness.mjs verify
 ```
+
+Para medir sólo la entrega de bloques, conservando el umbral y el código compartido afectado:
+
+```sh
+node .harness/harness.mjs mutate schedule_block-backend
+node .harness/harness.mjs mutate schedule_block-frontend
+```
+
+Sin target se conserva la mutación completa de ambos componentes. Los targets no reconocidos se rechazan antes de lanzar procesos.
 
 Las pruebas de producto y sus resultados concretos se registran en `progress/`; que exista un comando o un workflow no significa que ya haya pasado. Mutación con umbral 80 % y revisión independiente antes de marcar una feature como done.
 

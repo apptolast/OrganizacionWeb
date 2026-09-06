@@ -39,3 +39,26 @@ Hashes SHA256 del corte:
 - OutboxWorkTest.java: 8094A847BCCB48A2C9E900A642EE48940F069B187398EE419362CA8CE9D6C319
 
 Trazabilidad: @s36 usa block_s36_routesOriginalTwelveFieldsToDurableQuorumQueue y la regresión de seis rutas. @s37 usa block_s36_s37_publishesHistoricalZoneWithoutCatalogResolution, block_s37_blocksInvalidEnvelopeWithoutPublishing, block_s37_persistsInvalidClassificationWithoutSendingToRealRabbit y block_s37_retriesOriginalHistoricalEventAfterUnconfirmedRealDelivery. Las garantías previas de proceso/rollback se mantienen mediante OutboxRecoveryTest completo. No PIT ni aprobación final de feature.
+
+## Seguimiento de mutantes, 2026-09-06
+
+Root asigna autoría acotada a PublishOutboxTest después de revisión independiente de los40 no detectados; no implica autoaprobación. Backend coordina y ejecuta todo Gradle. No producción, Gradle ni frontend editados.
+
+Ciclo1 preparado: se amplía el positivo histórico existente block_s36_s37_publishesHistoricalZoneWithoutCatalogResolution a1/60/1440 minutos con instantes coherentes. Conserva exactitud del evento enviado, clasificación published y zona histórica fuera de catálogo. Pendiente primera ejecución focal por backend; no se afirma RED.
+Ciclo1 primera ejecución por backend:3/3 GREEN, salida503f88,9s; cobertura nueva inicialmente verde, sin RED fabricado ni producción alterada.
+
+Ciclo2 preparado: subtask_s37_preservesParentIdentityAndInvalidClassification, cuatro variantes parent UUID distinto válido/tipo numérico/formato abreviado/igual a task. Positivo conserva instancia y publicación; negativos exigen cero envíos y PublicationAttempt blocked/INVALID_EVENT exacto. Pendiente ejecución.
+Ciclo2 primera ejecución backend:4/4 GREEN, b8026f,12s. Sin modificación de producción.
+
+Refinamiento solicitado por revisión root: los dos positivos nuevos heredaban json placeholder del fixture antiguo. Se serializa ahora el payload exacto con ObjectMapper para que el envelope enviado tenga JSON coherente, también en negativos Subtask. containsExactly/isSameAs comprueban conservación en el puerto; no añado asserts espejo de getters. Transporte real corresponde a OutboxRecoveryTest/RabbitBrokerPublisherTest ya documentados arriba. Pendiente regresión focal7.
+Refinamiento JSON:7/7 GREEN cb8b8d,12s reportados por backend. Sin producción.
+
+Ciclo3 preparado: taskStatus_s37_publishesValidTransitionWithOriginalEnvelope. Positivo pending→completed con JSON coherente, conserva instancia y PublicationAttempt published exacto. Pendiente primera ejecución.
+Ciclo3 primera ejecución:1/1 GREEN d92b7a,12s reportado por backend. Sin RED ni producción.
+
+Ciclo4 preparado: ampliación del negativo taskStatus_s32_blocksEveryIncompatibleEnvelopeWithoutSending con fromType/toType numéricos. Reutiliza su aserción exacta blocked/INVALID_EVENT y broker que falla si recibe evento. Fixture del grupo serializa payload coherente. Pendiente ejecución focal de la matriz completa.
+Ciclo4 primera ejecución:19/19 GREEN d330d8,8s reportados por backend. Los dos nuevos tipos incorrectos no requieren modificación de producción.
+
+Freeze Java de autor publicador confirmado. Incremento neto9 casos:2 duraciones límite,4 parent,1 transición válida y2 tipos de estado. Todas las nuevas aserciones fueron inicialmente verdes. Sin replay mutado ni nuevo PIT: se espera medición posterior coordinada para afirmar qué mutantes elimina la nueva cobertura. Pendiente Spotless global y regresión final por backend una vez terminen sus ciclos; no se afirma todavía ese resultado. Root revisará independientemente el cambio.
+
+Cierre de seguimiento: backend coordinó Spotless global y regresión integrada323 GREEN6f086d/813b55; XML leído confirma PublishOutboxTest103 (neto9),0 fallos/errores/omitidos. La ejecución pertenece al autor backend, no al publicador. Root aprobó independientemente diseño/aserciones del diff+9 antes del formato. Sin cambios funcionales de producción y sin medición PIT nueva atribuida a estos casos.

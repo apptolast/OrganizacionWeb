@@ -1059,4 +1059,61 @@ class ScheduleBlockApiTest {
       jdbc.execute("ALTER TABLE unavailable_blocks RENAME TO planned_blocks");
     }
   }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"0001-01-01T00:00:00Z", "9999-12-31T23:59:59Z"})
+  void s27_acceptsCursorAtPublicYearBoundaries(String createdAt) throws Exception {
+    var cursor =
+        Base64.getUrlEncoder()
+            .withoutPadding()
+            .encodeToString(
+                json.writeValueAsBytes(
+                    Map.of(
+                        "collection",
+                        "blocks",
+                        "projectId",
+                        project.toString(),
+                        "taskId",
+                        task.toString(),
+                        "createdAt",
+                        createdAt,
+                        "id",
+                        UUID.randomUUID().toString())));
+    var response =
+        json.readTree(
+            mvc.perform(get(base()).param("cursor", cursor).with(user("persona-a")))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString());
+    assertThat(response.get("items").size()).isZero();
+    assertThat(response.get("nextCursor").isNull()).isTrue();
+    assertThat(jdbc.queryForObject("SELECT count(*) FROM planned_blocks", Long.class)).isZero();
+    assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events", Long.class)).isZero();
+  }
+
+  @Test
+  void s25_exactlyTwentyBlocksIsTerminalPage() throws Exception {
+    for (int day = 7; day < 27; day++) {
+      assertThat(
+              create(
+                      UUID.randomUUID(),
+                      createBody().replace("2030-01-07", LocalDate.of(2030, 1, day).toString()))
+                  .getStatus())
+          .isEqualTo(201);
+    }
+    var response =
+        json.readTree(
+            mvc.perform(get(base()).with(user("persona-a")))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString());
+    assertThat(response.get("items").size()).isEqualTo(20);
+    assertThat(response.get("nextCursor").isNull()).isTrue();
+    assertThat(jdbc.queryForObject("SELECT count(*) FROM planned_blocks", Long.class))
+        .isEqualTo(20);
+    assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events", Long.class)).isEqualTo(20);
+  }
 }

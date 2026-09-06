@@ -12,6 +12,98 @@ import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 
 class PublishOutboxTest {
+  @Test
+  void taskStatus_s37_publishesValidTransitionWithOriginalEnvelope() throws Exception {
+    var source = message(0);
+    var payload = new HashMap<>(source.payload());
+    payload.remove("name");
+    payload.put("type", "TaskStatusChanged.v1");
+    payload.put("taskId", UUID.randomUUID().toString());
+    payload.put("fromStatus", "pending");
+    payload.put("toStatus", "completed");
+    var event =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            source.occurredAt(),
+            "TaskStatusChanged.v1",
+            1,
+            new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(payload),
+            payload,
+            0);
+    var work = new Work(event);
+    var sent = new ArrayList<OutboxMessage>();
+    new PublishOutbox(
+            work,
+            delivered -> {
+              sent.add(delivered);
+              return DeliveryOutcome.ACCEPTED;
+            },
+            audit,
+            Clock.fixed(NOW, ZoneOffset.UTC))
+        .runCycle();
+    assertThat(sent).containsExactly(event);
+    assertThat(sent.getFirst()).isSameAs(event);
+    assertThat(work.persisted)
+        .containsExactly(new PublicationAttempt(event.eventId(), "published", 1, NOW, null, null));
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(strings = {"valid", "type", "format", "same"})
+  void subtask_s37_preservesParentIdentityAndInvalidClassification(String parentCase)
+      throws Exception {
+    var source = message(0);
+    var payload = new HashMap<>(source.payload());
+    payload.remove("name");
+    payload.put("type", "SubtaskCreated.v1");
+    payload.put("title", "Preparar material");
+    var task = UUID.randomUUID().toString();
+    payload.put("taskId", task);
+    payload.put(
+        "parentTaskId",
+        switch (parentCase) {
+          case "type" -> 42;
+          case "format" -> "1-1-1-1-1";
+          case "same" -> task;
+          default -> UUID.randomUUID().toString();
+        });
+    var event =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            source.occurredAt(),
+            "SubtaskCreated.v1",
+            1,
+            new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(payload),
+            payload,
+            0);
+    var work = new Work(event);
+    var sent = new ArrayList<OutboxMessage>();
+    new PublishOutbox(
+            work,
+            delivered -> {
+              sent.add(delivered);
+              return DeliveryOutcome.ACCEPTED;
+            },
+            audit,
+            Clock.fixed(NOW, ZoneOffset.UTC))
+        .runCycle();
+    if (parentCase.equals("valid")) {
+      assertThat(sent).containsExactly(event);
+      assertThat(sent.getFirst()).isSameAs(event);
+      assertThat(work.persisted)
+          .containsExactly(
+              new PublicationAttempt(event.eventId(), "published", 1, NOW, null, null));
+    } else {
+      assertThat(sent).isEmpty();
+      assertThat(work.persisted)
+          .containsExactly(
+              new PublicationAttempt(event.eventId(), "blocked", 0, NOW, null, "INVALID_EVENT"));
+    }
+  }
+
   static OutboxMessage blockMessage() {
     var source = message(0);
     var payload = new HashMap<>(source.payload());
@@ -35,9 +127,26 @@ class PublishOutboxTest {
         0);
   }
 
-  @Test
-  void block_s36_s37_publishesHistoricalZoneWithoutCatalogResolution() {
-    var event = blockMessage();
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(ints = {1, 60, 1440})
+  void block_s36_s37_publishesHistoricalZoneWithoutCatalogResolution(int minutes) throws Exception {
+    var source = blockMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("durationMinutes", minutes);
+    payload.put(
+        "endAt",
+        Instant.parse((String) payload.get("startAt")).plusSeconds(minutes * 60L).toString());
+    var event =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            source.occurredAt(),
+            source.type(),
+            source.schemaVersion(),
+            new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(payload),
+            payload,
+            source.attempts());
     var work = new Work(event);
     var sent = new ArrayList<OutboxMessage>();
     new PublishOutbox(
@@ -703,6 +812,8 @@ class PublishOutboxTest {
         "extra",
         "taskPartial",
         "taskType",
+        "fromType",
+        "toType",
         "fromUnknown",
         "toUnknown",
         "same",
@@ -716,7 +827,8 @@ class PublishOutboxTest {
         "missing:fromStatus",
         "missing:toStatus"
       })
-  void taskStatus_s32_blocksEveryIncompatibleEnvelopeWithoutSending(String defect) {
+  void taskStatus_s32_blocksEveryIncompatibleEnvelopeWithoutSending(String defect)
+      throws Exception {
     var source = message(0);
     var payload = new HashMap<>(source.payload());
     payload.remove("name");
@@ -730,6 +842,8 @@ class PublishOutboxTest {
         case "extra" -> payload.put("title", "private");
         case "taskPartial" -> payload.put("taskId", "1-1-1-1-1");
         case "taskType" -> payload.put("taskId", 42);
+        case "fromType" -> payload.put("fromStatus", 42);
+        case "toType" -> payload.put("toStatus", 42);
         case "fromUnknown" -> payload.put("fromStatus", "unknown");
         case "toUnknown" -> payload.put("toStatus", "unknown");
         case "same" -> payload.put("toStatus", "pending");
@@ -743,7 +857,7 @@ class PublishOutboxTest {
             source.occurredAt(),
             defect.equals("type") ? "TaskStatusChanged.v2" : "TaskStatusChanged.v1",
             defect.equals("version") ? 2 : 1,
-            source.json(),
+            new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(payload),
             payload,
             0);
     var work = new Work(event);

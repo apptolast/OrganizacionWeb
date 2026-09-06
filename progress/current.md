@@ -2,7 +2,7 @@
 
 ## Feature activa
 
-Feature 11 schedule_block in_progress. Contrato aprobado a84e42f (62 escenarios, 325 casos) publicado en origin/main. Implementación React/SCSS, API hexagonal, PostgreSQL y BlockPlanned.v1 revisada; judge completo APPROVED en progress/judge_schedule_block.md. No es cierre de feature ni de MVP. Features 1–10 terminadas; 12–30 pendientes, bajo autorización global del usuario.
+Feature 11 schedule_block in_progress. Contrato aprobado a84e42f (62 escenarios, 325 casos) y checkpoint de implementación 3671b94 publicados en origin/main (push 1ade67). Implementación React/SCSS, API hexagonal, PostgreSQL y BlockPlanned.v1 revisada; judge completo APPROVED en progress/judge_schedule_block.md. No es cierre de feature ni de MVP. Features 1–10 terminadas; 12–30 pendientes, bajo autorización global del usuario.
 
 ## Estado verificado
 
@@ -12,12 +12,15 @@ Feature 11 schedule_block in_progress. Contrato aprobado a84e42f (62 escenarios,
 - Regresión E2E global 45942: 57/58 verdes. El timeout de disponibilidad se diagnosticó con traza (27 segundos, 23,9 en 28 anchos); se separó la matriz manteniendo cobertura y timeout. Grupo afectado 31/31 verde aebd37. Son ejecuciones separadas con dos casos solapados.
 - Build frontend y Docker verdes. Revisiones independientes de cliente, dominio, persistencia, UI, publicador y E2E consolidadas en progress/tdd_schedule_block.md y judge_schedule_block.md.
 - CI de feature 10 cb162b7 terminó success, run 34014505916. No acredita feature 11.
+- CI del checkpoint 3671b94 en curso, run 34024330569 (snapshot df9b78); todavía sin conclusión.
 
 ## Mutación en curso
 
-Judge habilita medición, aún sin resultados finales. Backend ejecuta por arnés mutate schedule_block-backend (sesión 35831); frontend mutate schedule_block-frontend (13670). Scope incluye lógica nueva, adaptadores y configuración Java, API/UI y TaskReader/TaskState completos. Umbral 80 intacto. El arnés mantiene default completo y targets explícitos cerrados, probado con node:test.
+PIT backend inicial terminó EXIT 0: 454 mutantes, 414 KILLED, 35 SURVIVED y 5 NO_COVERAGE; 91,19 %, sin timeouts ni errores de ejecución. Inventario en progress/mutation_schedule_block_backend.md y revisión individual en progress/review_schedule_block_mutation_candidates.md. El seguimiento de cobertura pasa 323 pruebas; judge autoriza repetir PIT con las mismas clases y las suites Wiring/RabbitFailures incorporadas.
 
-PIT recibe el classpath de la prueba de recuperación mediante provider lazy validado sin omitirla. Stryker excluye explícitamente la carpeta protegida; patrón validado sintéticamente sin leerla. No modificar fuentes/tests mientras se mide. Un aviso de git diff --check por líneas vacías al final de build.gradle.kts se resolverá en la siguiente frontera de autoría; no afecta compilación.
+Stryker frontend terminó EXIT 0 (93196a): 1561 mutantes, 1332 Killed, 225 Survived, 3 NoCoverage y 1 RuntimeError; 85,38 %, sin timeouts. El error corresponde al runner al convertir una excepción de la mutación945; no se cuenta como killed. Informes nuevos de las 12:20, pendientes de clasificación y seguimiento. El arnés mantiene default completo y targets explícitos cerrados, probado con node:test.
+
+PIT recibe el classpath de la prueba de recuperación mediante provider lazy validado sin omitirla. Stryker excluye explícitamente la carpeta protegida; patrón validado sintéticamente sin leerla. Backend queda congelado para nueva medición tras cubrir límites de fechas/duración/paginación y wiring e incorporar RabbitBrokerFailuresTest existente. XML inicial preservado con hash idéntico; líneas vacías finales de Gradle corregidas. Frontend sigue sin cambios mientras se clasifica el informe final.
 
 ## Siguiente paso
 

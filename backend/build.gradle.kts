@@ -145,6 +145,7 @@ pitest {
     )
     val scheduleBlockTests = setOf(
         "com.apptolast.organization.adapter.config.ProjectStateConfigurationTest",
+        "com.apptolast.organization.adapter.config.ApplicationWiringTest",
         "com.apptolast.organization.domain.Block*Test",
         "com.apptolast.organization.domain.PlannedBlockTest",
         "com.apptolast.organization.domain.ResolvedBlockTimeTest",
@@ -153,6 +154,7 @@ pitest {
         "com.apptolast.organization.adapter.ScheduleBlockApiTest",
         "com.apptolast.organization.adapter.persistence.ScheduleBlockPersistenceTest",
         "com.apptolast.organization.adapter.broker.RabbitBrokerPublisherTest",
+        "com.apptolast.organization.adapter.broker.RabbitBrokerFailuresTest",
         "com.apptolast.organization.adapter.persistence.OutboxWorkTest",
         "com.apptolast.organization.adapter.persistence.OutboxRecoveryTest"
     )
@@ -197,5 +199,3 @@ pitest {
 }
 
 spotless { java { googleJavaFormat("1.31.0") } }
-
-

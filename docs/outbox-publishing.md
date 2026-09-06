@@ -62,6 +62,7 @@ La ejecución local opcional se documenta en el README del repositorio. El despl
 | TaskCreated.v1 | task.created.v1 | organization.task-created.v1 |
 | SubtaskCreated.v1 | subtask.created.v1 | organization.subtask-created.v1 |
 | TaskStatusChanged.v1 | task.status-changed.v1 | organization.task-status-changed.v1 |
+| BlockPlanned.v1 | block.planned.v1 | organization.block-planned.v1 |
 
 TaskCreated conserva aggregateId del proyecto y taskId de la tarea nueva. Su payload incluye título, pero excluye criterio y estimación. Crear una tarea confirma tarea y evento en la misma transacción, sin cambiar la representación o versión del proyecto. El estado final de validación se registra en create_task dentro del roadmap.
 
@@ -82,3 +83,11 @@ El contrato complete_reopen_task incorpora TaskStatusChanged.v1. El corte está 
 El evento contiene exactamente eventId, aggregateId, ownerId, occurredAt, schemaVersion, type, taskId, fromStatus y toStatus. aggregateId identifica el proyecto. Sólo una transición real entre pending y completed crea un evento; repetir el estado con la versión vigente conserva fechas y no genera otra transición. Una versión obsoleta se rechaza incluso si la intención ya está satisfecha.
 
 Estado, historial y outbox se guardan en una transacción PostgreSQL. El historial tiene persistencia propia y retención indefinida; retirar registros del outbox no elimina lo que el usuario completó o reabrió. La API lo ordena por versión de tarea, incluso cuando dos transiciones tienen la misma fecha. Este orden no se deduce de RabbitMQ: el evento no incluye versión de tarea y el publicador no garantiza orden por agregado.
+
+## Bloques planificados
+
+El contrato schedule_block incorpora BlockPlanned.v1 y su séptima ruta. Bloque y evento se confirman en la misma transacción; un replay por clave devuelve el bloque original sin otro evento. La revisión de presupuesto no escribe outbox. El estado de calidad de esta entrega permanece en el roadmap y su dictamen, con mutación todavía en curso.
+
+Su payload cerrado contiene eventId, aggregateId, ownerId, occurredAt, schemaVersion, type, blockId, taskId, startAt, endAt, zoneId y durationMinutes. aggregateId sigue identificando el proyecto. No incluye objetivo privado, clave de idempotencia ni aceptación del exceso. Los extremos son instantes UTC y la zona original se conserva aunque deje de estar disponible en el catálogo posterior; el publicador no vuelve a calcular horarios históricos.
+
+Se aplican las mismas garantías de aceptación, reintento y posibles duplicados. Recibir BlockPlanned no acredita tiempo trabajado ni tarea completada, y compartir aggregateId no impone orden causal entre los eventos del proyecto.

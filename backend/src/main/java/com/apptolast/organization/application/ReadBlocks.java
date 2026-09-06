@@ -4,6 +4,9 @@ import com.apptolast.organization.domain.PlannedBlock;
 import java.util.UUID;
 
 public final class ReadBlocks implements ReadBlocksUseCase {
+  public com.apptolast.organization.domain.BlockState state(String owner, UUID project, UUID task, UUID block) {
+    return queries.state(owner,project,task,block);
+  }
   public com.apptolast.organization.domain.BlockPage list(
       String owner,
       UUID project,

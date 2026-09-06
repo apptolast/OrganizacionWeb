@@ -9,6 +9,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  com.apptolast.organization.application.CancelBlock cancelBlock(com.apptolast.organization.application.BlockEditing store, Clock clock) {
+    return new com.apptolast.organization.application.CancelBlock(store,clock);
+  }
+  @Bean
   com.apptolast.organization.application.ReadBlocks readBlocks(
       com.apptolast.organization.application.BlockQueries queries) {
     return new com.apptolast.organization.application.ReadBlocks(queries);

@@ -49,6 +49,7 @@ class ApplicationWiringTest {
             .withBean(ZoneCatalog.class, () -> () -> Set.of("UTC"));
     for (var port :
         List.of(
+            BlockEditing.class,
             TodayQueries.class,
             BlockQueries.class,
             BlockPlanning.class,

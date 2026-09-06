@@ -115,10 +115,18 @@
       "id": 11,
       "name": "schedule_block",
       "title": "Planificar bloque",
-      "description": "Contrato aprobado en a84e42f: 62 escenarios y 325 casos para revisión, reserva atómica, presupuesto, idempotencia y recuperación; TDD en curso.",
-      "acceptance": [],
+      "description": "Planificación de bloques implementada y cierre local aprobado: contrato de 62 escenarios y 325 casos, revisión temporal, reserva atómica, presupuesto, idempotencia y recuperación. Evidencia y límites en progress/judge_schedule_block.md; sin declarar CI completo ni despliegue.",
+      "acceptance": [
+        "Contrato features/schedule_block.feature (a84e42f): 62 escenarios y 325 casos trazados y cumplidos según dictamen final APPROVED.",
+        "Revisión de intención, zona y ocurrencias DST; presupuesto por día y consentimiento explícito sin permitir solapes.",
+        "Reserva atómica con idempotencia, consultas propias y recuperación de identidad tras incertidumbre y reinicio real del backend.",
+        "Persistencia PostgreSQL, concurrencia, privacidad, validación y publicación de eventos verificadas con sus fixtures reales.",
+        "Interfaz responsive y accesibilidad técnica verificadas; límites de dispositivos, lector de pantalla y evaluación humana documentados.",
+        "Init final verde y mutación sobre umbral con campañas separadas; RuntimeError945 histórico del adaptador aceptado como límite, nunca contado como Killed.",
+        "Cierre local de feature11; CI2133120/run34030806009 en curso al cierre, timeout240 aún no certificado y sin despliegue productivo."
+      ],
       "sdd": true,
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 12,

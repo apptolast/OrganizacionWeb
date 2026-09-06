@@ -2,7 +2,7 @@
 
 ## Feature activa
 
-Ninguna. Feature12 `today` cerrada como done por dictamen global final APPROVED en [judge_today.md](judge_today.md). Registro de sesión y cierre conservados en [history.md](history.md).
+Feature13 `reschedule`, fase de especificación. Feature12 `today` cerrada y subida en e9269db; registro conservado en [history.md](history.md).
 
 ## Último cierre verificado
 
@@ -12,14 +12,19 @@ Ninguna. Feature12 `today` cerrada como done por dictamen global final APPROVED 
 
 ## Continuidad
 
-Features1–12 done;13–30 pending. Próxima:13 `reschedule`, pendiente de especificación/contrato antes de TDD. No se inicia esa fase durante este cierre. Autorización global vigente; no repetir permiso por feature. Ponytail full y Caveman lite.
+Features1–12 done;13–30 pending. Propuesta13 en revisión antes de Gherkin/TDD. Autorización global vigente; no repetir permiso por feature. Ponytail full y Caveman lite.
 
 ## Trabajo de la próxima sesión
 
-- Objetivo: por definir dentro de feature13.
-- Fase y evidencia: pendientes.
-- Archivos y resultados: pendientes.
+- Objetivo: mover/cancelar bloques con identidad estable, historial y recuperación idempotente.
+- Fase: spec_partner resume_frontend; exploración backend independiente resume_backend; revisión contractual previa resume_review y coordinador.
+- Evidencia: [research_reschedule_backend.md](research_reschedule_backend.md); propuesta en sección13 de project-spec.md. La fila original es también recibo de creación: preservarla es necesario para no romper replay11.
+- Sin cambios de fuentes/tests desde init78050. CI de e9269db sigue in_progress, consulta2ffbf8; no se atribuye resultado remoto.
 
 ## Límites vigentes
 
 Cierre local; no acredita MVP completo, despliegue ni CI remoto del último checkpoint. Commit/push documental a cargo del coordinador. No leer ni limpiar proposal_schedule_block_time.md, .e2e-work/read-review* o frontend/.stryker-tmp-availability-replay, ni eliminar sus ascendientes. No repetir acciones rechazadas ni afirmar limpieza completa.
+
+## Inicio de especificación13
+
+Por delegación del coordinador, spec_partner prepara la sección13 de project-spec.md y progress/proposal_reschedule.md. Fase: propuesta para revisión, sin Gherkin/TDD; feature13 sigue pending. Reutilización estudiada: recibo de creación11, proyección vigente, revisiones, presupuesto, outbox y UI de bloques. La autorización global continúa vigente. Init78050 anterior se conserva como contexto; no se repiten suites en esta tarea documental.

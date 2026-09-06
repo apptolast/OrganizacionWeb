@@ -184,14 +184,12 @@ const cancellation = {
   after: null,
 };
 it("@s12 @s13 transmits cancellation without availability and accepts a historical clock", async () => {
-  const fetch = vi
-    .fn()
-    .mockResolvedValue(
-      Response.json(cancellation, {
-        status: 201,
-        headers: { Location: base + "/changes/" + changeId },
-      }),
-    );
+  const fetch = vi.fn().mockResolvedValue(
+    Response.json(cancellation, {
+      status: 201,
+      headers: { Location: base + "/changes/" + changeId },
+    }),
+  );
   vi.stubGlobal("fetch", fetch);
   await expect(
     sendBlockChange({ state, key, kind: "CANCELLED" }),
@@ -270,14 +268,12 @@ const moveInput = {
   allowOverBudget: false,
 };
 it("@s11 @s15 sends movement and replays the same receipt with exact retained headers", async () => {
-  const fetch = vi
-    .fn()
-    .mockResolvedValue(
-      Response.json(movement, {
-        status: 200,
-        headers: { Location: base + "/changes/" + changeId },
-      }),
-    );
+  const fetch = vi.fn().mockResolvedValue(
+    Response.json(movement, {
+      status: 200,
+      headers: { Location: base + "/changes/" + changeId },
+    }),
+  );
   vi.stubGlobal("fetch", fetch);
   await expect(
     sendBlockChange({
@@ -306,14 +302,12 @@ it("@s11 @s15 sends movement and replays the same receipt with exact retained he
   );
 });
 it("@s29 @s32 refuses a movement whose retained review no longer matches input", async () => {
-  const fetch = vi
-    .fn()
-    .mockResolvedValue(
-      Response.json(movement, {
-        status: 201,
-        headers: { Location: base + "/changes/" + changeId },
-      }),
-    );
+  const fetch = vi.fn().mockResolvedValue(
+    Response.json(movement, {
+      status: 201,
+      headers: { Location: base + "/changes/" + changeId },
+    }),
+  );
   vi.stubGlobal("fetch", fetch);
   await expect(
     sendBlockChange({
@@ -422,17 +416,15 @@ it("@s32 never confirms a revision beyond BIGINT even after reading its valid ma
   };
   vi.stubGlobal(
     "fetch",
-    vi
-      .fn()
-      .mockResolvedValue(
-        Response.json(
-          {
-            ...cancellation,
-            revision: `"block:${block.id}:9223372036854775808"`,
-          },
-          { status: 201, headers: { Location: base + "/changes/" + changeId } },
-        ),
+    vi.fn().mockResolvedValue(
+      Response.json(
+        {
+          ...cancellation,
+          revision: `"block:${block.id}:9223372036854775808"`,
+        },
+        { status: 201, headers: { Location: base + "/changes/" + changeId } },
       ),
+    ),
   );
   await expect(
     sendBlockChange({ state: maximum, key, kind: "CANCELLED" }),

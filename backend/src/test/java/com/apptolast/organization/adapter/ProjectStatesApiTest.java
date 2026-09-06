@@ -70,7 +70,8 @@ class ProjectStatesApiTest {
 
   @BeforeEach
   void clear() {
-    jdbc.execute("TRUNCATE planned_blocks, task_status_history, tasks, outbox_events, projects");
+    jdbc.execute(
+        "TRUNCATE block_changes,block_projections,planned_blocks, task_status_history, tasks, outbox_events, projects");
   }
 
   java.util.UUID seed() {

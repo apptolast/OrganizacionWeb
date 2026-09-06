@@ -47,7 +47,8 @@ class TaskApiTest {
 
   @BeforeEach
   void setup() {
-    jdbc.execute("TRUNCATE planned_blocks, task_status_history, tasks, outbox_events, projects");
+    jdbc.execute(
+        "TRUNCATE block_changes,block_projections,planned_blocks, task_status_history, tasks, outbox_events, projects");
     project = UUID.randomUUID();
     jdbc.update(
         "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'persona-a','P','','idea',now(),now())",

@@ -10,6 +10,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public final class ApiErrors {
+  @ExceptionHandler(com.apptolast.organization.application.BlockNotFoundException.class)
+  ResponseEntity<Map<String, Object>> missingBlock() {
+    return ResponseEntity.status(404)
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+        .body(problem(404, "BLOCK_NOT_FOUND", "No se ha encontrado el bloque."));
+  }
+
   @ExceptionHandler(com.apptolast.organization.application.StorageUnavailableException.class)
   ResponseEntity<Map<String, Object>> storage() {
     return ResponseEntity.status(503)

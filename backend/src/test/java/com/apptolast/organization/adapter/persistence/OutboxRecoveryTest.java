@@ -77,7 +77,8 @@ class OutboxRecoveryTest {
 
   @BeforeEach
   void clear() throws Exception {
-    jdbc.execute("TRUNCATE planned_blocks, task_status_history, tasks, outbox_events, projects");
+    jdbc.execute(
+        "TRUNCATE block_changes,block_projections,planned_blocks, task_status_history, tasks, outbox_events, projects");
     try (var connection = factory().newConnection();
         var channel = connection.createChannel()) {
       channel.queuePurge(QUEUE);

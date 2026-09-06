@@ -48,10 +48,12 @@ class TaskApiTest {
   @BeforeEach
   void setup() {
     jdbc.execute(
-        "TRUNCATE block_changes,block_projections,planned_blocks, task_status_history, tasks, outbox_events, projects");
+        "TRUNCATE work_sessions,block_changes,block_projections,planned_blocks,"
+            + " task_status_history, tasks, outbox_events, projects");
     project = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'persona-a','P','','idea',now(),now())",
+        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+            + " (?,'persona-a','P','','idea',now(),now())",
         project);
   }
 
@@ -159,7 +161,8 @@ class TaskApiTest {
                     .with(csrf().asHeader())
                     .contentType("application/json")
                     .content(
-                        "{\"title\":\"🚀 tarea\",\"completionCriterion\":\"  conservar\\ntexto\",\"estimatedMinutes\":1440}"))
+                        "{\"title\":\"🚀 tarea\",\"completionCriterion\":\"  conservar\\n"
+                            + "texto\",\"estimatedMinutes\":1440}"))
             .andExpect(status().isCreated())
             .andReturn()
             .getResponse();
@@ -205,7 +208,8 @@ class TaskApiTest {
   void s20_s21_stablePaginationWithTiesAndNewerInsert() throws Exception {
     for (int n = 1; n <= 21; n++)
       jdbc.update(
-          "INSERT INTO tasks VALUES (?,?,?,'',null,'pending','2026-01-01T00:00:00.123456Z','2026-01-01T00:00:00.123456Z')",
+          "INSERT INTO tasks VALUES"
+              + " (?,?,?,'',null,'pending','2026-01-01T00:00:00.123456Z','2026-01-01T00:00:00.123456Z')",
           new UUID(0, n),
           project,
           "T" + n);
@@ -455,7 +459,8 @@ class TaskApiTest {
     if (defect.equals("wrongProject")) {
       UUID other = UUID.randomUUID();
       jdbc.update(
-          "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'persona-a','Other','','idea',now(),now())",
+          "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+              + " (?,'persona-a','Other','','idea',now(),now())",
           other);
       target = "/api/v1/projects/" + other + "/tasks/" + task;
     }

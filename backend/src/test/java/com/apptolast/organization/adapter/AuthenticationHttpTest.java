@@ -45,7 +45,8 @@ class AuthenticationHttpTest {
   void browser() {
     jdbc.execute("TRUNCATE spring_session CASCADE");
     jdbc.execute(
-        "TRUNCATE block_changes,block_projections,planned_blocks, task_status_history, tasks, outbox_events, projects");
+        "TRUNCATE work_sessions,block_changes,block_projections,planned_blocks,"
+            + " task_status_history, tasks, outbox_events, projects");
     cookies = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
     client =
         HttpClient.newBuilder()
@@ -259,7 +260,8 @@ class AuthenticationHttpTest {
     String event = operation.equals("logout") ? "DELETE" : "UPDATE";
     String condition = operation.equals("logout") ? "" : " WHEN (NEW.PRINCIPAL_NAME IS NOT NULL)";
     jdbc.execute(
-        "CREATE FUNCTION reject_session() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'synthetic secret SQL error'; END; $$");
+        "CREATE FUNCTION reject_session() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE"
+            + " EXCEPTION 'synthetic secret SQL error'; END; $$");
     jdbc.execute(
         "CREATE TRIGGER reject_session BEFORE "
             + event

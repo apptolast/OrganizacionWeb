@@ -49,14 +49,17 @@ class TaskStatusApiTest {
   @BeforeEach
   void setup() {
     jdbc.execute(
-        "TRUNCATE block_changes,block_projections,planned_blocks, task_status_history, tasks, outbox_events, projects");
+        "TRUNCATE work_sessions,block_changes,block_projections,planned_blocks,"
+            + " task_status_history, tasks, outbox_events, projects");
     project = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'persona-a','P','','idea',now(),now())",
+        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+            + " (?,'persona-a','P','','idea',now(),now())",
         project);
     parent = UUID.fromString("abcdef01-2345-6789-abcd-0123456789ab");
     jdbc.update(
-        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at) VALUES (?, ?, 'Parent', '', 'pending', now(), now())",
+        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at)"
+            + " VALUES (?, ?, 'Parent', '', 'pending', now(), now())",
         parent,
         project);
   }
@@ -432,7 +435,9 @@ class TaskStatusApiTest {
     jdbc.update("UPDATE projects SET status=? WHERE id=?", projectStatus, project);
     var child = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO tasks(id,project_id,parent_id,title,completion_criterion,status,created_at,updated_at) VALUES (?, ?, ?, 'Child', '', 'pending',now(),now())",
+        "INSERT INTO"
+            + " tasks(id,project_id,parent_id,title,completion_criterion,status,created_at,updated_at)"
+            + " VALUES (?, ?, ?, 'Child', '', 'pending',now(),now())",
         child,
         project,
         parent);
@@ -474,7 +479,8 @@ class TaskStatusApiTest {
     }
     var ancestor = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at) VALUES (?, ?, 'Ancestor', '', 'pending',now(),now())",
+        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at)"
+            + " VALUES (?, ?, 'Ancestor', '', 'pending',now(),now())",
         ancestor,
         project);
     jdbc.update("UPDATE tasks SET parent_id=? WHERE id=?", ancestor, parent);
@@ -521,7 +527,8 @@ class TaskStatusApiTest {
     if (defect.equals("wrongProject")) {
       var other = UUID.randomUUID();
       jdbc.update(
-          "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'persona-a','Other','','idea',now(),now())",
+          "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+              + " (?,'persona-a','Other','','idea',now(),now())",
           other);
       root = "/api/v1/projects/" + other + "/tasks/";
     }

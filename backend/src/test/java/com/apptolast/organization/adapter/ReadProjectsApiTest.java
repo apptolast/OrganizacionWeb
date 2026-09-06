@@ -69,7 +69,8 @@ class ReadProjectsApiTest {
   @BeforeEach
   void clear() {
     jdbc.execute(
-        "TRUNCATE block_changes,block_projections,planned_blocks, task_status_history, tasks, outbox_events, projects");
+        "TRUNCATE work_sessions,block_changes,block_projections,planned_blocks,"
+            + " task_status_history, tasks, outbox_events, projects");
   }
 
   @Test
@@ -90,7 +91,8 @@ class ReadProjectsApiTest {
     var id = java.util.UUID.randomUUID();
     var now = java.sql.Timestamp.from(java.time.Instant.parse("2026-09-05T12:00:00Z"));
     jdbc.update(
-        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,?,?,?,'idea',?,?)",
+        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+            + " (?,?,?,?,'idea',?,?)",
         id,
         owner,
         name,
@@ -206,7 +208,8 @@ class ReadProjectsApiTest {
     String cursor = json.readTree(first).get("nextCursor").asText();
     var newer = seed("persona-a", "Newer");
     jdbc.update(
-        "UPDATE projects SET created_at=created_at+interval '1 second', updated_at=updated_at+interval '1 second' WHERE id=?",
+        "UPDATE projects SET created_at=created_at+interval '1 second',"
+            + " updated_at=updated_at+interval '1 second' WHERE id=?",
         newer);
     var body =
         json.readTree(

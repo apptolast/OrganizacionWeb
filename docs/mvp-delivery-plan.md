@@ -1,6 +1,6 @@
 # Plan de entrega del MVP
 
-Estimación provisional actualizada el 6 de septiembre de 2026 tras cerrar Replanificar. Se revisará después de la primera prueba de despliegue. Las horas representan trabajo efectivo pendiente con ejecución disponible; no constituyen una fecha garantizada ni una predicción sobre cuota de la cuenta.
+Estimación provisional actualizada el 6 de septiembre de 2026 tras cerrar Replanificar. Se revisará después de la primera prueba de despliegue. Las horas representan tiempo transcurrido de ejecución efectiva del trabajo coordinado con herramientas disponibles, incluidas pruebas, CI, mutación y revisión. No son la suma de horas de los agentes en paralelo. Excluyen pausas por cuota, falta de acceso o espera de información del usuario; no constituyen una fecha garantizada ni una predicción sobre cuota de la cuenta.
 
 ## Qué se entregará primero
 
@@ -32,6 +32,18 @@ La previsión pendiente se redondea prudentemente a **30–60 horas efectivas**,
 Dependencia de despliegue ya identificada en docs/implementation-proposal.md: la lectura histórica del contrato de infraestructura dejaba 45 MiB dentro de su presupuesto de stacks. No representa RAM libre medida ni el estado actual del servidor. Hay que comprobar capacidad real y actualizar ese contrato antes de incorporar API, base de datos y broker. Si hace falta ampliar recursos o cambiar infraestructura, la partida de despliegue deberá reestimarse con ese trabajo concreto.
 
 Para el conjunto del roadmap, la orientación anterior de 1–3 semanas es de baja confianza, no un compromiso: «otros conectores» y «personalizable al extremo» requieren un inventario acotado por proveedor y comportamiento antes de poder estimar el total con rigor. Cada integración depende también de permisos y contratos externos. No se puede asegurar que el proyecto completo ni el MVP terminen antes de un reinicio de cuota dentro de cuatro días.
+
+## Secuencia de entrega y puntos de revisión
+
+1. Completar inicio de sesiones (14): reglas, concurrencia, recuperación, API, interfaz y publicación. Cerrar con contrato trazado, revisión y gates propios. El núcleo persistente y el cliente parcial actuales no sustituyen ese cierre.
+2. Implementar pausa/reanudación (15) y después cierre (16), cada una con su contrato y validación. Comprobar duración real, recuperación y posibilidad de terminar una sesión antes de habilitar el ciclo para uso habitual.
+3. Añadir aviso de fin (17), conservando el fin previsto y la decisión explícita del usuario sobre continuar o terminar.
+4. Incorporar historial (18): consultar lo realizado con fechas y tiempo real, separado de los bloques planificados.
+5. Validar el recorrido integrado y desplegar: acceso privado, persistencia tras reinicio, responsive, HTTPS, respaldo y restauración verificados en el servidor.
+
+En paralelo con el desarrollo puede prepararse la configuración documental del despliegue; la puesta en servicio depende del ciclo funcional y de comprobar acceso, capacidad y dominio. Se mantiene una feature en implementación cada vez, aunque backend y frontend de esa feature se repartan entre agentes.
+
+La revisión de estimación en `progress/review_mvp_estimate.md` confirma que 30–60 horas es una **hipótesis de planificación de baja confianza**, no una previsión validada por medición. No se convierte automáticamente en días ni se divide por el número de agentes. Se recalculará tras cerrar 14 con sus gates, tras completar el ciclo 14–16 y tras comprobar el servidor. Los recuentos de funcionalidades o pruebas no equivalen a un porcentaje de esfuerzo terminado.
 
 ## Resolución de las PR
 

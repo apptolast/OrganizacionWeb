@@ -15,6 +15,8 @@ Codex estaba desarrollando backend antes de detectar el solape. Se detiene en un
 
 El cambio remoto de CI706a0bc se conserva. Esta nota no cambia workflows, umbrales, paralelismo de pruebas ni decisiones de cierre. Los informes de cada equipo deben identificar su rama y ejecución; las pruebas de un árbol no acreditan automáticamente otro.
 
+Publicación confirmada: frontend en `codex/reschedule-frontend` a74a812 (incluye cliente cf5e3e3 y primer panel parcial con87 pruebas focales verdes). Backend previo en `codex/reschedule-backend-checkpoint`03ad92e, detenido con29 pruebas focales verdes; contiene pendientes explícitos y no está listo para integrar. Codex reanuda sólo frontend. Ambos avances están respaldados; ninguna de estas ramas se ha fusionado a main.
+
 ## Límites compartidos
 
 No acceder ni limpiar `.e2e-work/read-review*`, `frontend/.stryker-tmp-availability-replay` o `progress/proposal_schedule_block_time.md`, ni eliminar sus ascendientes. No force-push ni borrado de ramas/archivos del otro equipo. La autorización de features/commits sigue vigente; no se declara MVP, despliegue o feature13 terminada.

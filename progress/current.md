@@ -2,15 +2,15 @@
 
 ## Feature activa
 
-Ninguna. Feature 10 availability cerrada localmente; resumen y evidencias en history.md y judge_availability.md.
+Feature 11 schedule_block spec_ready: contrato aprobado de 62 escenarios y 325 casos, bajo autorización global. No hay producción ni pruebas nuevas de esta feature. Feature 10 publicada en cb162b7.
 
 ## Siguiente paso
 
-Feature 11 schedule_block permanece pending, sin implementación activa. Su contrato deberá concretarse antes de empezar. Este cierre no declara terminado el MVP.
+Registrar contrato en commit e iniciar TDD por capas con propiedad de archivos separada. Dictamen en progress/review_schedule_block_contract.md. Supuesto explícito comunicado: exceso con aceptación específica, solapes prohibidos. El MVP todavía no está terminado.
 
 ## Verificación pendiente
 
-Publicación del cierre y siguiente CI a cargo del coordinador. CI de e1afc11 cancelada por timeout; techo provisional ampliado a 120 minutos en 704ff0f, sin afirmar éxito remoto. No hay despliegue productivo.
+Baseline de esta sesión: init 96222 EXIT 0, lint verde y 875 frontend; backend UP-TO-DATE conserva 984 resultados previos. CI 34014505916 de cb162b7 en curso, sin afirmar éxito remoto. La CI anterior de e1afc11 terminó por timeout; techo provisional ampliado a 120 minutos en 704ff0f. No hay despliegue productivo.
 
 ## Límites conservados
 

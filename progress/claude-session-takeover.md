@@ -74,4 +74,3 @@ Acciones ejecutadas al aceptar el reparto:
 Aviso pendiente de arreglar, porque el usuario exige cero warnings: la CI emite la deprecacion de Node.js 20 en `gradle/actions/setup-gradle@v4` y `pnpm/action-setup@v4`. No se toca ahora para no encadenar cambios de workflow durante la coordinacion.
 
 Nota de operacion: la ejecucion de CI de 706a0bc se cancelo sola al llegar a378925. Es el grupo `concurrency` funcionando como se diseno, no un fallo.
-

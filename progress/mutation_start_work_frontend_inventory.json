@@ -1,0 +1,1468 @@
+{
+  "total": 533,
+  "killed": 452,
+  "survived": 81,
+  "noCoverage": 0,
+  "runtimeError": 0,
+  "timeout": 0,
+  "items": [
+    {
+      "file": "src/work-session-api.ts",
+      "id": "14",
+      "status": "Survived",
+      "mutatorName": "ArrowFunction",
+      "location": {
+        "end": {
+          "column": 22,
+          "line": 29
+        },
+        "start": {
+          "column": 12,
+          "line": 29
+        }
+      },
+      "original": "() => null",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "29",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 49,
+          "line": 32
+        },
+        "start": {
+          "column": 5,
+          "line": 32
+        }
+      },
+      "original": "value.code === \"WORK_SESSION_ALREADY_ACTIVE\"",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "32",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 74,
+          "line": 33
+        },
+        "start": {
+          "column": 5,
+          "line": 33
+        }
+      },
+      "original": "value.type === \"urn:organization:problem:work_session_already_active\"",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "37",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 35
+        },
+        "start": {
+          "column": 5,
+          "line": 35
+        }
+      },
+      "original": "error.status === 409",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "35",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 34
+        },
+        "start": {
+          "column": 5,
+          "line": 34
+        }
+      },
+      "original": "value.status === 409",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "54",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 74,
+          "line": 50
+        },
+        "start": {
+          "column": 5,
+          "line": 50
+        }
+      },
+      "original": "value.type !== \"urn:organization:problem:\" + value.code.toLowerCase()",
+      "replacement": "false"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "61",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 80,
+          "line": 54
+        },
+        "start": {
+          "column": 7,
+          "line": 53
+        }
+      },
+      "original": "(value.code === \"WORK_SESSION_NOT_FOUND\" && error.status === 404) ||\n      (value.code === \"WORK_SESSION_TIME_OUT_OF_RANGE\" && error.status === 409)",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "58",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 51
+        }
+      },
+      "original": "value.status !== error.status",
+      "replacement": "false"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "72",
+      "status": "Survived",
+      "mutatorName": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 79,
+          "line": 54
+        },
+        "start": {
+          "column": 8,
+          "line": 54
+        }
+      },
+      "original": "value.code === \"WORK_SESSION_TIME_OUT_OF_RANGE\" && error.status === 409",
+      "replacement": "value.code === \"WORK_SESSION_TIME_OUT_OF_RANGE\" || error.status === 409"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "65",
+      "status": "Survived",
+      "mutatorName": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 71,
+          "line": 53
+        },
+        "start": {
+          "column": 8,
+          "line": 53
+        }
+      },
+      "original": "value.code === \"WORK_SESSION_NOT_FOUND\" && error.status === 404",
+      "replacement": "value.code === \"WORK_SESSION_NOT_FOUND\" || error.status === 404"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "66",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 53
+        },
+        "start": {
+          "column": 8,
+          "line": 53
+        }
+      },
+      "original": "value.code === \"WORK_SESSION_NOT_FOUND\"",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "73",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 55,
+          "line": 54
+        },
+        "start": {
+          "column": 8,
+          "line": 54
+        }
+      },
+      "original": "value.code === \"WORK_SESSION_TIME_OUT_OF_RANGE\"",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "69",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 71,
+          "line": 53
+        },
+        "start": {
+          "column": 51,
+          "line": 53
+        }
+      },
+      "original": "error.status === 404",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "76",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 79,
+          "line": 54
+        },
+        "start": {
+          "column": 59,
+          "line": 54
+        }
+      },
+      "original": "error.status === 409",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "141",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 134
+        },
+        "start": {
+          "column": 5,
+          "line": 134
+        }
+      },
+      "original": "value.plannedMinutes !== plannedMinutes",
+      "replacement": "false"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "174",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 17,
+          "line": 160
+        },
+        "start": {
+          "column": 5,
+          "line": 159
+        }
+      },
+      "original": "start !== null &&\n    end !== null",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "175",
+      "status": "Survived",
+      "mutatorName": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 17,
+          "line": 160
+        },
+        "start": {
+          "column": 5,
+          "line": 159
+        }
+      },
+      "original": "start !== null &&\n    end !== null",
+      "replacement": "start !== null || end !== null"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "176",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 19,
+          "line": 159
+        },
+        "start": {
+          "column": 5,
+          "line": 159
+        }
+      },
+      "original": "start !== null",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "178",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 17,
+          "line": 160
+        },
+        "start": {
+          "column": 5,
+          "line": 160
+        }
+      },
+      "original": "end !== null",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "188",
+      "status": "Survived",
+      "mutatorName": "Regex",
+      "location": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "original": "/(?:\\.\\d+)?Z$/",
+      "replacement": "/(?:\\.\\d+)?Z/"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "189",
+      "status": "Survived",
+      "mutatorName": "Regex",
+      "location": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "original": "/(?:\\.\\d+)?Z$/",
+      "replacement": "/(?:\\.\\d+)Z$/"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "190",
+      "status": "Survived",
+      "mutatorName": "Regex",
+      "location": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "original": "/(?:\\.\\d+)?Z$/",
+      "replacement": "/(?:\\.\\d)?Z$/"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "191",
+      "status": "Survived",
+      "mutatorName": "Regex",
+      "location": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "original": "/(?:\\.\\d+)?Z$/",
+      "replacement": "/(?:\\.\\D+)?Z$/"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "192",
+      "status": "Survived",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 73,
+          "line": 167
+        },
+        "start": {
+          "column": 70,
+          "line": 167
+        }
+      },
+      "original": "\"Z\"",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "195",
+      "status": "Survived",
+      "mutatorName": "Regex",
+      "location": {
+        "end": {
+          "column": 43,
+          "line": 168
+        },
+        "start": {
+          "column": 32,
+          "line": 168
+        }
+      },
+      "original": "/\\.(\\d+)Z$/",
+      "replacement": "/\\.(\\d+)Z/"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "199",
+      "status": "Survived",
+      "mutatorName": "ArithmeticOperator",
+      "location": {
+        "end": {
+          "column": 77,
+          "line": 169
+        },
+        "start": {
+          "column": 10,
+          "line": 169
+        }
+      },
+      "original": "BigInt(wholeMilliseconds) * 1000n + BigInt(fraction.padEnd(6, \"0\"))",
+      "replacement": "BigInt(wholeMilliseconds) * 1000n - BigInt(fraction.padEnd(6, \"0\"))"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "201",
+      "status": "Survived",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 75,
+          "line": 169
+        },
+        "start": {
+          "column": 72,
+          "line": 169
+        }
+      },
+      "original": "\"0\"",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "id": "6",
+      "status": "Survived",
+      "mutatorName": "OptionalChaining",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 131
+        },
+        "start": {
+          "column": 19,
+          "line": 131
+        }
+      },
+      "original": "snapshot?.project",
+      "replacement": "snapshot.project"
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "id": "3",
+      "status": "Survived",
+      "mutatorName": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 49,
+          "line": 130
+        },
+        "start": {
+          "column": 15,
+          "line": 130
+        }
+      },
+      "original": "!projectLoading && !projectFailure",
+      "replacement": "!projectLoading || !projectFailure"
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "id": "1",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 49,
+          "line": 130
+        },
+        "start": {
+          "column": 15,
+          "line": 130
+        }
+      },
+      "original": "!projectLoading && !projectFailure",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "233",
+      "status": "Survived",
+      "mutatorName": "OptionalChaining",
+      "location": {
+        "end": {
+          "column": 29,
+          "line": 29
+        },
+        "start": {
+          "column": 7,
+          "line": 29
+        }
+      },
+      "original": "heading.current?.focus",
+      "replacement": "heading.current.focus"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "236",
+      "status": "Survived",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 36
+        },
+        "start": {
+          "column": 42,
+          "line": 36
+        }
+      },
+      "original": "\"\"",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "238",
+      "status": "Survived",
+      "mutatorName": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 49,
+          "line": 38
+        },
+        "start": {
+          "column": 44,
+          "line": 38
+        }
+      },
+      "original": "false",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "240",
+      "status": "Survived",
+      "mutatorName": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 51,
+          "line": 41
+        },
+        "start": {
+          "column": 46,
+          "line": 41
+        }
+      },
+      "original": "false",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "249",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 48
+        },
+        "start": {
+          "column": 24,
+          "line": 48
+        }
+      },
+      "original": "active === null",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "257",
+      "status": "Survived",
+      "mutatorName": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 38,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 50
+        }
+      },
+      "original": "props.taskStatus === \"pending\" &&\n    props.projectStatus !== undefined",
+      "replacement": "props.taskStatus === \"pending\" || props.projectStatus !== undefined"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "258",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 50
+        },
+        "start": {
+          "column": 5,
+          "line": 50
+        }
+      },
+      "original": "props.taskStatus === \"pending\"",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "261",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 38,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 51
+        }
+      },
+      "original": "props.projectStatus !== undefined",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "294",
+      "status": "Survived",
+      "mutatorName": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 28,
+          "line": 62
+        },
+        "start": {
+          "column": 9,
+          "line": 62
+        }
+      },
+      "original": "Number(minutes) < 1",
+      "replacement": "Number(minutes) <= 1"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "296",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 63
+        },
+        "start": {
+          "column": 9,
+          "line": 63
+        }
+      },
+      "original": "Number(minutes) > 1440",
+      "replacement": "false"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "297",
+      "status": "Survived",
+      "mutatorName": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 63
+        },
+        "start": {
+          "column": 9,
+          "line": 63
+        }
+      },
+      "original": "Number(minutes) > 1440",
+      "replacement": "Number(minutes) >= 1440"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "305",
+      "status": "Survived",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 69
+        },
+        "start": {
+          "column": 18,
+          "line": 69
+        }
+      },
+      "original": "\"\"",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "313",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 83
+        },
+        "start": {
+          "column": 11,
+          "line": 83
+        }
+      },
+      "original": "controller.signal.aborted",
+      "replacement": "false"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "273",
+      "status": "Survived",
+      "mutatorName": "ArrayDeclaration",
+      "location": {
+        "end": {
+          "column": 53,
+          "line": 54
+        },
+        "start": {
+          "column": 51,
+          "line": 54
+        }
+      },
+      "original": "[]",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "314",
+      "status": "Survived",
+      "mutatorName": "OptionalChaining",
+      "location": {
+        "end": {
+          "column": 28,
+          "line": 84
+        },
+        "start": {
+          "column": 7,
+          "line": 84
+        }
+      },
+      "original": "lookup.current?.abort",
+      "replacement": "lookup.current.abort"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "316",
+      "status": "Survived",
+      "mutatorName": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 23,
+          "line": 85
+        },
+        "start": {
+          "column": 18,
+          "line": 85
+        }
+      },
+      "original": "false",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "318",
+      "status": "Survived",
+      "mutatorName": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 28,
+          "line": 86
+        },
+        "start": {
+          "column": 23,
+          "line": 86
+        }
+      },
+      "original": "false",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "322",
+      "status": "Survived",
+      "mutatorName": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 89
+        },
+        "start": {
+          "column": 20,
+          "line": 89
+        }
+      },
+      "original": "false",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "367",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 59,
+          "line": 108
+        },
+        "start": {
+          "column": 13,
+          "line": 108
+        }
+      },
+      "original": "problem.code === \"WORK_SESSION_ALREADY_ACTIVE\"",
+      "replacement": "false"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "369",
+      "status": "Survived",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 59,
+          "line": 108
+        },
+        "start": {
+          "column": 30,
+          "line": 108
+        }
+      },
+      "original": "\"WORK_SESSION_ALREADY_ACTIVE\"",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "370",
+      "status": "Survived",
+      "mutatorName": "CallExpression",
+      "location": {
+        "end": {
+          "column": 32,
+          "line": 109
+        },
+        "start": {
+          "column": 11,
+          "line": 109
+        }
+      },
+      "original": "setActive(undefined);",
+      "replacement": ";"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "375",
+      "status": "Survived",
+      "mutatorName": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 113
+        },
+        "start": {
+          "column": 22,
+          "line": 113
+        }
+      },
+      "original": "false",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "384",
+      "status": "Survived",
+      "mutatorName": "OptionalChaining",
+      "location": {
+        "end": {
+          "column": 22,
+          "line": 119
+        },
+        "start": {
+          "column": 11,
+          "line": 118
+        }
+      },
+      "original": "problem.errors.find((error) => error.field === \"plannedMinutes\")\n            ?.message",
+      "replacement": "problem.errors.find(error => error.field === \"plannedMinutes\").message"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "386",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 74,
+          "line": 118
+        },
+        "start": {
+          "column": 42,
+          "line": 118
+        }
+      },
+      "original": "error.field === \"plannedMinutes\"",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "393",
+      "status": "Survived",
+      "mutatorName": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 123
+        },
+        "start": {
+          "column": 22,
+          "line": 123
+        }
+      },
+      "original": "false",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "411",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 71,
+          "line": 132
+        },
+        "start": {
+          "column": 11,
+          "line": 132
+        }
+      },
+      "original": "!controller.signal.aborted && command.current === controller",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "413",
+      "status": "Survived",
+      "mutatorName": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 71,
+          "line": 132
+        },
+        "start": {
+          "column": 11,
+          "line": 132
+        }
+      },
+      "original": "!controller.signal.aborted && command.current === controller",
+      "replacement": "!controller.signal.aborted || command.current === controller"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "415",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 71,
+          "line": 132
+        },
+        "start": {
+          "column": 41,
+          "line": 132
+        }
+      },
+      "original": "command.current === controller",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "429",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 38,
+          "line": 146
+        },
+        "start": {
+          "column": 13,
+          "line": 146
+        }
+      },
+      "original": "controller.signal.aborted",
+      "replacement": "false"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "467",
+      "status": "Survived",
+      "mutatorName": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 32,
+          "line": 182
+        },
+        "start": {
+          "column": 27,
+          "line": 182
+        }
+      },
+      "original": "false",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "469",
+      "status": "Survived",
+      "mutatorName": "ArrowFunction",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 183
+        },
+        "start": {
+          "column": 22,
+          "line": 183
+        }
+      },
+      "original": "(value) => value + 1",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "470",
+      "status": "Survived",
+      "mutatorName": "ArithmeticOperator",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 183
+        },
+        "start": {
+          "column": 33,
+          "line": 183
+        }
+      },
+      "original": "value + 1",
+      "replacement": "value - 1"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "446",
+      "status": "Survived",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 159
+        },
+        "start": {
+          "column": 24,
+          "line": 159
+        }
+      },
+      "original": "`${id}-heading`",
+      "replacement": "``"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "447",
+      "status": "Survived",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 30,
+          "line": 161
+        },
+        "start": {
+          "column": 15,
+          "line": 161
+        }
+      },
+      "original": "`${id}-heading`",
+      "replacement": "``"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "494",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 206
+        },
+        "start": {
+          "column": 12,
+          "line": 201
+        }
+      },
+      "original": "!eligible && !uncertain && (\n            <p>\n              Para iniciar trabajo necesitamos confirmar una tarea pendiente y\n              un proyecto no completado.\n            </p>\n          )",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "495",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 206
+        },
+        "start": {
+          "column": 12,
+          "line": 201
+        }
+      },
+      "original": "!eligible && !uncertain && (\n            <p>\n              Para iniciar trabajo necesitamos confirmar una tarea pendiente y\n              un proyecto no completado.\n            </p>\n          )",
+      "replacement": "false"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "502",
+      "status": "Survived",
+      "mutatorName": "CallExpression",
+      "location": {
+        "end": {
+          "column": 40,
+          "line": 213
+        },
+        "start": {
+          "column": 17,
+          "line": 213
+        }
+      },
+      "original": "event.preventDefault();",
+      "replacement": ";"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "500",
+      "status": "Survived",
+      "mutatorName": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 201
+        },
+        "start": {
+          "column": 25,
+          "line": 201
+        }
+      },
+      "original": "!uncertain",
+      "replacement": "uncertain"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "504",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 214
+        },
+        "start": {
+          "column": 21,
+          "line": 214
+        }
+      },
+      "original": "!uncertain",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "496",
+      "status": "Survived",
+      "mutatorName": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 206
+        },
+        "start": {
+          "column": 12,
+          "line": 201
+        }
+      },
+      "original": "!eligible && !uncertain && (\n            <p>\n              Para iniciar trabajo necesitamos confirmar una tarea pendiente y\n              un proyecto no completado.\n            </p>\n          )",
+      "replacement": "!eligible && !uncertain || <p>\n              Para iniciar trabajo necesitamos confirmar una tarea pendiente y\n              un proyecto no completado.\n            </p>"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "497",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 201
+        },
+        "start": {
+          "column": 12,
+          "line": 201
+        }
+      },
+      "original": "!eligible && !uncertain",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "498",
+      "status": "Survived",
+      "mutatorName": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 201
+        },
+        "start": {
+          "column": 12,
+          "line": 201
+        }
+      },
+      "original": "!eligible && !uncertain",
+      "replacement": "!eligible || !uncertain"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "499",
+      "status": "Survived",
+      "mutatorName": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 201
+        },
+        "start": {
+          "column": 12,
+          "line": 201
+        }
+      },
+      "original": "!eligible",
+      "replacement": "eligible"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "541",
+      "status": "Survived",
+      "mutatorName": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 23,
+          "line": 297
+        },
+        "start": {
+          "column": 18,
+          "line": 297
+        }
+      },
+      "original": "false",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "543",
+      "status": "Survived",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 48,
+          "line": 300
+        },
+        "start": {
+          "column": 41,
+          "line": 300
+        }
+      },
+      "original": "\"es-ES\"",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "545",
+      "status": "Survived",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 24,
+          "line": 302
+        },
+        "start": {
+          "column": 18,
+          "line": 302
+        }
+      },
+      "original": "\"long\"",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "546",
+      "status": "Survived",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 24,
+          "line": 303
+        },
+        "start": {
+          "column": 18,
+          "line": 303
+        }
+      },
+      "original": "\"long\"",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "554",
+      "status": "Survived",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 316
+        },
+        "start": {
+          "column": 17,
+          "line": 316
+        }
+      },
+      "original": "\" \"",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "555",
+      "status": "Survived",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 26,
+          "line": 323
+        },
+        "start": {
+          "column": 23,
+          "line": 323
+        }
+      },
+      "original": "\" \"",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "532",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 269
+        },
+        "start": {
+          "column": 17,
+          "line": 269
+        }
+      },
+      "original": "busy || uncertain",
+      "replacement": "true"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "440",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 152
+        },
+        "start": {
+          "column": 13,
+          "line": 152
+        }
+      },
+      "original": "!controller.signal.aborted",
+      "replacement": "true"
+    }
+  ]
+}

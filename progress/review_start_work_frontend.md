@@ -11,3 +11,7 @@ Evidencia del autor sobre el freeze:73/73 pruebas focales (32 API,39 UI,2 integr
 Ponytail: controles nativos y SCSS existente, sin dependencias ni abstracciones nuevas para el formulario. El puerto y el parser compartido conservan las reglas explícitas. Caveman lite no elimina mensajes necesarios de incertidumbre, cierre y accesibilidad.
 
 Límites pendientes obligatorios: recorrido HTTP/PG real14, mutación del código nuevo y puerta global, mediciones de geometría/contraste/áreas táctiles/feedback, zoom nativo y motores. ux_start_work_session.md incluye las treinta filas y distingue evidencia semántica de mediciones pendientes. JSDOM no acredita responsive ni evaluación humana. La integración TaskReader no debe publicarse para uso habitual antes del ciclo de cierre16. El lote puede versionarse en rama de desarrollo y medirse con Stryker mientras los otros autores completan backend y HTTP.
+
+## Configuración de mutación frontend revisada
+
+Root revisó bc9b16: el destino frontend sólo ejecuta la configuración fija; se mutan API y componente completos más la composición TaskReader124–135, cuyos extremos verifica el test de despacho. El default incluye también API/UI14. Se mantienen umbral80, análisis por test, concurrencia8 y exclusión del directorio protegido. Veintiocho tests de despacho verdes en d03b00. Aprobada la campaña frontend sobre producto congelado46913a7; el selector Gradle backend todavía no existe y **no debe ejecutarse** su destino hasta completarlo y revisarlo. No se versiona ni se publica el despacho incompleto como arnés final.

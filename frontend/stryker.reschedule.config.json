@@ -1,0 +1,32 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "ignorePatterns": [".stryker-tmp-availability-replay"],
+  "mutate": [
+    "src/reschedule-api.ts",
+    "src/reschedule-block.tsx",
+    "src/reschedule-history.tsx",
+    "src/block-confirmation.tsx",
+    "src/change-submit.tsx",
+    "src/block-details.tsx",
+    "src/task-blocks.tsx:22:0-223:1"
+  ],
+  "reporters": ["clear-text", "json", "html"],
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 80
+  },
+  "concurrency": 2,
+  "coverageAnalysis": "perTest",
+  "vitest": {
+    "configFile": "vite.config.ts"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation-reschedule/mutation.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation-reschedule/mutation.html"
+  }
+}

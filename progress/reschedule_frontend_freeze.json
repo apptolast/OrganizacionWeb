@@ -1,0 +1,62 @@
+[
+  {
+    "path": "frontend/src/reschedule-api.ts",
+    "sha256": "D4EA806C882F8372B1E5BCD10BF0992836E9D578FBC22FB75B3A533056CFAAB7"
+  },
+  {
+    "path": "frontend/src/reschedule-api.test.ts",
+    "sha256": "A292770415411D7D581B835A5FD4D6B88AE02C41871437FA8F5474149D803DFD"
+  },
+  {
+    "path": "frontend/src/reschedule-block.tsx",
+    "sha256": "F923BBEEAD7EFCE5FC2ED40DF994B8149B3D8B22B6A99C22752F762AB0242972"
+  },
+  {
+    "path": "frontend/src/reschedule-block.test.tsx",
+    "sha256": "F209651E32D5C3BD21CC1200B343BCFE61DC06508EB1D3E726A48CDE3D563EDF"
+  },
+  {
+    "path": "frontend/src/reschedule-history.tsx",
+    "sha256": "7C2E037F9573395D651C259A7E4BB8B83E1D0F63DC85D17FFA05EE8050C52C56"
+  },
+  {
+    "path": "frontend/src/reschedule-history.test.tsx",
+    "sha256": "28C747DFF7770FC824EFD2742BCED698E325A5B3DE6CE3D247A392ADCC1AFEF0"
+  },
+  {
+    "path": "frontend/src/block-confirmation.tsx",
+    "sha256": "6A882F6A46FF3B718D30676BA39E0838C820806C0A8C14664E94A876DCC8F73E"
+  },
+  {
+    "path": "frontend/src/block-confirmation.test.tsx",
+    "sha256": "5A0287963D945A275EA9B997CB2A7FFFEDFFC017A3A91DC8E819883120CA2C7C"
+  },
+  {
+    "path": "frontend/src/change-submit.tsx",
+    "sha256": "E12B6C1F5ABB4777976EF3792520D4365D53B8A4F5C8E3F06D1AE057A692FB02"
+  },
+  {
+    "path": "frontend/src/change-submit.test.tsx",
+    "sha256": "643384ED97528A17A1A98B204D5FA0692CE3FF9973F08BF1A6EB8B700828845F"
+  },
+  {
+    "path": "frontend/src/block-details.tsx",
+    "sha256": "73E9D94D56036F08CDE58B8FE2F7CE1C102E7D002D49CB846CF0528DE0846C85"
+  },
+  {
+    "path": "frontend/src/task-blocks.tsx",
+    "sha256": "EC2D7AC254DD1D96410FC4618C7D5AEDCAD51B02CE049160113EF8206D5FD5A3"
+  },
+  {
+    "path": "frontend/src/task-blocks.test.tsx",
+    "sha256": "40C660A77914EF0229D29C011D09519E495C4F55E4C05819D4AA4A20BAA9F253"
+  },
+  {
+    "path": "frontend/stryker.reschedule.config.json",
+    "sha256": "BFEADC18EA48071EAB09E489827F19E28109B0B94F33000B2BE210801C1F978D"
+  },
+  {
+    "path": "frontend/vite.config.ts",
+    "sha256": "953482A1689E9DF968D799095068BA42C4B5E683C04639E5D25D0D2A8FADCAA8"
+  }
+]

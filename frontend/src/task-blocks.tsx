@@ -1,6 +1,8 @@
 import { BlockDetails, BlockTime } from "./block-details";
 import type { BlockChange } from "./reschedule-api";
 import { BlockActions } from "./reschedule-block";
+import { BlockConfirmation } from "./block-confirmation";
+import { BlockChangeHistory } from "./reschedule-history";
 import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { readAvailability, readAvailabilityZones } from "./availability-api";
 import { RouteLink } from "./navigation";
@@ -35,6 +37,8 @@ export function TaskBlocks({
     mode: "move" | "cancel";
   }>();
   const [change, setChange] = useState<BlockChange>();
+  const [showChanges, setShowChanges] = useState(false);
+  const [changeRevision, setChangeRevision] = useState(0);
   const [editing, setEditing] = useState(false);
   const [confirmed, setConfirmed] = useState<Block>();
   const [page, setPage] = useState<BlockPage>();
@@ -88,14 +92,18 @@ export function TaskBlocks({
               <li key={item.id}>
                 <h3>{item.objective}</h3>
                 <BlockDetails block={item} />
-                {!editing && !selected && (
-                  <button
-                    onClick={() => setSelected({ id: item.id, mode: "move" })}
-                    aria-label={"Mover bloque: " + item.objective}
-                  >
-                    Mover bloque
-                  </button>
-                )}
+                {!editing &&
+                  !selected &&
+                  taskStatus === "pending" &&
+                  projectStatus &&
+                  projectStatus !== "completed" && (
+                    <button
+                      onClick={() => setSelected({ id: item.id, mode: "move" })}
+                      aria-label={"Mover bloque: " + item.objective}
+                    >
+                      Mover bloque
+                    </button>
+                  )}
                 {!editing && !selected && (
                   <button
                     onClick={() => setSelected({ id: item.id, mode: "cancel" })}
@@ -136,9 +144,17 @@ export function TaskBlocks({
           taskId={taskId}
           blockId={selected.id}
           mode={selected.mode}
+          onAccessFailure={onAccessFailure}
+          eligible={
+            taskStatus === "pending" &&
+            !!projectStatus &&
+            projectStatus !== "completed"
+          }
           onClose={() => setSelected(undefined)}
           onConfirmed={(value) => {
+            setConfirmed(undefined);
             setChange(value);
+            setChangeRevision((revision) => revision + 1);
             setSelected(undefined);
             setCursor(undefined);
             reload();
@@ -147,24 +163,20 @@ export function TaskBlocks({
         />
       )}
       {change && (
-        <article>
-          <p role="status">Cambio confirmado (hecho histórico)</p>
-          <p>
-            {change.kind === "CANCELLED"
-              ? "Reserva cancelada"
-              : "Reserva movida"}
-          </p>
-          <h3>{change.before.objective}</h3>
-          <BlockDetails block={change.after ?? change.before} />
-        </article>
+        <BlockConfirmation
+          block={change.before}
+          change={change}
+          onAccessFailure={onAccessFailure}
+        />
       )}
       {confirmed && (
-        <article>
-          <p role="status">Bloque guardado</p>
-          <h3>{confirmed.objective}</h3>
-          <BlockDetails block={confirmed} />
+        <>
+          <BlockConfirmation
+            block={confirmed}
+            onAccessFailure={onAccessFailure}
+          />
           <p>{confirmed.id}</p>
-        </article>
+        </>
       )}
       {!editing &&
         !selected &&
@@ -186,12 +198,25 @@ export function TaskBlocks({
           onAccessFailure={onAccessFailure}
           onCancel={() => setEditing(false)}
           onConfirmed={(block) => {
+            setChange(undefined);
             setConfirmed(block);
             setEditing(false);
             setCursor(undefined);
             reload();
           }}
         />
+      )}
+      {showChanges ? (
+        <BlockChangeHistory
+          projectId={projectId}
+          taskId={taskId}
+          onAccessFailure={onAccessFailure}
+          refreshToken={changeRevision}
+        />
+      ) : (
+        <button type="button" onClick={() => setShowChanges(true)}>
+          Ver cambios de bloques
+        </button>
       )}
     </section>
   );

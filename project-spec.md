@@ -414,3 +414,39 @@ El detalle carga estado y revisión antes de habilitar Completar tarea o Reabrir
 412, 503, fallo de red o HTTP 200 inválido no repiten PUT automáticamente: ofrecen consulta deliberada del estado vigente. Un fallo posterior de historial conserva la transición confirmada y presenta recuperación independiente; reintentar historia no reenvía la escritura. GET anterior no sustituye el PUT confirmado. Navegación/cierre de sesión descarta respuestas tardías de status, history y escritura; 401/404 retira detalle, estado e historial privados, también durante el reintento.
 
 Verificación: teclado/foco visible, objetivos de al menos 44 × 44 CSS, matriz y breakpoints de docs/ux-requirements.md, zoom nativo al 200 % con ancho interior de 320, feedback medido inferior a 400 ms antes de liberar respuesta retenida y treinta principios UX con evidencia o limitaciones explícitas. No atribuir bloques con inicio/fin, sesiones de concentración o progreso medido a esta feature. No incluye edición de contenido, borrado, propagación de estados, suma automática de estimaciones ni planificación. La futura edición de tarea podrá compartir esta versión interna mediante contrato propio.
+
+# Feature 10 — Disponibilidad personal
+
+Contrato aprobado dentro de la autorización global del usuario: `features/availability.feature`, 47 escenarios y 237 casos expandidos. Complete_reopen_task está cerrada y publicada en e1afc11; no se mantienen dos implementaciones activas. Las revisiones documentales backend/frontend y la resolución del coordinador preceden al contrato.
+
+## Presupuesto y zona
+
+El usuario elige una zona y siete presupuestos diarios, sin ventanas horarias. MONDAY a SUNDAY son las claves exactas; cada valor es un entero JSON de 0 a 1440 minutos. Todos los días a cero son válidos y permiten descanso. El total semanal se deriva, no se persiste ni acredita trabajo. Los días locales de 23/25 horas y las horas ambiguas o inexistentes pertenecen al posterior contrato de bloques con inicio y fin.
+
+El backend publica el conjunto ordenado y sin duplicados de IDs disponibles en TZDB mediante java.time, más UTC. Se valida pertenencia exacta al escribir; no se filtran aliases ni se amplía SHORT_IDS ni se aceptan offsets libres. El cliente no usa Intl como autoridad. Una sugerencia del navegador sólo rellena el borrador si está admitida. GET conserva una zona histórica que ya no esté en el catálogo, sin resolverla ni sustituirla: la UI la muestra no disponible y exige escoger otra antes de guardar, incluso para una intención equivalente.
+
+## Representación y persistencia
+
+GET `/api/v1/me/availability` devuelve exactamente configured, zoneId, dailyMinutes y updatedAt, con ETag del mismo snapshot. Ausencia confirmada: false y tres null, HTTP 200 y tag fuerte literal `"availability:unconfigured"`; leer no inserta. Configurada: true, zona, mapa completo y fecha UTC, con tag `"availability:<UUID canónico minúsculo>:<versión decimal canónica BIGINT no negativa>"`. GET `/api/v1/me/availability/zones` devuelve exactamente items. Endpoints privados, sin query params y con no-store.
+
+PUT reemplaza exactamente zoneId y dailyMinutes y exige If-Match. Una fila propia por owner_id único, UUID, siete columnas de minutos con restricciones SQL, zona, versión y fechas. Primer guardado usa versión 0; cambios reales incrementan una vez. La fecha inicial se trunca a microsegundos y una actualización usa el máximo entre reloj truncado y fecha previa. Revisar identidad/versión antes del no-op dentro de transacción; el no-op conserva cuerpo, tag y fechas. Identidad siempre desde sesión, sin consultar al propietario mediante el UUID enviado en el tag.
+
+Dos inserciones desde ausencia producen un 200 y un 412, nunca sobrescriben al ganador. Cero filas por colisión con una preferencia propia existente es conflicto; cero sin fila resultante por supresión es 503. Edición propia usa bloqueo de fila o actualización condicionada equivalente, sin bloqueo global entre usuarios. Cada escritura confirma una fila. La prueba de fallo de COMMIT usa rechazo PostgreSQL previo a confirmar mediante constraint trigger diferido; pérdida de respuesta después de confirmar es incierta y no implica rollback garantizado.
+
+No se emite evento de disponibilidad en este corte: no hay consumidor ni requisito causal para él. No se inventa un proyecto ni se debilita la FK del outbox. Las seis rutas existentes, proyectos, tareas e historia permanecen intactos. Un futuro evento personal requiere contrato y persistencia propios. Cambiar preferencias no desplaza reservas ni reescribe hechos históricos.
+
+## Validación y recuperación
+
+Se conservan filtros de sesión, origen y CSRF; negociación puede devolver 415 antes del handler. Query desconocida precede a If-Match; éste precede al cuerpo. Falta de precondición: 428 PRECONDITION_REQUIRED. Tag débil, lista, UUID no canónico o versión inválida: 400 VALIDATION_ERROR. Tag válido que no coincide con la fila propia: 412 AVAILABILITY_CONFLICT, también ante intención ya satisfecha. Fallo de almacenamiento: 503 STORAGE_UNAVAILABLE, nunca ausencia inventada.
+
+JSON estricto rechaza documento vacío, truncado, concatenado o claves duplicadas como MALFORMED_JSON. Forma, extras raíz, zoneId, objeto dailyMinutes, extras diarios y días de lunes a domingo se validan en ese orden. Extras usan orden léxico. Campo ausente/null: REQUIRED; tipo incorrecto: INVALID_TYPE; zona ajena: INVALID_VALUE; minutos fuera de rango: OUT_OF_RANGE; extra: UNKNOWN_FIELD. `1.0` no es token entero JSON para este contrato. El navegador puede serializar una entrada numérica válida como entero, pero nunca interpretar vacío o `1e` incompleto como cero. Las variantes concretas viven en Gherkin y se ejecutan todas.
+
+## Formulario
+
+Ruta exacta `/disponibilidad`, incluida en retorno tras login. Selector nativo y siete campos etiquetados en español, lunes a domingo. Snapshot, borrador textual y catálogo son estados separados. Ausencia confirmada muestra Sin configurar, sugerencia opcional y siete ceros; puede guardarse sin editar previamente. Total sólo con siete enteros válidos; en otro caso se pide completar los presupuestos. Un reintento de catálogo no sobrescribe lo editado.
+
+Aviso permanente: Los cambios sin guardar se pierden al salir. Cancelar y volver a Proyectos descarta y navega a `/proyectos`. La garantía de descarte explícito cubre acciones del formulario; no se añade guardia global, router, beforeunload ni autosave. La pérdida de sesión retira datos inmediatamente.
+
+Campos y Guardar se bloquean durante PUT o recuperación. Sólo PUT configurado válido, ETag válido y zona/minutos iguales a la intención enviada confirma Disponibilidad guardada. GET inicial incoherente no habilita guardar ni inventa ausencia. Errores de campo 400 conservan el borrador y permiten corregir. Tras 412, 503, red o confirmación inválida se requiere Recargar versión guardada antes de otra escritura. Esa acción explica el descarte y sólo GET válido reemplaza juntos formulario y ETag; un fallo conserva borrador. No hay comparación, fusión ni reenvío automático.
+
+Privacidad y cancelación incluyen GET de preferencia, GET de zonas y PUT: respuestas viejas no restauran datos ni revocan acceso vigente. Se reutiliza el cliente de sesión/CSRF y recuperación existentes. Verificar 44 × 44 CSS, teclado/foco, 22 anchos, zoom nativo 200 % a 320 CSS, feedback antes de 400 ms y matriz de treinta principios con límites explícitos. Este corte no incluye calendario, temporizador, conectores ni trabajo acreditado.

@@ -106,10 +106,10 @@
       "id": 10,
       "name": "availability",
       "title": "Disponibilidad",
-      "description": "Disponibilidad: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "description": "Zona y siete presupuestos diarios personales con guardado versionado; contrato aprobado de 47 escenarios y 237 casos, sin reservas ni evento personal.",
       "acceptance": [],
       "sdd": true,
-      "status": "pending"
+      "status": "spec_ready"
     },
     {
       "id": 11,

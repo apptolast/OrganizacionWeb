@@ -20,3 +20,9 @@ Fuentes versionadas: [instrucciones y estado de gates](https://github.com/apptol
 ## Efecto sobre la estimación
 
 Las 4–8 horas de validación y despliegue del plan MVP suponen acceso y configuración disponibles, capacidad suficiente y una vía de infraestructura utilizable. Si comprobar el servidor exige ampliar recursos, resolver adopción DNS o preparar respaldo externo, se estimará ese trabajo concreto antes de fijar fecha de entrega. No se presenta ninguna de esas necesidades documentales como un fallo vivo confirmado ni se cambia infraestructura durante esta revisión.
+
+## Comprobación de acceso del 7 de septiembre
+
+El inventario de producción indica admin en 159.195.156.57. La prueba SSH de sólo lectura desde este equipo, con BatchMode, verificación estricta del host y timeout de ocho segundos, terminó en `Permission denied (publickey)` (468624). No se ejecutó la consulta de memoria remota; no hay una medición nueva de capacidad ni acceso autenticado al host.
+
+Se ha solicitado al usuario el alias SSH o ruta de una clave ya configurada para ese acceso. No afecta a las pruebas locales ni al desarrollo de sesiones. La revisión documental de capacidad y los gates históricos conservan sus límites anteriores; el intento de autenticación no los revalida.

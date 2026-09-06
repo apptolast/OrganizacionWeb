@@ -1,27 +1,48 @@
 import type { ReactNode } from "react";
 import { useCreateProject } from "./use-create-project";
 import { ProjectReader } from "./project-reader";
-import { useRoute, isProjectRoute } from "./navigation";
+import { useRoute, RouteLink } from "./navigation";
 import { Workspace } from "./workspace";
 import { ProjectEditor } from "./project-editor";
 import { TaskReader } from "./task-reader";
+import { Today } from "./today";
 import { Availability } from "./availability";
 export function App({ sessionControls }: { sessionControls?: ReactNode }) {
   const route = useRoute();
   const availability = route === "/disponibilidad";
   const taskRoute = /^\/proyectos\/([^/]+)\/tareas\/([^/?]+)$/.exec(route);
   return (
-    <Workspace sessionControls={sessionControls} availability={availability}>
-      {availability ? (
+    <Workspace
+      sessionControls={sessionControls}
+      section={
+        route === "/"
+          ? "Hoy"
+          : availability
+            ? "Disponibilidad"
+            : route.startsWith("/proyectos")
+              ? "Proyectos"
+              : null
+      }
+    >
+      {route === "/" ? (
+        <Today />
+      ) : route === "/proyectos/nuevo" ? (
+        <CreateProjectScreen />
+      ) : availability ? (
         <Availability />
       ) : taskRoute ? (
         <TaskReader key={route} projectId={taskRoute[1]} id={taskRoute[2]} />
-      ) : route.endsWith("/editar") ? (
+      ) : /^\/proyectos\/[^/?]+\/editar$/.test(route) ? (
         <ProjectEditor key={route} route={route} />
-      ) : isProjectRoute(route) ? (
+      ) : /^\/proyectos(?:\?[^#]*|\/[^/?]+)?$/.test(route) ? (
         <ProjectReader key={route} route={route} />
       ) : (
-        <CreateProjectScreen />
+        <main id="proyectos" tabIndex={-1}>
+          <h1>Página no encontrada</h1>
+          <RouteLink href="/">Hoy</RouteLink>
+          {" · "}
+          <RouteLink href="/proyectos">Proyectos</RouteLink>
+        </main>
       )}
     </Workspace>
   );

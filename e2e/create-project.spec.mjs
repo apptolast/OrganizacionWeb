@@ -2,7 +2,7 @@ import { test, expect } from "./support/authenticated-test.mjs";
 test("real browser saves an idea through the same-origin API @s1 @s22", async ({
   page,
 }) => {
-  expect((await page.goto("/")).status()).toBe(200);
+  expect((await page.goto("/proyectos/nuevo")).status()).toBe(200);
   await page.getByLabel(/Nombre del proyecto/).fill("  Zenit Digital  ");
   await page.getByLabel(/Descripción/).fill("Preparar la web");
   const responsePromise = page.waitForResponse(
@@ -65,7 +65,7 @@ test("project and outbox survive reload and backend restart @s16 @s19 @s20", asy
   request,
 }) => {
   test.setTimeout(90_000);
-  expect((await page.goto("/")).status()).toBe(200);
+  expect((await page.goto("/proyectos/nuevo")).status()).toBe(200);
   await page.getByLabel(/Nombre del proyecto/).fill("Persistencia");
   await page.getByLabel(/Descripción/).fill("Contenido privado");
   const confirmed = page.waitForResponse(
@@ -121,7 +121,7 @@ test("project and outbox survive reload and backend restart @s16 @s19 @s20", asy
 });
 
 test("server-confirmed markup remains literal text @s26", async ({ page }) => {
-  expect((await page.goto("/")).status()).toBe(200);
+  expect((await page.goto("/proyectos/nuevo")).status()).toBe(200);
   const dialogs = [];
   page.on("dialog", (dialog) => {
     dialogs.push(dialog.message());
@@ -151,7 +151,7 @@ test("server-confirmed markup remains literal text @s26", async ({ page }) => {
 test("server validation preserves both fields and permits correction @s24", async ({
   page,
 }) => {
-  expect((await page.goto("/")).status()).toBe(200);
+  expect((await page.goto("/proyectos/nuevo")).status()).toBe(200);
   const description = "🚀".repeat(4001);
   await page.getByLabel(/Nombre del proyecto/).fill("Idea");
   await page.getByLabel(/Descripción/).fill(description);
@@ -195,7 +195,7 @@ for (const [width, zoom] of [
   }, testInfo) => {
     // Browser zoom halves the CSS viewport at 200%; reproduce that reflow width.
     await page.setViewportSize({ width: width / zoom, height: 900 / zoom });
-    expect((await page.goto("/")).status()).toBe(200);
+    expect((await page.goto("/proyectos/nuevo")).status()).toBe(200);
     const skipLink = page.getByRole("link", { name: /Saltar al contenido/ });
     expect(
       await skipLink.evaluate(

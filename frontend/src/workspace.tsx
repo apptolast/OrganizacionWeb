@@ -3,11 +3,11 @@ import { RouteLink } from "./navigation";
 export function Workspace({
   children,
   sessionControls,
-  availability,
+  section,
 }: {
   children: ReactNode;
   sessionControls?: ReactNode;
-  availability: boolean;
+  section: "Hoy" | "Proyectos" | "Disponibilidad" | null;
 }) {
   return (
     <div className="workspace">
@@ -26,18 +26,31 @@ export function Workspace({
         <p className="sidebar-label">TU ESPACIO</p>
         <nav aria-label="Principal">
           <RouteLink
+            href="/"
+            aria-current={section === "Hoy" ? "page" : undefined}
+          >
+            <span aria-hidden="true">◉</span> Hoy
+            {section === "Hoy" && (
+              <span className="nav-dot" aria-hidden="true" />
+            )}
+          </RouteLink>
+          <RouteLink
             href="/proyectos"
-            aria-current={availability ? undefined : "page"}
+            aria-current={section === "Proyectos" ? "page" : undefined}
           >
             <span aria-hidden="true">▦</span> Proyectos{" "}
-            {!availability && <span className="nav-dot" aria-hidden="true" />}
+            {section === "Proyectos" && (
+              <span className="nav-dot" aria-hidden="true" />
+            )}
           </RouteLink>
           <RouteLink
             href="/disponibilidad"
-            aria-current={availability ? "page" : undefined}
+            aria-current={section === "Disponibilidad" ? "page" : undefined}
           >
             <span aria-hidden="true">◷</span> Disponibilidad
-            {availability && <span className="nav-dot" aria-hidden="true" />}
+            {section === "Disponibilidad" && (
+              <span className="nav-dot" aria-hidden="true" />
+            )}
           </RouteLink>
         </nav>
         <div className="sidebar-note">
@@ -69,7 +82,7 @@ export function Workspace({
             <span className="breadcrumb-separator" aria-hidden="true">
               /
             </span>{" "}
-            <strong>{availability ? "Disponibilidad" : "Proyectos"}</strong>
+            <strong>{section ?? "Página no encontrada"}</strong>
           </span>
           <span className="space-badge">
             <span aria-hidden="true">●</span> Un paso cada día

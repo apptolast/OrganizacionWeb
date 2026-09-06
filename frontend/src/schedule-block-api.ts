@@ -269,7 +269,7 @@ export async function createBlock(
     throw new Error("Confirmación de bloque inválida");
   return data;
 }
-function uuid(value: unknown): value is string {
+export function uuid(value: unknown): value is string {
   return (
     typeof value === "string" &&
     /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(value)
@@ -278,7 +278,7 @@ function uuid(value: unknown): value is string {
 function sameId(value: unknown, expected: string) {
   return uuid(value) && value.toLowerCase() === expected.toLowerCase();
 }
-function isBlock(
+export function isBlock(
   value: unknown,
   projectId: string,
   taskId: string,
@@ -338,7 +338,10 @@ export async function previewBlock(
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
-function exact(value: unknown, keys: string): value is Record<string, unknown> {
+export function exact(
+  value: unknown,
+  keys: string,
+): value is Record<string, unknown> {
   return (
     record(value) &&
     Object.keys(value).length === keys.split(" ").length &&
@@ -347,10 +350,10 @@ function exact(value: unknown, keys: string): value is Record<string, unknown> {
 }
 const strip = (value: string) =>
   value.replace(/^\p{White_Space}+|\p{White_Space}+$/gu, "");
-function text(value: unknown): value is string {
+export function text(value: unknown): value is string {
   return typeof value === "string" && strip(value).length > 0;
 }
-function integer(
+export function integer(
   value: unknown,
   min: number,
   max = Number.MAX_SAFE_INTEGER,
@@ -362,7 +365,7 @@ function integer(
     value <= max
   );
 }
-function instant(value: unknown): value is string {
+export function instant(value: unknown): value is string {
   return (
     typeof value === "string" &&
     /^(?!0000)\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?Z$/.test(

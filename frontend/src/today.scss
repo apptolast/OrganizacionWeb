@@ -1,0 +1,65 @@
+.today {
+  max-width: 1050px;
+  margin-inline: auto;
+  overflow-wrap: anywhere;
+  h1 {
+    margin-bottom: 20px;
+  }
+  > button,
+  [role="alert"] button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px 18px;
+  }
+  > p {
+    max-width: 75ch;
+    line-height: 1.6;
+  }
+  .today-notice,
+  [role="alert"] {
+    padding: 16px;
+    border: 1px solid #b8c8b8;
+    border-radius: 12px;
+    background: #f0f3eb;
+  }
+  .today-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px 20px;
+    padding: 20px;
+    border: 1px solid #e0e5dc;
+    border-radius: 16px;
+    background: #fff;
+    line-height: 1.5;
+    dd {
+      margin: 0;
+      font-weight: 600;
+    }
+  }
+  .today-agenda {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 16px;
+    li {
+      min-width: 0;
+      padding: 20px;
+      background: #fff;
+      border: 1px solid #e0e5dc;
+      border-radius: 16px;
+    }
+    h2 {
+      margin: 0;
+      font-size: 1.3rem;
+    }
+    p {
+      line-height: 1.6;
+      margin-block: 10px;
+    }
+  }
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}

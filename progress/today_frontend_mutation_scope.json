@@ -1,0 +1,28 @@
+{
+  "contract": "a127747",
+  "purpose": "Reviewed Today scope; byte hashes identify this source snapshot, not mutation results.",
+  "mutate": [
+    "src/today-api.ts",
+    "src/today.tsx",
+    "src/App.tsx:10:0-49:1",
+    "src/workspace.tsx:27:0-54:22",
+    "src/workspace.tsx:85:0-85:64",
+    "src/project-reader.tsx:61:0-61:70",
+    "src/project-reader.tsx:157:0-157:76",
+    "src/use-session.ts:29:0-29:43",
+    "src/use-session.ts:189:0-189:36"
+  ],
+  "sourceSha256": {
+    "src/today-api.ts": "96eecdada067b78aea8da95ffe21b3e5dd663c7bd162736228b0dd40b0a93fba",
+    "src/today.tsx": "0bcc57577073014f76eee41110121b03413e9731a72544d13d0cf1432a9ef789",
+    "src/App.tsx": "b20a0362fdadecc2f4cb6ad9831d064d5b44903a9b85d73a361bc446cda335ee",
+    "src/workspace.tsx": "fc908230309df2dcd04b771707c7a2cb579cb329bf5844e84e629a636f8072f6",
+    "src/project-reader.tsx": "7d32c771195653d9c42fb00f039eb8c9e3e888077dca925f69192ffe92969aca",
+    "src/use-session.ts": "89a713232b426335a4ae7163f8cfd6625475047df1d10777bb0c36b7f0bcb75d"
+  },
+  "exclusions": {
+    "src/App.tsx:50:0": "CreateProjectScreen unchanged",
+    "src/navigation.tsx": "unchanged",
+    "src/schedule-block-api.ts": "exports and formatting only; behavior already in default whole-file scope"
+  }
+}

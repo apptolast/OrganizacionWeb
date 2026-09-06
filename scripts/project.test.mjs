@@ -3,6 +3,7 @@ import test from "node:test";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import * as commands from "./project.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -12,6 +13,83 @@ function capture() {
   const project = commands.createProject((...args) => calls.push(args));
   return { calls, project };
 }
+
+test("today backend scope runs only its fixed PIT target", () => {
+  const { calls, project } = capture();
+  project("mutate", "today-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=today"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
+test("today frontend scope runs only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "today-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.today.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("today configuration measures the frozen new code and changed shared regions", () => {
+  const read = (path) => JSON.parse(readFileSync(resolve(root, path), "utf8"));
+  const config = read("frontend/stryker.today.config.json");
+  const full = read("frontend/stryker.config.json");
+  const manifest = read("progress/today_frontend_mutation_scope.json");
+  assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
+  assert.equal(config.coverageAnalysis, "perTest");
+  assert.equal(config.concurrency, 2);
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  assert.equal(
+    config.jsonReporter.fileName,
+    "reports/mutation-today/mutation.json",
+  );
+  assert.equal(
+    config.htmlReporter.fileName,
+    "reports/mutation-today/mutation.html",
+  );
+  assert.deepEqual(config.mutate, manifest.mutate);
+  assert.deepEqual(config.mutate, [
+    "src/today-api.ts",
+    "src/today.tsx",
+    "src/App.tsx:10:0-49:1",
+    "src/workspace.tsx:27:0-54:22",
+    "src/workspace.tsx:85:0-85:64",
+    "src/project-reader.tsx:61:0-61:70",
+    "src/project-reader.tsx:157:0-157:76",
+    "src/use-session.ts:29:0-29:43",
+    "src/use-session.ts:189:0-189:36",
+  ]);
+  for (const [path, hash] of Object.entries(manifest.sourceSha256)) {
+    assert.equal(
+      createHash("sha256")
+        .update(readFileSync(resolve(root, "frontend", path)))
+        .digest("hex"),
+      hash,
+      path,
+    );
+  }
+  for (const range of config.mutate) {
+    const file = range.split(":")[0];
+    assert.ok(full.mutate.includes(range) || full.mutate.includes(file), range);
+  }
+  assert.ok(!full.mutate.includes("src/App.tsx"));
+  assert.ok(!full.mutate.includes("src/App.tsx:10:0-18:200"));
+  assert.ok(!full.mutate.includes("src/workspace.tsx:72:0-72:200"));
+});
 
 test("backend scope runs only the configured schedule_block PIT target", () => {
   const { calls, project } = capture();
@@ -50,6 +128,10 @@ test("unknown or misplaced targets fail before starting any subprocess", () => {
     ["test", "schedule_block-backend"],
     ["install", "schedule_block-frontend"],
     ["test", "schedule_block-frontend-replay"],
+    ["mutate", "today-backend;echo unsafe"],
+    ["mutate", "today-frontend --config other.json"],
+    ["test", "today-backend"],
+    ["install", "today-frontend"],
   ]) {
     const { calls, project } = capture();
     assert.throws(() => project(task, target), /Invalid target/);
@@ -169,6 +251,8 @@ test("harness placeholder and CLI deliver the selected target unchanged", () => 
     ["mutate", "schedule_block-backend"],
     ["mutate", "schedule_block-frontend"],
     ["mutate", "schedule_block-frontend-replay"],
+    ["mutate", "today-backend"],
+    ["mutate", "today-frontend"],
   ]) {
     const calls = [];
     commands.main(args, (...values) => calls.push(values));

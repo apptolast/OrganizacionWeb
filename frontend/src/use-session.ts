@@ -26,6 +26,7 @@ export function useSession() {
       if (controller.signal.aborted) return;
       if (
         next.authenticated &&
+        session?.authenticated === false &&
         !isPrivateRoute(window.location.pathname, window.location.search)
       ) {
         window.history.replaceState(null, "", "/");
@@ -185,6 +186,7 @@ function isPrivateRoute(path: string, search: string) {
     !search &&
     (path === "/" ||
       path === "/disponibilidad" ||
+      path === "/proyectos/nuevo" ||
       /^\/proyectos\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\/editar|\/tareas\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?$/i.test(
         path,
       ))

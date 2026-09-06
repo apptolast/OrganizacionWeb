@@ -13,7 +13,7 @@ test("authentication: recovering CSRF never repeats a rejected write @s9 @s17", 
     username: "e2e-user",
     password: "e2e-only-password",
   });
-  await page.goto("/");
+  await page.goto("/proyectos/nuevo");
   await page
     .getByLabel(/Nombre del proyecto/)
     .fill("Proyecto tras recuperación deliberada");
@@ -64,7 +64,7 @@ test("authentication: access and errors reflow at breakpoint edges with keyboard
   browser,
 }, testInfo) => {
   test.setTimeout(120_000);
-  await page.goto("/");
+  await page.goto("/proyectos/nuevo");
   await page.getByLabel("Usuario", { exact: true }).fill("e2e-user");
   await page
     .getByLabel("Contraseña", { exact: true })
@@ -140,7 +140,7 @@ test("authentication: access and errors reflow at breakpoint edges with keyboard
   });
   try {
     const touch = await touchContext.newPage();
-    await touch.goto("/");
+    await touch.goto("/proyectos/nuevo");
     await touch.getByLabel("Usuario", { exact: true }).fill("e2e-user");
     await touch
       .getByLabel("Contraseña", { exact: true })
@@ -370,7 +370,7 @@ test("authentication: invalid CSRF and expired persisted session cannot write @s
     username: "e2e-user",
     password: "e2e-only-password",
   });
-  await page.goto("/");
+  await page.goto("/proyectos/nuevo");
   await expect(page.getByLabel(/Nombre del proyecto/)).toBeVisible();
   for (const headers of [{}, { "X-CSRF-TOKEN": "invalid-test-token" }]) {
     const response = await context.request.post("/api/v1/projects", {

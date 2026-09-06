@@ -21,7 +21,7 @@ it("@s15 orienta solo el vacío confirmado y enlaza el formulario existente", as
   expect(await screen.findByText("Todavía no tienes proyectos")).toBeVisible();
   expect(screen.getByRole("link", { name: "Crear proyecto" })).toHaveAttribute(
     "href",
-    "/",
+    "/proyectos/nuevo",
   );
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
 });

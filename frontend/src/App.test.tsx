@@ -1,8 +1,10 @@
 vi.mock("./project-tasks", () => ({ ProjectTasks: () => null }));
 import { render, screen, act, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { App } from "./App";
+beforeEach(() => window.history.replaceState(null, "", "/proyectos/nuevo"));
+afterEach(() => window.history.replaceState(null, "", "/"));
 describe("crear proyecto", () => {
   it("@s27 ofrece campos etiquetados y una acción de crear", () => {
     render(<App />);

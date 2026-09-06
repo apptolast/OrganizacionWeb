@@ -58,7 +58,7 @@ export function ProjectReader({ route }: { route: string }) {
           )}
         </div>
         {page && page.items.length > 0 && (
-          <RouteLink className="primary-link" href="/">
+          <RouteLink className="primary-link" href="/proyectos/nuevo">
             <span aria-hidden="true">＋</span> Crear proyecto
           </RouteLink>
         )}
@@ -154,7 +154,7 @@ export function ProjectReader({ route }: { route: string }) {
                   : "Dale un nombre a esa idea que quieres guardar. Podrás volver a ella cuando quieras."}
               </p>
               {!isContinuation && (
-                <RouteLink className="primary-link" href="/">
+                <RouteLink className="primary-link" href="/proyectos/nuevo">
                   Crear proyecto <span aria-hidden="true">↗</span>
                 </RouteLink>
               )}

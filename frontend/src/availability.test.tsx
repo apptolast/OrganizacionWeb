@@ -553,7 +553,7 @@ it.each([
   fireEvent.click(
     await screen.findByRole("button", { name: "Iniciar sesión" }),
   );
-  await screen.findByLabelText(/Nombre del proyecto/);
+  await screen.findByRole("heading", { name: "Hoy" });
   expect(window.location.pathname + window.location.search).toBe("/");
   expect(
     screen.queryByRole("heading", { name: "Disponibilidad" }),
@@ -1012,6 +1012,7 @@ it("@s35 @s37 cancelar retira el borrador y un PUT 401 tardío no invalida la vi
   expect(options?.signal?.aborted).toBe(true);
 });
 it("@s47 navega a Disponibilidad con aviso y salida determinista", async () => {
+  window.history.replaceState(null, "", "/proyectos/nuevo");
   fixture(() => undefined);
   render(<App />);
   expect(screen.getByRole("link", { name: "Proyectos" })).toHaveAttribute(

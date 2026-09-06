@@ -7,7 +7,7 @@ import {
   fireEvent,
   act,
 } from "@testing-library/react";
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { SessionGate } from "./session-gate";
 const anonymous = {
   authenticated: false,
@@ -21,6 +21,7 @@ const authenticated = {
   username: "Pablo",
   csrfToken: "private-token",
 };
+beforeEach(() => window.history.replaceState(null, "", "/proyectos/nuevo"));
 afterEach(() => {
   window.history.replaceState(null, "", "/");
   vi.unstubAllGlobals();
@@ -570,7 +571,7 @@ it.each([
   fireEvent.click(
     await screen.findByRole("button", { name: "Iniciar sesión" }),
   );
-  await screen.findByLabelText(/Nombre del proyecto/);
+  await screen.findByRole("heading", { name: "Hoy" });
   expect(window.location.pathname + window.location.search).toBe("/");
 });
 it("@s14 logout resuelto tras desmontar no publica ni consulta otra sesión", async () => {
@@ -897,13 +898,17 @@ it.each([
   "/proyectos?extra=value",
   "/prefix/proyectos/6c5dbd10-9ad5-4000-8000-000000000001",
   "/proyectos/6c5dbd10-9ad5-4000-8000-000000000001/suffix",
-])("@s16 descarta rutas parcialmente válidas %s", async (route) => {
+])("@s16 login descarta rutas parcialmente válidas %s", async (route) => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-    Response.json(authenticated),
-  );
+  vi.spyOn(globalThis, "fetch")
+    .mockResolvedValueOnce(Response.json(anonymous))
+    .mockResolvedValueOnce(new Response(null, { status: 204 }))
+    .mockResolvedValueOnce(Response.json(authenticated));
   render(<SessionGate />);
-  await screen.findByLabelText(/Nombre del proyecto/);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Iniciar sesión" }),
+  );
+  await screen.findByRole("heading", { name: "Hoy" });
   expect(window.location.pathname + window.location.search).toBe("/");
 });
 it("@s14 el rechazo de GET anterior no oculta una sesión vigente", async () => {

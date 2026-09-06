@@ -11,7 +11,7 @@ test("read_projects: real creation survives list/detail navigation and fresh rel
   const name = "<b>Zenit 🚀</b>";
   const description =
     "<script>window.projectMarkupExecuted=true</script> — contenido privado";
-  await page.goto("/");
+  await page.goto("/proyectos/nuevo");
   await page.getByLabel(/Nombre del proyecto/).fill(name);
   await page.getByLabel(/Descripción/).fill(description);
   const confirmed = page.waitForResponse(
@@ -159,7 +159,7 @@ test("read_projects: empty guidance and private queries do not expose another ow
     page.getByText("Todavía no tienes proyectos", { exact: true }),
   ).toBeVisible();
   await page.getByRole("link", { name: "Crear proyecto", exact: true }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/proyectos\/nuevo$/);
   const own = await create(request, "Proyecto propio");
   const other = await create(request, "Nombre ajeno que no debe filtrarse");
   expect(other.id).toMatch(/^[0-9a-f-]{36}$/i);

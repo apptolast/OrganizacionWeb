@@ -93,3 +93,32 @@ Regresión focal final **319/319 PASS, EXIT0**,1e2072:56UI,73autenticación,190c
 Corrección de orden de verificación final: el lint27d65d ocurrió antes de retirar exact del matcher; después sólo se ejecutó buildb96beb. Init global del coordinador3534 detectó por ello Prettier pendiente en task-blocks.test.tsx (bddd1f). Se aplicó formato exclusivamente a ese archivo (b7b291), sin cambios funcionales, y luego **pnpm lint PASS, EXIT0**,9c0a7e. No se repitieron suites ni se ejecutó mutación; coordinador mantiene init global en curso y repetirá su puerta tras este formato. Freeze restaurado al finalizar este ajuste.
 
 Protección preventiva solicitada por coordinador antes de futura mutación: stryker.config.json añade sólo ignorePatterns [".stryker-tmp-availability-replay"], conservando targets/thresholds/tests. ProjectReader instalado incorpora ignorePatterns y filtra directorios antes de recursión (líneas218–260). Validación sintética con Minimatch instalado y las mismas opciones/predicado: PASS8e95f0; directorio protegido excluido y src incluido, sin enumerar directorios reales. Intentos previos de importar ProjectReader directamente fallaron por inicialización circular de la librería; resolución del symlink fue necesaria para cargar su dependencia con pnpm. No fueron ejecuciones Stryker ni acceso al destino protegido. Prettier específico config sin cambios adicionales447c40.
+
+## Refuerzo posterior a mutación — autor UI/shared
+
+Rol tdd_craftsman reactivado por root después de clasificación original. APItests tienen autor independiente. Sin Stryker/replay antes de nuevo judge.
+
+- @s56 `reintentar tarea espera su estado nuevo antes de permitir planificar`: primer fallo90a2c5 fue selector inexistente Completar proyecto; corregido por encabezado Estado del proyecto, sin producción. RED real9d5579: después de listado RESOURCE_NOT_FOUND y retry, GET proyecto confirma antes que GET estado; aparece Planificar con estado antiguo. Corrección mínima TaskReader: setTaskState(undefined) junto a setTask(undefined) en retry. GREEN56ed8e,1/1 focal. Producción sólo tras RED real.
+- @s53 `una transición vieja no cambia la elegibilidad tras reintentar tarea`: verde inicial e2ed4f,1/1. PUT viejo resuelve completed después de listado404, retry y confirmación nueva pending. Conserva Planificar/Completar tarea actuales. Refuerzo del hueco1530 por callback onSnapshot; no se declara killed sin replay posterior ni se fabricó RED de producción.
+
+Quedan matrices de callbacks/recuperación/UX del inventario. No se declara cierre global por dos focales.
+
+- @s53 proyecto anterior tras retry:118d33 GREEN inicial. Mantiene carga nueva y no incorpora proyecto completed viejo; cubre recorrido público de reader1401/1403/1427 reabiertos. Rechazo proyecto viejo404:6ce059 GREEN inicial, conserva tarea recuperada (1412). Sin producción extra ni replay.
+- @s49/@s58 rechazo de reenvío y segunda intención:8874cc GREEN inicial. Foco vuelve a heading al desaparecer Reenviar; después de rechazo negocio, nueva intención incierta no permite reenvío sin404. Oráculos887/1016, sin declarar killed aún.
+- @s41 varios días con sólo un exceso:9cb62e GREEN inicial. Consentimiento desmarcado, guardar bloqueado hasta aceptación; nueva revisión sin exceso retira checkbox y no inventa alertas. some/every y frontera cero.
+- @s56 submit nativo: d177b7 GREEN inicial. Evento default cancelado, una sola preview durante espera, ninguna preview adicional tras completed y Guardar disabled. No se invocan handlers privados.
+
+- @s56 reenvío retenido tras completed/404: fa3074 GREEN inicial, misma key/body y confirmación, cubre NoCoverage963.
+- @s40 disponibilidad no configurada: fixture inicial incompleta produjo fallo cb895c, corregida con nulls+ETag contractual;65bab6 GREEN sin cambio de producción. Campos/payload vacíos y ninguna zona inventada; cubre NoCoverage1082.
+- @s40 dos reintentos configuración:39d38f GREEN inicial, espera sin alerta y tercer GET confirmado; no se confunde primer retry con updater que queda undefined.
+- @s42 ocurrencias:378e46 GREEN inicial, opciones UTC+01:00/UTC+00:00 (Z), aria-invalid, selección asimétrica, cambio de fin conserva inicio, cambio de zona limpia ambos offsets en payload. Fixture de respuesta estructural de UI; no se presenta como validación física del huso por backend. NoCoverage1200 cubierto sin llamarlo killed aún.
+- @s39 fecha original Europe/Madrid: e3f808 GREEN inicial, fecha española/segundos/GMT+01:00 y datetime persistido; sin falso vacío/alerta.
+- @s52 estados consulta conflicto:0c7734 GREEN inicial; espera, disabled, fallo y reintento sin alerta obsoleta, éxito.
+- @s53 StrictMode:3b3e4a GREEN inicial; listado/configuración anteriores no reemplazan instancia vigente ni selección deliberada.
+- @s48 comprobación desconocida: c2583f GREEN inicial; mientras espera disabled, después TypeError sigue incierto sin reenvío y conserva explicación/identidad. RuntimeError945 original sigue siendo error de runner hasta replay.
+- @s56 reconsulta proyecto:69a33a GREEN inicial, snapshot previo no habilita Planificar durante nueva carga ni tras fallo. Refuerzo1465.
+- @s54 paginación/confirmación desde página antigua: b1edc2 GREEN inicial; filas antiguas retiradas durante cada lectura, creación retorna a consulta reciente y cierra editor, sin falso error.
+
+Formato específico a0d81c sólo task-blocks.test.tsx y task-reader.tsx (este último unchanged). Regresión final de tres archivos UI/shared: **180/180 PASS**, sesión12301,6ddfe4 EXIT0,15,99s. TaskBlocks73 (antes56, +17), resto estado/detalle107. ESLint focal16c42c EXIT0, tsc f37f93 EXIT0. API250 del otro autor no se mezcla con este conteo.
+
+Fuentes/pruebas UI/shared congeladas después de estas verificaciones. Única producción nueva: task-reader.tsx94 setTaskState(undefined), respaldada RED9d5579→GREEN56ed8e. No más suites ni Stryker hasta revisión/orden del coordinador. Los refuerzos verdes iniciales son oráculos propuestos para replay selectivo; no acreditan por sí solos killed ni que todos los NE hayan desaparecido. Conservan inventario original y RuntimeError separado.

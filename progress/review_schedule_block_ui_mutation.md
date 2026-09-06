@@ -1,0 +1,37 @@
+# Revisión del coordinador: mutaciones UI de bloques
+
+2026-09-06. Root revisó TaskBlocks/BlockEditor/BlockConflict y TaskReader/TaskState completos en los flujos afectados (c516d9, 9eace5, 930109), la clasificación inicial y la revisión histórica de complete_reopen_task (1d22b9). No escribió producción ni pruebas. No se modifica el score original de Stryker ni se conceden kills antes de medir.
+
+Se aceptan las equivalencias contextuales siguientes, con los argumentos de la bitácora del mutador: 731/1108 y 1380/1455 son contadores usados sólo para invalidar efectos; 803/875/879 tienen refs montados en todos sus puntos de uso; 918/1306 conservan dependencias constantes; 921/922/923/924/960 están respaldadas por la disponibilidad y deshabilitación de sus botones privados; 936/938/981/983/1052/1054 conservan las guardas hermanas y la guarda de classify antes del callback externo; 949/1023 y 1315/1320/1326 sólo afectan setters locales del componente ya desmontado. La retirada del cleanup no es equivalente: el observador global de apiRequest hace observable una respuesta antigua.
+
+En TaskState se mantienen las equivalencias históricas 1505/1511/1514/1515/1537/1556/1573: ref de encabezado montado, dependencia constante, acción privada protegida por botón, contadores usados sólo como key y setter local tras desmontaje, respectivamente. Los cuatro optional chaining de onSnapshot (1532/1541/1566/1577) se aceptan sólo en la composición de esta aplicación: su único caller productivo, TaskReader, siempre pasa el setter. No se afirma equivalencia para un consumidor externo que omita esa prop; no se inventa ese consumidor para esta entrega. 1468 conserva snapshot porque la rama exige lectura de proyecto terminada sin error y el lector de detalle valida ese contrato.
+
+Las seis variantes de foco 1490/1497/1498/1499/1501/1368 conservan un destino visible cuando body tiene foco y no roban otro control elegido. Se aceptan como variantes permitidas del momento de restauración, no como equivalencias semánticas. No cambian el denominador del informe.
+
+Resoluciones que prevalecen sobre candidatas iniciales:
+
+- 1530 deja de ser equivalente al antiguo131: ahora hay un callback onSnapshot al padre vivo tras la espera. Requiere prueba de una escritura antigua que termina después de retirar/remontar TaskState.
+- Reader1401/1403/1412/1427 también necesitan comprobar el reintento dentro del mismo TaskReader; la igualdad del código con un informe anterior no acredita la equivalencia después de cambiar su composición.
+- 886 es equivalente bajo los orígenes HTML de las acciones y campos del formulario; mantiene isConnected y :disabled. 887 sí tiene un recorrido público: un reenvío recibe un rechazo de negocio, desaparece el botón Reenviar y debe restaurarse el encabezado. Intentar enfocar ese botón retirado no cumple el fallback.
+- 1016 no se descarta como estado latente: comprobar rechazo de negocio, nueva revisión y siguiente guardado incierto. mayResend no debe sobrevivir para ofrecer un reenvío sin comprobar ausencia en ese nuevo intento.
+- La conservación de taskState durante Reintentar tarea es además una sospecha concreta sobre producción: comprobar si proyecto termina antes que la nueva consulta de estado y habilita planificación con el dato anterior. Se requiere reproducción antes de modificar código o afirmar defecto.
+
+El autor cubre los demás grupos observables con matrices de estados, fechas, presupuesto, recuperación y presentación, reutilizando los tests existentes. RuntimeError945 y los tres NoCoverage requieren evidencia propia; no se convierten en Killed por interpretación. Pendientes cambios, regresión, revisión de autoría y replay. Feature in_progress.
+
+## Revisión independiente del refuerzo UI — 2026-09-06
+
+Dictamen: **APPROVED** para el cambio y las pruebas UI/shared congelados. Sin hallazgos nuevos ni cambios adicionales solicitados. Esta revisión no concede resultados de mutación antes del replay ni modifica las resoluciones y equivalencias anteriores.
+
+Ámbito leído: TaskReader, TaskState y TaskBlocks en sus recorridos afectados, los 17 tests nuevos de task-blocks.test.tsx y su bitácora TDD. Se contrastó el inventario del manifest: 167 originales seleccionados, de los cuales 100 son UI/shared (94 TaskBlocks, cinco TaskReader y uno TaskState). Los 67 de schedule-block-api corresponden a la revisión del coordinador. No se revisa aquí el soporte del arnés previamente escrito por este revisor.
+
+La única modificación productiva, setTaskState(undefined) en TaskReader:94, corrige la causa reproducida: Reintentar tarea retiraba los datos de tarea y proyecto pero conservaba el estado utilizado para habilitar planificación. El reset mantiene la planificación pendiente hasta recibir el estado nuevo. El test conserva deliberadamente la respuesta de estado y deja terminar el proyecto; distingue el defecto real RED9d5579 del fallo de fixture anterior y del GREEN56ed8e. No introduce otra fuente de estado ni modifica las guardas existentes.
+
+Las pruebas de respuestas antiguas observan efectos en el padre vivo tras remontar TaskState y tras reconsultar proyecto; cubren los recorridos reabiertos 1530 y 1401/1403/1412/1427 sin recurrir a llamadas privadas. La reconsulta de proyecto también comprueba que carga o fallo impiden reutilizar un snapshot elegible. El rechazo de reenvío verifica el fallback de foco cuando desaparece el botón y una segunda intención incierta verifica que mayResend no autoriza reenvío prematuro (887/1016).
+
+Los demás grupos añaden oráculos visibles para exceso en sólo uno de varios días, consentimiento y revisión sin exceso; submit cancelado y exclusión durante espera o tarea completada; reenvío con identidad retenida después de completed y ausencia confirmada; configuración vacía y dos reintentos; selección asimétrica de offsets y limpieza al editar; fecha local y datetime persistido; consulta de conflicto; StrictMode; comprobación incierta; paginación y retorno a la página reciente tras confirmar. Los fixtures de offsets son respuestas estructurales para el consumidor UI, no evidencia física de transición de zona. No se exige una prueba por ID ni se deduce que todo el inventario ya esté eliminado.
+
+Los tres NoCoverage originales 963/1082/1200 tienen ahora recorridos concretos y aserciones pertinentes. RuntimeError945 conserva su clasificación histórica hasta medir; el nuevo caso de comprobación desconocida no lo convierte por interpretación en Killed. El replay decidirá la efectividad de estos oráculos sobre cada mutante real.
+
+Evidencia recibida del autor: regresión UI/shared **180/180 PASS** (73 TaskBlocks, +17), salida6ddfe4; ESLint16c42c y tsc f37f93 verdes, formatoa0d81c. Evidencia independiente del coordinador: init21625 **EXIT0**, f79afd, lint y nueve pruebas del arnés verdes, frontend **1198 PASS**; XML161c53 backend **1365**, cero fallos, errores o saltos; buildfrontend391add PASS. Este revisor no ejecutó suites ni Gradle. E2E focal real del coordinador sigue en curso al emitir este dictamen y precederá al replay; no se atribuye aquí su resultado.
+
+Corte comprobado SHA-256: TaskReader `2B5EF46864D5E9EA32021D5014B8C317520E9BF13B44A1B02DA2B281645B9B4C`; task-blocks.test.tsx `45056582E51E78E1A5F057A7AF244362A66CE023543B1C9E2E693390FF0F1938`. TaskBlocks y TaskState conservan los hashes originales del manifest. La revisión es funcional y de regresión del refuerzo; no sustituye la matriz UX previa ni amplía sus límites de dispositivos y evaluación humana. Feature continúa in_progress.

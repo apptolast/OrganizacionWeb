@@ -21,7 +21,11 @@ export function createProject(runner = run) {
       target !== undefined &&
       target !== "" &&
       (task !== "mutate" ||
-        !["schedule_block-backend", "schedule_block-frontend"].includes(target))
+        ![
+          "schedule_block-backend",
+          "schedule_block-frontend",
+          "schedule_block-frontend-replay",
+        ].includes(target))
     ) {
       throw new Error(`Invalid target: ${target}`);
     }
@@ -45,6 +49,17 @@ export function createProject(runner = run) {
     if (!commands[task]) throw new Error(`Unknown task: ${task}`);
     if (task === "mutate" && target === "schedule_block-backend") {
       backend("pitest", ["-PmutationScope=schedule_block"]);
+      return;
+    }
+    if (task === "mutate" && target === "schedule_block-frontend-replay") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.schedule-block.replay.config.json",
+      ]);
       return;
     }
     if (task === "mutate" && target === "schedule_block-frontend") {

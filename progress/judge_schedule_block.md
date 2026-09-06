@@ -101,3 +101,25 @@ El coordinador revisó los límites nuevos de BlockBudget y los cursores/página
 Regresión afectada del autor 6f086d EXIT 0 tras formato: 323 pruebas. XML comprobados independientemente por root en 107320: HTTP173, presupuesto17, wiring14, configuración7, publicación103 y fallos de Rabbit9; cero fallos, errores u omitidos. git diff --check limpio en 20b53c. Los casos nuevos son inicialmente verdes, sin RED fabricado. Detalle de ciclos75–92 y publicador en sus bitácoras.
 
 **APPROVED para repetir PIT backend** sobre el mismo alcance productivo. El informe inicial 414/454 se conserva. No se adelanta ningún nuevo kill; el candidato equivalente BlockBudget34 índice187 tiene argumento independiente en review_schedule_block_mutation_candidates.md y no modifica el score bruto. Stryker inicial ha terminado con umbral superado, pero su análisis de supervivientes y un error del runner sigue pendiente. La feature permanece in_progress.
+
+## Seguimiento frontend: API
+
+Root revisó el diff completo de schedule-block-api.test.ts en 2cfa2c: 60 casos netos agrupados en las matrices existentes y nuevos recorridos públicos, sin tocar producción. Se comprueban fronteras válidas, errores especializados cerrados, colecciones mixtas, coerción de valores JSON y coherencia de tiempo/intención. Los vectores de duración mantienen correctas las demás invariantes, y el UUID array se prueba por lista para evitar que una segunda validación de detalle oculte el hueco. readBlockError debe resolver null cuando el protocolo es incompatible; los DTO deben rechazarse. Las equivalencias se revisaron por separado.
+
+Entrega del autor: 250/250 API PASS bd27c5, sin omitidos; formato17b6df, ESLint7049b0 y TypeScript3184c6. **APPROVED diseño y cobertura del refuerzo API**. La aprobación no sustituye la regresión frontend integrada después de terminar UI ni autoriza aún Stryker; faltan esa entrega y la revisión de su configuración de replay. Los ciclos inicialmente verdes están registrados con sus límites, sin RED fabricado.
+
+## Seguimiento: resultado backend y soporte de replay frontend
+
+PIT segundo c6bc2c EXIT0: 453/454 KILLED (99,78 %), un SURVIVED contextual BlockBudget34 índice187, sin NoCoverage, errores ni timeouts. Root verificó XML y correspondencia de las454 identidades únicas (cf2ac6/925113); se conservan ambos informes. Se acepta el cierre del seguimiento de mutación backend, sin descontar la equivalencia.
+
+Root revisó scripts/project.mjs y sus tests completos d5264d: el target adicional de replay es cerrado, llama sólo una configuración fija y mantiene default/targets previos. La prueba usa runner inyectado y no lanza mutación. Reejecución independiente node:test589cd5: nueve casos verdes, cero omitidos. Verificación independiente3aa674: hashes de las cuatro fuentes y el informe original coinciden;167 IDs únicos y unión exacta de141 rangos incluyendo la línea nueva de producción. El CLI posicional fue confirmado por lectura de la versión instalada; reporters escriben destinos separados, umbral80/perTest/concurrency2 y patrón protector conservados.
+
+**APPROVED soporte de replay**, pendiente de entregar y revisar UI y pasar la regresión integrada antes de iniciar Stryker. El replay tendrá denominador propio y no se presentará como un nuevo resultado global ni se mezclarán sus identidades locales con las originales sin remapeo.
+
+## Puerta de replay frontend completa
+
+Dictamen independiente UI APPROVED en review_schedule_block_ui_mutation.md: 17 nuevos casos, 180/180 de regresión afectada. La única modificación productiva es retirar taskState anterior al reintentar TaskReader; RED9d5579 y GREEN56ed8e prueban que la planificación espera al nuevo estado. Se conserva la separación entre operación nueva y recuperación de una identidad ya enviada.
+
+Init global del coordinador21625 EXIT0 f79afd: lint verde, nueve tests del arnés,1198 frontend y1365 backend; XML backend contrastados en161c53, cero fallos/errores/omitidos. Build frontend391add EXIT0. E2E focal nuevo48211 EXIT0/72ed46: siete recorridos de bloques verdes en35,6s sobre Docker/API/PostgreSQL reales, incluido reinicio real. La invocación previa69111 falló antes de ejecutar pruebas por usar un nombre de proyecto inexistente en Playwright; se retiró ese argumento, sin modificar pruebas ni configuración. Ambos stacks de prueba se retiraron por su runner propio.
+
+**APPROVED para ejecutar replay frontend por arnés**, con fuentes, tests y configuración congelados. Los resultados de la campaña y del replay se conservarán separados, con remapeo de identidades y error945 explícito. No se marca done antes de analizar esa medición.

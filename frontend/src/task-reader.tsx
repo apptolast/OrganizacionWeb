@@ -91,6 +91,7 @@ export function TaskReader({
           <button
             onClick={() => {
               setTask(undefined);
+              setTaskState(undefined);
               setSnapshot(undefined);
               setProjectLoading(true);
               setProjectFailure(false);

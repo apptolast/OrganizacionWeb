@@ -1,3 +1,4 @@
+import { StrictMode } from "react";
 import {
   act,
   fireEvent,
@@ -1725,4 +1726,731 @@ it("@s53 renovación CSRF tardía no restaura contexto revocado durante recupera
       ([url, options]) => url === `${api}/blocks` && options?.method === "POST",
     ),
   ).toHaveLength(1);
+});
+it("@s56 reintentar tarea espera su estado nuevo antes de permitir planificar", async () => {
+  window.history.replaceState(null, "", route);
+  let finishList!: (response: Response) => void;
+  let finishStatus!: (response: Response) => void;
+  let listReads = 0;
+  let statusReads = 0;
+  fixture((url) => {
+    if (url === `${api}/blocks` && ++listReads === 1)
+      return new Promise((resolve) => {
+        finishList = resolve;
+      });
+    if (url === `${api}/status` && ++statusReads === 2)
+      return new Promise((resolve) => {
+        finishStatus = resolve;
+      });
+  });
+  render(<App />);
+  await screen.findByRole("button", { name: "Planificar bloque" });
+  await act(async () => finishList(problem("RESOURCE_NOT_FOUND", 404)));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Reintentar tarea" }),
+  );
+  await screen.findByRole("heading", { name: "Estado del proyecto" });
+  expect(screen.getByText("Consultando estado de la tarea")).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Planificar bloque" }),
+  ).not.toBeInTheDocument();
+  await act(async () =>
+    finishStatus(
+      Response.json(pending, {
+        headers: { ETag: `"task:${task.id}:1"` },
+      }),
+    ),
+  );
+  expect(
+    screen.getByRole("button", { name: "Planificar bloque" }),
+  ).toBeEnabled();
+});
+it("@s53 una transición vieja no cambia la elegibilidad tras reintentar tarea", async () => {
+  window.history.replaceState(null, "", route);
+  let finishList!: (response: Response) => void;
+  let finishWrite!: (response: Response) => void;
+  let listReads = 0;
+  fixture((url, options) => {
+    if (url === `${api}/blocks` && ++listReads === 1)
+      return new Promise((resolve) => {
+        finishList = resolve;
+      });
+    if (url === `${api}/status` && options?.method === "PUT")
+      return new Promise((resolve) => {
+        finishWrite = resolve;
+      });
+  });
+  render(<App />);
+  await screen.findByRole("button", { name: "Planificar bloque" });
+  fireEvent.click(screen.getByRole("button", { name: "Completar tarea" }));
+  await waitFor(() => expect(finishWrite).toBeDefined());
+  await act(async () => finishList(problem("RESOURCE_NOT_FOUND", 404)));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Reintentar tarea" }),
+  );
+  await screen.findByRole("button", { name: "Planificar bloque" });
+  await act(async () =>
+    finishWrite(
+      Response.json(
+        {
+          ...pending,
+          status: "completed",
+          completedAt: task.updatedAt,
+        },
+        { headers: { ETag: `"task:${task.id}:1"` } },
+      ),
+    ),
+  );
+  expect(
+    screen.getByRole("button", { name: "Planificar bloque" }),
+  ).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Completar tarea" })).toBeEnabled();
+});
+it("@s53 proyecto anterior no termina la carga ni reemplaza contexto tras retry de tarea", async () => {
+  window.history.replaceState(null, "", route);
+  let firstProject!: (response: Response) => void;
+  let currentProject!: (response: Response) => void;
+  let finishList!: (response: Response) => void;
+  let projectReads = 0;
+  let listReads = 0;
+  fixture((url) => {
+    if (url === `/api/v1/projects/${project.id}`)
+      return new Promise((resolve) => {
+        if (++projectReads === 1) firstProject = resolve;
+        else currentProject = resolve;
+      });
+    if (url === `${api}/blocks` && ++listReads === 1)
+      return new Promise((resolve) => {
+        finishList = resolve;
+      });
+  });
+  render(<App />);
+  await screen.findByRole("button", { name: "Completar tarea" });
+  await waitFor(() => expect(firstProject).toBeDefined());
+  await act(async () => finishList(problem("RESOURCE_NOT_FOUND", 404)));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Reintentar tarea" }),
+  );
+  await waitFor(() => expect(currentProject).toBeDefined());
+  await act(async () =>
+    firstProject(
+      Response.json(
+        { ...project, status: "completed" },
+        { headers: { ETag: '"old"' } },
+      ),
+    ),
+  );
+  expect(screen.getByText("Consultando proyecto")).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Planificar bloque" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Reabrir en pausa" }),
+  ).not.toBeInTheDocument();
+  await act(async () =>
+    currentProject(Response.json(project, { headers: { ETag: '"current"' } })),
+  );
+  expect(
+    screen.getByRole("button", { name: "Planificar bloque" }),
+  ).toBeEnabled();
+});
+it("@s53 rechazo del proyecto antiguo no retira tarea recuperada", async () => {
+  window.history.replaceState(null, "", route);
+  let firstProject!: (response: Response) => void;
+  let finishList!: (response: Response) => void;
+  let projectReads = 0;
+  let listReads = 0;
+  fixture((url) => {
+    if (url === `/api/v1/projects/${project.id}` && ++projectReads === 1)
+      return new Promise((resolve) => {
+        firstProject = resolve;
+      });
+    if (url === `${api}/blocks` && ++listReads === 1)
+      return new Promise((resolve) => {
+        finishList = resolve;
+      });
+  });
+  render(<App />);
+  await screen.findByRole("button", { name: "Completar tarea" });
+  await waitFor(() => expect(firstProject).toBeDefined());
+  await act(async () => finishList(problem("RESOURCE_NOT_FOUND", 404)));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Reintentar tarea" }),
+  );
+  await screen.findByRole("button", { name: "Planificar bloque" });
+  await act(async () => firstProject(new Response(null, { status: 404 })));
+  expect(
+    screen.getByRole("button", { name: "Planificar bloque" }),
+  ).toBeEnabled();
+  expect(
+    screen.queryByRole("button", { name: "Reintentar tarea" }),
+  ).not.toBeInTheDocument();
+});
+it("@s49 @s58 rechazo del reenvío restaura foco y una intención nueva exige comprobar antes de reenviar", async () => {
+  window.history.replaceState(null, "", route);
+  let writes = 0;
+  fixture((url, options) => {
+    if (url.endsWith("/preview")) return Response.json(preview);
+    if (url.includes("/by-request/")) return problem("BLOCK_NOT_FOUND", 404);
+    if (url === `${api}/blocks` && options?.method === "POST") {
+      if (++writes === 2)
+        return problem("BUDGET_EXCEEDED", 409, {
+          budgetZoneId: preview.budgetZoneId,
+          days: [
+            { ...preview.days[0], plannedSeconds: 6600, excessSeconds: 3000 },
+          ],
+        });
+      return problem("STORAGE_UNAVAILABLE", 503);
+    }
+  });
+  render(<App />);
+  await openEditor();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  await screen.findByRole("region", { name: "Revisión del bloque" });
+  fireEvent.click(screen.getByRole("button", { name: "Guardar bloque" }));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Comprobar guardado" }),
+  );
+  const resend = await screen.findByRole("button", {
+    name: "Reenviar el mismo bloque",
+  });
+  resend.focus();
+  fireEvent.click(resend);
+  await screen.findByText(
+    "El presupuesto cambió. Revisa este bloque de nuevo antes de decidir.",
+  );
+  expect(
+    screen.getByRole("heading", { name: "Bloques planificados" }),
+  ).toHaveFocus();
+  expect(
+    screen.queryByRole("button", { name: "Reenviar el mismo bloque" }),
+  ).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  await screen.findByRole("region", { name: "Revisión del bloque" });
+  fireEvent.click(screen.getByRole("button", { name: "Guardar bloque" }));
+  await screen.findByRole("button", { name: "Comprobar guardado" });
+  expect(
+    screen.queryByRole("button", { name: "Reenviar el mismo bloque" }),
+  ).not.toBeInTheDocument();
+  expect(writes).toBe(3);
+});
+it("@s41 varios días con exceso sólo en uno exigen consentimiento y revisión sin exceso lo retira", async () => {
+  window.history.replaceState(null, "", route);
+  let reviews = 0;
+  fixture((url) => {
+    if (!url.endsWith("/preview")) return;
+    const excess = ++reviews === 1;
+    return Response.json({
+      ...preview,
+      startAt: "2030-01-07T22:30:00Z",
+      endAt: "2030-01-07T23:30:00Z",
+      days: [
+        {
+          ...preview.days[0],
+          requestedSeconds: 1800,
+          plannedSeconds: excess ? 7200 : 0,
+          excessSeconds: excess ? 1800 : 0,
+        },
+        { ...preview.days[0], date: "2030-01-08", requestedSeconds: 1800 },
+      ],
+    });
+  });
+  render(<App />);
+  await openEditor();
+  fireEvent.change(screen.getByLabelText("Inicio del bloque"), {
+    target: { value: "2030-01-07T22:30" },
+  });
+  fireEvent.change(screen.getByLabelText("Fin del bloque"), {
+    target: { value: "2030-01-07T23:30" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  const acceptance = await screen.findByRole("checkbox");
+  expect(acceptance).not.toBeChecked();
+  expect(screen.getByRole("button", { name: "Guardar bloque" })).toBeDisabled();
+  fireEvent.click(acceptance);
+  expect(screen.getByRole("button", { name: "Guardar bloque" })).toBeEnabled();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  await waitFor(() =>
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument(),
+  );
+  expect(screen.getByRole("button", { name: "Guardar bloque" })).toBeEnabled();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+});
+it("@s56 el envío del formulario se cancela y no duplica preview pendiente ni revisa tarea completada", async () => {
+  window.history.replaceState(null, "", route);
+  let finishPreview!: (response: Response) => void;
+  let reviews = 0;
+  fixture((url, options) => {
+    if (url.endsWith("/preview")) {
+      reviews++;
+      return new Promise((resolve) => {
+        finishPreview = resolve;
+      });
+    }
+    if (url === `${api}/status` && options?.method === "PUT")
+      return Response.json(
+        { ...pending, status: "completed", completedAt: task.updatedAt },
+        { headers: { ETag: `"task:${task.id}:1"` } },
+      );
+  });
+  render(<App />);
+  await openEditor();
+  const form = screen.getByLabelText("Objetivo del bloque").closest("form")!;
+  expect(fireEvent.submit(form)).toBe(false);
+  await waitFor(() => expect(reviews).toBe(1));
+  expect(screen.getByText("Revisando bloque")).toBeVisible();
+  expect(fireEvent.submit(form)).toBe(false);
+  expect(reviews).toBe(1);
+  await act(async () => finishPreview(Response.json(preview)));
+  fireEvent.click(screen.getByRole("button", { name: "Completar tarea" }));
+  await screen.findByRole("button", { name: "Reabrir tarea" });
+  expect(fireEvent.submit(form)).toBe(false);
+  expect(reviews).toBe(1);
+  expect(screen.getByRole("button", { name: "Guardar bloque" })).toBeDisabled();
+});
+it("@s56 identidad retenida puede reenviarse tras ausencia confirmada aunque tarea complete", async () => {
+  window.history.replaceState(null, "", route);
+  let writes = 0;
+  const fetcher = fixture((url, options) => {
+    if (url.endsWith("/preview")) return Response.json(preview);
+    if (url.includes("/by-request/")) return problem("BLOCK_NOT_FOUND", 404);
+    if (url === `${api}/blocks` && options?.method === "POST")
+      return ++writes === 1
+        ? problem("STORAGE_UNAVAILABLE", 503)
+        : Response.json(block, {
+            status: 201,
+            headers: { Location: `${api}/blocks/${block.id}` },
+          });
+    if (url === `${api}/status` && options?.method === "PUT")
+      return Response.json(
+        { ...pending, status: "completed", completedAt: task.updatedAt },
+        { headers: { ETag: `"task:${task.id}:1"` } },
+      );
+  });
+  render(<App />);
+  await openEditor();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  await screen.findByRole("region", { name: "Revisión del bloque" });
+  fireEvent.click(screen.getByRole("button", { name: "Guardar bloque" }));
+  await screen.findByRole("button", { name: "Comprobar guardado" });
+  fireEvent.click(screen.getByRole("button", { name: "Completar tarea" }));
+  await screen.findByRole("button", { name: "Reabrir tarea" });
+  fireEvent.click(screen.getByRole("button", { name: "Comprobar guardado" }));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Reenviar el mismo bloque" }),
+  );
+  await screen.findByText("Bloque guardado");
+  const requests = fetcher.mock.calls.filter(
+    ([url, options]) => url === `${api}/blocks` && options?.method === "POST",
+  );
+  expect(requests).toHaveLength(2);
+  expect(requests[1][1]?.body).toBe(requests[0][1]?.body);
+  expect(new Headers(requests[1][1]?.headers).get("Idempotency-Key")).toBe(
+    new Headers(requests[0][1]?.headers).get("Idempotency-Key"),
+  );
+  expect(
+    screen.queryByRole("button", { name: "Planificar bloque" }),
+  ).not.toBeInTheDocument();
+});
+it("@s40 disponibilidad sin configurar conserva campos vacíos y selector sin zona inventada", async () => {
+  window.history.replaceState(null, "", route);
+  let finishConfiguration!: (response: Response) => void;
+  const fetcher = fixture((url) => {
+    if (url === "/api/v1/me/availability")
+      return new Promise((resolve) => {
+        finishConfiguration = resolve;
+      });
+    if (url.endsWith("/preview")) return problem("AVAILABILITY_REQUIRED", 409);
+  });
+  render(<App />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Planificar bloque" }),
+  );
+  expect(screen.getByLabelText("Objetivo del bloque")).toHaveValue("");
+  expect(screen.getByLabelText("Inicio del bloque")).toHaveValue("");
+  expect(screen.getByLabelText("Fin del bloque")).toHaveValue("");
+  expect(screen.getByLabelText("Zona del bloque")).toHaveValue("");
+  expect(
+    within(screen.getByLabelText("Zona del bloque")).getAllByRole("option"),
+  ).toHaveLength(1);
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  await act(async () =>
+    finishConfiguration(
+      Response.json(
+        {
+          configured: false,
+          zoneId: null,
+          dailyMinutes: null,
+          updatedAt: null,
+        },
+        { headers: { ETag: '"availability:unconfigured"' } },
+      ),
+    ),
+  );
+  expect(screen.getByLabelText("Zona del bloque")).toHaveValue("");
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  await screen.findByRole("link", { name: "Configurar disponibilidad" });
+  const sent = fetcher.mock.calls.find(([url]) =>
+    String(url).endsWith("/preview"),
+  );
+  expect(JSON.parse(String(sent?.[1]?.body))).toMatchObject({
+    objective: "",
+    startLocal: "",
+    endLocal: "",
+    zoneId: "",
+  });
+});
+it("@s40 configuración permite dos reintentos y retira errores durante espera y éxito", async () => {
+  window.history.replaceState(null, "", route);
+  let requests = 0;
+  let finishRetry!: (response: Response) => void;
+  fixture((url) => {
+    if (url !== "/api/v1/me/availability") return;
+    if (++requests === 1) return new Response(null, { status: 503 });
+    if (requests === 2)
+      return new Promise((resolve) => {
+        finishRetry = resolve;
+      });
+  });
+  render(<App />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Planificar bloque" }),
+  );
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Reintentar configuración" }),
+  );
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  await act(async () => finishRetry(new Response(null, { status: 503 })));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Reintentar configuración" }),
+  );
+  await waitFor(() =>
+    expect(screen.getByLabelText("Zona del bloque")).toHaveValue(
+      "Europe/Madrid",
+    ),
+  );
+  expect(requests).toBe(3);
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Reintentar configuración" }),
+  ).not.toBeInTheDocument();
+});
+it("@s42 ocurrencias muestran UTC cero y cambiar fin o zona retira sólo offsets obsoletos", async () => {
+  window.history.replaceState(null, "", route);
+  let reviews = 0;
+  const fetcher = fixture((url) => {
+    if (!url.endsWith("/preview")) return;
+    const field = ++reviews === 1 ? "startOffset" : "endOffset";
+    return problem("VALIDATION_ERROR", 400, {
+      errors: [
+        { field, code: "AMBIGUOUS_OFFSET", message: "Elige una ocurrencia" },
+      ],
+      validOffsets: { [field]: ["+01:00", "Z"] },
+    });
+  });
+  render(<App />);
+  await openEditor();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  const start = await screen.findByLabelText("Ocurrencia de inicio");
+  expect(start).toHaveAttribute("aria-invalid", "true");
+  expect(within(start).getByRole("option", { name: "UTC+00:00" })).toHaveValue(
+    "Z",
+  );
+  expect(within(start).getByRole("option", { name: "UTC+01:00" })).toHaveValue(
+    "+01:00",
+  );
+  fireEvent.change(start, { target: { value: "+01:00" } });
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  const end = await screen.findByLabelText("Ocurrencia de fin");
+  expect(end).toHaveAttribute("aria-invalid", "true");
+  expect(start).toHaveValue("+01:00");
+  fireEvent.change(end, { target: { value: "Z" } });
+  expect(end).toHaveValue("Z");
+  fireEvent.change(screen.getByLabelText("Fin del bloque"), {
+    target: { value: "2030-01-07T11:30" },
+  });
+  expect(screen.queryByLabelText("Ocurrencia de fin")).not.toBeInTheDocument();
+  expect(start).toHaveValue("+01:00");
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  await screen.findByLabelText("Ocurrencia de fin");
+  let sent = fetcher.mock.calls.filter(([url]) =>
+    String(url).endsWith("/preview"),
+  );
+  expect(JSON.parse(String(sent[2][1]?.body))).toMatchObject({
+    startOffset: "+01:00",
+    endOffset: null,
+  });
+  fireEvent.change(screen.getByLabelText("Zona del bloque"), {
+    target: { value: "Europe/Madrid" },
+  });
+  expect(
+    screen.queryByLabelText("Ocurrencia de inicio"),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Ocurrencia de fin")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  await screen.findByLabelText("Ocurrencia de fin");
+  sent = fetcher.mock.calls.filter(([url]) => String(url).endsWith("/preview"));
+  expect(JSON.parse(String(sent[3][1]?.body))).toMatchObject({
+    startOffset: null,
+    endOffset: null,
+    zoneId: "Europe/Madrid",
+  });
+});
+it("@s39 bloque guardado muestra fecha local española con segundos y desfase de su zona", async () => {
+  window.history.replaceState(null, "", route);
+  fixture((url) =>
+    url === `${api}/blocks`
+      ? Response.json({
+          items: [{ ...block, zoneId: "Europe/Madrid" }],
+          nextCursor: null,
+        })
+      : undefined,
+  );
+  render(<App />);
+  const list = await screen.findByRole("list", {
+    name: "Bloques planificados",
+  });
+  const start = within(list).getByText(
+    "7 ene 2030, 11:00:00 (GMT+01:00) · Europe/Madrid",
+  );
+  expect(start).toHaveAttribute("datetime", block.startAt);
+  expect(
+    within(list).getByText("7 ene 2030, 12:00:00 (GMT+01:00) · Europe/Madrid"),
+  ).toHaveAttribute("datetime", block.endAt);
+  expect(start.parentElement).toHaveTextContent("Inicio: 7 ene 2030");
+  expect(
+    screen.queryByText("Todavía no hay bloques planificados para esta tarea."),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+});
+it("@s52 consulta del conflicto distingue espera error y reintento sin alertas falsas", async () => {
+  window.history.replaceState(null, "", route);
+  let finish!: (response: Response) => void;
+  fixture((url) => {
+    if (url.endsWith("/preview"))
+      return problem("BLOCK_OVERLAP", 409, {
+        conflict: { id: block.id, projectId: project.id, taskId: task.id },
+      });
+    if (url === `${api}/blocks/${block.id}`)
+      return new Promise((resolve) => {
+        finish = resolve;
+      });
+  });
+  render(<App />);
+  await openEditor();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  const conflict = await screen.findByRole("region", {
+    name: "Bloque en conflicto",
+  });
+  const consult = within(conflict).getByRole("button", {
+    name: "Consultar bloque en conflicto",
+  });
+  expect(within(conflict).queryByRole("alert")).not.toBeInTheDocument();
+  expect(within(conflict).queryByRole("status")).not.toBeInTheDocument();
+  fireEvent.click(consult);
+  expect(consult).toBeDisabled();
+  expect(within(conflict).getByRole("status")).toHaveTextContent(
+    "Consultando bloque en conflicto",
+  );
+  await act(async () => finish(new Response(null, { status: 503 })));
+  expect(within(conflict).getByRole("alert")).toBeVisible();
+  expect(within(conflict).queryByRole("status")).not.toBeInTheDocument();
+  expect(consult).toBeEnabled();
+  fireEvent.click(consult);
+  expect(within(conflict).queryByRole("alert")).not.toBeInTheDocument();
+  expect(consult).toBeDisabled();
+  await act(async () => finish(Response.json(block)));
+  expect(
+    within(conflict).getByRole("heading", { name: block.objective }),
+  ).toBeVisible();
+  expect(within(conflict).queryByRole("alert")).not.toBeInTheDocument();
+  expect(within(conflict).queryByRole("status")).not.toBeInTheDocument();
+});
+it("@s53 StrictMode descarta listado y configuración anteriores al montaje vigente", async () => {
+  window.history.replaceState(null, "", route);
+  let oldList!: (response: Response) => void;
+  let oldConfiguration!: (response: Response) => void;
+  let lists = 0;
+  let configurations = 0;
+  fixture((url) => {
+    if (url === `${api}/blocks`) {
+      if (++lists === 1)
+        return new Promise((resolve) => {
+          oldList = resolve;
+        });
+      return Response.json({ items: [block], nextCursor: null });
+    }
+    if (url === "/api/v1/me/availability" && ++configurations === 1)
+      return new Promise((resolve) => {
+        oldConfiguration = resolve;
+      });
+  });
+  render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+  const list = await screen.findByRole("list", {
+    name: "Bloques planificados",
+  });
+  expect(
+    within(list).getByRole("heading", { name: block.objective }),
+  ).toBeVisible();
+  await act(async () =>
+    oldList(Response.json({ items: [], nextCursor: null })),
+  );
+  expect(
+    within(list).getByRole("heading", { name: block.objective }),
+  ).toBeVisible();
+  await openEditor();
+  await act(async () =>
+    oldConfiguration(
+      Response.json(
+        {
+          configured: false,
+          zoneId: null,
+          dailyMinutes: null,
+          updatedAt: null,
+        },
+        { headers: { ETag: '"availability:unconfigured"' } },
+      ),
+    ),
+  );
+  expect(screen.getByLabelText("Zona del bloque")).toHaveValue("UTC");
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+});
+it("@s48 comprobar guardado bloquea acciones durante espera y fallo desconocido no autoriza reenvío", async () => {
+  window.history.replaceState(null, "", route);
+  let rejectCheck!: (error: unknown) => void;
+  fixture((url, options) => {
+    if (url.endsWith("/preview")) return Response.json(preview);
+    if (url === `${api}/blocks` && options?.method === "POST")
+      return problem("STORAGE_UNAVAILABLE", 503);
+    if (url.includes("/by-request/"))
+      return new Promise((_resolve, reject) => {
+        rejectCheck = reject;
+      });
+  });
+  render(<App />);
+  await openEditor();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  await screen.findByRole("region", { name: "Revisión del bloque" });
+  fireEvent.click(screen.getByRole("button", { name: "Guardar bloque" }));
+  const check = await screen.findByRole("button", {
+    name: "Comprobar guardado",
+  });
+  fireEvent.click(check);
+  expect(check).toBeDisabled();
+  expect(
+    screen.queryByRole("button", { name: "Reenviar el mismo bloque" }),
+  ).not.toBeInTheDocument();
+  await act(async () => rejectCheck(new TypeError("Sin conexión")));
+  expect(check).toBeEnabled();
+  expect(
+    screen.queryByRole("button", { name: "Reenviar el mismo bloque" }),
+  ).not.toBeInTheDocument();
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "No podemos confirmar el guardado. Conservamos este bloque y su identificación para comprobarlo sin duplicarlo.",
+  );
+  expect(screen.getByLabelText("Objetivo del bloque")).toBeDisabled();
+});
+it("@s56 reconsulta de proyecto pendiente o fallida no reutiliza su snapshot elegible", async () => {
+  window.history.replaceState(null, "", route);
+  let projectReads = 0;
+  let finishProject!: (response: Response) => void;
+  fixture((url, options) => {
+    if (url === `/api/v1/projects/${project.id}/status`)
+      return new Response(null, { status: 412 });
+    if (
+      url === `/api/v1/projects/${project.id}` &&
+      options?.method !== "PUT" &&
+      ++projectReads === 2
+    )
+      return new Promise((resolve) => {
+        finishProject = resolve;
+      });
+  });
+  render(<App />);
+  await screen.findByRole("button", { name: "Planificar bloque" });
+  fireEvent.click(screen.getByRole("button", { name: "Pausar" }));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Recargar versión guardada" }),
+  );
+  expect(screen.getByText("Consultando proyecto")).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Planificar bloque" }),
+  ).not.toBeInTheDocument();
+  await act(async () => finishProject(new Response(null, { status: 503 })));
+  await screen.findByRole("button", { name: "Reintentar proyecto" });
+  expect(
+    screen.queryByRole("button", { name: "Planificar bloque" }),
+  ).not.toBeInTheDocument();
+});
+it("@s54 paginar y confirmar desde página antigua retira filas durante cada nueva consulta", async () => {
+  window.history.replaceState(null, "", route);
+  let finishPage!: (response: Response) => void;
+  let recentReads = 0;
+  const old = {
+    ...block,
+    id: "8c5dbd10-9ad5-4000-8000-000000000004",
+    objective: "Bloque antiguo",
+  };
+  const fetcher = fixture((url, options) => {
+    if (url.endsWith("/preview")) return Response.json(preview);
+    if (url === `${api}/blocks` && options?.method === "POST")
+      return Response.json(block, {
+        status: 201,
+        headers: { Location: `${api}/blocks/${block.id}` },
+      });
+    if (url === `${api}/blocks` && ++recentReads === 1)
+      return Response.json({ items: [block], nextCursor: "older" });
+    if (url.startsWith(`${api}/blocks`))
+      return new Promise((resolve) => {
+        finishPage = resolve;
+      });
+  });
+  render(<App />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ver bloques anteriores" }),
+  );
+  expect(
+    screen.queryByRole("list", { name: "Bloques planificados" }),
+  ).not.toBeInTheDocument();
+  expect(screen.getByText("Consultando bloques")).toBeVisible();
+  await act(async () =>
+    finishPage(Response.json({ items: [old], nextCursor: null })),
+  );
+  fireEvent.click(
+    screen.getByRole("button", { name: "Volver a bloques recientes" }),
+  );
+  expect(screen.queryByText("Bloque antiguo")).not.toBeInTheDocument();
+  expect(screen.getByText("Consultando bloques")).toBeVisible();
+  await act(async () =>
+    finishPage(Response.json({ items: [block], nextCursor: "older" })),
+  );
+  fireEvent.click(
+    screen.getByRole("button", { name: "Ver bloques anteriores" }),
+  );
+  await act(async () =>
+    finishPage(Response.json({ items: [old], nextCursor: null })),
+  );
+  await openEditor();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  await screen.findByRole("region", { name: "Revisión del bloque" });
+  fireEvent.click(screen.getByRole("button", { name: "Guardar bloque" }));
+  await screen.findByText("Bloque guardado");
+  expect(screen.queryByText("Bloque antiguo")).not.toBeInTheDocument();
+  expect(screen.getByText("Consultando bloques")).toBeVisible();
+  expect(
+    screen.queryByLabelText("Objetivo del bloque"),
+  ).not.toBeInTheDocument();
+  expect(String(fetcher.mock.calls.at(-1)?.[0])).toBe(`${api}/blocks`);
+  await act(async () =>
+    finishPage(Response.json({ items: [block], nextCursor: null })),
+  );
+  expect(
+    screen.queryByRole("button", { name: "Volver a bloques recientes" }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });

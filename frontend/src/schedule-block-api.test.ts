@@ -27,6 +27,12 @@ it.each([
   { errors: [{ field: "startLocal", code: "UNKNOWN", message: "Error" }] },
   {
     errors: [
+      { field: "objective", code: "REQUIRED", message: "Indica objetivo" },
+      { field: "startLocal", code: "UNKNOWN", message: "Error" },
+    ],
+  },
+  {
+    errors: [
       { field: "startLocal", code: "IN_PAST", message: "Error", extra: 1 },
     ],
   },
@@ -42,6 +48,9 @@ it.each([
     ["+01:00:60", "Z"],
     [null, "Z"],
     ["+1:00", "Z"],
+    [["+01:00"], "Z"],
+    ["prefix+01:00", "Z"],
+    ["+01:00suffix", "Z"],
   ].map((options) => ({
     errors: [
       { field: "startOffset", code: "AMBIGUOUS_OFFSET", message: "Elige" },
@@ -58,6 +67,30 @@ it.each([
     errors: [{ field: "startLocal", code: "IN_PAST", message: "Error" }],
     validOffsets: { startOffset: ["Z"] },
   },
+  {
+    errors: [
+      { field: "startOffset", code: "AMBIGUOUS_OFFSET", message: "Elige" },
+      { field: "endOffset", code: "INVALID_OFFSET", message: "Elige fin" },
+    ],
+    validOffsets: { startOffset: ["+02:00", "+01:00"] },
+  },
+  {
+    errors: [{ field: "startOffset", code: "IN_PAST", message: "Error" }],
+    validOffsets: { startOffset: ["+02:00", "+01:00"] },
+  },
+  {
+    errors: [
+      { field: "objective", code: "AMBIGUOUS_OFFSET", message: "Elige" },
+    ],
+    validOffsets: { objective: ["+02:00", "+01:00"] },
+  },
+  {
+    errors: {
+      length: 1,
+      0: { field: "startOffset", code: "AMBIGUOUS_OFFSET", message: "Elige" },
+    },
+    validOffsets: { startOffset: ["+02:00", "+01:00"] },
+  },
 ])(
   "@s40 @s41 @s45 refuses malformed validation and occurrence options %#",
   async (extra) => {
@@ -69,7 +102,14 @@ it.each([
   },
 );
 it.each(
-  [["+01:00"], ["+02:00", "+01:00"], ["-00:44:30"], ["Z"]].map((options) => ({
+  [
+    ["+01:00"],
+    ["+02:00", "+01:00"],
+    ["-00:44:30"],
+    ["Z"],
+    ["+18:00"],
+    ["-18:00"],
+  ].map((options) => ({
     options,
   })),
 )(
@@ -215,6 +255,177 @@ const request = {
   key: "55555555-5555-5555-5555-555555555555",
   availabilityRevision: preview.availabilityEtag,
 };
+it("@s4 accepts a preview normalized across repeated Unicode whitespace", async () => {
+  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json(preview));
+  await expect(
+    previewBlock(projectId, taskId, {
+      ...input,
+      objective: `\u00a0\u0085${preview.objective}\u0085\u00a0`,
+    }),
+  ).resolves.toEqual(preview);
+});
+it.each(["separator", "calendar"])(
+  "@s40 refuses noncanonical local input despite parseable instants %s",
+  async (defect) => {
+    const localDate = defect === "calendar" ? "2030-02-30" : "2030-01-07";
+    const separator = defect === "separator" ? " " : "T";
+    const sent = {
+      ...input,
+      startLocal: `${localDate}${separator}10:00`,
+      endLocal: `${localDate}${separator}11:00`,
+    };
+    const utcDate = defect === "calendar" ? "2030-03-02" : "2030-01-07";
+    const body = {
+      ...preview,
+      startAt: `${utcDate}T10:00:00Z`,
+      endAt: `${utcDate}T11:00:00Z`,
+      days: [{ ...preview.days[0], date: utcDate }],
+    };
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json(body));
+    await expect(previewBlock(projectId, taskId, sent)).rejects.toThrow();
+  },
+);
+it.each(["mixedExcess", "invalidSecond", "reversed", "duplicate"])(
+  "@s15 reads all budget days as one ordered collection %s",
+  async (condition) => {
+    const first = preview.days[0];
+    const second = {
+      ...first,
+      date: "2030-01-08",
+      budgetMinutes: 0,
+      excessSeconds: 3600,
+    };
+    const days =
+      condition === "mixedExcess"
+        ? [first, second]
+        : condition === "invalidSecond"
+          ? [second, { ...second, date: "2030-01-09", requestedSeconds: -1 }]
+          : condition === "reversed"
+            ? [second, first]
+            : [second, second];
+    const body = problem("BUDGET_EXCEEDED", 409, { budgetZoneId: "UTC", days });
+    await expect(
+      readBlockError(Response.json(body, { status: 409 })),
+    ).resolves.toEqual(condition === "mixedExcess" ? body : null);
+  },
+);
+it.each([
+  {
+    budgetZoneId: "",
+    days: [{ ...preview.days[0], budgetMinutes: 0, excessSeconds: 3600 }],
+  },
+  { days: [{ ...preview.days[0], budgetMinutes: 0, excessSeconds: 3600 }] },
+  { budgetZoneId: "UTC", days: { length: 1 } },
+  { budgetZoneId: "UTC", days: null },
+  {
+    budgetZoneId: "UTC",
+    days: [
+      {
+        ...preview.days[0],
+        date: [preview.days[0].date],
+        budgetMinutes: 0,
+        excessSeconds: 3600,
+      },
+    ],
+  },
+])(
+  "@s45 treats incompatible budget containers as unknown %#",
+  async (extra) => {
+    await expect(
+      readBlockError(
+        Response.json(problem("BUDGET_EXCEEDED", 409, extra), { status: 409 }),
+      ),
+    ).resolves.toBeNull();
+  },
+);
+const specializedProblems = [
+  problem("BUDGET_EXCEEDED", 409, {
+    budgetZoneId: "UTC",
+    days: [{ ...preview.days[0], budgetMinutes: 0, excessSeconds: 3600 }],
+  }),
+  problem("BLOCK_OVERLAP", 409, {
+    conflict: { id: block.id, projectId, taskId },
+  }),
+  problem("VALIDATION_ERROR", 400, {
+    errors: [
+      { field: "startOffset", code: "AMBIGUOUS_OFFSET", message: "Elige" },
+    ],
+    validOffsets: { startOffset: ["+02:00", "+01:00"] },
+  }),
+  problem("VALIDATION_ERROR", 400, {
+    errors: [
+      { field: "objective", code: "REQUIRED", message: "Indica objetivo" },
+    ],
+  }),
+];
+it.each(
+  specializedProblems.flatMap((body, family) =>
+    ["code", "status", "bodyStatus", "extra"].map((defect) => ({
+      body,
+      family,
+      defect,
+    })),
+  ),
+)(
+  "@s45 rejects inconsistent specialized problem $family $defect",
+  async ({ body, defect }) => {
+    const wrongStatus = body.status === 400 ? 409 : 400;
+    const changed =
+      defect === "code"
+        ? { ...body, ...problem("UNKNOWN", body.status) }
+        : defect === "status" || defect === "bodyStatus"
+          ? { ...body, status: wrongStatus }
+          : { ...body, extra: true };
+    await expect(
+      readBlockError(
+        Response.json(changed, {
+          status: defect === "status" ? wrongStatus : body.status,
+        }),
+      ),
+    ).resolves.toBeNull();
+  },
+);
+it("@s6 accepts zero fractional notation as whole seconds", async () => {
+  const body = {
+    items: [
+      {
+        ...block,
+        startAt: block.startAt.replace("Z", ".000Z"),
+        endAt: block.endAt.replace("Z", ".000Z"),
+      },
+    ],
+    nextCursor: null,
+  };
+  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json(body));
+  await expect(readBlocks(projectId, taskId)).resolves.toEqual(body);
+});
+it.each(["1", "10", "100", "9223372036854775807"])(
+  "@s20 accepts canonical availability revision %s",
+  async (version) => {
+    const body = {
+      ...preview,
+      availabilityEtag: preview.availabilityEtag.replace(':0"', `:${version}"`),
+    };
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json(body));
+    await expect(previewBlock(projectId, taskId, input)).resolves.toEqual(body);
+  },
+);
+it.each(["list", "preview"])(
+  "@s4 accepts exactly five hundred Unicode points in %s",
+  async (operation) => {
+    const objective = "🧭".repeat(500);
+    const body =
+      operation === "list"
+        ? { items: [{ ...block, objective }], nextCursor: null }
+        : { ...preview, objective };
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json(body));
+    await expect(
+      operation === "list"
+        ? readBlocks(projectId, taskId)
+        : previewBlock(projectId, taskId, { ...input, objective }),
+    ).resolves.toEqual(body);
+  },
+);
 it.each([
   problem("BLOCK_OVERLAP", 409),
   problem("BLOCK_OVERLAP", 409, {
@@ -460,6 +671,18 @@ it.each([
   { items: [{ ...block, durationMinutes: 0 }], nextCursor: null },
   { items: [{ ...block, durationMinutes: 1441 }], nextCursor: null },
   { items: [{ ...block, startAt: "0000-01-01T00:00:00Z" }], nextCursor: null },
+  ...[
+    { id: [block.id] },
+    { id: `prefix${block.id}` },
+    { id: `${block.id}suffix` },
+    { objective: "🧭".repeat(501) },
+    { objective: "  Objetivo  " },
+    { durationMinutes: 59 },
+    {
+      startAt: block.startAt.replace("Z", ".100Z"),
+      endAt: block.endAt.replace("Z", ".100Z"),
+    },
+  ].map((change) => ({ items: [{ ...block, ...change }], nextCursor: null })),
 ])("@s25 @s26 @s54 rejects malformed list %#", async (body) => {
   vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json(body));
   await expect(readBlocks(projectId, taskId)).rejects.toThrow(
@@ -484,6 +707,17 @@ it.each([undefined, "cursor+/="])(
     );
   },
 );
+it("@s25 accepts a full terminal page of twenty blocks", async () => {
+  const page = {
+    items: Array.from({ length: 20 }, (_, index) => ({
+      ...block,
+      id: `44444444-4444-4444-4444-${String(index).padStart(12, "0")}`,
+    })),
+    nextCursor: null,
+  };
+  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json(page));
+  await expect(readBlocks(projectId, taskId)).resolves.toEqual(page);
+});
 it.each([
   { status: 404, body: { code: "BLOCK_NOT_FOUND" } },
   { status: 503, body: {} },
@@ -524,6 +758,7 @@ it("@s46 recovers only matching retained confirmation with signal", async () => 
 it.each([
   { input: { ...request.input, objective: "Otro" } },
   { input: { ...request.input, startOffset: "+01:00" } },
+  { input: { ...request.input, endOffset: "+01:00" } },
   {
     availabilityRevision:
       '"availability:33333333-3333-3333-3333-333333333333:1"',
@@ -682,7 +917,19 @@ it.each([
   { ...preview, endAt: "2030-01-07T12:00:00Z" },
   { ...preview, startOffset: "+01:00" },
   { ...preview, durationMinutes: 59 },
+  {
+    ...preview,
+    durationMinutes: 59,
+    days: [{ ...preview.days[0], requestedSeconds: 3540 }],
+  },
   { ...preview, availabilityEtag: '"availability:unconfigured"' },
+  ...[
+    [preview.availabilityEtag],
+    `prefix${preview.availabilityEtag}`,
+    `${preview.availabilityEtag}suffix`,
+    preview.availabilityEtag.replace(':0"', ':-1"'),
+    preview.availabilityEtag.replace(':0"', ':01"'),
+  ].map((availabilityEtag) => ({ ...preview, availabilityEtag })),
   {
     ...preview,
     availabilityEtag:

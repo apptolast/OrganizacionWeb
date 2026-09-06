@@ -1,0 +1,2738 @@
+{
+  "state": "production-freeze-verified-awaiting-root-judge",
+  "originalReport": "frontend/reports/mutation/mutation.json",
+  "originalReportSha256": "4c95f22fef3d0040e52303c96427351a11fefaa4358f9d8f070944b1ec003aec",
+  "apiExcludedContextualIds": [
+    "5",
+    "359",
+    "361",
+    "363",
+    "388",
+    "403",
+    "432",
+    "449",
+    "452",
+    "453",
+    "473",
+    "516",
+    "537",
+    "552",
+    "553",
+    "575",
+    "576",
+    "716"
+  ],
+  "selectedOriginalCount": 167,
+  "rangeCount": 141,
+  "coordinateConvention": "Report line/column are 1-based; config line 1-based, column 0-based. Original lines mapped into insertion-only current source.",
+  "newProduction": [
+    {
+      "file": "src/task-reader.tsx",
+      "range": "src/task-reader.tsx:94:14-94:38",
+      "reason": "New reset before retry; no original mutant ID"
+    }
+  ],
+  "files": [
+    {
+      "file": "src/task-blocks.tsx",
+      "originalSourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "currentSourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "mutants": [
+        {
+          "id": "963",
+          "status": "NoCoverage",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 52,
+              "line": 265
+            },
+            "start": {
+              "column": 44,
+              "line": 265
+            }
+          },
+          "range": "src/task-blocks.tsx:265:43-265:51"
+        },
+        {
+          "id": "1082",
+          "status": "NoCoverage",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 69,
+              "line": 383
+            },
+            "start": {
+              "column": 67,
+              "line": 383
+            }
+          },
+          "range": "src/task-blocks.tsx:383:66-383:68"
+        },
+        {
+          "id": "1200",
+          "status": "NoCoverage",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 52,
+              "line": 553
+            },
+            "start": {
+              "column": 44,
+              "line": 553
+            }
+          },
+          "range": "src/task-blocks.tsx:553:43-553:51"
+        },
+        {
+          "id": "726",
+          "status": "Survived",
+          "mutator": "CallExpression",
+          "originalLocation": {
+            "end": {
+              "column": 24,
+              "line": 38
+            },
+            "start": {
+              "column": 5,
+              "line": 38
+            }
+          },
+          "range": "src/task-blocks.tsx:38:4-38:23"
+        },
+        {
+          "id": "728",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 25,
+              "line": 39
+            },
+            "start": {
+              "column": 20,
+              "line": 39
+            }
+          },
+          "range": "src/task-blocks.tsx:39:19-39:24"
+        },
+        {
+          "id": "736",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 39,
+              "line": 46
+            },
+            "start": {
+              "column": 13,
+              "line": 46
+            }
+          },
+          "range": "src/task-blocks.tsx:46:12-46:38"
+        },
+        {
+          "id": "744",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 38,
+              "line": 52
+            },
+            "start": {
+              "column": 13,
+              "line": 52
+            }
+          },
+          "range": "src/task-blocks.tsx:52:12-52:37"
+        },
+        {
+          "id": "746",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 38,
+              "line": 54
+            },
+            "start": {
+              "column": 13,
+              "line": 54
+            }
+          },
+          "range": "src/task-blocks.tsx:54:12-54:37"
+        },
+        {
+          "id": "750",
+          "status": "Survived",
+          "mutator": "OptionalChaining",
+          "originalLocation": {
+            "end": {
+              "column": 26,
+              "line": 55
+            },
+            "start": {
+              "column": 13,
+              "line": 55
+            }
+          },
+          "range": "src/task-blocks.tsx:55:12-55:25"
+        },
+        {
+          "id": "757",
+          "status": "Survived",
+          "mutator": "UnaryOperator",
+          "originalLocation": {
+            "end": {
+              "column": 37,
+              "line": 62
+            },
+            "start": {
+              "column": 35,
+              "line": 62
+            }
+          },
+          "range": "src/task-blocks.tsx:62:34-62:36"
+        },
+        {
+          "id": "759",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 34,
+              "line": 73
+            },
+            "start": {
+              "column": 11,
+              "line": 73
+            }
+          },
+          "range": "src/task-blocks.tsx:73:10-73:33"
+        },
+        {
+          "id": "770",
+          "status": "Survived",
+          "mutator": "CallExpression",
+          "originalLocation": {
+            "end": {
+              "column": 36,
+              "line": 89
+            },
+            "start": {
+              "column": 17,
+              "line": 89
+            }
+          },
+          "range": "src/task-blocks.tsx:89:16-89:35"
+        },
+        {
+          "id": "776",
+          "status": "Survived",
+          "mutator": "CallExpression",
+          "originalLocation": {
+            "end": {
+              "column": 36,
+              "line": 99
+            },
+            "start": {
+              "column": 17,
+              "line": 99
+            }
+          },
+          "range": "src/task-blocks.tsx:99:16-99:35"
+        },
+        {
+          "id": "814",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 42,
+              "line": 128
+            },
+            "start": {
+              "column": 13,
+              "line": 128
+            }
+          },
+          "range": "src/task-blocks.tsx:128:12-128:41"
+        },
+        {
+          "id": "816",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 42,
+              "line": 128
+            },
+            "start": {
+              "column": 31,
+              "line": 128
+            }
+          },
+          "range": "src/task-blocks.tsx:128:30-128:41"
+        },
+        {
+          "id": "822",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 29,
+              "line": 136
+            },
+            "start": {
+              "column": 24,
+              "line": 136
+            }
+          },
+          "range": "src/task-blocks.tsx:136:23-136:28"
+        },
+        {
+          "id": "823",
+          "status": "Survived",
+          "mutator": "CallExpression",
+          "originalLocation": {
+            "end": {
+              "column": 34,
+              "line": 137
+            },
+            "start": {
+              "column": 13,
+              "line": 137
+            }
+          },
+          "range": "src/task-blocks.tsx:137:12-137:33"
+        },
+        {
+          "id": "827",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 50,
+              "line": 163
+            },
+            "start": {
+              "column": 48,
+              "line": 163
+            }
+          },
+          "range": "src/task-blocks.tsx:163:47-163:49"
+        },
+        {
+          "id": "826",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 48,
+              "line": 162
+            },
+            "start": {
+              "column": 46,
+              "line": 162
+            }
+          },
+          "range": "src/task-blocks.tsx:162:45-162:47"
+        },
+        {
+          "id": "828",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 46,
+              "line": 164
+            },
+            "start": {
+              "column": 44,
+              "line": 164
+            }
+          },
+          "range": "src/task-blocks.tsx:164:43-164:45"
+        },
+        {
+          "id": "829",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 42,
+              "line": 170
+            },
+            "start": {
+              "column": 40,
+              "line": 170
+            }
+          },
+          "range": "src/task-blocks.tsx:170:39-170:41"
+        },
+        {
+          "id": "830",
+          "status": "Survived",
+          "mutator": "ArrayDeclaration",
+          "originalLocation": {
+            "end": {
+              "column": 50,
+              "line": 171
+            },
+            "start": {
+              "column": 48,
+              "line": 171
+            }
+          },
+          "range": "src/task-blocks.tsx:171:47-171:49"
+        },
+        {
+          "id": "831",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 73,
+              "line": 172
+            },
+            "start": {
+              "column": 68,
+              "line": 172
+            }
+          },
+          "range": "src/task-blocks.tsx:172:67-172:72"
+        },
+        {
+          "id": "833",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 59,
+              "line": 176
+            },
+            "start": {
+              "column": 54,
+              "line": 176
+            }
+          },
+          "range": "src/task-blocks.tsx:176:53-176:58"
+        },
+        {
+          "id": "834",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 63,
+              "line": 177
+            },
+            "start": {
+              "column": 58,
+              "line": 177
+            }
+          },
+          "range": "src/task-blocks.tsx:177:57-177:62"
+        },
+        {
+          "id": "838",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 55,
+              "line": 183
+            },
+            "start": {
+              "column": 50,
+              "line": 183
+            }
+          },
+          "range": "src/task-blocks.tsx:183:49-183:54"
+        },
+        {
+          "id": "887",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 27,
+              "line": 211
+            },
+            "start": {
+              "column": 7,
+              "line": 210
+            }
+          },
+          "range": "src/task-blocks.tsx:210:6-211:26"
+        },
+        {
+          "id": "894",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 48,
+              "line": 221
+            },
+            "start": {
+              "column": 7,
+              "line": 220
+            }
+          },
+          "range": "src/task-blocks.tsx:220:6-221:47"
+        },
+        {
+          "id": "897",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 47,
+              "line": 220
+            },
+            "start": {
+              "column": 7,
+              "line": 220
+            }
+          },
+          "range": "src/task-blocks.tsx:220:6-220:46"
+        },
+        {
+          "id": "898",
+          "status": "Survived",
+          "mutator": "EqualityOperator",
+          "originalLocation": {
+            "end": {
+              "column": 47,
+              "line": 220
+            },
+            "start": {
+              "column": 7,
+              "line": 220
+            }
+          },
+          "range": "src/task-blocks.tsx:220:6-220:46"
+        },
+        {
+          "id": "928",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 19,
+              "line": 242
+            },
+            "start": {
+              "column": 15,
+              "line": 242
+            }
+          },
+          "range": "src/task-blocks.tsx:242:14-242:18"
+        },
+        {
+          "id": "931",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 37,
+              "line": 253
+            },
+            "start": {
+              "column": 11,
+              "line": 253
+            }
+          },
+          "range": "src/task-blocks.tsx:253:10-253:36"
+        },
+        {
+          "id": "942",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 55,
+              "line": 259
+            },
+            "start": {
+              "column": 20,
+              "line": 259
+            }
+          },
+          "range": "src/task-blocks.tsx:259:19-259:54"
+        },
+        {
+          "id": "945",
+          "status": "RuntimeError",
+          "mutator": "OptionalChaining",
+          "originalLocation": {
+            "end": {
+              "column": 33,
+              "line": 259
+            },
+            "start": {
+              "column": 20,
+              "line": 259
+            }
+          },
+          "range": "src/task-blocks.tsx:259:19-259:32"
+        },
+        {
+          "id": "969",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 25,
+              "line": 281
+            },
+            "start": {
+              "column": 20,
+              "line": 281
+            }
+          },
+          "range": "src/task-blocks.tsx:281:19-281:24"
+        },
+        {
+          "id": "996",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 27,
+              "line": 303
+            },
+            "start": {
+              "column": 22,
+              "line": 303
+            }
+          },
+          "range": "src/task-blocks.tsx:303:21-303:26"
+        },
+        {
+          "id": "1016",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 27,
+              "line": 321
+            },
+            "start": {
+              "column": 22,
+              "line": 321
+            }
+          },
+          "range": "src/task-blocks.tsx:321:21-321:26"
+        },
+        {
+          "id": "1036",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 31,
+              "line": 336
+            },
+            "start": {
+              "column": 9,
+              "line": 336
+            }
+          },
+          "range": "src/task-blocks.tsx:336:8-336:30"
+        },
+        {
+          "id": "1037",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 31,
+              "line": 336
+            },
+            "start": {
+              "column": 9,
+              "line": 336
+            }
+          },
+          "range": "src/task-blocks.tsx:336:8-336:30"
+        },
+        {
+          "id": "1041",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 27,
+              "line": 340
+            },
+            "start": {
+              "column": 22,
+              "line": 340
+            }
+          },
+          "range": "src/task-blocks.tsx:340:21-340:26"
+        },
+        {
+          "id": "1070",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 37,
+              "line": 371
+            },
+            "start": {
+              "column": 11,
+              "line": 371
+            }
+          },
+          "range": "src/task-blocks.tsx:371:10-371:36"
+        },
+        {
+          "id": "1079",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 38,
+              "line": 381
+            },
+            "start": {
+              "column": 13,
+              "line": 381
+            }
+          },
+          "range": "src/task-blocks.tsx:381:12-381:37"
+        },
+        {
+          "id": "1084",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 38,
+              "line": 384
+            },
+            "start": {
+              "column": 33,
+              "line": 384
+            }
+          },
+          "range": "src/task-blocks.tsx:384:32-384:37"
+        },
+        {
+          "id": "1087",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 39,
+              "line": 387
+            },
+            "start": {
+              "column": 13,
+              "line": 387
+            }
+          },
+          "range": "src/task-blocks.tsx:387:12-387:38"
+        },
+        {
+          "id": "1091",
+          "status": "Survived",
+          "mutator": "ArrowFunction",
+          "originalLocation": {
+            "end": {
+              "column": 36,
+              "line": 389
+            },
+            "start": {
+              "column": 12,
+              "line": 389
+            }
+          },
+          "range": "src/task-blocks.tsx:389:11-389:35"
+        },
+        {
+          "id": "1094",
+          "status": "Survived",
+          "mutator": "CallExpression",
+          "originalLocation": {
+            "end": {
+              "column": 32,
+              "line": 397
+            },
+            "start": {
+              "column": 9,
+              "line": 397
+            }
+          },
+          "range": "src/task-blocks.tsx:397:8-397:31"
+        },
+        {
+          "id": "1105",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 46,
+              "line": 410
+            },
+            "start": {
+              "column": 41,
+              "line": 410
+            }
+          },
+          "range": "src/task-blocks.tsx:410:40-410:45"
+        },
+        {
+          "id": "1107",
+          "status": "Survived",
+          "mutator": "ArrowFunction",
+          "originalLocation": {
+            "end": {
+              "column": 62,
+              "line": 411
+            },
+            "start": {
+              "column": 42,
+              "line": 411
+            }
+          },
+          "range": "src/task-blocks.tsx:411:41-411:61"
+        },
+        {
+          "id": "1124",
+          "status": "Survived",
+          "mutator": "CallExpression",
+          "originalLocation": {
+            "end": {
+              "column": 36,
+              "line": 454
+            },
+            "start": {
+              "column": 15,
+              "line": 454
+            }
+          },
+          "range": "src/task-blocks.tsx:454:14-454:35"
+        },
+        {
+          "id": "1140",
+          "status": "Survived",
+          "mutator": "CallExpression",
+          "originalLocation": {
+            "end": {
+              "column": 34,
+              "line": 482
+            },
+            "start": {
+              "column": 15,
+              "line": 482
+            }
+          },
+          "range": "src/task-blocks.tsx:482:14-482:33"
+        },
+        {
+          "id": "1143",
+          "status": "Survived",
+          "mutator": "ObjectLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 16,
+              "line": 486
+            },
+            "start": {
+              "column": 46,
+              "line": 483
+            }
+          },
+          "range": "src/task-blocks.tsx:483:45-486:15"
+        },
+        {
+          "id": "1154",
+          "status": "Survived",
+          "mutator": "CallExpression",
+          "originalLocation": {
+            "end": {
+              "column": 28,
+              "line": 506
+            },
+            "start": {
+              "column": 15,
+              "line": 506
+            }
+          },
+          "range": "src/task-blocks.tsx:506:14-506:27"
+        },
+        {
+          "id": "1156",
+          "status": "Survived",
+          "mutator": "CallExpression",
+          "originalLocation": {
+            "end": {
+              "column": 36,
+              "line": 508
+            },
+            "start": {
+              "column": 15,
+              "line": 508
+            }
+          },
+          "range": "src/task-blocks.tsx:508:14-508:35"
+        },
+        {
+          "id": "1157",
+          "status": "Survived",
+          "mutator": "CallExpression",
+          "originalLocation": {
+            "end": {
+              "column": 34,
+              "line": 509
+            },
+            "start": {
+              "column": 15,
+              "line": 509
+            }
+          },
+          "range": "src/task-blocks.tsx:509:14-509:33"
+        },
+        {
+          "id": "1158",
+          "status": "Survived",
+          "mutator": "CallExpression",
+          "originalLocation": {
+            "end": {
+              "column": 36,
+              "line": 510
+            },
+            "start": {
+              "column": 15,
+              "line": 510
+            }
+          },
+          "range": "src/task-blocks.tsx:510:14-510:35"
+        },
+        {
+          "id": "1177",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 57,
+              "line": 536
+            },
+            "start": {
+              "column": 53,
+              "line": 536
+            }
+          },
+          "range": "src/task-blocks.tsx:536:52-536:56"
+        },
+        {
+          "id": "1181",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 45,
+              "line": 541
+            },
+            "start": {
+              "column": 22,
+              "line": 541
+            }
+          },
+          "range": "src/task-blocks.tsx:541:21-541:44"
+        },
+        {
+          "id": "1183",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 45,
+              "line": 541
+            },
+            "start": {
+              "column": 32,
+              "line": 541
+            }
+          },
+          "range": "src/task-blocks.tsx:541:31-541:44"
+        },
+        {
+          "id": "1184",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 78,
+              "line": 541
+            },
+            "start": {
+              "column": 76,
+              "line": 541
+            }
+          },
+          "range": "src/task-blocks.tsx:541:75-541:77"
+        },
+        {
+          "id": "1186",
+          "status": "Survived",
+          "mutator": "CallExpression",
+          "originalLocation": {
+            "end": {
+              "column": 34,
+              "line": 544
+            },
+            "start": {
+              "column": 21,
+              "line": 544
+            }
+          },
+          "range": "src/task-blocks.tsx:544:20-544:33"
+        },
+        {
+          "id": "1196",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 41,
+              "line": 553
+            },
+            "start": {
+              "column": 27,
+              "line": 553
+            }
+          },
+          "range": "src/task-blocks.tsx:553:26-553:40"
+        },
+        {
+          "id": "1197",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 41,
+              "line": 553
+            },
+            "start": {
+              "column": 27,
+              "line": 553
+            }
+          },
+          "range": "src/task-blocks.tsx:553:26-553:40"
+        },
+        {
+          "id": "1198",
+          "status": "Survived",
+          "mutator": "EqualityOperator",
+          "originalLocation": {
+            "end": {
+              "column": 41,
+              "line": 553
+            },
+            "start": {
+              "column": 27,
+              "line": 553
+            }
+          },
+          "range": "src/task-blocks.tsx:553:26-553:40"
+        },
+        {
+          "id": "1199",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 41,
+              "line": 553
+            },
+            "start": {
+              "column": 38,
+              "line": 553
+            }
+          },
+          "range": "src/task-blocks.tsx:553:37-553:40"
+        },
+        {
+          "id": "1219",
+          "status": "Survived",
+          "mutator": "MethodExpression",
+          "originalLocation": {
+            "end": {
+              "column": 62,
+              "line": 574
+            },
+            "start": {
+              "column": 14,
+              "line": 574
+            }
+          },
+          "range": "src/task-blocks.tsx:574:13-574:61"
+        },
+        {
+          "id": "1234",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 10,
+              "line": 586
+            },
+            "start": {
+              "column": 10,
+              "line": 582
+            }
+          },
+          "range": "src/task-blocks.tsx:582:9-586:9"
+        },
+        {
+          "id": "1237",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 10,
+              "line": 591
+            },
+            "start": {
+              "column": 10,
+              "line": 587
+            }
+          },
+          "range": "src/task-blocks.tsx:587:9-591:9"
+        },
+        {
+          "id": "1241",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 26,
+              "line": 600
+            },
+            "start": {
+              "column": 23,
+              "line": 600
+            }
+          },
+          "range": "src/task-blocks.tsx:600:22-600:25"
+        },
+        {
+          "id": "1246",
+          "status": "Survived",
+          "mutator": "MethodExpression",
+          "originalLocation": {
+            "end": {
+              "column": 62,
+              "line": 617
+            },
+            "start": {
+              "column": 14,
+              "line": 617
+            }
+          },
+          "range": "src/task-blocks.tsx:617:13-617:61"
+        },
+        {
+          "id": "1248",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 61,
+              "line": 617
+            },
+            "start": {
+              "column": 40,
+              "line": 617
+            }
+          },
+          "range": "src/task-blocks.tsx:617:39-617:60"
+        },
+        {
+          "id": "1250",
+          "status": "Survived",
+          "mutator": "EqualityOperator",
+          "originalLocation": {
+            "end": {
+              "column": 61,
+              "line": 617
+            },
+            "start": {
+              "column": 40,
+              "line": 617
+            }
+          },
+          "range": "src/task-blocks.tsx:617:39-617:60"
+        },
+        {
+          "id": "1267",
+          "status": "Survived",
+          "mutator": "ArrowFunction",
+          "originalLocation": {
+            "end": {
+              "column": 12,
+              "line": 647
+            },
+            "start": {
+              "column": 27,
+              "line": 641
+            }
+          },
+          "range": "src/task-blocks.tsx:641:26-647:11"
+        },
+        {
+          "id": "1268",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 81,
+              "line": 643
+            },
+            "start": {
+              "column": 78,
+              "line": 643
+            }
+          },
+          "range": "src/task-blocks.tsx:643:77-643:80"
+        },
+        {
+          "id": "1269",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 83,
+              "line": 644
+            },
+            "start": {
+              "column": 80,
+              "line": 644
+            }
+          },
+          "range": "src/task-blocks.tsx:644:79-644:82"
+        },
+        {
+          "id": "1273",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 56,
+              "line": 651
+            },
+            "start": {
+              "column": 9,
+              "line": 650
+            }
+          },
+          "range": "src/task-blocks.tsx:650:8-651:55"
+        },
+        {
+          "id": "1286",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 34,
+              "line": 667
+            },
+            "start": {
+              "column": 9,
+              "line": 667
+            }
+          },
+          "range": "src/task-blocks.tsx:667:8-667:33"
+        },
+        {
+          "id": "1289",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 129,
+              "line": 672
+            },
+            "start": {
+              "column": 17,
+              "line": 672
+            }
+          },
+          "range": "src/task-blocks.tsx:672:16-672:128"
+        },
+        {
+          "id": "1301",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 45,
+              "line": 714
+            },
+            "start": {
+              "column": 40,
+              "line": 714
+            }
+          },
+          "range": "src/task-blocks.tsx:714:39-714:44"
+        },
+        {
+          "id": "1303",
+          "status": "Survived",
+          "mutator": "ArrowFunction",
+          "originalLocation": {
+            "end": {
+              "column": 49,
+              "line": 716
+            },
+            "start": {
+              "column": 13,
+              "line": 716
+            }
+          },
+          "range": "src/task-blocks.tsx:716:12-716:48"
+        },
+        {
+          "id": "1304",
+          "status": "Survived",
+          "mutator": "ArrowFunction",
+          "originalLocation": {
+            "end": {
+              "column": 49,
+              "line": 716
+            },
+            "start": {
+              "column": 19,
+              "line": 716
+            }
+          },
+          "range": "src/task-blocks.tsx:716:18-716:48"
+        },
+        {
+          "id": "1310",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 20,
+              "line": 721
+            },
+            "start": {
+              "column": 16,
+              "line": 721
+            }
+          },
+          "range": "src/task-blocks.tsx:721:15-721:19"
+        },
+        {
+          "id": "1312",
+          "status": "Survived",
+          "mutator": "BooleanLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 20,
+              "line": 722
+            },
+            "start": {
+              "column": 15,
+              "line": 722
+            }
+          },
+          "range": "src/task-blocks.tsx:722:14-722:19"
+        },
+        {
+          "id": "1331",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 71,
+              "line": 746
+            },
+            "start": {
+              "column": 8,
+              "line": 746
+            }
+          },
+          "range": "src/task-blocks.tsx:746:7-746:70"
+        },
+        {
+          "id": "1332",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 71,
+              "line": 746
+            },
+            "start": {
+              "column": 8,
+              "line": 746
+            }
+          },
+          "range": "src/task-blocks.tsx:746:7-746:70"
+        },
+        {
+          "id": "1333",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 71,
+              "line": 746
+            },
+            "start": {
+              "column": 8,
+              "line": 746
+            }
+          },
+          "range": "src/task-blocks.tsx:746:7-746:70"
+        },
+        {
+          "id": "1336",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 8,
+              "line": 752
+            },
+            "start": {
+              "column": 8,
+              "line": 747
+            }
+          },
+          "range": "src/task-blocks.tsx:747:7-752:7"
+        },
+        {
+          "id": "1342",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 41,
+              "line": 765
+            },
+            "start": {
+              "column": 37,
+              "line": 765
+            }
+          },
+          "range": "src/task-blocks.tsx:765:36-765:40"
+        },
+        {
+          "id": "1344",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 22,
+              "line": 766
+            },
+            "start": {
+              "column": 13,
+              "line": 766
+            }
+          },
+          "range": "src/task-blocks.tsx:766:12-766:21"
+        },
+        {
+          "id": "1345",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 21,
+              "line": 767
+            },
+            "start": {
+              "column": 14,
+              "line": 767
+            }
+          },
+          "range": "src/task-blocks.tsx:767:13-767:20"
+        },
+        {
+          "id": "1346",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 21,
+              "line": 768
+            },
+            "start": {
+              "column": 12,
+              "line": 768
+            }
+          },
+          "range": "src/task-blocks.tsx:768:11-768:20"
+        },
+        {
+          "id": "1347",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 22,
+              "line": 769
+            },
+            "start": {
+              "column": 13,
+              "line": 769
+            }
+          },
+          "range": "src/task-blocks.tsx:769:12-769:21"
+        },
+        {
+          "id": "1348",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 24,
+              "line": 770
+            },
+            "start": {
+              "column": 15,
+              "line": 770
+            }
+          },
+          "range": "src/task-blocks.tsx:770:14-770:23"
+        },
+        {
+          "id": "1349",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 24,
+              "line": 771
+            },
+            "start": {
+              "column": 15,
+              "line": 771
+            }
+          },
+          "range": "src/task-blocks.tsx:771:14-771:23"
+        },
+        {
+          "id": "1350",
+          "status": "Survived",
+          "mutator": "StringLiteral",
+          "originalLocation": {
+            "end": {
+              "column": 33,
+              "line": 773
+            },
+            "start": {
+              "column": 21,
+              "line": 773
+            }
+          },
+          "range": "src/task-blocks.tsx:773:20-773:32"
+        }
+      ]
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalSourceSha256": "bfc93601ac6efb2c9367604ca4d3aed76d1e6278ab7ba417c979dfa6c8bebaab",
+      "currentSourceSha256": "bfc93601ac6efb2c9367604ca4d3aed76d1e6278ab7ba417c979dfa6c8bebaab",
+      "mutants": [
+        {
+          "id": "22",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 34,
+              "line": 60
+            },
+            "start": {
+              "column": 5,
+              "line": 60
+            }
+          },
+          "range": "src/schedule-block-api.ts:60:4-60:33"
+        },
+        {
+          "id": "29",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 29,
+              "line": 67
+            },
+            "start": {
+              "column": 5,
+              "line": 64
+            }
+          },
+          "range": "src/schedule-block-api.ts:64:4-67:28"
+        },
+        {
+          "id": "30",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 29,
+              "line": 67
+            },
+            "start": {
+              "column": 5,
+              "line": 64
+            }
+          },
+          "range": "src/schedule-block-api.ts:64:4-67:28"
+        },
+        {
+          "id": "31",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 61,
+              "line": 66
+            },
+            "start": {
+              "column": 5,
+              "line": 64
+            }
+          },
+          "range": "src/schedule-block-api.ts:64:4-66:60"
+        },
+        {
+          "id": "32",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 61,
+              "line": 66
+            },
+            "start": {
+              "column": 5,
+              "line": 64
+            }
+          },
+          "range": "src/schedule-block-api.ts:64:4-66:60"
+        },
+        {
+          "id": "33",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 25,
+              "line": 65
+            },
+            "start": {
+              "column": 5,
+              "line": 64
+            }
+          },
+          "range": "src/schedule-block-api.ts:64:4-65:24"
+        },
+        {
+          "id": "34",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 25,
+              "line": 65
+            },
+            "start": {
+              "column": 5,
+              "line": 64
+            }
+          },
+          "range": "src/schedule-block-api.ts:64:4-65:24"
+        },
+        {
+          "id": "35",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 37,
+              "line": 64
+            },
+            "start": {
+              "column": 5,
+              "line": 64
+            }
+          },
+          "range": "src/schedule-block-api.ts:64:4-64:36"
+        },
+        {
+          "id": "38",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 25,
+              "line": 65
+            },
+            "start": {
+              "column": 5,
+              "line": 65
+            }
+          },
+          "range": "src/schedule-block-api.ts:65:4-65:24"
+        },
+        {
+          "id": "41",
+          "status": "Survived",
+          "mutator": "MethodExpression",
+          "originalLocation": {
+            "end": {
+              "column": 52,
+              "line": 69
+            },
+            "start": {
+              "column": 5,
+              "line": 69
+            }
+          },
+          "range": "src/schedule-block-api.ts:69:4-69:51"
+        },
+        {
+          "id": "56",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 52,
+              "line": 75
+            },
+            "start": {
+              "column": 5,
+              "line": 73
+            }
+          },
+          "range": "src/schedule-block-api.ts:73:4-75:51"
+        },
+        {
+          "id": "58",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 25,
+              "line": 74
+            },
+            "start": {
+              "column": 5,
+              "line": 73
+            }
+          },
+          "range": "src/schedule-block-api.ts:73:4-74:24"
+        },
+        {
+          "id": "57",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 52,
+              "line": 75
+            },
+            "start": {
+              "column": 5,
+              "line": 73
+            }
+          },
+          "range": "src/schedule-block-api.ts:73:4-75:51"
+        },
+        {
+          "id": "59",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 25,
+              "line": 74
+            },
+            "start": {
+              "column": 5,
+              "line": 73
+            }
+          },
+          "range": "src/schedule-block-api.ts:73:4-74:24"
+        },
+        {
+          "id": "60",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 35,
+              "line": 73
+            },
+            "start": {
+              "column": 5,
+              "line": 73
+            }
+          },
+          "range": "src/schedule-block-api.ts:73:4-73:34"
+        },
+        {
+          "id": "63",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 25,
+              "line": 74
+            },
+            "start": {
+              "column": 5,
+              "line": 74
+            }
+          },
+          "range": "src/schedule-block-api.ts:74:4-74:24"
+        },
+        {
+          "id": "81",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 32,
+              "line": 86
+            },
+            "start": {
+              "column": 5,
+              "line": 83
+            }
+          },
+          "range": "src/schedule-block-api.ts:83:4-86:31"
+        },
+        {
+          "id": "82",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 63,
+              "line": 85
+            },
+            "start": {
+              "column": 5,
+              "line": 83
+            }
+          },
+          "range": "src/schedule-block-api.ts:83:4-85:62"
+        },
+        {
+          "id": "83",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 63,
+              "line": 85
+            },
+            "start": {
+              "column": 5,
+              "line": 83
+            }
+          },
+          "range": "src/schedule-block-api.ts:83:4-85:62"
+        },
+        {
+          "id": "84",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 25,
+              "line": 84
+            },
+            "start": {
+              "column": 5,
+              "line": 83
+            }
+          },
+          "range": "src/schedule-block-api.ts:83:4-84:24"
+        },
+        {
+          "id": "85",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 25,
+              "line": 84
+            },
+            "start": {
+              "column": 5,
+              "line": 83
+            }
+          },
+          "range": "src/schedule-block-api.ts:83:4-84:24"
+        },
+        {
+          "id": "86",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 38,
+              "line": 83
+            },
+            "start": {
+              "column": 5,
+              "line": 83
+            }
+          },
+          "range": "src/schedule-block-api.ts:83:4-83:37"
+        },
+        {
+          "id": "89",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 25,
+              "line": 84
+            },
+            "start": {
+              "column": 5,
+              "line": 84
+            }
+          },
+          "range": "src/schedule-block-api.ts:84:4-84:24"
+        },
+        {
+          "id": "92",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 30,
+              "line": 87
+            },
+            "start": {
+              "column": 5,
+              "line": 87
+            }
+          },
+          "range": "src/schedule-block-api.ts:87:4-87:29"
+        },
+        {
+          "id": "95",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 48,
+              "line": 91
+            },
+            "start": {
+              "column": 6,
+              "line": 90
+            }
+          },
+          "range": "src/schedule-block-api.ts:90:5-91:47"
+        },
+        {
+          "id": "103",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 44,
+              "line": 93
+            },
+            "start": {
+              "column": 6,
+              "line": 92
+            }
+          },
+          "range": "src/schedule-block-api.ts:92:5-93:43"
+        },
+        {
+          "id": "146",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 25,
+              "line": 111
+            },
+            "start": {
+              "column": 5,
+              "line": 110
+            }
+          },
+          "range": "src/schedule-block-api.ts:110:4-111:24"
+        },
+        {
+          "id": "147",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 25,
+              "line": 111
+            },
+            "start": {
+              "column": 5,
+              "line": 110
+            }
+          },
+          "range": "src/schedule-block-api.ts:110:4-111:24"
+        },
+        {
+          "id": "148",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 38,
+              "line": 110
+            },
+            "start": {
+              "column": 5,
+              "line": 110
+            }
+          },
+          "range": "src/schedule-block-api.ts:110:4-110:37"
+        },
+        {
+          "id": "151",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 25,
+              "line": 111
+            },
+            "start": {
+              "column": 5,
+              "line": 111
+            }
+          },
+          "range": "src/schedule-block-api.ts:111:4-111:24"
+        },
+        {
+          "id": "157",
+          "status": "Survived",
+          "mutator": "MethodExpression",
+          "originalLocation": {
+            "end": {
+              "column": 6,
+              "line": 121
+            },
+            "start": {
+              "column": 5,
+              "line": 115
+            }
+          },
+          "range": "src/schedule-block-api.ts:115:4-121:5"
+        },
+        {
+          "id": "217",
+          "status": "Survived",
+          "mutator": "EqualityOperator",
+          "originalLocation": {
+            "end": {
+              "column": 27,
+              "line": 216
+            },
+            "start": {
+              "column": 5,
+              "line": 216
+            }
+          },
+          "range": "src/schedule-block-api.ts:216:4-216:26"
+        },
+        {
+          "id": "280",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 30,
+              "line": 274
+            },
+            "start": {
+              "column": 5,
+              "line": 274
+            }
+          },
+          "range": "src/schedule-block-api.ts:274:4-274:29"
+        },
+        {
+          "id": "283",
+          "status": "Survived",
+          "mutator": "Regex",
+          "originalLocation": {
+            "end": {
+              "column": 65,
+              "line": 275
+            },
+            "start": {
+              "column": 5,
+              "line": 275
+            }
+          },
+          "range": "src/schedule-block-api.ts:275:4-275:64"
+        },
+        {
+          "id": "284",
+          "status": "Survived",
+          "mutator": "Regex",
+          "originalLocation": {
+            "end": {
+              "column": 65,
+              "line": 275
+            },
+            "start": {
+              "column": 5,
+              "line": 275
+            }
+          },
+          "range": "src/schedule-block-api.ts:275:4-275:64"
+        },
+        {
+          "id": "335",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 47,
+              "line": 295
+            },
+            "start": {
+              "column": 5,
+              "line": 295
+            }
+          },
+          "range": "src/schedule-block-api.ts:295:4-295:46"
+        },
+        {
+          "id": "337",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 39,
+              "line": 296
+            },
+            "start": {
+              "column": 5,
+              "line": 296
+            }
+          },
+          "range": "src/schedule-block-api.ts:296:4-296:38"
+        },
+        {
+          "id": "338",
+          "status": "Survived",
+          "mutator": "EqualityOperator",
+          "originalLocation": {
+            "end": {
+              "column": 39,
+              "line": 296
+            },
+            "start": {
+              "column": 5,
+              "line": 296
+            }
+          },
+          "range": "src/schedule-block-api.ts:296:4-296:38"
+        },
+        {
+          "id": "340",
+          "status": "Survived",
+          "mutator": "ArrayDeclaration",
+          "originalLocation": {
+            "end": {
+              "column": 25,
+              "line": 296
+            },
+            "start": {
+              "column": 5,
+              "line": 296
+            }
+          },
+          "range": "src/schedule-block-api.ts:296:4-296:24"
+        },
+        {
+          "id": "341",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 36,
+              "line": 302
+            },
+            "start": {
+              "column": 5,
+              "line": 301
+            }
+          },
+          "range": "src/schedule-block-api.ts:301:4-302:35"
+        },
+        {
+          "id": "408",
+          "status": "Survived",
+          "mutator": "Regex",
+          "originalLocation": {
+            "end": {
+              "column": 56,
+              "line": 349
+            },
+            "start": {
+              "column": 17,
+              "line": 349
+            }
+          },
+          "range": "src/schedule-block-api.ts:349:16-349:55"
+        },
+        {
+          "id": "411",
+          "status": "Survived",
+          "mutator": "Regex",
+          "originalLocation": {
+            "end": {
+              "column": 56,
+              "line": 349
+            },
+            "start": {
+              "column": 17,
+              "line": 349
+            }
+          },
+          "range": "src/schedule-block-api.ts:349:16-349:55"
+        },
+        {
+          "id": "484",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 32,
+              "line": 378
+            },
+            "start": {
+              "column": 7,
+              "line": 378
+            }
+          },
+          "range": "src/schedule-block-api.ts:378:6-378:31"
+        },
+        {
+          "id": "487",
+          "status": "Survived",
+          "mutator": "Regex",
+          "originalLocation": {
+            "end": {
+              "column": 55,
+              "line": 379
+            },
+            "start": {
+              "column": 17,
+              "line": 379
+            }
+          },
+          "range": "src/schedule-block-api.ts:379:16-379:54"
+        },
+        {
+          "id": "488",
+          "status": "Survived",
+          "mutator": "Regex",
+          "originalLocation": {
+            "end": {
+              "column": 55,
+              "line": 379
+            },
+            "start": {
+              "column": 17,
+              "line": 379
+            }
+          },
+          "range": "src/schedule-block-api.ts:379:16-379:54"
+        },
+        {
+          "id": "517",
+          "status": "Survived",
+          "mutator": "EqualityOperator",
+          "originalLocation": {
+            "end": {
+              "column": 21,
+              "line": 385
+            },
+            "start": {
+              "column": 10,
+              "line": 385
+            }
+          },
+          "range": "src/schedule-block-api.ts:385:9-385:20"
+        },
+        {
+          "id": "526",
+          "status": "Survived",
+          "mutator": "EqualityOperator",
+          "originalLocation": {
+            "end": {
+              "column": 19,
+              "line": 388
+            },
+            "start": {
+              "column": 5,
+              "line": 388
+            }
+          },
+          "range": "src/schedule-block-api.ts:388:4-388:18"
+        },
+        {
+          "id": "550",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 19,
+              "line": 398
+            },
+            "start": {
+              "column": 5,
+              "line": 397
+            }
+          },
+          "range": "src/schedule-block-api.ts:397:4-398:18"
+        },
+        {
+          "id": "551",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 19,
+              "line": 398
+            },
+            "start": {
+              "column": 5,
+              "line": 397
+            }
+          },
+          "range": "src/schedule-block-api.ts:397:4-398:18"
+        },
+        {
+          "id": "573",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 21,
+              "line": 406
+            },
+            "start": {
+              "column": 5,
+              "line": 405
+            }
+          },
+          "range": "src/schedule-block-api.ts:405:4-406:20"
+        },
+        {
+          "id": "574",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 21,
+              "line": 406
+            },
+            "start": {
+              "column": 5,
+              "line": 405
+            }
+          },
+          "range": "src/schedule-block-api.ts:405:4-406:20"
+        },
+        {
+          "id": "578",
+          "status": "Survived",
+          "mutator": "MethodExpression",
+          "originalLocation": {
+            "end": {
+              "column": 6,
+              "line": 425
+            },
+            "start": {
+              "column": 5,
+              "line": 407
+            }
+          },
+          "range": "src/schedule-block-api.ts:407:4-425:5"
+        },
+        {
+          "id": "598",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 37,
+              "line": 413
+            },
+            "start": {
+              "column": 9,
+              "line": 413
+            }
+          },
+          "range": "src/schedule-block-api.ts:413:8-413:36"
+        },
+        {
+          "id": "602",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 57,
+              "line": 415
+            },
+            "start": {
+              "column": 10,
+              "line": 415
+            }
+          },
+          "range": "src/schedule-block-api.ts:415:9-415:56"
+        },
+        {
+          "id": "607",
+          "status": "Survived",
+          "mutator": "EqualityOperator",
+          "originalLocation": {
+            "end": {
+              "column": 57,
+              "line": 415
+            },
+            "start": {
+              "column": 25,
+              "line": 415
+            }
+          },
+          "range": "src/schedule-block-api.ts:415:24-415:56"
+        },
+        {
+          "id": "620",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 30,
+              "line": 430
+            },
+            "start": {
+              "column": 5,
+              "line": 430
+            }
+          },
+          "range": "src/schedule-block-api.ts:430:4-430:29"
+        },
+        {
+          "id": "623",
+          "status": "Survived",
+          "mutator": "Regex",
+          "originalLocation": {
+            "end": {
+              "column": 92,
+              "line": 431
+            },
+            "start": {
+              "column": 5,
+              "line": 431
+            }
+          },
+          "range": "src/schedule-block-api.ts:431:4-431:91"
+        },
+        {
+          "id": "624",
+          "status": "Survived",
+          "mutator": "Regex",
+          "originalLocation": {
+            "end": {
+              "column": 92,
+              "line": 431
+            },
+            "start": {
+              "column": 5,
+              "line": 431
+            }
+          },
+          "range": "src/schedule-block-api.ts:431:4-431:91"
+        },
+        {
+          "id": "640",
+          "status": "Survived",
+          "mutator": "Regex",
+          "originalLocation": {
+            "end": {
+              "column": 92,
+              "line": 431
+            },
+            "start": {
+              "column": 5,
+              "line": 431
+            }
+          },
+          "range": "src/schedule-block-api.ts:431:4-431:91"
+        },
+        {
+          "id": "641",
+          "status": "Survived",
+          "mutator": "Regex",
+          "originalLocation": {
+            "end": {
+              "column": 92,
+              "line": 431
+            },
+            "start": {
+              "column": 5,
+              "line": 431
+            }
+          },
+          "range": "src/schedule-block-api.ts:431:4-431:91"
+        },
+        {
+          "id": "642",
+          "status": "Survived",
+          "mutator": "Regex",
+          "originalLocation": {
+            "end": {
+              "column": 92,
+              "line": 431
+            },
+            "start": {
+              "column": 5,
+              "line": 431
+            }
+          },
+          "range": "src/schedule-block-api.ts:431:4-431:91"
+        },
+        {
+          "id": "647",
+          "status": "Survived",
+          "mutator": "EqualityOperator",
+          "originalLocation": {
+            "end": {
+              "column": 67,
+              "line": 434
+            },
+            "start": {
+              "column": 27,
+              "line": 434
+            }
+          },
+          "range": "src/schedule-block-api.ts:434:26-434:66"
+        },
+        {
+          "id": "683",
+          "status": "Survived",
+          "mutator": "EqualityOperator",
+          "originalLocation": {
+            "end": {
+              "column": 39,
+              "line": 443
+            },
+            "start": {
+              "column": 5,
+              "line": 443
+            }
+          },
+          "range": "src/schedule-block-api.ts:443:4-443:38"
+        },
+        {
+          "id": "696",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 69,
+              "line": 450
+            },
+            "start": {
+              "column": 6,
+              "line": 450
+            }
+          },
+          "range": "src/schedule-block-api.ts:450:5-450:68"
+        },
+        {
+          "id": "702",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 36,
+              "line": 453
+            },
+            "start": {
+              "column": 5,
+              "line": 452
+            }
+          },
+          "range": "src/schedule-block-api.ts:452:4-453:35"
+        },
+        {
+          "id": "719",
+          "status": "Survived",
+          "mutator": "Regex",
+          "originalLocation": {
+            "end": {
+              "column": 46,
+              "line": 463
+            },
+            "start": {
+              "column": 29,
+              "line": 463
+            }
+          },
+          "range": "src/schedule-block-api.ts:463:28-463:45"
+        },
+        {
+          "id": "721",
+          "status": "Survived",
+          "mutator": "Regex",
+          "originalLocation": {
+            "end": {
+              "column": 46,
+              "line": 463
+            },
+            "start": {
+              "column": 29,
+              "line": 463
+            }
+          },
+          "range": "src/schedule-block-api.ts:463:28-463:45"
+        }
+      ]
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "originalSourceSha256": "58a3d58bed9693d8b6e6e8ea640a70c1f296005f23081439540a1cf663eb23a4",
+      "currentSourceSha256": "2b5ef46864d5e9ea32021d5014b8c317520e9bf13b44a1b02da2b281645b9b4c",
+      "mutants": [
+        {
+          "id": "1401",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 62,
+              "line": 57
+            },
+            "start": {
+              "column": 13,
+              "line": 57
+            }
+          },
+          "range": "src/task-reader.tsx:57:12-57:61"
+        },
+        {
+          "id": "1403",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 62,
+              "line": 57
+            },
+            "start": {
+              "column": 13,
+              "line": 57
+            }
+          },
+          "range": "src/task-reader.tsx:57:12-57:61"
+        },
+        {
+          "id": "1412",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 38,
+              "line": 63
+            },
+            "start": {
+              "column": 13,
+              "line": 63
+            }
+          },
+          "range": "src/task-reader.tsx:63:12-63:37"
+        },
+        {
+          "id": "1427",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 39,
+              "line": 72
+            },
+            "start": {
+              "column": 13,
+              "line": 72
+            }
+          },
+          "range": "src/task-reader.tsx:72:12-72:38"
+        },
+        {
+          "id": "1465",
+          "status": "Survived",
+          "mutator": "LogicalOperator",
+          "originalLocation": {
+            "end": {
+              "column": 49,
+              "line": 128
+            },
+            "start": {
+              "column": 15,
+              "line": 128
+            }
+          },
+          "range": "src/task-reader.tsx:129:14-129:48"
+        }
+      ]
+    },
+    {
+      "file": "src/task-state.tsx",
+      "originalSourceSha256": "9eb8b493ca43772d7b12f0d040526e135ce8a572f8cb5e191d3b8bfa7c1ec7a3",
+      "currentSourceSha256": "9eb8b493ca43772d7b12f0d040526e135ce8a572f8cb5e191d3b8bfa7c1ec7a3",
+      "mutants": [
+        {
+          "id": "1530",
+          "status": "Survived",
+          "mutator": "ConditionalExpression",
+          "originalLocation": {
+            "end": {
+              "column": 36,
+              "line": 54
+            },
+            "start": {
+              "column": 11,
+              "line": 54
+            }
+          },
+          "range": "src/task-state.tsx:54:10-54:35"
+        }
+      ]
+    }
+  ],
+  "verifiedAtUtc": "2026-09-06T10:42:34.180Z"
+}

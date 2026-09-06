@@ -28,6 +28,46 @@ class RabbitBrokerPublisherTest {
 
   final ObjectMapper json = new ObjectMapper();
 
+  @Test
+  void block_s36_routesOriginalTwelveFieldsToDurableQuorumQueue() throws Exception {
+    var base = message();
+    var payload = new java.util.HashMap<>(base.payload());
+    payload.remove("name");
+    payload.put("type", "BlockPlanned.v1");
+    payload.put("blockId", UUID.randomUUID().toString());
+    payload.put("taskId", UUID.randomUUID().toString());
+    payload.put("startAt", "2030-01-07T10:00:00Z");
+    payload.put("endAt", "2030-01-07T11:00:00Z");
+    payload.put("zoneId", "Historical/Removed");
+    payload.put("durationMinutes", 60);
+    var event =
+        new OutboxMessage(
+            base.eventId(),
+            base.aggregateId(),
+            base.ownerId(),
+            base.occurredAt(),
+            "BlockPlanned.v1",
+            1,
+            json.writeValueAsString(payload),
+            payload,
+            0);
+    assertThat(publisher().publish(event)).isEqualTo(DeliveryOutcome.ACCEPTED);
+    try (var connection = factory().newConnection();
+        var channel = connection.createChannel()) {
+      channel.queueDeclare(
+          "organization.block-planned.v1", true, false, false, Map.of("x-queue-type", "quorum"));
+      var delivered = channel.basicGet("organization.block-planned.v1", true);
+      assertThat(delivered).isNotNull();
+      assertThat(delivered.getBody())
+          .isEqualTo(event.json().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      assertThat(json.readTree(delivered.getBody()).size()).isEqualTo(12);
+      assertThat(delivered.getEnvelope().getRoutingKey()).isEqualTo("block.planned.v1");
+      assertThat(delivered.getProps().getMessageId()).isEqualTo(event.eventId().toString());
+      assertThat(delivered.getProps().getDeliveryMode()).isEqualTo(2);
+      assertThat(delivered.getProps().getContentType()).isEqualTo("application/json");
+    }
+  }
+
   OutboxMessage message() throws Exception {
     UUID eventId = UUID.randomUUID(), aggregateId = UUID.randomUUID();
     Instant now = Instant.parse("2026-09-05T12:00:00Z");

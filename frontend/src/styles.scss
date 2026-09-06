@@ -1150,7 +1150,8 @@ button {
   margin-top: 20px;
 }
 
-.project-tasks {
+.project-tasks,
+.task-blocks {
   margin-top: 32px;
   padding: clamp(20px, 4vw, 36px);
   border: 1px solid $line;
@@ -1453,6 +1454,94 @@ button {
     line-height: 1.6;
     font-size: 14px;
     color: #385b40;
+  }
+}
+.task-blocks {
+  fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+  input,
+  textarea,
+  select {
+    min-width: 0;
+    font-size: 16px;
+  }
+  select {
+    min-height: 48px;
+    width: 100%;
+    border: 1px solid #b7c1b1;
+    border-radius: 8px;
+    background: #fdfefb;
+    color: $ink;
+    padding: 12px;
+    font: inherit;
+    font-size: 16px;
+  }
+  select[aria-invalid="true"] {
+    border-color: #a23d36;
+  }
+  button {
+    margin: 6px 10px 6px 0;
+    max-width: 100%;
+    min-width: 44px;
+  }
+  h2,
+  h3,
+  h4,
+  time {
+    overflow-wrap: anywhere;
+  }
+  .block-review,
+  [aria-label="Bloque en conflicto"] {
+    margin-block: 20px;
+    padding: 16px;
+    border: 1px solid $line;
+    border-radius: 10px;
+    background: #f8faf4;
+    h4 {
+      margin-bottom: 8px;
+    }
+    p {
+      margin-block: 8px;
+    }
+  }
+  label:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    gap: 12px;
+    padding-block: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+    input {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      accent-color: $forest;
+    }
+  }
+  [role="alert"] {
+    padding: 14px;
+    border-inline-start: 3px solid #95502d;
+    border-radius: 6px;
+    background: #faf4e9;
+    color: #854a35;
+  }
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 600px) {
+  .task-blocks button {
+    width: 100%;
+    margin-right: 0;
   }
 }
 @media (max-width: 1000px) {

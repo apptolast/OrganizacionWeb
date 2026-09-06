@@ -12,7 +12,156 @@ import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 
 class PublishOutboxTest {
+  static OutboxMessage blockMessage() {
+    var source = message(0);
+    var payload = new HashMap<>(source.payload());
+    payload.remove("name");
+    payload.put("type", "BlockPlanned.v1");
+    payload.put("blockId", UUID.randomUUID().toString());
+    payload.put("taskId", UUID.randomUUID().toString());
+    payload.put("startAt", "2030-01-07T10:00:00Z");
+    payload.put("endAt", "2030-01-07T11:00:00Z");
+    payload.put("zoneId", "Historical/Removed");
+    payload.put("durationMinutes", 60);
+    return new OutboxMessage(
+        source.eventId(),
+        source.aggregateId(),
+        source.ownerId(),
+        source.occurredAt(),
+        "BlockPlanned.v1",
+        1,
+        source.json(),
+        payload,
+        0);
+  }
+
+  @Test
+  void block_s36_s37_publishesHistoricalZoneWithoutCatalogResolution() {
+    var event = blockMessage();
+    var work = new Work(event);
+    var sent = new ArrayList<OutboxMessage>();
+    new PublishOutbox(
+            work,
+            delivered -> {
+              sent.add(delivered);
+              return DeliveryOutcome.ACCEPTED;
+            },
+            audit,
+            Clock.fixed(NOW, ZoneOffset.UTC))
+        .runCycle();
+    assertThat(sent).containsExactly(event);
+    assertThat(sent.getFirst()).isSameAs(event);
+    assertThat(event.payload())
+        .hasSize(12)
+        .doesNotContainKeys("objective", "requestKey", "Idempotency-Key");
+    assertThat(work.persisted)
+        .containsExactly(new PublicationAttempt(event.eventId(), "published", 1, NOW, null, null));
+  }
+
   static final Instant NOW = Instant.parse("2026-09-05T12:00:00Z");
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {
+        "blockId",
+        "taskId",
+        "zoneEmpty",
+        "zoneType",
+        "startType",
+        "startInvalid",
+        "endInvalid",
+        "nonIncreasing",
+        "durationMismatch",
+        "durationZero",
+        "durationLong",
+        "durationDecimal",
+        "fractionalInstants",
+        "yearZero",
+        "year10000",
+        "extra",
+        "type",
+        "version",
+        "missing:eventId",
+        "missing:aggregateId",
+        "missing:ownerId",
+        "missing:occurredAt",
+        "missing:schemaVersion",
+        "missing:type",
+        "missing:blockId",
+        "missing:taskId",
+        "missing:startAt",
+        "missing:endAt",
+        "missing:zoneId",
+        "missing:durationMinutes"
+      })
+  void block_s37_blocksInvalidEnvelopeWithoutPublishing(String defect) {
+    var source = blockMessage();
+    var body = new HashMap<>(source.payload());
+    if (defect.startsWith("missing:")) body.remove(defect.substring(8));
+    else
+      switch (defect) {
+        case "blockId", "taskId" -> body.put(defect, "1-1-1-1-1");
+        case "zoneEmpty" -> body.put("zoneId", "  ");
+        case "zoneType" -> body.put("zoneId", 1);
+        case "startType" -> body.put("startAt", 1);
+        case "startInvalid" -> body.put("startAt", "invalid");
+        case "endInvalid" -> body.put("endAt", "invalid");
+        case "nonIncreasing" -> body.put("endAt", body.get("startAt"));
+        case "durationMismatch" -> body.put("durationMinutes", 59);
+        case "durationZero" -> body.put("durationMinutes", 0);
+        case "durationLong" -> {
+          body.put("durationMinutes", 1441);
+          body.put("endAt", "2030-01-08T10:01:00Z");
+        }
+        case "durationDecimal" -> body.put("durationMinutes", 60.0);
+        case "fractionalInstants" -> {
+          body.put("startAt", "2030-01-07T10:00:00.000001Z");
+          body.put("endAt", "2030-01-07T11:00:00.000001Z");
+        }
+        case "yearZero" -> {
+          body.put("startAt", "0000-01-07T10:00:00Z");
+          body.put("endAt", "0000-01-07T11:00:00Z");
+        }
+        case "year10000" -> {
+          body.put("startAt", "+10000-01-07T10:00:00Z");
+          body.put("endAt", "+10000-01-07T11:00:00Z");
+        }
+        case "extra" -> body.put("objective", "private");
+        default -> {}
+      }
+    var event =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            source.occurredAt(),
+            defect.equals("type") ? "BlockPlanned.v2" : source.type(),
+            defect.equals("version") ? 2 : 1,
+            source.json(),
+            body,
+            3);
+    var work = new Work(event);
+    new PublishOutbox(
+            work,
+            delivered -> {
+              throw new AssertionError("Invalid block published");
+            },
+            audit,
+            Clock.fixed(NOW, ZoneOffset.UTC))
+        .runCycle();
+    assertThat(work.persisted)
+        .containsExactly(
+            new PublicationAttempt(
+                event.eventId(),
+                "blocked",
+                3,
+                NOW,
+                null,
+                defect.equals("type") || defect.equals("version")
+                    ? "UNSUPPORTED_EVENT"
+                    : "INVALID_EVENT"));
+  }
+
   final List<PublicationAttempt> logs = new ArrayList<>();
   final List<String> workerErrors = new ArrayList<>();
   final PublicationAudit audit =

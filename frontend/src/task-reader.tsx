@@ -5,6 +5,8 @@ import { readProjects, type ProjectSnapshot } from "./read-projects-api";
 import { ProjectTasks } from "./project-tasks";
 import { TaskParent } from "./task-parent";
 import { TaskState } from "./task-state";
+import { TaskBlocks } from "./task-blocks";
+import type { TaskStatusSnapshot } from "./task-status-api";
 import { ProjectStatusControl } from "./project-status-control";
 export function TaskReader({
   projectId,
@@ -15,6 +17,7 @@ export function TaskReader({
 }) {
   const [snapshot, setSnapshot] = useState<ProjectSnapshot>();
   const [task, setTask] = useState<Task>();
+  const [taskState, setTaskState] = useState<TaskStatusSnapshot>();
   const [failure, setFailure] = useState<number | null>(null);
   const [revision, setRevision] = useState(0);
   const [projectRevision, setProjectRevision] = useState(0);
@@ -108,6 +111,7 @@ export function TaskReader({
             projectId={task.projectId}
             id={task.id}
             onAccessFailure={setFailure}
+            onSnapshot={setTaskState}
           />
           <p>
             {task.estimatedMinutes === null
@@ -115,6 +119,17 @@ export function TaskReader({
               : `Estimación: ${task.estimatedMinutes} min`}
           </p>
           <TaskParent projectId={task.projectId} id={task.id} />
+          <TaskBlocks
+            onAccessFailure={setFailure}
+            projectId={task.projectId}
+            taskId={task.id}
+            taskStatus={taskState?.status}
+            projectStatus={
+              !projectLoading && !projectFailure
+                ? snapshot?.project.status
+                : undefined
+            }
+          />
           {projectLoading && <p role="status">Consultando proyecto</p>}
           {projectFailure && (
             <div>

@@ -10,10 +10,12 @@ export function TaskState({
   projectId,
   id,
   onAccessFailure,
+  onSnapshot,
 }: {
   projectId: string;
   id: string;
   onAccessFailure: (status: number) => void;
+  onSnapshot?: (snapshot: TaskStatusSnapshot | undefined) => void;
 }) {
   const [snapshot, setSnapshot] = useState<TaskStatusSnapshot>();
   const [saving, setSaving] = useState(false);
@@ -51,10 +53,12 @@ export function TaskState({
       );
       if (controller.signal.aborted) return;
       setSnapshot(result);
+      onSnapshot?.(result);
       setConfirmed(true);
       setHistoryRevision((value) => value + 1);
     } catch (error) {
       if (controller.signal.aborted) return;
+      onSnapshot?.(undefined);
       if (
         error instanceof Response &&
         (error.status === 401 || error.status === 404)
@@ -71,10 +75,12 @@ export function TaskState({
       .then((result) => {
         if (controller.signal.aborted) return;
         setSnapshot(result);
+        onSnapshot?.(result);
         if (revision > 0) setHistoryRevision((value) => value + 1);
       })
       .catch((error) => {
         if (controller.signal.aborted) return;
+        onSnapshot?.(undefined);
         if (
           error instanceof Response &&
           (error.status === 401 || error.status === 404)
@@ -83,7 +89,7 @@ export function TaskState({
         else setFailure("read");
       });
     return () => controller.abort();
-  }, [projectId, id, revision, onAccessFailure]);
+  }, [projectId, id, revision, onAccessFailure, onSnapshot]);
   return (
     <>
       <section aria-label="Estado de la tarea" className="task-state">

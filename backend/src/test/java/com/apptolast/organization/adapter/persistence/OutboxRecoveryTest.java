@@ -77,7 +77,7 @@ class OutboxRecoveryTest {
 
   @BeforeEach
   void clear() throws Exception {
-    jdbc.execute("TRUNCATE task_status_history, tasks, outbox_events, projects");
+    jdbc.execute("TRUNCATE planned_blocks, task_status_history, tasks, outbox_events, projects");
     try (var connection = factory().newConnection();
         var channel = connection.createChannel()) {
       channel.queuePurge(QUEUE);
@@ -125,6 +125,160 @@ class OutboxRecoveryTest {
     new PublishOutbox(
             new PostgresOutboxWork(jdbc, transaction, json), broker, audit, Clock.systemUTC())
         .runCycle();
+  }
+
+  Map<String, Object> seedBlockPayload() throws Exception {
+    seed();
+    var row = jdbc.queryForMap("SELECT * FROM outbox_events");
+    var body = new HashMap<String, Object>();
+    body.put("eventId", row.get("event_id").toString());
+    body.put("aggregateId", row.get("aggregate_id").toString());
+    body.put("ownerId", row.get("owner_id"));
+    body.put("occurredAt", ((java.sql.Timestamp) row.get("occurred_at")).toInstant().toString());
+    body.put("schemaVersion", 1);
+    body.put("type", "BlockPlanned.v1");
+    body.put("blockId", UUID.randomUUID().toString());
+    body.put("taskId", UUID.randomUUID().toString());
+    body.put("startAt", "2030-01-07T10:00:00Z");
+    body.put("endAt", "2030-01-07T11:00:00Z");
+    body.put("zoneId", "Historical/Removed");
+    body.put("durationMinutes", 60);
+    jdbc.update(
+        "UPDATE outbox_events SET event_type='BlockPlanned.v1',payload=?::jsonb",
+        json.writeValueAsString(body));
+    try (var connection = factory().newConnection();
+        var channel = connection.createChannel()) {
+      channel.queueDeclare(
+          "organization.block-planned.v1", true, false, false, Map.of("x-queue-type", "quorum"));
+      channel.queuePurge("organization.block-planned.v1");
+    }
+    return body;
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "extra",
+        "type",
+        "version",
+        "id",
+        "nonIncreasing",
+        "mismatch",
+        "outside",
+        "missing:eventId",
+        "missing:aggregateId",
+        "missing:ownerId",
+        "missing:occurredAt",
+        "missing:schemaVersion",
+        "missing:type",
+        "missing:blockId",
+        "missing:taskId",
+        "missing:startAt",
+        "missing:endAt",
+        "missing:zoneId",
+        "missing:durationMinutes"
+      })
+  void block_s37_persistsInvalidClassificationWithoutSendingToRealRabbit(String defect)
+      throws Exception {
+    var body = seedBlockPayload();
+    if (defect.startsWith("missing:")) body.remove(defect.substring(8));
+    else
+      switch (defect) {
+        case "extra" -> body.put("objective", "private");
+        case "id" -> body.put("blockId", "1-1-1-1-1");
+        case "nonIncreasing" -> body.put("endAt", body.get("startAt"));
+        case "mismatch" -> body.put("durationMinutes", 59);
+        case "outside" -> {
+          body.put("durationMinutes", 1441);
+          body.put("endAt", "2030-01-08T10:01:00Z");
+        }
+        default -> {}
+      }
+    jdbc.update(
+        "UPDATE outbox_events SET payload=?::jsonb,event_type=?,schema_version=?",
+        json.writeValueAsString(body),
+        defect.equals("type") ? "BlockPlanned.v2" : "BlockPlanned.v1",
+        defect.equals("version") ? 2 : 1);
+    var before = jdbc.queryForMap("SELECT * FROM outbox_events");
+    publish();
+    var after = jdbc.queryForMap("SELECT * FROM outbox_events");
+    assertThat(after.get("status")).isEqualTo("blocked");
+    assertThat(after.get("last_error_code"))
+        .isEqualTo(
+            defect.equals("type") || defect.equals("version")
+                ? "UNSUPPORTED_EVENT"
+                : "INVALID_EVENT");
+    assertThat(after.get("attempts")).isEqualTo(0L);
+    assertThat(after.get("payload")).isEqualTo(before.get("payload"));
+    assertThat(after.get("event_id")).isEqualTo(before.get("event_id"));
+    try (var connection = factory().newConnection();
+        var channel = connection.createChannel()) {
+      assertThat(channel.basicGet("organization.block-planned.v1", true)).isNull();
+    }
+    assertThat(errors).isEmpty();
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"BROKER_NACK", "CONFIRM_TIMEOUT"})
+  void block_s37_retriesOriginalHistoricalEventAfterUnconfirmedRealDelivery(String outcome)
+      throws Exception {
+    seedBlockPayload();
+    var original = jdbc.queryForMap("SELECT * FROM outbox_events");
+    var connection = factory().newConnection();
+    var channel = org.mockito.Mockito.spy(connection.createChannel());
+    var confirmed = new java.util.concurrent.atomic.AtomicBoolean();
+    org.mockito.Mockito.doAnswer(
+            invocation -> {
+              confirmed.set((boolean) invocation.callRealMethod());
+              if (outcome.equals("CONFIRM_TIMEOUT"))
+                throw new java.util.concurrent.TimeoutException();
+              return false;
+            })
+        .when(channel)
+        .waitForConfirms(5000);
+    var wrapped = org.mockito.Mockito.spy(connection);
+    org.mockito.Mockito.doReturn(channel).when(wrapped).createChannel();
+    try (var factories =
+        org.mockito.Mockito.mockConstruction(
+            ConnectionFactory.class,
+            (factory, context) ->
+                org.mockito.Mockito.when(factory.newConnection()).thenReturn(wrapped))) {
+      publish();
+    } finally {
+      connection.abort(1000);
+    }
+    assertThat(confirmed).isTrue();
+    var pending = jdbc.queryForMap("SELECT * FROM outbox_events");
+    assertThat(pending.get("status")).isEqualTo("pending");
+    assertThat(pending.get("last_error_code")).isEqualTo(outcome);
+    assertThat(pending.get("attempts")).isEqualTo(1L);
+    assertThat(pending.get("published_at")).isNull();
+    assertThat(pending.get("payload")).isEqualTo(original.get("payload"));
+    assertThat(pending.get("event_id")).isEqualTo(original.get("event_id"));
+    try (var reader = factory().newConnection();
+        var reading = reader.createChannel()) {
+      var first = reading.basicGet("organization.block-planned.v1", true);
+      assertThat(first).isNotNull();
+      assertCopy(first, original);
+    }
+    jdbc.update(
+        "UPDATE outbox_events SET next_attempt_at=?", java.sql.Timestamp.from(Instant.EPOCH));
+    publish();
+    var complete = jdbc.queryForMap("SELECT * FROM outbox_events");
+    assertThat(complete.get("status")).isEqualTo("published");
+    assertThat(complete.get("attempts")).isEqualTo(2L);
+    assertThat(complete.get("last_error_code")).isNull();
+    assertThat(complete.get("published_at")).isNotNull();
+    assertThat(complete.get("payload")).isEqualTo(original.get("payload"));
+    assertThat(complete.get("event_id")).isEqualTo(original.get("event_id"));
+    try (var reader = factory().newConnection();
+        var reading = reader.createChannel()) {
+      var repeated = reading.basicGet("organization.block-planned.v1", true);
+      assertThat(repeated).isNotNull();
+      assertCopy(repeated, original);
+      assertThat(reading.basicGet("organization.block-planned.v1", true)).isNull();
+    }
+    assertThat(errors).isEmpty();
   }
 
   @ParameterizedTest

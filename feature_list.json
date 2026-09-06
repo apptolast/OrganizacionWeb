@@ -115,10 +115,10 @@
       "id": 11,
       "name": "schedule_block",
       "title": "Planificar bloque",
-      "description": "Contrato aprobado por autorización global: 62 escenarios y 325 casos para revisión, reserva atómica, presupuesto, idempotencia y recuperación; implementación pendiente.",
+      "description": "Contrato aprobado en a84e42f: 62 escenarios y 325 casos para revisión, reserva atómica, presupuesto, idempotencia y recuperación; TDD en curso.",
       "acceptance": [],
       "sdd": true,
-      "status": "spec_ready"
+      "status": "in_progress"
     },
     {
       "id": 12,

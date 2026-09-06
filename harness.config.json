@@ -7,7 +7,7 @@
     "install": "node scripts/project.mjs install",
     "lint": "node scripts/project.mjs lint",
     "test": "node scripts/project.mjs test",
-    "mutate": "node scripts/project.mjs mutate",
+    "mutate": "node scripts/project.mjs mutate {{target}}",
     "build": "node scripts/project.mjs build"
   },
   "paths": {

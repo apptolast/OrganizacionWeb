@@ -1,0 +1,27 @@
+CREATE TABLE planned_blocks (
+ id UUID PRIMARY KEY,
+ project_id UUID NOT NULL,
+ task_id UUID NOT NULL,
+ request_key UUID NOT NULL,
+ objective TEXT NOT NULL,
+ start_local TIMESTAMP NOT NULL,
+ end_local TIMESTAMP NOT NULL,
+ zone_id TEXT NOT NULL,
+ start_offset TEXT NOT NULL,
+ end_offset TEXT NOT NULL,
+ allow_over_budget BOOLEAN NOT NULL,
+ start_at TIMESTAMPTZ NOT NULL,
+ end_at TIMESTAMPTZ NOT NULL,
+ duration_minutes INTEGER NOT NULL,
+ created_at TIMESTAMPTZ NOT NULL,
+ FOREIGN KEY (project_id,task_id) REFERENCES tasks(project_id,id),
+ UNIQUE (task_id,request_key),
+ CHECK (start_at < end_at),
+ CHECK (duration_minutes BETWEEN 1 AND 1440),
+ CHECK (end_at - start_at = make_interval(mins => duration_minutes)),
+ CHECK (date_trunc('second',start_at)=start_at AND date_trunc('second',end_at)=end_at),
+ CHECK (start_at >= TIMESTAMPTZ '0001-01-01 00:00:00+00' AND end_at < TIMESTAMPTZ '10000-01-01 00:00:00+00'),
+ CHECK (start_local >= TIMESTAMP '0001-01-01 00:00:00' AND start_local < TIMESTAMP '10000-01-01 00:00:00'
+        AND end_local >= TIMESTAMP '0001-01-01 00:00:00' AND end_local < TIMESTAMP '10000-01-01 00:00:00'),
+ CHECK (date_trunc('minute',start_local)=start_local AND date_trunc('minute',end_local)=end_local)
+);

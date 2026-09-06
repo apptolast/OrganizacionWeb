@@ -2,6 +2,7 @@
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "vitest",
   "plugins": ["@stryker-mutator/vitest-runner"],
+  "ignorePatterns": [".stryker-tmp-availability-replay"],
   "mutate": [
     "src/projects-api.ts",
     "src/use-create-project.ts",
@@ -28,6 +29,8 @@
     "src/task-status-api.ts",
     "src/availability.tsx",
     "src/availability-api.ts",
+    "src/schedule-block-api.ts",
+    "src/task-blocks.tsx",
     "src/workspace.tsx:27:0-41:200",
     "src/workspace.tsx:72:0-72:200"
   ],

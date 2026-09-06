@@ -53,7 +53,11 @@ function contextFetch(
       if (url === `/api/v1/projects/${project.id}`)
         return Response.json(project, { headers: { ETag: '"project"' } });
       if (url.endsWith("/parent")) return Response.json({ parent: null });
-      if (url.endsWith("/subtasks") || url.endsWith("/history"))
+      if (
+        url.endsWith("/subtasks") ||
+        url.endsWith("/history") ||
+        url.endsWith("/blocks")
+      )
         return Response.json({ items: [], nextCursor: null });
       if (url.endsWith("/status"))
         return Response.json(pending, { headers: { ETag: etag } });

@@ -1,0 +1,18 @@
+# Diagnóstico del timeout E2E de disponibilidad
+
+Coordinador obtuvo57/58 PASS en suite global45942, salida9109e0; único fallo fue availability.spec.mjs:236 por timeout30s (604a5d). Artefacto error-context no localizaba operación concreta. Snapshot mostraba presupuesto lunes0 activo/error anterior, previo a completar recorrido teclado. Lectura del diffSCSS confirmó reglas nuevas limitadas a .task-blocks y adición de ese selector a .project-tasks; Availability no usa esas clases. No se atribuye defecto de producto a este timeout.
+
+Tras initglobal34832 EXIT0 (1b3236) y ventana sin Gradle, focal original con trace temporal: `node scripts/e2e.mjs e2e/availability.spec.mjs --grep="seven valid budgets" --trace=on`. **1/1 PASS, EXIT0**,27,0s test/30,8s suite; sesión78468,fixture8648,salida3f39fb. Backend y frontend snapshot estable con autores congelados. No se aumentó timeout.
+
+Traza conservada en `.e2e-work/availability-timeout-debug/focal-before.zip`; resumen `timings-before.json` extraído sólo de test.trace. Sus28 test.step de ancho consumen23.903,42ms (~89% del caso). Todos terminan y luego Tab/submit completan. Cada ancho ejecuta navigationFits, límites/tamaño de controles y auditoría axe completa, incluyendo catálogo extenso de zonas. Esto confirma coste agregado cercano al límite; no prueba por sí solo la carga exacta que causó el timeout global anterior.
+
+Coordinador aprobó división por evidencia. Se conserva test funcional de siete presupuestos, validación, no PUT inválido, foco, teclado, feedback<400ms, bloqueo durante envío y confirmación real. La matriz pasa a28 pruebas independientes por ancho, cada una prepara el mismo estado inválido seguido de0 y conserva literalmente navigationFits/bounds/axe y altura400 a768. Ningún ancho, tagaxe ni aserción eliminado; timeout30s y producciónSCSS intactos. Selección `--list`:29tests (9f63b3).
+
+Ejecución del grupo afectado en runner45297/fixture62412 pendiente. Los57 casos globales previamente verdes siguen como evidencia independiente; no se presentará suma como una ejecución global nueva. No mutación ni cambios de producto.
+
+Primer lanzamiento del grupo45297/62412 no ejecutó tests: la alternancia | del grep fue interpretada por el shell Windows interno del runner (`responsive` comando desconocido), EXIT1/1404c1. No fue fallo de aserción ni timeout. Se conserva runner y se selecciona mediante etiqueta existente --grep=@s39, que incluye29casos afectados y el test previo de navegación:30en total. Reejecución45703/fixture27476 pendiente. No cambios adicionales de código.
+Corrección de selección observada al iniciar: --grep=@s39 incluye31casos, no30; además de navegación, incluye el test previo de Enter/foco. Los29casos afectados están incluidos completos. Resultado todavía pendiente al registrar este detalle.
+
+Resultado final del grupo: **31/31 PASS, EXIT0,56,2s**, sesión45703/salidaaebd37,fixture27476. El recorrido funcional tarda1,4s; las28pruebas de ancho pasan entre1,5y2,5s, incluida altura400/768. Navegación949ms y Enter/foco1,3s también verdes. Timeout original30s por test intacto; todos28axe/bounds/navigation y contrato conservados. El coste total de preparar fixtures independientes es mayor, pero cada caso tiene margen y diagnostica su propio ancho. Esto estabiliza el diseño de pruebas sin cambiar producto.
+
+El runner cerró únicamente su stack/volumen propio. Prettier de e2e/availability.spec.mjs y stryker.config.json pasó793287. No se ejecutaron mutación ni otras suites. Se restaura freeze E2E/frontend; coordinador puede combinar este resultado con los57casos globales previos sin llamarlo ejecución única86/86.

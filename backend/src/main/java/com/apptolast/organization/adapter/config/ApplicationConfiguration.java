@@ -9,6 +9,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  com.apptolast.organization.application.ReadBlocks readBlocks(
+      com.apptolast.organization.application.BlockQueries queries) {
+    return new com.apptolast.organization.application.ReadBlocks(queries);
+  }
+
+  @Bean
+  com.apptolast.organization.application.PlanBlock planBlock(
+      com.apptolast.organization.application.BlockPlanning planning,
+      com.apptolast.organization.application.BlockCommit commit,
+      com.apptolast.organization.application.ZoneCatalog catalog,
+      Clock clock) {
+    return new com.apptolast.organization.application.PlanBlock(planning, commit, catalog, clock);
+  }
+
+  @Bean
   Clock clock() {
     return Clock.systemUTC();
   }

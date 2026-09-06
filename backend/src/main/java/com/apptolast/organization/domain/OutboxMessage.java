@@ -24,9 +24,11 @@ public record OutboxMessage(
             && !"ProjectStatusChanged.v1".equals(type)
             && !"TaskCreated.v1".equals(type)
             && !"SubtaskCreated.v1".equals(type)
-            && !"TaskStatusChanged.v1".equals(type))
+            && !"TaskStatusChanged.v1".equals(type)
+            && !"BlockPlanned.v1".equals(type))
         || schemaVersion != 1) return "UNSUPPORTED_EVENT";
     boolean taskStatusChanged = "TaskStatusChanged.v1".equals(type);
+    boolean blockPlanned = "BlockPlanned.v1".equals(type);
     boolean statusChanged = "ProjectStatusChanged.v1".equals(type);
     boolean subtaskCreated = "SubtaskCreated.v1".equals(type);
     boolean taskCreated = "TaskCreated.v1".equals(type) || subtaskCreated;
@@ -67,6 +69,21 @@ public record OutboxMessage(
       expected = new java.util.HashSet<>(expected);
       expected.add("parentTaskId");
     }
+    if (blockPlanned)
+      expected =
+          java.util.Set.of(
+              "eventId",
+              "aggregateId",
+              "ownerId",
+              "occurredAt",
+              "schemaVersion",
+              "type",
+              "blockId",
+              "taskId",
+              "startAt",
+              "endAt",
+              "zoneId",
+              "durationMinutes");
     if (!expected.equals(payload.keySet())
         || !eventId.toString().equals(payload.get("eventId"))
         || !aggregateId.toString().equals(payload.get("aggregateId"))
@@ -78,6 +95,30 @@ public record OutboxMessage(
       if (!occurredAt.equals(Instant.parse(timestamp))) return "INVALID_EVENT";
     } catch (java.time.format.DateTimeParseException error) {
       return "INVALID_EVENT";
+    }
+    if (blockPlanned) {
+      if (!(payload.get("blockId") instanceof String blockId)
+          || !blockId.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
+          || !(payload.get("taskId") instanceof String taskId)
+          || !taskId.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
+          || !(payload.get("zoneId") instanceof String zone)
+          || zone.isBlank()
+          || !(payload.get("startAt") instanceof String start)
+          || !(payload.get("endAt") instanceof String end)
+          || !(payload.get("durationMinutes") instanceof Integer minutes)
+          || minutes < 1
+          || minutes > 1440) return "INVALID_EVENT";
+      try {
+        new ResolvedBlockTime(
+            Instant.parse(start),
+            Instant.parse(end),
+            java.time.ZoneOffset.UTC,
+            java.time.ZoneOffset.UTC,
+            minutes);
+        return null;
+      } catch (java.time.DateTimeException | IllegalArgumentException error) {
+        return "INVALID_EVENT";
+      }
     }
     if ((taskCreated || taskStatusChanged)
         && (!(payload.get("taskId") instanceof String taskId)

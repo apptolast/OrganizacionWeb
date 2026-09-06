@@ -65,7 +65,7 @@ class ProjectApiTest {
 
   @BeforeEach
   void clear() {
-    jdbc.execute("TRUNCATE task_status_history, tasks, outbox_events, projects");
+    jdbc.execute("TRUNCATE planned_blocks, task_status_history, tasks, outbox_events, projects");
   }
 
   @org.junit.jupiter.params.ParameterizedTest

@@ -13,8 +13,9 @@ export default defineConfig({
     "split-task.spec.mjs",
     "complete-reopen-task.spec.mjs",
     "availability.spec.mjs",
+    "schedule-block.spec.mjs",
   ],
-  grep: /real creation survives|real update persists|explicit transitions persist|public access screen|confirmed task survives|nested children preserve|confirmed completion and reopening|absence, saved budgets/,
+  grep: /schedule_block:|real creation survives|real update persists|explicit transitions persist|public access screen|confirmed task survives|nested children preserve|confirmed completion and reopening|absence, saved budgets/,
   projects: [
     { name: "firefox", use: { browserName: "firefox" } },
     { name: "webkit", use: { browserName: "webkit" } },

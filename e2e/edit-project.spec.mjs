@@ -3,7 +3,7 @@ import { test, expect } from "./support/authenticated-test.mjs";
 import { sql, create, stored } from "./support/projects.mjs";
 import AxeBuilder from "@axe-core/playwright";
 
-test.beforeEach(() => sql("TRUNCATE task_status_history, tasks, outbox_events, projects"));
+test.beforeEach(() => sql("TRUNCATE planned_blocks, task_status_history, tasks, outbox_events, projects"));
 
 test("edit_project: real update persists its event and unchanged save writes nothing @s1 @s3 @s7 @s12 @s17 @s21", async ({
   page,

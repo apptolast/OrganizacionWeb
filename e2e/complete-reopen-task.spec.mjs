@@ -5,7 +5,7 @@ import { saveTask } from "./support/tasks.mjs";
 import { csrfHeaders } from "../scripts/session-client.mjs";
 
 test.beforeEach(() =>
-  sql("TRUNCATE task_status_history, tasks, outbox_events, projects"),
+  sql("TRUNCATE planned_blocks, task_status_history, tasks, outbox_events, projects"),
 );
 const path = (projectId, id) => `/api/v1/projects/${projectId}/tasks/${id}`;
 async function state(request, projectId, id) {

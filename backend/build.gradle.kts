@@ -40,6 +40,7 @@ pitest {
     val splitOnly = scope == "split_task"
     val taskStatusOnly = scope == "complete_reopen_task"
     val availabilityOnly = scope == "availability"
+    val scheduleBlockOnly = scope == "schedule_block"
     val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
     val authenticationClasses = setOf(
         "com.apptolast.organization.adapter.http.SessionController",
@@ -126,28 +127,63 @@ pitest {
         "com.apptolast.organization.adapter.config.JavaTimeZoneCatalogTest"
     )
     val taskTests = core + taskAdapterTests
+    val scheduleBlockAdapters = setOf(
+        "com.apptolast.organization.adapter.http.BlockController*",
+        "com.apptolast.organization.adapter.persistence.PostgresBlockStore"
+    )
+    val scheduleBlockClasses = scheduleBlockAdapters + setOf(
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+        "com.apptolast.organization.domain.Block*",
+        "com.apptolast.organization.domain.BudgetDay",
+        "com.apptolast.organization.domain.PlannedBlock",
+        "com.apptolast.organization.domain.ResolvedBlockTime",
+        "com.apptolast.organization.application.Block*",
+        "com.apptolast.organization.application.PlanBlock",
+        "com.apptolast.organization.application.ReadBlocks",
+        "com.apptolast.organization.domain.OutboxMessage",
+        "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher"
+    )
+    val scheduleBlockTests = setOf(
+        "com.apptolast.organization.adapter.config.ProjectStateConfigurationTest",
+        "com.apptolast.organization.domain.Block*Test",
+        "com.apptolast.organization.domain.PlannedBlockTest",
+        "com.apptolast.organization.domain.ResolvedBlockTimeTest",
+        "com.apptolast.organization.application.PlanBlockTest",
+        "com.apptolast.organization.application.PublishOutboxTest",
+        "com.apptolast.organization.adapter.ScheduleBlockApiTest",
+        "com.apptolast.organization.adapter.persistence.ScheduleBlockPersistenceTest",
+        "com.apptolast.organization.adapter.broker.RabbitBrokerPublisherTest",
+        "com.apptolast.organization.adapter.persistence.OutboxWorkTest",
+        "com.apptolast.organization.adapter.persistence.OutboxRecoveryTest"
+    )
     targetClasses.set(when {
+        scheduleBlockOnly -> scheduleBlockClasses
         availabilityOnly -> availabilityClasses
         authenticationOnly -> authenticationClasses
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters
     })
     targetTests.set(when {
+        scheduleBlockOnly -> scheduleBlockTests
         availabilityOnly -> availabilityTests + taskStatusAdapterTests + taskAdapterTests.filter { !it.contains("broker") }
         authenticationOnly -> authenticationTests
         taskStatusOnly -> taskTests + taskStatusAdapterTests
         splitOnly -> taskTests
         taskOnly -> taskTests
-        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests
+        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests
     })
     if (availabilityOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-availability"))
+    if (scheduleBlockOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-schedule-block"))
     if (taskStatusOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-complete-reopen-task"))
     if (authenticationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-authentication"))
     if (splitOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-split-task"))
     if (taskOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-create-task"))
     jvmArgs.set(setOf("-Dapi.version=1.44"))
+    jvmArgs.add(providers.provider {
+        "-Doutbox.test.classpath=${sourceSets.test.get().runtimeClasspath.asPath}"
+    })
     // Real broker tests restart a container for each JUnit lifecycle in PIT.
     // Keep their transport assertions intact while allowing measured container startup.
     if (!authenticationOnly) timeoutConstInMillis.set(15000)
@@ -161,3 +197,5 @@ pitest {
 }
 
 spotless { java { googleJavaFormat("1.31.0") } }
+
+

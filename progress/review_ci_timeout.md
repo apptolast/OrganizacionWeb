@@ -17,3 +17,9 @@ Los datos se obtuvieron mediante gh run view --json/--log y la API de anotacione
 Una separación futura de PIT y Stryker en jobs independientes podría reducir el camino crítico, manteniendo build/integración sujetos a ambos resultados. No forma parte de este cambio. Tampoco se cambia concurrencia, se omiten mutantes ni se ajustan timeouts de tests para obtener un score.
 
 Verificación local documental: diff limitado a 60 → 120 en el workflow y este informe; git diff --check sin errores de formato. No se ha ejecutado otra CI ni realizado commit/push desde este agente.
+
+## Resultado posterior comprobado por el coordinador
+
+La ejecución [34014505916](https://github.com/apptolast/OrganizacionWeb/actions/runs/34014505916), de cb162b7, terminó success. El job comenzó el 6 de septiembre de 2026 a las 05:38:58 UTC y terminó a las 07:15:49 UTC (96 minutos y 51 segundos). `harness verify` terminó correctamente a las 07:09:23 UTC; después pasaron build, E2E y publisher. Se comprobaron conclusión y estados de cada paso mediante gh run view.
+
+El techo de 120 minutos permitió completar esta ejecución sin cambiar umbrales ni omitir pasos. Este resultado verifica el corte de disponibilidad publicado en cb162b7; no se atribuye a la planificación de bloques todavía en desarrollo ni garantiza que futuros incrementos entren en el mismo tiempo.

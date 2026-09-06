@@ -11,3 +11,5 @@
 
 frontend/reports/
 frontend/.stryker-tmp/
+frontend/.stryker-tmp-availability-replay/
+**/proposal_schedule_block_time.md

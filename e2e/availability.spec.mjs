@@ -53,7 +53,7 @@ async function open(page) {
 
 test.beforeEach(() =>
   sql(
-    "TRUNCATE availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
   ),
 );
 
@@ -233,7 +233,7 @@ test("availability: valid-shaped contradictory confirmation cannot create false 
   expect(writes).toBe(1);
 });
 
-test("availability: seven valid budgets, responsive controls, keyboard and prompt feedback @s31 @s38 @s39 @s42 @s43", async ({
+test("availability: seven valid budgets, keyboard and prompt feedback @s31 @s38 @s39 @s42 @s43", async ({
   page,
 }) => {
   await open(page);
@@ -266,39 +266,6 @@ test("availability: seven valid budgets, responsive controls, keyboard and promp
   expect(invalidWrites).toBe(0);
   page.off("request", countInvalidWrite);
   await field(page, 0).fill("0");
-  for (const width of [
-    320, 359, 360, 361, 390, 419, 421, 480, 599, 600, 601, 699, 701, 759, 761,
-    768, 820, 999, 1001, 1024, 1099, 1101, 1280, 1440, 1599, 1601, 1920, 2560,
-  ]) {
-    await test.step(`${width} CSS pixels`, async () => {
-      await page.setViewportSize({ width, height: width === 768 ? 400 : 900 });
-      await navigationFits(page);
-      expect(
-        await page.evaluate(
-          () =>
-            document.documentElement.scrollWidth <=
-            document.documentElement.clientWidth,
-        ),
-      ).toBe(true);
-      for (const element of await page
-        .getByRole("main")
-        .locator("a,button,input,select")
-        .all()) {
-        const box = await element.boundingBox();
-        expect(box.width).toBeGreaterThanOrEqual(44);
-        expect(box.height).toBeGreaterThanOrEqual(44);
-        expect(box.x).toBeGreaterThanOrEqual(0);
-        expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
-      }
-      expect(
-        (
-          await new AxeBuilder({ page })
-            .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
-            .analyze()
-        ).violations,
-      ).toEqual([]);
-    });
-  }
   await page.setViewportSize({ width: 320, height: 700 });
   for (
     let attempt = 0;
@@ -376,6 +343,50 @@ test("availability: seven valid budgets, responsive controls, keyboard and promp
     page.getByRole("status").filter({ hasText: /^Disponibilidad guardada$/ }),
   ).toBeVisible();
 });
+
+for (const width of [
+  320, 359, 360, 361, 390, 419, 421, 480, 599, 600, 601, 699, 701, 759, 761,
+  768, 820, 999, 1001, 1024, 1099, 1101, 1280, 1440, 1599, 1601, 1920, 2560,
+]) {
+  test(`availability: responsive controls at ${width} CSS pixels @s39`, async ({
+    page,
+  }) => {
+    await open(page);
+    await field(page, 0).fill("");
+    await field(page, 0).pressSequentially("1e");
+    await saveButton(page).click();
+    await expect(field(page, 0)).toHaveAttribute("aria-invalid", "true");
+    await field(page, 0).fill("0");
+    await test.step(`${width} CSS pixels`, async () => {
+      await page.setViewportSize({ width, height: width === 768 ? 400 : 900 });
+      await navigationFits(page);
+      expect(
+        await page.evaluate(
+          () =>
+            document.documentElement.scrollWidth <=
+            document.documentElement.clientWidth,
+        ),
+      ).toBe(true);
+      for (const element of await page
+        .getByRole("main")
+        .locator("a,button,input,select")
+        .all()) {
+        const box = await element.boundingBox();
+        expect(box.width).toBeGreaterThanOrEqual(44);
+        expect(box.height).toBeGreaterThanOrEqual(44);
+        expect(box.x).toBeGreaterThanOrEqual(0);
+        expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
+      }
+      expect(
+        (
+          await new AxeBuilder({ page })
+            .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+            .analyze()
+        ).violations,
+      ).toEqual([]);
+    });
+  });
+}
 
 test("availability: expired session while catalog waits removes private draft without a late restoration @s23 @s34 @s40", async ({
   page,

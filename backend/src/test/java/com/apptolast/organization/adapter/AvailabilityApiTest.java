@@ -85,7 +85,7 @@ class AvailabilityApiTest {
   @BeforeEach
   void reset() {
     jdbc.execute(
-        "TRUNCATE availability_preferences,task_status_history,tasks,outbox_events,projects");
+        "TRUNCATE planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
   }
 
   String body(String zone, int minutes) {

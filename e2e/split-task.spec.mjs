@@ -5,7 +5,7 @@ import { csrfHeaders } from "../scripts/session-client.mjs";
 import AxeBuilder from "@axe-core/playwright";
 import { request as anonymousRequest } from "@playwright/test";
 
-test.beforeEach(() => sql("TRUNCATE task_status_history, tasks,outbox_events,projects"));
+test.beforeEach(() => sql("TRUNCATE planned_blocks, task_status_history, tasks,outbox_events,projects"));
 const resource = (projectId, taskId) =>
   `/api/v1/projects/${projectId}/tasks/${taskId}`;
 const screen = (projectId, taskId) =>

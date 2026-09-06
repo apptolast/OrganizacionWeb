@@ -1337,6 +1337,8 @@ it("@s23 permite abrir el detalle desde la lista plana del proyecto", async () =
 });
 
 function taskStateRead(url: string) {
+  if (url.endsWith("/blocks"))
+    return Response.json({ items: [], nextCursor: null });
   const match = /\/tasks\/([^/]+)\/status$/.exec(url);
   if (match)
     return Response.json(

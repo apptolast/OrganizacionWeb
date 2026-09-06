@@ -2,35 +2,32 @@
 
 ## Feature activa
 
-Feature 11 schedule_block in_progress. Contrato aprobado a84e42f (62 escenarios, 325 casos) y checkpoint de implementación 3671b94 publicados en origin/main (push 1ade67). Implementación React/SCSS, API hexagonal, PostgreSQL y BlockPlanned.v1 revisada; judge completo APPROVED en progress/judge_schedule_block.md. No es cierre de feature ni de MVP. Features 1–10 terminadas; 12–30 pendientes, bajo autorización global del usuario.
+Feature 11 `schedule_block` in_progress. Features 1–10 terminadas;12–30 pendientes bajo autorización global del usuario. Contrato a84e42f, implementación3671b94 y refuerzos334f47b/56ced31 publicados en origin/main. No es cierre de feature, MVP ni despliegue.
 
-## Estado verificado
+## Verificación vigente
 
-- Último init21625 EXIT0 f79afd: lint,1365 backend,1198 frontend y9 tests del arnés verdes, sin omitidos. Build frontend391add y E2E focal7/7 sobre Docker/API/PostgreSQL72ed46 verdes. Judge completo autoriza replay frontend; fuentes/tests/config congelados. La primera invocación E2E falló antes de ejecutar tests por nombre de proyecto CLI inexistente; corregido el comando sin cambiar pruebas.
-- Init global 34832 EXIT 0 (1b3236): lint verde, 1338 backend sin fallos/errores/omitidos, 1121 frontend y siete tests del arnés.
-- Primer init 3534 fue rojo por tres fallos del fixture ProjectStateConfigurationTest y formato UI. Se añadieron los tres puertos al contexto sin cambiar aserciones; formato corregido. Historia en bitácoras.
-- Siete recorridos de bloques reales por motor: Chromium 7/7, Firefox/WebKit 14/14. Incluyen ACK perdido después de 201 y reinicio real del backend con PostgreSQL conservado.
-- Regresión E2E global 45942: 57/58 verdes. El timeout de disponibilidad se diagnosticó con traza (27 segundos, 23,9 en 28 anchos); se separó la matriz manteniendo cobertura y timeout. Grupo afectado 31/31 verde aebd37. Son ejecuciones separadas con dos casos solapados.
-- Build frontend y Docker verdes. Revisiones independientes de cliente, dominio, persistencia, UI, publicador y E2E consolidadas en progress/tdd_schedule_block.md y judge_schedule_block.md.
-- CI de feature 10 cb162b7 terminó success, run 34014505916. No acredita feature 11.
-- CI del checkpoint 3671b94 en curso, run 34024330569 (snapshot df9b78); todavía sin conclusión.
+- Init21625 EXIT0/f79afd: lint,1365 backend,1198 frontend y9 tests del arnés verdes. Build391add y E2E7/7 Docker/API/PostgreSQL72ed46 verdes, incluido reinicio real. Invocación E2E anterior falló antes de ejecutar tests por nombre de proyecto inexistente; se corrigió el comando.
+- Siete recorridos de bloques pasan en Chromium y14 en Firefox/WebKit. Matriz responsive/zoom/axe y30 principios UX documentados con límites humanos explícitos.
+- Regresión E2E global previa57/58: timeout histórico de28 anchos diagnosticado con traza y dividido conservando todos los checks. Grupo afectado31/31 verde; son ejecuciones separadas, no una supuesta corrida86/86.
+- Judge completo APPROVED para último replay en progress/judge_schedule_block.md. La única corrección productiva del primer seguimiento fue retirar taskState antiguo durante retry: RED9d5579/GREEN56ed8e.
+- CI3671b94 terminó cancelled por timeout confirmado de120min durante Stryker completo, después de PIT verde. Cambio puntual120→240 revisado; no reduce ninguna puerta y espera validación en CI. El success de contrato a84e42f no acredita implementación11.
 
-## Mutación en curso
+## Mutación
 
-PIT backend inicial terminó EXIT 0: 414 KILLED de454 (91,19 %),35 SURVIVED y5 NO_COVERAGE. Tras refuerzo y323 pruebas verdes, segunda medición30272/c6bc2c: **453/454 KILLED (99,78 %)**,1 SURVIVED equivalente contextual,0 NO_COVERAGE/errores/timeouts. Root contrastó454 identidades únicas sin diferencias (cf2ac6/925113); las39 brechas restantes ahora se detectan, sin excluir la equivalencia ni modificar el denominador. Backend cerrado a nivel de mutación; feature completa espera frontend.
+Backend cerrado: PIT inicial414/454 Killed; segundo453/454 (99,78 %), una equivalencia contextual BlockBudget34, cero NoCoverage/errores/timeouts. Root contrastó454 identidades sin diferencias. No se excluyeron mutantes ni cambió producción backend.
 
-Stryker frontend terminó EXIT 0 (93196a): 1561 mutantes, 1332 Killed, 225 Survived, 3 NoCoverage y 1 RuntimeError; 85,38 %, sin timeouts. El error corresponde al runner al convertir una excepción de la mutación945; no se cuenta como killed. Informes nuevos de las 12:20, pendientes de clasificación y seguimiento. El arnés mantiene default completo y targets explícitos cerrados, probado con node:test.
+Frontend original:1332 Killed/1561 generados,225 Survived,3 NoCoverage,1 RuntimeError,0 Timeout. Stryker85,38 %. Informe original preservado.
 
-PIT conserva el runtime de recuperación; no cambió producción backend. Stryker excluye explícitamente la carpeta protegida; patrón validado sintéticamente sin leerla. Ambos informes originales se preservan. Refuerzo backend publicado en334f47b, push697cf0. Frontend en autoría: API250/250 verde y revisada, sin producción; UI corrige el estado anterior durante retry y refuerza los grupos de comportamiento. Se prepara replay separado por arnés, pendiente de freeze y judge.
+Replay56ced31 cerrado ca2c38:404 generados,362 Killed,41 Survived,1 RuntimeError,0 NoCoverage/Timeout. Bruto89,60 % y Stryker89,83 %. Root contrastó167 correspondencias067ac3;133 seleccionados ahora Killed (130 supervivientes y3 NoCoverage anteriores),33 Survived,1 RuntimeError. La nueva línea TaskReader también Killed. No se mezclan denominadores ni se cuenta945 como kill.
 
-## Siguiente paso
+## Trabajo en curso
 
-Ejecutar replay frontend schedule_block-frontend-replay por arnés y contrastar167 identidades originales más la línea nueva contra sus resultados, sin mezclar denominadores ni convertir RuntimeError en killed. Backend453/454 cerrado. No declarar done antes de resolver seguimiento frontend. Commits/push autorizados; despliegue productivo pendiente de su integración específica. No prometer fecha ni finalización antes de cuota.
+Seguimiento final:11 pruebas netas y ajustes existentes cubren29 identidades observables.84/84 bloques,55/55 creación de tareas, lint/types focales verdes. Dos revisiones corrigieron aserciones de petición anterior y nodo retirado. Init26470 detectó carrera en test antiguo:1208/1209 frontend; diagnóstico confirmó DOM retirado antes del cleanup pasivo. Sólo se sincronizó la espera404/cancelación, sin cambios de producción. Root94736 repite init; fuentes/tests/config congelados. Soporte final29 identidades/26 rangos APPROVED y10/10 scripts86881a. Reporters nuevos final.json/html conservan informes previos. Pendiente medición independiente final después de init verde; no declarar done antes del dictamen.
 
-## Límites conservados
+## Límites
 
-Ponytail full y Caveman lite activos en todos los agentes. No se consumieron resets. Permanecen destinos y acciones documentales/de limpieza bloqueados previamente por revisión automática: no reintentar, leer su contenido ni limpiar ascendientes. El incidente documental previo de aplicación parcial tras rechazo ya fue comunicado; no se oculta ni se presenta como ausencia de reintento. No se declara limpieza completa de temporales protegidos.
+Ponytail full y Caveman lite activos en todos los agentes. Commits/push autorizados. No resets, automaciones ni despliegue productivo. No promesas sobre fecha o cuota.
 
-Feature11 continúa in_progress. Refuerzo UI tras mutación: RED9d5579→GREEN56ed8e corrige estado TaskReader obsoleto en retry; test tardío1530 verde iniciale2ed4f. Detalle progress/tdd_schedule_block_frontend.md. No Stryker hasta nuevo judge; APItests autor independiente.
+Permanecen destinos y acciones previamente bloqueados por revisión automática: no reintentar, leer su contenido ni limpiar ascendientes. El incidente documental previo de aplicación parcial tras rechazo ya fue comunicado. No se afirma limpieza completa de temporales protegidos. El patrón protector de Stryker está conservado y fue comprobado sin leer esa carpeta.
 
-Corte UI/shared congelado:17refuerzos,73bloques/180focalshared PASS6ddfe4;eslint16c42c y tscf37f93 verdes. Producción1línea TaskReader94 tras REDreal. Informes progress/tdd_schedule_block_frontend.md y mutation_schedule_block_frontend.md. Pendiente judge/replay selectivo; sin done.
+Seguimiento tras replay: cinco tests de secuencias746/931/1070/1303-1304/1401-1403, todosGREENinicial.78/78 bloques750008,eslint3a7fd0,tsc94a1ba. Sólo task-blocks.test.tsx +221líneas, producción intacta. Detalle TDD; pendiente juez, sin nueva mutación. Corte congelado.

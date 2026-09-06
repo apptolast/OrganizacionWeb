@@ -1,0 +1,1203 @@
+{
+  "state": "sources-verified-awaiting-root-judge",
+  "verifiedAtUtc": "2026-09-06T11:23:39.383Z",
+  "previousSelectionManifest": "progress/schedule_block_frontend_replay_selection.json",
+  "previousSelectionManifestSha256": "61383639dfdfca03ec2aecb1f0e49187f39f379b2097bd203423be1227498832",
+  "previousReplayReport": "frontend/reports/mutation-schedule-block/replay.json",
+  "previousReplayReportSha256": "7c868917ac645a03be78893cdf575ea7ff3abaa8f3bd021fa2a3fbbd62b21059",
+  "previousMapping": "progress/mutation_schedule_block_frontend_replay_mapping.json",
+  "coordinateConvention": "Report locations 1-based. Config line 1-based, column 0-based. Current sources exactly match replay embedded sources after newline normalization.",
+  "selectedOriginalCount": 29,
+  "rangeCount": 26,
+  "selection": [
+    {
+      "originalId": "746",
+      "replayId": "248",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 38,
+          "line": 54
+        },
+        "start": {
+          "column": 13,
+          "line": 54
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 38,
+          "line": 54
+        },
+        "start": {
+          "column": 13,
+          "line": 54
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 38,
+          "line": 54
+        },
+        "start": {
+          "column": 13,
+          "line": 54
+        }
+      },
+      "range": "src/task-blocks.tsx:54:12-54:37",
+      "mutator": "ConditionalExpression",
+      "expression": "controller.signal.aborted",
+      "replacement": "false"
+    },
+    {
+      "originalId": "931",
+      "replayId": "281",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 37,
+          "line": 253
+        },
+        "start": {
+          "column": 11,
+          "line": 253
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 37,
+          "line": 253
+        },
+        "start": {
+          "column": 11,
+          "line": 253
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 37,
+          "line": 253
+        },
+        "start": {
+          "column": 11,
+          "line": 253
+        }
+      },
+      "range": "src/task-blocks.tsx:253:10-253:36",
+      "mutator": "ConditionalExpression",
+      "expression": "!controller.signal.aborted",
+      "replacement": "true"
+    },
+    {
+      "originalId": "1070",
+      "replayId": "298",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 37,
+          "line": 371
+        },
+        "start": {
+          "column": 11,
+          "line": 371
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 37,
+          "line": 371
+        },
+        "start": {
+          "column": 11,
+          "line": 371
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 37,
+          "line": 371
+        },
+        "start": {
+          "column": 11,
+          "line": 371
+        }
+      },
+      "range": "src/task-blocks.tsx:371:10-371:36",
+      "mutator": "ConditionalExpression",
+      "expression": "!controller.signal.aborted",
+      "replacement": "true"
+    },
+    {
+      "originalId": "1303",
+      "replayId": "367",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 49,
+          "line": 716
+        },
+        "start": {
+          "column": 13,
+          "line": 716
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 49,
+          "line": 716
+        },
+        "start": {
+          "column": 13,
+          "line": 716
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 49,
+          "line": 716
+        },
+        "start": {
+          "column": 13,
+          "line": 716
+        }
+      },
+      "range": "src/task-blocks.tsx:716:12-716:48",
+      "mutator": "ArrowFunction",
+      "expression": "() => () => request.current?.abort()",
+      "replacement": "() => undefined"
+    },
+    {
+      "originalId": "1304",
+      "replayId": "368",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 49,
+          "line": 716
+        },
+        "start": {
+          "column": 19,
+          "line": 716
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 49,
+          "line": 716
+        },
+        "start": {
+          "column": 19,
+          "line": 716
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 49,
+          "line": 716
+        },
+        "start": {
+          "column": 19,
+          "line": 716
+        }
+      },
+      "range": "src/task-blocks.tsx:716:18-716:48",
+      "mutator": "ArrowFunction",
+      "expression": "() => request.current?.abort()",
+      "replacement": "() => undefined"
+    },
+    {
+      "originalId": "1401",
+      "replayId": "386",
+      "replayStatus": "Survived",
+      "file": "src/task-reader.tsx",
+      "sourceSha256": "2b5ef46864d5e9ea32021d5014b8c317520e9bf13b44a1b02da2b281645b9b4c",
+      "originalLocation": {
+        "end": {
+          "column": 62,
+          "line": 57
+        },
+        "start": {
+          "column": 13,
+          "line": 57
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 62,
+          "line": 57
+        },
+        "start": {
+          "column": 13,
+          "line": 57
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 62,
+          "line": 57
+        },
+        "start": {
+          "column": 13,
+          "line": 57
+        }
+      },
+      "range": "src/task-reader.tsx:57:12-57:61",
+      "mutator": "ConditionalExpression",
+      "expression": "!controller.signal.aborted && \"project\" in result",
+      "replacement": "true"
+    },
+    {
+      "originalId": "1403",
+      "replayId": "388",
+      "replayStatus": "Survived",
+      "file": "src/task-reader.tsx",
+      "sourceSha256": "2b5ef46864d5e9ea32021d5014b8c317520e9bf13b44a1b02da2b281645b9b4c",
+      "originalLocation": {
+        "end": {
+          "column": 62,
+          "line": 57
+        },
+        "start": {
+          "column": 13,
+          "line": 57
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 62,
+          "line": 57
+        },
+        "start": {
+          "column": 13,
+          "line": 57
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 62,
+          "line": 57
+        },
+        "start": {
+          "column": 13,
+          "line": 57
+        }
+      },
+      "range": "src/task-reader.tsx:57:12-57:61",
+      "mutator": "LogicalOperator",
+      "expression": "!controller.signal.aborted && \"project\" in result",
+      "replacement": "!controller.signal.aborted || \"project\" in result"
+    },
+    {
+      "originalId": "750",
+      "replayId": "249",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 26,
+          "line": 55
+        },
+        "start": {
+          "column": 13,
+          "line": 55
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 26,
+          "line": 55
+        },
+        "start": {
+          "column": 13,
+          "line": 55
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 26,
+          "line": 55
+        },
+        "start": {
+          "column": 13,
+          "line": 55
+        }
+      },
+      "range": "src/task-blocks.tsx:55:12-55:25",
+      "mutator": "OptionalChaining",
+      "expression": "problem?.code",
+      "replacement": "problem.code"
+    },
+    {
+      "originalId": "757",
+      "replayId": "250",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 37,
+          "line": 62
+        },
+        "start": {
+          "column": 35,
+          "line": 62
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 37,
+          "line": 62
+        },
+        "start": {
+          "column": 35,
+          "line": 62
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 37,
+          "line": 62
+        },
+        "start": {
+          "column": 35,
+          "line": 62
+        }
+      },
+      "range": "src/task-blocks.tsx:62:34-62:36",
+      "mutator": "UnaryOperator",
+      "expression": "-1",
+      "replacement": "+1"
+    },
+    {
+      "originalId": "814",
+      "replayId": "256",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 42,
+          "line": 128
+        },
+        "start": {
+          "column": 13,
+          "line": 128
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 42,
+          "line": 128
+        },
+        "start": {
+          "column": 13,
+          "line": 128
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 42,
+          "line": 128
+        },
+        "start": {
+          "column": 13,
+          "line": 128
+        }
+      },
+      "range": "src/task-blocks.tsx:128:12-128:41",
+      "mutator": "ConditionalExpression",
+      "expression": "projectStatus !== \"completed\"",
+      "replacement": "true"
+    },
+    {
+      "originalId": "816",
+      "replayId": "258",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 42,
+          "line": 128
+        },
+        "start": {
+          "column": 31,
+          "line": 128
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 42,
+          "line": 128
+        },
+        "start": {
+          "column": 31,
+          "line": 128
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 42,
+          "line": 128
+        },
+        "start": {
+          "column": 31,
+          "line": 128
+        }
+      },
+      "range": "src/task-blocks.tsx:128:30-128:41",
+      "mutator": "StringLiteral",
+      "expression": "\"completed\"",
+      "replacement": "\"\""
+    },
+    {
+      "originalId": "829",
+      "replayId": "264",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 42,
+          "line": 170
+        },
+        "start": {
+          "column": 40,
+          "line": 170
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 42,
+          "line": 170
+        },
+        "start": {
+          "column": 40,
+          "line": 170
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 42,
+          "line": 170
+        },
+        "start": {
+          "column": 40,
+          "line": 170
+        }
+      },
+      "range": "src/task-blocks.tsx:170:39-170:41",
+      "mutator": "StringLiteral",
+      "expression": "\"\"",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "originalId": "887",
+      "replayId": "271",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 27,
+          "line": 211
+        },
+        "start": {
+          "column": 7,
+          "line": 210
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 27,
+          "line": 211
+        },
+        "start": {
+          "column": 7,
+          "line": 210
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 27,
+          "line": 211
+        },
+        "start": {
+          "column": 7,
+          "line": 210
+        }
+      },
+      "range": "src/task-blocks.tsx:210:6-211:26",
+      "mutator": "LogicalOperator",
+      "expression": "previous instanceof HTMLElement &&\n      previous.isConnected",
+      "replacement": "previous instanceof HTMLElement || previous.isConnected"
+    },
+    {
+      "originalId": "894",
+      "replayId": "272",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 48,
+          "line": 221
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 48,
+          "line": 221
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 48,
+          "line": 221
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      },
+      "range": "src/task-blocks.tsx:220:6-221:47",
+      "mutator": "ConditionalExpression",
+      "expression": "document.activeElement === document.body ||\n      document.activeElement === origin.current",
+      "replacement": "true"
+    },
+    {
+      "originalId": "897",
+      "replayId": "275",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 47,
+          "line": 220
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 47,
+          "line": 220
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 47,
+          "line": 220
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      },
+      "range": "src/task-blocks.tsx:220:6-220:46",
+      "mutator": "ConditionalExpression",
+      "expression": "document.activeElement === document.body",
+      "replacement": "false"
+    },
+    {
+      "originalId": "898",
+      "replayId": "276",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 47,
+          "line": 220
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 47,
+          "line": 220
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 47,
+          "line": 220
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      },
+      "range": "src/task-blocks.tsx:220:6-220:46",
+      "mutator": "EqualityOperator",
+      "expression": "document.activeElement === document.body",
+      "replacement": "document.activeElement !== document.body"
+    },
+    {
+      "originalId": "996",
+      "replayId": "290",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 27,
+          "line": 303
+        },
+        "start": {
+          "column": 22,
+          "line": 303
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 27,
+          "line": 303
+        },
+        "start": {
+          "column": 22,
+          "line": 303
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 27,
+          "line": 303
+        },
+        "start": {
+          "column": 22,
+          "line": 303
+        }
+      },
+      "range": "src/task-blocks.tsx:303:21-303:26",
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true"
+    },
+    {
+      "originalId": "1124",
+      "replayId": "312",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 36,
+          "line": 454
+        },
+        "start": {
+          "column": 15,
+          "line": 454
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 36,
+          "line": 454
+        },
+        "start": {
+          "column": 15,
+          "line": 454
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 36,
+          "line": 454
+        },
+        "start": {
+          "column": 15,
+          "line": 454
+        }
+      },
+      "range": "src/task-blocks.tsx:454:14-454:35",
+      "mutator": "CallExpression",
+      "expression": "setStartOffset(null);",
+      "replacement": ";"
+    },
+    {
+      "originalId": "1143",
+      "replayId": "314",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 16,
+          "line": 486
+        },
+        "start": {
+          "column": 46,
+          "line": 483
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 16,
+          "line": 486
+        },
+        "start": {
+          "column": 46,
+          "line": 483
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 16,
+          "line": 486
+        },
+        "start": {
+          "column": 46,
+          "line": 483
+        }
+      },
+      "range": "src/task-blocks.tsx:483:45-486:15",
+      "mutator": "ObjectLiteral",
+      "expression": "{\n                ...current,\n                endOffset: undefined,\n              }",
+      "replacement": "{}"
+    },
+    {
+      "originalId": "1154",
+      "replayId": "315",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 28,
+          "line": 506
+        },
+        "start": {
+          "column": 15,
+          "line": 506
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 28,
+          "line": 506
+        },
+        "start": {
+          "column": 15,
+          "line": 506
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 28,
+          "line": 506
+        },
+        "start": {
+          "column": 15,
+          "line": 506
+        }
+      },
+      "range": "src/task-blocks.tsx:506:14-506:27",
+      "mutator": "CallExpression",
+      "expression": "invalidate();",
+      "replacement": ";"
+    },
+    {
+      "originalId": "1157",
+      "replayId": "317",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 34,
+          "line": 509
+        },
+        "start": {
+          "column": 15,
+          "line": 509
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 34,
+          "line": 509
+        },
+        "start": {
+          "column": 15,
+          "line": 509
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 34,
+          "line": 509
+        },
+        "start": {
+          "column": 15,
+          "line": 509
+        }
+      },
+      "range": "src/task-blocks.tsx:509:14-509:33",
+      "mutator": "CallExpression",
+      "expression": "setEndOffset(null);",
+      "replacement": ";"
+    },
+    {
+      "originalId": "1186",
+      "replayId": "325",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 34,
+          "line": 544
+        },
+        "start": {
+          "column": 21,
+          "line": 544
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 34,
+          "line": 544
+        },
+        "start": {
+          "column": 21,
+          "line": 544
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 34,
+          "line": 544
+        },
+        "start": {
+          "column": 21,
+          "line": 544
+        }
+      },
+      "range": "src/task-blocks.tsx:544:20-544:33",
+      "mutator": "CallExpression",
+      "expression": "invalidate();",
+      "replacement": ";"
+    },
+    {
+      "originalId": "1241",
+      "replayId": "343",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 26,
+          "line": 600
+        },
+        "start": {
+          "column": 23,
+          "line": 600
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 26,
+          "line": 600
+        },
+        "start": {
+          "column": 23,
+          "line": 600
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 26,
+          "line": 600
+        },
+        "start": {
+          "column": 23,
+          "line": 600
+        }
+      },
+      "range": "src/task-blocks.tsx:600:22-600:25",
+      "mutator": "StringLiteral",
+      "expression": "\" \"",
+      "replacement": "\"\""
+    },
+    {
+      "originalId": "1248",
+      "replayId": "346",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 61,
+          "line": 617
+        },
+        "start": {
+          "column": 40,
+          "line": 617
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 61,
+          "line": 617
+        },
+        "start": {
+          "column": 40,
+          "line": 617
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 61,
+          "line": 617
+        },
+        "start": {
+          "column": 40,
+          "line": 617
+        }
+      },
+      "range": "src/task-blocks.tsx:617:39-617:60",
+      "mutator": "ConditionalExpression",
+      "expression": "day.excessSeconds > 0",
+      "replacement": "true"
+    },
+    {
+      "originalId": "1250",
+      "replayId": "348",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 61,
+          "line": 617
+        },
+        "start": {
+          "column": 40,
+          "line": 617
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 61,
+          "line": 617
+        },
+        "start": {
+          "column": 40,
+          "line": 617
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 61,
+          "line": 617
+        },
+        "start": {
+          "column": 40,
+          "line": 617
+        }
+      },
+      "range": "src/task-blocks.tsx:617:39-617:60",
+      "mutator": "EqualityOperator",
+      "expression": "day.excessSeconds > 0",
+      "replacement": "day.excessSeconds >= 0"
+    },
+    {
+      "originalId": "1267",
+      "replayId": "350",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 12,
+          "line": 647
+        },
+        "start": {
+          "column": 27,
+          "line": 641
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 12,
+          "line": 647
+        },
+        "start": {
+          "column": 27,
+          "line": 641
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 12,
+          "line": 647
+        },
+        "start": {
+          "column": 27,
+          "line": 641
+        }
+      },
+      "range": "src/task-blocks.tsx:641:26-647:11",
+      "mutator": "ArrowFunction",
+      "expression": "(day) => (\n            <p key={day.date}>\n              {day.date}: presupuesto {day.budgetMinutes} minutos, reservado{\" \"}\n              {day.plannedSeconds} segundos, solicitado {day.requestedSeconds}{\" \"}\n              segundos, exceso {day.excessSeconds} segundos.\n            </p>\n          )",
+      "replacement": "() => undefined"
+    },
+    {
+      "originalId": "1268",
+      "replayId": "351",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 81,
+          "line": 643
+        },
+        "start": {
+          "column": 78,
+          "line": 643
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 81,
+          "line": 643
+        },
+        "start": {
+          "column": 78,
+          "line": 643
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 81,
+          "line": 643
+        },
+        "start": {
+          "column": 78,
+          "line": 643
+        }
+      },
+      "range": "src/task-blocks.tsx:643:77-643:80",
+      "mutator": "StringLiteral",
+      "expression": "\" \"",
+      "replacement": "\"\""
+    },
+    {
+      "originalId": "1269",
+      "replayId": "352",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 83,
+          "line": 644
+        },
+        "start": {
+          "column": 80,
+          "line": 644
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 83,
+          "line": 644
+        },
+        "start": {
+          "column": 80,
+          "line": 644
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 83,
+          "line": 644
+        },
+        "start": {
+          "column": 80,
+          "line": 644
+        }
+      },
+      "range": "src/task-blocks.tsx:644:79-644:82",
+      "mutator": "StringLiteral",
+      "expression": "\" \"",
+      "replacement": "\"\""
+    },
+    {
+      "originalId": "1273",
+      "replayId": "353",
+      "replayStatus": "Survived",
+      "file": "src/task-blocks.tsx",
+      "sourceSha256": "4cba46d0fbaf0cc3e228e1edeb4405e5da8c38b99778613f56974c80a322fd9e",
+      "originalLocation": {
+        "end": {
+          "column": 56,
+          "line": 651
+        },
+        "start": {
+          "column": 9,
+          "line": 650
+        }
+      },
+      "replayLocation": {
+        "end": {
+          "column": 56,
+          "line": 651
+        },
+        "start": {
+          "column": 9,
+          "line": 650
+        }
+      },
+      "currentLocation": {
+        "end": {
+          "column": 56,
+          "line": 651
+        },
+        "start": {
+          "column": 9,
+          "line": 650
+        }
+      },
+      "range": "src/task-blocks.tsx:650:8-651:55",
+      "mutator": "ConditionalExpression",
+      "expression": "issue?.code === \"AVAILABILITY_REQUIRED\" ||\n        issue?.code === \"AVAILABILITY_ZONE_UNAVAILABLE\"",
+      "replacement": "true"
+    }
+  ]
+}

@@ -86,11 +86,11 @@ test("frontend replay keeps measurement policy and writes separate reports", () 
   assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
   assert.equal(
     config.jsonReporter.fileName,
-    "reports/mutation-schedule-block/replay.json",
+    "reports/mutation-schedule-block/final.json",
   );
   assert.equal(
     config.htmlReporter.fileName,
-    "reports/mutation-schedule-block/replay.html",
+    "reports/mutation-schedule-block/final.html",
   );
   assert.deepEqual(config.reporters, ["clear-text", "json", "html"]);
   assert.ok(config.mutate.length > 0);
@@ -114,6 +114,46 @@ test("absent or empty target preserves both full mutation suites", () => {
       ["pnpm", ["--dir", "frontend", "mutate"]],
     ]);
   }
+});
+test("final replay selects the reviewed outstanding identities without changing history", () => {
+  const manifest = JSON.parse(
+    readFileSync(
+      resolve(root, "progress/schedule_block_frontend_final_selection.json"),
+      "utf8",
+    ),
+  );
+  const config = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.schedule-block.replay.config.json"),
+      "utf8",
+    ),
+  );
+  const ids = manifest.selection.map((item) => item.originalId);
+  assert.equal(new Set(ids).size, 29);
+  assert.deepEqual(
+    [...ids].sort(),
+    "746,931,1070,1303,1304,1401,1403,750,757,814,816,829,887,894,897,898,996,1124,1143,1154,1157,1186,1241,1248,1250,1267,1268,1269,1273"
+      .split(",")
+      .sort(),
+  );
+  assert.ok(
+    manifest.selection.every(
+      (item) =>
+        item.replayStatus === "Survived" && item.replayId && item.sourceSha256,
+    ),
+  );
+  assert.deepEqual(
+    [...new Set(manifest.selection.map((item) => item.range))].sort(),
+    [...config.mutate].sort(),
+  );
+  assert.notEqual(
+    config.jsonReporter.fileName,
+    manifest.previousReplayReport.replace(/^frontend\//, ""),
+  );
+  assert.equal(
+    manifest.previousSelectionManifest,
+    "progress/schedule_block_frontend_replay_selection.json",
+  );
 });
 
 test("harness placeholder and CLI deliver the selected target unchanged", () => {

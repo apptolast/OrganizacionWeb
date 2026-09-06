@@ -1,3 +1,4 @@
+import userEvent from "@testing-library/user-event";
 import { StrictMode } from "react";
 import {
   act,
@@ -479,6 +480,8 @@ it.each([
   ["preview", true],
   ["create", false],
   ["create", true],
+  ["confirm", false],
+  ["confirm", true],
 ])(
   "@s58 restaura destino útil después de %s sin robar foco externo=%s",
   async (operation, moved) => {
@@ -501,7 +504,7 @@ it.each([
     const inspect = screen.getByRole("button", { name: "Revisar bloque" });
     inspect.focus();
     fireEvent.click(inspect);
-    if (operation === "create") {
+    if (operation !== "preview") {
       await screen.findByRole("region", { name: "Revisión del bloque" });
       const save = screen.getByRole("button", { name: "Guardar bloque" });
       save.focus();
@@ -516,9 +519,15 @@ it.each([
       finish(
         operation === "preview"
           ? Response.json(preview)
-          : problem("STORAGE_UNAVAILABLE", 503),
+          : operation === "confirm"
+            ? Response.json(block, {
+                status: 201,
+                headers: { Location: `${api}/blocks/${block.id}` },
+              })
+            : problem("STORAGE_UNAVAILABLE", 503),
       ),
     );
+    if (operation === "confirm") await screen.findByText("Bloque guardado");
     expect(
       moved
         ? outside
@@ -577,11 +586,28 @@ it("@s49 exceso concurrente exige revisar de nuevo antes de aceptar", async () =
   render(<App />);
   await openEditor();
   fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
-  await screen.findByRole("region", { name: "Revisión del bloque" });
+  const review = await screen.findByRole("region", {
+    name: "Revisión del bloque",
+  });
+  const startTime = review.querySelector("time")!;
+  expect(startTime.parentElement?.textContent).toBe(
+    `Inicio: ${startTime.textContent}`,
+  );
+  expect(
+    screen.queryByRole("link", { name: "Configurar disponibilidad" }),
+  ).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Guardar bloque" }));
   await screen.findByText(
     "El presupuesto cambió. Revisa este bloque de nuevo antes de decidir.",
   );
+  expect(
+    screen.getByText(
+      "2030-01-07: presupuesto 120 minutos, reservado 6600 segundos, solicitado 3600 segundos, exceso 3000 segundos.",
+    ),
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("link", { name: "Configurar disponibilidad" }),
+  ).not.toBeInTheDocument();
   expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
   expect(screen.getByLabelText("Objetivo del bloque")).toBeEnabled();
   fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
@@ -790,6 +816,16 @@ it("@s41 @s42 las ocurrencias DST se eligen por extremo y se retiran al cambiar 
         validOffsets: { [field]: ["+02:00", "+01:00"] },
       });
     }
+    if (previews > 3)
+      return problem("VALIDATION_ERROR", 400, {
+        errors: [
+          {
+            field: "startLocal",
+            code: "INVALID_VALUE",
+            message: "Revisa el nuevo inicio",
+          },
+        ],
+      });
     return Response.json({
       ...preview,
       zoneId: "Europe/Madrid",
@@ -845,6 +881,16 @@ it("@s41 @s42 las ocurrencias DST se eligen por extremo y se retiran al cambiar 
   ).not.toBeInTheDocument();
   expect(screen.getByLabelText("Ocurrencia de fin")).toHaveValue("+01:00");
   expect(screen.getByRole("button", { name: "Guardar bloque" })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  await screen.findByText("Revisa el nuevo inicio");
+  const revised = fetcher.mock.calls.filter(([url]) =>
+    String(url).endsWith("/preview"),
+  );
+  expect(JSON.parse(String(revised[3][1]?.body))).toMatchObject({
+    startOffset: null,
+    endOffset: "+01:00",
+    startLocal: "2026-10-25T03:15",
+  });
 });
 
 it("@s49 @s59 errores de campo reconocidos conservan texto seguro y permiten corregir", async () => {
@@ -920,6 +966,9 @@ it("@s51 recuperar CSRF conserva petición y exige reenvío manual con token ren
   expect(
     screen.getByText(/La protección de sesión rechazó este envío/),
   ).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Comprobar guardado" }),
+  ).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Recuperar acceso" }));
   await waitFor(() => expect(sessions).toBe(2));
   expect(posts).toBe(1);
@@ -1890,6 +1939,13 @@ it("@s49 @s58 rechazo del reenvío restaura foco y una intención nueva exige co
   window.history.replaceState(null, "", route);
   let writes = 0;
   fixture((url, options) => {
+    if (url === "/api/session")
+      return Response.json({
+        authenticated: true,
+        username: "Pablo",
+        csrfToken: "token",
+        csrfHeaderName: "X-CSRF-TOKEN",
+      });
     if (url.endsWith("/preview")) return Response.json(preview);
     if (url.includes("/by-request/")) return problem("BLOCK_NOT_FOUND", 404);
     if (url === `${api}/blocks` && options?.method === "POST") {
@@ -1900,22 +1956,31 @@ it("@s49 @s58 rechazo del reenvío restaura foco y una intención nueva exige co
             { ...preview.days[0], plannedSeconds: 6600, excessSeconds: 3000 },
           ],
         });
-      return problem("STORAGE_UNAVAILABLE", 503);
+      return writes === 1
+        ? problem("CSRF_INVALID", 403)
+        : problem("STORAGE_UNAVAILABLE", 503);
     }
   });
-  render(<App />);
+  render(<SessionGate />);
   await openEditor();
   fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
   await screen.findByRole("region", { name: "Revisión del bloque" });
   fireEvent.click(screen.getByRole("button", { name: "Guardar bloque" }));
   fireEvent.click(
-    await screen.findByRole("button", { name: "Comprobar guardado" }),
+    await screen.findByRole("button", { name: "Recuperar acceso" }),
+  );
+  await waitFor(() =>
+    expect(
+      screen.queryByRole("button", { name: "Recuperar acceso" }),
+    ).not.toBeInTheDocument(),
   );
   const resend = await screen.findByRole("button", {
     name: "Reenviar el mismo bloque",
   });
   resend.focus();
   fireEvent.click(resend);
+  expect(resend.isConnected).toBe(false);
+  expect(resend).not.toBeDisabled();
   await screen.findByText(
     "El presupuesto cambió. Revisa este bloque de nuevo antes de decidir.",
   );
@@ -1970,9 +2035,13 @@ it("@s41 varios días con exceso sólo en uno exigen consentimiento y revisión 
   fireEvent.click(acceptance);
   expect(screen.getByRole("button", { name: "Guardar bloque" })).toBeEnabled();
   fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
-  await waitFor(() =>
-    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument(),
+  const finalReview = await screen.findByRole("region", {
+    name: "Revisión del bloque",
+  });
+  expect(within(finalReview).getAllByText("Exceso: 0 segundos")).toHaveLength(
+    2,
   );
+  expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Guardar bloque" })).toBeEnabled();
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });
@@ -2074,6 +2143,24 @@ it("@s40 disponibilidad sin configurar conserva campos vacíos y selector sin zo
     within(screen.getByLabelText("Zona del bloque")).getAllByRole("option"),
   ).toHaveLength(1);
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText("Objetivo del bloque"), {
+    target: { value: "Antes de configuración" },
+  });
+  fireEvent.change(screen.getByLabelText("Inicio del bloque"), {
+    target: { value: "2030-01-07T10:00" },
+  });
+  fireEvent.change(screen.getByLabelText("Fin del bloque"), {
+    target: { value: "2030-01-07T11:00" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  await screen.findByRole("link", { name: "Configurar disponibilidad" });
+  const first = fetcher.mock.calls.find(([url]) =>
+    String(url).endsWith("/preview"),
+  );
+  expect(JSON.parse(String(first?.[1]?.body))).toMatchObject({
+    zoneId: "",
+    objective: "Antes de configuración",
+  });
   await act(async () =>
     finishConfiguration(
       Response.json(
@@ -2088,16 +2175,20 @@ it("@s40 disponibilidad sin configurar conserva campos vacíos y selector sin zo
     ),
   );
   expect(screen.getByLabelText("Zona del bloque")).toHaveValue("");
-  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
   await screen.findByRole("link", { name: "Configurar disponibilidad" });
-  const sent = fetcher.mock.calls.find(([url]) =>
-    String(url).endsWith("/preview"),
+  await waitFor(() =>
+    expect(
+      fetcher.mock.calls.filter(([url]) => String(url).endsWith("/preview")),
+    ).toHaveLength(2),
   );
+  const sent = fetcher.mock.calls
+    .filter(([url]) => String(url).endsWith("/preview"))
+    .at(-1);
   expect(JSON.parse(String(sent?.[1]?.body))).toMatchObject({
-    objective: "",
-    startLocal: "",
-    endLocal: "",
+    objective: "Antes de configuración",
+    startLocal: "2030-01-07T10:00",
+    endLocal: "2030-01-07T11:00",
     zoneId: "",
   });
 });
@@ -2164,14 +2255,14 @@ it("@s42 ocurrencias muestran UTC cero y cambiar fin o zona retira sólo offsets
   fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
   const end = await screen.findByLabelText("Ocurrencia de fin");
   expect(end).toHaveAttribute("aria-invalid", "true");
-  expect(start).toHaveValue("+01:00");
+  expect(screen.getByLabelText("Ocurrencia de inicio")).toHaveValue("+01:00");
   fireEvent.change(end, { target: { value: "Z" } });
   expect(end).toHaveValue("Z");
   fireEvent.change(screen.getByLabelText("Fin del bloque"), {
     target: { value: "2030-01-07T11:30" },
   });
   expect(screen.queryByLabelText("Ocurrencia de fin")).not.toBeInTheDocument();
-  expect(start).toHaveValue("+01:00");
+  expect(screen.getByLabelText("Ocurrencia de inicio")).toHaveValue("+01:00");
   fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
   await screen.findByLabelText("Ocurrencia de fin");
   let sent = fetcher.mock.calls.filter(([url]) =>
@@ -2181,6 +2272,10 @@ it("@s42 ocurrencias muestran UTC cero y cambiar fin o zona retira sólo offsets
     startOffset: "+01:00",
     endOffset: null,
   });
+  fireEvent.change(screen.getByLabelText("Ocurrencia de fin"), {
+    target: { value: "Z" },
+  });
+  expect(screen.getByLabelText("Ocurrencia de fin")).toHaveValue("Z");
   fireEvent.change(screen.getByLabelText("Zona del bloque"), {
     target: { value: "Europe/Madrid" },
   });
@@ -2453,4 +2548,407 @@ it("@s54 paginar y confirmar desde página antigua retira filas durante cada nue
     screen.queryByRole("button", { name: "Volver a bloques recientes" }),
   ).not.toBeInTheDocument();
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+});
+
+it("@s53 clasificación de listado antiguo no retira TaskReader recuperado", async () => {
+  window.history.replaceState(null, "", route);
+  let finishError!: (value: unknown) => void;
+  let finishHistory!: (response: Response) => void;
+  let listReads = 0;
+  let historyReads = 0;
+  fixture((url) => {
+    if (url === `${api}/blocks` && ++listReads === 1) {
+      const response = problem("RESOURCE_NOT_FOUND", 404);
+      const clone = response.clone();
+      vi.spyOn(clone, "json").mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            finishError = resolve;
+          }),
+      );
+      vi.spyOn(response, "clone").mockReturnValue(clone);
+      return response;
+    }
+    if (url === `${api}/history` && ++historyReads === 1)
+      return new Promise((resolve) => {
+        finishHistory = resolve;
+      });
+  });
+  render(<App />);
+  await screen.findByRole("button", { name: "Planificar bloque" });
+  await waitFor(() => expect(finishError).toBeTypeOf("function"));
+  await act(async () => finishHistory(new Response(null, { status: 404 })));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Reintentar tarea" }),
+  );
+  await screen.findByRole("button", { name: "Planificar bloque" });
+  await act(async () =>
+    finishError({
+      type: "urn:organization:problem:resource_not_found",
+      title: "No disponible",
+      status: 404,
+      code: "RESOURCE_NOT_FOUND",
+    }),
+  );
+  expect(
+    screen.getByRole("button", { name: "Planificar bloque" }),
+  ).toBeEnabled();
+  expect(
+    screen.getByRole("region", { name: "Bloques planificados" }),
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Reintentar tarea" }),
+  ).not.toBeInTheDocument();
+});
+
+it("@s53 check antiguo no confirma ni cierra otro editor del mismo listado", async () => {
+  window.history.replaceState(null, "", route);
+  let finishCheck!: (value: unknown) => void;
+  fixture((url, options) => {
+    if (url.endsWith("/preview")) return Response.json(preview);
+    if (url === `${api}/blocks` && options?.method === "POST")
+      return problem("STORAGE_UNAVAILABLE", 503);
+    if (url.includes("/by-request/")) {
+      const response = Response.json({});
+      vi.spyOn(response, "json").mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            finishCheck = resolve;
+          }),
+      );
+      return response;
+    }
+  });
+  render(<App />);
+  await openEditor();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  await screen.findByRole("region", { name: "Revisión del bloque" });
+  fireEvent.click(screen.getByRole("button", { name: "Guardar bloque" }));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Comprobar guardado" }),
+  );
+  await waitFor(() => expect(finishCheck).toBeTypeOf("function"));
+  fireEvent.click(screen.getByRole("button", { name: "Cancelar bloque" }));
+  fireEvent.click(screen.getByRole("button", { name: "Planificar bloque" }));
+  fireEvent.change(screen.getByLabelText("Objetivo del bloque"), {
+    target: { value: "Nueva intención del mismo contexto" },
+  });
+  await act(async () => finishCheck(block));
+  expect(screen.getByLabelText("Objetivo del bloque")).toHaveValue(
+    "Nueva intención del mismo contexto",
+  );
+  expect(screen.queryByText("Bloque guardado")).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Cancelar bloque" })).toBeEnabled();
+});
+
+it("@s53 finally de preview abortado no termina la revisión nueva pendiente", async () => {
+  window.history.replaceState(null, "", route);
+  const finish: Array<(value: unknown) => void> = [];
+  let reviews = 0;
+  fixture((url) => {
+    if (!url.endsWith("/preview")) return;
+    reviews++;
+    const response = Response.json({});
+    vi.spyOn(response, "json").mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finish.push(resolve);
+        }),
+    );
+    return response;
+  });
+  render(<App />);
+  await openEditor();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  await waitFor(() => expect(finish).toHaveLength(1));
+  fireEvent.change(screen.getByLabelText("Fin del bloque"), {
+    target: { value: "2030-01-07T12:00" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  await waitFor(() => expect(finish).toHaveLength(2));
+  await act(async () => finish[0](preview));
+  expect(screen.getByText("Revisando bloque")).toBeVisible();
+  expect(screen.getByRole("button", { name: "Revisar bloque" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Guardar bloque" })).toBeDisabled();
+  fireEvent.submit(
+    screen.getByLabelText("Objetivo del bloque").closest("form")!,
+  );
+  expect(reviews).toBe(2);
+  await act(async () =>
+    finish[1]({
+      ...preview,
+      endAt: "2030-01-07T12:00:00Z",
+      durationMinutes: 120,
+      days: [{ ...preview.days[0], requestedSeconds: 7200 }],
+    }),
+  );
+  expect(
+    screen.getByRole("region", { name: "Revisión del bloque" }),
+  ).toHaveTextContent("120 minutos");
+  expect(screen.queryByText("Revisando bloque")).not.toBeInTheDocument();
+});
+
+it("@s53 conflicto retirado no revoca sesión al recibir 401 tardío", async () => {
+  window.history.replaceState(null, "", route);
+  let finishConflict!: (response: Response) => void;
+  let sessions = 0;
+  fixture((url) => {
+    if (url === "/api/session")
+      return Response.json({
+        authenticated: ++sessions === 1,
+        username: sessions === 1 ? "Pablo" : null,
+        csrfToken: "token",
+        csrfHeaderName: "X-CSRF-TOKEN",
+      });
+    if (url.endsWith("/preview"))
+      return problem("BLOCK_OVERLAP", 409, {
+        conflict: { id: block.id, projectId: project.id, taskId: task.id },
+      });
+    if (url === `${api}/blocks/${block.id}`)
+      return new Promise((resolve) => {
+        finishConflict = resolve;
+      });
+  });
+  render(<SessionGate />);
+  await openEditor();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  fireEvent.click(
+    await screen.findByRole("button", {
+      name: "Consultar bloque en conflicto",
+    }),
+  );
+  await waitFor(() => expect(finishConflict).toBeTypeOf("function"));
+  fireEvent.click(screen.getByRole("button", { name: "Cancelar bloque" }));
+  fireEvent.click(screen.getByRole("button", { name: "Planificar bloque" }));
+  fireEvent.change(screen.getByLabelText("Objetivo del bloque"), {
+    target: { value: "Intención vigente tras conflicto" },
+  });
+  await act(async () => finishConflict(problem("UNAUTHORIZED", 401)));
+  expect(screen.getByLabelText("Objetivo del bloque")).toHaveValue(
+    "Intención vigente tras conflicto",
+  );
+  expect(screen.queryByLabelText("Contraseña")).not.toBeInTheDocument();
+  expect(sessions).toBe(1);
+});
+
+it("@s53 JSON de proyecto antiguo no reemplaza proyecto ya confirmado tras retry", async () => {
+  window.history.replaceState(null, "", route);
+  let finishProject!: (value: unknown) => void;
+  let finishList!: (response: Response) => void;
+  let projectReads = 0;
+  let listReads = 0;
+  fixture((url) => {
+    if (url === `/api/v1/projects/${project.id}` && ++projectReads === 1) {
+      const response = Response.json({}, { headers: { ETag: '"old"' } });
+      vi.spyOn(response, "json").mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            finishProject = resolve;
+          }),
+      );
+      return response;
+    }
+    if (url === `${api}/blocks` && ++listReads === 1)
+      return new Promise((resolve) => {
+        finishList = resolve;
+      });
+  });
+  render(<App />);
+  await waitFor(() => expect(finishProject).toBeTypeOf("function"));
+  await act(async () => finishList(problem("RESOURCE_NOT_FOUND", 404)));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Reintentar tarea" }),
+  );
+  await screen.findByRole("button", { name: "Planificar bloque" });
+  expect(screen.getByRole("button", { name: "Pausar" })).toBeEnabled();
+  await act(async () => finishProject({ ...project, status: "completed" }));
+  expect(
+    screen.getByRole("button", { name: "Planificar bloque" }),
+  ).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Pausar" })).toBeEnabled();
+  expect(
+    screen.queryByRole("button", { name: "Reabrir en pausa" }),
+  ).not.toBeInTheDocument();
+});
+
+it("@s54 error desconocido del listado ofrece reintento sin perder el editor", async () => {
+  window.history.replaceState(null, "", route);
+  let lists = 0;
+  fixture((url) =>
+    url === `${api}/blocks` && ++lists === 1
+      ? Promise.reject(new TypeError("Sin red"))
+      : undefined,
+  );
+  render(<App />);
+  const retry = await screen.findByRole("button", {
+    name: "Reintentar bloques",
+  });
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "No se pudieron consultar los bloques.",
+  );
+  await openEditor();
+  fireEvent.click(retry);
+  await screen.findByText(
+    "Todavía no hay bloques planificados para esta tarea.",
+  );
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(screen.getByLabelText("Objetivo del bloque")).toHaveValue(
+    " Preparar borrador ",
+  );
+  expect(lists).toBe(2);
+});
+
+it("@s56 proyecto completado retira elegibilidad del borrador ya revisado", async () => {
+  window.history.replaceState(null, "", route);
+  const fetcher = fixture((url, options) => {
+    if (url.endsWith("/preview")) return Response.json(preview);
+    if (
+      url === `/api/v1/projects/${project.id}/status` &&
+      options?.method === "PUT"
+    )
+      return Response.json(
+        { ...project, status: "completed" },
+        { headers: { ETag: '"project:1"' } },
+      );
+  });
+  render(<App />);
+  await openEditor();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  await screen.findByRole("region", { name: "Revisión del bloque" });
+  expect(screen.getByRole("button", { name: "Guardar bloque" })).toBeEnabled();
+  fireEvent.click(screen.getByRole("button", { name: "Marcar terminado" }));
+  await screen.findByRole("button", { name: "Reabrir en pausa" });
+  expect(screen.getByRole("button", { name: "Revisar bloque" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Guardar bloque" })).toBeDisabled();
+  fireEvent.submit(
+    screen.getByLabelText("Objetivo del bloque").closest("form")!,
+  );
+  expect(
+    fetcher.mock.calls.filter(([url]) => String(url).endsWith("/preview")),
+  ).toHaveLength(1);
+  expect(
+    fetcher.mock.calls.filter(
+      ([url, options]) => url === `${api}/blocks` && options?.method === "POST",
+    ),
+  ).toHaveLength(0);
+  expect(screen.getByLabelText("Objetivo del bloque")).toHaveValue(
+    " Preparar borrador ",
+  );
+});
+
+it("@s59 encabezado de bloques admite foco programático sin prioridad en Tab", async () => {
+  window.history.replaceState(null, "", route);
+  fixture();
+  const user = userEvent.setup();
+  render(<App />);
+  await screen.findByRole("button", { name: "Planificar bloque" });
+  const heading = screen.getByRole("heading", { name: "Bloques planificados" });
+  document.body.tabIndex = -1;
+  document.body.focus();
+  document.body.removeAttribute("tabindex");
+  await user.tab();
+  expect(
+    screen.getByRole("link", { name: "Saltar al contenido" }),
+  ).toHaveFocus();
+  heading.focus();
+  expect(heading).toHaveFocus();
+  expect(heading).toHaveAttribute("tabindex", "-1");
+  await user.tab();
+  expect(
+    screen.getByRole("button", { name: "Planificar bloque" }),
+  ).toHaveFocus();
+});
+
+it("@s42 cambiar ocurrencia o zona invalida revisión aceptada antes de otra intención", async () => {
+  window.history.replaceState(null, "", route);
+  let reviews = 0;
+  const fetcher = fixture((url) => {
+    if (!url.endsWith("/preview")) return;
+    if (++reviews < 3) {
+      const field = reviews === 1 ? "startOffset" : "endOffset";
+      return problem("VALIDATION_ERROR", 400, {
+        errors: [
+          { field, code: "AMBIGUOUS_OFFSET", message: "Elige ocurrencia" },
+        ],
+        validOffsets: { [field]: ["+02:00", "+01:00"] },
+      });
+    }
+    const initial = reviews === 3;
+    const utc = reviews === 5;
+    return Response.json({
+      ...preview,
+      zoneId: utc ? "UTC" : "Europe/Madrid",
+      startAt: initial
+        ? "2026-10-25T00:15:00Z"
+        : utc
+          ? "2026-10-25T02:15:00Z"
+          : "2026-10-25T01:15:00Z",
+      endAt: utc ? "2026-10-25T02:45:00Z" : "2026-10-25T01:45:00Z",
+      startOffset: initial ? "+02:00" : utc ? "Z" : "+01:00",
+      endOffset: utc ? "Z" : "+01:00",
+      durationMinutes: initial ? 90 : 30,
+      days: [
+        {
+          ...preview.days[0],
+          date: "2026-10-25",
+          plannedSeconds: 7200,
+          requestedSeconds: initial ? 5400 : 1800,
+          excessSeconds: initial ? 5400 : 1800,
+        },
+      ],
+    });
+  });
+  render(<App />);
+  await openEditor();
+  fireEvent.change(screen.getByLabelText("Zona del bloque"), {
+    target: { value: "Europe/Madrid" },
+  });
+  fireEvent.change(screen.getByLabelText("Inicio del bloque"), {
+    target: { value: "2026-10-25T02:15" },
+  });
+  fireEvent.change(screen.getByLabelText("Fin del bloque"), {
+    target: { value: "2026-10-25T02:45" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  fireEvent.change(await screen.findByLabelText("Ocurrencia de inicio"), {
+    target: { value: "+02:00" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  fireEvent.change(await screen.findByLabelText("Ocurrencia de fin"), {
+    target: { value: "+01:00" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  fireEvent.click(await screen.findByRole("checkbox"));
+  expect(screen.getByRole("button", { name: "Guardar bloque" })).toBeEnabled();
+  fireEvent.change(screen.getByLabelText("Ocurrencia de inicio"), {
+    target: { value: "+01:00" },
+  });
+  expect(
+    screen.queryByRole("region", { name: "Revisión del bloque" }),
+  ).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Guardar bloque" })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  expect(await screen.findByRole("checkbox")).not.toBeChecked();
+  fireEvent.click(screen.getByRole("checkbox"));
+  fireEvent.change(screen.getByLabelText("Zona del bloque"), {
+    target: { value: "UTC" },
+  });
+  expect(
+    screen.queryByRole("region", { name: "Revisión del bloque" }),
+  ).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Guardar bloque" })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Revisar bloque" }));
+  expect(await screen.findByRole("checkbox")).not.toBeChecked();
+  const calls = fetcher.mock.calls.filter(([url]) =>
+    String(url).endsWith("/preview"),
+  );
+  expect(JSON.parse(String(calls[3][1]?.body))).toMatchObject({
+    startOffset: "+01:00",
+    endOffset: "+01:00",
+  });
+  expect(JSON.parse(String(calls[4][1]?.body))).toMatchObject({
+    startOffset: null,
+    endOffset: null,
+    zoneId: "UTC",
+  });
 });

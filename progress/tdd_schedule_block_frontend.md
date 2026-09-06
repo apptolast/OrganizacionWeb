@@ -122,3 +122,51 @@ Quedan matrices de callbacks/recuperación/UX del inventario. No se declara cier
 Formato específico a0d81c sólo task-blocks.test.tsx y task-reader.tsx (este último unchanged). Regresión final de tres archivos UI/shared: **180/180 PASS**, sesión12301,6ddfe4 EXIT0,15,99s. TaskBlocks73 (antes56, +17), resto estado/detalle107. ESLint focal16c42c EXIT0, tsc f37f93 EXIT0. API250 del otro autor no se mezcla con este conteo.
 
 Fuentes/pruebas UI/shared congeladas después de estas verificaciones. Única producción nueva: task-reader.tsx94 setTaskState(undefined), respaldada RED9d5579→GREEN56ed8e. No más suites ni Stryker hasta revisión/orden del coordinador. Los refuerzos verdes iniciales son oráculos propuestos para replay selectivo; no acreditan por sí solos killed ni que todos los NE hayan desaparecido. Conservan inventario original y RuntimeError separado.
+
+## Seguimiento acotado tras replay — cinco entrelazados públicos
+
+Rol autor TDD, Ponytail full/Caveman lite; root libera freeze sólo para IDs746,931,1070,1303/1304,1401/1403. No se persiguen equivalencias ni100%. No se modifica producción, APItests, configuración, reports, harness ni rangos. Los cinco tests se añadieron y ejecutaron uno por uno; todos son **refuerzos inicialmente GREEN**, no RED de producción ni demostración de kills.
+
+| IDs originales | Test en task-blocks.test.tsx | Primer resultado y oráculo |
+| --- | --- | --- |
+| 746 | @s53 clasificación de listado antiguo no retira TaskReader recuperado (2458) | GREEN8b8623. clone().json del404 de listado ya comenzó; history404 desmonta hijos, retry recupera mismo padre; liberar JSON antiguo no retira contexto/Planificar. |
+| 931 | @s53 check antiguo no confirma ni cierra otro editor del mismo listado (2509) | GREEN8b25bf. JSON de check200 pendiente; cancelar y reabrir editor manteniendo TaskBlocks; liberar éxito antiguo conserva nueva intención y no confirma. |
+| 1070 | @s53 finally de preview abortado no termina la revisión nueva pendiente (2549) | GREENde9079. JSON de A pendiente, edición aborta A, B ya espera; terminar A no retira Revisando ni habilita botón/submit C; B confirma120min. |
+| 1303/1304 | @s53 conflicto retirado no revoca sesión al recibir401 tardío (2596) | GREEN98c4ca. SessionGate, GET conflicto pendiente, cancelar/reabrir;401 tardío no retira intención ni abre login ni consulta de nuevo sesión. Oráculo externo, no sólo signal.aborted. |
+| 1401/1403 | @s53 JSON de proyecto antiguo no reemplaza proyecto ya confirmado tras retry (2639) | GREEN89d29c. JSON de proyecto anterior ya comenzó; listado404/retry, proyecto nuevo active ya confirmado; resolver completed viejo no sustituye snapshot ni deshabilita Planificar/Pausar. A diferencia del caso anterior, se observa después de ambas confirmaciones. |
+
+Formato específico8680bc. Verificación final: **78/78 task-blocks PASS**, sesión54054 salida750008 EXIT0,15,15s; ESLint focal3a7fd0 EXIT0; tsc94a1ba EXIT0; git diff --check41e623 limpio. Diff de este tramo: un archivo de pruebas,221 inserciones. No se ejecutó mutación ni se reinterpretó RuntimeError945. Listo para revisión independiente; fuentes/pruebas vuelven a estar congeladas para ese corte.
+
+## Último seguimiento agrupado de supervivientes observables
+
+Autorización root: sólo task-blocks.test.tsx y bitácora; producción permanece56ced31. Se respetan EQ834/1087/1184 y no se añaden pruebas para ellas. Cada modificación de un flujo se ejecutó antes de continuar al siguiente; todos los refuerzos son **GREEN iniciales** y no se atribuyen kills antes de medición autorizada.
+
+| Grupo / IDs | Refuerzo público y evidencia focal |
+| --- | --- |
+| Recuperación750/996 | Caso nuevo error desconocido del listado: alerta/retry y conservación editor, bc1cb8 GREEN. Flujo CSRF existente ahora exige ausencia de Comprobar guardado tras rechazo definitivo, cee8c6 GREEN; conserva reenvío manual/key/body anteriores. |
+| Elegibilidad814/816/829 | Nuevo borrador revisado→proyecto completed confirma Revisar/Guardar disabled, submit sin nuevo preview y cero POST, a0e814 GREEN. Fixture existente de configuración pendiente rellena datos y revisa ANTES de resolver configuración: payload zoneId vacío aunque DOM muestre placeholder, b5d9a3 GREEN. |
+| Teclado/foco757/887/894/897/898 | Matriz existente conserva preview/error y añade confirmación exitosa con body/foco externo,6/6 GREEN10ea17. Nuevo recorrido Tab mantiene skip-link primero y heading programático seguido de Planificar, a0057b GREEN. Flujo de reenvío existente usa ahora CSRF→recuperar acceso→reenviar→rechazo negocio:183da5 GREEN, foco heading y nueva intención incierta sin reenvío prematuro. |
+| DST1124/1143/1154/1157/1186 | Fixture existente Madrid: cambiar inicio elegido envía startOffset:null, fe1b5d GREEN. Fixture de ocurrencias consulta selector de inicio desde DOM actual tras cambiar fin y vuelve a elegir endOffset=Z antes de cambiar zona:859a66 GREEN. Nuevo flujo con ambas ocurrencias y revisión aceptada: cambiar ocurrencia y luego zona retira review/consentimiento, exige aceptación nueva y envía offsets correctos/null:1ee5d6 GREEN. |
+| Presentación1241/1248/1250/1267/1268/1269/1273 | Rechazo concurrente de presupuesto existente comprueba frase completa con todas cifras/espacios y ausencia de enlace de disponibilidad en problema ajeno; revisión comprueba raw textContent Inicio+espacio+fecha, e88af0 GREEN. Caso de varios días espera región final y ambas cifras Exceso0 antes de exigir ausencia de checkbox:bfba53 GREEN. Ya no observa intervalo transitorio sin review. |
+
+### Recorrido887 confirmado, sin refs artificiales
+
+No se acepta EQ: cuando uncertain=false y csrfRejected=true, el botón Reenviar está fuera del fieldset. Al reenviar, save pone csrfRejected=false y saving=true en el mismo evento. El wrapper de recuperación desaparece; el botón retirado no llega a actualizar disabled=true. El test comprueba que ese nodo de acción real queda desconectado y habilitado, sin modificar sus propiedades. Tras rechazo BUDGET_EXCEEDED, el foco debe ir al heading actual. La variante OR omitiría isConnected y puede intentar enfocar el nodo retirado. En el recorrido anterior procedente de incertidumbre el botón sí conservaba disabled=true; por eso no distinguía887.
+
+### Corte final para juez
+
+Formato específicoa4130d. **84/84 PASS**, sesión78601, salida fee3b5 EXIT0,14,27s. ESLint focalf0addb EXIT0; tsc69ba29 EXIT0; diff --checkd6ebde limpio. Conteo78→84: cuatro nuevos tests y dos filas nuevas en matriz existente, además de refuerzos en fixtures existentes. Se mantiene toda cobertura previa.
+
+Los cinco grupos y sus22 IDs están atendidos por oráculos públicos; todavía no se afirma resultado de mutación. Sin bloqueos. No producción, APItests, config/harness, nuevos reports, E2E ni build repetidos. Sólo task-blocks.test.tsx y esta bitácora. Fuentes/pruebas congeladas otra vez para juez y puerta global del root.
+
+Ajustes de revisión posteriores al84/84: root0ab894 detectó que el segundo payload de disponibilidad seguía tomando primer preview; se corrigió esperando exactamente2 peticiones y usando la última, conservando también la aserción previa a configuración. Focal e892db GREEN. Revisor10422a detectó que el cambio de1143 había reconsultado el selector antes de editar fin, pero aún conservaba referencia start después: la afirmación anterior de bitácora era prematura para ese punto. Ahora también después de editar fin se usa screen.getByLabelText del DOM vigente; focal4f8899 GREEN. Sin producción ni nuevos tests. Formato91cda6, ESLint54bccd y tscc13610 EXIT0 tras ambos ajustes. La regresión84/84 anterior se complementa con estos dos focales; root tomará init global del corte final. Freeze final para juez.
+
+## Incidente init26470: aserción de cleanup en prueba antigua create-task
+
+Root comunica init26470 rojo9e0c93:1208PASS/1FAIL, cancelación de la revisión GET en create-task.test.tsx. Focal original8d3143 PASS; no se demuestra bug productivo. Se inspeccionan useProjectTasks/useReadProjects/ProjectReader: revisar estado sólo activa reviewing; no retira por sí mismo la región Tareas. El índice3 correspondía al GET correcto, por lo que tampoco se atribuye a identidad de llamada equivocada.
+
+Instrumentación temporal acotada con MutationObserver y listener de abort en el test observado: dos ejecuciones52083b/cb6262 pasaron pero el reporter no expuso console; se obtuvo el diagnóstico mediante fallo deliberado d1fcb9, NO un RED de producción. Secuencia observada: beforePause región=true y GETrevisión.signal=false; mutation región=true/signal=false; mutation región=false/signal=false; después evento abort. Esto demuestra ventana entre commit DOM y cleanup del useEffect, suficiente para que waitFor ausencia de región termine antes de la cancelación bajo carga global.
+
+Instrumentación completamente retirada. Ajuste sólo de prueba: captura signal en mock de la revisión identificada por URL+GET; espera mensaje terminal404 y waitFor(signal.aborted===true), conservando retiro de región y comprobaciones posteriores a respuesta tardía (ni Tareas ni título privado reaparecen). No timeout aumentado ni aserción eliminada: la cancelación pasa a sincronizarse con su fase real. Producción intacta y resto de archivos congelados.
+
+Focal ajustado364a22 PASS. Formato específico32bf5d. Suite create-task **55/55 PASS7c3c42**,5,19s; ESLint31b060 y tsc79b6ea EXIT0; diff --check9cb74d limpio. Corte congelado para revisor y nueva puerta global del root; no mutación ejecutada.

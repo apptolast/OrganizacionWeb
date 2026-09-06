@@ -1,0 +1,5928 @@
+{
+  "manifestCount": 167,
+  "matched": 167,
+  "uniqueReplay": 167,
+  "total": 404,
+  "statuses": {
+    "Killed": 362,
+    "Survived": 41,
+    "RuntimeError": 1
+  },
+  "selectedStatuses": {
+    "Killed": 133,
+    "Survived": 33,
+    "RuntimeError": 1
+  },
+  "transitions": {
+    "NoCoverage->Killed": 3,
+    "Survived->Killed": 130,
+    "Survived->Survived": 33,
+    "RuntimeError->RuntimeError": 1
+  },
+  "newLine": [
+    {
+      "id": "396",
+      "status": "Killed",
+      "expression": "setTaskState(undefined);",
+      "mutator": "CallExpression",
+      "replacement": ";"
+    }
+  ],
+  "selection": [
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "963",
+      "replayId": "288",
+      "originalStatus": "NoCoverage",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "!request",
+      "replacement": "request",
+      "originalLocation": {
+        "end": {
+          "column": 52,
+          "line": 265
+        },
+        "start": {
+          "column": 44,
+          "line": 265
+        }
+      },
+      "location": {
+        "end": {
+          "column": 52,
+          "line": 265
+        },
+        "start": {
+          "column": 44,
+          "line": 265
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1082",
+      "replayId": "302",
+      "originalStatus": "NoCoverage",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"\"",
+      "replacement": "\"Stryker was here!\"",
+      "originalLocation": {
+        "end": {
+          "column": 69,
+          "line": 383
+        },
+        "start": {
+          "column": 67,
+          "line": 383
+        }
+      },
+      "location": {
+        "end": {
+          "column": 69,
+          "line": 383
+        },
+        "start": {
+          "column": 67,
+          "line": 383
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1200",
+      "replayId": "330",
+      "originalStatus": "NoCoverage",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"+00:00\"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 52,
+          "line": 553
+        },
+        "start": {
+          "column": 44,
+          "line": 553
+        }
+      },
+      "location": {
+        "end": {
+          "column": 52,
+          "line": 553
+        },
+        "start": {
+          "column": 44,
+          "line": 553
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "726",
+      "replayId": "240",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "CallExpression",
+      "expression": "setPage(undefined);",
+      "replacement": ";",
+      "originalLocation": {
+        "end": {
+          "column": 24,
+          "line": 38
+        },
+        "start": {
+          "column": 5,
+          "line": 38
+        }
+      },
+      "location": {
+        "end": {
+          "column": 24,
+          "line": 38
+        },
+        "start": {
+          "column": 5,
+          "line": 38
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "728",
+      "replayId": "241",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 39
+        },
+        "start": {
+          "column": 20,
+          "line": 39
+        }
+      },
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 39
+        },
+        "start": {
+          "column": 20,
+          "line": 39
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "736",
+      "replayId": "243",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "!controller.signal.aborted",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 39,
+          "line": 46
+        },
+        "start": {
+          "column": 13,
+          "line": 46
+        }
+      },
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 46
+        },
+        "start": {
+          "column": 13,
+          "line": 46
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "744",
+      "replayId": "246",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "ConditionalExpression",
+      "expression": "controller.signal.aborted",
+      "replacement": "false",
+      "originalLocation": {
+        "end": {
+          "column": 38,
+          "line": 52
+        },
+        "start": {
+          "column": 13,
+          "line": 52
+        }
+      },
+      "location": {
+        "end": {
+          "column": 38,
+          "line": 52
+        },
+        "start": {
+          "column": 13,
+          "line": 52
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "746",
+      "replayId": "248",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "ConditionalExpression",
+      "expression": "controller.signal.aborted",
+      "replacement": "false",
+      "originalLocation": {
+        "end": {
+          "column": 38,
+          "line": 54
+        },
+        "start": {
+          "column": 13,
+          "line": 54
+        }
+      },
+      "location": {
+        "end": {
+          "column": 38,
+          "line": 54
+        },
+        "start": {
+          "column": 13,
+          "line": 54
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "750",
+      "replayId": "249",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "OptionalChaining",
+      "expression": "problem?.code",
+      "replacement": "problem.code",
+      "originalLocation": {
+        "end": {
+          "column": 26,
+          "line": 55
+        },
+        "start": {
+          "column": 13,
+          "line": 55
+        }
+      },
+      "location": {
+        "end": {
+          "column": 26,
+          "line": 55
+        },
+        "start": {
+          "column": 13,
+          "line": 55
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "757",
+      "replayId": "250",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "UnaryOperator",
+      "expression": "-1",
+      "replacement": "+1",
+      "originalLocation": {
+        "end": {
+          "column": 37,
+          "line": 62
+        },
+        "start": {
+          "column": 35,
+          "line": 62
+        }
+      },
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 62
+        },
+        "start": {
+          "column": 35,
+          "line": 62
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "759",
+      "replayId": "251",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "page.items.length === 0",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 34,
+          "line": 73
+        },
+        "start": {
+          "column": 11,
+          "line": 73
+        }
+      },
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 73
+        },
+        "start": {
+          "column": 11,
+          "line": 73
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "770",
+      "replayId": "254",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "CallExpression",
+      "expression": "setPage(undefined);",
+      "replacement": ";",
+      "originalLocation": {
+        "end": {
+          "column": 36,
+          "line": 89
+        },
+        "start": {
+          "column": 17,
+          "line": 89
+        }
+      },
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 89
+        },
+        "start": {
+          "column": 17,
+          "line": 89
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "776",
+      "replayId": "255",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "CallExpression",
+      "expression": "setPage(undefined);",
+      "replacement": ";",
+      "originalLocation": {
+        "end": {
+          "column": 36,
+          "line": 99
+        },
+        "start": {
+          "column": 17,
+          "line": 99
+        }
+      },
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 99
+        },
+        "start": {
+          "column": 17,
+          "line": 99
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "814",
+      "replayId": "256",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "ConditionalExpression",
+      "expression": "projectStatus !== \"completed\"",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 42,
+          "line": 128
+        },
+        "start": {
+          "column": 13,
+          "line": 128
+        }
+      },
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 128
+        },
+        "start": {
+          "column": 13,
+          "line": 128
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "816",
+      "replayId": "258",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "StringLiteral",
+      "expression": "\"completed\"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 42,
+          "line": 128
+        },
+        "start": {
+          "column": 31,
+          "line": 128
+        }
+      },
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 128
+        },
+        "start": {
+          "column": 31,
+          "line": 128
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "822",
+      "replayId": "259",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 29,
+          "line": 136
+        },
+        "start": {
+          "column": 24,
+          "line": 136
+        }
+      },
+      "location": {
+        "end": {
+          "column": 29,
+          "line": 136
+        },
+        "start": {
+          "column": 24,
+          "line": 136
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "823",
+      "replayId": "260",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "CallExpression",
+      "expression": "setCursor(undefined);",
+      "replacement": ";",
+      "originalLocation": {
+        "end": {
+          "column": 34,
+          "line": 137
+        },
+        "start": {
+          "column": 13,
+          "line": 137
+        }
+      },
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 137
+        },
+        "start": {
+          "column": 13,
+          "line": 137
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "827",
+      "replayId": "262",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"\"",
+      "replacement": "\"Stryker was here!\"",
+      "originalLocation": {
+        "end": {
+          "column": 50,
+          "line": 163
+        },
+        "start": {
+          "column": 48,
+          "line": 163
+        }
+      },
+      "location": {
+        "end": {
+          "column": 50,
+          "line": 163
+        },
+        "start": {
+          "column": 48,
+          "line": 163
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "826",
+      "replayId": "261",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"\"",
+      "replacement": "\"Stryker was here!\"",
+      "originalLocation": {
+        "end": {
+          "column": 48,
+          "line": 162
+        },
+        "start": {
+          "column": 46,
+          "line": 162
+        }
+      },
+      "location": {
+        "end": {
+          "column": 48,
+          "line": 162
+        },
+        "start": {
+          "column": 46,
+          "line": 162
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "828",
+      "replayId": "263",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"\"",
+      "replacement": "\"Stryker was here!\"",
+      "originalLocation": {
+        "end": {
+          "column": 46,
+          "line": 164
+        },
+        "start": {
+          "column": 44,
+          "line": 164
+        }
+      },
+      "location": {
+        "end": {
+          "column": 46,
+          "line": 164
+        },
+        "start": {
+          "column": 44,
+          "line": 164
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "829",
+      "replayId": "264",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "StringLiteral",
+      "expression": "\"\"",
+      "replacement": "\"Stryker was here!\"",
+      "originalLocation": {
+        "end": {
+          "column": 42,
+          "line": 170
+        },
+        "start": {
+          "column": 40,
+          "line": 170
+        }
+      },
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 170
+        },
+        "start": {
+          "column": 40,
+          "line": 170
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "830",
+      "replayId": "265",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ArrayDeclaration",
+      "expression": "[]",
+      "replacement": "[\"Stryker was here\"]",
+      "originalLocation": {
+        "end": {
+          "column": 50,
+          "line": 171
+        },
+        "start": {
+          "column": 48,
+          "line": 171
+        }
+      },
+      "location": {
+        "end": {
+          "column": 50,
+          "line": 171
+        },
+        "start": {
+          "column": 48,
+          "line": 171
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "831",
+      "replayId": "266",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 73,
+          "line": 172
+        },
+        "start": {
+          "column": 68,
+          "line": 172
+        }
+      },
+      "location": {
+        "end": {
+          "column": 73,
+          "line": 172
+        },
+        "start": {
+          "column": 68,
+          "line": 172
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "833",
+      "replayId": "267",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 59,
+          "line": 176
+        },
+        "start": {
+          "column": 54,
+          "line": 176
+        }
+      },
+      "location": {
+        "end": {
+          "column": 59,
+          "line": 176
+        },
+        "start": {
+          "column": 54,
+          "line": 176
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "834",
+      "replayId": "268",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 63,
+          "line": 177
+        },
+        "start": {
+          "column": 58,
+          "line": 177
+        }
+      },
+      "location": {
+        "end": {
+          "column": 63,
+          "line": 177
+        },
+        "start": {
+          "column": 58,
+          "line": 177
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "838",
+      "replayId": "269",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 55,
+          "line": 183
+        },
+        "start": {
+          "column": 50,
+          "line": 183
+        }
+      },
+      "location": {
+        "end": {
+          "column": 55,
+          "line": 183
+        },
+        "start": {
+          "column": 50,
+          "line": 183
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "887",
+      "replayId": "271",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "LogicalOperator",
+      "expression": "previous instanceof HTMLElement &&\n      previous.isConnected",
+      "replacement": "previous instanceof HTMLElement || previous.isConnected",
+      "originalLocation": {
+        "end": {
+          "column": 27,
+          "line": 211
+        },
+        "start": {
+          "column": 7,
+          "line": 210
+        }
+      },
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 211
+        },
+        "start": {
+          "column": 7,
+          "line": 210
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "894",
+      "replayId": "272",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "ConditionalExpression",
+      "expression": "document.activeElement === document.body ||\n      document.activeElement === origin.current",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 48,
+          "line": 221
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      },
+      "location": {
+        "end": {
+          "column": 48,
+          "line": 221
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "897",
+      "replayId": "275",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "ConditionalExpression",
+      "expression": "document.activeElement === document.body",
+      "replacement": "false",
+      "originalLocation": {
+        "end": {
+          "column": 47,
+          "line": 220
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      },
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 220
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "898",
+      "replayId": "276",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "EqualityOperator",
+      "expression": "document.activeElement === document.body",
+      "replacement": "document.activeElement !== document.body",
+      "originalLocation": {
+        "end": {
+          "column": 47,
+          "line": 220
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      },
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 220
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "928",
+      "replayId": "279",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "true",
+      "replacement": "false",
+      "originalLocation": {
+        "end": {
+          "column": 19,
+          "line": 242
+        },
+        "start": {
+          "column": 15,
+          "line": 242
+        }
+      },
+      "location": {
+        "end": {
+          "column": 19,
+          "line": 242
+        },
+        "start": {
+          "column": 15,
+          "line": 242
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "931",
+      "replayId": "281",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "ConditionalExpression",
+      "expression": "!controller.signal.aborted",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 37,
+          "line": 253
+        },
+        "start": {
+          "column": 11,
+          "line": 253
+        }
+      },
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 253
+        },
+        "start": {
+          "column": 11,
+          "line": 253
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "942",
+      "replayId": "283",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "problem?.code === \"BLOCK_NOT_FOUND\"",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 55,
+          "line": 259
+        },
+        "start": {
+          "column": 20,
+          "line": 259
+        }
+      },
+      "location": {
+        "end": {
+          "column": 55,
+          "line": 259
+        },
+        "start": {
+          "column": 20,
+          "line": 259
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "945",
+      "replayId": "286",
+      "originalStatus": "RuntimeError",
+      "status": "RuntimeError",
+      "mutator": "OptionalChaining",
+      "expression": "problem?.code",
+      "replacement": "problem.code",
+      "originalLocation": {
+        "end": {
+          "column": 33,
+          "line": 259
+        },
+        "start": {
+          "column": 20,
+          "line": 259
+        }
+      },
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 259
+        },
+        "start": {
+          "column": 20,
+          "line": 259
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "969",
+      "replayId": "289",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 281
+        },
+        "start": {
+          "column": 20,
+          "line": 281
+        }
+      },
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 281
+        },
+        "start": {
+          "column": 20,
+          "line": 281
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "996",
+      "replayId": "290",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 27,
+          "line": 303
+        },
+        "start": {
+          "column": 22,
+          "line": 303
+        }
+      },
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 303
+        },
+        "start": {
+          "column": 22,
+          "line": 303
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1016",
+      "replayId": "291",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 27,
+          "line": 321
+        },
+        "start": {
+          "column": 22,
+          "line": 321
+        }
+      },
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 321
+        },
+        "start": {
+          "column": 22,
+          "line": 321
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1036",
+      "replayId": "293",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "!eligible || reviewing",
+      "replacement": "false",
+      "originalLocation": {
+        "end": {
+          "column": 31,
+          "line": 336
+        },
+        "start": {
+          "column": 9,
+          "line": 336
+        }
+      },
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 336
+        },
+        "start": {
+          "column": 9,
+          "line": 336
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1037",
+      "replayId": "294",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "!eligible || reviewing",
+      "replacement": "!eligible && reviewing",
+      "originalLocation": {
+        "end": {
+          "column": 31,
+          "line": 336
+        },
+        "start": {
+          "column": 9,
+          "line": 336
+        }
+      },
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 336
+        },
+        "start": {
+          "column": 9,
+          "line": 336
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1041",
+      "replayId": "296",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 27,
+          "line": 340
+        },
+        "start": {
+          "column": 22,
+          "line": 340
+        }
+      },
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 340
+        },
+        "start": {
+          "column": 22,
+          "line": 340
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1070",
+      "replayId": "298",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "ConditionalExpression",
+      "expression": "!controller.signal.aborted",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 37,
+          "line": 371
+        },
+        "start": {
+          "column": 11,
+          "line": 371
+        }
+      },
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 371
+        },
+        "start": {
+          "column": 11,
+          "line": 371
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1079",
+      "replayId": "301",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "controller.signal.aborted",
+      "replacement": "false",
+      "originalLocation": {
+        "end": {
+          "column": 38,
+          "line": 381
+        },
+        "start": {
+          "column": 13,
+          "line": 381
+        }
+      },
+      "location": {
+        "end": {
+          "column": 38,
+          "line": 381
+        },
+        "start": {
+          "column": 13,
+          "line": 381
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1084",
+      "replayId": "303",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 38,
+          "line": 384
+        },
+        "start": {
+          "column": 33,
+          "line": 384
+        }
+      },
+      "location": {
+        "end": {
+          "column": 38,
+          "line": 384
+        },
+        "start": {
+          "column": 33,
+          "line": 384
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1087",
+      "replayId": "305",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "ConditionalExpression",
+      "expression": "!controller.signal.aborted",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 39,
+          "line": 387
+        },
+        "start": {
+          "column": 13,
+          "line": 387
+        }
+      },
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 387
+        },
+        "start": {
+          "column": 13,
+          "line": 387
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1091",
+      "replayId": "307",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ArrowFunction",
+      "expression": "() => controller.abort()",
+      "replacement": "() => undefined",
+      "originalLocation": {
+        "end": {
+          "column": 36,
+          "line": 389
+        },
+        "start": {
+          "column": 12,
+          "line": 389
+        }
+      },
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 389
+        },
+        "start": {
+          "column": 12,
+          "line": 389
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1094",
+      "replayId": "308",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "CallExpression",
+      "expression": "event.preventDefault();",
+      "replacement": ";",
+      "originalLocation": {
+        "end": {
+          "column": 32,
+          "line": 397
+        },
+        "start": {
+          "column": 9,
+          "line": 397
+        }
+      },
+      "location": {
+        "end": {
+          "column": 32,
+          "line": 397
+        },
+        "start": {
+          "column": 9,
+          "line": 397
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1105",
+      "replayId": "309",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 46,
+          "line": 410
+        },
+        "start": {
+          "column": 41,
+          "line": 410
+        }
+      },
+      "location": {
+        "end": {
+          "column": 46,
+          "line": 410
+        },
+        "start": {
+          "column": 41,
+          "line": 410
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1107",
+      "replayId": "310",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ArrowFunction",
+      "expression": "(value) => value + 1",
+      "replacement": "() => undefined",
+      "originalLocation": {
+        "end": {
+          "column": 62,
+          "line": 411
+        },
+        "start": {
+          "column": 42,
+          "line": 411
+        }
+      },
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 411
+        },
+        "start": {
+          "column": 42,
+          "line": 411
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1124",
+      "replayId": "312",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "CallExpression",
+      "expression": "setStartOffset(null);",
+      "replacement": ";",
+      "originalLocation": {
+        "end": {
+          "column": 36,
+          "line": 454
+        },
+        "start": {
+          "column": 15,
+          "line": 454
+        }
+      },
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 454
+        },
+        "start": {
+          "column": 15,
+          "line": 454
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1140",
+      "replayId": "313",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "CallExpression",
+      "expression": "setEndOffset(null);",
+      "replacement": ";",
+      "originalLocation": {
+        "end": {
+          "column": 34,
+          "line": 482
+        },
+        "start": {
+          "column": 15,
+          "line": 482
+        }
+      },
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 482
+        },
+        "start": {
+          "column": 15,
+          "line": 482
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1143",
+      "replayId": "314",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "ObjectLiteral",
+      "expression": "{\n                ...current,\n                endOffset: undefined,\n              }",
+      "replacement": "{}",
+      "originalLocation": {
+        "end": {
+          "column": 16,
+          "line": 486
+        },
+        "start": {
+          "column": 46,
+          "line": 483
+        }
+      },
+      "location": {
+        "end": {
+          "column": 16,
+          "line": 486
+        },
+        "start": {
+          "column": 46,
+          "line": 483
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1154",
+      "replayId": "315",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "CallExpression",
+      "expression": "invalidate();",
+      "replacement": ";",
+      "originalLocation": {
+        "end": {
+          "column": 28,
+          "line": 506
+        },
+        "start": {
+          "column": 15,
+          "line": 506
+        }
+      },
+      "location": {
+        "end": {
+          "column": 28,
+          "line": 506
+        },
+        "start": {
+          "column": 15,
+          "line": 506
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1156",
+      "replayId": "316",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "CallExpression",
+      "expression": "setStartOffset(null);",
+      "replacement": ";",
+      "originalLocation": {
+        "end": {
+          "column": 36,
+          "line": 508
+        },
+        "start": {
+          "column": 15,
+          "line": 508
+        }
+      },
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 508
+        },
+        "start": {
+          "column": 15,
+          "line": 508
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1157",
+      "replayId": "317",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "CallExpression",
+      "expression": "setEndOffset(null);",
+      "replacement": ";",
+      "originalLocation": {
+        "end": {
+          "column": 34,
+          "line": 509
+        },
+        "start": {
+          "column": 15,
+          "line": 509
+        }
+      },
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 509
+        },
+        "start": {
+          "column": 15,
+          "line": 509
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1158",
+      "replayId": "318",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "CallExpression",
+      "expression": "setOffsetChoices({});",
+      "replacement": ";",
+      "originalLocation": {
+        "end": {
+          "column": 36,
+          "line": 510
+        },
+        "start": {
+          "column": 15,
+          "line": 510
+        }
+      },
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 510
+        },
+        "start": {
+          "column": 15,
+          "line": 510
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1177",
+      "replayId": "319",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "true",
+      "replacement": "false",
+      "originalLocation": {
+        "end": {
+          "column": 57,
+          "line": 536
+        },
+        "start": {
+          "column": 53,
+          "line": 536
+        }
+      },
+      "location": {
+        "end": {
+          "column": 57,
+          "line": 536
+        },
+        "start": {
+          "column": 53,
+          "line": 536
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1181",
+      "replayId": "321",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "field === \"startOffset\"",
+      "replacement": "false",
+      "originalLocation": {
+        "end": {
+          "column": 45,
+          "line": 541
+        },
+        "start": {
+          "column": 22,
+          "line": 541
+        }
+      },
+      "location": {
+        "end": {
+          "column": 45,
+          "line": 541
+        },
+        "start": {
+          "column": 22,
+          "line": 541
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1183",
+      "replayId": "323",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"startOffset\"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 45,
+          "line": 541
+        },
+        "start": {
+          "column": 32,
+          "line": 541
+        }
+      },
+      "location": {
+        "end": {
+          "column": 45,
+          "line": 541
+        },
+        "start": {
+          "column": 32,
+          "line": 541
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1184",
+      "replayId": "324",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "StringLiteral",
+      "expression": "\"\"",
+      "replacement": "\"Stryker was here!\"",
+      "originalLocation": {
+        "end": {
+          "column": 78,
+          "line": 541
+        },
+        "start": {
+          "column": 76,
+          "line": 541
+        }
+      },
+      "location": {
+        "end": {
+          "column": 78,
+          "line": 541
+        },
+        "start": {
+          "column": 76,
+          "line": 541
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1186",
+      "replayId": "325",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "CallExpression",
+      "expression": "invalidate();",
+      "replacement": ";",
+      "originalLocation": {
+        "end": {
+          "column": 34,
+          "line": 544
+        },
+        "start": {
+          "column": 21,
+          "line": 544
+        }
+      },
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 544
+        },
+        "start": {
+          "column": 21,
+          "line": 544
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1196",
+      "replayId": "326",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "offset === \"Z\"",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 41,
+          "line": 553
+        },
+        "start": {
+          "column": 27,
+          "line": 553
+        }
+      },
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 553
+        },
+        "start": {
+          "column": 27,
+          "line": 553
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1197",
+      "replayId": "327",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "offset === \"Z\"",
+      "replacement": "false",
+      "originalLocation": {
+        "end": {
+          "column": 41,
+          "line": 553
+        },
+        "start": {
+          "column": 27,
+          "line": 553
+        }
+      },
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 553
+        },
+        "start": {
+          "column": 27,
+          "line": 553
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1198",
+      "replayId": "328",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "EqualityOperator",
+      "expression": "offset === \"Z\"",
+      "replacement": "offset !== \"Z\"",
+      "originalLocation": {
+        "end": {
+          "column": 41,
+          "line": 553
+        },
+        "start": {
+          "column": 27,
+          "line": 553
+        }
+      },
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 553
+        },
+        "start": {
+          "column": 27,
+          "line": 553
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1199",
+      "replayId": "329",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"Z\"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 41,
+          "line": 553
+        },
+        "start": {
+          "column": 38,
+          "line": 553
+        }
+      },
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 553
+        },
+        "start": {
+          "column": 38,
+          "line": 553
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1219",
+      "replayId": "331",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "MethodExpression",
+      "expression": "review.days.some((day) => day.excessSeconds > 0)",
+      "replacement": "review.days.every(day => day.excessSeconds > 0)",
+      "originalLocation": {
+        "end": {
+          "column": 62,
+          "line": 574
+        },
+        "start": {
+          "column": 14,
+          "line": 574
+        }
+      },
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 574
+        },
+        "start": {
+          "column": 14,
+          "line": 574
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1234",
+      "replayId": "339",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "reviewFailure && (\n          <p role=\"alert\">\n            No se pudo revisar el bloque. Conservamos tus datos.\n          </p>\n        )",
+      "replacement": "reviewFailure || <p role=\"alert\">\n            No se pudo revisar el bloque. Conservamos tus datos.\n          </p>",
+      "originalLocation": {
+        "end": {
+          "column": 10,
+          "line": 586
+        },
+        "start": {
+          "column": 10,
+          "line": 582
+        }
+      },
+      "location": {
+        "end": {
+          "column": 10,
+          "line": 586
+        },
+        "start": {
+          "column": 10,
+          "line": 582
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1237",
+      "replayId": "342",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "saveFailure && (\n          <p role=\"alert\">\n            No se guardó el bloque. Revisa los datos antes de volver a guardar.\n          </p>\n        )",
+      "replacement": "saveFailure || <p role=\"alert\">\n            No se guardó el bloque. Revisa los datos antes de volver a guardar.\n          </p>",
+      "originalLocation": {
+        "end": {
+          "column": 10,
+          "line": 591
+        },
+        "start": {
+          "column": 10,
+          "line": 587
+        }
+      },
+      "location": {
+        "end": {
+          "column": 10,
+          "line": 591
+        },
+        "start": {
+          "column": 10,
+          "line": 587
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1241",
+      "replayId": "343",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "StringLiteral",
+      "expression": "\" \"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 26,
+          "line": 600
+        },
+        "start": {
+          "column": 23,
+          "line": 600
+        }
+      },
+      "location": {
+        "end": {
+          "column": 26,
+          "line": 600
+        },
+        "start": {
+          "column": 23,
+          "line": 600
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1246",
+      "replayId": "344",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "MethodExpression",
+      "expression": "review.days.some((day) => day.excessSeconds > 0)",
+      "replacement": "review.days.every(day => day.excessSeconds > 0)",
+      "originalLocation": {
+        "end": {
+          "column": 62,
+          "line": 617
+        },
+        "start": {
+          "column": 14,
+          "line": 617
+        }
+      },
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 617
+        },
+        "start": {
+          "column": 14,
+          "line": 617
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1248",
+      "replayId": "346",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "ConditionalExpression",
+      "expression": "day.excessSeconds > 0",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 61,
+          "line": 617
+        },
+        "start": {
+          "column": 40,
+          "line": 617
+        }
+      },
+      "location": {
+        "end": {
+          "column": 61,
+          "line": 617
+        },
+        "start": {
+          "column": 40,
+          "line": 617
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1250",
+      "replayId": "348",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "EqualityOperator",
+      "expression": "day.excessSeconds > 0",
+      "replacement": "day.excessSeconds >= 0",
+      "originalLocation": {
+        "end": {
+          "column": 61,
+          "line": 617
+        },
+        "start": {
+          "column": 40,
+          "line": 617
+        }
+      },
+      "location": {
+        "end": {
+          "column": 61,
+          "line": 617
+        },
+        "start": {
+          "column": 40,
+          "line": 617
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1267",
+      "replayId": "350",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "ArrowFunction",
+      "expression": "(day) => (\n            <p key={day.date}>\n              {day.date}: presupuesto {day.budgetMinutes} minutos, reservado{\" \"}\n              {day.plannedSeconds} segundos, solicitado {day.requestedSeconds}{\" \"}\n              segundos, exceso {day.excessSeconds} segundos.\n            </p>\n          )",
+      "replacement": "() => undefined",
+      "originalLocation": {
+        "end": {
+          "column": 12,
+          "line": 647
+        },
+        "start": {
+          "column": 27,
+          "line": 641
+        }
+      },
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 647
+        },
+        "start": {
+          "column": 27,
+          "line": 641
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1268",
+      "replayId": "351",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "StringLiteral",
+      "expression": "\" \"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 81,
+          "line": 643
+        },
+        "start": {
+          "column": 78,
+          "line": 643
+        }
+      },
+      "location": {
+        "end": {
+          "column": 81,
+          "line": 643
+        },
+        "start": {
+          "column": 78,
+          "line": 643
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1269",
+      "replayId": "352",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "StringLiteral",
+      "expression": "\" \"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 83,
+          "line": 644
+        },
+        "start": {
+          "column": 80,
+          "line": 644
+        }
+      },
+      "location": {
+        "end": {
+          "column": 83,
+          "line": 644
+        },
+        "start": {
+          "column": 80,
+          "line": 644
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1273",
+      "replayId": "353",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "ConditionalExpression",
+      "expression": "issue?.code === \"AVAILABILITY_REQUIRED\" ||\n        issue?.code === \"AVAILABILITY_ZONE_UNAVAILABLE\"",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 56,
+          "line": 651
+        },
+        "start": {
+          "column": 9,
+          "line": 650
+        }
+      },
+      "location": {
+        "end": {
+          "column": 56,
+          "line": 651
+        },
+        "start": {
+          "column": 9,
+          "line": 650
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1286",
+      "replayId": "363",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "uncertain || csrfRejected",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 34,
+          "line": 667
+        },
+        "start": {
+          "column": 9,
+          "line": 667
+        }
+      },
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 667
+        },
+        "start": {
+          "column": 9,
+          "line": 667
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1289",
+      "replayId": "365",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"No podemos confirmar el guardado. Conservamos este bloque y su identificación para comprobarlo sin duplicarlo.\"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 129,
+          "line": 672
+        },
+        "start": {
+          "column": 17,
+          "line": 672
+        }
+      },
+      "location": {
+        "end": {
+          "column": 129,
+          "line": 672
+        },
+        "start": {
+          "column": 17,
+          "line": 672
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1301",
+      "replayId": "366",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 45,
+          "line": 714
+        },
+        "start": {
+          "column": 40,
+          "line": 714
+        }
+      },
+      "location": {
+        "end": {
+          "column": 45,
+          "line": 714
+        },
+        "start": {
+          "column": 40,
+          "line": 714
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1303",
+      "replayId": "367",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "ArrowFunction",
+      "expression": "() => () => request.current?.abort()",
+      "replacement": "() => undefined",
+      "originalLocation": {
+        "end": {
+          "column": 49,
+          "line": 716
+        },
+        "start": {
+          "column": 13,
+          "line": 716
+        }
+      },
+      "location": {
+        "end": {
+          "column": 49,
+          "line": 716
+        },
+        "start": {
+          "column": 13,
+          "line": 716
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1304",
+      "replayId": "368",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "ArrowFunction",
+      "expression": "() => request.current?.abort()",
+      "replacement": "() => undefined",
+      "originalLocation": {
+        "end": {
+          "column": 49,
+          "line": 716
+        },
+        "start": {
+          "column": 19,
+          "line": 716
+        }
+      },
+      "location": {
+        "end": {
+          "column": 49,
+          "line": 716
+        },
+        "start": {
+          "column": 19,
+          "line": 716
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1310",
+      "replayId": "370",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "true",
+      "replacement": "false",
+      "originalLocation": {
+        "end": {
+          "column": 20,
+          "line": 721
+        },
+        "start": {
+          "column": 16,
+          "line": 721
+        }
+      },
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 721
+        },
+        "start": {
+          "column": 16,
+          "line": 721
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1312",
+      "replayId": "371",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 20,
+          "line": 722
+        },
+        "start": {
+          "column": 15,
+          "line": 722
+        }
+      },
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 722
+        },
+        "start": {
+          "column": 15,
+          "line": 722
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1331",
+      "replayId": "372",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "loading && <p role=\"status\">Consultando bloque en conflicto</p>",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 71,
+          "line": 746
+        },
+        "start": {
+          "column": 8,
+          "line": 746
+        }
+      },
+      "location": {
+        "end": {
+          "column": 71,
+          "line": 746
+        },
+        "start": {
+          "column": 8,
+          "line": 746
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1332",
+      "replayId": "373",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "loading && <p role=\"status\">Consultando bloque en conflicto</p>",
+      "replacement": "false",
+      "originalLocation": {
+        "end": {
+          "column": 71,
+          "line": 746
+        },
+        "start": {
+          "column": 8,
+          "line": 746
+        }
+      },
+      "location": {
+        "end": {
+          "column": 71,
+          "line": 746
+        },
+        "start": {
+          "column": 8,
+          "line": 746
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1333",
+      "replayId": "374",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "loading && <p role=\"status\">Consultando bloque en conflicto</p>",
+      "replacement": "loading || <p role=\"status\">Consultando bloque en conflicto</p>",
+      "originalLocation": {
+        "end": {
+          "column": 71,
+          "line": 746
+        },
+        "start": {
+          "column": 8,
+          "line": 746
+        }
+      },
+      "location": {
+        "end": {
+          "column": 71,
+          "line": 746
+        },
+        "start": {
+          "column": 8,
+          "line": 746
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1336",
+      "replayId": "377",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "failed && (\n        <p role=\"alert\">\n          No se pudo consultar el bloque en conflicto. Puedes volver a\n          intentarlo.\n        </p>\n      )",
+      "replacement": "failed || <p role=\"alert\">\n          No se pudo consultar el bloque en conflicto. Puedes volver a\n          intentarlo.\n        </p>",
+      "originalLocation": {
+        "end": {
+          "column": 8,
+          "line": 752
+        },
+        "start": {
+          "column": 8,
+          "line": 747
+        }
+      },
+      "location": {
+        "end": {
+          "column": 8,
+          "line": 752
+        },
+        "start": {
+          "column": 8,
+          "line": 747
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1342",
+      "replayId": "378",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"es\"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 41,
+          "line": 765
+        },
+        "start": {
+          "column": 37,
+          "line": 765
+        }
+      },
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 765
+        },
+        "start": {
+          "column": 37,
+          "line": 765
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1344",
+      "replayId": "379",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"numeric\"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 22,
+          "line": 766
+        },
+        "start": {
+          "column": 13,
+          "line": 766
+        }
+      },
+      "location": {
+        "end": {
+          "column": 22,
+          "line": 766
+        },
+        "start": {
+          "column": 13,
+          "line": 766
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1345",
+      "replayId": "380",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"short\"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 21,
+          "line": 767
+        },
+        "start": {
+          "column": 14,
+          "line": 767
+        }
+      },
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 767
+        },
+        "start": {
+          "column": 14,
+          "line": 767
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1346",
+      "replayId": "381",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"numeric\"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 21,
+          "line": 768
+        },
+        "start": {
+          "column": 12,
+          "line": 768
+        }
+      },
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 768
+        },
+        "start": {
+          "column": 12,
+          "line": 768
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1347",
+      "replayId": "382",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"2-digit\"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 22,
+          "line": 769
+        },
+        "start": {
+          "column": 13,
+          "line": 769
+        }
+      },
+      "location": {
+        "end": {
+          "column": 22,
+          "line": 769
+        },
+        "start": {
+          "column": 13,
+          "line": 769
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1348",
+      "replayId": "383",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"2-digit\"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 24,
+          "line": 770
+        },
+        "start": {
+          "column": 15,
+          "line": 770
+        }
+      },
+      "location": {
+        "end": {
+          "column": 24,
+          "line": 770
+        },
+        "start": {
+          "column": 15,
+          "line": 770
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1349",
+      "replayId": "384",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"2-digit\"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 24,
+          "line": 771
+        },
+        "start": {
+          "column": 15,
+          "line": 771
+        }
+      },
+      "location": {
+        "end": {
+          "column": 24,
+          "line": 771
+        },
+        "start": {
+          "column": 15,
+          "line": 771
+        }
+      }
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "originalId": "1350",
+      "replayId": "385",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "StringLiteral",
+      "expression": "\"longOffset\"",
+      "replacement": "\"\"",
+      "originalLocation": {
+        "end": {
+          "column": 33,
+          "line": 773
+        },
+        "start": {
+          "column": 21,
+          "line": 773
+        }
+      },
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 773
+        },
+        "start": {
+          "column": 21,
+          "line": 773
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "22",
+      "replayId": "0",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.status !== error.status",
+      "replacement": "false",
+      "originalLocation": {
+        "end": {
+          "column": 34,
+          "line": 60
+        },
+        "start": {
+          "column": 5,
+          "line": 60
+        }
+      },
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 60
+        },
+        "start": {
+          "column": 5,
+          "line": 60
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "29",
+      "replayId": "2",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.code === \"BUDGET_EXCEEDED\" &&\n    error.status === 409 &&\n    exact(value, \"type title status code budgetZoneId days\") &&\n    text(value.budgetZoneId)",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 29,
+          "line": 67
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      },
+      "location": {
+        "end": {
+          "column": 29,
+          "line": 67
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "30",
+      "replayId": "3",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "value.code === \"BUDGET_EXCEEDED\" &&\n    error.status === 409 &&\n    exact(value, \"type title status code budgetZoneId days\") &&\n    text(value.budgetZoneId)",
+      "replacement": "value.code === \"BUDGET_EXCEEDED\" && error.status === 409 && exact(value, \"type title status code budgetZoneId days\") || text(value.budgetZoneId)",
+      "originalLocation": {
+        "end": {
+          "column": 29,
+          "line": 67
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      },
+      "location": {
+        "end": {
+          "column": 29,
+          "line": 67
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "31",
+      "replayId": "4",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.code === \"BUDGET_EXCEEDED\" &&\n    error.status === 409 &&\n    exact(value, \"type title status code budgetZoneId days\")",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 61,
+          "line": 66
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      },
+      "location": {
+        "end": {
+          "column": 61,
+          "line": 66
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "32",
+      "replayId": "5",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "value.code === \"BUDGET_EXCEEDED\" &&\n    error.status === 409 &&\n    exact(value, \"type title status code budgetZoneId days\")",
+      "replacement": "value.code === \"BUDGET_EXCEEDED\" && error.status === 409 || exact(value, \"type title status code budgetZoneId days\")",
+      "originalLocation": {
+        "end": {
+          "column": 61,
+          "line": 66
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      },
+      "location": {
+        "end": {
+          "column": 61,
+          "line": 66
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "33",
+      "replayId": "6",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.code === \"BUDGET_EXCEEDED\" &&\n    error.status === 409",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 65
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      },
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 65
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "34",
+      "replayId": "7",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "value.code === \"BUDGET_EXCEEDED\" &&\n    error.status === 409",
+      "replacement": "value.code === \"BUDGET_EXCEEDED\" || error.status === 409",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 65
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      },
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 65
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "35",
+      "replayId": "8",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.code === \"BUDGET_EXCEEDED\"",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 37,
+          "line": 64
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      },
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 64
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "38",
+      "replayId": "11",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "error.status === 409",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 65
+        },
+        "start": {
+          "column": 5,
+          "line": 65
+        }
+      },
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 65
+        },
+        "start": {
+          "column": 5,
+          "line": 65
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "41",
+      "replayId": "14",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "MethodExpression",
+      "expression": "value.days.some((day) => day.excessSeconds > 0)",
+      "replacement": "value.days.every(day => day.excessSeconds > 0)",
+      "originalLocation": {
+        "end": {
+          "column": 52,
+          "line": 69
+        },
+        "start": {
+          "column": 5,
+          "line": 69
+        }
+      },
+      "location": {
+        "end": {
+          "column": 52,
+          "line": 69
+        },
+        "start": {
+          "column": 5,
+          "line": 69
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "56",
+      "replayId": "20",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.code === \"BLOCK_OVERLAP\" &&\n    error.status === 409 &&\n    exact(value, \"type title status code conflict\")",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 52,
+          "line": 75
+        },
+        "start": {
+          "column": 5,
+          "line": 73
+        }
+      },
+      "location": {
+        "end": {
+          "column": 52,
+          "line": 75
+        },
+        "start": {
+          "column": 5,
+          "line": 73
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "58",
+      "replayId": "22",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.code === \"BLOCK_OVERLAP\" &&\n    error.status === 409",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 74
+        },
+        "start": {
+          "column": 5,
+          "line": 73
+        }
+      },
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 74
+        },
+        "start": {
+          "column": 5,
+          "line": 73
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "57",
+      "replayId": "21",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "value.code === \"BLOCK_OVERLAP\" &&\n    error.status === 409 &&\n    exact(value, \"type title status code conflict\")",
+      "replacement": "value.code === \"BLOCK_OVERLAP\" && error.status === 409 || exact(value, \"type title status code conflict\")",
+      "originalLocation": {
+        "end": {
+          "column": 52,
+          "line": 75
+        },
+        "start": {
+          "column": 5,
+          "line": 73
+        }
+      },
+      "location": {
+        "end": {
+          "column": 52,
+          "line": 75
+        },
+        "start": {
+          "column": 5,
+          "line": 73
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "59",
+      "replayId": "23",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "value.code === \"BLOCK_OVERLAP\" &&\n    error.status === 409",
+      "replacement": "value.code === \"BLOCK_OVERLAP\" || error.status === 409",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 74
+        },
+        "start": {
+          "column": 5,
+          "line": 73
+        }
+      },
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 74
+        },
+        "start": {
+          "column": 5,
+          "line": 73
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "60",
+      "replayId": "24",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.code === \"BLOCK_OVERLAP\"",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 35,
+          "line": 73
+        },
+        "start": {
+          "column": 5,
+          "line": 73
+        }
+      },
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 73
+        },
+        "start": {
+          "column": 5,
+          "line": 73
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "63",
+      "replayId": "27",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "error.status === 409",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 74
+        },
+        "start": {
+          "column": 5,
+          "line": 74
+        }
+      },
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 74
+        },
+        "start": {
+          "column": 5,
+          "line": 74
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "81",
+      "replayId": "31",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "value.code === \"VALIDATION_ERROR\" &&\n    error.status === 400 &&\n    exact(value, \"type title status code errors validOffsets\") &&\n    Array.isArray(value.errors)",
+      "replacement": "value.code === \"VALIDATION_ERROR\" && error.status === 400 && exact(value, \"type title status code errors validOffsets\") || Array.isArray(value.errors)",
+      "originalLocation": {
+        "end": {
+          "column": 32,
+          "line": 86
+        },
+        "start": {
+          "column": 5,
+          "line": 83
+        }
+      },
+      "location": {
+        "end": {
+          "column": 32,
+          "line": 86
+        },
+        "start": {
+          "column": 5,
+          "line": 83
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "82",
+      "replayId": "32",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.code === \"VALIDATION_ERROR\" &&\n    error.status === 400 &&\n    exact(value, \"type title status code errors validOffsets\")",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 63,
+          "line": 85
+        },
+        "start": {
+          "column": 5,
+          "line": 83
+        }
+      },
+      "location": {
+        "end": {
+          "column": 63,
+          "line": 85
+        },
+        "start": {
+          "column": 5,
+          "line": 83
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "83",
+      "replayId": "33",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "value.code === \"VALIDATION_ERROR\" &&\n    error.status === 400 &&\n    exact(value, \"type title status code errors validOffsets\")",
+      "replacement": "value.code === \"VALIDATION_ERROR\" && error.status === 400 || exact(value, \"type title status code errors validOffsets\")",
+      "originalLocation": {
+        "end": {
+          "column": 63,
+          "line": 85
+        },
+        "start": {
+          "column": 5,
+          "line": 83
+        }
+      },
+      "location": {
+        "end": {
+          "column": 63,
+          "line": 85
+        },
+        "start": {
+          "column": 5,
+          "line": 83
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "84",
+      "replayId": "34",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.code === \"VALIDATION_ERROR\" &&\n    error.status === 400",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 84
+        },
+        "start": {
+          "column": 5,
+          "line": 83
+        }
+      },
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 84
+        },
+        "start": {
+          "column": 5,
+          "line": 83
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "85",
+      "replayId": "35",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "value.code === \"VALIDATION_ERROR\" &&\n    error.status === 400",
+      "replacement": "value.code === \"VALIDATION_ERROR\" || error.status === 400",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 84
+        },
+        "start": {
+          "column": 5,
+          "line": 83
+        }
+      },
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 84
+        },
+        "start": {
+          "column": 5,
+          "line": 83
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "86",
+      "replayId": "36",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.code === \"VALIDATION_ERROR\"",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 38,
+          "line": 83
+        },
+        "start": {
+          "column": 5,
+          "line": 83
+        }
+      },
+      "location": {
+        "end": {
+          "column": 38,
+          "line": 83
+        },
+        "start": {
+          "column": 5,
+          "line": 83
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "89",
+      "replayId": "39",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "error.status === 400",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 84
+        },
+        "start": {
+          "column": 5,
+          "line": 84
+        }
+      },
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 84
+        },
+        "start": {
+          "column": 5,
+          "line": 84
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "92",
+      "replayId": "42",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.errors.length === 1",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 30,
+          "line": 87
+        },
+        "start": {
+          "column": 5,
+          "line": 87
+        }
+      },
+      "location": {
+        "end": {
+          "column": 30,
+          "line": 87
+        },
+        "start": {
+          "column": 5,
+          "line": 87
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "95",
+      "replayId": "44",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.errors[0].code === \"AMBIGUOUS_OFFSET\" ||\n      value.errors[0].code === \"INVALID_OFFSET\"",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 48,
+          "line": 91
+        },
+        "start": {
+          "column": 6,
+          "line": 90
+        }
+      },
+      "location": {
+        "end": {
+          "column": 48,
+          "line": 91
+        },
+        "start": {
+          "column": 6,
+          "line": 90
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "103",
+      "replayId": "52",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.errors[0].field === \"startOffset\" ||\n      value.errors[0].field === \"endOffset\"",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 44,
+          "line": 93
+        },
+        "start": {
+          "column": 6,
+          "line": 92
+        }
+      },
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 93
+        },
+        "start": {
+          "column": 6,
+          "line": 92
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "146",
+      "replayId": "60",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.code === \"VALIDATION_ERROR\" &&\n    error.status === 400",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 111
+        },
+        "start": {
+          "column": 5,
+          "line": 110
+        }
+      },
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 111
+        },
+        "start": {
+          "column": 5,
+          "line": 110
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "147",
+      "replayId": "61",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "value.code === \"VALIDATION_ERROR\" &&\n    error.status === 400",
+      "replacement": "value.code === \"VALIDATION_ERROR\" || error.status === 400",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 111
+        },
+        "start": {
+          "column": 5,
+          "line": 110
+        }
+      },
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 111
+        },
+        "start": {
+          "column": 5,
+          "line": 110
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "148",
+      "replayId": "62",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.code === \"VALIDATION_ERROR\"",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 38,
+          "line": 110
+        },
+        "start": {
+          "column": 5,
+          "line": 110
+        }
+      },
+      "location": {
+        "end": {
+          "column": 38,
+          "line": 110
+        },
+        "start": {
+          "column": 5,
+          "line": 110
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "151",
+      "replayId": "65",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "error.status === 400",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 111
+        },
+        "start": {
+          "column": 5,
+          "line": 111
+        }
+      },
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 111
+        },
+        "start": {
+          "column": 5,
+          "line": 111
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "157",
+      "replayId": "67",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "MethodExpression",
+      "expression": "value.errors.every(\n      (item) =>\n        exact(item, \"field code message\") &&\n        text(item.field) &&\n        text(item.message) &&\n        fieldCodes.includes(item.code as (typeof fieldCodes)[number]),\n    )",
+      "replacement": "value.errors.some(item => exact(item, \"field code message\") && text(item.field) && text(item.message) && fieldCodes.includes(item.code as typeof fieldCodes[number]))",
+      "originalLocation": {
+        "end": {
+          "column": 6,
+          "line": 121
+        },
+        "start": {
+          "column": 5,
+          "line": 115
+        }
+      },
+      "location": {
+        "end": {
+          "column": 6,
+          "line": 121
+        },
+        "start": {
+          "column": 5,
+          "line": 115
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "217",
+      "replayId": "78",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "EqualityOperator",
+      "expression": "data.items.length > 20",
+      "replacement": "data.items.length >= 20",
+      "originalLocation": {
+        "end": {
+          "column": 27,
+          "line": 216
+        },
+        "start": {
+          "column": 5,
+          "line": 216
+        }
+      },
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 216
+        },
+        "start": {
+          "column": 5,
+          "line": 216
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "280",
+      "replayId": "80",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "typeof value === \"string\"",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 30,
+          "line": 274
+        },
+        "start": {
+          "column": 5,
+          "line": 274
+        }
+      },
+      "location": {
+        "end": {
+          "column": 30,
+          "line": 274
+        },
+        "start": {
+          "column": 5,
+          "line": 274
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "283",
+      "replayId": "83",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "Regex",
+      "expression": "/^[\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}$/i",
+      "replacement": "/[\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}$/i",
+      "originalLocation": {
+        "end": {
+          "column": 65,
+          "line": 275
+        },
+        "start": {
+          "column": 5,
+          "line": 275
+        }
+      },
+      "location": {
+        "end": {
+          "column": 65,
+          "line": 275
+        },
+        "start": {
+          "column": 5,
+          "line": 275
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "284",
+      "replayId": "84",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "Regex",
+      "expression": "/^[\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}$/i",
+      "replacement": "/^[\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}/i",
+      "originalLocation": {
+        "end": {
+          "column": 65,
+          "line": 275
+        },
+        "start": {
+          "column": 5,
+          "line": 275
+        }
+      },
+      "location": {
+        "end": {
+          "column": 65,
+          "line": 275
+        },
+        "start": {
+          "column": 5,
+          "line": 275
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "335",
+      "replayId": "100",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "value.objective === strip(value.objective)",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 47,
+          "line": 295
+        },
+        "start": {
+          "column": 5,
+          "line": 295
+        }
+      },
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 295
+        },
+        "start": {
+          "column": 5,
+          "line": 295
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "337",
+      "replayId": "102",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "[...value.objective].length <= 500",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 39,
+          "line": 296
+        },
+        "start": {
+          "column": 5,
+          "line": 296
+        }
+      },
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 296
+        },
+        "start": {
+          "column": 5,
+          "line": 296
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "338",
+      "replayId": "103",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "EqualityOperator",
+      "expression": "[...value.objective].length <= 500",
+      "replacement": "[...value.objective].length < 500",
+      "originalLocation": {
+        "end": {
+          "column": 39,
+          "line": 296
+        },
+        "start": {
+          "column": 5,
+          "line": 296
+        }
+      },
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 296
+        },
+        "start": {
+          "column": 5,
+          "line": 296
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "340",
+      "replayId": "105",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ArrayDeclaration",
+      "expression": "[...value.objective]",
+      "replacement": "[]",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 296
+        },
+        "start": {
+          "column": 5,
+          "line": 296
+        }
+      },
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 296
+        },
+        "start": {
+          "column": 5,
+          "line": 296
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "341",
+      "replayId": "106",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "Date.parse(value.endAt) - Date.parse(value.startAt) ===\n      value.durationMinutes * 60000",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 36,
+          "line": 302
+        },
+        "start": {
+          "column": 5,
+          "line": 301
+        }
+      },
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 302
+        },
+        "start": {
+          "column": 5,
+          "line": 301
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "408",
+      "replayId": "111",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "Regex",
+      "expression": "/^\\p{White_Space}+|\\p{White_Space}+$/gu",
+      "replacement": "/^\\p{White_Space}|\\p{White_Space}+$/gu",
+      "originalLocation": {
+        "end": {
+          "column": 56,
+          "line": 349
+        },
+        "start": {
+          "column": 17,
+          "line": 349
+        }
+      },
+      "location": {
+        "end": {
+          "column": 56,
+          "line": 349
+        },
+        "start": {
+          "column": 17,
+          "line": 349
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "411",
+      "replayId": "114",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "Regex",
+      "expression": "/^\\p{White_Space}+|\\p{White_Space}+$/gu",
+      "replacement": "/^\\p{White_Space}+|\\p{White_Space}$/gu",
+      "originalLocation": {
+        "end": {
+          "column": 56,
+          "line": 349
+        },
+        "start": {
+          "column": 17,
+          "line": 349
+        }
+      },
+      "location": {
+        "end": {
+          "column": 56,
+          "line": 349
+        },
+        "start": {
+          "column": 17,
+          "line": 349
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "484",
+      "replayId": "117",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "typeof value !== \"string\"",
+      "replacement": "false",
+      "originalLocation": {
+        "end": {
+          "column": 32,
+          "line": 378
+        },
+        "start": {
+          "column": 7,
+          "line": 378
+        }
+      },
+      "location": {
+        "end": {
+          "column": 32,
+          "line": 378
+        },
+        "start": {
+          "column": 7,
+          "line": 378
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "487",
+      "replayId": "120",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "Regex",
+      "expression": "/^([+-])(\\d{2}):(\\d{2})(?::(\\d{2}))?$/",
+      "replacement": "/([+-])(\\d{2}):(\\d{2})(?::(\\d{2}))?$/",
+      "originalLocation": {
+        "end": {
+          "column": 55,
+          "line": 379
+        },
+        "start": {
+          "column": 17,
+          "line": 379
+        }
+      },
+      "location": {
+        "end": {
+          "column": 55,
+          "line": 379
+        },
+        "start": {
+          "column": 17,
+          "line": 379
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "488",
+      "replayId": "121",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "Regex",
+      "expression": "/^([+-])(\\d{2}):(\\d{2})(?::(\\d{2}))?$/",
+      "replacement": "/^([+-])(\\d{2}):(\\d{2})(?::(\\d{2}))?/",
+      "originalLocation": {
+        "end": {
+          "column": 55,
+          "line": 379
+        },
+        "start": {
+          "column": 17,
+          "line": 379
+        }
+      },
+      "location": {
+        "end": {
+          "column": 55,
+          "line": 379
+        },
+        "start": {
+          "column": 17,
+          "line": 379
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "517",
+      "replayId": "131",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "EqualityOperator",
+      "expression": "hours <= 18",
+      "replacement": "hours < 18",
+      "originalLocation": {
+        "end": {
+          "column": 21,
+          "line": 385
+        },
+        "start": {
+          "column": 10,
+          "line": 385
+        }
+      },
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 385
+        },
+        "start": {
+          "column": 10,
+          "line": 385
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "526",
+      "replayId": "134",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "EqualityOperator",
+      "expression": "total <= 64800",
+      "replacement": "total < 64800",
+      "originalLocation": {
+        "end": {
+          "column": 19,
+          "line": 388
+        },
+        "start": {
+          "column": 5,
+          "line": 388
+        }
+      },
+      "location": {
+        "end": {
+          "column": 19,
+          "line": 388
+        },
+        "start": {
+          "column": 5,
+          "line": 388
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "550",
+      "replayId": "136",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "/^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$/.test(local) &&\n    instant(naive)",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 19,
+          "line": 398
+        },
+        "start": {
+          "column": 5,
+          "line": 397
+        }
+      },
+      "location": {
+        "end": {
+          "column": 19,
+          "line": 398
+        },
+        "start": {
+          "column": 5,
+          "line": 397
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "551",
+      "replayId": "137",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "/^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$/.test(local) &&\n    instant(naive)",
+      "replacement": "/^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$/.test(local) || instant(naive)",
+      "originalLocation": {
+        "end": {
+          "column": 19,
+          "line": 398
+        },
+        "start": {
+          "column": 5,
+          "line": 397
+        }
+      },
+      "location": {
+        "end": {
+          "column": 19,
+          "line": 398
+        },
+        "start": {
+          "column": 5,
+          "line": 397
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "573",
+      "replayId": "151",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "Array.isArray(value) &&\n    value.length > 0",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 21,
+          "line": 406
+        },
+        "start": {
+          "column": 5,
+          "line": 405
+        }
+      },
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 406
+        },
+        "start": {
+          "column": 5,
+          "line": 405
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "574",
+      "replayId": "152",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "Array.isArray(value) &&\n    value.length > 0",
+      "replacement": "Array.isArray(value) || value.length > 0",
+      "originalLocation": {
+        "end": {
+          "column": 21,
+          "line": 406
+        },
+        "start": {
+          "column": 5,
+          "line": 405
+        }
+      },
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 406
+        },
+        "start": {
+          "column": 5,
+          "line": 405
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "578",
+      "replayId": "156",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "MethodExpression",
+      "expression": "value.every(\n      (day, index) =>\n        exact(\n          day,\n          \"date budgetMinutes plannedSeconds requestedSeconds excessSeconds\",\n        ) &&\n        typeof day.date === \"string\" &&\n        instant(day.date + \"T00:00:00Z\") &&\n        (index === 0 || value[index - 1].date < day.date) &&\n        integer(day.budgetMinutes, 0, 1440) &&\n        integer(day.plannedSeconds, 0) &&\n        integer(day.requestedSeconds, 1) &&\n        integer(day.excessSeconds, 0) &&\n        day.excessSeconds ===\n          Math.max(\n            0,\n            day.plannedSeconds + day.requestedSeconds - day.budgetMinutes * 60,\n          ),\n    )",
+      "replacement": "value.some((day, index) => exact(day, \"date budgetMinutes plannedSeconds requestedSeconds excessSeconds\") && typeof day.date === \"string\" && instant(day.date + \"T00:00:00Z\") && (index === 0 || value[index - 1].date < day.date) && integer(day.budgetMinutes, 0, 1440) && integer(day.plannedSeconds, 0) && integer(day.requestedSeconds, 1) && integer(day.excessSeconds, 0) && day.excessSeconds === Math.max(0, day.plannedSeconds + day.requestedSeconds - day.budgetMinutes * 60))",
+      "originalLocation": {
+        "end": {
+          "column": 6,
+          "line": 425
+        },
+        "start": {
+          "column": 5,
+          "line": 407
+        }
+      },
+      "location": {
+        "end": {
+          "column": 6,
+          "line": 425
+        },
+        "start": {
+          "column": 5,
+          "line": 407
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "598",
+      "replayId": "176",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "typeof day.date === \"string\"",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 37,
+          "line": 413
+        },
+        "start": {
+          "column": 9,
+          "line": 413
+        }
+      },
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 413
+        },
+        "start": {
+          "column": 9,
+          "line": 413
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "602",
+      "replayId": "180",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "index === 0 || value[index - 1].date < day.date",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 57,
+          "line": 415
+        },
+        "start": {
+          "column": 10,
+          "line": 415
+        }
+      },
+      "location": {
+        "end": {
+          "column": 57,
+          "line": 415
+        },
+        "start": {
+          "column": 10,
+          "line": 415
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "607",
+      "replayId": "185",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "EqualityOperator",
+      "expression": "value[index - 1].date < day.date",
+      "replacement": "value[index - 1].date <= day.date",
+      "originalLocation": {
+        "end": {
+          "column": 57,
+          "line": 415
+        },
+        "start": {
+          "column": 25,
+          "line": 415
+        }
+      },
+      "location": {
+        "end": {
+          "column": 57,
+          "line": 415
+        },
+        "start": {
+          "column": 25,
+          "line": 415
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "620",
+      "replayId": "194",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "typeof value === \"string\"",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 30,
+          "line": 430
+        },
+        "start": {
+          "column": 5,
+          "line": 430
+        }
+      },
+      "location": {
+        "end": {
+          "column": 30,
+          "line": 430
+        },
+        "start": {
+          "column": 5,
+          "line": 430
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "623",
+      "replayId": "197",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "Regex",
+      "expression": "/^\"availability:[\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}:(0|[1-9]\\d*)\"$/",
+      "replacement": "/\"availability:[\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}:(0|[1-9]\\d*)\"$/",
+      "originalLocation": {
+        "end": {
+          "column": 92,
+          "line": 431
+        },
+        "start": {
+          "column": 5,
+          "line": 431
+        }
+      },
+      "location": {
+        "end": {
+          "column": 92,
+          "line": 431
+        },
+        "start": {
+          "column": 5,
+          "line": 431
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "624",
+      "replayId": "198",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "Regex",
+      "expression": "/^\"availability:[\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}:(0|[1-9]\\d*)\"$/",
+      "replacement": "/^\"availability:[\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}:(0|[1-9]\\d*)\"/",
+      "originalLocation": {
+        "end": {
+          "column": 92,
+          "line": 431
+        },
+        "start": {
+          "column": 5,
+          "line": 431
+        }
+      },
+      "location": {
+        "end": {
+          "column": 92,
+          "line": 431
+        },
+        "start": {
+          "column": 5,
+          "line": 431
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "640",
+      "replayId": "214",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "Regex",
+      "expression": "/^\"availability:[\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}:(0|[1-9]\\d*)\"$/",
+      "replacement": "/^\"availability:[\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}:(0|[^1-9]\\d*)\"$/",
+      "originalLocation": {
+        "end": {
+          "column": 92,
+          "line": 431
+        },
+        "start": {
+          "column": 5,
+          "line": 431
+        }
+      },
+      "location": {
+        "end": {
+          "column": 92,
+          "line": 431
+        },
+        "start": {
+          "column": 5,
+          "line": 431
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "641",
+      "replayId": "215",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "Regex",
+      "expression": "/^\"availability:[\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}:(0|[1-9]\\d*)\"$/",
+      "replacement": "/^\"availability:[\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}:(0|[1-9]\\d)\"$/",
+      "originalLocation": {
+        "end": {
+          "column": 92,
+          "line": 431
+        },
+        "start": {
+          "column": 5,
+          "line": 431
+        }
+      },
+      "location": {
+        "end": {
+          "column": 92,
+          "line": 431
+        },
+        "start": {
+          "column": 5,
+          "line": 431
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "642",
+      "replayId": "216",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "Regex",
+      "expression": "/^\"availability:[\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}:(0|[1-9]\\d*)\"$/",
+      "replacement": "/^\"availability:[\\da-f]{8}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{4}-[\\da-f]{12}:(0|[1-9]\\D*)\"$/",
+      "originalLocation": {
+        "end": {
+          "column": 92,
+          "line": 431
+        },
+        "start": {
+          "column": 5,
+          "line": 431
+        }
+      },
+      "location": {
+        "end": {
+          "column": 92,
+          "line": 431
+        },
+        "start": {
+          "column": 5,
+          "line": 431
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "647",
+      "replayId": "218",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "EqualityOperator",
+      "expression": "BigInt(match[1]) <= 9223372036854775807n",
+      "replacement": "BigInt(match[1]) < 9223372036854775807n",
+      "originalLocation": {
+        "end": {
+          "column": 67,
+          "line": 434
+        },
+        "start": {
+          "column": 27,
+          "line": 434
+        }
+      },
+      "location": {
+        "end": {
+          "column": 67,
+          "line": 434
+        },
+        "start": {
+          "column": 27,
+          "line": 434
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "683",
+      "replayId": "221",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "EqualityOperator",
+      "expression": "[...value.objective].length <= 500",
+      "replacement": "[...value.objective].length < 500",
+      "originalLocation": {
+        "end": {
+          "column": 39,
+          "line": 443
+        },
+        "start": {
+          "column": 5,
+          "line": 443
+        }
+      },
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 443
+        },
+        "start": {
+          "column": 5,
+          "line": 443
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "696",
+      "replayId": "224",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "input.endOffset === null || input.endOffset === value.endOffset",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 69,
+          "line": 450
+        },
+        "start": {
+          "column": 6,
+          "line": 450
+        }
+      },
+      "location": {
+        "end": {
+          "column": 69,
+          "line": 450
+        },
+        "start": {
+          "column": 6,
+          "line": 450
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "702",
+      "replayId": "230",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "Date.parse(value.endAt as string) - Date.parse(value.startAt as string) ===\n      value.durationMinutes * 60000",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 36,
+          "line": 453
+        },
+        "start": {
+          "column": 5,
+          "line": 452
+        }
+      },
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 453
+        },
+        "start": {
+          "column": 5,
+          "line": 452
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "719",
+      "replayId": "237",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "Regex",
+      "expression": "/\\.\\d*[1-9]\\d*Z$/",
+      "replacement": "/\\.\\d*[^1-9]\\d*Z$/",
+      "originalLocation": {
+        "end": {
+          "column": 46,
+          "line": 463
+        },
+        "start": {
+          "column": 29,
+          "line": 463
+        }
+      },
+      "location": {
+        "end": {
+          "column": 46,
+          "line": 463
+        },
+        "start": {
+          "column": 29,
+          "line": 463
+        }
+      }
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "originalId": "721",
+      "replayId": "239",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "Regex",
+      "expression": "/\\.\\d*[1-9]\\d*Z$/",
+      "replacement": "/\\.\\d*[1-9]\\D*Z$/",
+      "originalLocation": {
+        "end": {
+          "column": 46,
+          "line": 463
+        },
+        "start": {
+          "column": 29,
+          "line": 463
+        }
+      },
+      "location": {
+        "end": {
+          "column": 46,
+          "line": 463
+        },
+        "start": {
+          "column": 29,
+          "line": 463
+        }
+      }
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "originalId": "1401",
+      "replayId": "386",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "ConditionalExpression",
+      "expression": "!controller.signal.aborted && \"project\" in result",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 62,
+          "line": 57
+        },
+        "start": {
+          "column": 13,
+          "line": 57
+        }
+      },
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 57
+        },
+        "start": {
+          "column": 13,
+          "line": 57
+        }
+      }
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "originalId": "1403",
+      "replayId": "388",
+      "originalStatus": "Survived",
+      "status": "Survived",
+      "mutator": "LogicalOperator",
+      "expression": "!controller.signal.aborted && \"project\" in result",
+      "replacement": "!controller.signal.aborted || \"project\" in result",
+      "originalLocation": {
+        "end": {
+          "column": 62,
+          "line": 57
+        },
+        "start": {
+          "column": 13,
+          "line": 57
+        }
+      },
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 57
+        },
+        "start": {
+          "column": 13,
+          "line": 57
+        }
+      }
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "originalId": "1412",
+      "replayId": "392",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "controller.signal.aborted",
+      "replacement": "false",
+      "originalLocation": {
+        "end": {
+          "column": 38,
+          "line": 63
+        },
+        "start": {
+          "column": 13,
+          "line": 63
+        }
+      },
+      "location": {
+        "end": {
+          "column": 38,
+          "line": 63
+        },
+        "start": {
+          "column": 13,
+          "line": 63
+        }
+      }
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "originalId": "1427",
+      "replayId": "394",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "!controller.signal.aborted",
+      "replacement": "true",
+      "originalLocation": {
+        "end": {
+          "column": 39,
+          "line": 72
+        },
+        "start": {
+          "column": 13,
+          "line": 72
+        }
+      },
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 72
+        },
+        "start": {
+          "column": 13,
+          "line": 72
+        }
+      }
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "originalId": "1465",
+      "replayId": "399",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "LogicalOperator",
+      "expression": "!projectLoading && !projectFailure",
+      "replacement": "!projectLoading || !projectFailure",
+      "originalLocation": {
+        "end": {
+          "column": 49,
+          "line": 128
+        },
+        "start": {
+          "column": 15,
+          "line": 128
+        }
+      },
+      "location": {
+        "end": {
+          "column": 49,
+          "line": 129
+        },
+        "start": {
+          "column": 15,
+          "line": 129
+        }
+      }
+    },
+    {
+      "file": "src/task-state.tsx",
+      "originalId": "1530",
+      "replayId": "403",
+      "originalStatus": "Survived",
+      "status": "Killed",
+      "mutator": "ConditionalExpression",
+      "expression": "controller.signal.aborted",
+      "replacement": "false",
+      "originalLocation": {
+        "end": {
+          "column": 36,
+          "line": 54
+        },
+        "start": {
+          "column": 11,
+          "line": 54
+        }
+      },
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 54
+        },
+        "start": {
+          "column": 11,
+          "line": 54
+        }
+      }
+    }
+  ],
+  "remaining": [
+    {
+      "file": "src/schedule-block-api.ts",
+      "replayId": "130",
+      "originalIds": [
+        "516"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 385
+        },
+        "start": {
+          "column": 10,
+          "line": 385
+        }
+      },
+      "mutator": "ConditionalExpression",
+      "expression": "hours <= 18",
+      "replacement": "true"
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "replayId": "138",
+      "originalIds": [
+        "552"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 46,
+          "line": 397
+        },
+        "start": {
+          "column": 5,
+          "line": 397
+        }
+      },
+      "mutator": "Regex",
+      "expression": "/^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$/",
+      "replacement": "/(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$/"
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "replayId": "139",
+      "originalIds": [
+        "553"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 46,
+          "line": 397
+        },
+        "start": {
+          "column": 5,
+          "line": 397
+        }
+      },
+      "mutator": "Regex",
+      "expression": "/^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$/",
+      "replacement": "/^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}/"
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "replayId": "153",
+      "originalIds": [
+        "575"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 406
+        },
+        "start": {
+          "column": 5,
+          "line": 406
+        }
+      },
+      "mutator": "ConditionalExpression",
+      "expression": "value.length > 0",
+      "replacement": "true"
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "replayId": "154",
+      "originalIds": [
+        "576"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 406
+        },
+        "start": {
+          "column": 5,
+          "line": 406
+        }
+      },
+      "mutator": "EqualityOperator",
+      "expression": "value.length > 0",
+      "replacement": "value.length >= 0"
+    },
+    {
+      "file": "src/schedule-block-api.ts",
+      "replayId": "234",
+      "originalIds": [
+        "716"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 46,
+          "line": 463
+        },
+        "start": {
+          "column": 29,
+          "line": 463
+        }
+      },
+      "mutator": "Regex",
+      "expression": "/\\.\\d*[1-9]\\d*Z$/",
+      "replacement": "/\\.\\d*[1-9]\\d*Z/"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "246",
+      "originalIds": [
+        "744"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 38,
+          "line": 52
+        },
+        "start": {
+          "column": 13,
+          "line": 52
+        }
+      },
+      "mutator": "ConditionalExpression",
+      "expression": "controller.signal.aborted",
+      "replacement": "false"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "248",
+      "originalIds": [
+        "746"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 38,
+          "line": 54
+        },
+        "start": {
+          "column": 13,
+          "line": 54
+        }
+      },
+      "mutator": "ConditionalExpression",
+      "expression": "controller.signal.aborted",
+      "replacement": "false"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "249",
+      "originalIds": [
+        "750"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 26,
+          "line": 55
+        },
+        "start": {
+          "column": 13,
+          "line": 55
+        }
+      },
+      "mutator": "OptionalChaining",
+      "expression": "problem?.code",
+      "replacement": "problem.code"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "250",
+      "originalIds": [
+        "757"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 62
+        },
+        "start": {
+          "column": 35,
+          "line": 62
+        }
+      },
+      "mutator": "UnaryOperator",
+      "expression": "-1",
+      "replacement": "+1"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "256",
+      "originalIds": [
+        "814"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 128
+        },
+        "start": {
+          "column": 13,
+          "line": 128
+        }
+      },
+      "mutator": "ConditionalExpression",
+      "expression": "projectStatus !== \"completed\"",
+      "replacement": "true"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "258",
+      "originalIds": [
+        "816"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 128
+        },
+        "start": {
+          "column": 31,
+          "line": 128
+        }
+      },
+      "mutator": "StringLiteral",
+      "expression": "\"completed\"",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "264",
+      "originalIds": [
+        "829"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 170
+        },
+        "start": {
+          "column": 40,
+          "line": 170
+        }
+      },
+      "mutator": "StringLiteral",
+      "expression": "\"\"",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "268",
+      "originalIds": [
+        "834"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 63,
+          "line": 177
+        },
+        "start": {
+          "column": 58,
+          "line": 177
+        }
+      },
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "270",
+      "originalIds": [
+        "886"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 211
+        },
+        "start": {
+          "column": 7,
+          "line": 210
+        }
+      },
+      "mutator": "ConditionalExpression",
+      "expression": "previous instanceof HTMLElement &&\n      previous.isConnected",
+      "replacement": "true"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "271",
+      "originalIds": [
+        "887"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 211
+        },
+        "start": {
+          "column": 7,
+          "line": 210
+        }
+      },
+      "mutator": "LogicalOperator",
+      "expression": "previous instanceof HTMLElement &&\n      previous.isConnected",
+      "replacement": "previous instanceof HTMLElement || previous.isConnected"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "272",
+      "originalIds": [
+        "894"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 48,
+          "line": 221
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      },
+      "mutator": "ConditionalExpression",
+      "expression": "document.activeElement === document.body ||\n      document.activeElement === origin.current",
+      "replacement": "true"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "275",
+      "originalIds": [
+        "897"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 220
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      },
+      "mutator": "ConditionalExpression",
+      "expression": "document.activeElement === document.body",
+      "replacement": "false"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "276",
+      "originalIds": [
+        "898"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 220
+        },
+        "start": {
+          "column": 7,
+          "line": 220
+        }
+      },
+      "mutator": "EqualityOperator",
+      "expression": "document.activeElement === document.body",
+      "replacement": "document.activeElement !== document.body"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "281",
+      "originalIds": [
+        "931"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 253
+        },
+        "start": {
+          "column": 11,
+          "line": 253
+        }
+      },
+      "mutator": "ConditionalExpression",
+      "expression": "!controller.signal.aborted",
+      "replacement": "true"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "286",
+      "originalIds": [
+        "945"
+      ],
+      "status": "RuntimeError",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 259
+        },
+        "start": {
+          "column": 20,
+          "line": 259
+        }
+      },
+      "mutator": "OptionalChaining",
+      "expression": "problem?.code",
+      "replacement": "problem.code",
+      "statusReason": "Test runner crashed. Tried twice to restart it without any luck. Last time the error message was: Error: TypeError: Cannot convert object to primitive value\nTypeError: Cannot convert object to primitive value\n    at String (<anonymous>)\n    at errorToString (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+util@10.0.0/node_modules/@stryker-mutator/util/dist/src/errors.js:22:12)\n    at Array.map (<anonymous>)\n    at VitestTestRunner.run (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+vitest-run_ad682ca84ee1a65181c9af1140987023/node_modules/@stryker-mutator/vitest-runner/dist/src/vitest-test-runner.js:182:18)\n    at VitestTestRunner.mutantRun (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+vitest-run_ad682ca84ee1a65181c9af1140987023/node_modules/@stryker-mutator/vitest-runner/dist/src/vitest-test-runner.js:129:30)\n    at ChildProcessTestRunnerWorker.mutantRun (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+core@10.0.0_@types+node@26.4.1/node_modules/@stryker-mutator/core/dist/src/test-runner/child-process-test-runner-worker.js:38:24)\n    at ChildProcessProxyWorker.handleCall (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+core@10.0.0_@types+node@26.4.1/node_modules/@stryker-mutator/core/dist/src/child-proxy/child-process-proxy-worker.js:87:28)\nError: TypeError: Cannot convert object to primitive value\nTypeError: Cannot convert object to primitive value\n    at String (<anonymous>)\n    at errorToString (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+util@10.0.0/node_modules/@stryker-mutator/util/dist/src/errors.js:22:12)\n    at Array.map (<anonymous>)\n    at VitestTestRunner.run (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+vitest-run_ad682ca84ee1a65181c9af1140987023/node_modules/@stryker-mutator/vitest-runner/dist/src/vitest-test-runner.js:182:18)\n    at VitestTestRunner.mutantRun (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+vitest-run_ad682ca84ee1a65181c9af1140987023/node_modules/@stryker-mutator/vitest-runner/dist/src/vitest-test-runner.js:129:30)\n    at ChildProcessTestRunnerWorker.mutantRun (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+core@10.0.0_@types+node@26.4.1/node_modules/@stryker-mutator/core/dist/src/test-runner/child-process-test-runner-worker.js:38:24)\n    at ChildProcessProxyWorker.handleCall (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+core@10.0.0_@types+node@26.4.1/node_modules/@stryker-mutator/core/dist/src/child-proxy/child-process-proxy-worker.js:87:28)\n    at ChildProcess.<anonymous> (file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb/frontend/node_modules/.pnpm/@stryker-mutator+core@10.0.0_@types+node@26.4.1/node_modules/@stryker-mutator/core/dist/src/child-proxy/child-process-proxy.js:123:33)\n    at ChildProcess.emit (node:events:518:28)\n    at emit (node:internal/child_process:949:14)\n    at process.processTicksAndRejections (node:internal/process/task_queues:91:21)"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "290",
+      "originalIds": [
+        "996"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 303
+        },
+        "start": {
+          "column": 22,
+          "line": 303
+        }
+      },
+      "mutator": "BooleanLiteral",
+      "expression": "false",
+      "replacement": "true"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "298",
+      "originalIds": [
+        "1070"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 371
+        },
+        "start": {
+          "column": 11,
+          "line": 371
+        }
+      },
+      "mutator": "ConditionalExpression",
+      "expression": "!controller.signal.aborted",
+      "replacement": "true"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "305",
+      "originalIds": [
+        "1087"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 387
+        },
+        "start": {
+          "column": 13,
+          "line": 387
+        }
+      },
+      "mutator": "ConditionalExpression",
+      "expression": "!controller.signal.aborted",
+      "replacement": "true"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "311",
+      "originalIds": [
+        "1108"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 411
+        },
+        "start": {
+          "column": 53,
+          "line": 411
+        }
+      },
+      "mutator": "ArithmeticOperator",
+      "expression": "value + 1",
+      "replacement": "value - 1"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "312",
+      "originalIds": [
+        "1124"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 454
+        },
+        "start": {
+          "column": 15,
+          "line": 454
+        }
+      },
+      "mutator": "CallExpression",
+      "expression": "setStartOffset(null);",
+      "replacement": ";"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "314",
+      "originalIds": [
+        "1143"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 16,
+          "line": 486
+        },
+        "start": {
+          "column": 46,
+          "line": 483
+        }
+      },
+      "mutator": "ObjectLiteral",
+      "expression": "{\n                ...current,\n                endOffset: undefined,\n              }",
+      "replacement": "{}"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "315",
+      "originalIds": [
+        "1154"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 28,
+          "line": 506
+        },
+        "start": {
+          "column": 15,
+          "line": 506
+        }
+      },
+      "mutator": "CallExpression",
+      "expression": "invalidate();",
+      "replacement": ";"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "317",
+      "originalIds": [
+        "1157"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 509
+        },
+        "start": {
+          "column": 15,
+          "line": 509
+        }
+      },
+      "mutator": "CallExpression",
+      "expression": "setEndOffset(null);",
+      "replacement": ";"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "324",
+      "originalIds": [
+        "1184"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 78,
+          "line": 541
+        },
+        "start": {
+          "column": 76,
+          "line": 541
+        }
+      },
+      "mutator": "StringLiteral",
+      "expression": "\"\"",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "325",
+      "originalIds": [
+        "1186"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 544
+        },
+        "start": {
+          "column": 21,
+          "line": 544
+        }
+      },
+      "mutator": "CallExpression",
+      "expression": "invalidate();",
+      "replacement": ";"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "343",
+      "originalIds": [
+        "1241"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 26,
+          "line": 600
+        },
+        "start": {
+          "column": 23,
+          "line": 600
+        }
+      },
+      "mutator": "StringLiteral",
+      "expression": "\" \"",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "346",
+      "originalIds": [
+        "1248"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 61,
+          "line": 617
+        },
+        "start": {
+          "column": 40,
+          "line": 617
+        }
+      },
+      "mutator": "ConditionalExpression",
+      "expression": "day.excessSeconds > 0",
+      "replacement": "true"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "350",
+      "originalIds": [
+        "1267"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 647
+        },
+        "start": {
+          "column": 27,
+          "line": 641
+        }
+      },
+      "mutator": "ArrowFunction",
+      "expression": "(day) => (\n            <p key={day.date}>\n              {day.date}: presupuesto {day.budgetMinutes} minutos, reservado{\" \"}\n              {day.plannedSeconds} segundos, solicitado {day.requestedSeconds}{\" \"}\n              segundos, exceso {day.excessSeconds} segundos.\n            </p>\n          )",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "348",
+      "originalIds": [
+        "1250"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 61,
+          "line": 617
+        },
+        "start": {
+          "column": 40,
+          "line": 617
+        }
+      },
+      "mutator": "EqualityOperator",
+      "expression": "day.excessSeconds > 0",
+      "replacement": "day.excessSeconds >= 0"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "351",
+      "originalIds": [
+        "1268"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 81,
+          "line": 643
+        },
+        "start": {
+          "column": 78,
+          "line": 643
+        }
+      },
+      "mutator": "StringLiteral",
+      "expression": "\" \"",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "352",
+      "originalIds": [
+        "1269"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 83,
+          "line": 644
+        },
+        "start": {
+          "column": 80,
+          "line": 644
+        }
+      },
+      "mutator": "StringLiteral",
+      "expression": "\" \"",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "353",
+      "originalIds": [
+        "1273"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 56,
+          "line": 651
+        },
+        "start": {
+          "column": 9,
+          "line": 650
+        }
+      },
+      "mutator": "ConditionalExpression",
+      "expression": "issue?.code === \"AVAILABILITY_REQUIRED\" ||\n        issue?.code === \"AVAILABILITY_ZONE_UNAVAILABLE\"",
+      "replacement": "true"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "367",
+      "originalIds": [
+        "1303"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 49,
+          "line": 716
+        },
+        "start": {
+          "column": 13,
+          "line": 716
+        }
+      },
+      "mutator": "ArrowFunction",
+      "expression": "() => () => request.current?.abort()",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": "src/task-blocks.tsx",
+      "replayId": "368",
+      "originalIds": [
+        "1304"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 49,
+          "line": 716
+        },
+        "start": {
+          "column": 19,
+          "line": 716
+        }
+      },
+      "mutator": "ArrowFunction",
+      "expression": "() => request.current?.abort()",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "replayId": "386",
+      "originalIds": [
+        "1401"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 57
+        },
+        "start": {
+          "column": 13,
+          "line": 57
+        }
+      },
+      "mutator": "ConditionalExpression",
+      "expression": "!controller.signal.aborted && \"project\" in result",
+      "replacement": "true"
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "replayId": "388",
+      "originalIds": [
+        "1403"
+      ],
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 57
+        },
+        "start": {
+          "column": 13,
+          "line": 57
+        }
+      },
+      "mutator": "LogicalOperator",
+      "expression": "!controller.signal.aborted && \"project\" in result",
+      "replacement": "!controller.signal.aborted || \"project\" in result"
+    }
+  ]
+}

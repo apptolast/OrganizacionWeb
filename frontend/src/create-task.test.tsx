@@ -167,8 +167,8 @@ it("un reintento de lista durante POST no impide refrescar al confirmar la creac
 it("una revisión tardía no restaura proyecto retirado por un 404 de sus acciones", async () => {
   window.history.replaceState(null, "", route);
   let resolve!: (response: Response) => void;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  let reviewSignal: AbortSignal | null | undefined;
+  vi.spyOn(globalThis, "fetch")
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -176,12 +176,14 @@ it("una revisión tardía no restaura proyecto retirado por un 404 de sus accion
     .mockResolvedValueOnce(
       Response.json({ code: "PROJECT_COMPLETED" }, { status: 409 }),
     )
-    .mockImplementationOnce(
-      () =>
-        new Promise((done) => {
-          resolve = done;
-        }),
-    )
+    .mockImplementationOnce((input, options) => {
+      expect(String(input)).toBe(`/api/v1/projects/${project.id}`);
+      expect(options?.method ?? "GET").toBe("GET");
+      reviewSignal = options?.signal;
+      return new Promise((done) => {
+        resolve = done;
+      });
+    })
     .mockResolvedValueOnce(new Response(null, { status: 404 }));
   render(<App />);
   fireEvent.change(await screen.findByLabelText("Título de la tarea"), {
@@ -192,12 +194,13 @@ it("una revisión tardía no restaura proyecto retirado por un 404 de sus accion
     await screen.findByRole("button", { name: "Revisar estado del proyecto" }),
   );
   fireEvent.click(screen.getByRole("button", { name: "Pausar" }));
+  await screen.findByText("Este proyecto no está disponible para tu cuenta.");
+  await waitFor(() => expect(reviewSignal?.aborted).toBe(true));
   await waitFor(() =>
     expect(
       screen.queryByRole("region", { name: "Tareas" }),
     ).not.toBeInTheDocument(),
   );
-  expect((fetcher.mock.calls[3][1]?.signal as AbortSignal).aborted).toBe(true);
   await act(async () =>
     resolve(Response.json(project, { headers: { ETag: '"stale"' } })),
   );

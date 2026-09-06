@@ -123,3 +123,21 @@ Dictamen independiente UI APPROVED en review_schedule_block_ui_mutation.md: 17 n
 Init global del coordinador21625 EXIT0 f79afd: lint verde, nueve tests del arnés,1198 frontend y1365 backend; XML backend contrastados en161c53, cero fallos/errores/omitidos. Build frontend391add EXIT0. E2E focal nuevo48211 EXIT0/72ed46: siete recorridos de bloques verdes en35,6s sobre Docker/API/PostgreSQL reales, incluido reinicio real. La invocación previa69111 falló antes de ejecutar pruebas por usar un nombre de proyecto inexistente en Playwright; se retiró ese argumento, sin modificar pruebas ni configuración. Ambos stacks de prueba se retiraron por su runner propio.
 
 **APPROVED para ejecutar replay frontend por arnés**, con fuentes, tests y configuración congelados. Los resultados de la campaña y del replay se conservarán separados, con remapeo de identidades y error945 explícito. No se marca done antes de analizar esa medición.
+
+## Revisión del primer replay y seguimiento final
+
+Root contrastó el informe final y167 identidades en067ac3:362/404 Killed,41 Survived,1 RuntimeError, puntuación bruta89,60 %. La nueva línea de TaskReader es detectada. Se conserva la campaña original y su denominador.
+
+Diff973b9d APPROVED: cinco pruebas nuevas difieren JSON después de recibir Response, mantienen vivo el padre al reintentar o reabrir, y observan estado/foco/sesión públicos tras resolver la petición retirada. Los78 tests de bloques, ESLint y TypeScript del autor pasan. No cambió producción.
+
+Root ratifica las equivalencias contextuales834/1087/1184 de review_schedule_block_replay_remaining.md: el consentimiento inicial se restablece al editar los campos obligatorios vacíos; el catch de configuración retirado sólo afecta un setter de la instancia desmontada o una promesa que ya rechazó; el fallback de select sin coincidencia conserva la primera opción vacía habilitada y no cambia el estado enviado. No se eliminan estos mutantes del denominador.
+
+Los22 casos observables restantes se asignan a cinco flujos públicos agrupados. El umbral numérico no elimina la obligación de justificar supervivientes de docs/verification.md. RuntimeError945 permanece como límite de medición del adaptador, sin kill ni equivalencia inferidos; no se ordena modificar el ejecutor ni repetirlo indefinidamente. Su aceptación final queda explícita en el dictamen de cierre, una vez resueltos los supervivientes observables. Feature sigue in_progress.
+
+Soporte final APPROVED: root leyó configuración26 rangos/29 identidades y diff de tests86881a, con10/10 pruebas stdlib verdes independientes. Reporters final.json/html separados del replay y original; defaults, umbral80 y patrón protector conservados. El nuevo manifiesto conserva identidades/posiciones/hashes; fuentes e informes históricos verificados. CI: aprobado diff de una línea120→240 por timeout confirmado del job antiguo; no cambia ninguna puerta. La medición final espera entrega y regresión del autor UI.
+
+## Puerta de medición final
+
+APPROVED tras revisión completa de los11 casos netos y ajustes existentes (0ab894/3eca08), dictamen independiente y dos correcciones de oráculos (@s40 última petición y selector actual tras editar fin). No hay cambios productivos respecto a56ced31. La regresión global inicial26470 falló en una prueba histórica por intervalo DOM retirado/cleanup pasivo; diagnóstico y corrección mantienen aborto y no restauración, revisados independientemente. No se debilitó el resultado esperado.
+
+Init final94736 EXIT0/8d8c38: lint verde,10 tests del arnés,1209/1209 frontend en21 archivos; Gradle test UP-TO-DATE con suite backend1365 previamente verificada, sin cambios backend. No se presenta ese resultado cacheado como1365 nuevas ejecuciones. Build/E2E previos conservan validez al no cambiar producción. Fuentes, pruebas y configuración congelados: APPROVED medición final por el target cerrado del arnés. RuntimeError945 histórico sigue separado.

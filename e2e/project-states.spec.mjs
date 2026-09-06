@@ -74,7 +74,11 @@ test("project_states: explicit transitions persist and remain readable and edita
         await page
           .getByRole("button", { name: action, exact: true })
           .dblclick();
-        await expect(page.getByRole("status")).toHaveText("Cambiando estado");
+        await expect(
+          page
+            .getByRole("region", { name: "Estado del proyecto", exact: true })
+            .getByRole("status"),
+        ).toHaveText("Cambiando estado");
         await expect(page.getByText("Idea", { exact: true })).toBeVisible();
         for (const button of await page
           .getByRole("region", { name: "Estado del proyecto" })
@@ -106,7 +110,11 @@ test("project_states: explicit transitions persist and remain readable and edita
       createdAt: project.createdAt,
       status,
     });
-    await expect(page.getByRole("status")).toHaveText("Estado actualizado");
+    await expect(
+      page
+        .getByRole("region", { name: "Estado del proyecto", exact: true })
+        .getByRole("status"),
+    ).toHaveText("Estado actualizado");
     await expect(page.getByText(label, { exact: true })).toBeVisible();
     const after = stored(project.id);
     expect(after.project.version).toBe(before.project.version + 1);
@@ -241,10 +249,18 @@ test("project_states: concurrent requests cannot overfill the last active slot @
     .click();
   await page.getByRole("link", { name: winner.name, exact: true }).click();
   await page.getByRole("button", { name: "Pausar", exact: true }).click();
-  await expect(page.getByRole("status")).toHaveText("Estado actualizado");
+  await expect(
+    page
+      .getByRole("region", { name: "Estado del proyecto", exact: true })
+      .getByRole("status"),
+  ).toHaveText("Estado actualizado");
   await page.goto(`/proyectos/${loser.id}`);
   await page.getByRole("button", { name: "Activar", exact: true }).click();
-  await expect(page.getByRole("status")).toHaveText("Estado actualizado");
+  await expect(
+    page
+      .getByRole("region", { name: "Estado del proyecto", exact: true })
+      .getByRole("status"),
+  ).toHaveText("Estado actualizado");
   expect(stored(loser.id).project.status).toBe("active");
   expect(stored(winner.id).project.status).toBe("paused");
   expect(
@@ -274,7 +290,11 @@ test("project_states: text and status share a version and require deliberate con
     );
     await editor.getByLabel(/Nombre del proyecto/).fill("Mi borrador de texto");
     await page.getByRole("button", { name: "Activar", exact: true }).click();
-    await expect(page.getByRole("status")).toHaveText("Estado actualizado");
+    await expect(
+      page
+        .getByRole("region", { name: "Estado del proyecto", exact: true })
+        .getByRole("status"),
+    ).toHaveText("Estado actualizado");
     const active = stored(project.id);
     const conflict = editor.waitForResponse(
       (response) => response.request().method() === "PUT",
@@ -319,7 +339,11 @@ test("project_states: text and status share a version and require deliberate con
       }),
     ).toBeVisible();
     await page.getByRole("button", { name: "Pausar", exact: true }).click();
-    await expect(page.getByRole("status")).toHaveText("Estado actualizado");
+    await expect(
+      page
+        .getByRole("region", { name: "Estado del proyecto", exact: true })
+        .getByRole("status"),
+    ).toHaveText("Estado actualizado");
     expect(stored(project.id).project).toMatchObject({
       status: "paused",
       name: "Texto confirmado tras revisar",
@@ -394,7 +418,11 @@ test("project_states: controls reflow at breakpoint edges and retain keyboard an
     ),
   ).toBeGreaterThan(0);
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("status")).toHaveText("Estado actualizado");
+  await expect(
+    page
+      .getByRole("region", { name: "Estado del proyecto", exact: true })
+      .getByRole("status"),
+  ).toHaveText("Estado actualizado");
   await expect(
     page.getByRole("heading", { name: "Estado del proyecto", exact: true }),
   ).toBeFocused();

@@ -11,7 +11,7 @@ El corte de entrega corresponde a las funcionalidades 1–18 del roadmap. Las fu
 ## Estado comprobado
 
 - Funcionalidades 1–12 cerradas localmente conforme a sus dictámenes y límites registrados. Esto no equivale a despliegue productivo.
-- Funcionalidad 13, Replanificar, en desarrollo. Revisión de composición del frontend corregida y aprobada; mutación en ejecución, todavía sin resultado. El movimiento básico ya pasa pruebas HTTP con PostgreSQL. Siguen pendientes reintentos y concurrencia, lecturas vigentes, consulta de recibos, integración de eventos y verificación completa del flujo.
+- Funcionalidad 13, Replanificar, en desarrollo. Revisión de composición del frontend corregida y aprobada; primera campaña de mutación terminada con 86,70 %, cero timeouts y dos errores de herramienta registrados, sin cierre funcional. Se revisan huecos de pruebas y una medición separada de rendimiento. Movimiento, cancelación y actualización de Hoy pasan pruebas con PostgreSQL. Siguen pendientes el cierre de concurrencia y atomicidad, las consultas de recibos, la integración final y el recorrido completo en navegador.
 - CI completo de `main` verde sobre `ae364e5`, ejecución `34047746896`, con 91 pruebas E2E aprobadas. Es regresión del conjunto integrado; no acredita los escenarios nuevos de Replanificar aún en desarrollo.
 - Funcionalidades 14–18 pendientes de contrato detallado e implementación.
 - Ningún despliegue productivo acreditado todavía.

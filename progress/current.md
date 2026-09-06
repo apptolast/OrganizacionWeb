@@ -24,7 +24,15 @@ Siguiente corte documental publicado en main407a534, sin cambios de producto. Co
 
 Agentes actuales: resume_backend completa replay/intención, lecturas vigentes, constraints y carreras; resume_frontend ahora desarrolla puerto/adaptador/controlador separados de recibos e historial en el mismo árbol backend, con ventanas Gradle coordinadas. resume_review prepara primer E2E13 en nuevo worktree OrganizacionWeb-reschedule-e2e, rama codex/reschedule-e2e desde407a534; posee e2e/reschedule.spec.mjs y documentación, no producción. No integrar su RED previo a los endpoints como entrega verde.
 
-Stryker18743 sigue en ejecución sin resultado; fuentes/configuración del manifest de15archivos intactas, comprobadasbff8ce. No modificar esos archivos ni afirmar score antes de terminar.
+Actualización posterior: Stryker18743 terminó179d24 EXIT0 en79min3s.1416 mutantes:1226 Killed,178 Survived,10 NoCoverage,2 RuntimeError,0 Timeout;86,70% Stryker y86,58% contando errores como no detectados. Informe original conservado. Revisar huecos antes del cierre; errores171/180 del adaptador no se cuentan como equivalentes ni Killed. Ver mutation_reschedule_frontend.md y review_reschedule_frontend_mutation_gaps.md.
+
+Medición autorizada2→8 procesos en ejecución83148, mismo alcance y fuentes/tests congelados. Sólo concurrency y dos rutas de informe cambian temporalmente;14 entradas no operativas del manifest verificadas3e46ee. Dry run745tests GREEN060193 en2min45s. No adoptar ocho procesos hasta comparar clasificaciones y ausencia de Timeout con el baseline.
+
+Main documental9e59516 tiene CI34050389138 SUCCESSa1abc6. Ninguna PR abierta en comprobación5e3da7. No hay despliegue. Plan y revisión documental de infraestructura publicados; capacidad real pendiente de comprobar, no confundir contrato de recursos con RAM libre.
+
+El primer E2E13 queda aislado en checkpoint8e91436, rama local codex/reschedule-e2e: REDb2b65e en preview500 frente a200; helper11 extraído y regresión GREEN551ece. No publicar como funcional hasta integrar backend. resume_review desarrolla ahora V13 aditiva y pruebas PostgreSQL/Flyway en ese mismo worktree, con E2E congelado. resume_backend conserva core/Today/atomicidad; resume_frontend conserva recibos/historia. El publicador y Move directo permanecen revisados parcialmente, sin cierre global.
+
+Snapshot posterior para errores HTTP: core GREEN469422 (46 casos HTTP13) y lecturas GREEN066d26 (8PG) congelaron Java unos segundos. Root copió y comprobó SHA256 de176 archivos de producción9bb10f/38658b y creó checkpoint local d3ffecf en el árbol E2E. No se publica ni se integra ese snapshot completo: faltan los ajustes de tests/wiring de los autores y el cierre funcional. Al aprobar V13, resume_review tendrá exclusivamente BlockController.java, ApiErrors.java y nueva suite de errores13; core y lecturas liberaron esos archivos. Sólo su diff posterior se integrará, conservando avances de Store y recibos. Copia de respaldo y manifest en work/reschedule-error-snapshot-066d26; no incluye secretos, SQL, tests, configuración git ni build.
 
 ## Entrega
 

@@ -2,6 +2,27 @@
 
 Lista de coordinación, no dictamen final ni declaración de cobertura completa. Los registros TDD de cada autor contienen los casos ejecutados y sus límites.
 
+## Estado vigente después de integrar main
+
+La tabla siguiente conserva el corte histórico anterior. El corte local1332eb7
+ya incorpora backend validado, frontend de main, nominal y recuperación E2E, y
+evidencia del replay frontend. Los pendientes históricos de lecturas, s21–24,
+atomicidad y nominal se han resuelto con las pruebas registradas en las bitácoras
+específicas y en review_reschedule_backend_integration.md:447 pruebas focales
+independientemente verificadas. La migración V13 mantiene su revisión propia.
+
+El nominal inicialmente rojo pasó con el mismo test; s25 pasó tras reiniciar
+realmente el backend y conservar PostgreSQL. Las pruebas no acreditan todavía
+el corte final conjunto. UX nominal, texto y zoom200 y controles DST/exceso
+tienen evidencia parcial; motores y feedback permanecen en validación.
+
+Pendientes actuales: init común con soporte PIT, campaña backend con umbral80,
+integrar y ejecutar paquetes UX/E2E, dictamen final y CI del nuevo corte. No
+hay bloqueos de coordinación con Claude ni PR abiertas. No publicar done por
+sumar informes de árboles distintos.
+
+## Tabla del corte histórico
+
 | Bloque | Estado de la evidencia | Condición pendiente de cierre |
 | --- | --- | --- |
 | Movimiento directo | Revisión parcial aprobada, reloj e identidad comprobados | Incorporar a verificación conjunta y mutación |

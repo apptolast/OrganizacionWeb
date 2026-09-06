@@ -149,7 +149,7 @@
       "description": "Mover y cancelar bloques con historial, concurrencia y recuperación; contrato aprobado por autorización global.",
       "acceptance": ["Cumplir @s1–@s41 de features/reschedule.feature antes de cerrar."],
       "sdd": true,
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 14,

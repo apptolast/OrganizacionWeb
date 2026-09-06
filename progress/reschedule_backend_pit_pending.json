@@ -1,0 +1,138 @@
+[
+  {
+    "ordinal": 252,
+    "status": "SURVIVED",
+    "sourceFile": "RescheduleController.java",
+    "mutatedClass": "com.apptolast.organization.adapter.http.RescheduleController",
+    "mutatedMethod": "blockStateConflict",
+    "methodDescription": "(Lcom/apptolast/organization/domain/BlockStateException;)Lorg/springframework/http/ResponseEntity;",
+    "lineNumber": 213,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "20"
+    ],
+    "blocks": [
+      "5"
+    ],
+    "description": "negated conditional"
+  },
+  {
+    "ordinal": 275,
+    "status": "NO_COVERAGE",
+    "sourceFile": "RescheduleController.java",
+    "mutatedClass": "com.apptolast.organization.adapter.http.RescheduleController",
+    "mutatedMethod": "move",
+    "methodDescription": "(Ljava/security/Principal;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/springframework/http/HttpHeaders;Lorg/springframework/util/MultiValueMap;)Lorg/springframework/http/ResponseEntity;",
+    "lineNumber": 42,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "37"
+    ],
+    "blocks": [
+      "10"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/http/RescheduleController::move"
+  },
+  {
+    "ordinal": 288,
+    "status": "SURVIVED",
+    "sourceFile": "RescheduleController.java",
+    "mutatedClass": "com.apptolast.organization.adapter.http.RescheduleController",
+    "mutatedMethod": "moveRequest",
+    "methodDescription": "(Ljava/lang/String;Z)Lcom/apptolast/organization/domain/BlockMoveRequest;",
+    "lineNumber": 120,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "indexes": [
+      "60"
+    ],
+    "blocks": [
+      "15"
+    ],
+    "description": "removed call to java/util/Iterator::forEachRemaining"
+  },
+  {
+    "ordinal": 464,
+    "status": "SURVIVED",
+    "sourceFile": "BlockBudget.java",
+    "mutatedClass": "com.apptolast.organization.domain.BlockBudget",
+    "mutatedMethod": "calculate",
+    "methodDescription": "(Lcom/apptolast/organization/domain/Availability;Ljava/time/Instant;Ljava/time/Instant;Ljava/util/List;)Ljava/util/List;",
+    "lineNumber": 34,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "187"
+    ],
+    "blocks": [
+      "57"
+    ],
+    "description": "changed conditional boundary"
+  },
+  {
+    "ordinal": 674,
+    "status": "NO_COVERAGE",
+    "sourceFile": "BlockMoveRequest.java",
+    "mutatedClass": "com.apptolast.organization.domain.BlockMoveRequest",
+    "mutatedMethod": "endLocal",
+    "methodDescription": "()Ljava/time/LocalDateTime;",
+    "lineNumber": 6,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/BlockMoveRequest::endLocal"
+  },
+  {
+    "ordinal": 675,
+    "status": "NO_COVERAGE",
+    "sourceFile": "BlockMoveRequest.java",
+    "mutatedClass": "com.apptolast.organization.domain.BlockMoveRequest",
+    "mutatedMethod": "endOffset",
+    "methodDescription": "()Ljava/time/ZoneOffset;",
+    "lineNumber": 6,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/BlockMoveRequest::endOffset"
+  },
+  {
+    "ordinal": 676,
+    "status": "NO_COVERAGE",
+    "sourceFile": "BlockMoveRequest.java",
+    "mutatedClass": "com.apptolast.organization.domain.BlockMoveRequest",
+    "mutatedMethod": "startLocal",
+    "methodDescription": "()Ljava/time/LocalDateTime;",
+    "lineNumber": 6,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/BlockMoveRequest::startLocal"
+  },
+  {
+    "ordinal": 677,
+    "status": "NO_COVERAGE",
+    "sourceFile": "BlockMoveRequest.java",
+    "mutatedClass": "com.apptolast.organization.domain.BlockMoveRequest",
+    "mutatedMethod": "startOffset",
+    "methodDescription": "()Ljava/time/ZoneOffset;",
+    "lineNumber": 6,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/BlockMoveRequest::startOffset"
+  }
+]

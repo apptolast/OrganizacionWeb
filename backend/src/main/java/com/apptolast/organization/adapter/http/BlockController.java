@@ -378,7 +378,7 @@ public final class BlockController {
                 409, "IDEMPOTENCY_CONFLICT", "La clave corresponde a otra intención de bloque."));
   }
 
-  private static UUID identifier(String value, String field) {
+  static UUID identifier(String value, String field) {
     if (!value.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))
       throw invalid(field, "INVALID_FORMAT");
     return UUID.fromString(value);
@@ -417,7 +417,7 @@ public final class BlockController {
     return value.textValue();
   }
 
-  private static ValidationException invalid(String field, String code) {
+  static ValidationException invalid(String field, String code) {
     return new ValidationException(
         List.of(new FieldError(field, code, "Revisa el valor de este campo.")));
   }

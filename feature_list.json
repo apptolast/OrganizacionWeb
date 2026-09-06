@@ -146,10 +146,10 @@
       "id": 13,
       "name": "reschedule",
       "title": "Replanificar",
-      "description": "Replanificar: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
-      "acceptance": [],
+      "description": "Mover y cancelar bloques con historial, concurrencia y recuperación; contrato aprobado por autorización global.",
+      "acceptance": ["Cumplir @s1–@s41 de features/reschedule.feature antes de cerrar."],
       "sdd": true,
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "id": 14,

@@ -2,7 +2,7 @@
 
 ## Feature activa
 
-Feature13 `reschedule`, fase de especificación. Feature12 `today` cerrada y subida en e9269db; registro conservado en [history.md](history.md).
+Feature13 `reschedule`, contrato aprobado para TDD:41 escenarios/156 casos. Feature12 `today` cerrada y subida en e9269db; registro conservado en [history.md](history.md).
 
 ## Último cierre verificado
 
@@ -12,12 +12,13 @@ Feature13 `reschedule`, fase de especificación. Feature12 `today` cerrada y sub
 
 ## Continuidad
 
-Features1–12 done;13–30 pending. Propuesta13 en revisión antes de Gherkin/TDD. Autorización global vigente; no repetir permiso por feature. Ponytail full y Caveman lite.
+Features1–12 done;13 in_progress;14–30 pending. Especificación13 subida5512b24; Gherkin aprobado tras revisión independiente06a869 y coordinador. Autorización global vigente; no repetir permiso por feature. Ponytail full y Caveman lite.
 
 ## Trabajo de la próxima sesión
 
 - Objetivo: mover/cancelar bloques con identidad estable, historial y recuperación idempotente.
-- Fase: spec_partner resume_frontend; exploración backend independiente resume_backend; revisión contractual previa resume_review y coordinador.
+- Fase: spec_partner resume_frontend completada; exploración backend independiente resume_backend completada; revisión aprobada por coordinador en [review_reschedule_spec.md](review_reschedule_spec.md). Autor Gherkin resume_review en curso.
+- Diseño UI acotado aceptado como mapa, sujeto al contrato: [design_reschedule_ui.md](design_reschedule_ui.md). Sin nuevas dependencias ni fuentes.
 - Evidencia: [research_reschedule_backend.md](research_reschedule_backend.md); propuesta en sección13 de project-spec.md. La fila original es también recibo de creación: preservarla es necesario para no romper replay11.
 - Sin cambios de fuentes/tests desde init78050. CI de e9269db sigue in_progress, consulta2ffbf8; no se atribuye resultado remoto.
 

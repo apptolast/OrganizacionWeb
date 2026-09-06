@@ -617,7 +617,9 @@ Workspace distingue Hoy, Proyectos y Disponibilidad: enlaces, breadcrumb y aria-
 
 La destilación Gherkin cubrirá familias observables acotadas: aislamiento y errores; snapshot y ausencia/cambio de preferencia; día/DST/intersecciones; capacidad conocida/desconocida y completed; current/next/cierre; lectura y fallback; refresco/obsolescencia/logout; migración de rutas y accesibilidad. La validación del esquema se agrupa por contrato, sin convertir variantes de mutadores en escenarios de producto. No se requiere nueva migración o índice sin evidencia de necesidad, ni introducir un framework temporal o de cache para este MVP.
 
-## Feature 13 — reschedule (propuesta para revisión, no contrato aprobado)
+## Feature 13 — reschedule
+
+Especificación revisada y contrato features/reschedule.feature aprobado bajo autorización global:41 escenarios/156 casos, dictámenes en progress/review_reschedule_spec.md y progress/review_reschedule_contract_backend.md. Las menciones a propuesta/revisión siguientes conservan el razonamiento previo y quedan resueltas por esta aprobación; feature13 pasa a in_progress, sin declarar implementación terminada.
 
 ### Propósito y límites
 

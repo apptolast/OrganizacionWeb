@@ -66,7 +66,8 @@ class ProjectApiTest {
   @BeforeEach
   void clear() {
     jdbc.execute(
-        "TRUNCATE block_changes,block_projections,planned_blocks, task_status_history, tasks, outbox_events, projects");
+        "TRUNCATE work_sessions,block_changes,block_projections,planned_blocks,"
+            + " task_status_history, tasks, outbox_events, projects");
   }
 
   @org.junit.jupiter.params.ParameterizedTest
@@ -147,7 +148,8 @@ class ProjectApiTest {
   @org.junit.jupiter.params.provider.ValueSource(strings = {"projects", "outbox_events"})
   void s17_rollsBackEitherFailedWrite(String table) throws Exception {
     jdbc.execute(
-        "CREATE OR REPLACE FUNCTION test_fail_write() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'private storage details' USING ERRCODE = '08006'; END; $$");
+        "CREATE OR REPLACE FUNCTION test_fail_write() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN"
+            + " RAISE EXCEPTION 'private storage details' USING ERRCODE = '08006'; END; $$");
     jdbc.execute(
         "CREATE TRIGGER test_failure BEFORE INSERT ON "
             + table
@@ -173,9 +175,11 @@ class ProjectApiTest {
   @Test
   void s18_internalFailureRollsBackAndHidesDetails() throws Exception {
     jdbc.execute(
-        "CREATE OR REPLACE FUNCTION test_fail_internal() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'password=private-secret'; END; $$");
+        "CREATE OR REPLACE FUNCTION test_fail_internal() RETURNS trigger LANGUAGE plpgsql AS $$"
+            + " BEGIN RAISE EXCEPTION 'password=private-secret'; END; $$");
     jdbc.execute(
-        "CREATE TRIGGER test_failure BEFORE INSERT ON outbox_events FOR EACH ROW EXECUTE FUNCTION test_fail_internal()");
+        "CREATE TRIGGER test_failure BEFORE INSERT ON outbox_events FOR EACH ROW EXECUTE FUNCTION"
+            + " test_fail_internal()");
     try {
       var response =
           mvc.perform(

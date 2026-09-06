@@ -49,14 +49,17 @@ class SubtaskApiTest {
   @BeforeEach
   void setup() {
     jdbc.execute(
-        "TRUNCATE block_changes,block_projections,planned_blocks, task_status_history, tasks, outbox_events, projects");
+        "TRUNCATE work_sessions,block_changes,block_projections,planned_blocks,"
+            + " task_status_history, tasks, outbox_events, projects");
     project = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'persona-a','P','','idea',now(),now())",
+        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+            + " (?,'persona-a','P','','idea',now(),now())",
         project);
     parent = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at) VALUES (?, ?, 'Parent', '', 'pending', now(), now())",
+        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at)"
+            + " VALUES (?, ?, 'Parent', '', 'pending', now(), now())",
         parent,
         project);
   }
@@ -141,7 +144,9 @@ class SubtaskApiTest {
 
   void insertChild(UUID id, UUID parentId, String title) {
     jdbc.update(
-        "INSERT INTO tasks(id,project_id,parent_id,title,completion_criterion,status,created_at,updated_at) VALUES (?,?,?,?,'','pending',now(),now())",
+        "INSERT INTO"
+            + " tasks(id,project_id,parent_id,title,completion_criterion,status,created_at,updated_at)"
+            + " VALUES (?,?,?,?,'','pending',now(),now())",
         id,
         project,
         parentId,
@@ -154,7 +159,9 @@ class SubtaskApiTest {
       insertChild(new UUID(0, n), parent, "T" + n);
     }
     jdbc.update(
-        "UPDATE tasks SET created_at='2026-01-01T00:00:00.123456Z',updated_at='2026-01-01T00:00:00.123456Z' WHERE parent_id=?",
+        "UPDATE tasks SET"
+            + " created_at='2026-01-01T00:00:00.123456Z',updated_at='2026-01-01T00:00:00.123456Z'"
+            + " WHERE parent_id=?",
         parent);
     var first =
         json.readTree(
@@ -457,7 +464,8 @@ class SubtaskApiTest {
   void s2_s3_s9_s10_s34_preservesAncestorsAndHistoricalRoots(String state) throws Exception {
     jdbc.update("UPDATE projects SET status=? WHERE id=?", state, project);
     jdbc.update(
-        "UPDATE tasks SET completion_criterion='Parent criterion',estimated_minutes=1440 WHERE id=?",
+        "UPDATE tasks SET completion_criterion='Parent criterion',estimated_minutes=1440 WHERE"
+            + " id=?",
         parent);
     var projectBefore = jdbc.queryForMap("SELECT * FROM projects WHERE id=?", project);
     var parentBefore = jdbc.queryForMap("SELECT * FROM tasks WHERE id=?", parent);
@@ -576,7 +584,8 @@ class SubtaskApiTest {
     if (defect.equals("wrongProject")) {
       requestedProject = UUID.randomUUID();
       jdbc.update(
-          "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'persona-a','Other','','idea',now(),now())",
+          "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+              + " (?,'persona-a','Other','','idea',now(),now())",
           requestedProject);
     }
     String target = "/api/v1/projects/" + requestedProject + "/tasks/" + requestedTask;
@@ -952,7 +961,8 @@ class SubtaskApiTest {
     if (defect.equals("foreignProject")) {
       target = UUID.randomUUID();
       jdbc.update(
-          "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'persona-a','Other','','idea',now(),now())",
+          "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+              + " (?,'persona-a','Other','','idea',now(),now())",
           target);
     }
     if (defect.equals("self")) parentId = id;
@@ -961,7 +971,9 @@ class SubtaskApiTest {
     assertThatThrownBy(
             () ->
                 jdbc.update(
-                    "INSERT INTO tasks(id,project_id,parent_id,title,completion_criterion,status,created_at,updated_at) VALUES (?,?,?,'Invalid','','pending',now(),now())",
+                    "INSERT INTO"
+                        + " tasks(id,project_id,parent_id,title,completion_criterion,status,created_at,updated_at)"
+                        + " VALUES (?,?,?,'Invalid','','pending',now(),now())",
                     id,
                     finalTarget,
                     finalParent))

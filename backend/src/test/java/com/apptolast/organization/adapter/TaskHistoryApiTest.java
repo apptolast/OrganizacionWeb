@@ -49,14 +49,17 @@ class TaskHistoryApiTest {
   @BeforeEach
   void setup() {
     jdbc.execute(
-        "TRUNCATE block_changes,block_projections,planned_blocks, task_status_history, tasks, outbox_events, projects");
+        "TRUNCATE work_sessions,block_changes,block_projections,planned_blocks,"
+            + " task_status_history, tasks, outbox_events, projects");
     project = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'persona-a','P','','idea',now(),now())",
+        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+            + " (?,'persona-a','P','','idea',now(),now())",
         project);
     parent = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at) VALUES (?, ?, 'Parent', '', 'pending', now(), now())",
+        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at)"
+            + " VALUES (?, ?, 'Parent', '', 'pending', now(), now())",
         parent,
         project);
   }
@@ -81,7 +84,9 @@ class TaskHistoryApiTest {
   UUID transition(long version) {
     var id = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO task_status_history(id,project_id,task_id,task_version,from_status,to_status,occurred_at) VALUES (?,?,?,?,'pending','completed','2026-09-06T00:00:00.123456Z')",
+        "INSERT INTO"
+            + " task_status_history(id,project_id,task_id,task_version,from_status,to_status,occurred_at)"
+            + " VALUES (?,?,?,?,'pending','completed','2026-09-06T00:00:00.123456Z')",
         id,
         project,
         parent,
@@ -140,7 +145,8 @@ class TaskHistoryApiTest {
     if (kind.equals("wrong-project")) {
       var own = UUID.randomUUID();
       jdbc.update(
-          "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'persona-a','Other','','idea',now(),now())",
+          "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+              + " (?,'persona-a','Other','','idea',now(),now())",
           own);
       target = path().replace(project.toString(), own.toString());
     }
@@ -396,11 +402,14 @@ class TaskHistoryApiTest {
         own);
     var other = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at) VALUES (?,?,'Other','','pending',now(),now())",
+        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at)"
+            + " VALUES (?,?,'Other','','pending',now(),now())",
         other,
         project);
     jdbc.update(
-        "INSERT INTO task_status_history(id,project_id,task_id,task_version,from_status,to_status,occurred_at) VALUES (?,?,?,2,'pending','completed',now())",
+        "INSERT INTO"
+            + " task_status_history(id,project_id,task_id,task_version,from_status,to_status,occurred_at)"
+            + " VALUES (?,?,?,2,'pending','completed',now())",
         UUID.randomUUID(),
         project,
         other);

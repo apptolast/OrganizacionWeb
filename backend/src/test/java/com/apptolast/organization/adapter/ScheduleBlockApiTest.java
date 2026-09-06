@@ -57,24 +57,30 @@ class ScheduleBlockApiTest {
     when(clock.instant()).thenReturn(Instant.parse("2030-01-01T00:00:00.123456789Z"));
     when(clock.getZone()).thenReturn(ZoneOffset.UTC);
     jdbc.execute(
-        "TRUNCATE block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
+        "TRUNCATE"
+            + " work_sessions,block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
     project = UUID.randomUUID();
     task = UUID.randomUUID();
     preference = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'persona-a','Proyecto','','active',now(),now())",
+        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+            + " (?,'persona-a','Proyecto','','active',now(),now())",
         project);
     jdbc.update(
-        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at) VALUES (?,?,'Tarea','','pending',now(),now())",
+        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at)"
+            + " VALUES (?,?,'Tarea','','pending',now(),now())",
         task,
         project);
     jdbc.update(
-        "INSERT INTO availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at) VALUES (?,'persona-a','UTC',120,120,120,120,120,120,120,0,now(),now())",
+        "INSERT INTO"
+            + " availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at)"
+            + " VALUES (?,'persona-a','UTC',120,120,120,120,120,120,120,0,now(),now())",
         preference);
   }
 
   String body() {
-    return "{\"objective\":\" Meta \",\"startLocal\":\"2030-01-07T10:00\",\"endLocal\":\"2030-01-07T11:00\",\"zoneId\":\"UTC\",\"startOffset\":null,\"endOffset\":null}";
+    return "{\"objective\":\" Meta"
+               + " \",\"startLocal\":\"2030-01-07T10:00\",\"endLocal\":\"2030-01-07T11:00\",\"zoneId\":\"UTC\",\"startOffset\":null,\"endOffset\":null}";
   }
 
   @Test
@@ -254,7 +260,8 @@ class ScheduleBlockApiTest {
     if (defect.equals("wrong-project")) {
       var other = UUID.randomUUID();
       jdbc.update(
-          "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'persona-a','Otro','','active',now(),now())",
+          "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+              + " (?,'persona-a','Otro','','active',now(),now())",
           other);
       project = other;
     }
@@ -553,7 +560,8 @@ class ScheduleBlockApiTest {
     if (mode.equals("other-task")) {
       task = UUID.randomUUID();
       jdbc.update(
-          "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at) VALUES (?,?,'Otra','','pending',now(),now())",
+          "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at)"
+              + " VALUES (?,?,'Otra','','pending',now(),now())",
           task,
           project);
     }
@@ -972,7 +980,8 @@ class ScheduleBlockApiTest {
     var firstBody = json.readTree(first.getContentAsString());
     task = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at) VALUES (?,?,'Otra','','pending',now(),now())",
+        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at)"
+            + " VALUES (?,?,'Otra','','pending',now(),now())",
         task,
         project);
     var second = create(key, createBody().replace("2030-01-07", "2030-01-08"));
@@ -998,7 +1007,9 @@ class ScheduleBlockApiTest {
     for (int i = 0; i < 2; i++) {
       var local = LocalDateTime.of(2030, 1, 7 + i, 10, 0);
       jdbc.update(
-          "INSERT INTO planned_blocks(id,project_id,task_id,request_key,objective,start_local,end_local,zone_id,start_offset,end_offset,allow_over_budget,start_at,end_at,duration_minutes,created_at) VALUES (?,?,?,?,'Meta',?,?,'UTC','Z','Z',false,?,?,60,?)",
+          "INSERT INTO"
+              + " planned_blocks(id,project_id,task_id,request_key,objective,start_local,end_local,zone_id,start_offset,end_offset,allow_over_budget,start_at,end_at,duration_minutes,created_at)"
+              + " VALUES (?,?,?,?,'Meta',?,?,'UTC','Z','Z',false,?,?,60,?)",
           i == 0 ? older : newer,
           project,
           task,

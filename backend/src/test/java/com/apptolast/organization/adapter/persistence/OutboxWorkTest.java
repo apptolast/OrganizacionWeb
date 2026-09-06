@@ -58,7 +58,8 @@ class OutboxWorkTest {
   @BeforeEach
   void clear() {
     jdbc.execute(
-        "TRUNCATE block_changes,block_projections,planned_blocks, task_status_history, tasks, outbox_events, projects");
+        "TRUNCATE work_sessions,block_changes,block_projections,planned_blocks,"
+            + " task_status_history, tasks, outbox_events, projects");
   }
 
   ProjectCreated seed() {
@@ -132,7 +133,8 @@ class OutboxWorkTest {
       ProjectCreated event = seed();
       Instant occurred = NOW.minusSeconds(index % 2);
       jdbc.update(
-          "UPDATE outbox_events SET occurred_at=?, payload=jsonb_set(payload,'{occurredAt}',to_jsonb(?::text)) WHERE event_id=?",
+          "UPDATE outbox_events SET occurred_at=?,"
+              + " payload=jsonb_set(payload,'{occurredAt}',to_jsonb(?::text)) WHERE event_id=?",
           java.sql.Timestamp.from(occurred),
           occurred.toString(),
           event.eventId());
@@ -213,9 +215,11 @@ class OutboxWorkTest {
     seed();
     var before = jdbc.queryForMap("SELECT * FROM outbox_events");
     jdbc.execute(
-        "CREATE FUNCTION test_reject_result() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'private database failure'; END; $$");
+        "CREATE FUNCTION test_reject_result() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE"
+            + " EXCEPTION 'private database failure'; END; $$");
     jdbc.execute(
-        "CREATE TRIGGER test_failure BEFORE UPDATE ON outbox_events FOR EACH ROW EXECUTE FUNCTION test_reject_result()");
+        "CREATE TRIGGER test_failure BEFORE UPDATE ON outbox_events FOR EACH ROW EXECUTE FUNCTION"
+            + " test_reject_result()");
     List<OutboxMessage> accepted = new ArrayList<>();
     try {
       publisher(

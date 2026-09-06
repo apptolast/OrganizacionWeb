@@ -52,9 +52,12 @@ class TodayApiTest {
     when(clock.instant()).thenReturn(Instant.parse("2030-01-07T12:00:00Z"));
     when(clock.getZone()).thenReturn(ZoneOffset.UTC);
     jdbc.execute(
-        "TRUNCATE block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
+        "TRUNCATE"
+            + " work_sessions,block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
     jdbc.update(
-        "INSERT INTO availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at) VALUES (?,'persona-a','UTC',120,120,120,120,120,120,120,0,now(),now())",
+        "INSERT INTO"
+            + " availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at)"
+            + " VALUES (?,'persona-a','UTC',120,120,120,120,120,120,120,0,now(),now())",
         UUID.randomUUID());
   }
 
@@ -72,8 +75,8 @@ class TodayApiTest {
         .isEqualTo(
             json.readTree(
                 """
-      {"serverNow":"2030-01-07T12:00:00Z","date":"2030-01-07","zoneId":"UTC","zoneSource":"AVAILABILITY","availabilityZoneId":"UTC","dayStartAt":"2030-01-07T00:00:00Z","dayEndAt":"2030-01-08T00:00:00Z","budgetMinutes":120,"plannedSeconds":0,"remainingSeconds":7200,"excessSeconds":0,"currentBlockId":null,"nextBlockId":null,"closingAt":null,"items":[]}
-      """));
+                {"serverNow":"2030-01-07T12:00:00Z","date":"2030-01-07","zoneId":"UTC","zoneSource":"AVAILABILITY","availabilityZoneId":"UTC","dayStartAt":"2030-01-07T00:00:00Z","dayEndAt":"2030-01-08T00:00:00Z","budgetMinutes":120,"plannedSeconds":0,"remainingSeconds":7200,"excessSeconds":0,"currentBlockId":null,"nextBlockId":null,"closingAt":null,"items":[]}
+                """));
     assertThat(jdbc.queryForList("SELECT * FROM availability_preferences")).isEqualTo(before);
     for (var table : List.of("projects", "tasks", "planned_blocks", "outbox_events"))
       assertThat(jdbc.queryForObject("SELECT count(*) FROM " + table, Long.class)).isZero();
@@ -87,12 +90,16 @@ class TodayApiTest {
     var task = UUID.randomUUID();
     var id = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,?,'Proyecto actualizado','',?,now(),now())",
+        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+            + " (?,?,'Proyecto actualizado','',?,now(),now())",
         project,
         owner,
         projectStatus);
     jdbc.update(
-        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,completed_at,created_at,updated_at) VALUES (?,?,'Tarea actualizada','',?,?,TIMESTAMPTZ '2030-01-01 00:00:00+00',TIMESTAMPTZ '2030-01-01 00:00:00+00')",
+        "INSERT INTO"
+            + " tasks(id,project_id,title,completion_criterion,status,completed_at,created_at,updated_at)"
+            + " VALUES (?,?,'Tarea actualizada','',?,?,TIMESTAMPTZ '2030-01-01"
+            + " 00:00:00+00',TIMESTAMPTZ '2030-01-01 00:00:00+00')",
         task,
         project,
         taskStatus,
@@ -102,7 +109,9 @@ class TodayApiTest {
     var from = Instant.parse(start);
     var to = Instant.parse(end);
     jdbc.update(
-        "INSERT INTO planned_blocks(id,project_id,task_id,request_key,objective,start_local,end_local,zone_id,start_offset,end_offset,allow_over_budget,start_at,end_at,duration_minutes,created_at) VALUES (?,?,?,?,'Meta',?,?,'UTC','Z','Z',true,?,?,?,?)",
+        "INSERT INTO"
+            + " planned_blocks(id,project_id,task_id,request_key,objective,start_local,end_local,zone_id,start_offset,end_offset,allow_over_budget,start_at,end_at,duration_minutes,created_at)"
+            + " VALUES (?,?,?,?,'Meta',?,?,'UTC','Z','Z',true,?,?,?,?)",
         id,
         project,
         task,
@@ -213,11 +222,15 @@ class TodayApiTest {
                                 status -> {
                                   if (absent)
                                     jdbc.update(
-                                        "INSERT INTO availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at) VALUES (?,'persona-a','Europe/Madrid',30,30,30,30,30,30,30,0,now(),now())",
+                                        "INSERT INTO"
+                                            + " availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at)"
+                                            + " VALUES"
+                                            + " (?,'persona-a','Europe/Madrid',30,30,30,30,30,30,30,0,now(),now())",
                                         UUID.randomUUID());
                                   else
                                     jdbc.update(
-                                        "UPDATE availability_preferences SET zone_id='Europe/Madrid',monday_minutes=30,version=version+1");
+                                        "UPDATE availability_preferences SET"
+                                            + " zone_id='Europe/Madrid',monday_minutes=30,version=version+1");
                                   seedBlock(
                                       "persona-a",
                                       "active",
@@ -300,7 +313,9 @@ class TodayApiTest {
     jdbc.update("UPDATE projects SET name='Nombre privado B'");
     jdbc.update("UPDATE tasks SET title='Título privado B'");
     jdbc.update(
-        "INSERT INTO availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at) SELECT ?, 'persona-b','Europe/Madrid',0,0,0,0,0,0,0,0,now(),now()",
+        "INSERT INTO"
+            + " availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at)"
+            + " SELECT ?, 'persona-b','Europe/Madrid',0,0,0,0,0,0,0,0,now(),now()",
         UUID.randomUUID());
     var response =
         mvc.perform(get("/api/v1/today").with(user("persona-a")))
@@ -385,8 +400,8 @@ class TodayApiTest {
           .isEqualTo(
               json.readTree(
                   """
-        {"type":"urn:organization:problem:storage_unavailable","title":"El almacenamiento no está disponible. Inténtalo más tarde.","status":503,"code":"STORAGE_UNAVAILABLE"}
-        """));
+                  {"type":"urn:organization:problem:storage_unavailable","title":"El almacenamiento no está disponible. Inténtalo más tarde.","status":503,"code":"STORAGE_UNAVAILABLE"}
+                  """));
       assertThat(response.getContentAsString())
           .doesNotContain("SELECT", "private", "secret", "today_unavailable");
     } finally {

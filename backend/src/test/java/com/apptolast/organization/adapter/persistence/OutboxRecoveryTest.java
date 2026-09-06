@@ -78,7 +78,8 @@ class OutboxRecoveryTest {
   @BeforeEach
   void clear() throws Exception {
     jdbc.execute(
-        "TRUNCATE block_changes,block_projections,planned_blocks, task_status_history, tasks, outbox_events, projects");
+        "TRUNCATE work_sessions,block_changes,block_projections,planned_blocks,"
+            + " task_status_history, tasks, outbox_events, projects");
     try (var connection = factory().newConnection();
         var channel = connection.createChannel()) {
       channel.queuePurge(QUEUE);
@@ -397,9 +398,11 @@ class OutboxRecoveryTest {
     seed();
     var original = jdbc.queryForMap("SELECT * FROM outbox_events");
     jdbc.execute(
-        "CREATE FUNCTION recovery_reject_result() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'test result storage unavailable'; END; $$");
+        "CREATE FUNCTION recovery_reject_result() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN"
+            + " RAISE EXCEPTION 'test result storage unavailable'; END; $$");
     jdbc.execute(
-        "CREATE TRIGGER recovery_failure BEFORE UPDATE ON outbox_events FOR EACH ROW EXECUTE FUNCTION recovery_reject_result()");
+        "CREATE TRIGGER recovery_failure BEFORE UPDATE ON outbox_events FOR EACH ROW EXECUTE"
+            + " FUNCTION recovery_reject_result()");
     try {
       publish();
       assertThat(jdbc.queryForMap("SELECT * FROM outbox_events")).isEqualTo(original);

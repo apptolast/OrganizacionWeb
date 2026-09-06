@@ -71,14 +71,16 @@ class ProjectStatesApiTest {
   @BeforeEach
   void clear() {
     jdbc.execute(
-        "TRUNCATE block_changes,block_projections,planned_blocks, task_status_history, tasks, outbox_events, projects");
+        "TRUNCATE work_sessions,block_changes,block_projections,planned_blocks,"
+            + " task_status_history, tasks, outbox_events, projects");
   }
 
   java.util.UUID seed() {
     var id = java.util.UUID.randomUUID();
     var now = java.sql.Timestamp.from(java.time.Instant.parse("2026-09-05T11:00:00Z"));
     jdbc.update(
-        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,?,?,?,'idea',?,?)",
+        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+            + " (?,?,?,?,'idea',?,?)",
         id,
         "persona-a",
         "Original",

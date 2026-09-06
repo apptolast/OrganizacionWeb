@@ -85,7 +85,8 @@ class AvailabilityApiTest {
   @BeforeEach
   void reset() {
     jdbc.execute(
-        "TRUNCATE block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
+        "TRUNCATE"
+            + " work_sessions,block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
   }
 
   String body(String zone, int minutes) {
@@ -187,9 +188,11 @@ class AvailabilityApiTest {
             .getResponse();
     var before = jdbc.queryForMap("SELECT * FROM availability_preferences");
     jdbc.execute(
-        "CREATE FUNCTION reject_availability_noop() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'No write expected'; END $$");
+        "CREATE FUNCTION reject_availability_noop() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN"
+            + " RAISE EXCEPTION 'No write expected'; END $$");
     jdbc.execute(
-        "CREATE TRIGGER reject_availability_noop BEFORE UPDATE ON availability_preferences FOR EACH ROW EXECUTE FUNCTION reject_availability_noop()");
+        "CREATE TRIGGER reject_availability_noop BEFORE UPDATE ON availability_preferences FOR EACH"
+            + " ROW EXECUTE FUNCTION reject_availability_noop()");
     try {
       var same =
           save(first.getHeader("ETag"), "UTC", 60)
@@ -536,12 +539,14 @@ class AvailabilityApiTest {
               ? "RETURN NULL;"
               : "RAISE EXCEPTION 'synthetic storage rejection';";
       jdbc.execute(
-          "CREATE FUNCTION reject_availability_write() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN "
+          "CREATE FUNCTION reject_availability_write() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN"
+              + " "
               + action
               + " END $$");
       String definition =
           fault.equals("commit")
-              ? "CREATE CONSTRAINT TRIGGER reject_availability_write AFTER UPDATE ON availability_preferences DEFERRABLE INITIALLY DEFERRED"
+              ? "CREATE CONSTRAINT TRIGGER reject_availability_write AFTER UPDATE ON"
+                    + " availability_preferences DEFERRABLE INITIALLY DEFERRED"
               : "CREATE TRIGGER reject_availability_write BEFORE "
                   + (fault.startsWith("insert") ? "INSERT" : "UPDATE")
                   + " ON availability_preferences";
@@ -593,7 +598,9 @@ class AvailabilityApiTest {
         while (System.nanoTime() < deadline) {
           waiting =
               jdbc.queryForObject(
-                  "SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock' AND query LIKE 'INSERT INTO availability_preferences%'",
+                  "SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND"
+                      + " wait_event_type='Lock' AND query LIKE 'INSERT INTO"
+                      + " availability_preferences%'",
                   Integer.class);
           if (waiting == 2) break;
           Thread.sleep(20);
@@ -666,7 +673,9 @@ class AvailabilityApiTest {
     while (System.nanoTime() < deadline) {
       waiting =
           jdbc.queryForObject(
-              "SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock' AND query LIKE 'SELECT * FROM availability_preferences WHERE owner_id=%FOR UPDATE'",
+              "SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND"
+                  + " wait_event_type='Lock' AND query LIKE 'SELECT * FROM availability_preferences"
+                  + " WHERE owner_id=%FOR UPDATE'",
               Integer.class);
       if (waiting == count) break;
       Thread.sleep(20);
@@ -866,7 +875,8 @@ class AvailabilityApiTest {
   void s45_s46_historicalZoneCanBeReadButCannotBeSaved(String operation) throws Exception {
     var first = save("\"availability:unconfigured\"", "UTC", 60).andReturn().getResponse();
     jdbc.update(
-        "UPDATE availability_preferences SET zone_id='Historical/Removed' WHERE owner_id='persona-a'");
+        "UPDATE availability_preferences SET zone_id='Historical/Removed' WHERE"
+            + " owner_id='persona-a'");
     var before = jdbc.queryForMap("SELECT * FROM availability_preferences");
     if (operation.equals("GET")) {
       mvc.perform(get("/api/v1/me/availability").with(user("persona-a")))
@@ -1071,14 +1081,19 @@ class AvailabilityApiTest {
     var project = UUID.randomUUID();
     var task = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'persona-a','Project','', 'active',now(),now())",
+        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+            + " (?,'persona-a','Project','', 'active',now(),now())",
         project);
     jdbc.update(
-        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at,completed_at,version) VALUES (?,?,'Task','','completed',now(),now(),now(),1)",
+        "INSERT INTO"
+            + " tasks(id,project_id,title,completion_criterion,status,created_at,updated_at,completed_at,version)"
+            + " VALUES (?,?,'Task','','completed',now(),now(),now(),1)",
         task,
         project);
     jdbc.update(
-        "INSERT INTO task_status_history(id,project_id,task_id,task_version,from_status,to_status,occurred_at) VALUES (?,?,?,1,'pending','completed',now())",
+        "INSERT INTO"
+            + " task_status_history(id,project_id,task_id,task_version,from_status,to_status,occurred_at)"
+            + " VALUES (?,?,?,1,'pending','completed',now())",
         UUID.randomUUID(),
         project,
         task);
@@ -1091,7 +1106,9 @@ class AvailabilityApiTest {
             "SubtaskCreated",
             "TaskStatusChanged"))
       jdbc.update(
-          "INSERT INTO outbox_events(event_id,aggregate_id,owner_id,event_type,schema_version,occurred_at,payload) VALUES (?,?,'persona-a',?,1,now(),'{}'::jsonb)",
+          "INSERT INTO"
+              + " outbox_events(event_id,aggregate_id,owner_id,event_type,schema_version,occurred_at,payload)"
+              + " VALUES (?,?,'persona-a',?,1,now(),'{}'::jsonb)",
           UUID.randomUUID(),
           project,
           type);

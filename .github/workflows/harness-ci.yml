@@ -1,15 +1,32 @@
 name: Application CI
+
+# Puerta rápida por push y PR: entorno, lint, suites, build y recorridos reales.
+# La campaña de mutación NO vive aquí: tardaba horas en un runner gratuito de dos
+# núcleos y, sin grupo `concurrency`, cada push apilaba otra ejecución de horas en
+# lugar de sustituir la anterior. El 6 de septiembre de 2026 eso dejó ocho
+# ejecuciones simultáneas y ningún verde remoto desde a127747. La mutación pasa a
+# `harness-mutation.yml` (nocturna y manual) y sigue siendo obligatoria en local
+# para cerrar cada feature, que es donde `docs/verification.md` ya la exige.
+
 on:
   push:
     branches: [main]
   pull_request:
   workflow_dispatch:
+
 permissions:
   contents: read
+
+# Un push nuevo sustituye al anterior en la misma referencia. Sin esto la cola
+# crece sin límite y ninguna ejecución llega a terminar.
+concurrency:
+  group: application-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -29,7 +46,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - run: node scripts/project.mjs install
       - run: pnpm exec playwright install --with-deps chromium
-      - run: node .harness/harness.mjs verify
+      - run: node .harness/harness.mjs init
       - run: pnpm build
-      - run: pnpm test:e2e
+      - run: xvfb-run -a pnpm test:e2e
       - run: pnpm test:publisher

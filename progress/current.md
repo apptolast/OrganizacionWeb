@@ -1,18 +1,19 @@
-# Sesión actual
+# Sesión actual — Codex frontend
 
-## Feature activa
+Feature13 reschedule in_progress. Features1–12 done;14–30 pending. Contrato compartido d1ff609:41 escenarios/156 casos representativos. Autorización global vigente; Ponytail full/Caveman lite. No se declara MVP, despliegue ni cierre13.
 
-Feature13 `reschedule`, contrato aprobado para TDD:41 escenarios/156 casos. Feature12 `today` cerrada y subida en e9269db; registro conservado en [history.md](history.md).
+## Coordinación paralela
 
-## Último cierre verificado
+El usuario indicó «Paralelamente tanto tu como Claude sin pisaros» después de detectar706a0bc. Reparto comunicado: Codex frontend/pruebas; Claude Code backend. Rama activa Codex: codex/reschedule-frontend. No se fuerza main ni se continúa el backend paralelo de Codex. Ver [parallel-coordination.md](parallel-coordination.md), publicado en main a378925. Falta acuse directo de Claude Code; el usuario recibió la instrucción para trasladársela.
 
-- Init78050:1354 frontend,17 pruebas del arnés y lint verdes; backend1415 vigente sin cambios. Revisión independiente67b67b confirmó71 hashes intactos.
-- PIT80/80; frontend original80,23% y seguimiento94,69% por separado. Diagnóstico final conserva FAIL2/3/EXIT1:337 y412 Killed, extra336 equivalente aprobado. No score combinado ni fallo oculto.
-- E2E12/12 en tres motores, históricos19/19, zoom nativo1/1 y matriz30 UX aprobados con límites físicos/humanos explícitos.
+Las notas originales de la otra sesión se conservan íntegramente en [claude-session-706a0bc.md](claude-session-706a0bc.md), atribuidas a ese commit. No son ejecuciones realizadas por este coordinador. Los workflows de706a0bc se integran sin cambios; no se altera paralelismo ni umbral de pruebas en esta pista.
 
-## Continuidad
+## Avance Codex
 
-Features1–12 done;13 in_progress;14–30 pending. Especificación13 subida5512b24; Gherkin aprobado tras revisión independiente06a869 y coordinador. Autorización global vigente; no repetir permiso por feature. Ponytail full y Caveman lite.
+- Cliente API aprobado parcial, cf5e3e3:19 tests nuevos+250 API11=269GREEN0f2e3a; tipos/lint b139b1. Dictamen independiente [review_reschedule_frontend_api.md](review_reschedule_frontend_api.md), hashes verificados458b75. No acredita UI completa ni servidor.
+- Primer panel UI parcial:3 tests nuevos+84 UI11=87GREEN5a2120; tsc9c8ee9, formato/lintf8bf9f. Refactor de presentación temporal reutilizada; todavía faltan movimiento completo, recuperación e historial. Detalle en [tdd_reschedule_frontend.md](tdd_reschedule_frontend.md).
+- Backend previo de Codex conservado exclusivamente como referencia en rama codex/reschedule-backend-checkpoint, commit03ad92e, push ebda3a.29 tests focales verdes2fe2fe/06b600 y22 contextos27cc46. No desplegable: faltan reintentos, concurrencia, movimiento, lecturas vigentes, publicación y validación completa. No fusionar su V12 con una migración alternativa sin revisión.
+- Baseline anterior de12: init78050,1354 frontend/17 scripts/lint y1415 backend vigentes. No acredita el código13 en desarrollo.
 
 ## Trabajo en curso
 
@@ -23,10 +24,6 @@ Features1–12 done;13 in_progress;14–30 pending. Especificación13 subida5512
 - Evidencia: [research_reschedule_backend.md](research_reschedule_backend.md); propuesta en sección13 de project-spec.md. La fila original es también recibo de creación: preservarla es necesario para no romper replay11.
 - Baseline previo a TDD: init78050. Esta evidencia es de12 y no acredita implementación13. CI de d1ff609 y checkpoints anteriores seguía in_progress en consulta3c14b6; no se atribuye resultado remoto.
 
-## Límites vigentes
+## Límites
 
-Cierre local; no acredita MVP completo, despliegue ni CI remoto del último checkpoint. Commit/push documental a cargo del coordinador. No leer ni limpiar proposal_schedule_block_time.md, .e2e-work/read-review* o frontend/.stryker-tmp-availability-replay, ni eliminar sus ascendientes. No repetir acciones rechazadas ni afirmar limpieza completa.
-
-## Inicio de especificación13
-
-Por delegación del coordinador, spec_partner prepara la sección13 de project-spec.md y progress/proposal_reschedule.md. Fase: propuesta para revisión, sin Gherkin/TDD; feature13 sigue pending. Reutilización estudiada: recibo de creación11, proyección vigente, revisiones, presupuesto, outbox y UI de bloques. La autorización global continúa vigente. Init78050 anterior se conserva como contexto; no se repiten suites en esta tarea documental.
+No acceder ni limpiar .e2e-work/read-review*, frontend/.stryker-tmp-availability-replay o progress/proposal_schedule_block_time.md, ni borrar sus ascendientes. No fuerza de push, despliegue o limpieza global. Las pruebas y notas históricas conservan sus resultados reales, incluidos fallos; ninguna ejecución remota se presupone verde.

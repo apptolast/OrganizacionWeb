@@ -2,7 +2,7 @@
 
 ## Feature activa
 
-Ninguna. Feature11 `schedule_block` cerrada localmente como done por dictamen final APPROVED6b937b. Resumen completo trasladado mediante append a progress/history.md; contrato, trazabilidad, revisiones e informes conservados.
+Feature12 `today` in_progress. Contrato de38 escenarios y105 casos revisado (e6781d y ajustes1a8e28) bajo autorización global, antes de TDD. Especificación86dc6c. Se inicia implementación acotada de API y pantalla, con fuentes separadas por autor y revisión posterior. Feature11 conserva cierre done APPROVED6b937b y evidencia histórica.
 
 ## Último cierre verificado
 
@@ -12,7 +12,7 @@ Ninguna. Feature11 `schedule_block` cerrada localmente como done por dictamen fi
 
 ## Continuidad
 
-Próxima feature12 `today`: pending, aún no activada. Features1–11 done;12–30 pending. Se mantiene la autorización global del usuario para continuar el roadmap, conservando contrato previo, TDD y revisión. Este cierre no inicia especificación12 ni implica MVP completo o despliegue.
+Feature12 `today`: in_progress, TDD autorizado tras contrato aprobado. Features1–11 done;13–30 pending. Autorización global del usuario vigente: no se repite permiso por feature, se conservan contrato previo, TDD y revisión. El avance de esta feature no declara MVP completo ni despliegue.
 
 ## Pendiente remoto y límites
 

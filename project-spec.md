@@ -537,3 +537,82 @@ Publicar un evento histórico no vuelve a resolver su zona contra el catálogo v
 Si el control que inició una acción desapareció o permanece deshabilitado, restaurar foco al encabezado de Bloques planificados, sólo cuando el usuario no eligió otro destino. La recuperación conservada ante cambio de elegibilidad cubre tanto tarea completed como proyecto completed. Un preview válido requiere ETag de disponibilidad configurada, days no vacío y valores enteros no negativos, con requestedSeconds positivo y budgetMinutes entre 0 y 1440 para cada fecha.
 
 Conservar el protocolo existente del publicador: un payload inválido de evento soportado queda blocked con INVALID_EVENT, sin publicar; tipo/versión de envoltorio no soportado mantiene UNSUPPORTED_EVENT. La ausencia de cualquiera de los doce campos obligatorios del payload es inválida. Los fallos reconocidos de almacenamiento usan 503 STORAGE_UNAVAILABLE. Las pruebas de concurrencia con completar tarea/proyecto y cambiar disponibilidad deben ejercitar ambos órdenes posibles de adquisición, además de comprobar ausencia de deadlocks y éxitos parciales.
+
+## Feature 12 — today (Hoy)
+
+### Propósito y alcance
+
+Mostrar al usuario su agenda personal del día, el bloque en horario planificado, el próximo inicio y la hora de cierre prevista. Es una lectura de reservas existentes: transcurrir una hora nunca acredita trabajo ni completa una tarea. Conserva bloques de tareas y proyectos completed. No introduce sesiones, temporizadores de trabajo, replanificación, recurrencia, calendario semanal ni creación de bloques desde Hoy.
+
+Especificación revisada por el coordinador (86dc6c) bajo la autorización global vigente, pendiente de destilación Gherkin; no activa implementación.
+
+### Día y snapshot
+
+`GET /api/v1/today` requiere la sesión existente y no admite parámetros de consulta, propietario, fecha ni zona suministrados por el cliente. Captura una sola vez el reloj de servidor: `serverNow`. Un puerto de lectura devuelve un snapshot coherente de disponibilidad y bloques del propietario autenticado, con los nombres de sus proyectos y títulos de sus tareas. El adaptador PostgreSQL usa una transacción local read-only REPEATABLE_READ para que preferencia, ausencia de preferencia, nombres y reservas no mezclen versiones entre consultas. No reutiliza PlanBlock, no bloquea filas para escribir, no crea disponibilidad, no emite eventos ni modifica outbox. Reutiliza los modelos de bloques y el reloj existentes; filtra en SQL las intersecciones del día, sin cargar todo el historial ni realizar lecturas HTTP por cada tarea.
+
+La zona efectiva es la guardada en disponibilidad si el servidor puede resolverla. Sin disponibilidad usa UTC y `zoneSource=UNCONFIGURED`; con una zona guardada que ya no puede resolver usa UTC y `zoneSource=UNAVAILABLE`. En ambos casos explica la causa y devuelve presupuesto desconocido (null), nunca cero ni una capacidad trasladada de otra zona. No modifica la preferencia ni los instantes o zonas históricos de los bloques. Con una zona válida usa `zoneSource=AVAILABILITY`.
+
+`date` es la fecha local de serverNow en la zona efectiva. `dayStartAt` es el inicio de esa fecha y `dayEndAt` el inicio de la siguiente fecha en esa zona: no se suman 24 horas fijas. El día y los bloques son intervalos semiabiertos. Incluye un bloque si `startAt < dayEndAt && endAt > dayStartAt`; el contacto exclusivo con un extremo no basta. Los días de cambio horario tienen su duración real. Una reserva que cruza medianoche aparece en ambos días que intersecta, sin recortar sus instantes almacenados.
+
+### Respuesta cerrada
+
+200 JSON, `Cache-Control: no-store`, sin cursor ni truncamiento de la agenda del día. El objeto tiene exactamente estos quince campos, todos obligatorios; los valores ausentes se representan mediante null donde se indica:
+
+| Campo | Contrato |
+| --- | --- |
+| serverNow | Instante UTC del reloj de servidor capturado una vez para esta respuesta. |
+| date | Fecha local ISO YYYY-MM-DD del día efectivo. |
+| zoneId | ID resoluble de la zona efectiva; UTC en los fallback. |
+| zoneSource | AVAILABILITY, UNCONFIGURED o UNAVAILABLE. |
+| availabilityZoneId | Zona guardada, incluso si no es resoluble; null si no hay preferencia. |
+| dayStartAt, dayEndAt | Instantes UTC que delimitan el día efectivo y contienen serverNow. |
+| budgetMinutes | Entero 0–1440 del día de semana de date con zona válida; null en fallback. |
+| plannedSeconds | Suma entera no negativa de las intersecciones de los bloques con el día. |
+| remainingSeconds | max(budgetMinutes × 60 − plannedSeconds, 0); null si no hay presupuesto conocido. |
+| excessSeconds | max(plannedSeconds − budgetMinutes × 60, 0); null si no hay presupuesto conocido. |
+| currentBlockId | ID del bloque cuyo startAt ≤ serverNow < endAt; null si no existe. |
+| nextBlockId | ID del primer bloque de la agenda con startAt > serverNow; null si no existe. |
+| closingAt | Mayor endAt real entre los bloques de la agenda; null si está vacía. |
+| items | Lista completa, sin IDs repetidos, ordenada por startAt y después ID UUID canónico ascendente. |
+
+Cada item tiene exactamente `block`, `projectName` y `taskTitle`. `block` reutiliza el DTO cerrado de nueve campos de feature11: id, projectId, taskId, objective, startAt, endAt, zoneId, durationMinutes y createdAt. Los nombres/títulos son los valores persistidos actuales, obtenidos dentro del mismo snapshot y bajo el mismo filtro de propietario. No se añaden estados derivados de haber pasado el horario. Los IDs current/next, cuando existen, referencian items distintos de esta respuesta. Un inicio exactamente en serverNow pertenece a current, no a next; un final exactamente en serverNow ya no pertenece a current. Las reservas existentes mantienen la prohibición de solape, también entre proyectos y aunque estén completed.
+
+El cálculo de plannedSeconds recorta cada intervalo sólo para el resumen de capacidad. No añade una petición ficticia a BlockBudget. ClosingAt conserva el fin real aunque caiga mañana; no se sustituye por dayEndAt. Una agenda vacía devuelve items vacíos, plannedSeconds cero y current/next/closing null; conserva el presupuesto conocido, si lo hay.
+
+El cliente valida el esquema cerrado, tipos, DTOs, unicidad/orden, referencias current/next y coherencia de límites, sumas y nulls antes de presentar la respuesta. Valida que date sea una fecha ISO de calendario válida, pero no recalcula su correspondencia local con los límites del día mediante TZDB: esa correspondencia se garantiza en el servidor. No exige equivalencia entre los catálogos del cliente y del servidor, ni resolver la zona efectiva o las zonas históricas para aceptar un DTO válido. Una respuesta inválida se trata como fallo de lectura, nunca como agenda vacía ni como dato confirmado. La identidad del propietario procede exclusivamente de la sesión del servidor, no de campos confiados al navegador.
+
+### Errores y privacidad
+
+Se mantienen los filtros de seguridad y el formato de errores existentes. Sin sesión: 401. Cualquier parámetro de consulta: 400 VALIDATION_ERROR con el campo correspondiente, después de los filtros de seguridad. Fallo reconocido de almacenamiento, incluido el cierre de la transacción: 503 STORAGE_UNAVAILABLE, sin detalles SQL ni datos de otros usuarios. Una lectura fallida de disponibilidad no equivale a disponibilidad no configurada. Este GET no requiere headers de idempotencia o revisión y no escribe aunque falle. Las respuestas exitosas y los errores no se guardan en almacenamiento persistente del navegador.
+
+Cada petición pertenece a la sesión, ruta y generación de actualización que la inició. Salir de Hoy, cerrar/cambiar sesión o sustituir la petición invalida su resultado y cancela la solicitud cuando sea posible. Ninguna respuesta antigua, incluso un error de autenticación, altera una sesión o pantalla posterior. El logout borra inmediatamente la agenda privada; una sesión nueva no muestra datos de la anterior mientras carga.
+
+### Pantalla y actualización
+
+La ruta `/` pasa a ser Hoy, entrada autenticada. Muestra fecha y zona efectiva, nombres de proyecto/tarea, objetivo e intervalo de cada reserva, y enlaces a la ruta existente `/proyectos/{projectId}/tareas/{taskId}`. Mantiene los intervalos reales con fecha cuando cruzan día. Presenta «En horario planificado», «Próximo inicio planificado» y «Cierre previsto», sin afirmar que se está trabajando ni que lo pasado se ha completado. El cierre del día siguiente se etiqueta con su fecha o «mañana». Los resúmenes son «Tiempo planificado», «Presupuesto del día», «Presupuesto sin reservar» y exceso, nunca productividad ni trabajo realizado.
+
+La zona de visualización es explícita. Si Intl no reconoce la zona efectiva o una zona histórica mostrada, presenta el instante UTC etiquetado y conserva el ID de zona original; nunca usa silenciosamente la zona del dispositivo. En fallback de preferencia muestra el motivo, capacidad desconocida y enlace a `/disponibilidad`. Una agenda vacía explica que no hay bloques planificados y ofrece `/proyectos`; no equivale a error. Los enlaces de tareas completed siguen disponibles mientras sus bloques existan.
+
+La pantalla carga al entrar y permite «Actualizar». Refresca al volver a estar visible/con foco, agrupando los eventos de una misma recuperación para no lanzar peticiones duplicadas y compartiendo la petición si ya hay una vigente. Mientras está visible mantiene un único timeout para la siguiente frontera futura del snapshot: el mínimo entre los inicios/finales de sus bloques y dayEndAt. Al vencer invalida la generación y consulta de nuevo; no hay polling periódico, segundero ni WebSocket. La espera se calcula con la diferencia respecto a serverNow y se ancla al tiempo transcurrido desde recibir la respuesta, no a la fecha o zona configurada en el dispositivo. Al ocultarse cancela ese timeout; al regresar obtiene un snapshot nuevo y lo programa otra vez. Sólo programa fronteras estrictamente futuras para evitar bucles.
+
+Cada snapshot muestra «Según actualización de …» con la hora del servidor. Durante actualización conserva los datos con indicación de actualización pendiente, salvo al vencer dayEndAt: retira la agenda anterior de la presentación de Hoy y carga el nuevo día. Un error inicial o tras rollover muestra fallo y reintento, no un vacío de negocio. Un fallo al refrescar dentro del mismo día conserva el último snapshot claramente señalado como «Sin actualizar», con su fecha/hora, y un reintento manual; no vuelve a programar automáticamente una frontera ya vencida. Tras fallo, la recuperación visible/con foco también puede reintentar. No promete observar cambios externos mientras permanece visible antes de una frontera o actualización manual.
+
+### Migración de navegación y accesibilidad
+
+La captura de proyecto se mueve a `/proyectos/nuevo`, que debe resolverse antes del matcher genérico de proyectos. Los dos enlaces de creación de la lista/vacío y las pruebas que usaban `/` para capturar pasan a esa ruta. Se conservan `/proyectos`, su paginación, detalle y edición de proyecto, detalle de tarea y `/disponibilidad`, incluida la entrada directa y retorno de autenticación existentes. Las rutas no reconocidas muestran un mensaje de página no encontrada con enlaces Hoy/Proyectos; no presentan accidentalmente el formulario de creación. El reinicio de ruta a `/` al cerrar sesión sigue siendo válido y lleva a Hoy tras el acceso posterior.
+
+Workspace distingue Hoy, Proyectos y Disponibilidad: enlaces, breadcrumb y aria-current corresponden a la ruta efectiva, con una sola entrada activa. El skip link sigue llegando al contenido principal enfocable; se permite conservar el ID legacy `proyectos` en ese contenido para evitar un renombrado transversal. Carga, error y actualización se anuncian accesiblemente sin robar foco; «Actualizar»/«Reintentar» y enlaces son operables con teclado. Agenda vertical legible en móvil y sin scroll horizontal accidental, con la matriz de 30 principios y evidencia responsive de docs/ux-requirements.md aplicadas a este flujo; no se afirma cumplimiento global sólo por axe.
+
+### Decisiones y límites deliberados
+
+| Decisión | Alternativa descartada y razón |
+| --- | --- |
+| UTC explícito y presupuesto null si falta zona utilizable. | Usar la zona del dispositivo, cero o bloquear toda lectura ocultaría el contexto o impediría consultar reservas válidas. |
+| Item con DTO de bloque reutilizado y nombres mediante join. | UUIDs solos o consultas por tarea hacen la agenda ilegible o añaden peticiones y snapshots inconsistentes. |
+| Snapshot read-only único y reloj capturado una vez. | Lecturas independientes pueden mezclar disponibilidad y reservas de revisiones distintas. |
+| Intersección para capacidad y fin real para cierre. | Recortar también el cierre fingiría que una reserva termina a medianoche. |
+| Agenda completa de un único día. | Paginación o historial arbitrario complica current/next/resumen y pertenece a vistas posteriores. |
+| Hoy en raíz y captura en ruta explícita. | Añadir sólo /hoy dejaría incumplida la entrada Hoy ya aprobada; cambiar deep links existentes no es necesario. |
+| Un timeout de frontera, foco/visibilidad y actualización manual. | Polling continuo o reloj de trabajo añade carga y confunde planificación con ejecución. El snapshot fechado hace explícito el límite de frescura. |
+
+La destilación Gherkin cubrirá familias observables acotadas: aislamiento y errores; snapshot y ausencia/cambio de preferencia; día/DST/intersecciones; capacidad conocida/desconocida y completed; current/next/cierre; lectura y fallback; refresco/obsolescencia/logout; migración de rutas y accesibilidad. La validación del esquema se agrupa por contrato, sin convertir variantes de mutadores en escenarios de producto. No se requiere nueva migración o índice sin evidencia de necesidad, ni introducir un framework temporal o de cache para este MVP.

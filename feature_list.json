@@ -132,10 +132,15 @@
       "id": 12,
       "name": "today",
       "title": "Consultar Hoy",
-      "description": "Consultar Hoy: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
-      "acceptance": [],
+      "description": "Hoy: contrato aprobado bajo autorización global,38 escenarios y105 casos representativos. Snapshot propio read-only, agenda, capacidad y actualización; TDD en curso.",
+      "acceptance": [
+        "Contrato features/today.feature: lectura coherente y privada con esquema cerrado15 y item block9+nombres.",
+        "Día por zona efectiva, fallback UTC con presupuesto null, intersecciones reales, current/next/cierre sin acreditar trabajo.",
+        "Lectura, actualización por frontera/foco y recuperación con protección de resultados obsoletos y logout.",
+        "Hoy en raíz, captura en /proyectos/nuevo y conservación de rutas, navegación y criterios UX existentes."
+      ],
       "sdd": true,
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "id": 13,

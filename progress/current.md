@@ -14,6 +14,14 @@ Ponytail full y Caveman lite. No leer ni limpiar `.e2e-work/read-review*`, `fron
 
 ## Continuación concreta
 
-Backend: siguientes ciclos individuales de validación, zona fallback y elegibilidad; después idempotencia por propietario, unicidad activa, integridad contextual y errores transaccionales antes de HTTP y consultas. V14 sigue siendo una migración de desarrollo: por ahora sólo crea la tabla y retira la FK legacy del agregado outbox hacia proyectos; sus constraints de negocio todavía no están completos. El evento14 aún no tiene ruta de publicador implementada.
+Backend: siguientes ciclos individuales de rango temporal y zona fallback; después idempotencia por propietario, unicidad activa, integridad contextual y errores transaccionales antes de HTTP y consultas. Duración y elegibilidad del núcleo ya están implementadas en 53b37de; tipos/ausencia JSON siguen pendientes del adaptador HTTP. V14 sigue siendo una migración de desarrollo: por ahora sólo crea la tabla y retira la FK legacy del agregado outbox hacia proyectos; sus constraints de negocio todavía no están completos. El evento14 aún no tiene ruta de publicador implementada.
 
-Frontend: siguientes ciclos de consultas por ID/key, variantes contractuales restantes y componente de tarea con recuperación deliberada, privacidad y foco. Ninguna UI usa todavía este cliente y ningún endpoint/bean expone el nuevo backend. No se ha ejecutado una suite global, E2E ni mutación sobre feature14; los gates de feature13 no se atribuyen al código nuevo. Esta rama no está lista para merge ni despliegue.
+Frontend: consultas por ID/key implementadas en 9e67299. Siguientes ciclos: variantes contractuales restantes y componente de tarea con recuperación deliberada, privacidad y foco. Ninguna UI usa todavía este cliente y ningún endpoint/bean expone el nuevo backend. No se ha ejecutado una suite global, E2E ni mutación sobre feature14; los gates de feature13 no se atribuyen al código nuevo. Esta rama no está lista para merge ni despliegue.
+
+## Avance posterior y estimación revisada
+
+Plan actualizado en 170ca76: 30–60 horas sigue siendo hipótesis de baja confianza, con secuencia y definición de horas explícitas. No equivale a calendario ni a cuota garantizados; 19–30 siguen fuera del MVP sin cancelarse.
+
+Cliente 9e67299: GET por ID/key añade diez casos, 27/27 verdes en 23584f, con tipos, lint y formato. Dictamen review_start_work_recovery_client.md APPROVED parcial; root leyó el diff completo en 2b53db. Backend 53b37de: rango 1–1440 y completed proyecto/tarea, ocho pruebas de núcleo verdes e55cd8; dictamen review_start_work_guards.md APPROVED parcial, root386a6a. Regresión PG existente d4b176 1/1 sobre el núcleo actualizado, XML confirmado por root888dd5. Los nueve casos backend se ejecutaron en dos corridas focales, no en una suite global nueva.
+
+Ambos autores terminaron y dejaron el corte congelado, sin procesos activos. Conservados incidentes e inicialmente GREEN en bitácoras. Feature14 continúa in_progress; no nuevos endpoints, UI ni publicación, no merge de esta rama ni despliegue. No trasladar la aprobación de checkpoints a una aprobación final de feature14.

@@ -42,6 +42,7 @@ pitest {
     val availabilityOnly = scope == "availability"
     val scheduleBlockOnly = scope == "schedule_block"
     val todayOnly = scope == "today"
+    val rescheduleOnly = scope == "reschedule"
     val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
     val authenticationClasses = setOf(
         "com.apptolast.organization.adapter.http.SessionController",
@@ -175,7 +176,24 @@ pitest {
         "com.apptolast.organization.adapter.config.ApplicationWiringTest",
         "com.apptolast.organization.adapter.config.ProjectStateConfigurationTest"
     )
+    // Feature13 includes the changed shared creation, publication and read paths.
+    val rescheduleClasses = scheduleBlockClasses + setOf(
+        "com.apptolast.organization.application.MoveBlock*",
+        "com.apptolast.organization.application.MoveContext",
+        "com.apptolast.organization.application.CancelBlock*",
+        "com.apptolast.organization.application.ReadBlockChanges*",
+        "com.apptolast.organization.application.PublishOutbox",
+        "com.apptolast.organization.adapter.http.RescheduleController*",
+        "com.apptolast.organization.adapter.http.BlockChangesController*",
+        "com.apptolast.organization.adapter.http.BlockCursor*",
+        "com.apptolast.organization.adapter.http.ApiErrors",
+        "com.apptolast.organization.adapter.persistence.PostgresBlockChangeQueries",
+        "com.apptolast.organization.adapter.persistence.PostgresTodayQueries"
+    )
+    // Keep all JUnit candidates: PIT chooses tests using measured coverage.
+    val rescheduleTests = setOf("com.apptolast.organization.*")
     targetClasses.set(when {
+        rescheduleOnly -> rescheduleClasses
         todayOnly -> todayClasses
         scheduleBlockOnly -> scheduleBlockClasses
         availabilityOnly -> availabilityClasses
@@ -183,9 +201,10 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses
     })
     targetTests.set(when {
+        rescheduleOnly -> rescheduleTests
         todayOnly -> todayTests
         scheduleBlockOnly -> scheduleBlockTests
         availabilityOnly -> availabilityTests + taskStatusAdapterTests + taskAdapterTests.filter { !it.contains("broker") }
@@ -193,8 +212,9 @@ pitest {
         taskStatusOnly -> taskTests + taskStatusAdapterTests
         splitOnly -> taskTests
         taskOnly -> taskTests
-        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests
+        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests
     })
+    if (rescheduleOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-reschedule"))
     if (todayOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-today"))
     if (availabilityOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-availability"))
     if (scheduleBlockOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-schedule-block"))

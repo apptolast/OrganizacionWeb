@@ -23,6 +23,7 @@ export function createProject(runner = run) {
       (task !== "mutate" ||
         ![
           "reschedule-frontend",
+          "reschedule-backend",
           "today-backend",
           "today-frontend",
           "today-frontend-replay",
@@ -52,6 +53,10 @@ export function createProject(runner = run) {
       mutate: "pitest",
     };
     if (!commands[task]) throw new Error(`Unknown task: ${task}`);
+    if (task === "mutate" && target === "reschedule-backend") {
+      backend("pitest", ["-PmutationScope=reschedule"]);
+      return;
+    }
     if (task === "mutate" && target === "reschedule-frontend") {
       runner("pnpm", [
         "--dir",

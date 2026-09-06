@@ -114,12 +114,13 @@ function outbox(id, type = "ProjectCreated.v1", taskId) {
       "ProjectUpdated.v1",
       "ProjectStatusChanged.v1",
       "TaskCreated.v1",
+      "SubtaskCreated.v1",
     ].includes(type),
   );
   assert.match(id, /^[0-9a-f-]{36}$/i);
-  if (type === "TaskCreated.v1") assert.match(taskId, /^[0-9a-f-]{36}$/i);
-  const taskFilter =
-    type === "TaskCreated.v1" ? ` AND payload->>'taskId'='${taskId}'` : "";
+  const taskEvent = ["TaskCreated.v1", "SubtaskCreated.v1"].includes(type);
+  if (taskEvent) assert.match(taskId, /^[0-9a-f-]{36}$/i);
+  const taskFilter = taskEvent ? ` AND payload->>'taskId'='${taskId}'` : "";
   const value = docker([
     "exec",
     "-T",
@@ -181,6 +182,7 @@ function assertMessage(row, received) {
     "ProjectUpdated.v1": ["name"],
     "ProjectStatusChanged.v1": ["fromStatus", "toStatus"],
     "TaskCreated.v1": ["taskId", "title"],
+    "SubtaskCreated.v1": ["taskId", "parentTaskId", "title"],
   }[row.event_type];
   assert.ok(specificFields, "Only approved event schemas are accepted");
   assert.deepEqual(
@@ -357,6 +359,39 @@ try {
   assert.equal(taskPending.payload.aggregateId, created.id);
   assert.equal(taskPending.payload.taskId, task.id);
   assert.equal(taskPending.payload.title, task.title);
+  const childResponse = await application.post(
+    `/api/v1/projects/${created.id}/tasks/${task.id}/subtasks`,
+    {
+      headers: { ...(await csrfHeaders(application)), Origin: origin },
+      data: {
+        title: "Paso durante caída del broker",
+        completionCriterion: "Criterio privado del paso",
+        estimatedMinutes: 5,
+      },
+      timeout: 4500,
+    },
+  );
+  assert.equal(
+    childResponse.status(),
+    201,
+    "Subtask must commit independently of broker",
+  );
+  const child = await childResponse.json();
+  const childPending = await eventually(
+    "split @s37 pending retry with broker stopped",
+    () => {
+      const row = outbox(created.id, "SubtaskCreated.v1", child.id);
+      return row?.status === "pending" && row.attempts >= 1 ? row : false;
+    },
+    30,
+  );
+  assert.equal(childPending.last_error_code, "BROKER_UNAVAILABLE");
+  assert.equal(childPending.published_at, null);
+  assert.equal(childPending.payload.aggregateId, created.id);
+  assert.equal(childPending.payload.taskId, child.id);
+  assert.equal(childPending.payload.parentTaskId, task.id);
+  assert.notEqual(child.id, task.id);
+  assert.equal(outbox(created.id, "TaskCreated.v1", child.id), undefined);
   docker(["start", "rabbitmq"], undefined, 30000);
   const recovered = await eventually(
     "@s9 background publisher recovers automatically",
@@ -505,6 +540,53 @@ try {
   console.log(
     "PASS tasks @s16/@s17: broker stopped, HTTP 201, original TaskCreated recovered with distinct project and task identities",
   );
+  const childPublished = await eventually(
+    "split @s21 publishes original child event",
+    () => {
+      const row = outbox(created.id, "SubtaskCreated.v1", child.id);
+      return row?.status === "published" ? row : false;
+    },
+    120,
+  );
+  assert.equal(childPublished.event_id, childPending.event_id);
+  assert.deepEqual(childPublished.payload, childPending.payload);
+  assert.ok(childPublished.attempts > childPending.attempts);
+  async function receiveChild() {
+    return eventually(
+      "SubtaskCreated original message receipt",
+      () => {
+        const messages = management(
+          "queues/organization/organization.subtask-created.v1/get",
+          {
+            count: 100,
+            ackmode: "ack_requeue_true",
+            encoding: "auto",
+            truncate: 1000000,
+          },
+        );
+        return messages.some(
+          (item) => item.properties.message_id === childPublished.event_id,
+        )
+          ? messages
+          : false;
+      },
+      30,
+    );
+  }
+  assertMessage(childPublished, await receiveChild());
+  const childQueue = management(
+    "queues/organization/organization.subtask-created.v1",
+  );
+  assert.equal(childQueue.durable, true);
+  assert.equal(childQueue.type, "quorum");
+  assert.ok(
+    management(
+      "bindings/organization/e/organization.events/q/organization.subtask-created.v1",
+    ).some((binding) => binding.routing_key === "subtask.created.v1"),
+  );
+  console.log(
+    "PASS split @s21/@s37: HTTP 201 while broker stopped; original nine-field SubtaskCreated recovered",
+  );
   docker(["stop", "backend"], undefined, 30000);
   docker(["restart", "rabbitmq"], undefined, 30000);
   const retained = await receiveOriginals(
@@ -514,6 +596,11 @@ try {
   );
   assertMessage(published, retained);
   assertMessage(recovered, retained);
+  assertMessage(childPublished, await receiveChild());
+  assert.deepEqual(
+    outbox(created.id, "SubtaskCreated.v1", child.id),
+    childPublished,
+  );
   const retainedTasks = await eventually(
     "TaskCreated retained after same-volume Rabbit restart",
     () => {

@@ -37,6 +37,7 @@ pitest {
     val scope = providers.gradleProperty("mutationScope").orNull
     val authenticationOnly = scope == "authentication"
     val taskOnly = scope == "create_task"
+    val splitOnly = scope == "split_task"
     val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
     val authenticationClasses = setOf(
         "com.apptolast.organization.adapter.http.SessionController",
@@ -65,20 +66,29 @@ pitest {
     )
     val taskAdapterTests = setOf(
         "com.apptolast.organization.adapter.TaskApiTest",
+        "com.apptolast.organization.adapter.SubtaskApiTest",
         "com.apptolast.organization.adapter.broker.*Test"
+    )
+    val splitClasses = taskClasses + setOf(
+        "com.apptolast.organization.application.CreateSubtask",
+        "com.apptolast.organization.application.ReadSubtasks",
+        "com.apptolast.organization.application.SubtaskCreated"
     )
     val taskTests = core + taskAdapterTests
     targetClasses.set(when {
         authenticationOnly -> authenticationClasses
+        splitOnly -> splitClasses
         taskOnly -> taskClasses
         else -> core + authenticationClasses + taskAdapters
     })
     targetTests.set(when {
         authenticationOnly -> authenticationTests
+        splitOnly -> taskTests
         taskOnly -> taskTests
         else -> core + authenticationTests + taskAdapterTests
     })
     if (authenticationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-authentication"))
+    if (splitOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-split-task"))
     if (taskOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-create-task"))
     jvmArgs.set(setOf("-Dapi.version=1.44"))
     // Real broker tests restart a container for each JUnit lifecycle in PIT.

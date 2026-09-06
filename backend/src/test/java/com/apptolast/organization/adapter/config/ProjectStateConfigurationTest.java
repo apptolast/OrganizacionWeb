@@ -23,6 +23,8 @@ class ProjectStateConfigurationTest {
             .withBean(ProjectQueries.class, () -> org.mockito.Mockito.mock(ProjectQueries.class))
             .withBean(ProjectEditing.class, () -> org.mockito.Mockito.mock(ProjectEditing.class))
             .withBean(TaskCommit.class, () -> org.mockito.Mockito.mock(TaskCommit.class))
+            .withBean(SubtaskCommit.class, () -> org.mockito.Mockito.mock(SubtaskCommit.class))
+            .withBean(SubtaskQueries.class, () -> org.mockito.Mockito.mock(SubtaskQueries.class))
             .withBean(TaskQueries.class, () -> org.mockito.Mockito.mock(TaskQueries.class))
             .withBean(ProjectStatusEditing.class, () -> store);
     if (!value.equals("absent"))

@@ -4,7 +4,9 @@ import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_READ
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS;
 import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
 
+import com.apptolast.organization.application.CreateSubtaskUseCase;
 import com.apptolast.organization.application.CreateTaskUseCase;
+import com.apptolast.organization.application.ReadSubtasksUseCase;
 import com.apptolast.organization.application.ReadTasksUseCase;
 import com.apptolast.organization.domain.FieldError;
 import com.apptolast.organization.domain.Task;
@@ -31,16 +33,33 @@ public final class TaskController {
   private final ReadTasksUseCase read;
   private final CreateTaskUseCase create;
   private final ObjectMapper json;
+  private final CreateSubtaskUseCase split;
+  private final ReadSubtasksUseCase subtasks;
 
-  public TaskController(CreateTaskUseCase create, ObjectMapper json, ReadTasksUseCase read) {
+  public TaskController(
+      CreateTaskUseCase create,
+      ObjectMapper json,
+      ReadTasksUseCase read,
+      CreateSubtaskUseCase split,
+      ReadSubtasksUseCase subtasks) {
+    this.subtasks = subtasks;
+    this.split = split;
     this.create = create;
     this.json = json;
     this.read = read;
   }
 
-  @PostMapping(value = "/api/v1/projects/{projectId}/tasks", consumes = "application/json")
+  @PostMapping(
+      value = {
+        "/api/v1/projects/{projectId}/tasks",
+        "/api/v1/projects/{projectId}/tasks/{parentId}/subtasks"
+      },
+      consumes = "application/json")
   public ResponseEntity<Task> create(
-      @PathVariable String projectId, @RequestBody String raw, Principal principal)
+      @PathVariable String projectId,
+      @PathVariable(required = false) String parentId,
+      @RequestBody String raw,
+      Principal principal)
       throws JsonProcessingException {
     JsonNode body =
         json.reader()
@@ -55,12 +74,20 @@ public final class TaskController {
                 throw invalid(field, "UNKNOWN_FIELD");
             });
     var task =
-        create.execute(
-            principal.getName(),
-            identifier(projectId, "projectId"),
-            string(body, "title"),
-            string(body, "completionCriterion"),
-            minutes(body));
+        parentId == null
+            ? create.execute(
+                principal.getName(),
+                identifier(projectId, "projectId"),
+                string(body, "title"),
+                string(body, "completionCriterion"),
+                minutes(body))
+            : split.execute(
+                principal.getName(),
+                identifier(projectId, "projectId"),
+                identifier(parentId, "parentId"),
+                string(body, "title"),
+                string(body, "completionCriterion"),
+                minutes(body));
     return ResponseEntity.created(
             URI.create("/api/v1/projects/" + task.projectId() + "/tasks/" + task.id()))
         .body(task);
@@ -128,6 +155,10 @@ public final class TaskController {
   }
 
   private TaskPosition decode(String cursor, UUID project) {
+    return decode(cursor, project, null);
+  }
+
+  private TaskPosition decode(String cursor, UUID project, UUID parent) {
     try {
       if (cursor == null || !cursor.matches("[A-Za-z0-9_-]+"))
         throw invalid("cursor", "INVALID_VALUE");
@@ -141,7 +172,7 @@ public final class TaskController {
               .readTree(bytes);
       if (body == null
           || !body.isObject()
-          || body.size() != 3
+          || body.size() != (parent == null ? 3 : 4)
           || !body.has("projectId")
           || !body.has("createdAt")
           || !body.has("id")
@@ -149,6 +180,11 @@ public final class TaskController {
           || !body.get("createdAt").isTextual()
           || !body.get("id").isTextual()) throw invalid("cursor", "INVALID_VALUE");
       if (!project.toString().equals(body.get("projectId").textValue()))
+        throw invalid("cursor", "INVALID_VALUE");
+      if (parent != null
+          && (!body.has("parentTaskId")
+              || !body.get("parentTaskId").isTextual()
+              || !parent.toString().equals(body.get("parentTaskId").textValue())))
         throw invalid("cursor", "INVALID_VALUE");
       String timestamp = body.get("createdAt").textValue();
       var instant = Instant.parse(timestamp);
@@ -177,5 +213,52 @@ public final class TaskController {
     if (!value.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))
       throw invalid(field, "INVALID_FORMAT");
     return UUID.fromString(value);
+  }
+
+  public record ParentResponse(Task parent) {}
+
+  @GetMapping("/api/v1/projects/{projectId}/tasks/{id}/parent")
+  public ParentResponse parent(
+      @PathVariable String projectId, @PathVariable String id, Principal principal) {
+    return new ParentResponse(
+        subtasks
+            .parent(principal.getName(), identifier(projectId, "projectId"), identifier(id, "id"))
+            .orElse(null));
+  }
+
+  @GetMapping("/api/v1/projects/{projectId}/tasks/{parentId}/subtasks")
+  public PageResponse children(
+      @PathVariable String projectId,
+      @PathVariable String parentId,
+      @RequestParam MultiValueMap<String, String> parameters,
+      Principal principal)
+      throws JsonProcessingException {
+    var project = identifier(projectId, "projectId");
+    var parent = identifier(parentId, "parentId");
+    if (parameters.keySet().stream().anyMatch(key -> !key.equals("cursor")))
+      throw invalid("query", "INVALID_VALUE");
+    TaskPosition after = null;
+    if (parameters.containsKey("cursor")) {
+      if (parameters.get("cursor").size() != 1) throw invalid("cursor", "INVALID_VALUE");
+      after = decode(parameters.getFirst("cursor"), project, parent);
+    }
+    var page = subtasks.list(principal.getName(), project, parent, after);
+    var next =
+        page.next() == null
+            ? null
+            : Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(
+                    json.writeValueAsBytes(
+                        Map.of(
+                            "projectId",
+                            project.toString(),
+                            "parentTaskId",
+                            parent.toString(),
+                            "createdAt",
+                            page.next().createdAt().toString(),
+                            "id",
+                            page.next().id().toString())));
+    return new PageResponse(page.items(), next);
   }
 }

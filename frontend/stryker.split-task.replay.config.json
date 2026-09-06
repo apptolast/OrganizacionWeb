@@ -1,0 +1,38 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "mutate": [
+    "src/App.tsx:10:0-10:200",
+    "src/task-parent.tsx:40:0-40:200",
+    "src/task-parent.tsx:50:0-50:200",
+    "src/task-reader.tsx:23:0-25:200",
+    "src/task-reader.tsx:27:0-28:200",
+    "src/task-reader.tsx:32:0-32:200",
+    "src/task-reader.tsx:61:0-64:200",
+    "src/task-reader.tsx:70:0-70:200",
+    "src/task-reader.tsx:75:0-75:200",
+    "src/task-reader.tsx:90:0-92:200",
+    "src/task-reader.tsx:102:0-102:200",
+    "src/task-reader.tsx:108:0-109:200",
+    "src/tasks-api.ts:15:0-15:200",
+    "src/tasks-api.ts:36:0-36:200"
+  ],
+  "reporters": ["clear-text", "json", "html"],
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 80
+  },
+  "concurrency": 2,
+  "coverageAnalysis": "perTest",
+  "vitest": {
+    "configFile": "vite.config.ts"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation-split-task/replay.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation-split-task/replay.html"
+  }
+}

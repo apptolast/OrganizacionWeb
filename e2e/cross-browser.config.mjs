@@ -10,8 +10,9 @@ export default defineConfig({
     "project-states.spec.mjs",
     "authentication.spec.mjs",
     "create-task.spec.mjs",
+    "split-task.spec.mjs",
   ],
-  grep: /real creation survives|real update persists|explicit transitions persist|public access screen|confirmed task survives/,
+  grep: /real creation survives|real update persists|explicit transitions persist|public access screen|confirmed task survives|nested children preserve/,
   projects: [
     { name: "firefox", use: { browserName: "firefox" } },
     { name: "webkit", use: { browserName: "webkit" } },

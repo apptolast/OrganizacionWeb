@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.*;
 import org.springframework.stereotype.Component;
 
 @Component
-public final class PostgresTaskQueries implements TaskQueries {
+public final class PostgresTaskQueries implements TaskQueries, SubtaskQueries {
   private final JdbcTemplate jdbc;
 
   public PostgresTaskQueries(JdbcTemplate jdbc) {
@@ -71,5 +71,44 @@ public final class PostgresTaskQueries implements TaskQueries {
             Boolean.class,
             owner,
             project))) throw new ResourceNotFoundException();
+  }
+
+  public Optional<Task> parent(String owner, UUID project, UUID id) {
+    try {
+      var rows =
+          jdbc.query(
+              "SELECT parent.* FROM tasks child JOIN projects p ON p.id=child.project_id LEFT JOIN tasks parent ON parent.project_id=child.project_id AND parent.id=child.parent_id WHERE p.owner_id=? AND p.id=? AND child.id=?",
+              (row, n) ->
+                  row.getObject("id") == null
+                      ? Optional.<Task>empty()
+                      : Optional.of(MAPPER.mapRow(row, n)),
+              owner,
+              project,
+              id);
+      return rows.stream().findFirst().orElseThrow(ResourceNotFoundException::new);
+    } catch (DataAccessException error) {
+      throw new StorageUnavailableException(error);
+    }
+  }
+
+  public List<Task> list(String owner, UUID project, UUID parent, TaskPosition after) {
+    try {
+      detail(owner, project, parent);
+      if (after != null)
+        return jdbc.query(
+            "SELECT * FROM tasks WHERE project_id=? AND parent_id=? AND (created_at,id)<(?,?) ORDER BY created_at DESC,id DESC LIMIT 21",
+            MAPPER,
+            project,
+            parent,
+            Timestamp.from(after.createdAt()),
+            after.id());
+      return jdbc.query(
+          "SELECT * FROM tasks WHERE project_id=? AND parent_id=? ORDER BY created_at DESC,id DESC LIMIT 21",
+          MAPPER,
+          project,
+          parent);
+    } catch (DataAccessException error) {
+      throw new StorageUnavailableException(error);
+    }
   }
 }

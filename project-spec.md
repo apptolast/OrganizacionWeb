@@ -346,7 +346,7 @@ La web incorpora una sección Tareas al detalle existente: formulario, lista per
 
 ## Feature 8: dividir tareas — contrato aprobado
 
-Create_task está cerrada localmente y publicada en db4d20b; su CI remota sigue en curso. El contrato `features/split_task.feature` contiene 38 escenarios, revisados desde las perspectivas de integración y backend y aprobados dentro de la autorización global. El parser confirmó 82 casos de tablas locales; ese recuento no incluye las entradas heredadas por referencia, que deberán ejecutarse también sobre el endpoint nuevo. La siguiente implementación activa será exclusivamente split_task.
+Create_task está cerrada y publicada en db4d20b; su CI remota 34004667683 terminó correctamente, incluidos verify, compilación, E2E y smoke del publicador. El contrato `features/split_task.feature` contiene 38 escenarios, revisados desde las perspectivas de integración y backend y aprobados dentro de la autorización global. El parser confirmó 82 casos de tablas locales; ese recuento no incluye las entradas heredadas por referencia, que deberán ejecutarse también sobre el endpoint nuevo. Split_task está cerrada localmente con dictamen APPROVED; su CI de publicación se registra por separado.
 
 Una tarea propia puede dividirse creando hijos nuevos, con los mismos campos y límites de contenido. Un hijo puede tener a su vez hijos: se permite división progresiva sin mover, reasignar o borrar entidades existentes. Crear un paso no completa ninguna tarea, no registra tiempo trabajado ni suma estimaciones. Padre y proyecto conservan sus valores, fechas y versiones. Añadir trabajo a un proyecto completed exige reapertura deliberada en pausa.
 

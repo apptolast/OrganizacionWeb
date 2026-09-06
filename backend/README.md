@@ -94,3 +94,15 @@ Las rutas de tareas usan 404 RESOURCE_NOT_FOUND uniforme para recursos inexisten
 TaskCreated.v1 contiene eventId, aggregateId, ownerId, occurredAt, schemaVersion, type, taskId y title. No incluye criterio ni estimación. El publicador usa task.created.v1 y organization.task-created.v1 sobre el exchange existente. Mantiene confirmaciones, entrega obligatoria, reintentos y entrega al menos una vez; no promete orden entre eventos distintos del proyecto.
 
 `./gradlew -PmutationScope=create_task pitest` selecciona la lógica de tareas, validación HTTP/cursor, adaptadores PostgreSQL y extensión del publicador. Su informe separado es `build/reports/pitest-create-task`; el alcance predeterminado también conserva esos adaptadores para la CI. El resultado observado se documenta en el informe de mutación de la feature.
+
+## Subtareas y relación directa
+
+`POST /api/v1/projects/{projectId}/tasks/{parentId}/subtasks` reutiliza los tres campos y las reglas de creación. Confirma una tarea nueva y un único SubtaskCreated.v1, conservando DTO8 y Location del detalle. El POST anterior crea raíces y su TaskCreated.v1; la colección plana anterior sigue incluyendo todas las tareas del proyecto.
+
+V8 añade tasks.parent_id opcional, identidad única compuesta (project_id, id), FK compuesta al padre y restricción contra referencia a sí misma. No añade borrado en cascada. El índice de hijos directos usa project_id, parent_id, created_at e id. PostgresTaskCommit implementa ambos puertos de creación y reutiliza la misma transacción: bloqueo del proyecto propio, verificación del padre dentro del proyecto y dos inserciones de una fila. Padre y proyecto no cambian; se conserva la carrera con completar, sin otro bloqueo asesor ni recorrido de ancestros.
+
+`GET /api/v1/projects/{projectId}/tasks/{parentId}/subtasks` lista sólo hijos directos, veinte por página con orden descendente. Su cursor estricto contiene projectId, parentTaskId, createdAt e id; no acepta cursores planos ni de otro padre. `GET /api/v1/projects/{projectId}/tasks/{id}/parent` devuelve exactamente parent con DTO8 o null para una raíz confirmada. El JOIN distingue una relación nula de recurso inexistente; un fallo de almacenamiento produce 503, nunca una raíz ficticia. Todas las rutas conservan privacidad, sesión y no-store; POST conserva CSRF y origen.
+
+SubtaskCreated.v1 tiene los ocho campos de TaskCreated.v1 más parentTaskId. Los dos identificadores de tarea deben ser UUID completos y distintos, comparados como identidades. Se conserva el proyecto como aggregateId; criterio y estimación no salen al evento. La ruta cerrada es subtask.created.v1, cola quorum durable organization.subtask-created.v1. Se mantienen intactas las cuatro rutas anteriores y las garantías de entrega existentes.
+
+`./gradlew -PmutationScope=split_task pitest` cubre casos de uso nuevos y adaptadores compartidos, incluida la regresión de raíces. Informe independiente en `build/reports/pitest-split-task`; resultados y limitaciones en `progress/mutation_split_task_backend.md`.

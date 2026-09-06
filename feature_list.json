@@ -88,10 +88,10 @@
       "id": 8,
       "name": "split_task",
       "title": "Dividir tarea",
-      "description": "Dividir tarea: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "description": "Subtareas propias, relación directa y evento atómico implementados; contrato de 38 escenarios verificado y dictamen final APPROVED.",
       "acceptance": [],
       "sdd": true,
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": 9,

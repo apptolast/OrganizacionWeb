@@ -53,4 +53,16 @@ public class ApplicationConfiguration {
       com.apptolast.organization.application.TaskQueries queries) {
     return new com.apptolast.organization.application.ReadTasks(queries);
   }
+
+  @Bean
+  com.apptolast.organization.application.CreateSubtask createSubtask(
+      com.apptolast.organization.application.SubtaskCommit commit, Clock clock) {
+    return new com.apptolast.organization.application.CreateSubtask(commit, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReadSubtasks readSubtasks(
+      com.apptolast.organization.application.SubtaskQueries queries) {
+    return new com.apptolast.organization.application.ReadSubtasks(queries);
+  }
 }

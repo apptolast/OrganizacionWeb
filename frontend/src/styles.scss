@@ -1223,6 +1223,40 @@ button {
     }
   }
 }
+.project-tasks h3 a,
+.task-parent a {
+  display: grid;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 44px;
+  min-height: 44px;
+  color: $forest;
+  text-underline-offset: 4px;
+  overflow-wrap: anywhere;
+}
+.task-reader {
+  h1 {
+    margin: 24px 0 18px;
+    font-size: clamp(30px, 4vw, 46px);
+    letter-spacing: -1px;
+  }
+  > article > p {
+    white-space: pre-wrap;
+    line-height: 1.7;
+  }
+  .task-parent {
+    margin: 26px 0;
+    padding: 16px 20px;
+    border-left: 3px solid #8caa7a;
+    border-radius: 0 12px 12px 0;
+    background: #edf2e7;
+    p {
+      margin: 0;
+      line-height: 1.7;
+    }
+  }
+}
 @media (max-width: 600px) {
   .project-tasks button {
     width: 100%;

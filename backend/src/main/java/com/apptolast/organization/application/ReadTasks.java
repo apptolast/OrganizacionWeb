@@ -14,6 +14,10 @@ public final class ReadTasks implements ReadTasksUseCase {
 
   public TaskPage list(String owner, UUID project, TaskPosition after) {
     var found = queries.list(owner, project, after);
+    return page(found);
+  }
+
+  static TaskPage page(java.util.List<Task> found) {
     var items = found.stream().limit(20).toList();
     var last = items.isEmpty() ? null : items.getLast();
     return new TaskPage(

@@ -14,7 +14,7 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Component
-public final class PostgresTaskCommit implements TaskCommit {
+public final class PostgresTaskCommit implements TaskCommit, SubtaskCommit {
   private final JdbcTemplate jdbc;
   private final TransactionTemplate transaction;
   private final ObjectMapper json;
@@ -26,6 +26,11 @@ public final class PostgresTaskCommit implements TaskCommit {
   }
 
   public Task save(String owner, UUID project, Function<String, TaskCreation> operation) {
+    return save(owner, project, null, operation);
+  }
+
+  public Task save(
+      String owner, UUID project, UUID parent, Function<String, TaskCreation> operation) {
     try {
       return transaction.execute(
           status -> {
@@ -38,11 +43,18 @@ public final class PostgresTaskCommit implements TaskCommit {
                     owner,
                     project);
             if (states.isEmpty()) throw new ResourceNotFoundException();
+            if (parent != null
+                && !Boolean.TRUE.equals(
+                    jdbc.queryForObject(
+                        "SELECT EXISTS(SELECT 1 FROM tasks WHERE project_id=? AND id=?)",
+                        Boolean.class,
+                        project,
+                        parent))) throw new ResourceNotFoundException();
             var creation = operation.apply(states.getFirst());
             var task = creation.task();
             int insertedTask =
                 jdbc.update(
-                    "INSERT INTO tasks(id,project_id,title,completion_criterion,estimated_minutes,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?)",
+                    "INSERT INTO tasks(id,project_id,title,completion_criterion,estimated_minutes,status,created_at,updated_at,parent_id) VALUES (?,?,?,?,?,?,?,?,?)",
                     task.id(),
                     project,
                     task.title(),
@@ -50,7 +62,8 @@ public final class PostgresTaskCommit implements TaskCommit {
                     task.estimatedMinutes(),
                     task.status(),
                     Timestamp.from(task.createdAt()),
-                    Timestamp.from(task.updatedAt()));
+                    Timestamp.from(task.updatedAt()),
+                    parent);
             if (insertedTask != 1)
               throw new StorageUnavailableException(
                   new IllegalStateException("Task write did not affect one row"));
@@ -75,7 +88,7 @@ public final class PostgresTaskCommit implements TaskCommit {
     }
   }
 
-  private String serialize(TaskCreated event) {
+  private String serialize(TaskCreationEvent event) {
     try {
       return json.writeValueAsString(event);
     } catch (JsonProcessingException error) {

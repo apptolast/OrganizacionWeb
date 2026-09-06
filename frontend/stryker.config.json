@@ -19,7 +19,10 @@
     "src/tasks-api.ts",
     "src/task-validation.ts",
     "src/use-project-tasks.ts",
-    "src/project-tasks.tsx"
+    "src/project-tasks.tsx",
+    "src/task-reader.tsx",
+    "src/task-parent.tsx",
+    "src/App.tsx:10:0-14:200"
   ],
   "reporters": ["clear-text", "json", "html"],
   "thresholds": {

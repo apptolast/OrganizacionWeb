@@ -11,4 +11,5 @@ public record TaskCreated(
     int schemaVersion,
     String type,
     UUID taskId,
-    String title) {}
+    String title)
+    implements TaskCreationEvent {}

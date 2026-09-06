@@ -260,4 +260,37 @@ class RabbitBrokerPublisherTest {
             changed.equals("vhost") ? "/unavailable-vhost" : "/");
     assertThat(publisher.publish(message())).isEqualTo(DeliveryOutcome.BROKER_UNAVAILABLE);
   }
+
+  @Test
+  void subtask_s21_publishesOriginalNineFieldsToOwnQuorumRoute() throws Exception {
+    var base = message();
+    var payload = new java.util.HashMap<String, Object>(base.payload());
+    payload.remove("name");
+    payload.put("type", "SubtaskCreated.v1");
+    payload.put("taskId", UUID.randomUUID().toString());
+    payload.put("parentTaskId", UUID.randomUUID().toString());
+    payload.put("title", "Tarea");
+    var task =
+        new OutboxMessage(
+            base.eventId(),
+            base.aggregateId(),
+            base.ownerId(),
+            base.occurredAt(),
+            "SubtaskCreated.v1",
+            1,
+            json.writeValueAsString(payload),
+            payload,
+            0);
+    assertThat(publisher().publish(task)).isEqualTo(DeliveryOutcome.ACCEPTED);
+    try (var connection = factory().newConnection();
+        var channel = connection.createChannel()) {
+      var delivered = channel.basicGet("organization.subtask-created.v1", true);
+      assertThat(delivered).isNotNull();
+      assertThat(delivered.getBody())
+          .isEqualTo(task.json().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      assertThat(delivered.getProps().getDeliveryMode()).isEqualTo(2);
+      assertThat(delivered.getProps().getMessageId()).isEqualTo(task.eventId().toString());
+      assertThat(delivered.getEnvelope().getRoutingKey()).isEqualTo("subtask.created.v1");
+    }
+  }
 }

@@ -370,13 +370,10 @@ test("read_projects: long text reflows across twelve widths with accessible keyb
     name: "Volver a proyectos",
     exact: true,
   });
-  for (
-    let index = 0;
-    index < 12 &&
-    !(await back.evaluate((element) => element === document.activeElement));
-    index++
-  )
-    await page.keyboard.press("Tab");
+  await expect(
+    page.getByRole("heading", { name: project.name, exact: true }),
+  ).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
   await expect(back).toBeFocused();
   expect(
     await back.evaluate((element) =>

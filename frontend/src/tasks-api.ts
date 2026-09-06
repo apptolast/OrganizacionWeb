@@ -10,6 +10,56 @@ export type Task = {
   updatedAt: string;
 };
 export type TaskPage = { items: Task[]; nextCursor: string | null };
+function sameId(value: unknown, expected: string) {
+  return (
+    typeof value === "string" && value.toLowerCase() === expected.toLowerCase()
+  );
+}
+function taskCollection(projectId: string, parentTaskId?: string) {
+  return (
+    `/api/v1/projects/${projectId}/tasks` +
+    (parentTaskId ? `/${parentTaskId}/subtasks` : "")
+  );
+}
+export async function readTaskParent(
+  projectId: string,
+  id: string,
+  signal?: AbortSignal,
+): Promise<{ parent: Task | null }> {
+  const response = await apiRequest(
+    `/api/v1/projects/${projectId}/tasks/${id}/parent`,
+    { credentials: "same-origin", cache: "no-store", signal },
+  );
+  if (response.status !== 200) throw response;
+  const data: unknown = await response.json();
+  if (
+    typeof data !== "object" ||
+    data === null ||
+    Object.keys(data).length !== 1 ||
+    !("parent" in data) ||
+    !(
+      data.parent === null ||
+      (isTask(data.parent, projectId) && !sameId(data.parent.id, id))
+    )
+  )
+    throw new Error("Respuesta de relación inválida");
+  return { parent: data.parent };
+}
+export async function readTask(
+  projectId: string,
+  id: string,
+  signal: AbortSignal,
+): Promise<Task> {
+  const response = await apiRequest(
+    `/api/v1/projects/${projectId}/tasks/${id}`,
+    { credentials: "same-origin", cache: "no-store", signal },
+  );
+  if (response.status !== 200) throw response;
+  const data: unknown = await response.json();
+  if (!isTask(data, projectId) || !sameId(data.id, id))
+    throw new Error("Respuesta de tarea inválida");
+  return data;
+}
 function isTask(value: unknown, projectId: string): value is Task {
   if (
     typeof value !== "object" ||
@@ -23,7 +73,7 @@ function isTask(value: unknown, projectId: string): value is Task {
     /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(
       data.id,
     ) &&
-    data.projectId === projectId &&
+    sameId(data.projectId, projectId) &&
     typeof data.title === "string" &&
     [...data.title].length >= 1 &&
     [...data.title].length <= 160 &&
@@ -49,8 +99,9 @@ export async function createTask(
     estimatedMinutes: number | null;
   },
   signal?: AbortSignal,
+  parentTaskId?: string,
 ): Promise<Task> {
-  const response = await apiRequest(`/api/v1/projects/${projectId}/tasks`, {
+  const response = await apiRequest(taskCollection(projectId, parentTaskId), {
     method: "POST",
     signal,
     credentials: "same-origin",
@@ -59,7 +110,11 @@ export async function createTask(
   });
   if (response.status !== 201) throw response;
   const data: unknown = await response.json();
-  if (!isTask(data, projectId) || data.createdAt !== data.updatedAt)
+  if (
+    !isTask(data, projectId) ||
+    data.createdAt !== data.updatedAt ||
+    (parentTaskId && sameId(data.id, parentTaskId))
+  )
     throw new Error("Respuesta de tarea inválida");
   return data;
 }
@@ -67,9 +122,10 @@ export async function readTasks(
   projectId: string,
   cursor?: string,
   signal?: AbortSignal,
+  parentTaskId?: string,
 ): Promise<TaskPage> {
   const response = await apiRequest(
-    `/api/v1/projects/${projectId}/tasks` +
+    taskCollection(projectId, parentTaskId) +
       (cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""),
     {
       credentials: "same-origin",
@@ -87,7 +143,11 @@ export async function readTasks(
     !("nextCursor" in data) ||
     !Array.isArray(data.items) ||
     data.items.length > 20 ||
-    !data.items.every((item) => isTask(item, projectId)) ||
+    !data.items.every(
+      (item) =>
+        isTask(item, projectId) &&
+        (!parentTaskId || !sameId(item.id, parentTaskId)),
+    ) ||
     !(
       data.nextCursor === null ||
       (typeof data.nextCursor === "string" && data.nextCursor.length > 0)

@@ -22,10 +22,12 @@ public record OutboxMessage(
     if ((!"ProjectCreated.v1".equals(type)
             && !"ProjectUpdated.v1".equals(type)
             && !"ProjectStatusChanged.v1".equals(type)
-            && !"TaskCreated.v1".equals(type))
+            && !"TaskCreated.v1".equals(type)
+            && !"SubtaskCreated.v1".equals(type))
         || schemaVersion != 1) return "UNSUPPORTED_EVENT";
     boolean statusChanged = "ProjectStatusChanged.v1".equals(type);
-    boolean taskCreated = "TaskCreated.v1".equals(type);
+    boolean subtaskCreated = "SubtaskCreated.v1".equals(type);
+    boolean taskCreated = "TaskCreated.v1".equals(type) || subtaskCreated;
     var expected =
         taskCreated
             ? java.util.Set.of(
@@ -55,6 +57,10 @@ public record OutboxMessage(
                     "schemaVersion",
                     "name",
                     "type");
+    if (subtaskCreated) {
+      expected = new java.util.HashSet<>(expected);
+      expected.add("parentTaskId");
+    }
     if (!expected.equals(payload.keySet())
         || !eventId.toString().equals(payload.get("eventId"))
         || !aggregateId.toString().equals(payload.get("aggregateId"))
@@ -70,6 +76,11 @@ public record OutboxMessage(
     if (taskCreated
         && (!(payload.get("taskId") instanceof String taskId)
             || !taskId.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")))
+      return "INVALID_EVENT";
+    if (subtaskCreated
+        && (!(payload.get("parentTaskId") instanceof String parentId)
+            || !parentId.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
+            || UUID.fromString(parentId).equals(UUID.fromString((String) payload.get("taskId")))))
       return "INVALID_EVENT";
     if (statusChanged) {
       return payload.get("fromStatus") instanceof String from

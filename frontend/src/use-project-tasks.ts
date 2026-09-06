@@ -5,6 +5,7 @@ import { readProjects, type ProjectSnapshot } from "./read-projects-api";
 export function useProjectTasks(
   projectId: string,
   onProjectConfirmed: (snapshot: ProjectSnapshot) => void,
+  parentTaskId?: string,
 ) {
   const [title, setTitle] = useState("");
   const [errors, setErrors] = useState<TaskField[]>([]);
@@ -30,7 +31,7 @@ export function useProjectTasks(
   );
   useEffect(() => {
     const controller = new AbortController();
-    void readTasks(projectId, cursor, controller.signal)
+    void readTasks(projectId, cursor, controller.signal, parentTaskId)
       .then((data) => {
         if (!controller.signal.aborted) setPage(data);
       })
@@ -38,7 +39,7 @@ export function useProjectTasks(
         if (!controller.signal.aborted) setFailure(true);
       });
     return () => controller.abort();
-  }, [projectId, revision, cursor]);
+  }, [projectId, revision, cursor, parentTaskId]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (saving || completedConflict || reviewing) return;
@@ -72,6 +73,7 @@ export function useProjectTasks(
           estimatedMinutes: estimate === "" ? null : Number(estimate),
         },
         controller.signal,
+        parentTaskId,
       );
       if (controller.signal.aborted) return;
       setSaved(created);

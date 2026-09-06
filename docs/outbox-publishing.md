@@ -60,7 +60,16 @@ La ejecución local opcional se documenta en el README del repositorio. El despl
 | ProjectUpdated.v1 | project.updated.v1 | organization.project-updated.v1 |
 | ProjectStatusChanged.v1 | project.status-changed.v1 | organization.project-status-changed.v1 |
 | TaskCreated.v1 | task.created.v1 | organization.task-created.v1 |
+| SubtaskCreated.v1 | subtask.created.v1 | organization.subtask-created.v1 |
 
-TaskCreated conserva aggregateId del proyecto y taskId de la tarea hija. Su payload incluye título, pero excluye criterio y estimación. Crear una tarea confirma tarea y evento en la misma transacción, sin cambiar la representación o versión del proyecto. El estado final de validación se registra en create_task dentro del roadmap.
+TaskCreated conserva aggregateId del proyecto y taskId de la tarea nueva. Su payload incluye título, pero excluye criterio y estimación. Crear una tarea confirma tarea y evento en la misma transacción, sin cambiar la representación o versión del proyecto. El estado final de validación se registra en create_task dentro del roadmap.
 
 Compartir aggregateId no garantiza orden de publicación por proyecto: las filas se procesan de forma independiente y pueden reintentarse. Un consumidor futuro deberá atender a identidad y semántica del evento, sin deducir una secuencia causal de su orden de llegada.
+
+## Subtareas
+
+El contrato aprobado de split_task añade SubtaskCreated.v1, ruta `subtask.created.v1` y cola quorum durable `organization.subtask-created.v1`. El corte está verificado localmente; el servicio todavía no está desplegado en el servidor.
+
+El payload cerrado contiene eventId, aggregateId, ownerId, occurredAt, schemaVersion, type, taskId, parentTaskId y title. aggregateId sigue siendo el proyecto; taskId identifica la nueva subtarea y parentTaskId su padre directo. No incluye criterio ni estimación. La creación histórica de raíces conserva TaskCreated.v1; crear una subtarea genera únicamente SubtaskCreated.v1. La relación, la tarea y el evento se confirman en la misma transacción.
+
+Los hijos pueden publicarse antes que sus padres por los reintentos independientes. Los futuros consumidores deben tolerar referencias todavía no recibidas, además de deduplicar por eventId. La estructura del árbol se consulta mediante la API, sin inferirla del orden de llegada de mensajes.

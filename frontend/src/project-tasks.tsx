@@ -2,14 +2,17 @@ import { useProjectTasks } from "./use-project-tasks";
 import { taskMessages } from "./task-validation";
 import type { ProjectSnapshot } from "./read-projects-api";
 import { useLayoutEffect, useRef } from "react";
+import { RouteLink } from "./navigation";
 export function ProjectTasks({
   projectId,
   projectStatus,
   onProjectConfirmed,
+  parentTaskId,
 }: {
   projectId: string;
   projectStatus: string;
   onProjectConfirmed: (snapshot: ProjectSnapshot) => void;
+  parentTaskId?: string;
 }) {
   const {
     title,
@@ -31,7 +34,7 @@ export function ProjectTasks({
     reviewProject,
     reload,
     changePage,
-  } = useProjectTasks(projectId, onProjectConfirmed);
+  } = useProjectTasks(projectId, onProjectConfirmed, parentTaskId);
   const heading = useRef<HTMLHeadingElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
   useLayoutEffect(() => {
@@ -58,23 +61,44 @@ export function ProjectTasks({
       }}
     >
       <h2 id="tasks-heading" tabIndex={-1} ref={heading}>
-        Tareas
+        {parentTaskId ? "Subtareas" : "Tareas"}
       </h2>
       <p className="tasks-intro">Pasos pequeños, con un resultado claro.</p>
+      {parentTaskId && (
+        <p>
+          Cada estimación es independiente; las subtareas no se suman
+          automáticamente a la tarea principal.
+        </p>
+      )}
       {failure ? (
         <div>
           <p role="alert">No hemos podido cargar las tareas.</p>
-          <button onClick={reload}>Reintentar tareas</button>
+          <button onClick={reload}>
+            {parentTaskId ? "Reintentar subtareas" : "Reintentar tareas"}
+          </button>
         </div>
       ) : !page ? (
-        <p role="status">Cargando tareas</p>
+        <p role="status">
+          {parentTaskId ? "Cargando subtareas" : "Cargando tareas"}
+        </p>
       ) : page.items.length === 0 ? (
-        <p>Todavía no hay tareas en este proyecto.</p>
+        <p>
+          {parentTaskId
+            ? "Esta tarea todavía no tiene subtareas."
+            : "Todavía no hay tareas en este proyecto."}
+        </p>
       ) : (
-        <ul className="task-list" aria-label="Tareas guardadas">
+        <ul
+          className="task-list"
+          aria-label={parentTaskId ? "Subtareas guardadas" : "Tareas guardadas"}
+        >
           {page.items.map((task) => (
             <li key={task.id}>
-              <h3>{task.title}</h3>
+              <h3>
+                <RouteLink href={`/proyectos/${projectId}/tareas/${task.id}`}>
+                  {task.title}
+                </RouteLink>
+              </h3>
               <p>{task.completionCriterion}</p>
               <span className="idea-badge">Pendiente</span>
               <p>
@@ -88,11 +112,15 @@ export function ProjectTasks({
       )}
       {page?.nextCursor && (
         <button onClick={() => changePage(page.nextCursor!)}>
-          Más tareas antiguas
+          {parentTaskId ? "Más subtareas antiguas" : "Más tareas antiguas"}
         </button>
       )}
       {cursor && (
-        <button onClick={() => changePage()}>Volver a tareas recientes</button>
+        <button onClick={() => changePage()}>
+          {parentTaskId
+            ? "Volver a subtareas recientes"
+            : "Volver a tareas recientes"}
+        </button>
       )}
       <p>Terminar el proyecto no completa sus tareas pendientes.</p>
       {projectStatus === "completed" ? (
@@ -163,9 +191,13 @@ export function ProjectTasks({
           </div>
           <p>La estimación no es tiempo trabajado.</p>
           <button disabled={saving || completedConflict || reviewing}>
-            Crear tarea
+            {parentTaskId ? "Crear subtarea" : "Crear tarea"}
           </button>
-          {saving && <p role="status">Guardando tarea</p>}
+          {saving && (
+            <p role="status">
+              {parentTaskId ? "Guardando subtarea" : "Guardando tarea"}
+            </p>
+          )}
         </form>
       )}
       {saveFailure && <p role="alert">{saveFailure}</p>}
@@ -178,10 +210,18 @@ export function ProjectTasks({
           {reviewing && <p role="status">Revisando estado del proyecto</p>}
         </div>
       )}
-      {saved && <p role="status">Tarea guardada</p>}
+      {saved && (
+        <p role="status">
+          {parentTaskId ? "Subtarea guardada" : "Tarea guardada"}
+        </p>
+      )}
       {saved && !page?.items.some((item) => item.id === saved.id) && (
         <article aria-label="Última tarea guardada">
-          <h3>{saved.title}</h3>
+          <h3>
+            <RouteLink href={`/proyectos/${projectId}/tareas/${saved.id}`}>
+              {saved.title}
+            </RouteLink>
+          </h3>
           <p>{saved.completionCriterion}</p>
           <span>Pendiente</span>
           <p>

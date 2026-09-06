@@ -1,3 +1,6 @@
+import { BlockDetails, BlockTime } from "./block-details";
+import type { BlockChange } from "./reschedule-api";
+import { BlockActions } from "./reschedule-block";
 import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { readAvailability, readAvailabilityZones } from "./availability-api";
 import { RouteLink } from "./navigation";
@@ -27,6 +30,11 @@ export function TaskBlocks({
   projectStatus?: string;
   onAccessFailure: (status: number) => void;
 }) {
+  const [selected, setSelected] = useState<{
+    id: string;
+    mode: "move" | "cancel";
+  }>();
+  const [change, setChange] = useState<BlockChange>();
   const [editing, setEditing] = useState(false);
   const [confirmed, setConfirmed] = useState<Block>();
   const [page, setPage] = useState<BlockPage>();
@@ -80,6 +88,22 @@ export function TaskBlocks({
               <li key={item.id}>
                 <h3>{item.objective}</h3>
                 <BlockDetails block={item} />
+                {!editing && !selected && (
+                  <button
+                    onClick={() => setSelected({ id: item.id, mode: "move" })}
+                    aria-label={"Mover bloque: " + item.objective}
+                  >
+                    Mover bloque
+                  </button>
+                )}
+                {!editing && !selected && (
+                  <button
+                    onClick={() => setSelected({ id: item.id, mode: "cancel" })}
+                    aria-label={"Cancelar bloque: " + item.objective}
+                  >
+                    Cancelar bloque
+                  </button>
+                )}
               </li>
             ))}
           </ul>
@@ -105,6 +129,35 @@ export function TaskBlocks({
           )}
         </>
       )}
+      {selected && (
+        <BlockActions
+          key={selected.id + selected.mode}
+          projectId={projectId}
+          taskId={taskId}
+          blockId={selected.id}
+          mode={selected.mode}
+          onClose={() => setSelected(undefined)}
+          onConfirmed={(value) => {
+            setChange(value);
+            setSelected(undefined);
+            setCursor(undefined);
+            reload();
+          }}
+          focusFallback={() => heading.current?.focus()}
+        />
+      )}
+      {change && (
+        <article>
+          <p role="status">Cambio confirmado (hecho histórico)</p>
+          <p>
+            {change.kind === "CANCELLED"
+              ? "Reserva cancelada"
+              : "Reserva movida"}
+          </p>
+          <h3>{change.before.objective}</h3>
+          <BlockDetails block={change.after ?? change.before} />
+        </article>
+      )}
       {confirmed && (
         <article>
           <p role="status">Bloque guardado</p>
@@ -114,6 +167,7 @@ export function TaskBlocks({
         </article>
       )}
       {!editing &&
+        !selected &&
         taskStatus === "pending" &&
         projectStatus &&
         projectStatus !== "completed" && (
@@ -691,19 +745,6 @@ function BlockEditor({
   );
 }
 
-function BlockDetails({ block }: { block: Block }) {
-  return (
-    <>
-      <p>
-        Inicio: <BlockTime value={block.startAt} zoneId={block.zoneId} />
-      </p>
-      <p>
-        Fin: <BlockTime value={block.endAt} zoneId={block.zoneId} />
-      </p>
-      <p>{block.durationMinutes} minutos planificados</p>
-    </>
-  );
-}
 function BlockConflict({
   conflict,
 }: {
@@ -757,27 +798,5 @@ function BlockConflict({
         </>
       )}
     </section>
-  );
-}
-function BlockTime({ value, zoneId }: { value: string; zoneId: string }) {
-  let label: string;
-  try {
-    label = new Intl.DateTimeFormat("es", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      timeZone: zoneId,
-      timeZoneName: "longOffset",
-    }).format(new Date(value));
-  } catch {
-    label = `${value} UTC`;
-  }
-  return (
-    <time dateTime={value}>
-      {label} · {zoneId}
-    </time>
   );
 }

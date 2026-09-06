@@ -47,7 +47,7 @@ class BlockChangeQueriesPersistenceTest {
   void context() {
     jdbc.execute(
         "TRUNCATE"
-            + " block_changes,block_projections,planned_blocks,task_status_history,tasks,outbox_events,projects");
+            + " work_sessions,block_changes,block_projections,planned_blocks,task_status_history,tasks,outbox_events,projects");
     project = UUID.randomUUID();
     task = UUID.randomUUID();
     jdbc.update(

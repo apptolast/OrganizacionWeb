@@ -48,7 +48,8 @@ class ScheduleBlockPersistenceTest {
   @BeforeEach
   void reset() {
     jdbc.execute(
-        "TRUNCATE block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
+        "TRUNCATE"
+            + " work_sessions,block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
     store =
         new PostgresBlockStore(
             jdbc, transaction, new PostgresAvailabilityStore(jdbc, transaction), json);
@@ -61,13 +62,15 @@ class ScheduleBlockPersistenceTest {
     var project = UUID.randomUUID();
     var task = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,?,'Project','','active',?,?)",
+        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES"
+            + " (?,?,'Project','','active',?,?)",
         project,
         owner,
         java.sql.Timestamp.from(NOW),
         java.sql.Timestamp.from(NOW));
     jdbc.update(
-        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at) VALUES (?,?,'Task','','pending',?,?)",
+        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at)"
+            + " VALUES (?,?,'Task','','pending',?,?)",
         task,
         project,
         java.sql.Timestamp.from(NOW),
@@ -78,7 +81,9 @@ class ScheduleBlockPersistenceTest {
     var preference = preferences.isEmpty() ? UUID.randomUUID() : preferences.getFirst();
     if (preferences.isEmpty())
       jdbc.update(
-          "INSERT INTO availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at) VALUES (?,?,'UTC',120,120,120,120,120,120,120,0,?,?)",
+          "INSERT INTO"
+              + " availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at)"
+              + " VALUES (?,?,'UTC',120,120,120,120,120,120,120,0,?,?)",
           preference,
           owner,
           java.sql.Timestamp.from(NOW),
@@ -153,7 +158,8 @@ class ScheduleBlockPersistenceTest {
     do {
       waiting =
           jdbc.queryForObject(
-              "SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock' AND query LIKE ?",
+              "SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND"
+                  + " wait_event_type='Lock' AND query LIKE ?",
               Integer.class,
               "%" + fragment + "%");
       if (waiting >= expected) return;
@@ -279,7 +285,9 @@ class ScheduleBlockPersistenceTest {
             + " END; $$");
     jdbc.execute(
         fault.equals("commit")
-            ? "CREATE CONSTRAINT TRIGGER block_persistence_fault AFTER INSERT ON outbox_events DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION block_persistence_failure()"
+            ? "CREATE CONSTRAINT TRIGGER block_persistence_fault AFTER INSERT ON outbox_events"
+                  + " DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION"
+                  + " block_persistence_failure()"
             : "CREATE TRIGGER block_persistence_fault BEFORE INSERT ON "
                 + table
                 + " FOR EACH ROW EXECUTE FUNCTION block_persistence_failure()");
@@ -333,17 +341,22 @@ class ScheduleBlockPersistenceTest {
           case "fraction" ->
               "start_at=start_at+interval '1 microsecond',end_at=end_at+interval '1 microsecond'";
           case "yearZero" ->
-              "start_at=timestamptz '0001-01-01 10:00:00+00'-interval '1 year',end_at=timestamptz '0001-01-01 11:00:00+00'-interval '1 year'";
+              "start_at=timestamptz '0001-01-01 10:00:00+00'-interval '1 year',end_at=timestamptz"
+                  + " '0001-01-01 11:00:00+00'-interval '1 year'";
           case "year10000" ->
-              "start_at=timestamptz '9999-12-31 23:30:00+00',end_at=timestamptz '10000-01-01 00:30:00+00'";
+              "start_at=timestamptz '9999-12-31 23:30:00+00',end_at=timestamptz '10000-01-01"
+                  + " 00:30:00+00'";
           case "localYear" ->
-              "start_local=timestamp '10000-01-01 10:00:00',end_local=timestamp '10000-01-01 11:00:00'";
+              "start_local=timestamp '10000-01-01 10:00:00',end_local=timestamp '10000-01-01"
+                  + " 11:00:00'";
           case "localPrecision" -> "start_local=start_local+interval '1 second'";
           default -> "project_id=gen_random_uuid()";
         };
     String sql =
         defect.equals("key")
-            ? "INSERT INTO planned_blocks SELECT gen_random_uuid(),project_id,task_id,request_key,objective,start_local,end_local,zone_id,start_offset,end_offset,allow_over_budget,start_at,end_at,duration_minutes,created_at FROM planned_blocks"
+            ? "INSERT INTO planned_blocks SELECT"
+                  + " gen_random_uuid(),project_id,task_id,request_key,objective,start_local,end_local,zone_id,start_offset,end_offset,allow_over_budget,start_at,end_at,duration_minutes,created_at"
+                  + " FROM planned_blocks"
             : "UPDATE planned_blocks SET " + assignment;
     assertThatThrownBy(() -> jdbc.execute(sql))
         .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
@@ -363,7 +376,9 @@ class ScheduleBlockPersistenceTest {
               java.util.concurrent.CompletableFuture.runAsync(
                       () -> {
                         jdbc.update(
-                            "INSERT INTO availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at) VALUES (?,?,'UTC',120,120,120,120,120,120,120,0,?,?)",
+                            "INSERT INTO"
+                                + " availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at)"
+                                + " VALUES (?,?,'UTC',120,120,120,120,120,120,120,0,?,?)",
                             context.preference(),
                             context.owner(),
                             java.sql.Timestamp.from(NOW),
@@ -568,7 +583,8 @@ class ScheduleBlockPersistenceTest {
                       status -> {
                         var result = change("availability");
                         jdbc.update(
-                            "UPDATE availability_preferences SET monday_minutes=30 WHERE owner_id=?",
+                            "UPDATE availability_preferences SET monday_minutes=30 WHERE"
+                                + " owner_id=?",
                             context.owner());
                         return result;
                       });

@@ -11,10 +11,12 @@ import java.util.UUID;
 public final class StartWorkSession implements StartWorkSessionUseCase {
   private final WorkSessionStarting store;
   private final Clock clock;
+  private final ZoneCatalog catalog;
 
-  public StartWorkSession(WorkSessionStarting store, Clock clock) {
+  public StartWorkSession(WorkSessionStarting store, Clock clock, ZoneCatalog catalog) {
     this.store = store;
     this.clock = clock;
+    this.catalog = catalog;
   }
 
   public WorkSessionConfirmation start(
@@ -32,9 +34,14 @@ public final class StartWorkSession implements StartWorkSessionUseCase {
         key,
         plannedMinutes,
         context -> {
-          if ("completed".equals(context.projectStatus())) throw new ProjectCompletedException();
-          if ("completed".equals(context.taskStatus())) throw new TaskCompletedException();
+          WorkSessionContext.requireEligible(context.projectStatus(), context.taskStatus());
           var started = clock.instant().truncatedTo(ChronoUnit.MICROS);
+          if (started.isBefore(java.time.Instant.parse("0001-01-01T00:00:00Z"))
+              || !started.isBefore(java.time.Instant.parse("+10000-01-01T00:00:00Z")))
+            throw new WorkSessionTimeOutOfRangeException();
+          var end = started.plusSeconds(plannedMinutes * 60L);
+          if (!end.isBefore(java.time.Instant.parse("+10000-01-01T00:00:00Z")))
+            throw new WorkSessionTimeOutOfRangeException();
           var session =
               new SessionStart(
                   UUID.randomUUID(),
@@ -42,8 +49,12 @@ public final class StartWorkSession implements StartWorkSessionUseCase {
                   task,
                   started,
                   plannedMinutes,
-                  started.plusSeconds(plannedMinutes * 60L),
-                  context.zoneId().orElseThrow());
+                  end,
+                  context
+                      .zoneId()
+                      .filter(catalog.zones()::contains)
+                      .filter(StartWorkSession::resolvable)
+                      .orElse("UTC"));
           var event =
               new WorkSessionStarted(
                   UUID.randomUUID(),
@@ -59,5 +70,14 @@ public final class StartWorkSession implements StartWorkSessionUseCase {
                   session.zoneId());
           return new WorkSessionChange(session, event);
         });
+  }
+
+  private static boolean resolvable(String zone) {
+    try {
+      java.time.ZoneId.of(zone);
+      return true;
+    } catch (java.time.DateTimeException invalid) {
+      return false;
+    }
   }
 }

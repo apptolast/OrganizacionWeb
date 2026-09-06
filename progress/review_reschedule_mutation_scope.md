@@ -22,3 +22,7 @@ Riesgos y condición pendiente: TaskBlocks tiene modificaciones activas. Cualqui
 - task-blocks.tsx: 171D25312F46DB44110BD1611FDBA8A70BD047ED4EDB714F6422BDC9C37ABD62.
 
 No se detecta omisión funcional nueva en este corte. Esta aprobación de alcance no afirma baseline verde, score, cobertura de mutantes ni cierre de la feature; esas puertas siguen pendientes.
+
+## Freeze posterior a la revisión de composición
+
+Root confirmó34b9f8 que TaskBlocks ahora termina en223 y BlockEditor empieza224. Las dos líneas añadidas retiran la otra confirmación sólo al confirmar éxito, por lo que se amplió el rango a22:0–223:1 antes de medir. No cambia el resto de selectores, umbral, runner, concurrencia ni ignorePatterns. Fuentes y tests finales registrados en reschedule_frontend_freeze.json (f1b28b), sobre commit integrado759271b. Init de ese corte en curso; no se atribuye score todavía.

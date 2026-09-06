@@ -1,3 +1,4 @@
+vi.mock("./project-tasks", () => ({ ProjectTasks: () => null }));
 import { StrictMode, Profiler } from "react";
 import {
   render,

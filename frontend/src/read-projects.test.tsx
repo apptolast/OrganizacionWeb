@@ -1,3 +1,4 @@
+vi.mock("./project-tasks", () => ({ ProjectTasks: () => null }));
 import { render, screen, act, fireEvent } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { App } from "./App";

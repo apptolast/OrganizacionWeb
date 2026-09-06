@@ -51,3 +51,16 @@ La espera de confirmación es de 5 segundos. Conexión, operaciones del canal y 
 PostgreSQL y RabbitMQ necesitan sus volúmenes. La cola quorum durable de un nodo conserva mensajes al reiniciar con los mismos datos; no constituye alta disponibilidad ni garantiza recuperación tras perder el disco. Una topología incompatible se reporta sin eliminarla ni sustituirla automáticamente.
 
 La ejecución local opcional se documenta en el README del repositorio. El despliegue al servidor sigue el repositorio de infraestructura y requiere integrar capacidad, TLS, secretos y respaldo de ambos almacenes. No se ha desplegado este servicio en producción por añadir la configuración local.
+
+## Eventos incorporados
+
+| Evento | Ruta | Cola quorum durable |
+| --- | --- | --- |
+| ProjectCreated.v1 | project.created.v1 | organization.project-created.v1 |
+| ProjectUpdated.v1 | project.updated.v1 | organization.project-updated.v1 |
+| ProjectStatusChanged.v1 | project.status-changed.v1 | organization.project-status-changed.v1 |
+| TaskCreated.v1 | task.created.v1 | organization.task-created.v1 |
+
+TaskCreated conserva aggregateId del proyecto y taskId de la tarea hija. Su payload incluye título, pero excluye criterio y estimación. Crear una tarea confirma tarea y evento en la misma transacción, sin cambiar la representación o versión del proyecto. El estado final de validación se registra en create_task dentro del roadmap.
+
+Compartir aggregateId no garantiza orden de publicación por proyecto: las filas se procesan de forma independiente y pueden reintentarse. Un consumidor futuro deberá atender a identidad y semántica del evento, sin deducir una secuencia causal de su orden de llegada.

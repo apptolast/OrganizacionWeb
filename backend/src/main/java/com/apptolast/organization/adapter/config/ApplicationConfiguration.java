@@ -41,4 +41,16 @@ public class ApplicationConfiguration {
       throw new IllegalArgumentException("APP_MAX_ACTIVE_PROJECTS must be an integer from 1 to 10");
     return new com.apptolast.organization.application.ChangeProjectStatus(store, clock, limit);
   }
+
+  @Bean
+  com.apptolast.organization.application.CreateTask createTask(
+      com.apptolast.organization.application.TaskCommit commit, Clock clock) {
+    return new com.apptolast.organization.application.CreateTask(commit, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReadTasks readTasks(
+      com.apptolast.organization.application.TaskQueries queries) {
+    return new com.apptolast.organization.application.ReadTasks(queries);
+  }
 }

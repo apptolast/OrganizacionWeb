@@ -105,4 +105,18 @@ public final class ApiErrors {
     body.put("limit", error.limit());
     return ResponseEntity.status(409).contentType(MediaType.APPLICATION_PROBLEM_JSON).body(body);
   }
+
+  @ExceptionHandler(com.apptolast.organization.application.ResourceNotFoundException.class)
+  ResponseEntity<Map<String, Object>> resourceNotFound() {
+    return ResponseEntity.status(404)
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+        .body(problem(404, "RESOURCE_NOT_FOUND", "No se ha encontrado el recurso."));
+  }
+
+  @ExceptionHandler(com.apptolast.organization.application.ProjectCompletedException.class)
+  ResponseEntity<Map<String, Object>> completedProject() {
+    return ResponseEntity.status(409)
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+        .body(problem(409, "PROJECT_COMPLETED", "Reabre el proyecto en pausa para añadir tareas."));
+  }
 }

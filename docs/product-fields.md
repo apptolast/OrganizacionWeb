@@ -53,7 +53,7 @@ tema; acento; densidad; tamaño de texto; orden y visibilidad de paneles.
 6. Cerrar, anotar avance y dejar el siguiente paso. Completar la tarea es otra acción.
 7. Consultar en el historial el trabajo realizado y revisar la siguiente semana.
 
-## Ejemplo de descomposición: web de Cenit Digital
+## Ejemplo de descomposición: web de Zenit Digital
 
 Ejemplo propuesto, no datos importados de un repositorio ni tareas ya creadas.
 

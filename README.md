@@ -6,7 +6,7 @@ Organización personal por proyectos y sesiones de trabajo acotadas: decidir qu�
 
 La web permite crear proyectos propios, recuperarlos en una lista persistente de 20 elementos por página, abrir su detalle y editar nombre y descripción. También permite activar, pausar, terminar y reabrir proyectos en pausa. La edición y los estados comparten control de versión para proteger cambios concurrentes. PostgreSQL conserva proyectos y eventos de forma atómica; el publicador RabbitMQ añade entrega confirmada, reintentos y recuperación conservando la identidad del evento. El estado de verificación de cada entrega está en el [roadmap](feature_list.json).
 
-Rutas: `/` conserva el formulario de creación; `/proyectos` muestra la lista privada; `/proyectos/{id}` muestra nombre, descripción, estado, fechas y acciones de estado; `/proyectos/{id}/editar` permite guardar cambios con control de versión. Un conflicto ofrece recargar deliberadamente la versión guardada. Tareas, calendario y temporizador siguen en desarrollo; el MVP completo todavía no está terminado.
+Rutas: `/` conserva el formulario de creación; `/proyectos` muestra la lista privada; `/proyectos/{id}` muestra nombre, descripción, estado, fechas y acciones de estado; `/proyectos/{id}/editar` permite guardar cambios con control de versión. Un conflicto ofrece recargar deliberadamente la versión guardada. La creación y lectura de tareas está implementada y verificada localmente: título, criterio de finalización opcional y estimación en minutos, con lista persistente paginada dentro del detalle del proyecto. Terminar el proyecto conserva sus tareas pendientes; añadir trabajo requiere reabrirlo en pausa. Subtareas, completar tareas, calendario y temporizador siguen pendientes; el MVP completo todavía no está terminado.
 
 El límite inicial es de tres proyectos activos por propietario. `APP_MAX_ACTIVE_PROJECTS` permite elegir de 1 a 10 en `.env`; todas las réplicas deben usar el mismo valor. Al alcanzar el límite, el propietario decide qué pausar. Reducirlo no pausa proyectos automáticamente y dos activaciones simultáneas no pueden ocupar la misma última plaza.
 
@@ -38,7 +38,7 @@ El Compose base mantiene el publicador desactivado. Para habilitar RabbitMQ, com
 docker compose -f docker-compose.yml -f deploy/compose.publisher.yml up --build -d --wait
 ```
 
-El broker usa colas quorum durables para ProjectCreated, ProjectUpdated y ProjectStatusChanged y un volumen persistente. AMQP y su administración permanecen en la red interna de Docker. La API puede crear, editar y cambiar el estado de proyectos aunque el broker esté caído; el outbox conserva los eventos y reintenta con espera creciente hasta 60 segundos. La entrega es al menos una vez: un consumidor debe deduplicar por `eventId`.
+El broker usa colas quorum durables para ProjectCreated, ProjectUpdated, ProjectStatusChanged y TaskCreated y un volumen persistente. AMQP y su administración permanecen en la red interna de Docker. La API puede crear, editar y cambiar el estado de proyectos, así como crear tareas, aunque el broker esté caído; el outbox conserva los eventos y reintenta con espera creciente hasta 60 segundos. La entrega es al menos una vez: un consumidor debe deduplicar por `eventId`.
 
 Para detener esta instancia conservando sus datos, utiliza los mismos dos argumentos `-f` con `down`, sin `--volumes`. Las credenciales de RabbitMQ inicializan el volumen la primera vez; modificar `.env` no rota un usuario existente.
 
@@ -76,7 +76,7 @@ Las pruebas de producto y sus resultados concretos se registran en `progress/`; 
 - [Personalización, conectores e infraestructura](docs/implementation-proposal.md).
 - [Proceso SDD](docs/workflow.md) y [plantilla original](docs/template-harness.md).
 
-Las skills de React y revisión de interfaces están versionadas en `.agents/skills/`. Los plugins del agente no son los conectores del producto.
+Las skills de React y revisión de interfaces están versionadas en `.agents/skills/`. Todos los agentes aplican también Ponytail full y Caveman lite siguiendo [su integración documentada](docs/agent-efficiency.md): reutilizar soluciones existentes, evitar complejidad innecesaria y comunicar con brevedad, conservando arquitectura, validación, seguridad y accesibilidad. Los plugins del agente no son los conectores del producto.
 
 ## Despliegue productivo
 

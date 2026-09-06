@@ -15,7 +15,11 @@
     "src/api-client.ts",
     "src/session-api.ts",
     "src/use-session.ts",
-    "src/session-gate.tsx:22:0-31:100"
+    "src/session-gate.tsx:22:0-31:100",
+    "src/tasks-api.ts",
+    "src/task-validation.ts",
+    "src/use-project-tasks.ts",
+    "src/project-tasks.tsx"
   ],
   "reporters": ["clear-text", "json", "html"],
   "thresholds": {

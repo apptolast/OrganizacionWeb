@@ -70,7 +70,7 @@
       "id": 6,
       "name": "authentication",
       "title": "Inicio y cierre de sesión",
-      "description": "Sesión privada revocable: contrato aprobado en features/authentication.feature; producción pendiente de activación del coordinador.",
+      "description": "Sesión personal JDBC, formulario de acceso y CSRF implementados y verificados localmente; contrato aprobado.",
       "acceptance": [],
       "sdd": true,
       "status": "done"
@@ -79,10 +79,10 @@
       "id": 7,
       "name": "create_task",
       "title": "Crear tarea",
-      "description": "Crear tarea: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "description": "Creación y consulta persistente de tareas propias dentro de proyectos, contrato aprobado de 35 escenarios, implementado y verificado localmente.",
       "acceptance": [],
       "sdd": true,
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": 8,

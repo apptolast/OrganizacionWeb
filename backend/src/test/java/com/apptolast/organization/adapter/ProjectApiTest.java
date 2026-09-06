@@ -61,7 +61,7 @@ class ProjectApiTest {
 
   @BeforeEach
   void clear() {
-    jdbc.execute("TRUNCATE outbox_events, projects");
+    jdbc.execute("TRUNCATE outbox_events, projects CASCADE");
   }
 
   @org.junit.jupiter.params.ParameterizedTest

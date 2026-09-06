@@ -21,11 +21,13 @@ public record OutboxMessage(
   public String validationCode() {
     if ((!"ProjectCreated.v1".equals(type)
             && !"ProjectUpdated.v1".equals(type)
-            && !"ProjectStatusChanged.v1".equals(type))
+            && !"ProjectStatusChanged.v1".equals(type)
+            && !"TaskCreated.v1".equals(type))
         || schemaVersion != 1) return "UNSUPPORTED_EVENT";
     boolean statusChanged = "ProjectStatusChanged.v1".equals(type);
+    boolean taskCreated = "TaskCreated.v1".equals(type);
     var expected =
-        statusChanged
+        taskCreated
             ? java.util.Set.of(
                 "eventId",
                 "aggregateId",
@@ -33,10 +35,26 @@ public record OutboxMessage(
                 "occurredAt",
                 "schemaVersion",
                 "type",
-                "fromStatus",
-                "toStatus")
-            : java.util.Set.of(
-                "eventId", "aggregateId", "ownerId", "occurredAt", "schemaVersion", "name", "type");
+                "taskId",
+                "title")
+            : statusChanged
+                ? java.util.Set.of(
+                    "eventId",
+                    "aggregateId",
+                    "ownerId",
+                    "occurredAt",
+                    "schemaVersion",
+                    "type",
+                    "fromStatus",
+                    "toStatus")
+                : java.util.Set.of(
+                    "eventId",
+                    "aggregateId",
+                    "ownerId",
+                    "occurredAt",
+                    "schemaVersion",
+                    "name",
+                    "type");
     if (!expected.equals(payload.keySet())
         || !eventId.toString().equals(payload.get("eventId"))
         || !aggregateId.toString().equals(payload.get("aggregateId"))
@@ -49,6 +67,10 @@ public record OutboxMessage(
     } catch (java.time.format.DateTimeParseException error) {
       return "INVALID_EVENT";
     }
+    if (taskCreated
+        && (!(payload.get("taskId") instanceof String taskId)
+            || !taskId.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")))
+      return "INVALID_EVENT";
     if (statusChanged) {
       return payload.get("fromStatus") instanceof String from
               && payload.get("toStatus") instanceof String to
@@ -56,9 +78,10 @@ public record OutboxMessage(
           ? null
           : "INVALID_EVENT";
     }
-    if (!(payload.get("name") instanceof String name)) return "INVALID_EVENT";
+    if (!(payload.get(taskCreated ? "title" : "name") instanceof String name))
+      return "INVALID_EVENT";
     if (name.isEmpty()
-        || name.codePointCount(0, name.length()) > 120
+        || name.codePointCount(0, name.length()) > (taskCreated ? 160 : 120)
         || !name.equals(name.replaceAll("(?U)^\\s+|\\s+$", ""))) return "INVALID_EVENT";
     return null;
   }

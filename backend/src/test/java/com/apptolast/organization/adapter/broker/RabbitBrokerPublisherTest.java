@@ -215,4 +215,49 @@ class RabbitBrokerPublisherTest {
           .isEqualTo(event.json().getBytes(java.nio.charset.StandardCharsets.UTF_8));
     }
   }
+
+  @Test
+  void task_s17_publishesTaskRouteWithoutChangingProjectRoutes() throws Exception {
+    var base = message();
+    var payload = new java.util.HashMap<String, Object>(base.payload());
+    payload.remove("name");
+    payload.put("type", "TaskCreated.v1");
+    payload.put("taskId", UUID.randomUUID().toString());
+    payload.put("title", "Tarea");
+    var task =
+        new OutboxMessage(
+            base.eventId(),
+            base.aggregateId(),
+            base.ownerId(),
+            base.occurredAt(),
+            "TaskCreated.v1",
+            1,
+            json.writeValueAsString(payload),
+            payload,
+            0);
+    assertThat(publisher().publish(task)).isEqualTo(DeliveryOutcome.ACCEPTED);
+    try (var connection = factory().newConnection();
+        var channel = connection.createChannel()) {
+      var delivered = channel.basicGet("organization.task-created.v1", true);
+      assertThat(delivered).isNotNull();
+      assertThat(delivered.getBody())
+          .isEqualTo(task.json().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      assertThat(delivered.getProps().getDeliveryMode()).isEqualTo(2);
+      assertThat(delivered.getProps().getMessageId()).isEqualTo(task.eventId().toString());
+      assertThat(delivered.getEnvelope().getRoutingKey()).isEqualTo("task.created.v1");
+    }
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(strings = {"host", "vhost"})
+  void task_s17_doesNotFallBackToDefaultBrokerDestination(String changed) throws Exception {
+    var publisher =
+        new RabbitBrokerPublisher(
+            changed.equals("host") ? "does-not-exist.invalid" : rabbit.getHost(),
+            rabbit.getMappedPort(5672),
+            "broker-test",
+            "broker-test-secret",
+            changed.equals("vhost") ? "/unavailable-vhost" : "/");
+    assertThat(publisher.publish(message())).isEqualTo(DeliveryOutcome.BROKER_UNAVAILABLE);
+  }
 }

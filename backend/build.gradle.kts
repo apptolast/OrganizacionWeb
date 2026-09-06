@@ -34,7 +34,9 @@ tasks.test {
 pitest {
     pitestVersion.set("1.22.0")
     junit5PluginVersion.set("1.2.3")
-    val authenticationOnly = providers.gradleProperty("mutationScope").orNull == "authentication"
+    val scope = providers.gradleProperty("mutationScope").orNull
+    val authenticationOnly = scope == "authentication"
+    val taskOnly = scope == "create_task"
     val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
     val authenticationClasses = setOf(
         "com.apptolast.organization.adapter.http.SessionController",
@@ -46,9 +48,42 @@ pitest {
         "com.apptolast.organization.adapter.http.Session*Test",
         "com.apptolast.organization.adapter.config.SessionCookiePolicyTest"
     )
-    targetClasses.set(if (authenticationOnly) authenticationClasses else core + authenticationClasses)
-    targetTests.set(if (authenticationOnly) authenticationTests else core + authenticationTests)
+    val taskAdapters = setOf(
+        "com.apptolast.organization.adapter.http.TaskController",
+        "com.apptolast.organization.adapter.persistence.PostgresTaskCommit",
+        "com.apptolast.organization.adapter.persistence.PostgresTaskQueries",
+        "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher"
+    )
+    val taskClasses = taskAdapters + setOf(
+        "com.apptolast.organization.domain.Task",
+        "com.apptolast.organization.domain.TaskPage",
+        "com.apptolast.organization.domain.TaskPosition",
+        "com.apptolast.organization.domain.OutboxMessage",
+        "com.apptolast.organization.application.CreateTask",
+        "com.apptolast.organization.application.ReadTasks",
+        "com.apptolast.organization.application.TaskCreated"
+    )
+    val taskAdapterTests = setOf(
+        "com.apptolast.organization.adapter.TaskApiTest",
+        "com.apptolast.organization.adapter.broker.*Test"
+    )
+    val taskTests = core + taskAdapterTests
+    targetClasses.set(when {
+        authenticationOnly -> authenticationClasses
+        taskOnly -> taskClasses
+        else -> core + authenticationClasses + taskAdapters
+    })
+    targetTests.set(when {
+        authenticationOnly -> authenticationTests
+        taskOnly -> taskTests
+        else -> core + authenticationTests + taskAdapterTests
+    })
     if (authenticationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-authentication"))
+    if (taskOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-create-task"))
+    jvmArgs.set(setOf("-Dapi.version=1.44"))
+    // Real broker tests restart a container for each JUnit lifecycle in PIT.
+    // Keep their transport assertions intact while allowing measured container startup.
+    if (!authenticationOnly) timeoutConstInMillis.set(15000)
     // PIT's default FRECORD also removes hand-written compact constructors.
     features.set(setOf("-FRECORD"))
     excludedMethods.set(setOf("equals", "hashCode", "toString"))

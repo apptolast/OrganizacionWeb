@@ -66,7 +66,7 @@ class EditProjectsApiTest {
 
   @BeforeEach
   void clear() {
-    jdbc.execute("TRUNCATE outbox_events, projects");
+    jdbc.execute("TRUNCATE outbox_events, projects CASCADE");
   }
 
   java.util.UUID seed() {

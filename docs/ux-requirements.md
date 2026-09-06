@@ -60,3 +60,9 @@ La primera entrega tiene pruebas Chromium a 320, 768 y 1440 px, más 720 px CSS 
 Pendiente de comprobar con evidencia nueva: anchos intermedios y grandes, límites de breakpoints, orientaciones/alturas pequeñas, zoom real, ampliación de texto, controles táctiles medidos, teclado virtual, Firefox/WebKit y dispositivos reales. El feedback <400 ms requiere medición. La facilidad de aprendizaje/carga cognitiva requiere revisión de uso. Planificación, sesiones y personalización se evaluarán cuando existan sus respectivos recorridos. No se atribuyen resultados de pruebas que todavía no se han ejecutado.
 
 En cada futuro contrato UI, enlazar este documento y convertir las condiciones aplicables en escenarios concretos. En el informe de revisión, adjuntar la matriz de 30 filas con su evidencia y los dispositivos/estados probados. Este documento incorpora requisitos; no modifica el contrato ni los resultados históricos de create_project y no aprueba publish_outbox.
+
+### Evidencia posterior: creación de tareas
+
+La verificación de `create_task` amplía la evidencia local sin atribuirla retrospectivamente a otros recorridos. `progress/ux_create_task.md` recoge las treinta filas, veintidós anchos de 320 a 2560 píxeles CSS, ambos lados de los breakpoints, altura reducida, contenido largo, teclado, medición de controles y axe. Las capturas de zoom nativo Chromium al 200 % muestran un ancho interior de 320 píxeles CSS sin desbordamiento. El feedback de guardado se midió en 2 ms antes de liberar la respuesta HTTP retenida.
+
+El recorrido básico de creación y persistencia pasó también en Firefox y WebKit. La matriz completa y el zoom corresponden a Chromium; no se extrapolan a esos motores. Siguen pendientes dispositivos físicos, teclado virtual, lector de pantalla real y evaluación de facilidad de uso por personas. Esta evidencia de interfaz no sustituye las puertas de mutación ni declara terminada la funcionalidad.

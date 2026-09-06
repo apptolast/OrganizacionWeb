@@ -95,3 +95,21 @@
 - Integración final: 27/27 E2E y publisher con salida 0. Pruebas de navegador, persistencia, expiración, CSRF, origen y evidencia UX constan en los informes; no se afirma cobertura universal de dispositivos físicos.
 - Juez conjunto APPROVED en progress/judge_authentication.md. Authentication queda done localmente por señal del coordinador. Commit y CI de esta entrega pendientes al cerrar; no se declara despliegue en servidor ni MVP completo.
 - Continuidad: create_task conserva sólo propuesta y borrador de contrato revisado, sin activación ni producción. El coordinador determina el siguiente inicio dentro de la autorización persistente.
+
+### Confirmación remota de authentication
+
+El coordinador confirmó CI 34001003734 SUCCESS sobre 0913d758e0225efbeb0c32e6ee63f9915950bcb8, incluidos verify/mutación, build, E2E y publisher. Esta confirmación completa el estado remoto pendiente del cierre local de feature 6; no implica despliegue en servidor.
+
+## 2026-09-06 — feature `create_task`
+
+- Contrato aprobado de 35 escenarios bajo autorización persistente. Ponytail full y Caveman lite activos; arquitectura hexagonal, TDD, seguridad y accesibilidad conservados.
+- Backend: tareas hijas del proyecto con ocho campos, validación Unicode/estimación y lecturas propias paginadas por cursor vinculado al proyecto. V7 aditiva y FK de outbox conservada. La creación bloquea la fila del proyecto y confirma tarea y TaskCreated.v1 juntos, sin cambiar ETag ni capacidad.
+- PostgreSQL real verifica privacidad, UUID/cursor estrictos, rollback de errores y escrituras suprimidas, y carrera con completar en ambos órdenes. RabbitMQ real verifica el evento original y ruta nueva; entrega al menos una vez conservada.
+- Frontend: formulario y lista independientes en el detalle, recarga persistente, errores con borrador conservado, sesión y respuestas obsoletas protegidas. Una carrera entre POST retenido y reintento GET se reprodujo y corrigió con actualización funcional; no se ocultó mediante una relajación de pruebas.
+- Init final 73511: 486 pruebas backend, 366 frontend y lint verdes. Tras refuerzos exclusivos de pruebas frontend, suite final 371 y lint verdes. No se atribuye una nueva ejecución global conjunta posterior.
+- Mutación backend: perfil completo 182/186, cero timeouts y NO_COVERAGE; replay separado 15/15 elimina tres huecos reales y deja una equivalencia de normalización justificada. Se corrigió lifecycle del fixture PostgreSQL y se midió margen de arranque Rabbit, sin tratar fallos del entorno como mutantes eliminados.
+- Mutación frontend: campaña inicial 402/504; después de la corrección funcional se ejecutaron los 505 mutantes actuales, con 480 eliminados (95,05 %). Replay separado 16/16 confirma las cuatro identidades reforzadas; 21 variantes justificadas y ningún hueco real abierto según revisión independiente. No se suman denominadores ni se afirma reutilización incremental inexistente.
+- Integración: 32/32 E2E originales, 2/2 Firefox/WebKit, 22 anchos y zoom nativo, feedback medido en 2 ms y smoke de caída/recuperación/retención TaskCreated tras reiniciar broker con salida 0. La corrección funcional posterior tiene regresión real focal 1/1, conservada por separado. No se certifican dispositivos físicos ni usabilidad universal.
+- Dictamen final APPROVED en progress/judge_create_task.md. Feature 7 queda done localmente; commit/push y CI de esta entrega pendientes al registrar el cierre. No se declara despliegue en servidor ni finalización del MVP.
+- Limpieza: la revisión automática rechazó eliminar .e2e-work/read-review-state.json y .e2e-work/read-review-stop con el motivo literal «blocked by policy». Permanecen ignorados por Git; no se expuso su contenido ni se eludió el bloqueo. Es una limitación de limpieza, no de funcionamiento de la aplicación.
+- Continuidad: split_task conserva propuesta y borrador @draft revisado de 38 escenarios. No se activa feature 8 ni se inicia producción durante este cierre.

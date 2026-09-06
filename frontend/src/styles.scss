@@ -1144,3 +1144,90 @@ button {
   line-height: 1.65;
   margin-top: 20px;
 }
+
+.project-tasks {
+  margin-top: 32px;
+  padding: clamp(20px, 4vw, 36px);
+  border: 1px solid $line;
+  border-radius: 18px;
+  background: #fffefa;
+  min-width: 0;
+  h2 {
+    margin: 0;
+    font-size: 25px;
+    letter-spacing: -0.5px;
+  }
+  h3 {
+    margin: 0 0 10px;
+    font-size: 17px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  p {
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+  }
+  .tasks-intro {
+    margin: 8px 0 26px;
+    color: $muted;
+  }
+  > button {
+    margin: 8px 12px 8px 0;
+  }
+  button {
+    white-space: normal;
+  }
+  [role="alert"] {
+    color: #854a35;
+  }
+  [role="status"] {
+    color: $forest;
+  }
+  .task-list {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0;
+    display: grid;
+    gap: 14px;
+  }
+  .task-list li,
+  > article {
+    padding: 20px;
+    border: 1px solid #dfe5d9;
+    border-radius: 12px;
+    background: #f8faf4;
+    min-width: 0;
+    p {
+      white-space: pre-wrap;
+      margin: 8px 0 12px;
+    }
+    p:last-child {
+      color: $muted;
+      font-size: 13px;
+      margin-bottom: 0;
+    }
+  }
+  .task-form {
+    border-top: 1px solid $line;
+    margin-top: 26px;
+    padding-top: 26px;
+    textarea {
+      min-height: 112px;
+    }
+    .field {
+      margin-bottom: 22px;
+    }
+    > p {
+      color: $muted;
+      font-size: 13px;
+    }
+  }
+}
+@media (max-width: 600px) {
+  .project-tasks button {
+    width: 100%;
+  }
+  .project-tasks > button {
+    margin-right: 0;
+  }
+}

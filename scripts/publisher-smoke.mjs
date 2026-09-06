@@ -107,15 +107,19 @@ async function createProject(name) {
   );
   return response.json();
 }
-function outbox(id, type = "ProjectCreated.v1") {
+function outbox(id, type = "ProjectCreated.v1", taskId) {
   assert.ok(
     [
       "ProjectCreated.v1",
       "ProjectUpdated.v1",
       "ProjectStatusChanged.v1",
+      "TaskCreated.v1",
     ].includes(type),
   );
   assert.match(id, /^[0-9a-f-]{36}$/i);
+  if (type === "TaskCreated.v1") assert.match(taskId, /^[0-9a-f-]{36}$/i);
+  const taskFilter =
+    type === "TaskCreated.v1" ? ` AND payload->>'taskId'='${taskId}'` : "";
   const value = docker([
     "exec",
     "-T",
@@ -127,7 +131,7 @@ function outbox(id, type = "ProjectCreated.v1") {
     "organization",
     "-At",
     "-c",
-    `SELECT row_to_json(e) FROM outbox_events e WHERE aggregate_id='${id}' AND event_type='${type}'`,
+    `SELECT row_to_json(e) FROM outbox_events e WHERE aggregate_id='${id}' AND event_type='${type}'${taskFilter}`,
   ]);
   return value ? JSON.parse(value) : undefined;
 }
@@ -172,18 +176,25 @@ function assertMessage(row, received) {
   );
   assert.ok(message, "Original event must remain available in RabbitMQ");
   assert.deepEqual(JSON.parse(message.payload), row.payload);
-  assert.deepEqual(Object.keys(row.payload).sort(), [
-    "aggregateId",
-    "eventId",
-    ...(row.event_type === "ProjectStatusChanged.v1"
-      ? ["fromStatus"]
-      : ["name"]),
-    "occurredAt",
-    "ownerId",
-    "schemaVersion",
-    ...(row.event_type === "ProjectStatusChanged.v1" ? ["toStatus"] : []),
-    "type",
-  ]);
+  const specificFields = {
+    "ProjectCreated.v1": ["name"],
+    "ProjectUpdated.v1": ["name"],
+    "ProjectStatusChanged.v1": ["fromStatus", "toStatus"],
+    "TaskCreated.v1": ["taskId", "title"],
+  }[row.event_type];
+  assert.ok(specificFields, "Only approved event schemas are accepted");
+  assert.deepEqual(
+    Object.keys(row.payload).sort(),
+    [
+      "aggregateId",
+      "eventId",
+      "occurredAt",
+      "ownerId",
+      "schemaVersion",
+      "type",
+      ...specificFields,
+    ].sort(),
+  );
   assert.equal(message.properties.content_type, "application/json");
   assert.equal(message.properties.delivery_mode, 2);
 }
@@ -301,6 +312,51 @@ try {
   assert.equal(statePending.last_error_code, "BROKER_UNAVAILABLE");
   assert.equal(statePending.payload.fromStatus, "idea");
   assert.equal(statePending.payload.toStatus, "active");
+  const taskResponse = await application.post(
+    `/api/v1/projects/${created.id}/tasks`,
+    {
+      headers: { ...(await csrfHeaders(application)), Origin: origin },
+      data: {
+        title: "Tarea durante caída del broker",
+        completionCriterion: "Criterio privado sintético",
+        estimatedMinutes: 25,
+      },
+      timeout: 4500,
+    },
+  );
+  assert.equal(
+    taskResponse.status(),
+    201,
+    "Task creation must confirm independently of broker",
+  );
+  const task = await taskResponse.json();
+  const taskPending = await eventually(
+    "tasks @s16 worker retries while broker is stopped",
+    () => {
+      const row = outbox(created.id, "TaskCreated.v1", task.id);
+      return row?.status === "pending" && row.attempts >= 1 ? row : false;
+    },
+    30,
+  );
+  assert.equal(taskPending.published_at, null);
+  assert.equal(taskPending.last_error_code, "BROKER_UNAVAILABLE");
+  assert.deepEqual(
+    Object.keys(taskPending.payload).sort(),
+    [
+      "eventId",
+      "aggregateId",
+      "ownerId",
+      "occurredAt",
+      "schemaVersion",
+      "type",
+      "taskId",
+      "title",
+    ].sort(),
+  );
+  assert.equal(taskPending.aggregate_id, created.id);
+  assert.equal(taskPending.payload.aggregateId, created.id);
+  assert.equal(taskPending.payload.taskId, task.id);
+  assert.equal(taskPending.payload.title, task.title);
   docker(["start", "rabbitmq"], undefined, 30000);
   const recovered = await eventually(
     "@s9 background publisher recovers automatically",
@@ -404,6 +460,51 @@ try {
   );
   // Freeze publisher activity: recovery must come from the existing Rabbit volume,
   // not a worker silently recreating topology or republishing during the assertion.
+  const taskPublished = await eventually(
+    "tasks @s17 publishes after broker recovery",
+    () => {
+      const row = outbox(created.id, "TaskCreated.v1", task.id);
+      return row?.status === "published" ? row : false;
+    },
+    120,
+  );
+  assert.equal(taskPublished.event_id, taskPending.event_id);
+  assert.deepEqual(taskPublished.payload, taskPending.payload);
+  assert.ok(taskPublished.attempts > taskPending.attempts);
+  const taskReceived = await eventually(
+    "tasks @s17 dedicated queue receives original event",
+    () => {
+      const received = management(
+        "queues/organization/organization.task-created.v1/get",
+        {
+          count: 100,
+          ackmode: "ack_requeue_true",
+          encoding: "auto",
+          truncate: 1000000,
+        },
+      );
+      return received.some(
+        (item) => item.properties.message_id === taskPublished.event_id,
+      )
+        ? received
+        : false;
+    },
+    30,
+  );
+  assertMessage(taskPublished, taskReceived);
+  const taskQueue = management(
+    "queues/organization/organization.task-created.v1",
+  );
+  assert.equal(taskQueue.durable, true);
+  assert.equal(taskQueue.type, "quorum");
+  assert.ok(
+    management(
+      "bindings/organization/e/organization.events/q/organization.task-created.v1",
+    ).some((binding) => binding.routing_key === "task.created.v1"),
+  );
+  console.log(
+    "PASS tasks @s16/@s17: broker stopped, HTTP 201, original TaskCreated recovered with distinct project and task identities",
+  );
   docker(["stop", "backend"], undefined, 30000);
   docker(["restart", "rabbitmq"], undefined, 30000);
   const retained = await receiveOriginals(
@@ -413,6 +514,31 @@ try {
   );
   assertMessage(published, retained);
   assertMessage(recovered, retained);
+  const retainedTasks = await eventually(
+    "TaskCreated retained after same-volume Rabbit restart",
+    () => {
+      const messages = management(
+        "queues/organization/organization.task-created.v1/get",
+        {
+          count: 100,
+          ackmode: "ack_requeue_true",
+          encoding: "auto",
+          truncate: 1000000,
+        },
+      );
+      return messages.some(
+        (item) => item.properties.message_id === taskPublished.event_id,
+      )
+        ? messages
+        : false;
+    },
+    30,
+  );
+  assertMessage(taskPublished, retainedTasks);
+  assert.deepEqual(
+    outbox(created.id, "TaskCreated.v1", task.id),
+    taskPublished,
+  );
   const queue = management(
     "queues/organization/organization.project-created.v1",
   );

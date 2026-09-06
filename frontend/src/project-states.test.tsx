@@ -1,3 +1,4 @@
+vi.mock("./project-tasks", () => ({ ProjectTasks: () => null }));
 import {
   render,
   screen,

@@ -1,3 +1,4 @@
+import { ProjectTasks } from "./project-tasks";
 import { useRef, useLayoutEffect } from "react";
 import { RouteLink } from "./navigation";
 import { useReadProjects } from "./use-read-projects";
@@ -203,6 +204,14 @@ export function ProjectReader({ route }: { route: string }) {
             </nav>
           )}
         </>
+      )}
+      {project && (
+        <ProjectTasks
+          key={project.id}
+          projectId={project.id}
+          projectStatus={project.status}
+          onProjectConfirmed={confirmProject}
+        />
       )}
       <footer className="page-footer">
         <span>Un lugar para lo que quieres construir.</span>

@@ -26,7 +26,7 @@ Agentes actuales: resume_backend completa replay/intención, lecturas vigentes, 
 
 Actualización posterior: Stryker18743 terminó179d24 EXIT0 en79min3s.1416 mutantes:1226 Killed,178 Survived,10 NoCoverage,2 RuntimeError,0 Timeout;86,70% Stryker y86,58% contando errores como no detectados. Informe original conservado. Revisar huecos antes del cierre; errores171/180 del adaptador no se cuentan como equivalentes ni Killed. Ver mutation_reschedule_frontend.md y review_reschedule_frontend_mutation_gaps.md.
 
-Medición autorizada2→8 procesos en ejecución83148, mismo alcance y fuentes/tests congelados. Sólo concurrency y dos rutas de informe cambian temporalmente;14 entradas no operativas del manifest verificadas3e46ee. Dry run745tests GREEN060193 en2min45s. No adoptar ocho procesos hasta comparar clasificaciones y ausencia de Timeout con el baseline.
+Medición autorizada terminada: ejecución 83148 EXIT0 c20ceb, 44 minutos y 13 segundos frente a 79 minutos y 3 segundos. Comparación 120492: las 1.416 firmas mantienen exactamente sus estados, cero Timeout, mismos dos RuntimeError y 14 hashes de fuentes/tests intactos. Concurrency 8 adoptada; rutas normales restauradas y ambos informes archivados por separado. Ver reschedule_frontend_concurrency_comparison.json. Se libera la congelación operativa; el autor de recibos termina primero su paquete backend antes de abordar pruebas frontend.
 
 Main documental9e59516 tiene CI34050389138 SUCCESSa1abc6. Ninguna PR abierta en comprobación5e3da7. No hay despliegue. Plan y revisión documental de infraestructura publicados; capacidad real pendiente de comprobar, no confundir contrato de recursos con RAM libre.
 

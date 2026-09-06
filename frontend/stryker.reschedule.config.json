@@ -18,7 +18,7 @@
     "low": 80,
     "break": 80
   },
-  "concurrency": 2,
+  "concurrency": 8,
   "coverageAnalysis": "perTest",
   "vitest": {
     "configFile": "vite.config.ts"

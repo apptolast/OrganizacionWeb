@@ -17,3 +17,13 @@ Errores171 y180 en change-submit.tsx: mutaciones OptionalChaining de onRejected(
 Existe autorización de rendimiento para comprobar ocho procesos, condicionada a cero Timeout y reproducción de la campaña controlada del mismo alcance. Ahora existe ese baseline. Se mantienen las fuentes/tests y los1416 candidatos; sólo se cambia temporalmente concurrency2→8 y el directorio de informes para no sobrescribir el original. El manifest original conserva los hashes de baseline; la excepción es esta configuración operativa declarada.
 
 Se vuelve a usar el mismo comando del harness. La prueba no intenta reparar ni ocultar RuntimeError171/180; compara rendimiento y clasificaciones, conservando ambas ejecuciones separadas. No se adoptará la configuración por una puntuación mayor si cambian estados por contención o aparecen timeouts. Resultado pendiente; fuentes frontend siguen congeladas hasta terminar esta medición.
+
+## Resultado de la comparación y adopción
+
+La ejecución 83148 terminó con EXIT0, evidencia c20ceb, en 44 minutos y 13 segundos frente a 79 minutos y 3 segundos del baseline. Ahorro observado: 34 minutos y 50 segundos, aproximadamente 44 % en esta campaña. No se extrapola a PIT ni a todas las pruebas.
+
+Comparación independiente 120492: las 1.416 firmas únicas de mutante tienen exactamente el mismo estado en ambos informes. Misma fuente de los siete archivos y 14 hashes de fuentes/tests intactos. Resultado: 1.226 Killed, 178 Survived, 10 NoCoverage, dos RuntimeError y cero Timeout. Se mantienen los errores 171/180 del adaptador; no hay nuevas equivalencias ni detecciones por la subida de concurrencia.
+
+Se adopta concurrency=8. Las rutas normales del reporter se restauran; antes, el baseline JSON/HTML se archivó y verificó por SHA256 en `frontend/reports/mutation-reschedule-baseline-concurrency2` (637f49). El benchmark permanece en `frontend/reports/mutation-reschedule-concurrency8`. Evidencia estructurada y hashes en `reschedule_frontend_concurrency_comparison.json`. El manifest original conserva su configuración histórica de dos procesos; el nuevo hash operativo figura en la comparación.
+
+La medición libera la congelación operativa de fuentes frontend. No acredita cierre funcional: quedan los oráculos prioritarios de la revisión de huecos y la integración E2E/backend. El autor de lecturas termina primero su paquete backend para no abrir dos frentes de edición propios.

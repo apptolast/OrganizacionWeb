@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import com.apptolast.organization.domain.SessionStart;
+import com.apptolast.organization.domain.ValidationException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.*;
@@ -67,5 +68,105 @@ class StartWorkSessionTest {
                 "Europe/Madrid"));
     verify(clock).instant();
     verifyNoMoreInteractions(clock);
+  }
+
+  @Test
+  void s6_rejectsZeroMinutesBeforeStorage() {
+    var store = mock(WorkSessionStarting.class);
+    var clock = mock(Clock.class);
+    assertThatThrownBy(
+            () ->
+                new StartWorkSession(store, clock)
+                    .start("owner", UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), 0))
+        .isInstanceOfSatisfying(
+            ValidationException.class,
+            error ->
+                assertThat(error.errors())
+                    .extracting("field", "code")
+                    .containsExactly(tuple("plannedMinutes", "OUT_OF_RANGE")));
+    verifyNoInteractions(store, clock);
+  }
+
+  @Test
+  void s6_rejectsMinutesAboveMaximumBeforeStorage() {
+    var store = mock(WorkSessionStarting.class);
+    var clock = mock(Clock.class);
+    assertThatThrownBy(
+            () ->
+                new StartWorkSession(store, clock)
+                    .start("owner", UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), 1441))
+        .isInstanceOfSatisfying(
+            ValidationException.class,
+            error ->
+                assertThat(error.errors())
+                    .extracting("field", "code")
+                    .containsExactly(tuple("plannedMinutes", "OUT_OF_RANGE")));
+    verifyNoInteractions(store, clock);
+  }
+
+  @Test
+  void s2_acceptsOneMinute() {
+    var result =
+        startInContext(
+            "active",
+            "pending",
+            1,
+            Clock.fixed(Instant.parse("2026-09-06T10:00:00.123456Z"), java.time.ZoneOffset.UTC));
+    assertThat(result.session().plannedMinutes()).isEqualTo(1);
+    assertThat(result.session().plannedEndAt())
+        .isEqualTo(Instant.parse("2026-09-06T10:01:00.123456Z"));
+  }
+
+  private WorkSessionConfirmation startInContext(
+      String projectStatus, String taskStatus, int minutes, Clock clock) {
+    WorkSessionStarting store =
+        (owner, project, task, key, duration, operation) -> {
+          var change =
+              operation.apply(
+                  new WorkSessionContext(projectStatus, taskStatus, Optional.of("UTC")));
+          return new WorkSessionConfirmation(change.session(), false);
+        };
+    return new StartWorkSession(store, clock)
+        .start("owner", UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), minutes);
+  }
+
+  @Test
+  void s2_acceptsMaximumMinutes() {
+    var result =
+        startInContext(
+            "active",
+            "pending",
+            1440,
+            Clock.fixed(Instant.parse("2026-09-06T10:00:00.123456Z"), java.time.ZoneOffset.UTC));
+    assertThat(result.session().plannedMinutes()).isEqualTo(1440);
+    assertThat(result.session().plannedEndAt())
+        .isEqualTo(Instant.parse("2026-09-07T10:00:00.123456Z"));
+  }
+
+  @Test
+  void s11_rejectsCompletedProjectBeforeClock() {
+    var clock = mock(Clock.class);
+    when(clock.instant()).thenReturn(Instant.parse("2026-09-06T10:00:00Z"));
+    assertThatThrownBy(() -> startInContext("completed", "pending", 25, clock))
+        .isInstanceOf(ProjectCompletedException.class);
+    verifyNoInteractions(clock);
+  }
+
+  @Test
+  void s11_rejectsCompletedTaskBeforeClock() {
+    var clock = mock(Clock.class);
+    when(clock.instant()).thenReturn(Instant.parse("2026-09-06T10:00:00Z"));
+    assertThatThrownBy(() -> startInContext("active", "completed", 25, clock))
+        .isInstanceOf(TaskCompletedException.class);
+    verifyNoInteractions(clock);
+  }
+
+  @Test
+  void s11_completedProjectTakesPrecedenceOverCompletedTask() {
+    var clock = mock(Clock.class);
+    when(clock.instant()).thenReturn(Instant.parse("2026-09-06T10:00:00Z"));
+    assertThatThrownBy(() -> startInContext("completed", "completed", 25, clock))
+        .isInstanceOf(ProjectCompletedException.class);
+    verifyNoInteractions(clock);
   }
 }

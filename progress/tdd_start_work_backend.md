@@ -25,3 +25,23 @@ Refuerzo del mismo fixture tras GREEN: migrar primero hasta V13, sembrar context
 Fuentes: ocho tipos del núcleo anterior, PostgresWorkSessionStore y V14__work_sessions.sql. Pruebas: StartWorkSessionTest y WorkSessionPersistenceTest. Ningún bean, endpoint o publisher compartido modificado; no suite global, PIT, Git ni metadatos. DTO SessionStart conserva siete campos y precisión de microsegundos.
 
 Límites explícitos: aún faltan validación/rango temporal/fallback de catálogo; elegibilidad; replay owner/key y unicidad activa; captura de errores incluyendo COMMIT; rowcounts/rollback y resolución de colisiones en nueva transacción; GET/HTTP y publicación. El adaptador nominal todavía devuelve replayed=false y el núcleo requiere zona presente. No es una entrega utilizable de toda la feature. Se detiene aquí por la frontera de revisión solicitada, sin abrir otra matriz.
+
+## Reanudación acotada — duración y elegibilidad del núcleo
+
+Root autorizó sólo application/domain y StartWorkSessionTest desde HEAD6578c9e, baseline nominal 2/2 cf68d5. No se modifica PG, migración, HTTP, publisher ni configuración. Los casos se añadieron individualmente y cada ejecución terminó antes de escribir el siguiente caso.
+
+- @s6, duración 0: incidente de compilación fd30e8 por usar dos argumentos en FieldError (requiere tres); se corrigió el oráculo para comprobar field/code. No se atribuye a producción. RED funcional 464879 por ausencia de rechazo; guarda de rango cerrado 1–1440 antes del puerto; GREEN 508d4c, dos casos vigentes.
+- @s6, duración 1441: añadido después del GREEN anterior; inicialmente GREEN 4ff77f, sin nueva producción. Ausencia/null/tipos JSON pertenecen al futuro adaptador HTTP: la entrada del núcleo es int y este corte no afirma cubrir esas filas.
+- @s2, duración 1: inicialmente GREEN 7a34f9, fin exacto de 60 segundos preservando microsegundos.
+- @s2, duración 1440: inicialmente GREEN 790e6f, fin exacto al día siguiente, 86400 segundos; sin ampliación DST/catálogo.
+- @s11, proyecto completed y tarea pending: el primer fixture dejó Clock sin valor y obtuvo NPE (efe0f7); un reemplazo textual no aplicado repitió ese incidente (e88e8c). Se corrigió antes de editar producción para usar un instante válido. RED funcional final ef38e7/6677c6 por no lanzar ProjectCompletedException; mínimo guard dentro del callback antes del reloj, GREEN 628bc4 con seis casos.
+- @s11, proyecto active y tarea completed: RED funcional c23250; guard de tarea después del de proyecto, GREEN e2d44a con siete casos.
+- @s11, ambos completed: inicialmente GREEN a99f46. El rechazo sigue siendo ProjectCompletedException y no se consulta Clock. No se fabrica un RED para esta precedencia ya presente.
+
+Se reutilizan ValidationException/FieldError y ProjectCompletedException/TaskCompletedException sin modificar sus clases ni títulos HTTP existentes. La duración se valida antes de entrar al puerto, y la elegibilidad dentro de su callback, de modo que la futura resolución de replay del puerto pueda preceder al negocio. Esa integración futura no se acredita con estas pruebas del núcleo.
+
+Formato focal de los dos Java propios con GJF 1.31.0 c2fa8d, retirando nombres de clase plenamente cualificados y sin cambiar otros archivos. Pendiente de registrar resultado de la regresión final del archivo completo.
+
+Cierre congelado: regresión final e55cd8, StartWorkSessionTest 8/8 GREEN tras formato, cero fallos/errores/omitidos. Sólo StartWorkSession.java, StartWorkSessionTest.java y esta bitácora cambiaron por esta subtarea. No se ejecutaron pruebas PG ni suites globales. Se entrega a revisión sin ampliar a temporal, fallback o persistencia.
+
+Verificación de integración solicitada por root tras freeze del núcleo: sólo WorkSessionPersistenceTest existente, sin nuevos tests ni cambios de producción. GREEN d4b176, un caso PostgreSQL; XML confirma 1/1, cero fallos/errores/omitidos. No se repitieron los ocho casos del núcleo ni suite global. Freeze conservado para revisión/commit.

@@ -1,8 +1,11 @@
 package com.apptolast.organization.application;
 
+import com.apptolast.organization.domain.FieldError;
 import com.apptolast.organization.domain.SessionStart;
+import com.apptolast.organization.domain.ValidationException;
 import java.time.Clock;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 
 public final class StartWorkSession implements StartWorkSessionUseCase {
@@ -16,6 +19,12 @@ public final class StartWorkSession implements StartWorkSessionUseCase {
 
   public WorkSessionConfirmation start(
       String owner, UUID project, UUID task, UUID key, int plannedMinutes) {
+    if (plannedMinutes < 1 || plannedMinutes > 1440) {
+      throw new ValidationException(
+          List.of(
+              new FieldError(
+                  "plannedMinutes", "OUT_OF_RANGE", "Debe estar entre 1 y 1440 minutos.")));
+    }
     return store.commit(
         owner,
         project,
@@ -23,6 +32,8 @@ public final class StartWorkSession implements StartWorkSessionUseCase {
         key,
         plannedMinutes,
         context -> {
+          if ("completed".equals(context.projectStatus())) throw new ProjectCompletedException();
+          if ("completed".equals(context.taskStatus())) throw new TaskCompletedException();
           var started = clock.instant().truncatedTo(ChronoUnit.MICROS);
           var session =
               new SessionStart(

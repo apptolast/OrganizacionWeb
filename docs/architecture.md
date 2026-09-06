@@ -37,11 +37,11 @@ Los subpaquetes concretos quedan a cargo de la implementación. Pruebas de arqui
 
 Un POST autenticado entra por REST y un puerto de aplicación. El dominio valida nombre y descripción. La aplicación solicita guardar proyecto y evento pendiente dentro de una transacción PostgreSQL. Una excepción revierte ambas escrituras. El éxito se envía tras commit. Ni localStorage ni ejemplos sustituyen a la base de datos.
 
-La outbox forma parte del primer corte. El publicador RabbitMQ corresponde a la siguiente feature. Entrega al menos una vez con consumidores idempotentes, confirmaciones, reintentos y cola de errores. Una tabla de eventos pendientes por sí sola no acredita EDA completa.
+La outbox y el publicador RabbitMQ están implementados. La entrega es al menos una vez, con confirmaciones y reintentos; el consumidor debe deduplicar por eventId. Los eventos incompatibles quedan blocked en la outbox, conservando el registro para su revisión. Las pruebas incluyen broker detenido, recuperación y persistencia de mensajes.
 
-## Identidad inicial
+## Identidad vigente
 
-La identidad verificada es precondición del contrato aprobado. Para ejecutar este corte se permite HTTP Basic de bootstrap configurado por entorno, sin credenciales por defecto ni propietario suministrado por cliente. Producción requiere HTTPS. Inicio/cierre de sesión con experiencia propia es una feature posterior. JSON estricto, CORS restringido y protección contra solicitudes de otro origen pertenecen al adaptador HTTP.
+La identidad verificada es precondición de los recursos privados. La feature authentication utiliza formulario de acceso y Spring Session JDBC con caducidad, rotación y cierre revocable. El propietario deriva del Principal; las credenciales se configuran por entorno sin valores predeterminados. HTTP Basic está deshabilitado. La cookie es HttpOnly, SameSite=Lax y Path /api; Secure depende del origen público HTTPS configurado, con HTTP sólo en loopback de desarrollo. JSON estricto, CSRF y protección de origen pertenecen al adaptador HTTP. No hay registro público ni recuperación de contraseña implementados.
 
 ## Dependencias justificadas
 

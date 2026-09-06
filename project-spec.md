@@ -314,9 +314,9 @@ Máximo inicial de tres proyectos activos propios, configurable para el desplieg
 
 Cada cambio real produce atómicamente ProjectStatusChanged.v1, payload exacto de ocho campos eventId, aggregateId, ownerId, occurredAt, schemaVersion, type, fromStatus y toStatus. Ruta cerrada project.status-changed.v1 y cola quorum durable organization.project-status-changed.v1 en organization.events. Conserva Created/Updated y las garantías del publicador; no incorpora consumidor ni orden global. Fallos revierten estado, versión, fechas y outbox. UI con acciones explícitas por transición, feedback temprano, conflictos sin reintento automático y matriz UX aplicada al control nuevo.
 
-## Feature 6: inicio y cierre de sesión — contrato preparado
+## Feature 6: inicio y cierre de sesión — completada localmente
 
-Contrato `features/authentication.feature`, aprobado dentro de la autorización global. No inicia producción hasta cerrar project_states. La propuesta `progress/proposal_authentication.md` incorpora decisiones de seguridad y contraste de las versiones resueltas: Spring Security 6.5.8 y Spring Session JDBC 3.5.5 sobre PostgreSQL existente, sin actualizar el stack ni introducir Redis o JWT propios.
+Contrato `features/authentication.feature`, aprobado dentro de la autorización global y cerrado tras revisión independiente, pruebas y mutación. Publicado en 0913d75; CI 34001003734 en ejecución. La evidencia y los límites están en `progress/judge_authentication.md`; no se ha desplegado en el servidor. La propuesta `progress/proposal_authentication.md` incorpora decisiones de seguridad y contraste de las versiones resueltas: Spring Security 6.5.8 y Spring Session JDBC 3.5.5 sobre PostgreSQL existente, sin actualizar el stack ni introducir Redis o JWT propios.
 
 El único usuario configurado conserva su nombre como propietario. Formulario nativo username/password, POST `/api/session` con codificación de formulario y CSRF, 204 confirmado o 401 UNAUTHENTICATED genérico. GET `/api/session` devuelve exactamente authenticated, username (null anónimo), csrfToken opaco y csrfHeaderName `X-CSRF-TOKEN`, siempre sin caché. POST `/api/session/logout` invalida en servidor y expira la cookie; GET no cierra sesión. Retirar Basic de la aplicación, conservando el acceso separado a administración de RabbitMQ.
 

@@ -49,3 +49,7 @@ La lista devolverá items y nextCursor; veinte tareas por página, orden descend
 En la web, el detalle del proyecto incorporará una sección Tareas con formulario y lista propios. Sólo título obligatorio; criterio y estimación opcionales con ayuda breve. Mostrar la estimación como planificación, nunca como tiempo realizado. La creación confirmada presenta la tarea guardada; ante error o resultado incierto conserva el borrador y ofrece una acción deliberada, sin reenvío automático. El detalle y las acciones actuales del proyecto siguen disponibles aunque falle la lista de tareas. Completar, subtareas, etiquetas y calendario mantienen sus contratos posteriores.
 
 Estas decisiones siguen en preparación documental mientras authentication termina su validación. Antes de implementar se destilarán límites, estados HTTP, cursor, atomicidad, concurrencia, publicación y UX en escenarios independientes.
+
+## Estado posterior de la propuesta
+
+Authentication quedó cerrada y el contrato de esta propuesta fue aprobado en features/create_task.feature. Create_task es la única implementación activa. Las referencias anteriores a preparación describen la secuencia de decisiones, no el estado actual.

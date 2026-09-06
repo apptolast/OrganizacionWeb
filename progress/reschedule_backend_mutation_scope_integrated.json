@@ -1,0 +1,249 @@
+{
+  "status": "INTEGRATED_INIT_RUNNING_NOT_MUTATED",
+  "patterns": [
+    "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "com.apptolast.organization.domain.Block*",
+    "com.apptolast.organization.domain.BudgetDay",
+    "com.apptolast.organization.domain.PlannedBlock",
+    "com.apptolast.organization.domain.ResolvedBlockTime",
+    "com.apptolast.organization.application.Block*",
+    "com.apptolast.organization.application.PlanBlock",
+    "com.apptolast.organization.application.ReadBlocks",
+    "com.apptolast.organization.domain.OutboxMessage",
+    "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher",
+    "com.apptolast.organization.application.MoveBlock*",
+    "com.apptolast.organization.application.MoveContext",
+    "com.apptolast.organization.application.CancelBlock*",
+    "com.apptolast.organization.application.ReadBlockChanges*",
+    "com.apptolast.organization.application.PublishOutbox",
+    "com.apptolast.organization.adapter.http.RescheduleController*",
+    "com.apptolast.organization.adapter.http.BlockChangesController*",
+    "com.apptolast.organization.adapter.http.BlockCursor*",
+    "com.apptolast.organization.adapter.http.ApiErrors",
+    "com.apptolast.organization.adapter.persistence.PostgresBlockChangeQueries",
+    "com.apptolast.organization.adapter.persistence.PostgresTodayQueries",
+    "com.apptolast.organization.adapter.http.BlockController*",
+    "com.apptolast.organization.adapter.persistence.PostgresBlockStore"
+  ],
+  "selectedSourceClasses": [
+    {
+      "class": "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher",
+      "sha256": "cb30a3b2c8a05539d5ba184eb0a1468bedcb6b09ef837d9b16566469a1884633"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+      "sha256": "f8c886dd468c581a6c3cfed1052a3311b5fc1fa1a7f26df11eb6b785195349e9"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.http.ApiErrors",
+      "sha256": "f34e369002b7aeb2678c971d44db2d639d7487803bb5b0bf78f9b18be523b96a"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.http.BlockChangesController",
+      "sha256": "f34effa01cd21af4de264b169faf30cacfb0dec8a30eb8380b7f6ce72ecef483"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.http.BlockController",
+      "sha256": "05d02bd0118e23ab3cf34b3c07324622669725f32986dfd1685f1907a87dbbe7"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.http.BlockCursor",
+      "sha256": "8217beb6b26eb046d70cf66d5e142121e11f5673dc2defee7f7afa2c87e0e630"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.http.RescheduleController",
+      "sha256": "2178af54aa8fcc3f84de1ba974b6c8d95c7bcce38d848128058525e0a8ded3d5"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.persistence.PostgresBlockChangeQueries",
+      "sha256": "36b60d1fdccda6d020c74a8c6442a5bcf183aa6563d09b675ca78fa35b9ae257"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.persistence.PostgresBlockStore",
+      "sha256": "a0ab035c9c568de8156066bd10b541e7b619cb1738f24e6f1fa0ef53d7f3022c"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.persistence.PostgresTodayQueries",
+      "sha256": "81adda7169b24b2239a686d4d50e74516f26a95d324083260abf2c704ff32576"
+    },
+    {
+      "class": "com.apptolast.organization.application.BlockBudgetExceededException",
+      "sha256": "0463d9279cecab7c0d1e67818b8cb5ef7b05dcbe1b9af7a0eb459f1ec43324f8"
+    },
+    {
+      "class": "com.apptolast.organization.application.BlockChange",
+      "sha256": "dcc5a4b2b235d453b6d111767d850a776d6dd96bedbed0b214e523b18fd82f05"
+    },
+    {
+      "class": "com.apptolast.organization.application.BlockChanged",
+      "sha256": "220ea72bf6662c68e2b52e60e1196e33e6102e3e3b1118c606e66a64193c415d"
+    },
+    {
+      "class": "com.apptolast.organization.application.BlockChangeNotFoundException",
+      "sha256": "a783f260056a5faab51e2a1e41405f2169fac979feeb8076960bbeeb05253e61"
+    },
+    {
+      "class": "com.apptolast.organization.application.BlockChangeQueries",
+      "sha256": "f3114eec8a003c9d8afdbef1bea23587adb28895f7cbd60150c68dab9e238be3"
+    },
+    {
+      "class": "com.apptolast.organization.application.BlockCommit",
+      "sha256": "acad444b417badfb347d47dde183b1ff850fe3a6033afcdaa93c111f9154048b"
+    },
+    {
+      "class": "com.apptolast.organization.application.BlockEditing",
+      "sha256": "b62da69e373842f6580d98a5f3b2b1dc24954b637dd0942450dcabb277ce5015"
+    },
+    {
+      "class": "com.apptolast.organization.application.BlockIdempotencyConflictException",
+      "sha256": "9280c1cd13ae95418412a14583c3e38d8a89ea9256300570c85d12148fb6448f"
+    },
+    {
+      "class": "com.apptolast.organization.application.BlockMoving",
+      "sha256": "0ee02493b765d645d0e696b4d81e04daa2c74038933f9430948be18105ec9f9c"
+    },
+    {
+      "class": "com.apptolast.organization.application.BlockMutation",
+      "sha256": "35411500f5e74b2f96cface2e7ef164e21a61a2937751c05066be7d439ecb8f0"
+    },
+    {
+      "class": "com.apptolast.organization.application.BlockNotFoundException",
+      "sha256": "0906ee9a9737e5ef7f49dd2bf0078e5def9b62fb3dfb9f6b7edf5d50e75b7f49"
+    },
+    {
+      "class": "com.apptolast.organization.application.BlockOverlapException",
+      "sha256": "69f91bba69fa31c84ef52568b99d64cc2fbb2115ef1c2a8d819d8f7239492d41"
+    },
+    {
+      "class": "com.apptolast.organization.application.BlockPlanned",
+      "sha256": "0f292b8dba77411aa3b75668563f8ae194788bb91894db55da07a368afe2a73d"
+    },
+    {
+      "class": "com.apptolast.organization.application.BlockPlanning",
+      "sha256": "1b7767076620d062fe4d9bd7d572d72cceec21d86415bca7a2fb012bccd42d09"
+    },
+    {
+      "class": "com.apptolast.organization.application.BlockQueries",
+      "sha256": "0cf571681d02e2dfda62cfc027e9c152482bd08eebdef568a16b1dffe89f3fa3"
+    },
+    {
+      "class": "com.apptolast.organization.application.CancelBlock",
+      "sha256": "6044ff3852e2662e4b1c04341dd2fe19e6c93dfcb86dd80de43295a781f0b818"
+    },
+    {
+      "class": "com.apptolast.organization.application.CancelBlockUseCase",
+      "sha256": "a41105ed62c8ad7417a8825e086ec5c770554db64056a0b44cebe610562bc7a3"
+    },
+    {
+      "class": "com.apptolast.organization.application.MoveBlock",
+      "sha256": "52ac62d72e843144f33f129004042af0c2c61d4a37bfe6b9d5b673af1fbb0a3f"
+    },
+    {
+      "class": "com.apptolast.organization.application.MoveBlockUseCase",
+      "sha256": "caae7e80b06303689f7d813f2df046d7676cc083ecec03a8eba42a7e98551037"
+    },
+    {
+      "class": "com.apptolast.organization.application.MoveContext",
+      "sha256": "fd9c2ed7d1e5afe123b2a11d156c7130a63f44520e5ed0738e33ab06c5657a0f"
+    },
+    {
+      "class": "com.apptolast.organization.application.PlanBlock",
+      "sha256": "40411e7bb7b5b99a1c076f370315c69ba2d0343bc9b176aa4d4c53a71a70a548"
+    },
+    {
+      "class": "com.apptolast.organization.application.PublishOutbox",
+      "sha256": "b590d70cc982c0d299327dc6854469931b7ad374f7b78129b709ace63aa7aa88"
+    },
+    {
+      "class": "com.apptolast.organization.application.ReadBlockChanges",
+      "sha256": "80d921ce987d0c1c54ae8deb471bde7e27435c6ab923a6eea83d5c8326f020ce"
+    },
+    {
+      "class": "com.apptolast.organization.application.ReadBlockChangesUseCase",
+      "sha256": "766c08d3fe8956cbaf7cfa1bebfdc293307ad2f2806b5745a4da905162a0bf71"
+    },
+    {
+      "class": "com.apptolast.organization.application.ReadBlocks",
+      "sha256": "294e8bc7d93bb02c569f663e178656a325d1f2ee3362ce301e0f7fb842adece0"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BlockBudget",
+      "sha256": "5c2912077234b173be7699c0b11d4b896e3dc7a3b5ffb75ca38cc4118b5af5bc"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BlockChangeConfirmation",
+      "sha256": "145a59a8e9e35b6670280f462197f506cc65a88a8fad1a3cc0af2bd162add76a"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BlockChangePage",
+      "sha256": "16979fcac422eda01a9407dd80368bd0147c7ab7a32c8edcc34ac72b90419131"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BlockChangePosition",
+      "sha256": "df31d26a0af87a2d6a0bfc153eb830fbe9061e76bd5498eda1609a79646d9921"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BlockChangeReceipt",
+      "sha256": "2accc9ce01782ba9698bf4ea8bb86022706f5fe2bb8a78abb753b843d0494ae2"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BlockCreation",
+      "sha256": "90e61512c8b834d480a94a360379b4315121c8ff03dcfd1fb406915fa305f041"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BlockMoveRequest",
+      "sha256": "f6050fb9cf0ec61aa32d2596b88b995f2a5bdd0fad231f96f99983bd9217985b"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BlockOffsetException",
+      "sha256": "4a201f1f69b0a06457924aa56c4d72ac308f5315bbda1611f693e78c40d22dec"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BlockPage",
+      "sha256": "757f8fbd373f48d15272ba1b2fb1b84b01f6f0f5f8d320547e44c09a196704f1"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BlockPlanningContext",
+      "sha256": "171813d2438604263f874cdec90f38aab02fb2bdefce5d0539095a04af7687c8"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BlockPosition",
+      "sha256": "9ceb9f6f9f28b755867e59e7b7ac4002b8f06643bfb9d2b81e8b0172ef060285"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BlockPreview",
+      "sha256": "0345cc91fa8f610bfaf9746dddbe98659b47e5b994fae6f1495c3f124ded9358"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BlockRequest",
+      "sha256": "864ef82cc23a6fcb2a132deffe7282a84a1f04d222e014437a502f12ae097f14"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BlockState",
+      "sha256": "c24811561d7da10211d62dda6b40b269f130d486c47ea8616006e021a54038c1"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BlockStateException",
+      "sha256": "0e6cd6d82339c206542836d33df758fd74e055fed4d3be54bf0a2e4d988d50a9"
+    },
+    {
+      "class": "com.apptolast.organization.domain.BudgetDay",
+      "sha256": "481b3952c8aba961ac534828496c89b983484876758eaadd370e5652c03be16e"
+    },
+    {
+      "class": "com.apptolast.organization.domain.OutboxMessage",
+      "sha256": "2870f31213fa35ab1f8c376d1ce3194a5b04b95af297c26b0c84fe15654703b1"
+    },
+    {
+      "class": "com.apptolast.organization.domain.PlannedBlock",
+      "sha256": "93f2d2efad8787d1bc7dcd7ea89681bf7fac7d0bcd75ba17b90cd33c894d87bc"
+    },
+    {
+      "class": "com.apptolast.organization.domain.ResolvedBlockTime",
+      "sha256": "d8438878564e2f4e74834752fcfe37fa59e915635bd221152e2d933aaed5144a"
+    }
+  ],
+  "configurationSha256": "5905df8f40be87c144f117fb545d2adf718b3df597da1271267865abdade6735",
+  "dispatcherSha256": "34d97dd58359f4e2564bd51e49bc8eb10226992b619740b1439f90f7cfc3959a",
+  "testsSha256": "7484df42c746527b50b31daf89e8c71ccfb58f4f0048749e1ae8bc7ec52918fd"
+}

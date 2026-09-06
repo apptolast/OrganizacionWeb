@@ -1,6 +1,6 @@
 # Plan de entrega del MVP
 
-Estimación provisional del 6 de septiembre de 2026, basada en el estado del repositorio. Se revisará al cerrar Replanificar y después de la primera prueba de despliegue. Las horas representan trabajo efectivo pendiente con ejecución disponible; no constituyen una fecha garantizada ni una predicción sobre cuota de la cuenta.
+Estimación provisional actualizada el 6 de septiembre de 2026 tras cerrar Replanificar. Se revisará después de la primera prueba de despliegue. Las horas representan trabajo efectivo pendiente con ejecución disponible; no constituyen una fecha garantizada ni una predicción sobre cuota de la cuenta.
 
 ## Qué se entregará primero
 
@@ -10,9 +10,9 @@ El corte de entrega corresponde a las funcionalidades 1–18 del roadmap. Las fu
 
 ## Estado comprobado
 
-- Funcionalidades 1–12 cerradas localmente conforme a sus dictámenes y límites registrados. Esto no equivale a despliegue productivo.
-- Funcionalidad 13, Replanificar, en integración. Backend congelado con 447 pruebas focales verdes: movimiento, cancelación, recibos, concurrencia, presupuesto y atomicidad. Frontend revisado y mutación global 86,70 %, con dos errores de herramienta registrados; refuerzos posteriores y replay focal documentados. Pasan en el árbol aislado el recorrido nominal, recuperación tras reinicio real, geometría en 31 anchuras, texto y zoom nativo al 200 %, y selección DST con consentimiento de exceso por teclado. Pendientes: init del corte común, mutación backend, regresión E2E integrada y cierre UX en otros motores.
-- CI completo de `main` verde sobre `fc31969`, ejecución `34055744993`. El corte anterior `ae364e5` documentó 91 pruebas E2E. Ninguno acredita los paquetes backend y E2E13 que todavía se están integrando localmente.
+- Funcionalidades 1–13 cerradas conforme a sus dictámenes y límites registrados. Esto no equivale a despliegue productivo.
+- Replanificar: init integrado con1617 pruebas backend,1498 frontend y22 scripts verdes;98 E2E y9 comprobaciones del publicador aprobadas. Mutación backend98,9446 % (750/758), cero errores/timeouts; frontend86,70 % global con dos errores de herramienta registrados. Recuperación tras reinicio, concurrencia, privacidad, presupuesto y UX cuentan con dictámenes finales; los residuales y límites físicos se conservan explícitos.
+- CI de la PR6 verde sobre `1c467e5`, ejecución `34058642729`. Main anterior `fc31969` también tenía CI verde. Dictamen final en `progress/judge_reschedule_final.md` autoriza cierre e integración.
 - Funcionalidades 14–18 pendientes de contrato detallado e implementación.
 - Ningún despliegue productivo acreditado todavía.
 
@@ -20,14 +20,14 @@ El corte de entrega corresponde a las funcionalidades 1–18 del roadmap. Las fu
 
 | Hito | Resultado verificable | Horas efectivas estimadas |
 | --- | --- | ---: |
-| Integrar y cerrar Replanificar (13) | Mover/cancelar, historial del cambio, recuperación y concurrencia con API/BD reales; revisión y mutación | 6–12 |
+| Replanificar (13), completado | Dictamen final, integración funcional y mutación superadas | 0 |
 | Sesiones de trabajo (14–17) | Iniciar, pausar/reanudar, cerrar y avisar al terminar; tiempo real persistido y recuperación tras recarga | 12–24 |
 | Historial de trabajo (18) | Consultar tareas y sesiones realizadas, fechas y tiempos reales sin confundirlos con planificación | 4–8 |
 | Validación y despliegue del MVP | CI, recorridos completos, responsive/accesibilidad, configuración del servidor, comprobación tras reinicio y recuperación | 4–8 |
 | Margen de integración y correcciones | Incidencias descubiertas al unir los flujos o desplegar | 8–16 |
-| Total de las partidas | Intervalo aritmético | 34–68 |
+| Total de las partidas pendientes | Intervalo aritmético | 28–56 |
 
-La previsión comunicada se redondea prudentemente a **36–72 horas efectivas**. La confianza es limitada hasta cerrar el backend de Replanificar y contrastar acceso/configuración del servidor. El extremo inferior exige reutilización fluida de la infraestructura existente y ausencia de incidencias importantes. Si esos supuestos fallan, se publica una nueva estimación con su causa; no se recortan pruebas para mantener la cifra.
+La previsión pendiente se redondea prudentemente a **30–60 horas efectivas**, frente a las36–72 estimadas antes del cierre13. La confianza sigue siendo limitada hasta contrastar acceso/configuración del servidor y completar el primer ciclo de sesiones. El extremo inferior exige reutilización fluida de la infraestructura existente y ausencia de incidencias importantes. Si esos supuestos fallan, se publica una nueva estimación con su causa; no se recortan pruebas para mantener la cifra.
 
 Dependencia de despliegue ya identificada en docs/implementation-proposal.md: la lectura histórica del contrato de infraestructura dejaba 45 MiB dentro de su presupuesto de stacks. No representa RAM libre medida ni el estado actual del servidor. Hay que comprobar capacidad real y actualizar ese contrato antes de incorporar API, base de datos y broker. Si hace falta ampliar recursos o cambiar infraestructura, la partida de despliegue deberá reestimarse con ese trabajo concreto.
 
@@ -40,8 +40,9 @@ Para el conjunto del roadmap, la orientación anterior de 1–3 semanas es de ba
 - PR5: frontend completado y fusionado por el usuario en `53ed311`.
 - Correcciones posteriores de formato y fixtures E2E integradas en `ae364e5`; CI completo verde sobre ese commit.
 - Consulta remota posterior `27bee7`: cero PR abiertas y main `fc31969`. La integración local `1332eb7` conserva backend revisado y frontend de main; incorpora únicamente los paquetes E2E aprobados, sin fusionar snapshots Java provisionales.
+- PR6 reúne la integración final de Replanificar. Código validado `1c467e5`, CI34058642729 SUCCESS y dictamen final aprobado después de la campaña PIT. Los metadatos de cierre y la evidencia acompañan la entrega.
 
-El usuario confirmó que él realiza squash and merge desde GitHub y que Claude está detenido. Las cancelaciones de CI anteriores coincidían con nuevas fusiones; ya no hay una duda de coordinación pendiente. Los agentes internos mantienen propiedad por archivo y revisión independiente. Las fusiones no sustituyen el cierre funcional: se sigue desarrollando y verificando el backend de Replanificar antes de dar por terminada la funcionalidad 13 o desplegar.
+El usuario confirmó que él realiza squash and merge desde GitHub y que Claude está detenido. Las cancelaciones de CI anteriores coincidían con nuevas fusiones; ya no hay una duda de coordinación pendiente. Los agentes internos mantienen propiedad por archivo y revisión independiente. Replanificar queda cerrada por sus pruebas y dictámenes, no por el mero hecho de fusionar una rama. El despliegue del MVP sigue pendiente del ciclo de trabajo real y la preparación del servidor.
 
 ## Qué significa funcional para esta entrega
 

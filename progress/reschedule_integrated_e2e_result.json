@@ -1,0 +1,18 @@
+{
+  "recordedAt": "2026-09-06T20:49:33.004Z",
+  "checked": 296,
+  "changed": [],
+  "publisherPassLines": [
+    "PASS @s1: real POST -> background publisher -> original persistent RabbitMQ JSON",
+    "PASS @s16/@s9: broker stopped, API201 under4.5s, original pending event published after recovery",
+    "PASS edit @s14/@s15: enabled worker, broker stopped, PUT200 under4.5s, pending retry, original Updated published after recovery",
+    "PASS states @s11/@s13: enabled worker, stopped broker, HTTP 200, pending retry, original eight-field event received after recovery",
+    "PASS tasks @s16/@s17: broker stopped, HTTP 201, original TaskCreated recovered with distinct project and task identities",
+    "PASS split @s21/@s37: HTTP 201 while broker stopped; original nine-field SubtaskCreated recovered",
+    "PASS complete @s19/@s20: broker stopped, HTTP 200 with durable history, original nine-field TaskStatusChanged recovered",
+    "PASS @s14/@s20: same-volume Rabbit restart retains messages and durable quorum topology with worker stopped",
+    "PASS complete @s11: persisted session, task snapshot and history survive backend restart"
+  ],
+  "e2eLogSha256": "aa9ba81d53cba76ccdec1bf6b68f815c3ce412845b029d4ab3077518d9e75aaf",
+  "publisherLogSha256": "5dc0a84c073f0b56101769261b55bcd148824daf245e96ea289e7656cb56a868"
+}

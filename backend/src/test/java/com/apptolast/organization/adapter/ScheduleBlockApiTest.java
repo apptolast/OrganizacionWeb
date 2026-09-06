@@ -80,7 +80,7 @@ class ScheduleBlockApiTest {
 
   String body() {
     return "{\"objective\":\" Meta"
-               + " \",\"startLocal\":\"2030-01-07T10:00\",\"endLocal\":\"2030-01-07T11:00\",\"zoneId\":\"UTC\",\"startOffset\":null,\"endOffset\":null}";
+        + " \",\"startLocal\":\"2030-01-07T10:00\",\"endLocal\":\"2030-01-07T11:00\",\"zoneId\":\"UTC\",\"startOffset\":null,\"endOffset\":null}";
   }
 
   @Test

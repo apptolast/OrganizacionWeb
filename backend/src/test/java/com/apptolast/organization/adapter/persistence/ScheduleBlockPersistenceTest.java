@@ -286,8 +286,8 @@ class ScheduleBlockPersistenceTest {
     jdbc.execute(
         fault.equals("commit")
             ? "CREATE CONSTRAINT TRIGGER block_persistence_fault AFTER INSERT ON outbox_events"
-                  + " DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION"
-                  + " block_persistence_failure()"
+                + " DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION"
+                + " block_persistence_failure()"
             : "CREATE TRIGGER block_persistence_fault BEFORE INSERT ON "
                 + table
                 + " FOR EACH ROW EXECUTE FUNCTION block_persistence_failure()");
@@ -355,8 +355,8 @@ class ScheduleBlockPersistenceTest {
     String sql =
         defect.equals("key")
             ? "INSERT INTO planned_blocks SELECT"
-                  + " gen_random_uuid(),project_id,task_id,request_key,objective,start_local,end_local,zone_id,start_offset,end_offset,allow_over_budget,start_at,end_at,duration_minutes,created_at"
-                  + " FROM planned_blocks"
+                + " gen_random_uuid(),project_id,task_id,request_key,objective,start_local,end_local,zone_id,start_offset,end_offset,allow_over_budget,start_at,end_at,duration_minutes,created_at"
+                + " FROM planned_blocks"
             : "UPDATE planned_blocks SET " + assignment;
     assertThatThrownBy(() -> jdbc.execute(sql))
         .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);

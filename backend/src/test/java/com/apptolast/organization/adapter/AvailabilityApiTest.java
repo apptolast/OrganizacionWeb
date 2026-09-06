@@ -546,7 +546,7 @@ class AvailabilityApiTest {
       String definition =
           fault.equals("commit")
               ? "CREATE CONSTRAINT TRIGGER reject_availability_write AFTER UPDATE ON"
-                    + " availability_preferences DEFERRABLE INITIALLY DEFERRED"
+                  + " availability_preferences DEFERRABLE INITIALLY DEFERRED"
               : "CREATE TRIGGER reject_availability_write BEFORE "
                   + (fault.startsWith("insert") ? "INSERT" : "UPDATE")
                   + " ON availability_preferences";

@@ -690,3 +690,96 @@ La futura destilación agrupará familias observables: compatibilidad de creaci�
 ### Decisiones pendientes de revisión del coordinador
 
 Las alternativas y motivos están en progress/proposal_reschedule.md. El coordinador aceptó preliminarmente duración/zona editables, cancelación histórica terminal, historial por tarea, evento común y recibos201/200. Se adopta para revisión final identidad estable con planned_blocks inmutable y proyección opcional; el documento completo aún no constituye contrato Gherkin aprobado. La revisión debe confirmar esas decisiones antes de destilar el contrato, sin pedir otra autorización global al usuario.
+
+## 14. Iniciar sesión de trabajo — especificación normativa
+
+Feature 13 está cerrada y fusionada por el usuario en `9623990`; main publicado `d997421`. Esta sección incorpora las decisiones aceptadas en `progress/proposal_start_work.md` y `progress/review_proposal_start_work.md`. Define el alcance de 14 para su destilación Gherkin; todavía no declara ese contrato aprobado ni inicia implementación. Se conserva la autorización global del usuario y el proceso de una feature a la vez.
+
+### Hecho de inicio y fin previsto
+
+Una sesión de trabajo comienza únicamente al confirmar «Empezar a trabajar» sobre una tarea propia. Un inicio nuevo requiere tarea `pending` y proyecto distinto de `completed`; los estados `idea`, `active` y `paused` no se restringen adicionalmente. No requiere bloque planificado, disponibilidad configurada, presupuesto positivo ni vínculo a una reserva. No recibe `blockId`, objetivo nuevo o nombres: usa el contexto existente de la tarea.
+
+El inicio no modifica bloques, capacidad, estimaciones, Today, estado de tarea/proyecto ni historial de finalizaciones. Acredita un instante de inicio real; no acredita minutos terminados, tiempo neto, avance, racha o tarea completada. Una reserva sigue siendo planificación y una estimación sigue siendo estimación.
+
+La única entrada de negocio es `plannedMinutes`, entero JSON obligatorio entre 1 y 1440 inclusive, elegido explícitamente. No se acepta string, booleano, fracción ni un valor ausente/null. La UI no precarga una duración como supuesta preferencia del usuario. Este límite se aplica al objetivo previsto, no impone un máximo retrospectivo al trabajo real.
+
+El servidor captura `Clock.instant()` una vez para un inicio nuevo y lo trunca a microsegundos. Ese valor es `startedAt` y también `occurredAt` del evento. `plannedEndAt` se calcula sumando exactamente `plannedMinutes × 60` segundos a ese instante. Ambos instantes deben poder representarse en UTC dentro de los años 0001–9999; no se recorta ni redondea una suma fuera de rango. La duración relativa evita otro formulario de hora civil y otra resolución de ocurrencias DST. Cruzar medianoche o un cambio horario no altera la duración real elegida.
+
+La zona de presentación se captura de la disponibilidad actual del propietario cuando pertenece al catálogo vigente y es resoluble; si no existe preferencia o su zona no es resoluble, se registra `UTC`. No se guarda una preferencia para producir ese fallback ni se exige corregirla antes de trabajar. Si el almacenamiento falla al consultar disponibilidad, se devuelve 503: no se disfraza como ausencia. La zona capturada es texto histórico; cambiar preferencias o catálogo después no cambia el recibo, sus instantes o su zona.
+
+La fecha, hora y zona del fin previsto se muestran explícitamente. Ese fin permanece fijo aunque la respuesta tarde o se recupere más tarde. Alcanzarlo no amplía, pausa ni cierra la sesión. En 14 no se programa un aviso ni se presenta un contador como tiempo neto acreditado. La atribución histórica del día trabajado al cerrar sigue perteneciendo a 16.
+
+### Una sesión activa y recuperación histórica
+
+Cada propietario puede tener como máximo una sesión activa, incluso entre proyectos, tareas, pestañas y dispositivos. En 14 el único estado operativo es `running`; no hay transición de pausa o cierre. Completar después la tarea o el proyecto no elimina, cancela ni cierra el inicio registrado y no impide su consulta o replay. Las transiciones existentes de tarea/proyecto mantienen sus propios contratos.
+
+La confirmación de inicio es inmutable y recuperable, separada conceptualmente de la consulta de actividad actual. En 14 la activa puede representarse con el mismo DTO de inicio porque no existen transiciones posteriores. Feature 15 deberá evolucionar explícitamente la representación de estado sin convertir el recibo histórico en estado mutable ni permitir dos sesiones no cerradas al introducir `paused`.
+
+No se habilitará 14 sola para uso habitual como temporizador sin salida. La habilitación se revisará con el ciclo de inicio, pausa y cierre de 14–16. No se añade un cierre oculto, reset administrativo, eliminación de datos o cierre automático para suplir 16. Esta frontera no introduce infraestructura de flags ni autoriza despliegue.
+
+### API y DTO cerrado
+
+Las rutas son:
+
+- `POST /api/v1/projects/{projectId}/tasks/{taskId}/work-sessions`: cuerpo cerrado con exactamente `plannedMinutes` y header `Idempotency-Key` obligatorio.
+- `GET /api/v1/work-sessions/active`: respuesta200 cerrada con exactamente `session`, cuyo valor es `SessionStart` o `null` si se comprobó que no hay activa propia.
+- `GET /api/v1/work-sessions/{id}`: recupera el inicio propio por ID, independientemente del estado de tarea/proyecto o del outbox.
+- `GET /api/v1/work-sessions/by-request/{requestKey}`: recupera el mismo inicio por key propia. Las rutas literales no se tratan como IDs.
+
+`SessionStart` contiene exactamente siete campos: `id`, `projectId`, `taskId`, `startedAt`, `plannedMinutes`, `plannedEndAt`, `zoneId`. IDs UUID canónicos generados por servidor, instantes UTC con precisión máxima de microsegundos y años 0001–9999, entero previsto 1–1440 y zona histórica no vacía. Se exige la relación exacta entre ambos instantes y la duración. No incluye propietario, key, nombres, revisión, estado mutable, `elapsedSeconds`, `netMinutes`, `endedAt` o `completed`.
+
+El primer POST confirmado devuelve 201 sólo después del commit, `Location: /api/v1/work-sessions/{id}` y `SessionStart`. Un replay devuelve 200 con el mismo cuerpo y Location. GET por ID/key devuelve 200 con ese DTO; no añade Location de una operación nueva. GET active devuelve 200 con su envoltorio, nunca204 ni ausencia inventada ante un error. Ninguna lectura crea sesiones, preferencias, recibos o eventos.
+
+Los validadores cliente comprueban forma cerrada, tipos, contexto, identidad y la relación de duración sin comparar los instantes históricos con el reloj actual ni resolver el catálogo de nuevo. Un201/200 incompatible no confirma el inicio. Para presentación con una zona histórica no soportada por `Intl`, mostrar los instantes en UTC etiquetado y conservar visible el ID de zona original; no usar silenciosamente la zona del navegador.
+
+### Intención, precedencia y errores
+
+`Idempotency-Key` es una UUID canónica única por propietario en el espacio de inicios. Este espacio es independiente de creación11 y cambios13. La intención normalizada contiene `projectId`, `taskId` y el entero `plannedMinutes`; no incluye reloj, zona elegida por servidor, cookies o CSRF. Reutilizar la key con otra tarea, proyecto o duración devuelve 409 `IDEMPOTENCY_CONFLICT`, sin mostrar otro inicio como confirmación de esa intención.
+
+Se heredan filtros de autenticación, origen y CSRF, negociación de contenido, `application/problem+json`, `no-store`, validación UUID y JSON ilegible de 11/13. La negociación puede devolver415 antes del handler. Después de los filtros, el POST valida en este orden: query; IDs de ruta; key; sintaxis JSON; forma/campos extra; tipo/rango de `plannedMinutes`; propiedad y existencia de proyecto/tarea; replay; sesión activa; elegibilidad de proyecto y luego tarea; captura de reloj y zona; escritura. No exige `If-Match` ni `Availability-Revision` sobre una sesión que aún no existe.
+
+La validación de query se aplica a las cuatro rutas. En los GET, seguridad precede a query y query precede a la validación del ID o key; GET active no admite parámetros. Query desconocida o repetida se rechaza con 400 `VALIDATION_ERROR`, campo `query`, código `INVALID_VALUE`. Key ausente usa campo `Idempotency-Key`/`REQUIRED`; repetida o mal formada conserva las reglas UUID comunes. JSON vacío, truncado, duplicado o concatenado usa400 `MALFORMED_JSON`. Raíz no objeto: `body`/`INVALID_TYPE`. Campo extra: nombre del campo/`UNKNOWN_FIELD`, seleccionando el primero por orden lexical. `plannedMinutes` ausente/null usa `REQUIRED`; tipo no entero usa `INVALID_TYPE`; entero fuera de 1–1440 usa `OUT_OF_RANGE`. No se reinterpreta una representación inválida para aceptar un replay.
+
+Propiedad/existencia incorrecta del contexto del POST devuelve 404 `RESOURCE_NOT_FOUND`. GET de ID/key ajeno e inexistente devuelve el mismo404 `WORK_SESSION_NOT_FOUND`, sin divulgar propiedad. La consulta activa sólo devuelve información del propietario autenticado. Proyecto completed usa409 `PROJECT_COMPLETED`; tarea completed usa409 `TASK_COMPLETED`, con explicación apropiada para iniciar trabajo y sin cambiar los textos de rutas anteriores.
+
+Una activa propia impide una intención nueva con 409 `WORK_SESSION_ALREADY_ACTIVE`: problema cerrado con los cuatro campos comunes `type`, `title`, `status`, `code`, más `sessionId`, ID de la activa propia recuperable. No devuelve otro recibo como éxito. El título explica que ya existe una sesión de trabajo activa. ID/key ausente usa problema común de cuatro campos con título «No se ha encontrado la sesión de trabajo.». Los fallos de almacenamiento, incluido el final de transacción, son503 `STORAGE_UNAVAILABLE`.
+
+Si el reloj capturado o el fin calculado queda fuera del rango temporal admitido, se rechaza sin escribir con 409 `WORK_SESSION_TIME_OUT_OF_RANGE`, problema común de cuatro campos y título «No se puede representar el inicio y el fin previsto de la sesión.». No se atribuye una lectura de reloj inválida a un campo editable ni se clasifica como fallo de almacenamiento. No se utiliza este error en replay, que devuelve los instantes ya confirmados.
+
+El replay confirmado precede a activa, completed, disponibilidad, catálogo y reloj actuales. Tras esperar una operación concurrente se vuelve a comprobar la key antes de decidir un conflicto de activa. Para la misma key con intención distinta prevalece `IDEMPOTENCY_CONFLICT`, aunque la ganadora haya creado ya una activa. No se sustituye el inicio previo ni se mueve su fin.
+
+### Persistencia y orden concurrente
+
+Dominio puro para inicio y duración; aplicación mediante puertos de iniciar/consultar, reloj y catálogo; adaptadores PostgreSQL, HTTP y outbox existentes. No se añade event sourcing, servicio de temporizadores, consumidor, broker o framework. No es necesario duplicar el recibo en otra tabla.
+
+Una migración aditiva crea la persistencia de sesiones con los datos inmutables de inicio, propietario, key e intención, y el indicador operativo `running`. La misma fila conserva el recibo original. Debe existir unicidad de `(owner_id, request_key)` y una restricción única parcial por `owner_id` para `running`, además de la integridad de relación proyecto/tarea. Las columnas del hecho de inicio no se actualizan. No se copian bloques ni se fabrican inicios a partir de planes anteriores.
+
+El comando usa READ_COMMITTED. Toma proyecto propio `FOR SHARE`, después tarea propia `FOR SHARE`, en ese orden compatible con las transiciones existentes. Para un inicio nuevo que alcance captura de zona, consulta la preferencia con `FOR SHARE` si existe. Una consulta vacía fija fallback UTC para esa operación, sin afirmar que bloquea una inserción posterior. No se usa disponibilidad como mutex de sesión ni se crea una fila por ausencia.
+
+La unicidad de PostgreSQL decide el ganador de inicios simultáneos del propietario aun cuando no exista availability. No hay mutex global entre propietarios. Si dos peticiones alcanzan INSERT, una colisión esperada se resuelve después de terminar la transacción fallida: reconsultar por key propia y comparar intención antes de consultar activa. No reutilizar una transacción PostgreSQL abortada. No hace falta otro lock o tabla de propietario si estas restricciones y reconsultas garantizan las respuestas establecidas.
+
+Misma key e intención:201 y200, un inicio y un evento. Keys distintas del mismo propietario: un201 y un409 `WORK_SESSION_ALREADY_ACTIVE`. Misma key con intenciones distintas: un201 y un409 `IDEMPOTENCY_CONFLICT`. La existencia/propiedad del contexto de cada petición se comprueba antes de divulgar resultados. La terminación concurrente de tarea/proyecto se ordena con sus locks: si confirma primero completed, se rechaza el inicio nuevo; si el inicio confirma primero, el hecho permanece recuperable y no se cierra por esa transición.
+
+Inicio/intención/key y registro outbox se insertan en la misma transacción, con comprobación de una fila por escritura. Supresión de INSERT sin un ganador durable, fallo de outbox o error previo al commit revierte todo y devuelve 503. Una colisión de unicidad esperada no se presenta como503 genérico; tampoco se presenta una supresión sin ganador como conflicto. Un error de respuesta posterior a commit deja el hecho recuperable por key.
+
+Los GET son transacciones read-only con consultas por propietario, sin `FOR UPDATE`/`FOR SHARE` ni materialización. No modifican flags de una plantilla compartida entre peticiones. El DTO de inicio se obtiene de la fila durable; active consulta la fila `running` propia. READ_COMMITTED basta para estas lecturas de una sola representación; no se impone el RR de Today a rutas independientes. Fallo de lectura o de finalización devuelve 503, nunca `session:null` ni404 inventado. El recibo sobrevive a reiniciar API y a retirar el outbox publicado.
+
+### Evento y publicación
+
+`WorkSessionStarted.v1` contiene exactamente `eventId`, `aggregateId`, `ownerId`, `occurredAt`, `schemaVersion`, `type`, `projectId`, `taskId`, `plannedMinutes`, `plannedEndAt`, `zoneId`. `aggregateId` es el ID de sesión; `occurredAt` es el mismo `startedAt` capturado; `schemaVersion` es 1 y `type` es `WorkSessionStarted.v1`. EventId se genera independientemente de la identidad de sesión. No publica key, nombres ni criterio de finalización.
+
+La ruta es `work-session.started.v1` y la cola quorum durable `organization.work-session-started.v1`. Reutiliza confirms, entrega al menos una vez, reintentos y clasificación blocked existentes, conservando las ocho rutas anteriores. La validación exige forma cerrada, identidad, duración prevista y relación de instantes coherentes; acepta zona histórica textual sin consultar el catálogo al publicar. Broker caído no impide confirmar el commit local. Un resultado incierto puede producir redelivery con la misma identidad, sin prometer exactamente una vez.
+
+### Interfaz, incertidumbre y límites de 14
+
+El formulario de tarea muestra contexto, «Duración prevista (minutos)» y «Empezar a trabajar». No empieza por montar una pantalla, llegar la hora de una reserva, recuperar login o reenviar automáticamente tras un error. La sección «Sesión de trabajo» consulta activa al montarse o al volver a ella y ofrece actualización manual, sin polling por segundo. Distingue consulta pendiente, ausencia, error y activa propia. Con activa muestra inicio, duración, fin previsto, zona y enlace a la tarea; no muestra controles de pausa/cierre todavía inexistentes.
+
+Mientras un POST está pendiente, la intención queda retenida y bloqueada con feedback anunciado. Red,503, cuerpo incompatible, códigos desconocidos e `IDEMPOTENCY_CONFLICT` conservan incertidumbre. «Comprobar inicio» usa GET by-request. Un404 de recibo no acredita rollback de una petición en vuelo; permite comprobar de nuevo o reenviar manualmente la misma intención/key. No genera key nueva ni cambia `plannedMinutes` mientras se resuelve. Los rechazos definitivos reconocidos permiten corregir una nueva intención; el conflicto de activa ofrece consultar la activa propia, sin borrar otra intención todavía incierta.
+
+CSRF reconocido reutiliza la renovación manual de SessionGate; el reenvío de la intención es otra acción manual y usa el token vigente. Cerrar el formulario no revoca un POST enviado y se explica antes de salir. Tras recarga sin key en memoria, consultar activa descubre el inicio confirmado de 14; no promete recuperar una petición que nunca llegó ni reemplaza el futuro historial18. El recibo por ID/key sigue disponible aunque el contexto haya pasado a completed.
+
+Antes de mostrar éxito se comprueba el DTO completo y su correspondencia con la intención. «Sesión iniciada» anuncia el hecho confirmado; un error posterior al consultar activa no lo revoca. Guardas de sesión/ruta/generación después de cada await, también al clasificar error; abortar antes de propagar401 obsoleto. Un401 actual retira datos inmediatamente. El foco no se roba si la persona eligió otro control; si desaparece el iniciador y el foco queda sin destino, se lleva al encabezado de sesión. Espera y error conservan borrador y controles accesibles.
+
+Se aplica la matriz de 30 principios de `docs/ux-requirements.md`, con evidencia por alcance, responsive, ampliación, motores, teclado y foco. El fin previsto fijo, distinción plan/trabajo y lenguaje neutral favorecen constancia sin culpa. No se afirma usabilidad humana o dispositivos físicos sin evidencia ni se añaden rachas, presión para continuar o métricas ficticias.
+
+Quedan fuera de 14: pausa/reanudación e intervalos netos de 15; cierre, avance, siguiente paso y atribución del día de 16; aviso y ampliación deliberada de 17; historial global/filtros de 18; métricas semanales, corrección de hechos y vínculo retrospectivo con bloques. Las transiciones futuras deberán mantener la unicidad de toda sesión no cerrada y la inmutabilidad del inicio. La persistencia y recuperación de 14 no equivalen a haber implementado esas funciones.

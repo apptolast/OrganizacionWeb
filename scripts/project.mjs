@@ -24,6 +24,7 @@ export function createProject(runner = run) {
         ![
           "today-backend",
           "today-frontend",
+          "today-frontend-replay",
           "schedule_block-backend",
           "schedule_block-frontend",
           "schedule_block-frontend-replay",
@@ -61,6 +62,17 @@ export function createProject(runner = run) {
         "stryker",
         "run",
         "stryker.today.config.json",
+      ]);
+      return;
+    }
+    if (task === "mutate" && target === "today-frontend-replay") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.today.replay.config.json",
       ]);
       return;
     }

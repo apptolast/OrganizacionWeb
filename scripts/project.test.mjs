@@ -44,6 +44,115 @@ test("today frontend scope runs only its fixed Stryker configuration", () => {
   ]);
 });
 
+test("today replay runs only its fixed separate Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "today-frontend-replay");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.today.replay.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("today replay preserves 63 reviewed identities plus the new focus region without rewriting initial measurement", () => {
+  const read = (path) => JSON.parse(readFileSync(resolve(root, path), "utf8"));
+  const manifest = read("progress/today_frontend_replay_selection.json");
+  const inventory = read("progress/mutation_today_frontend_inventory.json");
+  const config = read("frontend/stryker.today.replay.config.json");
+  assert.equal(
+    manifest.originalReportSha256,
+    "5cc335b97919aaa1bcd3cf4cf956af54ee55db3a02fdb23a060c77508f5c47a3",
+  );
+  assert.equal(manifest.selection.length, 63);
+  assert.equal(
+    new Set(manifest.selection.map((item) => item.originalId)).size,
+    63,
+  );
+  assert.deepEqual(
+    [...manifest.excludedIds].sort(),
+    "78,85,89,93,209,215,216,219,222,253,259,291,336,338,350,351,371,411,435,487,493,506,507,508,509,510,511,517,518,519,520,521,522,523,529,530,531,532,533,534"
+      .split(",")
+      .sort(),
+  );
+  assert.equal(
+    new Set([
+      ...manifest.selection.map((item) => item.originalId),
+      ...manifest.excludedIds,
+    ]).size,
+    103,
+  );
+  assert.deepEqual(
+    manifest.selection.map((item) => item.originalId),
+    inventory.pending
+      .filter((item) => !manifest.excludedIds.includes(item.id))
+      .map((item) => item.id),
+  );
+  assert.deepEqual(config.mutate, [
+    ...new Set([
+      ...manifest.selection.map((item) => item.range),
+      manifest.newFocusRegion.range,
+    ]),
+  ]);
+  assert.equal(manifest.newFocusRegion.originalId, null);
+  assert.equal(manifest.newFocusRegion.range, "src/today.tsx:124:0-124:78");
+  assert.equal(
+    config.jsonReporter.fileName,
+    "reports/mutation-today/replay.json",
+  );
+  assert.equal(
+    config.htmlReporter.fileName,
+    "reports/mutation-today/replay.html",
+  );
+  assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
+  assert.equal(config.coverageAnalysis, "perTest");
+  assert.equal(config.concurrency, 2);
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  for (const item of manifest.selection) {
+    assert.ok(["Survived", "NoCoverage"].includes(item.originalStatus));
+    const original = inventory.pending.find(
+      (entry) => entry.id === item.originalId,
+    );
+    assert.equal(item.sourceExpression, original.sourceExpression);
+    assert.equal(item.replacement, original.replacement);
+    assert.equal(item.operator, original.operator);
+    assert.equal(item.originalStatus, original.status);
+    assert.deepEqual(item.originalLocation, original.location);
+    const source = readFileSync(
+      resolve(root, "frontend", item.file),
+      "utf8",
+    ).replace(/\r\n/g, "\n");
+    const offset = ({ line, column }) =>
+      source
+        .split("\n")
+        .slice(0, line - 1)
+        .reduce((sum, text) => sum + text.length + 1, 0) + column;
+    assert.equal(
+      source.slice(
+        offset(item.mappedLocation.start),
+        offset(item.mappedLocation.end),
+      ),
+      item.sourceExpression,
+      item.originalId,
+    );
+  }
+  for (const [file, hash] of Object.entries(manifest.sourceSha256))
+    assert.equal(
+      createHash("sha256")
+        .update(readFileSync(resolve(root, "frontend", file)))
+        .digest("hex"),
+      hash,
+      file,
+    );
+});
+
 test("today configuration measures the frozen new code and changed shared regions", () => {
   const read = (path) => JSON.parse(readFileSync(resolve(root, path), "utf8"));
   const config = read("frontend/stryker.today.config.json");
@@ -132,6 +241,8 @@ test("unknown or misplaced targets fail before starting any subprocess", () => {
     ["mutate", "today-frontend --config other.json"],
     ["test", "today-backend"],
     ["install", "today-frontend"],
+    ["mutate", "today-frontend-replay --config other.json"],
+    ["test", "today-frontend-replay"],
   ]) {
     const { calls, project } = capture();
     assert.throws(() => project(task, target), /Invalid target/);
@@ -253,6 +364,7 @@ test("harness placeholder and CLI deliver the selected target unchanged", () => 
     ["mutate", "schedule_block-frontend-replay"],
     ["mutate", "today-backend"],
     ["mutate", "today-frontend"],
+    ["mutate", "today-frontend-replay"],
   ]) {
     const calls = [];
     commands.main(args, (...values) => calls.push(values));

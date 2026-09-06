@@ -20,6 +20,7 @@ it("@s21 loads then confirms the empty day with known capacity and project link"
   vi.stubGlobal("fetch", vi.fn().mockReturnValue(request.promise));
   render(<Today />);
   expect(screen.getByRole("status")).toHaveTextContent("Cargando Hoy");
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   expect(
     screen.queryByText("No hay bloques planificados"),
   ).not.toBeInTheDocument();
@@ -745,4 +746,312 @@ it("@s37 update stays focusable but announces unavailability and coalesces repea
   expect(update).toHaveFocus();
   expect(update).toHaveAttribute("aria-disabled", "false");
   expect(screen.getByRole("alert")).toHaveTextContent("Sin actualizar");
+});
+it.each([30, null])(
+  "@s18 @s19 distinguishes planned excess from unknown capacity: %s",
+  async (budgetMinutes) => {
+    const value = {
+      ...agendaToday(),
+      budgetMinutes,
+      zoneSource: budgetMinutes === null ? "UNCONFIGURED" : "AVAILABILITY",
+      availabilityZoneId: budgetMinutes === null ? null : "UTC",
+      remainingSeconds: budgetMinutes === null ? null : 0,
+      excessSeconds: budgetMinutes === null ? null : 1800,
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(value)));
+    render(<Today />);
+    await screen.findByText("Proyecto personal");
+    expect(
+      screen.getByText("Exceso planificado").nextElementSibling,
+    ).toHaveTextContent(budgetMinutes === null ? "Desconocido" : "30 min");
+    if (budgetMinutes !== null) {
+      expect(
+        screen.queryByText(/capacidad desconocida/),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Configurar disponibilidad" }),
+      ).not.toBeInTheDocument();
+    }
+  },
+);
+it("@s18 labels only the matching current and next reservation and preserves readable intervals", async () => {
+  const value = agendaToday();
+  value.items[0].block.zoneId = "UTC";
+  const later = {
+    ...value.items[0],
+    block: {
+      ...value.items[0].block,
+      id: "00000000-0000-0000-0000-000000000004",
+      startAt: "2030-01-07T14:00:00Z",
+      endAt: "2030-01-07T15:00:00Z",
+    },
+    taskTitle: "Segunda tarea",
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json({
+        ...value,
+        items: [...value.items, later],
+        plannedSeconds: 7200,
+        remainingSeconds: 0,
+        nextBlockId: later.block.id,
+        closingAt: later.block.endAt,
+      }),
+    ),
+  );
+  render(<Today />);
+  await screen.findByRole("link", { name: "Escribir" });
+  const [current, next] = screen.getAllByRole("listitem");
+  expect(
+    within(current).getByText("En horario planificado"),
+  ).toBeInTheDocument();
+  expect(
+    within(current).queryByText("Próximo inicio planificado"),
+  ).not.toBeInTheDocument();
+  expect(
+    within(next).getByText("Próximo inicio planificado"),
+  ).toBeInTheDocument();
+  expect(
+    within(next).queryByText("En horario planificado"),
+  ).not.toBeInTheDocument();
+  expect(within(current).getByText(/12:00.*—.*13:00/)).toBeInTheDocument();
+  expect(within(next).getByText(/14:00.*—.*15:00/)).toBeInTheDocument();
+  expect(screen.queryByText(/Zona original:/)).not.toBeInTheDocument();
+});
+it("@s30 obsolete failure and finally cannot replace the current loading state", async () => {
+  vi.useFakeTimers();
+  const old = deferred<Response>();
+  const current = deferred<Response>();
+  const value = { ...agendaToday(), serverNow: "2030-01-07T12:59:59Z" };
+  const fetch = vi
+    .fn()
+    .mockResolvedValueOnce(Response.json(value))
+    .mockReturnValueOnce(old.promise)
+    .mockReturnValueOnce(current.promise);
+  vi.stubGlobal("fetch", fetch);
+  render(<Today />);
+  await act(async () => {});
+  fireEvent.click(screen.getByRole("button", { name: "Actualizar" }));
+  await act(async () => vi.advanceTimersByTimeAsync(1000));
+  expect(fetch.mock.calls[1][1].signal.aborted).toBe(true);
+  await act(async () => old.resolve(new Response(null, { status: 503 })));
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(screen.getByRole("status")).toHaveTextContent("Actualizando Hoy");
+  fireEvent(window, new Event("focus"));
+  expect(fetch).toHaveBeenCalledTimes(3);
+  await act(async () =>
+    current.resolve(
+      Response.json({
+        ...value,
+        serverNow: "2030-01-07T13:00:00Z",
+        currentBlockId: null,
+      }),
+    ),
+  );
+  expect(screen.getByRole("status")).toHaveTextContent("Agenda actualizada.");
+});
+it("@s26 accepting a response while hidden leaves no scheduled refresh", async () => {
+  vi.useFakeTimers();
+  const pending = deferred<Response>();
+  const fetch = vi
+    .fn()
+    .mockReturnValueOnce(pending.promise)
+    .mockReturnValue(new Promise(() => {}));
+  vi.stubGlobal("fetch", fetch);
+  render(<Today />);
+  vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
+  fireEvent(document, new Event("visibilitychange"));
+  await act(async () =>
+    pending.resolve(
+      Response.json({ ...agendaToday(), serverNow: "2030-01-07T12:59:59Z" }),
+    ),
+  );
+  expect(vi.getTimerCount()).toBe(0);
+  await act(async () => vi.advanceTimersByTimeAsync(2000));
+  expect(fetch).toHaveBeenCalledTimes(1);
+  vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+  fireEvent(document, new Event("visibilitychange"));
+  expect(fetch).toHaveBeenCalledTimes(2);
+});
+it("@s22 retry removes the old alert while loading and confirms an explicit empty closing", async () => {
+  const pending = deferred<Response>();
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError("offline"))
+      .mockReturnValueOnce(pending.promise),
+  );
+  render(<Today />);
+  await screen.findByRole("alert");
+  expect(screen.getByRole("status")).toBeEmptyDOMElement();
+  fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(screen.getByRole("status")).toHaveTextContent("Cargando Hoy");
+  await act(async () => pending.resolve(Response.json(emptyToday())));
+  expect(
+    screen.getByText("Cierre previsto").nextElementSibling,
+  ).toHaveTextContent("Sin bloques");
+});
+it.each([
+  "/extra/proyectos/id/editar",
+  "/proyectos/id/editar/extra",
+  "/extra/proyectos/id",
+  "/desconocida",
+])(
+  "@s35 unknown route %s remains private 404 without reads or active navigation",
+  async (route) => {
+    window.history.replaceState(null, "", route);
+    const fetch = vi.fn();
+    vi.stubGlobal("fetch", fetch);
+    render(<App />);
+    const main = screen.getByRole("main");
+    expect(
+      within(main).getByRole("heading", { name: "Página no encontrada" }),
+    ).toBeInTheDocument();
+    expect(main).toHaveAttribute("tabindex", "-1");
+    expect(within(main).getByRole("link", { name: "Hoy" })).toHaveAttribute(
+      "href",
+      "/",
+    );
+    expect(
+      within(main).getByRole("link", { name: "Proyectos" }),
+    ).toHaveAttribute("href", "/proyectos");
+    if (!route.startsWith("/proyectos")) {
+      expect(
+        screen
+          .getByRole("navigation", { name: "Principal" })
+          .querySelector('[aria-current="page"]'),
+      ).toBeNull();
+      expect(document.querySelector(".topbar strong")).toHaveTextContent(
+        "Página no encontrada",
+      );
+    }
+    expect(fetch).not.toHaveBeenCalled();
+    window.history.replaceState(null, "", "/");
+  },
+);
+it("@s18 @s19 keeps a readable boundary between time and zone and between fallback explanation and action", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json({
+        ...emptyToday(),
+        zoneSource: "UNCONFIGURED",
+        availabilityZoneId: null,
+        budgetMinutes: null,
+        remainingSeconds: null,
+        excessSeconds: null,
+      }),
+    ),
+  );
+  render(<Today />);
+  expect(await screen.findByText(/Según actualización de/)).toHaveTextContent(
+    /12:00\s+·\s+UTC/,
+  );
+  expect(screen.getByText(/Disponibilidad no configurada/)).toHaveTextContent(
+    /desconocida\.\s+Configurar disponibilidad/,
+  );
+});
+it("@s35 the recovery links on 404 remain visually distinct text", () => {
+  window.history.replaceState(null, "", "/desconocida");
+  vi.stubGlobal("fetch", vi.fn());
+  render(<App />);
+  expect(screen.getByRole("main")).toHaveTextContent(/Hoy\s+·\s+Proyectos/);
+  window.history.replaceState(null, "", "/");
+});
+it("@s30 unmount releases its visibility and focus subscriptions", async () => {
+  const documentAdd = vi.spyOn(document, "addEventListener");
+  const documentRemove = vi.spyOn(document, "removeEventListener");
+  const windowAdd = vi.spyOn(window, "addEventListener");
+  const windowRemove = vi.spyOn(window, "removeEventListener");
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(Response.json(agendaToday())),
+  );
+  const { unmount } = render(<Today />);
+  await screen.findByText("Proyecto personal");
+  const visibility = documentAdd.mock.calls.filter(
+    ([type]) => type === "visibilitychange",
+  );
+  const focus = windowAdd.mock.calls.filter(([type]) => type === "focus");
+  expect(visibility.length).toBeGreaterThan(0);
+  expect(focus.length).toBeGreaterThan(0);
+  unmount();
+  for (const [type, listener] of visibility)
+    expect(documentRemove).toHaveBeenCalledWith(type, listener);
+  for (const [type, listener] of focus)
+    expect(windowRemove).toHaveBeenCalledWith(type, listener);
+});
+it.each(["boundary", "visibility"])(
+  "@s28 a fractional %s deadline retires the old day while its replacement is pending",
+  async (entry) => {
+    vi.useFakeTimers();
+    const clockNow = performance.now.bind(performance);
+    let sampled = false;
+    vi.spyOn(performance, "now").mockImplementation(() => {
+      const fraction = sampled ? 0.5 : 0;
+      sampled = true;
+      return clockNow() + fraction;
+    });
+    const schedule = window.setTimeout.bind(window);
+    vi.spyOn(window, "setTimeout").mockImplementation(
+      (handler, delay, ...args) =>
+        schedule(
+          handler,
+          Math.trunc(delay ?? 0),
+          ...args,
+        ) as unknown as ReturnType<typeof setTimeout>,
+    );
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({
+          ...agendaToday(),
+          serverNow: "2030-01-07T23:59:59Z",
+          currentBlockId: null,
+        }),
+      )
+      .mockReturnValue(new Promise(() => {}));
+    vi.stubGlobal("fetch", fetch);
+    render(<Today />);
+    await act(async () => {});
+    expect(screen.getByText("Proyecto personal")).toBeInTheDocument();
+    if (entry === "visibility") {
+      vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
+      fireEvent(document, new Event("visibilitychange"));
+      vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+      fireEvent(document, new Event("visibilitychange"));
+    }
+    await act(async () => vi.advanceTimersByTimeAsync(999));
+    expect(screen.queryByText("Proyecto personal")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Cargando Hoy");
+    expect(fetch).toHaveBeenCalledTimes(entry === "visibility" ? 3 : 2);
+  },
+);
+it("@s28 returning exactly at the day deadline retires a pending old-day request", async () => {
+  vi.useFakeTimers();
+  const fetch = vi
+    .fn()
+    .mockResolvedValueOnce(
+      Response.json({
+        ...agendaToday(),
+        serverNow: "2030-01-07T23:59:59Z",
+        currentBlockId: null,
+      }),
+    )
+    .mockReturnValue(new Promise(() => {}));
+  vi.stubGlobal("fetch", fetch);
+  render(<Today />);
+  await act(async () => {});
+  fireEvent.click(screen.getByRole("button", { name: "Actualizar" }));
+  vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
+  fireEvent(document, new Event("visibilitychange"));
+  await act(async () => vi.advanceTimersByTimeAsync(1000));
+  vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+  fireEvent(document, new Event("visibilitychange"));
+  expect(fetch.mock.calls[1][1].signal.aborted).toBe(true);
+  expect(fetch).toHaveBeenCalledTimes(3);
+  expect(screen.queryByText("Proyecto personal")).not.toBeInTheDocument();
 });

@@ -229,3 +229,143 @@ it("@s4 @s9 accepts all twenty-one intersections, including both midnight crossi
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(value)));
   await expect(readToday()).resolves.toEqual(value);
 });
+it("@s16 @s17 rejects an ISO date wrapped in a coercible JSON array", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json({
+        ...emptyToday(),
+        date: ["2030-01-07"],
+      }),
+    ),
+  );
+  await expect(readToday()).rejects.toThrow("Respuesta de Hoy inválida");
+});
+it.each(
+  ["UNCONFIGURED", "UNAVAILABLE"].flatMap((source) => [
+    [source, "zoneId", "Europe/Madrid"],
+    [source, "budgetMinutes", 0],
+    [source, "remainingSeconds", 0],
+    [source, "excessSeconds", 0],
+    [source, "availabilityZoneId", source === "UNCONFIGURED" ? "UTC" : null],
+  ]),
+)(
+  "@s17 rejects the isolated %s fallback defect in %s",
+  async (source, field, change) => {
+    const value = {
+      ...emptyToday(),
+      zoneSource: source,
+      availabilityZoneId: source === "UNCONFIGURED" ? null : "Legacy/Retired",
+      budgetMinutes: null,
+      remainingSeconds: null,
+      excessSeconds: null,
+      [field as string]: change,
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(value)));
+    await expect(readToday()).rejects.toThrow("Respuesta de Hoy inválida");
+  },
+);
+it.each([false, true])(
+  "@s16 rejects a non-adjacent repeated UUID with independent intervals and mixedCase=%s",
+  async (mixedCase) => {
+    const first = agendaToday().items[0];
+    const repeated = "00000000-0000-0000-0000-00000000000a";
+    const items = [
+      repeated,
+      "00000000-0000-0000-0000-00000000000b",
+      mixedCase ? repeated.toUpperCase() : repeated,
+    ].map((id, index) => ({
+      ...first,
+      block: {
+        ...first.block,
+        id,
+        startAt: `2030-01-07T${String(9 + index).padStart(2, "0")}:00:00Z`,
+        endAt: `2030-01-07T${String(10 + index).padStart(2, "0")}:00:00Z`,
+      },
+    }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        Response.json({
+          ...emptyToday(),
+          items,
+          plannedSeconds: 10800,
+          remainingSeconds: 0,
+          excessSeconds: 3600,
+          closingAt: "2030-01-07T12:00:00Z",
+        }),
+      ),
+    );
+    await expect(readToday()).rejects.toThrow("Respuesta de Hoy inválida");
+  },
+);
+it("@s9 @s16 accepts chronological reservations even when UUID lexical order is reversed", async () => {
+  const first = agendaToday().items[0];
+  const items = [
+    "00000000-0000-0000-0000-0000000000FF",
+    "00000000-0000-0000-0000-00000000000a",
+  ].map((id, index) => ({
+    ...first,
+    block: {
+      ...first.block,
+      id,
+      startAt: `2030-01-07T${String(9 + index * 2).padStart(2, "0")}:00:00Z`,
+      endAt: `2030-01-07T${String(10 + index * 2).padStart(2, "0")}:00:00Z`,
+    },
+  }));
+  const value = {
+    ...emptyToday(),
+    items,
+    plannedSeconds: 7200,
+    remainingSeconds: 0,
+    closingAt: "2030-01-07T12:00:00Z",
+  };
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(value)));
+  await expect(readToday()).resolves.toEqual(value);
+});
+it("@s16 rejects manipulated tied starts with descending canonical UUIDs", async () => {
+  const first = agendaToday().items[0];
+  // Deliberately malformed: tied starts also overlap; no valid server agenda is claimed.
+  const items = [
+    "00000000-0000-0000-0000-0000000000bb",
+    "00000000-0000-0000-0000-0000000000Aa",
+  ].map((id) => ({
+    ...first,
+    block: {
+      ...first.block,
+      id,
+      startAt: "2030-01-07T09:00:00Z",
+      endAt: "2030-01-07T10:00:00Z",
+    },
+  }));
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json({
+        ...emptyToday(),
+        items,
+        plannedSeconds: 7200,
+        remainingSeconds: 0,
+        closingAt: "2030-01-07T10:00:00Z",
+      }),
+    ),
+  );
+  await expect(readToday()).rejects.toThrow("Respuesta de Hoy inválida");
+});
+it.each([
+  ["2030-01-06T23:00:00Z", "2030-01-07T00:00:00Z", false],
+  ["2030-01-08T00:00:00Z", "2030-01-08T01:00:00Z", true],
+])(
+  "@s17 rejects an item touching the day only at %s with otherwise coherent summaries",
+  async (startAt, endAt, future) => {
+    const item = agendaToday().items[0];
+    const value = {
+      ...emptyToday(),
+      items: [{ ...item, block: { ...item.block, startAt, endAt } }],
+      nextBlockId: future ? item.block.id : null,
+      closingAt: endAt,
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(value)));
+    await expect(readToday()).rejects.toThrow("Respuesta de Hoy inválida");
+  },
+);

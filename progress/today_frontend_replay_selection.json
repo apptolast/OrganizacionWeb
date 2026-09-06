@@ -1,0 +1,1891 @@
+{
+  "originalReport": "frontend/reports/mutation-today-initial/mutation.json",
+  "originalReportSha256": "5cc335b97919aaa1bcd3cf4cf956af54ee55db3a02fdb23a060c77508f5c47a3",
+  "originalCheckpoint": "f568f6e",
+  "currentSourceCheckpoint": "5fe9afc",
+  "review": "progress/review_today_mutation_candidates.md",
+  "coordinateConvention": "Original Stryker report columns are one-based; mapped selector columns are zero-based. Matched source characters must remain unchanged.",
+  "excludedIds": [
+    "78",
+    "85",
+    "89",
+    "93",
+    "209",
+    "215",
+    "216",
+    "219",
+    "222",
+    "253",
+    "259",
+    "291",
+    "336",
+    "338",
+    "350",
+    "351",
+    "371",
+    "411",
+    "435",
+    "487",
+    "493",
+    "506",
+    "507",
+    "508",
+    "509",
+    "510",
+    "511",
+    "517",
+    "518",
+    "519",
+    "520",
+    "521",
+    "522",
+    "523",
+    "529",
+    "530",
+    "531",
+    "532",
+    "533",
+    "534"
+  ],
+  "selection": [
+    {
+      "originalId": "225",
+      "file": "src/today-api.ts",
+      "operator": "BooleanLiteral",
+      "originalStatus": "NoCoverage",
+      "originalLocation": {
+        "end": {
+          "column": 34,
+          "line": 127
+        },
+        "start": {
+          "column": 29,
+          "line": 127
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 127,
+          "column": 28
+        },
+        "end": {
+          "line": 127,
+          "column": 33
+        }
+      },
+      "sourceExpression": "false",
+      "replacement": "true",
+      "range": "src/today-api.ts:127:28-127:33"
+    },
+    {
+      "originalId": "127",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 35,
+          "line": 79
+        },
+        "start": {
+          "column": 5,
+          "line": 79
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 79,
+          "column": 4
+        },
+        "end": {
+          "line": 79,
+          "column": 34
+        }
+      },
+      "sourceExpression": "typeof value.date !== \"string\"",
+      "replacement": "false",
+      "range": "src/today-api.ts:79:4-79:34"
+    },
+    {
+      "originalId": "171",
+      "file": "src/today-api.ts",
+      "operator": "LogicalOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 41,
+          "line": 107
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 101,
+          "column": 4
+        },
+        "end": {
+          "line": 107,
+          "column": 40
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null ||\n    value.remainingSeconds !== null ||\n    value.excessSeconds !== null ||\n    (value.zoneSource === \"UNCONFIGURED\"\n      ? value.availabilityZoneId !== null\n      : !text(value.availabilityZoneId))",
+      "replacement": "(value.zoneId !== \"UTC\" || value.budgetMinutes !== null || value.remainingSeconds !== null || value.excessSeconds !== null) && (value.zoneSource === \"UNCONFIGURED\" ? value.availabilityZoneId !== null : !text(value.availabilityZoneId))",
+      "range": "src/today-api.ts:101:4-107:40"
+    },
+    {
+      "originalId": "172",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 33,
+          "line": 104
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 101,
+          "column": 4
+        },
+        "end": {
+          "line": 104,
+          "column": 32
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null ||\n    value.remainingSeconds !== null ||\n    value.excessSeconds !== null",
+      "replacement": "false",
+      "range": "src/today-api.ts:101:4-104:32"
+    },
+    {
+      "originalId": "173",
+      "file": "src/today-api.ts",
+      "operator": "LogicalOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 33,
+          "line": 104
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 101,
+          "column": 4
+        },
+        "end": {
+          "line": 104,
+          "column": 32
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null ||\n    value.remainingSeconds !== null ||\n    value.excessSeconds !== null",
+      "replacement": "(value.zoneId !== \"UTC\" || value.budgetMinutes !== null || value.remainingSeconds !== null) && value.excessSeconds !== null",
+      "range": "src/today-api.ts:101:4-104:32"
+    },
+    {
+      "originalId": "174",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 36,
+          "line": 103
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 101,
+          "column": 4
+        },
+        "end": {
+          "line": 103,
+          "column": 35
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null ||\n    value.remainingSeconds !== null",
+      "replacement": "false",
+      "range": "src/today-api.ts:101:4-103:35"
+    },
+    {
+      "originalId": "175",
+      "file": "src/today-api.ts",
+      "operator": "LogicalOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 36,
+          "line": 103
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 101,
+          "column": 4
+        },
+        "end": {
+          "line": 103,
+          "column": 35
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null ||\n    value.remainingSeconds !== null",
+      "replacement": "(value.zoneId !== \"UTC\" || value.budgetMinutes !== null) && value.remainingSeconds !== null",
+      "range": "src/today-api.ts:101:4-103:35"
+    },
+    {
+      "originalId": "176",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 33,
+          "line": 102
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 101,
+          "column": 4
+        },
+        "end": {
+          "line": 102,
+          "column": 32
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null",
+      "replacement": "false",
+      "range": "src/today-api.ts:101:4-102:32"
+    },
+    {
+      "originalId": "177",
+      "file": "src/today-api.ts",
+      "operator": "LogicalOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 33,
+          "line": 102
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 101,
+          "column": 4
+        },
+        "end": {
+          "line": 102,
+          "column": 32
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null",
+      "replacement": "value.zoneId !== \"UTC\" && value.budgetMinutes !== null",
+      "range": "src/today-api.ts:101:4-102:32"
+    },
+    {
+      "originalId": "178",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 27,
+          "line": 101
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 101,
+          "column": 4
+        },
+        "end": {
+          "line": 101,
+          "column": 26
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\"",
+      "replacement": "false",
+      "range": "src/today-api.ts:101:4-101:26"
+    },
+    {
+      "originalId": "181",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 33,
+          "line": 102
+        },
+        "start": {
+          "column": 5,
+          "line": 102
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 102,
+          "column": 4
+        },
+        "end": {
+          "line": 102,
+          "column": 32
+        }
+      },
+      "sourceExpression": "value.budgetMinutes !== null",
+      "replacement": "false",
+      "range": "src/today-api.ts:102:4-102:32"
+    },
+    {
+      "originalId": "183",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 36,
+          "line": 103
+        },
+        "start": {
+          "column": 5,
+          "line": 103
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 103,
+          "column": 4
+        },
+        "end": {
+          "line": 103,
+          "column": 35
+        }
+      },
+      "sourceExpression": "value.remainingSeconds !== null",
+      "replacement": "false",
+      "range": "src/today-api.ts:103:4-103:35"
+    },
+    {
+      "originalId": "185",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 33,
+          "line": 104
+        },
+        "start": {
+          "column": 5,
+          "line": 104
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 104,
+          "column": 4
+        },
+        "end": {
+          "line": 104,
+          "column": 32
+        }
+      },
+      "sourceExpression": "value.excessSeconds !== null",
+      "replacement": "false",
+      "range": "src/today-api.ts:104:4-104:32"
+    },
+    {
+      "originalId": "192",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 42,
+          "line": 106
+        },
+        "start": {
+          "column": 9,
+          "line": 106
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 106,
+          "column": 8
+        },
+        "end": {
+          "line": 106,
+          "column": 41
+        }
+      },
+      "sourceExpression": "value.availabilityZoneId !== null",
+      "replacement": "false",
+      "range": "src/today-api.ts:106:8-106:41"
+    },
+    {
+      "originalId": "211",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 62,
+          "line": 118
+        },
+        "start": {
+          "column": 10,
+          "line": 117
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 117,
+          "column": 9
+        },
+        "end": {
+          "line": 118,
+          "column": 61
+        }
+      },
+      "sourceExpression": "Date.parse(previous.startAt) === Date.parse(block.startAt) &&\n          previous.id.toLowerCase() >= block.id.toLowerCase()",
+      "replacement": "false",
+      "range": "src/today-api.ts:117:9-118:61"
+    },
+    {
+      "originalId": "212",
+      "file": "src/today-api.ts",
+      "operator": "LogicalOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 62,
+          "line": 118
+        },
+        "start": {
+          "column": 10,
+          "line": 117
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 117,
+          "column": 9
+        },
+        "end": {
+          "line": 118,
+          "column": 61
+        }
+      },
+      "sourceExpression": "Date.parse(previous.startAt) === Date.parse(block.startAt) &&\n          previous.id.toLowerCase() >= block.id.toLowerCase()",
+      "replacement": "Date.parse(previous.startAt) === Date.parse(block.startAt) || previous.id.toLowerCase() >= block.id.toLowerCase()",
+      "range": "src/today-api.ts:117:9-118:61"
+    },
+    {
+      "originalId": "213",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 68,
+          "line": 117
+        },
+        "start": {
+          "column": 10,
+          "line": 117
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 117,
+          "column": 9
+        },
+        "end": {
+          "line": 117,
+          "column": 67
+        }
+      },
+      "sourceExpression": "Date.parse(previous.startAt) === Date.parse(block.startAt)",
+      "replacement": "true",
+      "range": "src/today-api.ts:117:9-117:67"
+    },
+    {
+      "originalId": "214",
+      "file": "src/today-api.ts",
+      "operator": "EqualityOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 68,
+          "line": 117
+        },
+        "start": {
+          "column": 10,
+          "line": 117
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 117,
+          "column": 9
+        },
+        "end": {
+          "line": 117,
+          "column": 67
+        }
+      },
+      "sourceExpression": "Date.parse(previous.startAt) === Date.parse(block.startAt)",
+      "replacement": "Date.parse(previous.startAt) !== Date.parse(block.startAt)",
+      "range": "src/today-api.ts:117:9-117:67"
+    },
+    {
+      "originalId": "217",
+      "file": "src/today-api.ts",
+      "operator": "EqualityOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 62,
+          "line": 118
+        },
+        "start": {
+          "column": 11,
+          "line": 118
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 118,
+          "column": 10
+        },
+        "end": {
+          "line": 118,
+          "column": 61
+        }
+      },
+      "sourceExpression": "previous.id.toLowerCase() >= block.id.toLowerCase()",
+      "replacement": "previous.id.toLowerCase() < block.id.toLowerCase()",
+      "range": "src/today-api.ts:118:10-118:61"
+    },
+    {
+      "originalId": "218",
+      "file": "src/today-api.ts",
+      "operator": "MethodExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 36,
+          "line": 118
+        },
+        "start": {
+          "column": 11,
+          "line": 118
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 118,
+          "column": 10
+        },
+        "end": {
+          "line": 118,
+          "column": 35
+        }
+      },
+      "sourceExpression": "previous.id.toLowerCase()",
+      "replacement": "previous.id.toUpperCase()",
+      "range": "src/today-api.ts:118:10-118:35"
+    },
+    {
+      "originalId": "224",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 20,
+          "line": 127
+        },
+        "start": {
+          "column": 9,
+          "line": 127
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 127,
+          "column": 8
+        },
+        "end": {
+          "line": 127,
+          "column": 19
+        }
+      },
+      "sourceExpression": "ids.has(id)",
+      "replacement": "false",
+      "range": "src/today-api.ts:127:8-127:19"
+    },
+    {
+      "originalId": "226",
+      "file": "src/today-api.ts",
+      "operator": "CallExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 17,
+          "line": 128
+        },
+        "start": {
+          "column": 5,
+          "line": 128
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 128,
+          "column": 4
+        },
+        "end": {
+          "line": 128,
+          "column": 16
+        }
+      },
+      "sourceExpression": "ids.add(id);",
+      "replacement": ";",
+      "range": "src/today-api.ts:128:4-128:16"
+    },
+    {
+      "originalId": "232",
+      "file": "src/today-api.ts",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 21,
+          "line": 133
+        },
+        "start": {
+          "column": 9,
+          "line": 133
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 133,
+          "column": 8
+        },
+        "end": {
+          "line": 133,
+          "column": 20
+        }
+      },
+      "sourceExpression": "seconds <= 0",
+      "replacement": "false",
+      "range": "src/today-api.ts:133:8-133:20"
+    },
+    {
+      "originalId": "233",
+      "file": "src/today-api.ts",
+      "operator": "EqualityOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 21,
+          "line": 133
+        },
+        "start": {
+          "column": 9,
+          "line": 133
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 133,
+          "column": 8
+        },
+        "end": {
+          "line": 133,
+          "column": 20
+        }
+      },
+      "sourceExpression": "seconds <= 0",
+      "replacement": "seconds < 0",
+      "range": "src/today-api.ts:133:8-133:20"
+    },
+    {
+      "originalId": "18",
+      "file": "src/App.tsx",
+      "operator": "StringLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 44,
+          "line": 22
+        },
+        "start": {
+          "column": 32,
+          "line": 22
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 22,
+          "column": 31
+        },
+        "end": {
+          "line": 22,
+          "column": 43
+        }
+      },
+      "sourceExpression": "\"/proyectos\"",
+      "replacement": "\"\"",
+      "range": "src/App.tsx:22:31-22:43"
+    },
+    {
+      "originalId": "28",
+      "file": "src/App.tsx",
+      "operator": "Regex",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 42,
+          "line": 35
+        },
+        "start": {
+          "column": 11,
+          "line": 35
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 35,
+          "column": 10
+        },
+        "end": {
+          "line": 35,
+          "column": 41
+        }
+      },
+      "sourceExpression": "/^\\/proyectos\\/[^/?]+\\/editar$/",
+      "replacement": "/\\/proyectos\\/[^/?]+\\/editar$/",
+      "range": "src/App.tsx:35:10-35:41"
+    },
+    {
+      "originalId": "29",
+      "file": "src/App.tsx",
+      "operator": "Regex",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 42,
+          "line": 35
+        },
+        "start": {
+          "column": 11,
+          "line": 35
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 35,
+          "column": 10
+        },
+        "end": {
+          "line": 35,
+          "column": 41
+        }
+      },
+      "sourceExpression": "/^\\/proyectos\\/[^/?]+\\/editar$/",
+      "replacement": "/^\\/proyectos\\/[^/?]+\\/editar/",
+      "range": "src/App.tsx:35:10-35:41"
+    },
+    {
+      "originalId": "32",
+      "file": "src/App.tsx",
+      "operator": "Regex",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 47,
+          "line": 37
+        },
+        "start": {
+          "column": 11,
+          "line": 37
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 37,
+          "column": 10
+        },
+        "end": {
+          "line": 37,
+          "column": 46
+        }
+      },
+      "sourceExpression": "/^\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/",
+      "replacement": "/\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/",
+      "range": "src/App.tsx:37:10-37:46"
+    },
+    {
+      "originalId": "39",
+      "file": "src/App.tsx",
+      "operator": "UnaryOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 42,
+          "line": 40
+        },
+        "start": {
+          "column": 40,
+          "line": 40
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 40,
+          "column": 39
+        },
+        "end": {
+          "line": 40,
+          "column": 41
+        }
+      },
+      "sourceExpression": "-1",
+      "replacement": "+1",
+      "range": "src/App.tsx:40:39-40:41"
+    },
+    {
+      "originalId": "40",
+      "file": "src/App.tsx",
+      "operator": "StringLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 17,
+          "line": 43
+        },
+        "start": {
+          "column": 12,
+          "line": 43
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 43,
+          "column": 11
+        },
+        "end": {
+          "line": 43,
+          "column": 16
+        }
+      },
+      "sourceExpression": "\" · \"",
+      "replacement": "\"\"",
+      "range": "src/App.tsx:43:11-43:16"
+    },
+    {
+      "originalId": "286",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 12,
+          "line": 13
+        },
+        "start": {
+          "column": 7,
+          "line": 13
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 13,
+          "column": 6
+        },
+        "end": {
+          "line": 13,
+          "column": 11
+        }
+      },
+      "sourceExpression": "\" · \"",
+      "replacement": "\"\"",
+      "range": "src/today.tsx:13:6-13:11"
+    },
+    {
+      "originalId": "292",
+      "file": "src/today.tsx",
+      "operator": "BooleanLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 47,
+          "line": 28
+        },
+        "start": {
+          "column": 42,
+          "line": 28
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 28,
+          "column": 41
+        },
+        "end": {
+          "line": 28,
+          "column": 46
+        }
+      },
+      "sourceExpression": "false",
+      "replacement": "true",
+      "range": "src/today.tsx:28:41-28:46"
+    },
+    {
+      "originalId": "309",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 39,
+          "line": 47
+        },
+        "start": {
+          "column": 13,
+          "line": 47
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 47,
+          "column": 12
+        },
+        "end": {
+          "line": 47,
+          "column": 38
+        }
+      },
+      "sourceExpression": "!controller.signal.aborted",
+      "replacement": "true",
+      "range": "src/today.tsx:47:12-47:38"
+    },
+    {
+      "originalId": "315",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 39,
+          "line": 50
+        },
+        "start": {
+          "column": 13,
+          "line": 50
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 50,
+          "column": 12
+        },
+        "end": {
+          "line": 50,
+          "column": 38
+        }
+      },
+      "sourceExpression": "!controller.signal.aborted",
+      "replacement": "true",
+      "range": "src/today.tsx:50:12-50:38"
+    },
+    {
+      "originalId": "329",
+      "file": "src/today.tsx",
+      "operator": "EqualityOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 58,
+          "line": 58
+        },
+        "start": {
+          "column": 18,
+          "line": 58
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 58,
+          "column": 17
+        },
+        "end": {
+          "line": 58,
+          "column": 57
+        }
+      },
+      "sourceExpression": "performance.now() >= dayDeadline.current",
+      "replacement": "performance.now() > dayDeadline.current",
+      "range": "src/today.tsx:58:17-58:57"
+    },
+    {
+      "originalId": "331",
+      "file": "src/today.tsx",
+      "operator": "AssignmentOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 23,
+          "line": 59
+        },
+        "start": {
+          "column": 5,
+          "line": 59
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 59,
+          "column": 4
+        },
+        "end": {
+          "line": 59,
+          "column": 22
+        }
+      },
+      "sourceExpression": "force ||= rollover",
+      "replacement": "force &&= rollover",
+      "range": "src/today.tsx:59:4-59:22"
+    },
+    {
+      "originalId": "337",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 14,
+          "line": 61
+        },
+        "start": {
+          "column": 9,
+          "line": 61
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 61,
+          "column": 8
+        },
+        "end": {
+          "line": 61,
+          "column": 13
+        }
+      },
+      "sourceExpression": "force",
+      "replacement": "false",
+      "range": "src/today.tsx:61:8-61:13"
+    },
+    {
+      "originalId": "347",
+      "file": "src/today.tsx",
+      "operator": "BooleanLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 21,
+          "line": 68
+        },
+        "start": {
+          "column": 16,
+          "line": 68
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 68,
+          "column": 15
+        },
+        "end": {
+          "line": 68,
+          "column": 20
+        }
+      },
+      "sourceExpression": "false",
+      "replacement": "true",
+      "range": "src/today.tsx:68:15-68:20"
+    },
+    {
+      "originalId": "366",
+      "file": "src/today.tsx",
+      "operator": "BlockStatement",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 6,
+          "line": 83
+        },
+        "start": {
+          "column": 18,
+          "line": 80
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 80,
+          "column": 17
+        },
+        "end": {
+          "line": 83,
+          "column": 5
+        }
+      },
+      "sourceExpression": "{\n      document.removeEventListener(\"visibilitychange\", recover);\n      window.removeEventListener(\"focus\", recover);\n    }",
+      "replacement": "{}",
+      "range": "src/today.tsx:80:17-83:5"
+    },
+    {
+      "originalId": "368",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 54,
+          "line": 81
+        },
+        "start": {
+          "column": 36,
+          "line": 81
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 81,
+          "column": 35
+        },
+        "end": {
+          "line": 81,
+          "column": 53
+        }
+      },
+      "sourceExpression": "\"visibilitychange\"",
+      "replacement": "\"\"",
+      "range": "src/today.tsx:81:35-81:53"
+    },
+    {
+      "originalId": "370",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 41,
+          "line": 82
+        },
+        "start": {
+          "column": 34,
+          "line": 82
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 82,
+          "column": 33
+        },
+        "end": {
+          "line": 82,
+          "column": 40
+        }
+      },
+      "sourceExpression": "\"focus\"",
+      "replacement": "\"\"",
+      "range": "src/today.tsx:82:33-82:40"
+    },
+    {
+      "originalId": "378",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 59,
+          "line": 86
+        },
+        "start": {
+          "column": 22,
+          "line": 86
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 86,
+          "column": 21
+        },
+        "end": {
+          "line": 86,
+          "column": 58
+        }
+      },
+      "sourceExpression": "document.visibilityState === \"hidden\"",
+      "replacement": "false",
+      "range": "src/today.tsx:86:21-86:58"
+    },
+    {
+      "originalId": "380",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 59,
+          "line": 86
+        },
+        "start": {
+          "column": 51,
+          "line": 86
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 86,
+          "column": 50
+        },
+        "end": {
+          "line": 86,
+          "column": 58
+        }
+      },
+      "sourceExpression": "\"hidden\"",
+      "replacement": "\"\"",
+      "range": "src/today.tsx:86:50-86:58"
+    },
+    {
+      "originalId": "397",
+      "file": "src/today.tsx",
+      "operator": "BooleanLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 25,
+          "line": 104
+        },
+        "start": {
+          "column": 21,
+          "line": 104
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 104,
+          "column": 20
+        },
+        "end": {
+          "line": 104,
+          "column": 24
+        }
+      },
+      "sourceExpression": "true",
+      "replacement": "false",
+      "range": "src/today.tsx:104:20-104:24"
+    },
+    {
+      "originalId": "399",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 65,
+          "line": 104
+        },
+        "start": {
+          "column": 27,
+          "line": 104
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 104,
+          "column": 26
+        },
+        "end": {
+          "line": 104,
+          "column": 64
+        }
+      },
+      "sourceExpression": "next === Date.parse(snapshot.dayEndAt)",
+      "replacement": "false",
+      "range": "src/today.tsx:104:26-104:64"
+    },
+    {
+      "originalId": "412",
+      "file": "src/today.tsx",
+      "operator": "BooleanLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 35,
+          "line": 111
+        },
+        "start": {
+          "column": 31,
+          "line": 111
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 111,
+          "column": 30
+        },
+        "end": {
+          "line": 111,
+          "column": 34
+        }
+      },
+      "sourceExpression": "true",
+      "replacement": "false",
+      "range": "src/today.tsx:111:30-111:34"
+    },
+    {
+      "originalId": "426",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 17,
+          "line": 133
+        },
+        "start": {
+          "column": 15,
+          "line": 133
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 133,
+          "column": 14
+        },
+        "end": {
+          "line": 133,
+          "column": 16
+        }
+      },
+      "sourceExpression": "\"\"",
+      "replacement": "\"Stryker was here!\"",
+      "range": "src/today.tsx:133:14-133:16"
+    },
+    {
+      "originalId": "443",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 50,
+          "line": 146
+        },
+        "start": {
+          "column": 12,
+          "line": 146
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 146,
+          "column": 11
+        },
+        "end": {
+          "line": 146,
+          "column": 49
+        }
+      },
+      "sourceExpression": "snapshot.zoneSource !== \"AVAILABILITY\"",
+      "replacement": "true",
+      "range": "src/today.tsx:146:11-146:49"
+    },
+    {
+      "originalId": "445",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 50,
+          "line": 146
+        },
+        "start": {
+          "column": 36,
+          "line": 146
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 146,
+          "column": 35
+        },
+        "end": {
+          "line": 146,
+          "column": 49
+        }
+      },
+      "sourceExpression": "\"AVAILABILITY\"",
+      "replacement": "\"\"",
+      "range": "src/today.tsx:146:35-146:49"
+    },
+    {
+      "originalId": "452",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 125,
+          "line": 150
+        },
+        "start": {
+          "column": 122,
+          "line": 150
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 150,
+          "column": 121
+        },
+        "end": {
+          "line": 150,
+          "column": 124
+        }
+      },
+      "sourceExpression": "\" \"",
+      "replacement": "\"\"",
+      "range": "src/today.tsx:150:121-150:124"
+    },
+    {
+      "originalId": "465",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 47,
+          "line": 179
+        },
+        "start": {
+          "column": 16,
+          "line": 179
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 179,
+          "column": 15
+        },
+        "end": {
+          "line": 179,
+          "column": 46
+        }
+      },
+      "sourceExpression": "snapshot.excessSeconds === null",
+      "replacement": "true",
+      "range": "src/today.tsx:179:15-179:46"
+    },
+    {
+      "originalId": "466",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 47,
+          "line": 179
+        },
+        "start": {
+          "column": 16,
+          "line": 179
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 179,
+          "column": 15
+        },
+        "end": {
+          "line": 179,
+          "column": 46
+        }
+      },
+      "sourceExpression": "snapshot.excessSeconds === null",
+      "replacement": "false",
+      "range": "src/today.tsx:179:15-179:46"
+    },
+    {
+      "originalId": "467",
+      "file": "src/today.tsx",
+      "operator": "EqualityOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 47,
+          "line": 179
+        },
+        "start": {
+          "column": 16,
+          "line": 179
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 179,
+          "column": 15
+        },
+        "end": {
+          "line": 179,
+          "column": 46
+        }
+      },
+      "sourceExpression": "snapshot.excessSeconds === null",
+      "replacement": "snapshot.excessSeconds !== null",
+      "range": "src/today.tsx:179:15-179:46"
+    },
+    {
+      "originalId": "468",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 32,
+          "line": 180
+        },
+        "start": {
+          "column": 19,
+          "line": 180
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 180,
+          "column": 18
+        },
+        "end": {
+          "line": 180,
+          "column": 31
+        }
+      },
+      "sourceExpression": "\"Desconocido\"",
+      "replacement": "\"\"",
+      "range": "src/today.tsx:180:18-180:31"
+    },
+    {
+      "originalId": "469",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 55,
+          "line": 181
+        },
+        "start": {
+          "column": 19,
+          "line": 181
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 181,
+          "column": 18
+        },
+        "end": {
+          "line": 181,
+          "column": 54
+        }
+      },
+      "sourceExpression": "`${snapshot.excessSeconds / 60} min`",
+      "replacement": "``",
+      "range": "src/today.tsx:181:18-181:54"
+    },
+    {
+      "originalId": "470",
+      "file": "src/today.tsx",
+      "operator": "ArithmeticOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 49,
+          "line": 181
+        },
+        "start": {
+          "column": 22,
+          "line": 181
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 181,
+          "column": 21
+        },
+        "end": {
+          "line": 181,
+          "column": 48
+        }
+      },
+      "sourceExpression": "snapshot.excessSeconds / 60",
+      "replacement": "snapshot.excessSeconds * 60",
+      "range": "src/today.tsx:181:21-181:48"
+    },
+    {
+      "originalId": "471",
+      "file": "src/today.tsx",
+      "operator": "StringLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 32,
+          "line": 187
+        },
+        "start": {
+          "column": 19,
+          "line": 187
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 187,
+          "column": 18
+        },
+        "end": {
+          "line": 187,
+          "column": 31
+        }
+      },
+      "sourceExpression": "\"Sin bloques\"",
+      "replacement": "\"\"",
+      "range": "src/today.tsx:187:18-187:31"
+    },
+    {
+      "originalId": "479",
+      "file": "src/today.tsx",
+      "operator": "LogicalOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 20,
+          "line": 206
+        },
+        "start": {
+          "column": 20,
+          "line": 204
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 204,
+          "column": 19
+        },
+        "end": {
+          "line": 206,
+          "column": 19
+        }
+      },
+      "sourceExpression": "block.id === snapshot.currentBlockId && (\n                    <p>En horario planificado</p>\n                  )",
+      "replacement": "block.id === snapshot.currentBlockId || <p>En horario planificado</p>",
+      "range": "src/today.tsx:204:19-206:19"
+    },
+    {
+      "originalId": "481",
+      "file": "src/today.tsx",
+      "operator": "EqualityOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 56,
+          "line": 204
+        },
+        "start": {
+          "column": 20,
+          "line": 204
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 204,
+          "column": 19
+        },
+        "end": {
+          "line": 204,
+          "column": 55
+        }
+      },
+      "sourceExpression": "block.id === snapshot.currentBlockId",
+      "replacement": "block.id !== snapshot.currentBlockId",
+      "range": "src/today.tsx:204:19-204:55"
+    },
+    {
+      "originalId": "484",
+      "file": "src/today.tsx",
+      "operator": "LogicalOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 20,
+          "line": 209
+        },
+        "start": {
+          "column": 20,
+          "line": 207
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 207,
+          "column": 19
+        },
+        "end": {
+          "line": 209,
+          "column": 19
+        }
+      },
+      "sourceExpression": "block.id === snapshot.nextBlockId && (\n                    <p>Próximo inicio planificado</p>\n                  )",
+      "replacement": "block.id === snapshot.nextBlockId || <p>Próximo inicio planificado</p>",
+      "range": "src/today.tsx:207:19-209:19"
+    },
+    {
+      "originalId": "486",
+      "file": "src/today.tsx",
+      "operator": "EqualityOperator",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 53,
+          "line": 207
+        },
+        "start": {
+          "column": 20,
+          "line": 207
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 207,
+          "column": 19
+        },
+        "end": {
+          "line": 207,
+          "column": 52
+        }
+      },
+      "sourceExpression": "block.id === snapshot.nextBlockId",
+      "replacement": "block.id !== snapshot.nextBlockId",
+      "range": "src/today.tsx:207:19-207:52"
+    },
+    {
+      "originalId": "491",
+      "file": "src/today.tsx",
+      "operator": "ConditionalExpression",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 52,
+          "line": 215
+        },
+        "start": {
+          "column": 20,
+          "line": 215
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 215,
+          "column": 19
+        },
+        "end": {
+          "line": 215,
+          "column": 51
+        }
+      },
+      "sourceExpression": "block.zoneId !== snapshot.zoneId",
+      "replacement": "true",
+      "range": "src/today.tsx:215:19-215:51"
+    },
+    {
+      "originalId": "536",
+      "file": "src/workspace.tsx",
+      "operator": "StringLiteral",
+      "originalStatus": "Survived",
+      "originalLocation": {
+        "end": {
+          "column": 55,
+          "line": 85
+        },
+        "start": {
+          "column": 33,
+          "line": 85
+        }
+      },
+      "mappedLocation": {
+        "start": {
+          "line": 85,
+          "column": 32
+        },
+        "end": {
+          "line": 85,
+          "column": 54
+        }
+      },
+      "sourceExpression": "\"Página no encontrada\"",
+      "replacement": "\"\"",
+      "range": "src/workspace.tsx:85:32-85:54"
+    }
+  ],
+  "newFocusRegion": {
+    "originalId": null,
+    "range": "src/today.tsx:124:0-124:78",
+    "sourceExpression": "      <button type=\"button\" aria-disabled={loading} onClick={() => refresh()}>",
+    "reason": "New generation after disabled→aria-disabled focus correction. Original catalog had no direct disabled attribute mutant; do not assign an old id or invent a kill."
+  },
+  "sourceSha256": {
+    "src/today-api.ts": "96eecdada067b78aea8da95ffe21b3e5dd663c7bd162736228b0dd40b0a93fba",
+    "src/App.tsx": "b20a0362fdadecc2f4cb6ad9831d064d5b44903a9b85d73a361bc446cda335ee",
+    "src/today.tsx": "930495aee7f67e1101fc966c6c42db448788208b76fe228ac6eea63fd99a8d1c",
+    "src/workspace.tsx": "fc908230309df2dcd04b771707c7a2cb579cb329bf5844e84e629a636f8072f6"
+  }
+}

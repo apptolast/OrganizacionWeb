@@ -6,6 +6,10 @@ Feature12 `today` in_progress. Contrato de38 escenarios y105 casos revisado (e67
 
 Backend implementado, revisado independientemente y subido en5cc80a9 (push4ea98f). Init35422 EXIT0/292711:1415 backend,1317 frontend,13 pruebas del arnés y lint verdes. Este corte precede a la última corrección UI de retorno visible con GET pendiente. Frontend permanece en revisión; E2E reales vacío y agenda pasan por separado. Capturas320/1440 revisadas por root; matriz UX completa y mutación pendientes. Ver progress/judge_today.md para alcance y evidencias, sin atribuir cierre a estas mediciones parciales.
 
+Checkpoint posterior f568f6e publicado (43e507): frontend final de fronteras temporales, regresión1319/1319 y lint9698e6. PIT backend80/80 Killed confirmado por root1b93c3. Stryker frontend sesión83950 mide521mutantes sobre este corte; baseline657GREEN, todavía sin resultado. No modificar fuentes/tests/config durante esa campaña.
+
+E2E posteriores: históricos19/19c437d1; tres smokes de Hoy pasan en Chromium/Firefox/WebKit; zoom nativo200%1/1c492dc. UXFirefox/WebKit completó155medidas y cinco axe por motor, pero mantiene EXIT1 por defecto real de foco: disabled de Actualizar envía el foco a BODY al pulsar Enter (cc49ad). Autor resume_review tiene diseñado cambiar a aria-disabled preservando guard de petición; espera terminar Stryker antes de editar. Resume_frontend espera ese fix para ejecutar los cuatro tests Today en tres motores, sin repetir los históricos/zoom si sólo cambia esa semántica. Root revisó PNG de zoom44224 y capturas9324. Matriz30 y límites físicos/humanos en tdd_today_e2e.md. Feature12 no está cerrada.
+
 ## Último cierre verificado
 
 - Init94736 EXIT0/8d8c38:1209 frontend,10 pruebas del arnés y lint verdes. Backend UP-TO-DATE sobre1365 pruebas previamente verificadas.

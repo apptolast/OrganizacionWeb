@@ -14,7 +14,7 @@
   ],
   "sourceSha256": {
     "src/today-api.ts": "96eecdada067b78aea8da95ffe21b3e5dd663c7bd162736228b0dd40b0a93fba",
-    "src/today.tsx": "0bcc57577073014f76eee41110121b03413e9731a72544d13d0cf1432a9ef789",
+    "src/today.tsx": "930495aee7f67e1101fc966c6c42db448788208b76fe228ac6eea63fd99a8d1c",
     "src/App.tsx": "b20a0362fdadecc2f4cb6ad9831d064d5b44903a9b85d73a361bc446cda335ee",
     "src/workspace.tsx": "fc908230309df2dcd04b771707c7a2cb579cb329bf5844e84e629a636f8072f6",
     "src/project-reader.tsx": "7d32c771195653d9c42fb00f039eb8c9e3e888077dca925f69192ffe92969aca",

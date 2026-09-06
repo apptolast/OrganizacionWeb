@@ -121,7 +121,7 @@ export function Today() {
   return (
     <main id="proyectos" tabIndex={-1} className="today">
       <h1>Hoy</h1>
-      <button type="button" disabled={loading} onClick={() => refresh()}>
+      <button type="button" aria-disabled={loading} onClick={() => refresh()}>
         Actualizar
       </button>
       <p role="status">

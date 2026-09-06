@@ -1,0 +1,2019 @@
+{
+  "reportSha256": "5cc335b97919aaa1bcd3cf4cf956af54ee55db3a02fdb23a060c77508f5c47a3",
+  "checkpoint": "f568f6e",
+  "total": 521,
+  "counts": [
+    {
+      "status": "Killed",
+      "count": 418
+    },
+    {
+      "status": "NoCoverage",
+      "count": 1
+    },
+    {
+      "status": "Survived",
+      "count": 102
+    }
+  ],
+  "rawScore": 80.23032629558541,
+  "pending": [
+    {
+      "file": "src/today-api.ts",
+      "id": "225",
+      "operator": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 127
+        },
+        "start": {
+          "column": 29,
+          "line": 127
+        }
+      },
+      "sourceExpression": "false",
+      "replacement": "true",
+      "status": "NoCoverage",
+      "coveredByCount": 0
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "78",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 51
+        }
+      },
+      "sourceExpression": "typeof value.zoneSource === \"string\"",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 78
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "85",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 75,
+          "line": 56
+        },
+        "start": {
+          "column": 6,
+          "line": 56
+        }
+      },
+      "sourceExpression": "value.budgetMinutes === null || integer(value.budgetMinutes, 0, 1440)",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 75
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "89",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 75,
+          "line": 57
+        },
+        "start": {
+          "column": 6,
+          "line": 57
+        }
+      },
+      "sourceExpression": "value.remainingSeconds === null || integer(value.remainingSeconds, 0)",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 72
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "93",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 69,
+          "line": 58
+        },
+        "start": {
+          "column": 6,
+          "line": 58
+        }
+      },
+      "sourceExpression": "value.excessSeconds === null || integer(value.excessSeconds, 0)",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 71
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "127",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 79
+        },
+        "start": {
+          "column": 5,
+          "line": 79
+        }
+      },
+      "sourceExpression": "typeof value.date !== \"string\"",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 59
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "171",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 107
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null ||\n    value.remainingSeconds !== null ||\n    value.excessSeconds !== null ||\n    (value.zoneSource === \"UNCONFIGURED\"\n      ? value.availabilityZoneId !== null\n      : !text(value.availabilityZoneId))",
+      "replacement": "(value.zoneId !== \"UTC\" || value.budgetMinutes !== null || value.remainingSeconds !== null || value.excessSeconds !== null) && (value.zoneSource === \"UNCONFIGURED\" ? value.availabilityZoneId !== null : !text(value.availabilityZoneId))",
+      "status": "Survived",
+      "coveredByCount": 5
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "172",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 104
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null ||\n    value.remainingSeconds !== null ||\n    value.excessSeconds !== null",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 5
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "173",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 104
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null ||\n    value.remainingSeconds !== null ||\n    value.excessSeconds !== null",
+      "replacement": "(value.zoneId !== \"UTC\" || value.budgetMinutes !== null || value.remainingSeconds !== null) && value.excessSeconds !== null",
+      "status": "Survived",
+      "coveredByCount": 5
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "174",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 103
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null ||\n    value.remainingSeconds !== null",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 5
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "175",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 103
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null ||\n    value.remainingSeconds !== null",
+      "replacement": "(value.zoneId !== \"UTC\" || value.budgetMinutes !== null) && value.remainingSeconds !== null",
+      "status": "Survived",
+      "coveredByCount": 5
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "176",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 102
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 5
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "177",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 102
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\" ||\n    value.budgetMinutes !== null",
+      "replacement": "value.zoneId !== \"UTC\" && value.budgetMinutes !== null",
+      "status": "Survived",
+      "coveredByCount": 5
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "178",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 101
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      },
+      "sourceExpression": "value.zoneId !== \"UTC\"",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 5
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "181",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 102
+        },
+        "start": {
+          "column": 5,
+          "line": 102
+        }
+      },
+      "sourceExpression": "value.budgetMinutes !== null",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 5
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "183",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 103
+        },
+        "start": {
+          "column": 5,
+          "line": 103
+        }
+      },
+      "sourceExpression": "value.remainingSeconds !== null",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 4
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "185",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 104
+        },
+        "start": {
+          "column": 5,
+          "line": 104
+        }
+      },
+      "sourceExpression": "value.excessSeconds !== null",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 4
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "192",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 106
+        },
+        "start": {
+          "column": 9,
+          "line": 106
+        }
+      },
+      "sourceExpression": "value.availabilityZoneId !== null",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 2
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "209",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 65,
+          "line": 116
+        },
+        "start": {
+          "column": 9,
+          "line": 116
+        }
+      },
+      "sourceExpression": "Date.parse(previous.startAt) > Date.parse(block.startAt)",
+      "replacement": "Date.parse(previous.startAt) >= Date.parse(block.startAt)",
+      "status": "Survived",
+      "coveredByCount": 4
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "211",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 118
+        },
+        "start": {
+          "column": 10,
+          "line": 117
+        }
+      },
+      "sourceExpression": "Date.parse(previous.startAt) === Date.parse(block.startAt) &&\n          previous.id.toLowerCase() >= block.id.toLowerCase()",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 3
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "212",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 118
+        },
+        "start": {
+          "column": 10,
+          "line": 117
+        }
+      },
+      "sourceExpression": "Date.parse(previous.startAt) === Date.parse(block.startAt) &&\n          previous.id.toLowerCase() >= block.id.toLowerCase()",
+      "replacement": "Date.parse(previous.startAt) === Date.parse(block.startAt) || previous.id.toLowerCase() >= block.id.toLowerCase()",
+      "status": "Survived",
+      "coveredByCount": 3
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "213",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 68,
+          "line": 117
+        },
+        "start": {
+          "column": 10,
+          "line": 117
+        }
+      },
+      "sourceExpression": "Date.parse(previous.startAt) === Date.parse(block.startAt)",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 3
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "214",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 68,
+          "line": 117
+        },
+        "start": {
+          "column": 10,
+          "line": 117
+        }
+      },
+      "sourceExpression": "Date.parse(previous.startAt) === Date.parse(block.startAt)",
+      "replacement": "Date.parse(previous.startAt) !== Date.parse(block.startAt)",
+      "status": "Survived",
+      "coveredByCount": 3
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "215",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 118
+        },
+        "start": {
+          "column": 11,
+          "line": 118
+        }
+      },
+      "sourceExpression": "previous.id.toLowerCase() >= block.id.toLowerCase()",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 1
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "216",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 118
+        },
+        "start": {
+          "column": 11,
+          "line": 118
+        }
+      },
+      "sourceExpression": "previous.id.toLowerCase() >= block.id.toLowerCase()",
+      "replacement": "previous.id.toLowerCase() > block.id.toLowerCase()",
+      "status": "Survived",
+      "coveredByCount": 1
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "217",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 118
+        },
+        "start": {
+          "column": 11,
+          "line": 118
+        }
+      },
+      "sourceExpression": "previous.id.toLowerCase() >= block.id.toLowerCase()",
+      "replacement": "previous.id.toLowerCase() < block.id.toLowerCase()",
+      "status": "Survived",
+      "coveredByCount": 1
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "218",
+      "operator": "MethodExpression",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 118
+        },
+        "start": {
+          "column": 11,
+          "line": 118
+        }
+      },
+      "sourceExpression": "previous.id.toLowerCase()",
+      "replacement": "previous.id.toUpperCase()",
+      "status": "Survived",
+      "coveredByCount": 1
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "219",
+      "operator": "MethodExpression",
+      "location": {
+        "end": {
+          "column": 62,
+          "line": 118
+        },
+        "start": {
+          "column": 40,
+          "line": 118
+        }
+      },
+      "sourceExpression": "block.id.toLowerCase()",
+      "replacement": "block.id.toUpperCase()",
+      "status": "Survived",
+      "coveredByCount": 1
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "222",
+      "operator": "MethodExpression",
+      "location": {
+        "end": {
+          "column": 38,
+          "line": 126
+        },
+        "start": {
+          "column": 16,
+          "line": 126
+        }
+      },
+      "sourceExpression": "block.id.toLowerCase()",
+      "replacement": "block.id.toUpperCase()",
+      "status": "Survived",
+      "coveredByCount": 35
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "224",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 127
+        },
+        "start": {
+          "column": 9,
+          "line": 127
+        }
+      },
+      "sourceExpression": "ids.has(id)",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 35
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "226",
+      "operator": "CallExpression",
+      "location": {
+        "end": {
+          "column": 17,
+          "line": 128
+        },
+        "start": {
+          "column": 5,
+          "line": 128
+        }
+      },
+      "sourceExpression": "ids.add(id);",
+      "replacement": ";",
+      "status": "Survived",
+      "coveredByCount": 35
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "232",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 133
+        },
+        "start": {
+          "column": 9,
+          "line": 133
+        }
+      },
+      "sourceExpression": "seconds <= 0",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 35
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "233",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 133
+        },
+        "start": {
+          "column": 9,
+          "line": 133
+        }
+      },
+      "sourceExpression": "seconds <= 0",
+      "replacement": "seconds < 0",
+      "status": "Survived",
+      "coveredByCount": 35
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "253",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 70,
+          "line": 143
+        },
+        "start": {
+          "column": 7,
+          "line": 143
+        }
+      },
+      "sourceExpression": "latest === null || Date.parse(block.endAt) > Date.parse(latest)",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 34
+    },
+    {
+      "file": "src/today-api.ts",
+      "id": "259",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 70,
+          "line": 143
+        },
+        "start": {
+          "column": 26,
+          "line": 143
+        }
+      },
+      "sourceExpression": "Date.parse(block.endAt) > Date.parse(latest)",
+      "replacement": "Date.parse(block.endAt) >= Date.parse(latest)",
+      "status": "Survived",
+      "coveredByCount": 2
+    },
+    {
+      "file": "src/App.tsx",
+      "id": "18",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 22
+        },
+        "start": {
+          "column": 32,
+          "line": 22
+        }
+      },
+      "sourceExpression": "\"/proyectos\"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 424
+    },
+    {
+      "file": "src/App.tsx",
+      "id": "28",
+      "operator": "Regex",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 35
+        },
+        "start": {
+          "column": 11,
+          "line": 35
+        }
+      },
+      "sourceExpression": "/^\\/proyectos\\/[^/?]+\\/editar$/",
+      "replacement": "/\\/proyectos\\/[^/?]+\\/editar$/",
+      "status": "Survived",
+      "coveredByCount": 195
+    },
+    {
+      "file": "src/App.tsx",
+      "id": "29",
+      "operator": "Regex",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 35
+        },
+        "start": {
+          "column": 11,
+          "line": 35
+        }
+      },
+      "sourceExpression": "/^\\/proyectos\\/[^/?]+\\/editar$/",
+      "replacement": "/^\\/proyectos\\/[^/?]+\\/editar/",
+      "status": "Survived",
+      "coveredByCount": 195
+    },
+    {
+      "file": "src/App.tsx",
+      "id": "32",
+      "operator": "Regex",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 37
+        },
+        "start": {
+          "column": 11,
+          "line": 37
+        }
+      },
+      "sourceExpression": "/^\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/",
+      "replacement": "/\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/",
+      "status": "Survived",
+      "coveredByCount": 151
+    },
+    {
+      "file": "src/App.tsx",
+      "id": "39",
+      "operator": "UnaryOperator",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 40
+        },
+        "start": {
+          "column": 40,
+          "line": 40
+        }
+      },
+      "sourceExpression": "-1",
+      "replacement": "+1",
+      "status": "Survived",
+      "coveredByCount": 6
+    },
+    {
+      "file": "src/App.tsx",
+      "id": "40",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 17,
+          "line": 43
+        },
+        "start": {
+          "column": 12,
+          "line": 43
+        }
+      },
+      "sourceExpression": "\" · \"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 6
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "286",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 13
+        },
+        "start": {
+          "column": 7,
+          "line": 13
+        }
+      },
+      "sourceExpression": "\" · \"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 28
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "291",
+      "operator": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 23
+        },
+        "start": {
+          "column": 42,
+          "line": 23
+        }
+      },
+      "sourceExpression": "false",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 44
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "292",
+      "operator": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 28
+        },
+        "start": {
+          "column": 42,
+          "line": 28
+        }
+      },
+      "sourceExpression": "false",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 44
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "309",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 47
+        },
+        "start": {
+          "column": 13,
+          "line": 47
+        }
+      },
+      "sourceExpression": "!controller.signal.aborted",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 20
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "315",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 50
+        },
+        "start": {
+          "column": 13,
+          "line": 50
+        }
+      },
+      "sourceExpression": "!controller.signal.aborted",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 43
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "329",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 58,
+          "line": 58
+        },
+        "start": {
+          "column": 18,
+          "line": 58
+        }
+      },
+      "sourceExpression": "performance.now() >= dayDeadline.current",
+      "replacement": "performance.now() > dayDeadline.current",
+      "status": "Survived",
+      "coveredByCount": 17
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "331",
+      "operator": "AssignmentOperator",
+      "location": {
+        "end": {
+          "column": 23,
+          "line": 59
+        },
+        "start": {
+          "column": 5,
+          "line": 59
+        }
+      },
+      "sourceExpression": "force ||= rollover",
+      "replacement": "force &&= rollover",
+      "status": "Survived",
+      "coveredByCount": 18
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "336",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 14,
+          "line": 61
+        },
+        "start": {
+          "column": 9,
+          "line": 61
+        }
+      },
+      "sourceExpression": "force",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 17
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "337",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 14,
+          "line": 61
+        },
+        "start": {
+          "column": 9,
+          "line": 61
+        }
+      },
+      "sourceExpression": "force",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 17
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "338",
+      "operator": "OptionalChaining",
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 61
+        },
+        "start": {
+          "column": 16,
+          "line": 61
+        }
+      },
+      "sourceExpression": "active.current?.abort",
+      "replacement": "active.current.abort",
+      "status": "Survived",
+      "coveredByCount": 11
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "347",
+      "operator": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 68
+        },
+        "start": {
+          "column": 16,
+          "line": 68
+        }
+      },
+      "sourceExpression": "false",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 17
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "350",
+      "operator": "ArithmeticOperator",
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 69
+        },
+        "start": {
+          "column": 28,
+          "line": 69
+        }
+      },
+      "sourceExpression": "value + 1",
+      "replacement": "value - 1",
+      "status": "Survived",
+      "coveredByCount": 17
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "351",
+      "operator": "ArrayDeclaration",
+      "location": {
+        "end": {
+          "column": 8,
+          "line": 70
+        },
+        "start": {
+          "column": 6,
+          "line": 70
+        }
+      },
+      "sourceExpression": "[]",
+      "replacement": "[\"Stryker was here\"]",
+      "status": "Survived",
+      "coveredByCount": 44
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "366",
+      "operator": "BlockStatement",
+      "location": {
+        "end": {
+          "column": 6,
+          "line": 83
+        },
+        "start": {
+          "column": 18,
+          "line": 80
+        }
+      },
+      "sourceExpression": "{\n      document.removeEventListener(\"visibilitychange\", recover);\n      window.removeEventListener(\"focus\", recover);\n    }",
+      "replacement": "{}",
+      "status": "Survived",
+      "coveredByCount": 44
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "368",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 54,
+          "line": 81
+        },
+        "start": {
+          "column": 36,
+          "line": 81
+        }
+      },
+      "sourceExpression": "\"visibilitychange\"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 44
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "370",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 82
+        },
+        "start": {
+          "column": 34,
+          "line": 82
+        }
+      },
+      "sourceExpression": "\"focus\"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 44
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "371",
+      "operator": "ArrayDeclaration",
+      "location": {
+        "end": {
+          "column": 15,
+          "line": 84
+        },
+        "start": {
+          "column": 6,
+          "line": 84
+        }
+      },
+      "sourceExpression": "[refresh]",
+      "replacement": "[]",
+      "status": "Survived",
+      "coveredByCount": 44
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "378",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 59,
+          "line": 86
+        },
+        "start": {
+          "column": 22,
+          "line": 86
+        }
+      },
+      "sourceExpression": "document.visibilityState === \"hidden\"",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 29
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "380",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 59,
+          "line": 86
+        },
+        "start": {
+          "column": 51,
+          "line": 86
+        }
+      },
+      "sourceExpression": "\"hidden\"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 29
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "397",
+      "operator": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 104
+        },
+        "start": {
+          "column": 21,
+          "line": 104
+        }
+      },
+      "sourceExpression": "true",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 9
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "399",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 65,
+          "line": 104
+        },
+        "start": {
+          "column": 27,
+          "line": 104
+        }
+      },
+      "sourceExpression": "next === Date.parse(snapshot.dayEndAt)",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 9
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "411",
+      "operator": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 29,
+          "line": 111
+        },
+        "start": {
+          "column": 25,
+          "line": 111
+        }
+      },
+      "sourceExpression": "true",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 1
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "412",
+      "operator": "BooleanLiteral",
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 111
+        },
+        "start": {
+          "column": 31,
+          "line": 111
+        }
+      },
+      "sourceExpression": "true",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 1
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "426",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 17,
+          "line": 133
+        },
+        "start": {
+          "column": 15,
+          "line": 133
+        }
+      },
+      "sourceExpression": "\"\"",
+      "replacement": "\"Stryker was here!\"",
+      "status": "Survived",
+      "coveredByCount": 9
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "435",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 73,
+          "line": 138
+        },
+        "start": {
+          "column": 70,
+          "line": 138
+        }
+      },
+      "sourceExpression": "\" \"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 9
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "443",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 50,
+          "line": 146
+        },
+        "start": {
+          "column": 12,
+          "line": 146
+        }
+      },
+      "sourceExpression": "snapshot.zoneSource !== \"AVAILABILITY\"",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 29
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "445",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 50,
+          "line": 146
+        },
+        "start": {
+          "column": 36,
+          "line": 146
+        }
+      },
+      "sourceExpression": "\"AVAILABILITY\"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 29
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "452",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 125,
+          "line": 150
+        },
+        "start": {
+          "column": 122,
+          "line": 150
+        }
+      },
+      "sourceExpression": "\" \"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 2
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "465",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 179
+        },
+        "start": {
+          "column": 16,
+          "line": 179
+        }
+      },
+      "sourceExpression": "snapshot.excessSeconds === null",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 29
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "466",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 179
+        },
+        "start": {
+          "column": 16,
+          "line": 179
+        }
+      },
+      "sourceExpression": "snapshot.excessSeconds === null",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 29
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "467",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 179
+        },
+        "start": {
+          "column": 16,
+          "line": 179
+        }
+      },
+      "sourceExpression": "snapshot.excessSeconds === null",
+      "replacement": "snapshot.excessSeconds !== null",
+      "status": "Survived",
+      "coveredByCount": 29
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "468",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 32,
+          "line": 180
+        },
+        "start": {
+          "column": 19,
+          "line": 180
+        }
+      },
+      "sourceExpression": "\"Desconocido\"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 2
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "469",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 55,
+          "line": 181
+        },
+        "start": {
+          "column": 19,
+          "line": 181
+        }
+      },
+      "sourceExpression": "`${snapshot.excessSeconds / 60} min`",
+      "replacement": "``",
+      "status": "Survived",
+      "coveredByCount": 27
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "470",
+      "operator": "ArithmeticOperator",
+      "location": {
+        "end": {
+          "column": 49,
+          "line": 181
+        },
+        "start": {
+          "column": 22,
+          "line": 181
+        }
+      },
+      "sourceExpression": "snapshot.excessSeconds / 60",
+      "replacement": "snapshot.excessSeconds * 60",
+      "status": "Survived",
+      "coveredByCount": 27
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "471",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 32,
+          "line": 187
+        },
+        "start": {
+          "column": 19,
+          "line": 187
+        }
+      },
+      "sourceExpression": "\"Sin bloques\"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 10
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "479",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 206
+        },
+        "start": {
+          "column": 20,
+          "line": 204
+        }
+      },
+      "sourceExpression": "block.id === snapshot.currentBlockId && (\n                    <p>En horario planificado</p>\n                  )",
+      "replacement": "block.id === snapshot.currentBlockId || <p>En horario planificado</p>",
+      "status": "Survived",
+      "coveredByCount": 21
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "481",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 56,
+          "line": 204
+        },
+        "start": {
+          "column": 20,
+          "line": 204
+        }
+      },
+      "sourceExpression": "block.id === snapshot.currentBlockId",
+      "replacement": "block.id !== snapshot.currentBlockId",
+      "status": "Survived",
+      "coveredByCount": 21
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "484",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 209
+        },
+        "start": {
+          "column": 20,
+          "line": 207
+        }
+      },
+      "sourceExpression": "block.id === snapshot.nextBlockId && (\n                    <p>Próximo inicio planificado</p>\n                  )",
+      "replacement": "block.id === snapshot.nextBlockId || <p>Próximo inicio planificado</p>",
+      "status": "Survived",
+      "coveredByCount": 21
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "486",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 53,
+          "line": 207
+        },
+        "start": {
+          "column": 20,
+          "line": 207
+        }
+      },
+      "sourceExpression": "block.id === snapshot.nextBlockId",
+      "replacement": "block.id !== snapshot.nextBlockId",
+      "status": "Survived",
+      "coveredByCount": 21
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "487",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 63,
+          "line": 212
+        },
+        "start": {
+          "column": 60,
+          "line": 212
+        }
+      },
+      "sourceExpression": "\" \"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 21
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "491",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 52,
+          "line": 215
+        },
+        "start": {
+          "column": 20,
+          "line": 215
+        }
+      },
+      "sourceExpression": "block.zoneId !== snapshot.zoneId",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 21
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "493",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 77,
+          "line": 217
+        },
+        "start": {
+          "column": 74,
+          "line": 217
+        }
+      },
+      "sourceExpression": "\" \"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 21
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "507",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 14,
+          "line": 35
+        },
+        "start": {
+          "column": 14,
+          "line": 33
+        }
+      },
+      "sourceExpression": "section === \"Hoy\" && (\n              <span className=\"nav-dot\" aria-hidden=\"true\" />\n            )",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "506",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 14,
+          "line": 35
+        },
+        "start": {
+          "column": 14,
+          "line": 33
+        }
+      },
+      "sourceExpression": "section === \"Hoy\" && (\n              <span className=\"nav-dot\" aria-hidden=\"true\" />\n            )",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "509",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 33
+        },
+        "start": {
+          "column": 14,
+          "line": 33
+        }
+      },
+      "sourceExpression": "section === \"Hoy\"",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "508",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 14,
+          "line": 35
+        },
+        "start": {
+          "column": 14,
+          "line": 33
+        }
+      },
+      "sourceExpression": "section === \"Hoy\" && (\n              <span className=\"nav-dot\" aria-hidden=\"true\" />\n            )",
+      "replacement": "section === \"Hoy\" || <span className=\"nav-dot\" aria-hidden=\"true\" />",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "511",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 33
+        },
+        "start": {
+          "column": 26,
+          "line": 33
+        }
+      },
+      "sourceExpression": "\"Hoy\"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "510",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 33
+        },
+        "start": {
+          "column": 14,
+          "line": 33
+        }
+      },
+      "sourceExpression": "section === \"Hoy\"",
+      "replacement": "section !== \"Hoy\"",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "517",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 60,
+          "line": 41
+        },
+        "start": {
+          "column": 57,
+          "line": 41
+        }
+      },
+      "sourceExpression": "\" \"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "518",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 14,
+          "line": 44
+        },
+        "start": {
+          "column": 14,
+          "line": 42
+        }
+      },
+      "sourceExpression": "section === \"Proyectos\" && (\n              <span className=\"nav-dot\" aria-hidden=\"true\" />\n            )",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "519",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 14,
+          "line": 44
+        },
+        "start": {
+          "column": 14,
+          "line": 42
+        }
+      },
+      "sourceExpression": "section === \"Proyectos\" && (\n              <span className=\"nav-dot\" aria-hidden=\"true\" />\n            )",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "520",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 14,
+          "line": 44
+        },
+        "start": {
+          "column": 14,
+          "line": 42
+        }
+      },
+      "sourceExpression": "section === \"Proyectos\" && (\n              <span className=\"nav-dot\" aria-hidden=\"true\" />\n            )",
+      "replacement": "section === \"Proyectos\" || <span className=\"nav-dot\" aria-hidden=\"true\" />",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "521",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 42
+        },
+        "start": {
+          "column": 14,
+          "line": 42
+        }
+      },
+      "sourceExpression": "section === \"Proyectos\"",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "522",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 42
+        },
+        "start": {
+          "column": 14,
+          "line": 42
+        }
+      },
+      "sourceExpression": "section === \"Proyectos\"",
+      "replacement": "section !== \"Proyectos\"",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "523",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 42
+        },
+        "start": {
+          "column": 26,
+          "line": 42
+        }
+      },
+      "sourceExpression": "\"Proyectos\"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "529",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 14,
+          "line": 53
+        },
+        "start": {
+          "column": 14,
+          "line": 51
+        }
+      },
+      "sourceExpression": "section === \"Disponibilidad\" && (\n              <span className=\"nav-dot\" aria-hidden=\"true\" />\n            )",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "530",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 14,
+          "line": 53
+        },
+        "start": {
+          "column": 14,
+          "line": 51
+        }
+      },
+      "sourceExpression": "section === \"Disponibilidad\" && (\n              <span className=\"nav-dot\" aria-hidden=\"true\" />\n            )",
+      "replacement": "false",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "531",
+      "operator": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 14,
+          "line": 53
+        },
+        "start": {
+          "column": 14,
+          "line": 51
+        }
+      },
+      "sourceExpression": "section === \"Disponibilidad\" && (\n              <span className=\"nav-dot\" aria-hidden=\"true\" />\n            )",
+      "replacement": "section === \"Disponibilidad\" || <span className=\"nav-dot\" aria-hidden=\"true\" />",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "532",
+      "operator": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 51
+        },
+        "start": {
+          "column": 14,
+          "line": 51
+        }
+      },
+      "sourceExpression": "section === \"Disponibilidad\"",
+      "replacement": "true",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "533",
+      "operator": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 51
+        },
+        "start": {
+          "column": 14,
+          "line": 51
+        }
+      },
+      "sourceExpression": "section === \"Disponibilidad\"",
+      "replacement": "section !== \"Disponibilidad\"",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "534",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 51
+        },
+        "start": {
+          "column": 26,
+          "line": 51
+        }
+      },
+      "sourceExpression": "\"Disponibilidad\"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 514
+    },
+    {
+      "file": "src/workspace.tsx",
+      "id": "536",
+      "operator": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 55,
+          "line": 85
+        },
+        "start": {
+          "column": 33,
+          "line": 85
+        }
+      },
+      "sourceExpression": "\"Página no encontrada\"",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "coveredByCount": 3
+    }
+  ],
+  "buttonRelated": [
+    {
+      "file": "src/today.tsx",
+      "id": "289",
+      "operator": "BlockStatement",
+      "location": {
+        "end": {
+          "column": 2,
+          "line": 230
+        },
+        "start": {
+          "column": 25,
+          "line": 20
+        }
+      },
+      "sourceExpression": "{\n  const [snapshot, setSnapshot] = useState<TodaySnapshot | null>(null);\n  const pending = useRef(true);\n  const awaitingVisibleSnapshot = useRef(false);\n  const active = useRef<AbortController | null>(null);\n  const receivedAt = useRef(0);\n  const dayDeadline = useRef(Infinity);\n  const [revision, setRevision] = useState(0);\n  const [failure, setFailure] = useState(false);\n  const [loading, setLoading] = useState(true);\n  useEffect(() => {\n    const controller = new AbortController();\n    active.current = controller;\n    void readToday(controller.signal)\n      .then((value) => {\n        if (!controller.signal.aborted) {\n          awaitingVisibleSnapshot.current = false;\n          receivedAt.current = performance.now();\n          dayDeadline.current =\n            receivedAt.current +\n            Date.parse(value.dayEndAt) -\n            Date.parse(value.serverNow);\n          setSnapshot(value);\n          setFailure(false);\n        }\n      })\n      .catch(() => {\n        if (!controller.signal.aborted) setFailure(true);\n      })\n      .finally(() => {\n        if (!controller.signal.aborted) {\n          pending.current = false;\n          setLoading(false);\n        }\n      });\n    return () => controller.abort();\n  }, [revision]);\n  const refresh = useCallback((force = false, rollover = false) => {\n    rollover ||= performance.now() >= dayDeadline.current;\n    force ||= rollover;\n    if (pending.current && !force) return;\n    if (force) active.current?.abort();\n    if (rollover) {\n      dayDeadline.current = Infinity;\n      setSnapshot(null);\n    }\n    pending.current = true;\n    setLoading(true);\n    setFailure(false);\n    setRevision((value) => value + 1);\n  }, []);\n  useEffect(() => {\n    const recover = () => {\n      if (document.visibilityState !== \"hidden\") {\n        awaitingVisibleSnapshot.current = true;\n        refresh();\n      }\n    };\n    document.addEventListener(\"visibilitychange\", recover);\n    window.addEventListener(\"focus\", recover);\n    return () => {\n      document.removeEventListener(\"visibilitychange\", recover);\n      window.removeEventListener(\"focus\", recover);\n    };\n  }, [refresh]);\n  useEffect(() => {\n    if (!snapshot || document.visibilityState === \"hidden\") return;\n    const now = Date.parse(snapshot.serverNow);\n    const elapsed = performance.now() - receivedAt.current;\n    const next =\n      failure || awaitingVisibleSnapshot.current\n        ? Date.parse(snapshot.dayEndAt)\n        : Math.min(\n            ...[\n              snapshot.dayEndAt,\n              ...snapshot.items.flatMap(({ block }) => [\n                block.startAt,\n                block.endAt,\n              ]),\n            ]\n              .map(Date.parse)\n              .filter((time) => time > now + elapsed),\n          );\n    let timer = window.setTimeout(\n      () => refresh(true, next === Date.parse(snapshot.dayEndAt)),\n      Math.max(0, next - now - elapsed),\n    );\n    const visibility = () => {\n      window.clearTimeout(timer);\n      if (document.visibilityState !== \"hidden\")\n        timer = window.setTimeout(\n          () => refresh(true, true),\n          Math.max(0, dayDeadline.current - performance.now()),\n        );\n    };\n    document.addEventListener(\"visibilitychange\", visibility);\n    return () => {\n      window.clearTimeout(timer);\n      document.removeEventListener(\"visibilitychange\", visibility);\n    };\n  }, [snapshot, refresh, failure, revision]);\n  return (\n    <main id=\"proyectos\" tabIndex={-1} className=\"today\">\n      <h1>Hoy</h1>\n      <button type=\"button\" disabled={loading} onClick={() => refresh()}>\n        Actualizar\n      </button>\n      <p role=\"status\">\n        {loading\n          ? snapshot\n            ? \"Actualizando Hoy…\"\n            : \"Cargando Hoy…\"\n          : failure\n            ? \"\"\n            : \"Agenda actualizada.\"}\n      </p>\n      {failure && (\n        <p role=\"alert\">\n          {snapshot && \"Sin actualizar. \"}No se pudo actualizar Hoy.{\" \"}\n          <button type=\"button\" onClick={() => refresh()}>\n            Reintentar\n          </button>\n        </p>\n      )}\n      {snapshot && (\n        <>\n          {snapshot.zoneSource !== \"AVAILABILITY\" && (\n            <p className=\"today-notice\">\n              {snapshot.zoneSource === \"UNCONFIGURED\"\n                ? \"Disponibilidad no configurada. Mostramos UTC; capacidad desconocida.\"\n                : `Zona guardada no disponible (${snapshot.availabilityZoneId}). Mostramos UTC; capacidad desconocida.`}{\" \"}\n              <RouteLink href=\"/disponibilidad\">\n                Configurar disponibilidad\n              </RouteLink>\n            </p>\n          )}\n          <p>\n            {snapshot.date} · {snapshot.zoneId}\n          </p>\n          <p>\n            Según actualización de {at(snapshot.serverNow, snapshot.zoneId)}\n          </p>\n          <dl className=\"today-summary\">\n            <dt>Tiempo planificado</dt>\n            <dd>{snapshot.plannedSeconds / 60} min</dd>\n            <dt>Presupuesto del día</dt>\n            <dd>\n              {snapshot.budgetMinutes === null\n                ? \"Desconocido\"\n                : `${snapshot.budgetMinutes} min`}\n            </dd>\n            <dt>Presupuesto sin reservar</dt>\n            <dd>\n              {snapshot.remainingSeconds === null\n                ? \"Desconocido\"\n                : `${snapshot.remainingSeconds / 60} min`}\n            </dd>\n            <dt>Exceso planificado</dt>\n            <dd>\n              {snapshot.excessSeconds === null\n                ? \"Desconocido\"\n                : `${snapshot.excessSeconds / 60} min`}\n            </dd>\n            <dt>Cierre previsto</dt>\n            <dd>\n              {snapshot.closingAt\n                ? at(snapshot.closingAt, snapshot.zoneId)\n                : \"Sin bloques\"}\n            </dd>\n          </dl>\n          {snapshot.items.length === 0 ? (\n            <p>No hay bloques planificados</p>\n          ) : (\n            <ol className=\"today-agenda\">\n              {snapshot.items.map(({ block, projectName, taskTitle }) => (\n                <li key={block.id}>\n                  <p>{projectName}</p>\n                  <h2>\n                    <RouteLink\n                      href={`/proyectos/${block.projectId}/tareas/${block.taskId}`}\n                    >\n                      {taskTitle}\n                    </RouteLink>\n                  </h2>\n                  {block.id === snapshot.currentBlockId && (\n                    <p>En horario planificado</p>\n                  )}\n                  {block.id === snapshot.nextBlockId && (\n                    <p>Próximo inicio planificado</p>\n                  )}\n                  <p>{block.objective}</p>\n                  <p>\n                    {at(block.startAt, snapshot.zoneId)} —{\" \"}\n                    {at(block.endAt, snapshot.zoneId)}\n                  </p>\n                  {block.zoneId !== snapshot.zoneId && (\n                    <p>\n                      Zona original: {at(block.startAt, block.zoneId)} —{\" \"}\n                      {at(block.endAt, block.zoneId)}\n                    </p>\n                  )}\n                </li>\n              ))}\n            </ol>\n          )}\n          <RouteLink href=\"/proyectos\">Ver proyectos</RouteLink>\n        </>\n      )}\n    </main>\n  );\n}",
+      "replacement": "{}",
+      "status": "Killed",
+      "coveredByCount": 44
+    },
+    {
+      "file": "src/today.tsx",
+      "id": "423",
+      "operator": "ArrowFunction",
+      "location": {
+        "end": {
+          "column": 72,
+          "line": 124
+        },
+        "start": {
+          "column": 57,
+          "line": 124
+        }
+      },
+      "sourceExpression": "() => refresh()",
+      "replacement": "() => undefined",
+      "status": "Killed",
+      "coveredByCount": 44
+    }
+  ]
+}

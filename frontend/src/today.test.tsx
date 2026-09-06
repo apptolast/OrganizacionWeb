@@ -723,3 +723,26 @@ it("@s27 visibility recovery waits for its new snapshot before rearming a block 
   );
   expect(screen.getByRole("status")).toHaveTextContent("Agenda actualizada");
 });
+it("@s37 update stays focusable but announces unavailability and coalesces repeated Enter", async () => {
+  const pending = deferred<Response>();
+  const fetch = vi
+    .fn()
+    .mockResolvedValueOnce(Response.json(agendaToday()))
+    .mockReturnValueOnce(pending.promise);
+  vi.stubGlobal("fetch", fetch);
+  render(<Today />);
+  await screen.findByText("Proyecto personal");
+  const update = screen.getByRole("button", { name: "Actualizar" });
+  update.focus();
+  await userEvent.keyboard("{Enter}");
+  expect(screen.getByRole("status")).toHaveTextContent("Actualizando Hoy");
+  expect(update).toHaveAttribute("aria-disabled", "true");
+  expect(update).not.toBeDisabled();
+  expect(update).toHaveFocus();
+  await userEvent.keyboard("{Enter}{Enter}");
+  expect(fetch).toHaveBeenCalledTimes(2);
+  await act(async () => pending.resolve(new Response(null, { status: 503 })));
+  expect(update).toHaveFocus();
+  expect(update).toHaveAttribute("aria-disabled", "false");
+  expect(screen.getByRole("alert")).toHaveTextContent("Sin actualizar");
+});

@@ -196,7 +196,9 @@ function Session(props: Props) {
       )}
       {(active === null || uncertain || busy) && (
         <>
-          {absenceKnown && <p>No hay una sesión de trabajo activa.</p>}
+          {absenceKnown && !busy && !uncertain && (
+            <p>No hay una sesión de trabajo activa.</p>
+          )}
           <p>{props.taskTitle}</p>
           {!eligible && !uncertain && (
             <p>

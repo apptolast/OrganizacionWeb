@@ -18,6 +18,105 @@ const receipt = {
   zoneId: "Europe/Madrid",
 };
 const key = "42345678-1234-1234-1234-123456789abc";
+it.each([
+  {
+    label: "time range at 404",
+    code: "WORK_SESSION_TIME_OUT_OF_RANGE",
+    httpStatus: 404,
+    bodyStatus: 404,
+    type: "urn:organization:problem:work_session_time_out_of_range",
+  },
+  {
+    label: "missing receipt at 409",
+    code: "WORK_SESSION_NOT_FOUND",
+    httpStatus: 409,
+    bodyStatus: 409,
+    type: "urn:organization:problem:work_session_not_found",
+  },
+  {
+    label: "unknown code at 409",
+    code: "UNKNOWN",
+    httpStatus: 409,
+    bodyStatus: 409,
+    type: "urn:organization:problem:unknown",
+  },
+  {
+    label: "unknown code at 404",
+    code: "UNKNOWN",
+    httpStatus: 404,
+    bodyStatus: 404,
+    type: "urn:organization:problem:unknown",
+  },
+  {
+    label: "body status",
+    code: "WORK_SESSION_NOT_FOUND",
+    httpStatus: 404,
+    bodyStatus: 409,
+    type: "urn:organization:problem:work_session_not_found",
+  },
+  {
+    label: "type",
+    code: "WORK_SESSION_NOT_FOUND",
+    httpStatus: 404,
+    bodyStatus: 404,
+    type: "urn:organization:problem:other",
+  },
+])(
+  "@s32 ignores a simple problem with contradictory $label",
+  async ({ code, httpStatus, bodyStatus, type }) => {
+    const response = Response.json(
+      {
+        type,
+        title: "Problema",
+        status: bodyStatus,
+        code,
+      },
+      { status: httpStatus },
+    );
+    await expect(readWorkSessionError(response)).resolves.toBeNull();
+    expect(response.bodyUsed).toBe(false);
+  },
+);
+
+it.each([
+  { label: "HTTP status", override: {}, httpStatus: 404 },
+  { label: "body status", override: { status: 404 }, httpStatus: 409 },
+  {
+    label: "type",
+    override: { type: "urn:organization:problem:other" },
+    httpStatus: 409,
+  },
+  { label: "code", override: { code: "UNKNOWN" }, httpStatus: 409 },
+])(
+  "@s35 ignores an active conflict with contradictory $label",
+  async ({ override, httpStatus }) => {
+    const response = Response.json(
+      {
+        type: "urn:organization:problem:work_session_already_active",
+        title: "Activa",
+        status: 409,
+        code: "WORK_SESSION_ALREADY_ACTIVE",
+        sessionId: receipt.id,
+        ...override,
+      },
+      { status: httpStatus },
+    );
+    await expect(readWorkSessionError(response)).resolves.toBeNull();
+    expect(response.bodyUsed).toBe(false);
+  },
+);
+
+it("@s30 rejects a coherent POST receipt for a different intended duration", async () => {
+  respond({
+    ...receipt,
+    plannedMinutes: 26,
+    plannedEndAt: "2026-09-06T10:26:00.123456Z",
+  });
+  await expect(
+    startWorkSession(receipt.projectId, receipt.taskId, 25, key),
+  ).rejects.toThrow();
+});
+
 it("@s35 does not recognize an active conflict with an extra private field", async () => {
   const response = Response.json(
     {

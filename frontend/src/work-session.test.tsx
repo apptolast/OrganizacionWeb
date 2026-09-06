@@ -42,6 +42,97 @@ afterEach(() => {
   observeAccess();
   setCsrfToken();
 });
+it("@s32 withdraws earlier absence while a transmitted start is pending or uncertain", async () => {
+  const pending = deferred<Response>();
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(Response.json({ session: null }))
+    .mockReturnValueOnce(pending.promise);
+  vi.stubGlobal("fetch", fetcher);
+  render(<WorkSession {...props} />);
+  expect(
+    await screen.findByText("No hay una sesión de trabajo activa."),
+  ).toBeVisible();
+  fireEvent.change(screen.getByLabelText("Duración prevista (minutos)"), {
+    target: { value: "25" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Empezar a trabajar" }));
+  expect(screen.getByText("Iniciando sesión de trabajo")).toBeVisible();
+  expect(
+    screen.queryByText("No hay una sesión de trabajo activa."),
+  ).not.toBeInTheDocument();
+  await act(async () => pending.resolve(new Response(null, { status: 503 })));
+  expect(
+    await screen.findByRole("button", { name: "Comprobar inicio" }),
+  ).toBeVisible();
+  expect(
+    screen.queryByText("No hay una sesión de trabajo activa."),
+  ).not.toBeInTheDocument();
+  expect(screen.getByLabelText("Duración prevista (minutos)")).toHaveValue(25);
+  expect(fetcher).toHaveBeenCalledTimes(2);
+});
+
+it("@s38 ignores an aborted active lookup's 401 and finally while a newer lookup is pending", async () => {
+  const old = deferred<Response>();
+  const current = deferred<Response>();
+  const fetcher = vi
+    .fn()
+    .mockReturnValueOnce(old.promise)
+    .mockReturnValueOnce(current.promise);
+  vi.stubGlobal("fetch", fetcher);
+  render(
+    <div>
+      <button>Control del padre</button>
+      <WorkSession {...props} />
+    </div>,
+  );
+  await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(1));
+  fireEvent.click(
+    screen.getByRole("button", { name: "Actualizar sesión activa" }),
+  );
+  await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(2));
+  await act(async () => old.resolve(new Response(null, { status: 401 })));
+  expect(props.onAccessFailure).not.toHaveBeenCalled();
+  expect(
+    screen.getByRole("button", { name: "Control del padre" }),
+  ).toBeVisible();
+  expect(screen.getByText("Consultando sesión activa")).toBeVisible();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("No hay una sesión de trabajo activa."),
+  ).not.toBeInTheDocument();
+  await act(async () => current.resolve(Response.json({ session: null })));
+  expect(
+    await screen.findByText("No hay una sesión de trabajo activa."),
+  ).toBeVisible();
+  expect(fetcher).toHaveBeenCalledTimes(2);
+});
+
+it("@s32 Enter and a submit event during uncertainty cannot resend the intention", async () => {
+  const user = userEvent.setup();
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(Response.json({ session: null }))
+    .mockResolvedValueOnce(new Response(null, { status: 503 }));
+  vi.stubGlobal("fetch", fetcher);
+  render(<WorkSession {...props} />);
+  const input = await screen.findByLabelText("Duración prevista (minutos)");
+  await user.type(input, "25");
+  await user.click(screen.getByRole("button", { name: "Empezar a trabajar" }));
+  await screen.findByRole("button", { name: "Comprobar inicio" });
+  await user.click(input);
+  await user.keyboard("{Enter}");
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  const submit = new Event("submit", { bubbles: true, cancelable: true });
+  fireEvent(input.closest("form")!, submit);
+  expect(submit.defaultPrevented).toBe(true);
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  expect(input).toHaveValue(25);
+  expect(
+    screen.getByRole("button", { name: "Comprobar inicio" }),
+  ).toBeVisible();
+});
+
 it("@s33 recovers a retained start after the task becomes completed", async () => {
   const fetcher = vi
     .fn()
@@ -575,6 +666,12 @@ it("@s28 waits for confirmed eligible task and project states before a new start
   fireEvent.change(input, { target: { value: "25" } });
   fireEvent.submit(input.closest("form")!);
   expect(fetcher).toHaveBeenCalledTimes(1);
+  view.rerender(<WorkSession {...props} taskStatus="completed" />);
+  fireEvent.submit(input.closest("form")!);
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  view.rerender(<WorkSession {...props} projectStatus={undefined} />);
+  fireEvent.submit(input.closest("form")!);
+  expect(fetcher).toHaveBeenCalledTimes(1);
   view.rerender(<WorkSession {...props} projectStatus="completed" />);
   fireEvent.submit(input.closest("form")!);
   expect(fetcher).toHaveBeenCalledTimes(1);
@@ -726,6 +823,13 @@ it("@s35 offers the owner's active lookup after a recognized active conflict", a
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "Ya existe una sesión de trabajo activa.",
   );
+  expect(
+    screen.queryByText("No hay una sesión de trabajo activa."),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Empezar a trabajar" }),
+  ).not.toBeInTheDocument();
+  expect(fetcher).toHaveBeenCalledTimes(2);
   expect(
     screen.queryByRole("button", { name: "Comprobar inicio" }),
   ).not.toBeInTheDocument();

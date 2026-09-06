@@ -15,7 +15,7 @@ test("reschedule: native Chromium zoom preserves movement and history at 200 per
 }, testInfo) => {
   test.setTimeout(120_000);
   sql(
-    "TRUNCATE block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
   );
   const availability = await configure(request);
   const project = await create(request, "Proyecto para zoom nativo real");

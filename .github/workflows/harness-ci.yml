@@ -48,5 +48,7 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - run: node .harness/harness.mjs init
       - run: pnpm build
+      - name: Verify web DNS recovery with Docker
+        run: pnpm test:web-dns
       - run: xvfb-run -a pnpm test:e2e
       - run: pnpm test:publisher

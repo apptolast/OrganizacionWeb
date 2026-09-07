@@ -9,6 +9,25 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries weeklyReviewQueries(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions) {
+    return new com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries(
+        new com.apptolast.organization.adapter.persistence.PostgresAvailabilityStore(
+            jdbc, new org.springframework.transaction.support.TransactionTemplate(transactions)),
+        jdbc,
+        transactions);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReadWeeklyReview readWeeklyReview(
+      com.apptolast.organization.application.WeeklyReviewQueries queries,
+      Clock clock,
+      com.apptolast.organization.application.ZoneCatalog catalog) {
+    return new com.apptolast.organization.application.ReadWeeklyReview(queries, clock, catalog);
+  }
+
+  @Bean
   com.apptolast.organization.adapter.persistence.PostgresHistoryQueries historyQueries(
       org.springframework.jdbc.core.JdbcTemplate jdbc,
       org.springframework.transaction.PlatformTransactionManager transactions,

@@ -1,0 +1,60 @@
+{
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadWeeklyReview.java",
+      "sha256": "C0945722A8967BA73E00949F340C63E1B4042FC7976512FD302A7796635D7601"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/WeeklyReviewWindow.java",
+      "sha256": "A4055D6B1B8245DA962C316489309E3D757BD42C4ECC23D165EA41B3108C4A4F"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/WeeklyReviewTimeOutOfRangeException.java",
+      "sha256": "C09E0586FCFEF4A15FF8BC35FC0FE727A72F92B6F887484E537B9D1D54096A22"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries.java",
+      "sha256": "B64CE4AF931DB315436165C203512B351FE7E66572548C01C717B7366C0825C1"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+      "sha256": "D60B548E76D170793764FCC8DAECFE7FB25884A0AF4DA3356283088FBC450C3B"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/application/ReadWeeklyReviewTest.java",
+      "sha256": "4EB3B5215C5B00716898564156BC0703C89CE2AAF7B16FA2C8AC48EA23E78707"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/WeeklyReviewPersistenceTest.java",
+      "sha256": "41891E016DC30603470953099A210FEC76D20927C2CEAB7F17741B7A8B00B153"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/config/ApplicationWiringTest.java",
+      "sha256": "EEA8844575903CAE3BEFFACC612EE4EDB3F10A4B7A516BE9EA53C3786019A392"
+    }
+  ],
+  "xml": [
+    {
+      "path": "progress/weekly_review_nominal_xml/TEST-com.apptolast.organization.adapter.config.ApplicationWiringTest.xml",
+      "sha256": "3303B7AB40E58E42682948F12A30467E94B6F18A8497C9B37486AA7ACF732C15",
+      "tests": 23,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "path": "progress/weekly_review_nominal_xml/TEST-com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.xml",
+      "sha256": "7282A94DB910A905FBD84FDFE2D298AE2AEA61FF4CDA1F47F0C9B8A073F2903C",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "path": "progress/weekly_review_nominal_xml/TEST-com.apptolast.organization.application.ReadWeeklyReviewTest.xml",
+      "sha256": "8379C5995C16C179B397670E6EDC32E84A734513EA3F7985536E5A8E36E953FD",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0
+    }
+  ],
+  "scope": "Parámetros/zonas/fechas y PG vacío/wiring; sin agregación de hechos todavía"
+}

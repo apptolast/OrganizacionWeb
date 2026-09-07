@@ -1,0 +1,224 @@
+[
+  {
+    "engine": "chromium",
+    "mode": "ux",
+    "feedback": {
+      "feedbackMs": 1.7000000178813934
+    },
+    "measures": 155,
+    "axe": [
+      {
+        "violations": 0,
+        "file": "reader-form-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-confirmed-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-form-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-pending-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-uncertain-axe.json"
+      }
+    ]
+  },
+  {
+    "engine": "chromium",
+    "mode": "text200",
+    "feedback": {
+      "feedbackMs": 1.7000000178813934
+    },
+    "measures": 15,
+    "axe": [
+      {
+        "violations": 0,
+        "file": "reader-form-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-confirmed-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-form-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-pending-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-uncertain-axe.json"
+      }
+    ]
+  },
+  {
+    "engine": "firefox",
+    "mode": "ux",
+    "feedback": {
+      "feedbackMs": 3
+    },
+    "measures": 155,
+    "axe": [
+      {
+        "violations": 0,
+        "file": "reader-form-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-confirmed-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-form-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-pending-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-uncertain-axe.json"
+      }
+    ]
+  },
+  {
+    "engine": "firefox",
+    "mode": "text200",
+    "feedback": {
+      "feedbackMs": 3
+    },
+    "measures": 15,
+    "axe": [
+      {
+        "violations": 0,
+        "file": "reader-form-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-confirmed-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-form-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-pending-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-uncertain-axe.json"
+      }
+    ]
+  },
+  {
+    "engine": "webkit",
+    "mode": "ux",
+    "feedback": {
+      "feedbackMs": 5
+    },
+    "measures": 155,
+    "axe": [
+      {
+        "violations": 0,
+        "file": "reader-form-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-confirmed-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-form-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-pending-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-uncertain-axe.json"
+      }
+    ]
+  },
+  {
+    "engine": "webkit",
+    "mode": "text200",
+    "feedback": {
+      "feedbackMs": 5
+    },
+    "measures": 15,
+    "axe": [
+      {
+        "violations": 0,
+        "file": "reader-form-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-confirmed-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-form-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-pending-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-uncertain-axe.json"
+      }
+    ]
+  },
+  {
+    "mode": "native200",
+    "feedback": {
+      "feedbackMs": 1.9000000059604645
+    },
+    "zoom": {
+      "zoom": 2,
+      "baseline": {
+        "dpr": 1.5,
+        "inner": 1426,
+        "outer": 1440
+      },
+      "current": {
+        "dpr": 3,
+        "width": 320
+      }
+    },
+    "measures": 5,
+    "axe": [
+      {
+        "violations": 0,
+        "file": "reader-form-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-confirmed-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-form-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-pending-axe.json"
+      },
+      {
+        "violations": 0,
+        "file": "task-uncertain-axe.json"
+      }
+    ],
+    "engine": "chromium"
+  }
+]

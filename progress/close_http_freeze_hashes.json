@@ -1,0 +1,10 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/http/WorkSessionStateController.java",
+    "sha256": "7EED9E97A4C18D92A09E52575E506A24F5C71557941E71DEAC433FFC0AE2F82E"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/CloseWorkSessionApiTest.java",
+    "sha256": "7D5DB07F422FF70A3CBF3028F2235E9F3F6B15CE6C8561F8901679B9020324F7"
+  }
+]

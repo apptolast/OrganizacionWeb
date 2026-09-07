@@ -1475,6 +1475,12 @@ valor, no para arrays, definición o flags. Errores de entrada independientes
 del estado no se posponen para devolver 412. Un valor de tipo desconocido
 se valida sólo después de propiedad y revisiones, no por datos del cliente.
 
+Precisión de implementación: repetir un fieldId en el array es detectable
+sin consultar configuración y devuelve 400 values[i].fieldId INVALID_VALUE
+en el índice repetido, incluso con una revisión antigua bien formada.
+No se confunde con un ID inactivo/desconocido o un conjunto incompleto,
+que requieren configuración vigente y se validan después de la revisión.
+
 Fallo de almacenamiento, fila seleccionada corrupta, versión máxima del recurso
 que debe cambiar o Clock fallido/fuera del rango: 503 STORAGE_UNAVAILABLE, sin parcial.
 updatedAt de cambio real usa max(previo,Clock truncado a microsegundos);

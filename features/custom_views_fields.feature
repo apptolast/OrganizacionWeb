@@ -335,6 +335,7 @@ Feature: Personalizar vistas y campos propios sin alterar los hechos de trabajo
       | actualización con active null                 | active REQUIRED                     |
       | valores con entrada que incluye type          | type UNKNOWN_FIELD                  |
       | values null                                   | values REQUIRED                     |
+      | values con fieldId repetido en índice 1        | values[1].fieldId INVALID_VALUE      |
 
   @s26
   Scenario: Consultar tras reinicio conserva configuración, valores y revisiones confirmados

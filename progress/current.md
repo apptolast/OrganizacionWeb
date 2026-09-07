@@ -165,3 +165,11 @@ PIT18 terminó EXIT0 f7a179:284 mutantes,263 KILLED,19 SURVIVED y2 NO_COVERAGE; 
 Root autorizó refuerzos test-only acotados: B hasta12 oráculos de forma/DTO/rango/reintento/notas; A seis de página20, vínculoUUID, contexto conjunto, cierre running y dos salidas alcanzables sin cobertura. Ambos deben proponer replay dirigido antes de lanzarlo; no campaña completa repetida ni cambios productivos.
 
 Publisher99577 terminó EXIT0 66a983,13PASS. Log history_publisher_verified.log SHA5AE112227DB7524F6834A71A8D85BCE7566271FB4F53526DD19BBE62B2D57E0A. C completa geometría/axe WebKit mediante clic declarando que el port Windows no acreditó teclado de enlaces; teclado Chromium/Firefox y zoom nativo tienen evidencia separada. No se fabrica un resultado universal. E2E global final aún pendiente; root sin proceso activo.
+
+## Integración final18 en ejecución
+
+Último UX de C integrado8092443, cuatro hashes verificados3897b6 y141 artefactos copiados con SHA idéntico50cac4. Revisión root review_history_ux_final.md y trazabilidad review_history_traceability_final.md aceptadas con límites explícitos:39escenarios/142ejemplos,495medidas/27axe en evidencia compuesta; tecladoWebKitWindows y dispositivos físicos no acreditados.
+
+Root inició E2E global31187, log history_e2e_global_final.log, sobre producto final8092443; los agentes sólo modifican refuerzos de tests/configuraciones de replay, sin producción. Backend replay90185 sigue activo. Frontend replay38642 terminóEXIT0:33=32K1S,17/17objetivosK y15extrasK,unextraSurvived con contador decremental observacionalmente equivalente; mapping comprobado por rootb00293.137inputs idénticos y raworiginal intacto. PaqueteB versionadocebebeb. B repite una vez la regresión frontend completa con los12refuerzos y últimoCSS, lint/build; no mutación adicional.
+
+La estimación vigente es2–4horas de software desde los hitos comprobados al terminar campañas originales, más4–8condicionales de despliegue; ver docs/mvp-delivery-plan.md. PR17 continúa borrador/OPEN/CLEAN ymain mantieneCIverde34101887939 (020b1e). No nuevafeature ni despliegue ejecutados.

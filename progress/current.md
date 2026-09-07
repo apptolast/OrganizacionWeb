@@ -312,7 +312,7 @@ PR24 borrador. Modelos/puerto de lectura9ef8a75 publicados; puertos de vista2797
 
 A entregó Store/V20/beanRead y dos tests reales con cinco hashes verificados:7b58da6. Root confirmó14 XML verdes del checkpoint y BUILD SUCCESSFUL del log; la sesión35877 se perdió al compactar A, por lo que no se inventa EXIT recuperado. GET de C integrado enCOMMON b1ed8e6. A confirma arranque combinado GREEN34a4d6 EXIT0 con CustomizationApiTest+CustomizationWiringTest y ciclo16, log customization_16_green.log. No cierre integral de21: validación de filas, comandos/valores/PG/escrituras/UI/mutación/E2E siguen en curso.
 
-C continúa PUT de vista en aislado con puertos reales y mocks de caso de uso, sin beanSave ficticio. Su RED inicial fue500 por el fallback heredado ante método sin ruta, no405; al añadir PUT nominal pasa200. No se modifica ese manejador transversal para simular RED. B mantiene cliente propio y tests nuevos; configuración40 casos verdes tras formato y lint, 400/refactor y valores todavía en curso. Ninguna UI21 terminada. No correr GradleCOMMON en paralelo a A. V14 protegida intacta y producción sigueed00ad4 (funciones1–20).
+C continúa PUT de vista en aislado con puertos reales y mocks de caso de uso, sin beanSave ficticio. Su RED inicial fue500 por el fallback heredado ante método sin ruta, no405; al añadir PUT nominal pasa200. No se modifica ese manejador transversal para simular RED. B mantiene cliente propio y tests nuevos; configuración40 casos verdes tras formato y lint, 400/refactor y valores todavía en curso. Ninguna UI21 terminada. No correr GradleCOMMON en paralelo a A. V14 protegida intacta y producción sigueed00ad4 (funciones 1–20).
 
 ## Feature 21: revisión de comandos y clientes, 7 de septiembre 22:50
 
@@ -384,3 +384,28 @@ integridad completa de filas y comandos todavía en desarrollo.
 COPYDONE enviado a backend: puede continuar Gradle tras integrar GET.
 Frontend continúa estado y formularios. Producción sigue en `ed00ad4`;
 no hay cierre ni despliegue de la feature 21, ni cambios de alcance22–30.
+
+## Feature 21: backend nominal completo y verificación ampliada
+
+Caso de uso puro en `8b6f893`, quince pruebas y cinco hashes revisados.
+PG de valores y bean Save real en `ac8b484`; seis hashes, cinco XML y 125
+pruebas verdes revisados. Incluye upgrade 19→20, primera escritura vacía
+competitiva, no-op físico con inactivos/versión MAX y tarea terminada sin
+cambiar hechos de negocio ni valores de subtareas. PUT HTTP en `e617a09`,
+desde `1074c5f`: tres hashes y 134 MVC verdes revisados. A recibió COPYDONE;
+integridad de filas, traducción 503, rollback y coherencia de snapshot siguen
+en desarrollo. No confundir el corte nominal con aprobación final.
+
+Precisión estructural de fieldId duplicado en `b3436fc`, bajo autorización
+global, añade un ejemplo a @s25; hash nuevo en judge. El duplicado se rechaza
+antes del puerto y revisión; conjunto activo sigue después de revisión.
+
+Soporte de mutación aislado `cfd319f`, 61 pruebas de arnés verdes, aún pendiente
+integrar build.gradle en ventana sin Gradle. No campaña lanzada. Stryker
+necesita rangos reales del montaje frontend antes de ejecutar. C continúa
+en worktree nuevo OrganizacionWeb-customization-integration, e617a09, con
+pruebas HTTP/PG reales en archivo nuevo; B continúa formularios/estado.
+
+CI 34163594795 sobre `f46200c` superó init, build, DNS Docker y E2E; publicador
+en curso a las 21:56 UTC. Esa CI no incluye los commits locales posteriores.
+Producción conserva `ed00ad4` y funciones 1–20; funciones 22–30 pendientes.

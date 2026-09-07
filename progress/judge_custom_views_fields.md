@@ -62,6 +62,31 @@ Estado: **IN_PROGRESS**, sin aprobación de cierre de la feature 21.
   proyección cerrada y ETag compuesto con BIGINT exacto, cero, false y null.
   Integra el constructor sólo después del bean real. No sustituye las
   pruebas integradas ni acredita todavía PUT de valores.
+- Caso de uso de guardado en `8b6f893`: cinco hashes y XML de quince pruebas
+  verificados. Conserva identidad y valores inactivos, compara todos los
+  componentes de revisión antes del conjunto/tipos y no consume reloj ni
+  revisión en no-op. Tiempo monótono y límite BIGINT revisados. La proyección
+  usa las definiciones activas ordenadas. El callback de los tests no acredita
+  bloqueo, commit ni rollback PostgreSQL; ese adaptador sigue en desarrollo.
+
+La aclaración `b3436fc` distingue fieldId repetido (estructural, antes de
+revisión) de conjunto activo incompleto o IDs desconocidos (requiere esquema).
+Se añade un ejemplo a @s25 bajo autorización global; siguen 42 escenarios.
+Hash actual del Gherkin:
+`BAEC71FF20540B69E4DA01846EB85767F3A6D86EAA1D06F65569393B4CBC7BE8`.
+El hash anterior documenta el contrato inicial, no esta precisión posterior.
+
+Integración nominal posterior: `ac8b484` (PG/beans, seis hashes y cinco XML
+con 125 pruebas verdes) y `e617a09` (PUT HTTP, tres hashes y 134 MVC verdes).
+Revisados SQL y oráculos de identidad, no-op físico, carrera inicial,
+propiedad previa a revisión, tarea terminada y upgrade 19→20. La negociación,
+precondición compuesta, decimal exacto y errores indexados preceden al puerto
+según contrato; no hay GET previo en el controlador de escritura. Pendientes
+integridad seleccionada y fallos de almacenamiento antes del juicio final.
+
+Soporte de mutación `cfd319f` revisado en aislado: cinco hashes, 61 pruebas de
+arnés verdes, y omisión de CustomizationWiringTest en default corregida.
+No hay campaña ni score 21. Alcance Stryker de montaje todavía pendiente.
 
 ## Hallazgos que deben resolverse antes del cierre
 

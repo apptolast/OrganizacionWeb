@@ -4,8 +4,8 @@ La consulta reúne cinco fuentes durables de PostgreSQL, conserva precisión de 
 
 Este es el corte de integración de la funcionalidad 18. El adaptador HTTP de la PR 18 ya está incorporado: esa rama es una referencia y no debe fusionarse aparte.
 
-Validación completada hasta este borrador: regresión general con 2.211 pruebas Java, 1.887 frontend y 47 del arnés; compilación; 13 comprobaciones del publicador; campañas originales PIT 263/284 y Stryker 621/738, con tres RuntimeError explícitos fuera de su denominador oficial. Los refuerzos posteriores y replays se informarán separadamente. El E2E global final está en curso.
+Validación local final: 2.217 pruebas Java, 1.899 frontend y 47 del arnés; compilación; 129 E2E y 13 comprobaciones del publicador. Campañas originales PIT 263/284 y Stryker 621/738, con tres RuntimeError explícitos fuera de su denominador oficial. Replays separados: PIT 15/17 (seis objetivos detectados) y Stryker 32/33 (diecisiete objetivos detectados). Residuos e identidad de cada mutación conservados en progress/.
 
 La revisión UX conserva 495 mediciones y 27 análisis axe sin violaciones en evidencia compuesta. Teclado verificado en Chromium y Firefox; WebKit Windows sólo acredita geometría mediante clic y texto ampliado. Zoom nativo verificado en Chromium. Dispositivos y lectores de pantalla físicos siguen sin comprobarse.
 
-Continúa en borrador hasta cerrar la validación integrada. No hay despliegue productivo acreditado. Contrato en project-spec.md y features/history.feature; alcance y dependencias operativas en docs/mvp-delivery-plan.md.
+Cierre técnico local aprobado en progress/judge_history_final.md; la CI remota debe pasar sobre este corte antes de fusionar. No hay despliegue productivo acreditado. Contrato en project-spec.md y features/history.feature; alcance y dependencias operativas en docs/mvp-delivery-plan.md.

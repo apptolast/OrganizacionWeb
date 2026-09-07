@@ -121,3 +121,5 @@ reports/
 /progress/history_ux_webkit_final_artifacts/
 /progress/history_ux_native_final_artifacts/
 /frontend/.stryker-tmp-history-replay/
+/progress/history_pit_replay_exit.txt
+/progress/history_closure_backend_xml/

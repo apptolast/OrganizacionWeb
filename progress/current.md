@@ -173,3 +173,9 @@ Publisher99577 terminó EXIT0 66a983,13PASS. Log history_publisher_verified.log 
 Root inició E2E global31187, log history_e2e_global_final.log, sobre producto final8092443; los agentes sólo modifican refuerzos de tests/configuraciones de replay, sin producción. Backend replay90185 sigue activo. Frontend replay38642 terminóEXIT0:33=32K1S,17/17objetivosK y15extrasK,unextraSurvived con contador decremental observacionalmente equivalente; mapping comprobado por rootb00293.137inputs idénticos y raworiginal intacto. PaqueteB versionadocebebeb. B repite una vez la regresión frontend completa con los12refuerzos y últimoCSS, lint/build; no mutación adicional.
 
 La estimación vigente es2–4horas de software desde los hitos comprobados al terminar campañas originales, más4–8condicionales de despliegue; ver docs/mvp-delivery-plan.md. PR17 continúa borrador/OPEN/CLEAN ymain mantieneCIverde34101887939 (020b1e). No nuevafeature ni despliegue ejecutados.
+
+## Historial18 cerrado técnicamente en local
+
+Init de cierre33489 EXIT0 0b3990:2.217Java/93suites sin fallos/errores/omitidos,1.899frontend/40suites y47Node. XML preservado history_closure_backend_xml y contadoa695bb; logSHAFC2006AFBC2135CBE0435BC2E08A5B0813E2576562F2646B1CC1E91200656972. E2Eglobal31187 EXIT0 2c5d89,129/129 en13,4min; logSHAF54A994AE897C22A1E4F842287DFCD218C728435BE518F6FE91D667E08DA279C. Ambos procesos terminados; ningún rootrunner activo.
+
+ReplayA EXIT0 3a2a66:17=15K2S; seisobjetivosK y376inputs idénticos, root551477. PaqueteA integrado18e19fb. Backend/UI/HTTP/UX, trazabilidad y ambos replays aprobados; judge_history_final.md consolida el cierre local con límites. Feature18 done técnico local;19–30pending. Pendientes publicar corte final, CI/fusión/CIposterior y despliegue condicionado; no se atribuyen resultados remotos futuros. La estimación para integraciónremota es1–2horas y despliegue4–8adicionales, según plan actualizado.

@@ -10,11 +10,13 @@ import { Today } from "./today";
 import { Availability } from "./availability";
 import { History } from "./history";
 import { WeeklyReview } from "./weekly-review";
+import { Appearance } from "./appearance";
 export function App({ sessionControls }: { sessionControls?: ReactNode }) {
   const route = useRoute();
   const weeklyReview = /^\/revision-semanal(?:\?[^#]*)?$/.test(route);
   const history = /^\/historial(?:\?[^#]*)?$/.test(route);
   const availability = route === "/disponibilidad";
+  const appearance = route === "/apariencia";
   const taskRoute = /^\/proyectos\/([^/]+)\/tareas\/([^/?]+)$/.exec(route);
   const sessionRoute =
     /^\/proyectos\/([^/]+)\/tareas\/([^/]+)\/sesiones\/([^/?]+)$/.exec(route);
@@ -22,20 +24,24 @@ export function App({ sessionControls }: { sessionControls?: ReactNode }) {
     <Workspace
       sessionControls={sessionControls}
       section={
-        route === "/"
-          ? "Hoy"
-          : weeklyReview
-            ? "Revisión semanal"
-            : history
-              ? "Historial"
-              : availability
-                ? "Disponibilidad"
-                : route.startsWith("/proyectos")
-                  ? "Proyectos"
-                  : null
+        appearance
+          ? "Apariencia"
+          : route === "/"
+            ? "Hoy"
+            : weeklyReview
+              ? "Revisión semanal"
+              : history
+                ? "Historial"
+                : availability
+                  ? "Disponibilidad"
+                  : route.startsWith("/proyectos")
+                    ? "Proyectos"
+                    : null
       }
     >
-      {route === "/" ? (
+      {appearance ? (
+        <Appearance />
+      ) : route === "/" ? (
         <Today />
       ) : route === "/proyectos/nuevo" ? (
         <CreateProjectScreen />

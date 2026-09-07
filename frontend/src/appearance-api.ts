@@ -48,6 +48,19 @@ function validAccent(value: unknown, surfaces: string[]): value is string {
     );
   });
 }
+export function isAppearanceAccent(value: string, theme: "LIGHT" | "DARK") {
+  return validAccent(
+    value.toUpperCase(),
+    theme === "LIGHT" ? lightSurfaces : darkSurfaces,
+  );
+}
+export class AppearanceValidationError extends Error {
+  constructor(
+    public readonly fields: Partial<Record<keyof AppearanceInput, string>>,
+  ) {
+    super("Revisa los campos de apariencia");
+  }
+}
 export async function readAppearance(
   signal?: AbortSignal,
 ): Promise<AppearanceSnapshot> {
@@ -76,6 +89,45 @@ export async function saveAppearance(
     headers: { "Content-Type": "application/json", "If-Match": etag },
     body: JSON.stringify(sent),
   });
+  signal?.throwIfAborted();
+  if (response.status === 400) {
+    const problem: unknown = await response
+      .clone()
+      .json()
+      .catch(() => null);
+    signal?.throwIfAborted();
+    if (
+      exact(problem, "type title status code errors") &&
+      problem.type === "urn:organization:problem:validation_error" &&
+      problem.code === "VALIDATION_ERROR" &&
+      problem.status === 400 &&
+      typeof problem.title === "string" &&
+      problem.title.trim() &&
+      Array.isArray(problem.errors) &&
+      problem.errors.length > 0 &&
+      problem.errors.every(
+        (entry) =>
+          exact(entry, "field code message") &&
+          ["theme", "accentLight", "accentDark"].includes(
+            entry.field as string,
+          ) &&
+          [
+            "REQUIRED",
+            "INVALID_TYPE",
+            "INVALID_VALUE",
+            "INSUFFICIENT_CONTRAST",
+          ].includes(entry.code as string) &&
+          typeof entry.message === "string" &&
+          entry.message.trim(),
+      )
+    ) {
+      throw new AppearanceValidationError(
+        Object.fromEntries(
+          problem.errors.map((entry) => [entry.field, entry.message]),
+        ),
+      );
+    }
+  }
   const next = await snapshot(response, signal);
   signal?.throwIfAborted();
   if (

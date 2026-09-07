@@ -1,0 +1,828 @@
+{
+  "source": "238931b259d42aacec7ab3900c562e88b482a90f",
+  "exitCode": 0,
+  "tests": 2387.0,
+  "failures": 0.0,
+  "errors": 0.0,
+  "skipped": 0.0,
+  "suiteCount": 102,
+  "logSha256": "8FFD93B8FD104A7472F5031CE566969931F61AC1781C1ADA8FFF2DAE6AD69FB8",
+  "suites": [
+    {
+      "name": "com.apptolast.organization.adapter.AppearanceApiTest",
+      "tests": 55,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "347F80913F0AA451AA296A843D75862C47B00F69FB597D47865B5D6856337665"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.AuthenticationHttpTest",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "DE1C2ADDE6D97E563E32F9239CFB3ACC5B3AA2802BEBB36C3642C13F456F1CAC"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.AvailabilityApiTest",
+      "tests": 151,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "FB4009C628A1D3D6406494654E53D4183D2B76FA8035A59B479A07EB49C422DE"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.BlockChangesApiTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "264ADB8CE90112D464B9EB11D5C3570A234E674CD943934817787D60B539D722"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.broker.RabbitBrokerFailuresTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "5E2395A14E76589CEAA50ABD123EDAF1A8356A79F8738D9590F809104403316D"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.broker.RabbitBrokerPublisherTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "E238BBA67832EC7A2E62DD03D4261F61CB2A57F97624530D10C48B06129C1995"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.CloseWorkSessionApiTest",
+      "tests": 25,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "0458D4CF6ACFCCE032D8D0F08CDD73A695252AA4F55C1C2FB4D0B596B1DD7BA8"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "952044BE2684AB34425236FDCA7B2E876788FC7A0F38A9396A484FC20063DE0C"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.config.ApplicationWiringTest",
+      "tests": 24,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "6EFA86505D30E28C35E6B4155575FC6676F2F2D1F5763008D4D4F3B0B6E7B379"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.config.JavaTimeZoneCatalogTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "A8E73F75E8A41B3C44B6DAF95E816F16C9E43CF537B767751FB0BD601A3BFAE3"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.config.ProjectStateConfigurationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "6315218B73075946573E709E76270E82846E2F0602F6AD825042D301F9E105FD"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.config.PublisherConfigurationTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "402C497E6730F000A033AA695998C38207D4AA729BAC0ADE7F5BA5FDCEEA25BD"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.config.SecurityConfigurationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "CAC444E6BCCFC6D43C9A386DB183D78E783E3C596A662A6B4FEB6A041C47AA65"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.config.SessionCookiePolicyTest",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "D39890E21AB8DBF79E7282065B21D8ED7B0F27E08939A07C7D365D1D19B57B1E"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.EditProjectsApiTest",
+      "tests": 42,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "0485024ED24F56E558794ED0EE2D2E3B4BD94C3513E0D9A393066F4000243CDE"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.EndTimeApiTest",
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "E96001AB45DD329B22DD37208C53CE759B118CEB4F30073FE944CC282752211E"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.EndTimeIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "8823511A3F37E47A8E142D04B008786A292EF41EC92C103AA090121389112431"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.HistoryApiTest",
+      "tests": 75,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "9CCFC16582B9DEE66D0B7810FC4E65CC53D3160D9BCDADA9844CEBE0996A2850"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.http.SessionAccessDeniedHandlerTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "0FAD835B89B0248CDBF4417EDD377E4BEAC07F77CBBF68AAFDA3E8628CCB222B"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.http.SessionControllerTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "2F636FF8CBE612B3939BD7601F4D4954839DFA3AB2615658B34A88086CD431B9"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.http.SessionFailureFilterTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "BF7CFE924F7B213010F7A0CB35D387EDCDEF6E286D4EBC527F8E81A8A16CA41E"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.AppearancePersistenceTest",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "CECD2EEA9D4C9545F9E998E32F328038F1007565C165282A315E19D8D5D4A9A2"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.BlockChangeQueriesPersistenceTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "1DD9A3896E85C395A63719974305369E9BBAA54817F209CD0DBD065750130A0B"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest",
+      "tests": 57,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "8AC276373ACD0307A417B1463EE1F7F9B19CF649DBDC5059E64375FCDE78662C"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.HistoryReadTransactionTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "0D372EE9AC3265E06724805513EBA0282EDED376E5C998DCA32F350C733980C4"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.OutboxRecoveryTest",
+      "tests": 24,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "6358E1952D713EAB56A2C3438265B21D0379E73D58C9E29567A5E117F7E0141B"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.OutboxWorkTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "7FF0A0A93525B3D9627C23CC4C79613BC8C8A7E8FA070E142DBDA77A4DEF233C"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.RescheduleCoordinationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "E37930D64966A5936B5D5C5F75ECD9DF9E590F3F0E3259F27759FCEF44C82BD1"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.RescheduleMigrationTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "709C16F893C73FDD6473E0F2AF82760BBB2DD63F769ED5C8D9EB9174723875D1"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.ScheduleBlockPersistenceTest",
+      "tests": 38,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "26127E60ECC837A759DC2A87514924D73F85D83AE14AD497543C1EEAEB27ADB4"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest",
+      "tests": 33,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "8D7712DC0E628D83797F123850CC51324748049860A02ECB3B5E3DB1234BAF9F"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.WorkSessionClosureMigrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "B155985E9A9B43C2F45368DD919421D0F952CCBD448ACF545B702A97308DF2D7"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.WorkSessionEndMigrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "D7ED5AC54E76AF6A8EDA2C0EB6642FA74242AA22432424BFD3EA9FC4E41FB4BC"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.WorkSessionExtensionReceiptTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "464F3E6FCD94829AFEEAB982D6CAFF728087D336D5965603BADFB7C9482A5C0B"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.WorkSessionPersistenceTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "9E1401CDE79E116BF8B3EE0E183913B83D39F0C380DF737D8A53568F2B9E54ED"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.WorkSessionStoreTest",
+      "tests": 41,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "236ED7BF23E3BF109EDD224CD117F2D5419CCABFAA4DDD9DC1C0F9CE4572AC34"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.WorkSessionTransitionMigrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "3A7F4CF84DCD6898869AB2F95CC21E68787E9FAF4792BC59DA256C1FB5B746FC"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.persistence.WorkSessionTransitionStoreTest",
+      "tests": 94,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "0C5F27BB0A028FDCF1DD51AEB14EE815A55BE77469F1D48D48F5275F18B77D91"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.ProjectApiTest",
+      "tests": 42,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "5198A7ADB71AE337ED0AA4E91282938BE04C2C7C32B598855B4DCE34A4DD471E"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.ProjectStatesApiTest",
+      "tests": 43,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "6BFA8982165807610F8576C32F3FFAC8A29D5E91A6FE072AF05629A2B1CE0ED6"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.ReadProjectsApiTest",
+      "tests": 36,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "E131C928A458A4C2820C0EFE220365369D29E507EF9432D3ADE710122759F8DF"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.RescheduleApiTest",
+      "tests": 70,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "2A16B97F4D38D4C459914091CC43E6D04B16A03B91F46A0FBA5C967D28117387"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.RescheduleErrorsApiTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "814DA48EBBED191870277DE465F7189DD57AA18416E9D6149820F798023C71AB"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.ScheduleBlockApiTest",
+      "tests": 173,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "2B9F5966B7CE318121DE08532B72E6365FFC199927561357F3C6B1E31C23461E"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.SubtaskApiTest",
+      "tests": 105,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "ED6F904C44D36ECF5342A766F497A35EAE2BB42FE9FAF22C277634B8C1FED3C8"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.TaskApiTest",
+      "tests": 65,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "3D4848D694A878FF75F6A8F0CEB2151896347D1674DDA09571B182C8F2637838"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.TaskHistoryApiTest",
+      "tests": 48,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "ACE3FFEE69BCB9DA1134CCC4C8CC844D2DBE9CF20444144452F8DF5315F16EA9"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.TaskStatusApiTest",
+      "tests": 80,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "4B53B7E59ADB9DB6AF787C60E035769CB4BF945DFA838C2DB61EECA9AE13C280"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.TodayApiTest",
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "3159A169B25BAF0E4399B522D99A8F7D83241C6CBD8C8A1F3ACE030E28294745"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.WeeklyReviewApiTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "959EBF14D818517EFE8ECCABEE7819D878038AF425FC434B1C274DD8CD73096A"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.WorkSessionApiTest",
+      "tests": 49,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "C4C40008110FE40901D47A468CE568233BD8B6B7EC23B3A5CF06AAEECD186278"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.WorkSessionIntegrationTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "481A7AB0688C59DA5AE78F842DF22BAED464098D00BB08329F1EEB078887A270"
+    },
+    {
+      "name": "com.apptolast.organization.adapter.WorkSessionStateApiTest",
+      "tests": 48,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "D3BF5B4D630116F5A42F3E6D94123D0FB226292A6A81BBFDD62B17F8DD9209A6"
+    },
+    {
+      "name": "com.apptolast.organization.application.ChangeProjectStatusTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "4EB3C784723C8BAF6F7FB6597DC4C9F399649DD0E66DA434433599C085327BB9"
+    },
+    {
+      "name": "com.apptolast.organization.application.ChangeTaskStatusTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "59F421D741DDBF89A66C79A27C221CDF924FC63527FBE6F140DC0E07B03B2DC2"
+    },
+    {
+      "name": "com.apptolast.organization.application.ChangeWorkSessionTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "0F279DE60C2FDCACF05CEBE6F37C85572007F0D36AD9380D24F849E0DFCC7767"
+    },
+    {
+      "name": "com.apptolast.organization.application.CloseWorkSessionTest",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "B50E10214F1D4E00F8960910FE6D845B6B37CAF0E9C833D0A1C8ABAF89309396"
+    },
+    {
+      "name": "com.apptolast.organization.application.CreateProjectTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "054B9A736DD5699610B7072C62D88BBF9B61F97A954725471C1ABAE5926769FF"
+    },
+    {
+      "name": "com.apptolast.organization.application.CreateSubtaskTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "6744319A2AE9DB0BE08D36A464EE45EDC2D5FA0945037D25F6BD72D6E5DCBD82"
+    },
+    {
+      "name": "com.apptolast.organization.application.CreateTaskTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "1FF34E5F8629F68C9827748F54B4A30DB543B948EE4323EFDFBFFB5215362088"
+    },
+    {
+      "name": "com.apptolast.organization.application.EditProjectTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "0F04B1CF0718AE5242F46966766A781362BEE6D047E3C8E45FC0FBD28CE359FD"
+    },
+    {
+      "name": "com.apptolast.organization.application.ExtendWorkSessionTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "D8502B2D5780DC526B47AA971067396339061AE0D659A894F3034045F5CBE184"
+    },
+    {
+      "name": "com.apptolast.organization.application.MoveBlockTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "BB1F405B0A0C7BA4DFF9E08660C24007015841C908E8FE50D7B42BDF18D3480A"
+    },
+    {
+      "name": "com.apptolast.organization.application.PlanBlockTest",
+      "tests": 24,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "9B276B1D5DACA4E0A78454774DE68FB3E43BF285991A103A6BC3B87E89533651"
+    },
+    {
+      "name": "com.apptolast.organization.application.PublicationAuditTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "74D1D955D93F073686DD8E3F1B05DC27143AEF8C32113E47238E291E6163D670"
+    },
+    {
+      "name": "com.apptolast.organization.application.PublishOutboxTest",
+      "tests": 211,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "179D912EEE918164E643B314B11CB4F027A96C5984AE383B685D62BC963A08AC"
+    },
+    {
+      "name": "com.apptolast.organization.application.ReadAppearanceTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "55CCF2B9AD68F51DBF41E178934B41E4CA1DB3553159BAAFFBB2556D4ACF57A3"
+    },
+    {
+      "name": "com.apptolast.organization.application.ReadAvailabilityTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "22DCC1104D89598A47E5EAA4745B35751C4B10B4A23ADC247C9FBFDD07DA2B1A"
+    },
+    {
+      "name": "com.apptolast.organization.application.ReadBlockChangesTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "F5F3874FF8912D5E057B68B7967F6632D008B6CAAC0FBA34FB6F09630C32EA77"
+    },
+    {
+      "name": "com.apptolast.organization.application.ReadHistoryTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "A4DEE5E837E6729289F3BD8937602B802ED0B74725B97587D598F060D8678F1B"
+    },
+    {
+      "name": "com.apptolast.organization.application.ReadProjectsTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "8848DB59A882BC0E88A39964104F80D3964D37E9AAE7CFD414E8FD1C0DA4A290"
+    },
+    {
+      "name": "com.apptolast.organization.application.ReadSubtasksTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "F64F72BCACA770B9F43E9AC4CF66D3CAED938CAE17F120AA9D386E5353532FB0"
+    },
+    {
+      "name": "com.apptolast.organization.application.ReadTaskHistoryTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "B9FD39D855F8CED0136A7F0966F6B70252CACE1FC21B9EF09AFA796D60799972"
+    },
+    {
+      "name": "com.apptolast.organization.application.ReadTasksTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "82AE53534476B69BED4233CC4F35796DC279CDAAADCC0B4B4D12E96AE81CA1C9"
+    },
+    {
+      "name": "com.apptolast.organization.application.ReadWeeklyReviewTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "407CE94DEA1955F88E3D98A5C491B3FD1AB03F004EC29657D6FCFBB13A434D7F"
+    },
+    {
+      "name": "com.apptolast.organization.application.ReadWorkSessionChangesTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "7C074A881D476C7E4AB56FC1780DC44973DAC10E69B3F7F0BD476DE2DD3BF312"
+    },
+    {
+      "name": "com.apptolast.organization.application.ReadWorkSessionEndTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "591402480F62AB464683C8F6305506A7BB7DA351C026CFE50A2EE97D4AD38263"
+    },
+    {
+      "name": "com.apptolast.organization.application.ReadWorkSessionStateTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "80DF721C14DEE939878C239DF98715B2377D2D10491178EEE4A59883CCB1B04E"
+    },
+    {
+      "name": "com.apptolast.organization.application.ReadWorkSessionsTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "280FE1DEE75A563227C03945A7D176AC340D90228DFC7C8CE202998E546C1D62"
+    },
+    {
+      "name": "com.apptolast.organization.application.SaveAppearanceTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "AFD4D3E3D3C342121FAF0E37542DFE9E7E2AE990E4C7F02E99FE61DB7A6184B4"
+    },
+    {
+      "name": "com.apptolast.organization.application.SaveAvailabilityTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "FCA59B264A7A25B98831924290C50E8C68DFA7647044911C8030AE3AC9DD220C"
+    },
+    {
+      "name": "com.apptolast.organization.application.StartWorkSessionTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "4363979C1C28FAF1A5AB72400CC71142EE2EA9EFF30080A7B6DDFBE72B0F2A97"
+    },
+    {
+      "name": "com.apptolast.organization.application.SubtaskPublicationTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "41FFB091E161DE33E9FEC1A5365B8D049AB045D6D9D8CA125EF3FD93C5F60EDC"
+    },
+    {
+      "name": "com.apptolast.organization.ArchitectureTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "FB5DDBAB85897614E9B9DEE4C34095FA6C2EB7E3A47997A26EF87A5D915F5E30"
+    },
+    {
+      "name": "com.apptolast.organization.domain.AppearanceValuesTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "7FD6D1F7F2B912A5A1510358597FEBD914A6297145090BE36D94F6A5473532E2"
+    },
+    {
+      "name": "com.apptolast.organization.domain.AvailabilityRevisionTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "994AEDE90712A528C5A0790CFDEBEB928891F177145416CABAE4C1C219B6666E"
+    },
+    {
+      "name": "com.apptolast.organization.domain.AvailabilityTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "F7452DFFCF024A6CCD83D3A9B7ED500F29472C41FC2EF57CB64FD004A49134D1"
+    },
+    {
+      "name": "com.apptolast.organization.domain.BlockBudgetTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "3A680F14A22C64BB0941BF3E8529E7F6B32A3B8A4F60459704D5E5F92F6F8303"
+    },
+    {
+      "name": "com.apptolast.organization.domain.BlockMoveRequestTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "971E25C4D54224F72CDFBAFCF3012A1A41BD62648067CEE0E98601C9D489AA89"
+    },
+    {
+      "name": "com.apptolast.organization.domain.BlockRequestTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "E5B63D4F6218F0BB318D6839A8A8E04349F87CDB5E5AB9D93A38E05FDA5B30ED"
+    },
+    {
+      "name": "com.apptolast.organization.domain.BlockStateTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "A425D66F712C87F84B2725569FFAE604AC8258A856591507BF3AC93E0DDA3506"
+    },
+    {
+      "name": "com.apptolast.organization.domain.PlannedBlockTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "F2CA2ABB1BDE806222DAC98A88A7A4A6145E91F3626BDA94CD91C568D277A363"
+    },
+    {
+      "name": "com.apptolast.organization.domain.ProjectStatesTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "EADB412A2972A07EEABBEE73B480CBA9C19EEA461D1F7491C41D45AA92AAA788"
+    },
+    {
+      "name": "com.apptolast.organization.domain.ProjectTest",
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "AEA93B1D644F5A7A5396B782EBA7507D5DD549C7D5D4BBAD3C108D0AF548673E"
+    },
+    {
+      "name": "com.apptolast.organization.domain.ResolvedBlockTimeTest",
+      "tests": 30,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "6BFB28E6C79DA12C828505C3D8D5C4A972FE25F6310AE4589E864B2551C7B745"
+    },
+    {
+      "name": "com.apptolast.organization.domain.SubtaskEventTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "46E38646A324635730F685EF132F3360BD74272713B0DECE3E955130CDA35ADF"
+    },
+    {
+      "name": "com.apptolast.organization.domain.TaskEventTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "C081BC3B6514BD5FCD142EB7E9CA3073839CB6769DC12CAC217A974ED991123D"
+    },
+    {
+      "name": "com.apptolast.organization.domain.TaskStateTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "4847AA4FA0E62A60A908EBB2A18723240CC4B8B76725149EA548435290AA3DC2"
+    },
+    {
+      "name": "com.apptolast.organization.domain.TaskStatusEventTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "18AC99CAF8A787E9A470034D55DEBCC2B85309551EC6BA64E1E5F819B40D35B1"
+    },
+    {
+      "name": "com.apptolast.organization.domain.TaskTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "354F272CD4DD7DF4C207E362E1436354911230C25144E370C353316A20EC773B"
+    },
+    {
+      "name": "com.apptolast.organization.domain.TodayWindowTest",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "594AB7684F48DCCF08B59ABFF6053A03FA2AC4869EA23588291298A02E26C1F7"
+    },
+    {
+      "name": "com.apptolast.organization.domain.WeeklyReviewWindowTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "FF708F88BEBC5BCBD038DF528B3446CFE3F3B81EF957BBA688AFEB26609DD0AE"
+    }
+  ]
+}

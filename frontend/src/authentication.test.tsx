@@ -9,6 +9,32 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { SessionGate } from "./session-gate";
+// Estos oráculos cuentan tráfico de sesión/negocio. Apariencia se integra de
+// verdad en appearance.test.tsx; aquí sólo su GET exacto tiene datos propios.
+function mockSessionTraffic() {
+  const traffic = vi.fn<typeof fetch>(globalThis.fetch);
+  vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
+    if (
+      input === "/api/v1/me/appearance" &&
+      (init?.method === undefined || init.method === "GET")
+    ) {
+      return Promise.resolve(
+        Response.json(
+          {
+            configured: false,
+            theme: "SYSTEM",
+            accentLight: "#244C3C",
+            accentDark: "#B7E4C7",
+            updatedAt: null,
+          },
+          { headers: { ETag: '"appearance:unconfigured"' } },
+        ),
+      );
+    }
+    return traffic(input, init);
+  });
+  return traffic;
+}
 const anonymous = {
   authenticated: false,
   username: null,
@@ -29,7 +55,7 @@ afterEach(() => {
 it("@s1 comprueba acceso antes de montar vistas privadas", async () => {
   let firstCommit: string | undefined;
   let finish!: (response: Response) => void;
-  const fetcher = vi.spyOn(globalThis, "fetch").mockImplementationOnce(
+  const fetcher = mockSessionTraffic().mockImplementationOnce(
     () =>
       new Promise((resolve) => {
         finish = resolve;
@@ -67,8 +93,7 @@ it("@s1 comprueba acceso antes de montar vistas privadas", async () => {
   expect(fetcher).toHaveBeenCalledTimes(1);
 });
 it("@s2 confirma la sesión después de enviar formulario con CSRF", async () => {
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(anonymous))
     .mockResolvedValueOnce(new Response(null, { status: 204 }))
     .mockResolvedValueOnce(Response.json(authenticated));
@@ -104,7 +129,7 @@ it.each([
   { ...anonymous, username: "unexpected" },
   { ...authenticated, csrfHeaderName: "Other" },
 ])("@s1 no abre datos ante sesión incompatible %j", async (body) => {
-  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json(body));
+  mockSessionTraffic().mockResolvedValueOnce(Response.json(body));
   render(<SessionGate />);
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "No hemos podido comprobar el acceso",
@@ -119,8 +144,7 @@ it.each([401, 503, "network"])(
   async (status) => {
     let finish!: (response: Response) => void;
     let fail!: (error: Error) => void;
-    const fetcher = vi
-      .spyOn(globalThis, "fetch")
+    const fetcher = mockSessionTraffic()
       .mockResolvedValueOnce(Response.json(anonymous))
       .mockImplementationOnce(
         () =>
@@ -161,8 +185,7 @@ it.each([401, 503, "network"])(
   },
 );
 it("@s18 crear desde la sesión real envía el token renovado", async () => {
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockResolvedValueOnce(Response.json({}, { status: 503 }));
   render(<SessionGate />);
@@ -176,7 +199,7 @@ it("@s18 crear desde la sesión real envía el token renovado", async () => {
   ).toBe("private-token");
 });
 it("@s6 una escritura HTTP 401 retira también el borrador privado", async () => {
-  vi.spyOn(globalThis, "fetch")
+  mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockResolvedValueOnce(Response.json({}, { status: 401 }))
     .mockResolvedValueOnce(Response.json(anonymous));
@@ -192,8 +215,7 @@ it("@s6 una escritura HTTP 401 retira también el borrador privado", async () =>
 });
 it("@s7 cerrar retira el borrador antes de la respuesta y confirma el cierre", async () => {
   let finish!: (response: Response) => void;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockImplementationOnce(
       () =>
@@ -223,9 +245,9 @@ it("@s7 cerrar retira el borrador antes de la respuesta y confirma el cierre", a
 it.each([503, "network"])(
   "@s12 cierre no confirmado %s oculta datos y permite reintento deliberado",
   async (status) => {
-    const fetcher = vi
-      .spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(Response.json(authenticated));
+    const fetcher = mockSessionTraffic().mockResolvedValueOnce(
+      Response.json(authenticated),
+    );
     if (typeof status === "number")
       fetcher.mockResolvedValueOnce(
         Response.json({ title: "private" }, { status }),
@@ -257,7 +279,7 @@ it.each([
   "/proyectos",
 ])("@s6 lectura privada %s también invalida acceso", async (route) => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockResolvedValueOnce(Response.json({}, { status: 401 }))
     .mockResolvedValueOnce(Response.json(anonymous));
@@ -266,8 +288,7 @@ it.each([
 });
 it("@s14 StrictMode ignora un GET de sesión antiguo después de su cleanup", async () => {
   let finish!: (response: Response) => void;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockImplementationOnce(
       () =>
         new Promise((resolve) => {
@@ -288,8 +309,7 @@ it("@s14 StrictMode ignora un GET de sesión antiguo después de su cleanup", as
 
 it("@s14 un POST de creación abandonado no retira el acceso de la vista nueva", async () => {
   let finish!: (response: Response) => void;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockImplementationOnce(
       () =>
@@ -312,8 +332,7 @@ it("@s14 un POST de creación abandonado no retira el acceso de la vista nueva",
 
 it("@s14 un login resuelto tras desmontar no consulta ni abre sesión", async () => {
   let finish!: (response: Response) => void;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(anonymous))
     .mockImplementationOnce(
       () =>
@@ -330,8 +349,7 @@ it("@s14 un login resuelto tras desmontar no consulta ni abre sesión", async ()
   expect(fetcher).toHaveBeenCalledTimes(2);
 });
 it("@s17 CSRF inválido recupera token por decisión y conserva borrador sin repetir POST", async () => {
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockResolvedValueOnce(
       Response.json({ code: "CSRF_INVALID" }, { status: 403 }),
@@ -367,8 +385,7 @@ it("@s17 CSRF inválido recupera token por decisión y conserva borrador sin rep
 it.each(["login", "logout"])(
   "@s9 @s17 %s permite renovar CSRF sin repetir la operación",
   async (operation) => {
-    const fetcher = vi
-      .spyOn(globalThis, "fetch")
+    const fetcher = mockSessionTraffic()
       .mockResolvedValueOnce(
         Response.json(operation === "login" ? anonymous : authenticated),
       )
@@ -414,7 +431,7 @@ it("@s15 el cierre confirmado publica sólo una señal sin secretos", async () =
       return channel;
     }),
   );
-  vi.spyOn(globalThis, "fetch")
+  mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockResolvedValueOnce(new Response(null, { status: 204 }))
     .mockResolvedValueOnce(Response.json(anonymous));
@@ -439,8 +456,7 @@ it("@s15 otra pestaña retira datos antes de comprobar sesión y no acepta seña
     }),
   );
   let finish!: (response: Response) => void;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockImplementationOnce(
       () =>
@@ -467,8 +483,7 @@ it("@s15 otra pestaña retira datos antes de comprobar sesión y no acepta seña
   expect(channel.postMessage).not.toHaveBeenCalled();
 });
 it("@s15 volver a visible comprueba la sesión y retira la vista caducada", async () => {
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockResolvedValueOnce(Response.json(anonymous));
   const view = render(<SessionGate />);
@@ -484,7 +499,7 @@ it("@s15 volver a visible comprueba la sesión y retira la vista caducada", asyn
   expect(fetcher).toHaveBeenCalledTimes(2);
 });
 it("@s19 entrar y salir dejan el foco en el encabezado del contexto nuevo", async () => {
-  vi.spyOn(globalThis, "fetch")
+  mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(anonymous))
     .mockResolvedValueOnce(new Response(null, { status: 204 }))
     .mockResolvedValueOnce(Response.json(authenticated))
@@ -507,8 +522,7 @@ it("@s19 entrar y salir dejan el foco en el encabezado del contexto nuevo", asyn
 });
 
 it("@s17 recuperar CSRF con red caída conserva el borrador y permite otra comprobación", async () => {
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockResolvedValueOnce(
       Response.json({ code: "CSRF_INVALID" }, { status: 403 }),
@@ -537,7 +551,7 @@ it("@s17 recuperar CSRF con red caída conserva el borrador y permite otra compr
 });
 it("@s1 un reintento tras fallo de comprobación no vuelve a montar datos antiguos", async () => {
   let finish!: (response: Response) => void;
-  vi.spyOn(globalThis, "fetch")
+  mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockRejectedValueOnce(new Error("offline"))
     .mockImplementationOnce(
@@ -563,7 +577,7 @@ it.each([
   "/?csrfToken=untrusted",
 ])("@s16 descarta retorno ajeno al recorrido %s", async (route) => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(anonymous))
     .mockResolvedValueOnce(new Response(null, { status: 204 }))
     .mockResolvedValueOnce(Response.json(authenticated));
@@ -583,8 +597,7 @@ it("@s14 logout resuelto tras desmontar no publica ni consulta otra sesión", as
     }),
   );
   let finish!: (response: Response) => void;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockImplementationOnce(
       () =>
@@ -612,7 +625,7 @@ it("@s14 login cancelado por otra pestaña no borra una contraseña escrita desp
     }),
   );
   let finish!: (response: Response) => void;
-  vi.spyOn(globalThis, "fetch")
+  mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(anonymous))
     .mockImplementationOnce(
       () =>
@@ -639,8 +652,7 @@ it("@s14 login cancelado por otra pestaña no borra una contraseña escrita desp
 it.each(["anonymous", "offline"])(
   "@s6 logout HTTP 401 comprueba la sesión: %s",
   async (outcome) => {
-    const fetcher = vi
-      .spyOn(globalThis, "fetch")
+    const fetcher = mockSessionTraffic()
       .mockResolvedValueOnce(Response.json(authenticated))
       .mockResolvedValueOnce(Response.json({}, { status: 401 }));
     if (outcome === "anonymous")
@@ -686,7 +698,7 @@ it.each(["login", "logout"])(
     );
     const rejected = new Response(null, { status: 403 });
     vi.spyOn(rejected, "clone").mockReturnValue(copy);
-    vi.spyOn(globalThis, "fetch")
+    mockSessionTraffic()
       .mockResolvedValueOnce(
         Response.json(operation === "login" ? anonymous : authenticated),
       )
@@ -714,8 +726,7 @@ it.each(["login", "logout"])(
 );
 it("@s14 borra contraseña al recibir respuesta aunque la comprobación posterior siga pendiente", async () => {
   let finish!: (response: Response) => void;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(anonymous))
     .mockResolvedValueOnce(new Response(null, { status: 204 }))
     .mockImplementationOnce(
@@ -741,7 +752,7 @@ it.each([false, true])(
   "@s19 login fallido conserva foco elegido: %s",
   async (moved) => {
     let finish!: (response: Response) => void;
-    vi.spyOn(globalThis, "fetch")
+    mockSessionTraffic()
       .mockResolvedValueOnce(Response.json(anonymous))
       .mockImplementationOnce(
         () =>
@@ -773,8 +784,7 @@ it.each([
   "/proyectos/6c5dbd10-9ad5-4000-8000-000000000001/editar",
 ])("@s16 conserva la ruta propia tras login %s", async (route) => {
   window.history.replaceState(null, "", route);
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(anonymous))
     .mockResolvedValueOnce(new Response(null, { status: 204 }))
     .mockResolvedValueOnce(Response.json(authenticated))
@@ -796,7 +806,7 @@ it.each([
   { ...anonymous, csrfHeaderName: undefined },
   { ...authenticated, username: "" },
 ])("@s1 rechaza tipos de sesión incompatibles %j", async (body) => {
-  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json(body));
+  mockSessionTraffic().mockResolvedValueOnce(Response.json(body));
   render(<SessionGate />);
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "No hemos podido comprobar",
@@ -808,7 +818,7 @@ it.each([
 it.each([401, 503, 500])(
   "@s1 GET HTTP %i no acepta un cuerpo de sesión autenticada",
   async (status) => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+    mockSessionTraffic().mockResolvedValueOnce(
       Response.json(authenticated, { status }),
     );
     render(<SessionGate />);
@@ -819,7 +829,7 @@ it.each([401, 503, 500])(
 );
 it("@s13 login y cierre no escriben secretos en almacenamiento web", async () => {
   const storage = vi.spyOn(Storage.prototype, "setItem");
-  vi.spyOn(globalThis, "fetch")
+  mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(anonymous))
     .mockResolvedValueOnce(new Response(null, { status: 204 }))
     .mockResolvedValueOnce(Response.json(authenticated))
@@ -840,7 +850,7 @@ it.each([
   { ...anonymous, authenticated: 0 },
   { ...authenticated, username: 42 },
 ])("@s1 no convierte tipos escalares de identidad %j", async (body) => {
-  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json(body));
+  mockSessionTraffic().mockResolvedValueOnce(Response.json(body));
   render(<SessionGate />);
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "No hemos podido comprobar",
@@ -848,7 +858,7 @@ it.each([
 });
 it("@s14 acceso inicial vacío y submit nativo cancelado sin errores antiguos", async () => {
   let finish!: (response: Response) => void;
-  vi.spyOn(globalThis, "fetch")
+  mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(anonymous))
     .mockImplementationOnce(
       () =>
@@ -868,7 +878,7 @@ it("@s14 acceso inicial vacío y submit nativo cancelado sin errores antiguos", 
   await act(async () => finish(Response.json({}, { status: 401 })));
 });
 it("@s17 distingue primer aviso CSRF del fallo de recuperación", async () => {
-  vi.spyOn(globalThis, "fetch")
+  mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockResolvedValueOnce(
       Response.json({ code: "CSRF_INVALID" }, { status: 403 }),
@@ -900,7 +910,7 @@ it.each([
   "/proyectos/6c5dbd10-9ad5-4000-8000-000000000001/suffix",
 ])("@s16 login descarta rutas parcialmente válidas %s", async (route) => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(anonymous))
     .mockResolvedValueOnce(new Response(null, { status: 204 }))
     .mockResolvedValueOnce(Response.json(authenticated));
@@ -913,7 +923,7 @@ it.each([
 });
 it("@s14 el rechazo de GET anterior no oculta una sesión vigente", async () => {
   let fail!: (error: Error) => void;
-  vi.spyOn(globalThis, "fetch")
+  mockSessionTraffic()
     .mockImplementationOnce(
       () =>
         new Promise((_resolve, reject) => {
@@ -931,8 +941,7 @@ it("@s14 el rechazo de GET anterior no oculta una sesión vigente", async () => 
   expect(screen.getByLabelText(/Nombre del proyecto/)).toBeVisible();
 });
 it("@s12 logout401 con GET fallido conserva capacidad de reintentar cierre", async () => {
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockResolvedValueOnce(Response.json({}, { status: 401 }))
     .mockRejectedValueOnce(new Error("offline"))
@@ -949,7 +958,7 @@ it("@s12 logout401 con GET fallido conserva capacidad de reintentar cierre", asy
   ).toBe("private-token");
 });
 it("@s12 logout401 cuya comprobación sigue autenticada no reabre los datos", async () => {
-  vi.spyOn(globalThis, "fetch")
+  mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockResolvedValueOnce(Response.json({}, { status: 401 }))
     .mockResolvedValueOnce(Response.json(authenticated));
@@ -976,7 +985,7 @@ it("@s14 logout antiguo no retira la espera de un segundo cierre", async () => {
   );
   let first!: (response: Response) => void;
   let second!: (response: Response) => void;
-  vi.spyOn(globalThis, "fetch")
+  mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockImplementationOnce(
       () =>
@@ -1008,8 +1017,7 @@ it("@s14 logout antiguo no retira la espera de un segundo cierre", async () => {
 it("@s7 un GET posterior al cierre abortado no vuelve a abrir sesión antigua", async () => {
   let first!: (response: Response) => void;
   let second!: (response: Response) => void;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(authenticated))
     .mockResolvedValueOnce(new Response(null, { status: 204 }))
     .mockImplementationOnce(
@@ -1042,8 +1050,7 @@ it("@s33 conserva la URL del cierre tras autenticarse sin transmitir el cierre",
   const route =
     "/proyectos/22345678-1234-1234-1234-123456789abc/tareas/32345678-1234-1234-1234-123456789abc/sesiones/12345678-1234-1234-1234-123456789abc";
   window.history.replaceState(null, "", route);
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockSessionTraffic()
     .mockResolvedValueOnce(Response.json(anonymous))
     .mockResolvedValueOnce(new Response(null, { status: 204 }))
     .mockResolvedValueOnce(Response.json(authenticated))

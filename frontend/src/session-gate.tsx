@@ -1,4 +1,5 @@
 import { App } from "./App";
+import { AppearanceProvider } from "./appearance-state";
 import { useSession } from "./use-session";
 import { useLayoutEffect } from "react";
 export function SessionGate() {
@@ -30,7 +31,7 @@ export function SessionGate() {
   }, [session?.authenticated, closing, closeError, failure, saving]);
   if (session?.authenticated && !closing && !closeError && !failure)
     return (
-      <>
+      <AppearanceProvider key={session.username}>
         <div className="access-recovery" hidden={!csrfExpired}>
           <p role={csrfExpired ? "alert" : undefined}>
             {recoveryFailed ? "No hemos podido renovar el acceso. " : ""}La
@@ -46,7 +47,7 @@ export function SessionGate() {
             </button>
           }
         />
-      </>
+      </AppearanceProvider>
     );
   return (
     <main className="session-screen">

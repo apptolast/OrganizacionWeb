@@ -1308,7 +1308,7 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     "src/App.tsx:19:8-19:44",
     "src/App.tsx:27:8-39:26",
     "src/App.tsx:42:7-74:7",
-    "src/workspace.tsx:35:10-40:22",
+    "src/workspace.tsx:74:10-79:22",
     "src/session-gate.tsx:32:2-51:6",
     "src/use-session.ts:177:0-195:1",
   ]);

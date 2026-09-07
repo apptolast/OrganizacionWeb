@@ -354,3 +354,16 @@ Accept previa a los comandos tras reproducir una escritura que llegaba al
 puerto con Accept incompatible. A continúa valores y validación durable;
 B continúa estado/UI. Sólo A usa Gradle COMMON. PR 24 permanece en borrador,
 producción sigue ed00ad4 y funciones 22–30 pendientes.
+
+## Feature 21: negociación integrada y segundo resultado de CI
+
+Integrado `e9e9e54`, seguridad y Accept antes de puertos, 66 MVC verdes
+en aislado y en COMMON (`406744`). El agente HTTP continúa GET de valores
+con el puerto real; backend continúa comandos de valores y frontend sus
+formularios y estado. No hay nuevo despliegue.
+
+CI correctiva `34162746457`: 2469/2470 Java verdes. Único fallo en la prueba
+histórica de migración de apariencia: usa latest y ahora incluye V20.
+Se ha delegado fijar su destino V19 y preservar una prueba propia de V20.
+Log completo conservado fuera de Git; hash en el informe de revisión.
+Build y E2E posteriores siguen pendientes. No se declara cerrada la feature.

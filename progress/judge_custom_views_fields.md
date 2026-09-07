@@ -93,6 +93,18 @@ Estado: **IN_PROGRESS**, sin aprobación de cierre de la feature 21.
    una guardia local a las rutas 21, basada en negociación y especificidad
    de Spring, con rechazo antes de cualquier comando. Corrección y sus
    pruebas de calidad, comodines y ausencia de efectos todavía pendientes.
+   Resuelto en `e9e9e54`, desde el corte aislado `0747869`: guardia previa
+   a los puertos con especificidad y calidad de Accept. Los 66 casos MVC
+   del autor pasaron en `507b84`; integración COMMON también verde en
+   `406744`. No hay cambio global de negociación ni aprobación final HTTP.
+6. CI correctiva `34162746457` terminó con 2469 de 2470 pruebas Java verdes.
+   El único fallo es `AppearancePersistenceTest.s9`: su migración desde V18
+   usa latest y compara el esquema excluyendo sólo la tabla de apariencia.
+   V20 añade legítimamente tres tablas. Se solicita fijar esa prueba histórica
+   en V19 y comprobar V20 en su propio contrato, conservando los oráculos.
+   Log externo: `organizationweb-customization-ci-34162746457.log`, SHA256
+   `1244733DB8F1768E9FB3FB1FBDF3C25B9EAFD66EBA65BECFA97610C3EA74BCF6`.
+   Los pasos posteriores de build y E2E aún no se ejecutaron en esta CI.
 
 ## Puertas pendientes
 

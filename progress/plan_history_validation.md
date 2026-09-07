@@ -1,0 +1,24 @@
+# Plan mínimo de validación18
+
+Plan documental para revisión antes de implementar. La sección18 aprobada manda sobre ejemplos SQL preliminares de history_query_design.md (en particular cursor owner/filtros/upper/after). No fija nombres de clases futuras ni crea configuración, scripts o tests.
+
+## Mutación según el diff real
+
+- **PIT:** módulos nuevos completos de dominio/aplicación de historial, cursor/HTTP y adaptador PostgreSQL. Incluir cualquier lógica existente realmente modificada para18: validación, mapeo, propiedad, filtros y wiring con decisiones. DTO/lecturas reutilizados sin cambios conservan sus contratos y regresiones, sin relanzar por ello todas las campañas14–17. Lista explícita final revisada contra diff; todos los JUnit disponibles,4workers y umbral80 vigentes. PIT no sustituye pruebas SQL reales: una cadena SQL puede quedar fuera de mutadores útiles.
+- **Stryker:** cliente/decoder/página/controles nuevos completos, Vitest completo/perTest,8workers y80. Si App/Workspace/detalles existentes sólo reciben rutas o enlaces, rangos explícitos de los nodos añadidos/modificados y sus condiciones necesarias, documentados con hash y ubicación final. Si cambia comportamiento compartido más allá de anchors, ampliar a esa lógica real; no recortar guardas por sobrevivir ni incluir sólo una cadena para evitar la condición envolvente. Mappers nuevos o validaciones extraídas entran completos. No fijar config hasta freeze de fuentes.
+- Mantener reportes históricos/exclusiones protegidas, salidas18 separadas, manifiestos antes/después, denominador y todos los estados. Prevalidar rangos Stryker con parser instalado: columnas report1→selector0. Revisar residuos por riesgo, sin exigir100%, reclasificar errores o sumar campañas. Un replay posterior sólo por hallazgo concreto y autorización.
+
+## Oráculos de backend y cliente
+
+Un caso observable por ciclo, GREEN inicial documentado cuando se reutiliza comportamiento. PostgreSQL real acredita UNION de cinco fuentes/owner en cada rama, detalle histórico frente a proyección actual, nombres actuales, ausencia de escrituras, outbox independiente y RR por solicitud. Cubrir límites20/21, empateµs entre fuentes/UUID y decisiones locales, cursor con filtros/owner y precedencia400/404, fronteras de fechaUTC (incluido máximo sin año10000), inserción tardía y recorrido sin duplicados. No prometer snapshot entre páginas ni inventar carrera natural: una coordinación/fixture temporal controlada se documenta como tal.
+
+El cliente prueba unión de cincoDTO, coherencia exterior/detalle sólo campos existentes, filtros aplicados, orden estricto/identidadcompuesta y rechazo integral; vacío/error/no-store, abortos y401 tardío con padre vivo. Los guardas de privacidad/contexto y la sintaxis de cursor no se excluyen de mutación. Verificar APIs existentes reutilizadas mediante los focos pertinentes, sin nuevas suites espejo de todos sus casos.
+
+## E2E funcional y UX propios
+
+1. Primer recorrido real: crear hechos de las cinco fuentes usando APIs/acciones existentes; abrir /historial y verificar que planes no son trabajo, finalización/reapertura permanece y sesión/CLOSE/EXTEND se describen desde recibos. Comprobar enlaces a tarea/proyecto/sesión y entrada filtrada desde ambos detalles, sin N+1 de consultas de estado. No mocks de éxito.
+2. Siguiente caso: fixture real suficiente para más de20hechos; navegar Más antiguos, Back/recarga y recientes, aplicar/quitar categoría/fechasUTC/contexto y contrastar API/SQL, sin IDs repetidos. Retirar sólo outbox de ese fixture y verificar recuperación idéntica de hechos; eso prueba independencia de lectura, no despliegue o una política productiva de retención. Empates extremos y commits tardíos ya se prueban en PG, sin repetir una matriz entera en navegador.
+3. Privacidad/error en un recorrido acotado: contexto ajeno, consulta retenida reemplazada por otro filtro/ruta, fallo503 y reintento; no datos viejos bajo filtros nuevos ni ausencia falsa. No acción mutante desde historial ni recuperación automática de comandos.
+4. Una matriz UX de **la nueva vista**, no repetir matrices16–17:31anchos320–2560/bordes y altura400; lista/detalle expandido/filtros/paginación/vacío/espera/error,44px, teclado/foco, texto largo y notas, axe y feedback<400ms. Después casos separados texto200 y zoom nativo200; reutilizar esos recorridos enFirefox/WebKit con límites reales. Matriz30 documenta evidencia automática y revisión visual por separado; dispositivos/lectores físicos no se dan por probados.
+
+Tras los focos y revisión de fuentes/alcances: init/build integrados, campañas18 coordinadas y E2E global final una vez que los fixtures de integración estén revisados. Smoke del publicador existente verifica regresión de empaquetado si el gate lo exige; historial no añade evento/ruta Rabbit ni smoke nuevo. No duplicar globales durante TDD ni empezar campañas sobre fuentes móviles.

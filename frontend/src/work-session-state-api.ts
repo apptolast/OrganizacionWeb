@@ -194,7 +194,7 @@ function isChange(value: unknown): value is WorkSessionChange {
   );
 }
 
-function validNote(value: unknown): value is string {
+export function validNote(value: unknown): value is string {
   return (
     typeof value === "string" &&
     !/[\uD800-\uDFFF]/u.test(value) &&

@@ -1,4 +1,8 @@
 .work-session {
+  .closure-note {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
   .task-form {
     display: grid;
     gap: 12px;

@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { SessionStart } from "./work-session-api";
+import { RouteLink } from "./navigation";
 import {
   readWorkSessionStateError,
   recoverWorkSessionChange,
@@ -198,7 +199,13 @@ function StatePanel({ session, onAccessFailure }: StatePanelProps) {
         <p role="status">Consultando estado de la sesión</p>
       ) : (
         <>
-          <p>{snapshot.state.status === "running" ? "En curso" : "En pausa"}</p>
+          <p>
+            {snapshot.state.status === "closed"
+              ? "Sesión cerrada"
+              : snapshot.state.status === "running"
+                ? "En curso"
+                : "En pausa"}
+          </p>
           <p>
             Tiempo de trabajo hasta la actualización:{" "}
             {seconds(snapshot.netMicroseconds)} s
@@ -210,20 +217,31 @@ function StatePanel({ session, onAccessFailure }: StatePanelProps) {
               zone={snapshot.state.session.zoneId}
             />
           </p>
-          <button
-            type="button"
-            aria-disabled={busy}
-            onClick={() => void send()}
-          >
-            {snapshot.state.status === "running" ? "Pausar" : "Reanudar"}
-          </button>
+          {snapshot.state.status !== "closed" && (
+            <button
+              type="button"
+              aria-disabled={busy}
+              onClick={() => void send()}
+            >
+              {snapshot.state.status === "running" ? "Pausar" : "Reanudar"}
+            </button>
+          )}
+          {!busy && (
+            <RouteLink
+              href={`/proyectos/${session.projectId}/tareas/${session.taskId}/sesiones/${session.id}`}
+            >
+              {snapshot.state.status === "closed"
+                ? "Ver cierre de la sesión"
+                : "Cerrar sesión de trabajo"}
+            </RouteLink>
+          )}
         </>
       )}
     </div>
   );
 }
 
-function seconds(value: string) {
+export function seconds(value: string) {
   const micros = BigInt(value);
   const fraction = String(micros % 1000000n)
     .padStart(6, "0")
@@ -231,7 +249,13 @@ function seconds(value: string) {
   return String(micros / 1000000n) + (fraction ? "," + fraction : "");
 }
 
-function SnapshotTime({ instant, zone }: { instant: string; zone: string }) {
+export function SnapshotTime({
+  instant,
+  zone,
+}: {
+  instant: string;
+  zone: string;
+}) {
   let formatter: Intl.DateTimeFormat;
   let label = zone;
   try {
@@ -256,7 +280,7 @@ function SnapshotTime({ instant, zone }: { instant: string; zone: string }) {
   );
 }
 
-function rejectionMessage(code: string) {
+export function rejectionMessage(code: string) {
   switch (code) {
     case "WORK_SESSION_NOT_FOUND":
       return "No se ha encontrado la sesión de trabajo.";

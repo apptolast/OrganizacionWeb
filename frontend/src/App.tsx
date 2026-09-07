@@ -5,12 +5,15 @@ import { useRoute, RouteLink } from "./navigation";
 import { Workspace } from "./workspace";
 import { ProjectEditor } from "./project-editor";
 import { TaskReader } from "./task-reader";
+import { WorkSessionReader } from "./work-session-reader";
 import { Today } from "./today";
 import { Availability } from "./availability";
 export function App({ sessionControls }: { sessionControls?: ReactNode }) {
   const route = useRoute();
   const availability = route === "/disponibilidad";
   const taskRoute = /^\/proyectos\/([^/]+)\/tareas\/([^/?]+)$/.exec(route);
+  const sessionRoute =
+    /^\/proyectos\/([^/]+)\/tareas\/([^/]+)\/sesiones\/([^/?]+)$/.exec(route);
   return (
     <Workspace
       sessionControls={sessionControls}
@@ -30,6 +33,13 @@ export function App({ sessionControls }: { sessionControls?: ReactNode }) {
         <CreateProjectScreen />
       ) : availability ? (
         <Availability />
+      ) : sessionRoute ? (
+        <WorkSessionReader
+          key={route}
+          projectId={sessionRoute[1]}
+          taskId={sessionRoute[2]}
+          id={sessionRoute[3]}
+        />
       ) : taskRoute ? (
         <TaskReader key={route} projectId={taskRoute[1]} id={taskRoute[2]} />
       ) : /^\/proyectos\/[^/?]+\/editar$/.test(route) ? (

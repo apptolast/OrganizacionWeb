@@ -1,0 +1,42 @@
+[
+  {
+    "path": "src/work-session-state-api.ts",
+    "sha256": "BFB2A7FC4E4261E0CFF42DCAEE28C96684DF1D80644B5CD3F42E8337FCB5536C"
+  },
+  {
+    "path": "src/close-work-session-api.test.ts",
+    "sha256": "B688D28B23C54604B65C2E64D507D4170FE2532773B41F648D6192B864B3B039"
+  },
+  {
+    "path": "src/work-session-reader.tsx",
+    "sha256": "C7FB07A1B05B47938ADD0B46EE41E5728687DC92BA7D608970D5C22B9097E4F2"
+  },
+  {
+    "path": "src/work-session-reader.test.tsx",
+    "sha256": "61A24FE8AA0FDC4652327CB357FD59E6EEDEAF6FE371B4E5DB4F5461B03E19DC"
+  },
+  {
+    "path": "src/work-session-state.tsx",
+    "sha256": "CBB5525E7916F04C1BD2A9D2AC730E0B189D4FACC636EB9DD7681B0D1F279032"
+  },
+  {
+    "path": "src/work-session-state.test.tsx",
+    "sha256": "37C5B049F57D647231CF4CCF49E45D09D76C70E598ADFBFD0491A766CFB49180"
+  },
+  {
+    "path": "src/use-session.ts",
+    "sha256": "7DC0D92F3E9CA199B5365D9C387F9C990B6486BF5096EBDCACCF293105950F94"
+  },
+  {
+    "path": "src/authentication.test.tsx",
+    "sha256": "00D5FEAA1D2642A756885A6593D137C9E334E88649F0DB346D6EA3E67AD547D2"
+  },
+  {
+    "path": "src/App.tsx",
+    "sha256": "85D125EA639FF4F85B2ADBEA295A6D55FC95B4A99E5AAD79947DB4156DDC3B4B"
+  },
+  {
+    "path": "src/work-session.scss",
+    "sha256": "30BE3278D82CF64327BB821AD5EE5B526C783EEC1237CAC56FA69AB64F91422B"
+  }
+]

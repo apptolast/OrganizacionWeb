@@ -21,6 +21,7 @@ public final class CustomizationController {
   private final SaveCustomizationViewUseCase save;
   private final CreateCustomFieldUseCase create;
   private final UpdateCustomFieldUseCase update;
+  private final ReadCustomFieldValuesUseCase readValues;
   private final ObjectMapper json;
 
   public CustomizationController(
@@ -28,11 +29,13 @@ public final class CustomizationController {
       SaveCustomizationViewUseCase save,
       CreateCustomFieldUseCase create,
       UpdateCustomFieldUseCase update,
+      ReadCustomFieldValuesUseCase readValues,
       ObjectMapper json) {
     this.read = read;
     this.save = save;
     this.create = create;
     this.update = update;
+    this.readValues = readValues;
     this.json = json;
   }
 
@@ -51,10 +54,7 @@ public final class CustomizationController {
     acceptable(request);
     query(parameters);
     var parsed = scope(scope);
-    if (!fieldId.matches(
-        "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"))
-      throw invalid("fieldId", "INVALID_FORMAT");
-    var id = UUID.fromString(fieldId);
+    var id = uuid(fieldId, "fieldId");
     var expected = precondition(headers, parsed);
     var body = body(raw, Set.of("label", "active"));
     var label = new CustomFieldLabel(text(body, "label")).value();
@@ -63,6 +63,62 @@ public final class CustomizationController {
     var active = body.get("active").booleanValue();
     return response(update.update(principal.getName(), parsed, id, expected, label, active));
   }
+
+  @GetMapping("/api/v1/projects/{projectId}/custom-fields")
+  public ResponseEntity<ValuesResponse> projectValues(
+      Principal principal,
+      @PathVariable String projectId,
+      @RequestParam MultiValueMap<String, String> parameters,
+      HttpServletRequest request) {
+    acceptable(request);
+    query(parameters);
+    var id = uuid(projectId, "projectId");
+    return valuesResponse(readValues.get(principal.getName(), CustomizationScope.PROJECT, id, id));
+  }
+
+  private static UUID uuid(String value, String field) {
+    if (!value.matches(
+        "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"))
+      throw invalid(field, "INVALID_FORMAT");
+    return UUID.fromString(value);
+  }
+
+  @GetMapping("/api/v1/projects/{projectId}/tasks/{taskId}/custom-fields")
+  public ResponseEntity<ValuesResponse> taskValues(
+      Principal principal,
+      @PathVariable String projectId,
+      @PathVariable String taskId,
+      @RequestParam MultiValueMap<String, String> parameters,
+      HttpServletRequest request) {
+    acceptable(request);
+    query(parameters);
+    var project = uuid(projectId, "projectId");
+    var task = uuid(taskId, "taskId");
+    return valuesResponse(
+        readValues.get(principal.getName(), CustomizationScope.TASK, project, task));
+  }
+
+  private static String revision(CustomizationRevision value) {
+    return value.id() == null ? "unconfigured" : value.id() + ":" + value.version();
+  }
+
+  private static ResponseEntity<ValuesResponse> valuesResponse(CustomFieldValues value) {
+    return ResponseEntity.ok()
+        .eTag(
+            "\"custom-values:"
+                + value.scope()
+                + ":"
+                + value.entityId()
+                + ":schema:"
+                + revision(value.schema())
+                + ":values:"
+                + revision(value.revision())
+                + "\"")
+        .body(new ValuesResponse(value.revision().id() != null, value.values(), value.updatedAt()));
+  }
+
+  public record ValuesResponse(
+      boolean configured, List<CustomFieldValue> values, Instant updatedAt) {}
 
   @PostMapping(value = "/api/v1/me/customization/{scope}/fields", consumes = "application/json")
   public ResponseEntity<CustomizationResponse> create(

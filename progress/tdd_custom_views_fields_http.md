@@ -181,3 +181,21 @@ Guardia en los cuatro métodos de CustomizationController antes de query y puert
 La ausencia de Access-Control-Allow-Origin no acredita lectura desde un navegador de otro origen. La guarda sólo aplica a rutas21 de este controlador; contratos1–20 no se modificaron. Bundle de lectura de valores b72e6ad incorporado por root durante la ventana sin Gradle; todavía no se usa en estos tests.
 
 Freeze seguridad/negociación: regresión del paquete 66/66 sin fallos/errores/skips, formato focal real, EXIT0 `507b84`. Log `customization_http_security_final.log`. Manifest `customization_http_security_freeze.json`; originales43 y REDAccept conservados. No PG, SQL, E2E ni campañas ejecutados. Pendiente revisión root e integración antes de cobertura real de valores.
+
+### Lectura HTTP de valores con puertos reales
+
+Tras commit 0747869, se usa ReadCustomFieldValuesUseCase del bundle b72e6ad. Las dos rutas se incorporan al mismo controlador para reutilizar negociación, validación de query y errores locales. El parser UUID se extrae y reutiliza también para fieldId; no cambia la gramática anterior. No se modifica wiring ni se inventa un bean. El nuevo argumento del constructor requiere el bean real de A antes de integrar en Spring completo.
+
+| Ciclo individual | Evidencia | Log en progress |
+| --- | --- | --- |
+| PROJECT ausente: cuerpo cerrado, ETag compuesto y no-store | RED c982b8 EXIT1 por ruta ausente; GREEN 30aac5 EXIT0 | customization_values_get_red.log / customization_values_get_green.log |
+| TASK: UUID de entrada con letras mayúsculas, cuatro tipos, espacios, fecha y dos revisiones long exactas | RED 36071b EXIT1 por ruta ausente; GREEN b89128 EXIT0 | customization_values_task_red.log / customization_values_task_green.log |
+| Definición activa null sin fila de valores no implica configured | Inicialmente GREEN 015f3c EXIT0 | customization_values_null_initial.log |
+| Query antes de UUID y projectId antes de taskId; UUID abreviado rechazado | 5/5 inicialmente GREEN 802ab0 EXIT0 | customization_values_path_initial.log |
+| Ambas rutas: auth antes de Accept y q0 específico antes de query | 4/4 inicialmente GREEN 771e6c EXIT0 | customization_values_security_initial.log |
+| Ambas rutas: delegación de propiedad404 y almacenamiento503, sin DTO privado ni ETag | Error de compilación del fixture 7dfc79 (faltaba Throwable del constructor real); corregido el fixture, 4/4 inicialmente GREEN bb4f80 EXIT0. No se atribuye RED funcional | customization_values_errors_initial.log / customization_values_errors_green.log |
+| Cero definiciones activas con fila de valores conservada | Inicialmente GREEN c2c463 EXIT0 | customization_values_empty_initial.log |
+
+El DTO público contiene exactamente configured, values y updatedAt. Los IDs/revisiones internos de esquema y fila sólo componen un ETag fuerte; las entradas públicas mantienen fieldId, label, type y value. La lista se proyecta en el orden del puerto, sin consultas por campo ni Clock. Estos slices verifican delegación owner/contexto y traducción de errores; no acreditan joins, filtrado de inactivos, integridad ni snapshot PostgreSQL. PUT valores permanece pendiente del puerto real.
+
+Freeze: formato focal de los dos Java y regresión de CustomizationApiTest, 83/83 sin fallos, errores ni skips; EXIT0 43a02a. Log customization_values_get_final.log y XML backend/build/test-results/test/TEST-com.apptolast.organization.adapter.CustomizationApiTest.xml. Manifest customization_values_get_freeze.json. No suite global, E2E, SQL, mutación ni cambios en modelos/configuración.

@@ -1,0 +1,20 @@
+{
+  "scope": "GET custom field values PROJECT/TASK HTTP only",
+  "exit": 0,
+  "output": "43a02a",
+  "tests": 83,
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/CustomizationController.java",
+      "sha256": "C125B49A079E14D700A7E733CCB670B3A11FCDA74C820DF3DE108C0CB65B05F5"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/CustomizationApiTest.java",
+      "sha256": "1D4AC74BC213E603CEF667AA0E6FD772B3C4E13FED7861BDA8511597FC10BED0"
+    },
+    {
+      "path": "progress/tdd_custom_views_fields_http.md",
+      "sha256": "18A92BAA26B2ACABB18F23214B2D5656DA48DDA77FC4CD9F12F92331F9D57118"
+    }
+  ]
+}

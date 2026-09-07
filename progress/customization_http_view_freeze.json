@@ -1,0 +1,20 @@
+{
+  "scope": "GET configuration and PUT view only",
+  "exit": 0,
+  "output": "6140ab",
+  "tests": 30,
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/CustomizationController.java",
+      "sha256": "96D4EA545106BA63CB176FC416817F07CF64ABE25B1E73165BEBCEBACF9BE97C"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/CustomizationApiTest.java",
+      "sha256": "8CC1D99B1FE79273D028DC47383463E1DE5C5A907445081574CE879279C55F95"
+    },
+    {
+      "path": "progress/tdd_custom_views_fields_http.md",
+      "sha256": "B5A6D723FED5F6D016B9AA4509CAF81DDDA8F5B0944CDE61B80239F667DED1DA"
+    }
+  ]
+}

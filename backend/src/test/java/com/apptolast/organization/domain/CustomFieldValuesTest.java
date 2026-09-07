@@ -33,7 +33,7 @@ class CustomFieldValuesTest {
   }
 
   static java.util.stream.Stream<String> invalidTexts() {
-    return java.util.stream.Stream.of("x".repeat(1001), "\u0000", "\ud800");
+    return java.util.stream.Stream.of("x".repeat(1001), "\u0000", "\ud800", "\udfff");
   }
 
   @ParameterizedTest

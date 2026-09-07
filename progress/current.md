@@ -455,3 +455,33 @@ Los dos refuerzos ya están aprobados por root: 62 pruebas y formato verdes,
 seis hashes/XML verificados en `880f9f`; producción idéntica al freeze anterior.
 Se autoriza PIT backend con el foco revisado y cuatro workers. La campaña
 conservará entradas y reporte original; no editar Java/build mientras corre.
+
+## Feature 21: backend validado e integración visual final
+
+Backend final `1cd88e7` subido. CI `34167438318` terminó SUCCESS, con init,
+build, DNS Docker, 144 E2E y publicador. Log externo
+organizationweb-customization-ci-34167438318.log, SHA256
+C9D7503B4D3B23DC0932E4FF47EADEE24D90473440B8072F574BDE6594FA9E0B.
+No contiene aún el montaje frontend 21.
+
+PIT original: 378/386 KILLED, 3 SURVIVED y 5 NO_COVERAGE, 97.9274611%;
+sin errores ni timeouts. Root verificó XML y 437 hashes estables (`db7081`).
+Tres refuerzos puros observables pasaron 77 casos sin cambios productivos;
+replay dirigido de quince firmas autorizado, reporte separado. No se suma
+su resultado al original ni se excluyen cinco accesores del denominador.
+
+Frontend alcanzó freeze funcional de catorce archivos y 151 casos focales.
+La revisión de estado cerró recuperación de esquema y respuestas obsoletas.
+La regresión global detectó 125 fallos de nueve fixtures legacy que no
+simulan las nuevas rutas GET; B los adapta localmente sin modificar oráculos
+de negocio. Un recorrido de teclado real de C detectó además recuperación
+de foco incompleta tras respuesta perdida: es un hallazgo productivo abierto,
+separado de los mocks, pendiente de diagnóstico/corrección y nuevo freeze.
+
+C tiene en su aislado los commits `2a4edb6` (UI PROJECT), `e2d5389` (UI TASK)
+y `078155d` (SCSS y geometría), revisados por root, aún sin transferir a COMMON.
+Las pruebas usan HTTP/SQL reales; geometría parcial verifica 31 anchos en dos
+estados, con dos axe limpios. Doce campos/texto ampliado también pasaron allí;
+las modalidades restantes y la aceptación final siguen en curso. CSS sólo
+afecta a personalización y usa los tokens existentes. El skip-link de las
+capturas fullPage se comprobó fuera del viewport en una captura real a scroll0.

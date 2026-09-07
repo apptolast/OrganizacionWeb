@@ -12,6 +12,55 @@ import org.junit.jupiter.api.Test;
 
 class SaveCustomFieldValuesTest {
   @Test
+  void s22_valueChangeAdvancesToLaterClockWithMicrosecondPrecision() {
+    var entity = UUID.randomUUID();
+    var field = new CustomFieldDefinition(UUID.randomUUID(), "Texto", CustomFieldType.TEXT, true);
+    var schema =
+        new Customization(
+            UUID.randomUUID(),
+            "owner-a",
+            CustomizationScope.PROJECT,
+            List.of(),
+            List.of(field),
+            Long.MAX_VALUE,
+            Instant.EPOCH);
+    var previous =
+        new CustomFieldValuesCollection(
+            UUID.randomUUID(),
+            Map.of(field.id(), "anterior"),
+            2,
+            Instant.parse("2026-09-07T20:00:00Z"));
+    var clock = mock(Clock.class);
+    when(clock.instant()).thenReturn(Instant.parse("2026-09-07T21:00:00.123456789Z"));
+    var save =
+        new SaveCustomFieldValues(
+            (owner, scope, project, id, operation) ->
+                CustomFieldValues.project(
+                    scope,
+                    id,
+                    Optional.of(schema),
+                    Optional.of(operation.apply(Optional.of(schema), Optional.of(previous)))),
+            clock);
+    var result =
+        save.save(
+            "owner-a",
+            CustomizationScope.PROJECT,
+            entity,
+            entity,
+            new CustomFieldValuesRevision(
+                CustomizationScope.PROJECT,
+                entity,
+                new CustomizationRevision(schema.id(), Long.MAX_VALUE),
+                new CustomizationRevision(previous.id(), 2)),
+            List.of(new CustomFieldInput(field.id(), "nuevo")));
+    assertThat(result.updatedAt()).isEqualTo(Instant.parse("2026-09-07T21:00:00.123456Z"));
+    verify(clock).instant();
+    verifyNoMoreInteractions(clock);
+    assertThat(result.revision()).isEqualTo(new CustomizationRevision(previous.id(), 3));
+    assertThat(result.schema()).isEqualTo(new CustomizationRevision(schema.id(), Long.MAX_VALUE));
+  }
+
+  @Test
   void s22_valueChangeKeepsMonotoneTimeAndDoesNotConsumeTheSchemaRevision() {
     var entity = UUID.randomUUID();
     var field = new CustomFieldDefinition(UUID.randomUUID(), "Texto", CustomFieldType.TEXT, true);

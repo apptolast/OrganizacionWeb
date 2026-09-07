@@ -1,0 +1,167 @@
+[
+  {
+    "class": "com.apptolast.organization.domain.CustomFieldInput",
+    "line": "25",
+    "description": "changed conditional boundary",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "method": "canonical",
+    "originalStatus": "KILLED",
+    "index": "100",
+    "block": "19",
+    "descriptor": "(Lcom/apptolast/organization/domain/CustomFieldType;I)Ljava/lang/Object;"
+  },
+  {
+    "class": "com.apptolast.organization.domain.CustomFieldInput",
+    "line": "39",
+    "description": "changed conditional boundary",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "method": "canonical",
+    "originalStatus": "KILLED",
+    "index": "163",
+    "block": "37",
+    "descriptor": "(Lcom/apptolast/organization/domain/CustomFieldType;I)Ljava/lang/Object;"
+  },
+  {
+    "class": "com.apptolast.organization.domain.CustomFieldInput",
+    "line": "53",
+    "description": "changed conditional boundary",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "method": "canonical",
+    "originalStatus": "KILLED",
+    "index": "210",
+    "block": "46",
+    "descriptor": "(Lcom/apptolast/organization/domain/CustomFieldType;I)Ljava/lang/Object;"
+  },
+  {
+    "class": "com.apptolast.organization.domain.CustomFieldInput",
+    "line": "53",
+    "description": "changed conditional boundary",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "method": "canonical",
+    "originalStatus": "KILLED",
+    "index": "213",
+    "block": "47",
+    "descriptor": "(Lcom/apptolast/organization/domain/CustomFieldType;I)Ljava/lang/Object;"
+  },
+  {
+    "class": "com.apptolast.organization.domain.CustomFieldInput",
+    "line": "26",
+    "description": "changed conditional boundary",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "method": "lambda$canonical$0",
+    "originalStatus": "KILLED",
+    "index": "7",
+    "block": "1",
+    "descriptor": "(I)Z"
+  },
+  {
+    "class": "com.apptolast.organization.domain.CustomFieldInput",
+    "line": "26",
+    "description": "changed conditional boundary",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "method": "lambda$canonical$0",
+    "originalStatus": "SURVIVED",
+    "index": "10",
+    "block": "2",
+    "descriptor": "(I)Z"
+  },
+  {
+    "class": "com.apptolast.organization.domain.CustomFieldInput",
+    "line": "26",
+    "description": "replaced boolean return with true for com/apptolast/organization/domain/CustomFieldInput::lambda$canonical$0",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "method": "lambda$canonical$0",
+    "originalStatus": "KILLED",
+    "index": "20",
+    "block": "5",
+    "descriptor": "(I)Z"
+  },
+  {
+    "class": "com.apptolast.organization.application.SaveCustomFieldValues",
+    "line": "45",
+    "description": "changed conditional boundary",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "method": "lambda$save$0",
+    "originalStatus": "KILLED",
+    "index": "82",
+    "block": "20",
+    "descriptor": "(Lcom/apptolast/organization/domain/CustomizationScope;Ljava/util/UUID;Lcom/apptolast/organization/domain/CustomFieldValuesRevision;Ljava/util/List;Ljava/util/Optional;Ljava/util/Optional;)Lcom/apptolast/organization/domain/CustomFieldValuesCollection;"
+  },
+  {
+    "class": "com.apptolast.organization.application.SaveCustomFieldValues",
+    "line": "49",
+    "description": "replaced boolean return with true for com/apptolast/organization/application/SaveCustomFieldValues::lambda$save$3",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "method": "lambda$save$3",
+    "originalStatus": "KILLED",
+    "index": "8",
+    "block": "3",
+    "descriptor": "(Lcom/apptolast/organization/domain/CustomFieldInput;Lcom/apptolast/organization/domain/CustomFieldDefinition;)Z"
+  },
+  {
+    "class": "com.apptolast.organization.application.SaveCustomFieldValues",
+    "line": "70",
+    "description": "replaced boolean return with true for com/apptolast/organization/application/SaveCustomFieldValues::lambda$save$4",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "method": "lambda$save$4",
+    "originalStatus": "KILLED",
+    "index": "17",
+    "block": "6",
+    "descriptor": "(Ljava/util/Optional;Ljava/util/Map$Entry;)Z"
+  },
+  {
+    "class": "com.apptolast.organization.application.SaveCustomFieldValues",
+    "line": "83",
+    "description": "replaced boolean return with true for com/apptolast/organization/application/SaveCustomFieldValues::lambda$save$5",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "method": "lambda$save$5",
+    "originalStatus": "SURVIVED",
+    "index": "7",
+    "block": "2",
+    "descriptor": "(Ljava/time/Instant;Lcom/apptolast/organization/domain/CustomFieldValuesCollection;)Z"
+  },
+  {
+    "class": "com.apptolast.organization.domain.CustomFieldLabel",
+    "line": "9",
+    "description": "changed conditional boundary",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "method": "<init>",
+    "originalStatus": "KILLED",
+    "index": "25",
+    "block": "6",
+    "descriptor": "(Ljava/lang/String;)V"
+  },
+  {
+    "class": "com.apptolast.organization.domain.CustomFieldLabel",
+    "line": "10",
+    "description": "changed conditional boundary",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "method": "lambda$new$0",
+    "originalStatus": "KILLED",
+    "index": "7",
+    "block": "1",
+    "descriptor": "(I)Z"
+  },
+  {
+    "class": "com.apptolast.organization.domain.CustomFieldLabel",
+    "line": "10",
+    "description": "changed conditional boundary",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "method": "lambda$new$0",
+    "originalStatus": "SURVIVED",
+    "index": "10",
+    "block": "2",
+    "descriptor": "(I)Z"
+  },
+  {
+    "class": "com.apptolast.organization.domain.CustomFieldLabel",
+    "line": "10",
+    "description": "replaced boolean return with true for com/apptolast/organization/domain/CustomFieldLabel::lambda$new$0",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "method": "lambda$new$0",
+    "originalStatus": "KILLED",
+    "index": "20",
+    "block": "5",
+    "descriptor": "(I)Z"
+  }
+]

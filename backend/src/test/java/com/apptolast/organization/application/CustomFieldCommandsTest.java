@@ -415,6 +415,7 @@ class CustomFieldCommandsTest {
         "\u2003\u00a0",
         "\u0000",
         "\ud800",
+        "\udfff",
         "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       })
   void s4_invalidLabelIsRejectedBeforeReadingConfiguration(String label) {

@@ -1,0 +1,26 @@
+[
+  {
+    "class": "domain.CustomFieldValuesTest",
+    "sha256": "05599488AB2A5E15236CE4EDC58D44755A3CE78B06BA3407F2D0F944293F1E91",
+    "errors": "0",
+    "failures": "0",
+    "tests": "34",
+    "skipped": "0"
+  },
+  {
+    "class": "application.CustomFieldCommandsTest",
+    "sha256": "E3B4A29922D094035C34D9CC8A49A0435D59C3DFE6E22739380941CC83E53F84",
+    "errors": "0",
+    "failures": "0",
+    "tests": "27",
+    "skipped": "0"
+  },
+  {
+    "class": "application.SaveCustomFieldValuesTest",
+    "sha256": "5D32C78B00B9A87BDDCBFDC4DB085D171A168F368F5A56EFA023A168F2864762",
+    "errors": "0",
+    "failures": "0",
+    "tests": "16",
+    "skipped": "0"
+  }
+]

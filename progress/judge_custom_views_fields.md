@@ -194,3 +194,22 @@ Sólo cambia la clase de pruebas. Root verificó seis hashes del manifiesto
 refinado y su XML de 62 casos, cero fallos/errores (`880f9f`). La primera
 regresión 315/11 queda preservada, no se presenta como reejecutada.
 Backend aprobado para iniciar PIT; no es todavía aprobación de mutación.
+
+## Mutación backend aprobada
+
+Root verificó el XML original y los 437 hashes before/after (`db7081`):
+378 KILLED de 386, tres SURVIVED y cinco NO_COVERAGE, 97.9274611%, sin
+errores ni timeouts. Los tres supervivientes eran límites observables de
+Unicode y avance temporal. Se revisaron los refuerzos test-only y sus tres
+XML, 77 casos verdes (`c92819`), sin modificación productiva.
+
+Replay dirigido autorizado con init de tres clases y dos mutadores, separado
+del original. Root comprobó las quince firmas completas previstas contra
+el XML real, todas KILLED, incluidos los tres objetivos (`ac8c59`); 438 inputs
+estables. XML SHA256 `55BB9C3525C7514DD2CF9A6542A81953036EB648E3833A73ADFCB59C75177478`.
+No se agregan campañas ni se sustituye el score original. Los cinco accesores
+sin cobertura conservan su clasificación y el denominador original.
+
+Puerta de mutación backend superada. CI `34167438318` sobre `1cd88e7` también
+terminó SUCCESS con 144 E2E y publicador. Frontend, integración final y
+aceptación productiva siguen pendientes; no se declara terminada la feature.

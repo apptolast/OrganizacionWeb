@@ -49,6 +49,19 @@ Estado: **IN_PROGRESS**, sin aprobación de cierre de la feature 21.
   Revisados esquema compuesto, orden de definiciones, tipos, límites,
   aborto y confirmación coherente. Formato, ESLint y TypeScript verdes
   en `9e69bc`; ejecución focal de 88 pruebas en `aece31`.
+- Valores: cuatro archivos puros revisados e integrados en `1522d39`;
+  treinta pruebas de tipos, fechas, Unicode, ausencia y números exactos.
+  Lectura PostgreSQL nominal y bean real integrados en `98b53a4`, con cinco
+  pruebas de persistencia y tres de wiring. Ocho hashes coinciden con
+  `customization_values_checkpoint_manifest.json`. Los seis XML originales
+  suman 120 pruebas verdes, pero incluyen quince de Save aún en desarrollo;
+  esas quince no acreditan un comando integrado en este corte.
+  Siguen pendientes la validación integral de filas y traducción de errores.
+- GET de valores `a403f5d`, desde `1267146`: tres hashes y XML de 83 casos
+  MVC verificados. Se revisaron ambas rutas, UUID completo, errores privados,
+  proyección cerrada y ETag compuesto con BIGINT exacto, cero, false y null.
+  Integra el constructor sólo después del bean real. No sustituye las
+  pruebas integradas ni acredita todavía PUT de valores.
 
 ## Hallazgos que deben resolverse antes del cierre
 
@@ -105,6 +118,9 @@ Estado: **IN_PROGRESS**, sin aprobación de cierre de la feature 21.
    Log externo: `organizationweb-customization-ci-34162746457.log`, SHA256
    `1244733DB8F1768E9FB3FB1FBDF3C25B9EAFD66EBA65BECFA97610C3EA74BCF6`.
    Los pasos posteriores de build y E2E aún no se ejecutaron en esta CI.
+   Corregido en `f46200c`: único cambio funcional target("19"), con todas
+   las aserciones anteriores conservadas. Hash y XML de veinte pruebas
+   verdes verificados por root (`0dd56d`). Nueva CI `34163594795` en curso.
 
 ## Puertas pendientes
 

@@ -367,3 +367,20 @@ histórica de migración de apariencia: usa latest y ahora incluye V20.
 Se ha delegado fijar su destino V19 y preservar una prueba propia de V20.
 Log completo conservado fuera de Git; hash en el informe de revisión.
 Build y E2E posteriores siguen pendientes. No se declara cerrada la feature.
+
+## Feature 21: lectura real de valores y contratos de guardado integrados
+
+Reparación de migración histórica en `f46200c`, veinte pruebas verdes;
+CI `34163594795` en curso. No cancelar con un push documental mientras
+aporte verificación correctiva nueva.
+
+Puertos PUT y validación tipada en `1522d39`, transferidos al autor HTTP.
+Lectura PostgreSQL y bean real en `98b53a4`; GET de valores en `a403f5d`
+desde `1267146`. Ocho hashes backend y tres HTTP revisados. Los 83 MVC
+del corte HTTP no acreditan PostgreSQL; cinco PG y tres wiring del corte
+backend aportan evidencia separada. Persistencia nominal integrada,
+integridad completa de filas y comandos todavía en desarrollo.
+
+COPYDONE enviado a backend: puede continuar Gradle tras integrar GET.
+Frontend continúa estado y formularios. Producción sigue en `ed00ad4`;
+no hay cierre ni despliegue de la feature 21, ni cambios de alcance22–30.

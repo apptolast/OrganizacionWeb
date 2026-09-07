@@ -20,11 +20,12 @@ Se creó una copia PostgreSQL real en el servidor y se restauró en una instanci
 
 ## Orden de trabajo
 
-1. Cerrar la mejora de resolución DNS de Nginx para que el proxy arranque y se recupere aunque la API todavía no esté disponible. El ensayo local pasó; CI detectó una incompatibilidad del fixture de cambio de IP que se está corrigiendo. Esta mejora aún no está desplegada.
+1. Terminar apariencia20: completar SCSS, integración, pruebas de navegador, UX y mutación de la interfaz. Backend, HTTP y recuperación real tras reiniciar la API ya están revisados.
 2. Conservar la aceptación del MVP y completar las obligaciones operativas de respaldo externo y recuperación que siguen pendientes.
-3. Terminar apariencia20: persistencia y concurrencia, contrato HTTP, estado compartido y formulario, SCSS, integración, pruebas de navegador, UX y mutación.
-4. Continuar21–30 con contratos acotados: vistas/campos, exportación/importación, API de integración, webhooks, calendarios, GitHub, otros conectores y automatizaciones.
+3. Continuar21–30 con contratos acotados: vistas/campos, exportación/importación, API de integración, webhooks, calendarios, GitHub, otros conectores y automatizaciones.
+
+La mejora DNS está desplegada con aplicación4d9469a y catálogo770b736. PR22 y PR30 fusionadas con CI verde; check27/2/0 y apply38/5/0, ambos liberados correctamente. API/web terminaron su actualización, PostgreSQL/Rabbit conservaron sus contenedores, los20servicios están1/1 y las ocho rutas anteriores mantienen sus respuestas. La aceptación HTTPS posterior conserva sesión cerrada, tiempo neto, historial y revisión semanal. La sesión privada utilizada para verificarlo se cerró correctamente.
 
 ## Estimaciones y límites
 
-El MVP ya se puede usar. Apariencia tiene el backend integrado y una regresión de 2.384 pruebas Java verde; la mutación original está en curso y quedan la integración visual, regresiones del frontend, pruebas de navegador, UX y mutación de la interfaz. Los trabajos avanzados requieren contratos y proveedores concretos, por lo que no hay una estimación total fiable ni una garantía de terminar con una recarga o cuota determinada. Los plazos anteriores de despliegue quedan sustituidos por este estado comprobado.
+El MVP ya se puede usar. Apariencia tiene el backend integrado, una regresión de 2.384 pruebas Java verde y mutación original153/159 (96,23%). Tres refuerzos posteriores verifican los cuatro cambios observables que faltaban, mediante un replay separado; no se suman campañas. Quedan la integración visual, regresiones finales, UX y mutación de la interfaz. Los trabajos avanzados requieren contratos y proveedores concretos, por lo que no hay una estimación total fiable ni una garantía de terminar con una recarga o cuota determinada. Los plazos anteriores de despliegue quedan sustituidos por este estado comprobado.

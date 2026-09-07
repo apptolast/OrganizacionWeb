@@ -1,0 +1,26 @@
+[
+  {
+    "sha256": "B3EE1EA07EB2838DC6F25BC9057125E93043FFE7FB6D5B3ABF81DF1EB28A24F9",
+    "path": "e2e/end-time-notification.spec.mjs"
+  },
+  {
+    "sha256": "1E48868F17AC3A1D58B1E9FB49A47F01755ACA8A651FCD96D2976BFF4D64BBA9",
+    "path": "progress/end_e2e_nominal_final.log"
+  },
+  {
+    "sha256": "230FDED8D2DB2EB3ED5841D8C7448D142130CFB5641AEBE1A15A84A193843774",
+    "path": "progress/end_e2e_deadline_initial.log"
+  },
+  {
+    "sha256": "A90BB6799269CFFE011B4715ACB1D27D12B0025C81235AF224F7EF4423C0F924",
+    "path": "progress/end_e2e_recovery_initial.log"
+  },
+  {
+    "sha256": "10E9E5DD8EDBEEF0EC9CAC7D05A54872F94E71BA70EF8A2916727561FBBD125F",
+    "path": "progress/end_e2e_recovery_final.log"
+  },
+  {
+    "sha256": "605654BDBEFD6A0F7D3CD9A146D3DBE6A2B83108CECD136DD5D1409744AF3D1C",
+    "path": "progress/tdd_end_time_e2e.md"
+  }
+]

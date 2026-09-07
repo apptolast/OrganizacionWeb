@@ -1,0 +1,48 @@
+[
+  {
+    "path": "frontend/src/App.tsx",
+    "sha256": "D8F64EB9C8305CE334EDFBA269D44BBC249F54EE63F5F5B51F2F6924633A3AAC",
+    "nodes": [
+      {
+        "label": "weekly review route recognition",
+        "kind": "VariableDeclaration",
+        "range": "15:8-15:69",
+        "text": "weeklyReview = /^\\/revision-semanal(?:\\?[^#]*)?$/.test(route)"
+      },
+      {
+        "label": "complete weekly review conditional",
+        "kind": "ConditionalExpression",
+        "range": "27:12-35:24",
+        "text": "weeklyReview\n            ? \"Revisión semanal\"\n            : history\n              ? \"Historial\"\n              : availability\n                ? \"Disponibilidad\"\n                : route.startsWith(\"/proyectos\")\n                  ? \"Proyectos\"\n                  : null"
+      },
+      {
+        "label": "complete weekly review conditional",
+        "kind": "ConditionalExpression",
+        "range": "42:10-68:7",
+        "text": "weeklyReview ? (\n        <WeeklyReview route={route} />\n      ) : history ? (\n        <History route={route} />\n      ) : availability ? (\n        <Availability />\n      ) : sessionRoute ? (\n        <WorkSessionReader\n          key={route}\n          projectId={sessionRoute[1]}\n          taskId={sessionRoute[2]}\n          id={sessionRoute[3]}\n        />\n      ) : taskRoute ? (\n        <TaskReader key={route} projectId={taskRoute[1]} id={taskRoute[2]} />\n      ) : /^\\/proyectos\\/[^/?]+\\/editar$/.test(route) ? (\n        <ProjectEditor key={route} route={route} />\n      ) : /^\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/.test(route) ? (\n        <ProjectReader key={route} route={route} />\n      ) : (\n        <main id=\"proyectos\" tabIndex={-1}>\n          <h1>Página no encontrada</h1>\n          <RouteLink href=\"/\">Hoy</RouteLink>\n          {\" · \"}\n          <RouteLink href=\"/proyectos\">Proyectos</RouteLink>\n        </main>\n      )"
+      }
+    ]
+  },
+  {
+    "path": "frontend/src/workspace.tsx",
+    "sha256": "3FEF8760F2DB65D5FE09967A1F3AB27D30BDB773BBC933FF2FF9B18EAF2478E3",
+    "nodes": [
+      {
+        "label": "weekly review link",
+        "kind": "JsxElement",
+        "range": "67:10-72:22",
+        "text": "<RouteLink\n            href=\"/revision-semanal\"\n            aria-current={section === \"Revisión semanal\" ? \"page\" : undefined}\n          >\n            Revisión semanal\n          </RouteLink>"
+      }
+    ]
+  },
+  {
+    "path": "frontend/src/weekly-review-api.ts",
+    "sha256": "9A9C336BD6946099E23C7CC1CF655C229A698365C38308A8EF1DC8BD94631F76",
+    "scope": "full"
+  },
+  {
+    "path": "frontend/src/weekly-review.tsx",
+    "sha256": "284098F9B523FD289E026C5BFD60C626C9437D9A89354CEC684F4AA2A11FE16C",
+    "scope": "full"
+  }
+]

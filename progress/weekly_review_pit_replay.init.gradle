@@ -1,0 +1,14 @@
+// Directed weekly review19 replay. Original campaign and inherited gates remain intact.
+allprojects {
+    afterEvaluate { project ->
+        def pit = project.extensions.findByName('pitest')
+        if (pit != null) {
+            pit.targetClasses.set([
+                'com.apptolast.organization.application.ReadWeeklyReview',
+                'com.apptolast.organization.domain.WeeklyReviewWindow'
+            ] as Set)
+            pit.mutators.set(['CONDITIONALS_BOUNDARY', 'VOID_METHOD_CALLS'] as Set)
+            pit.reportDir.set(project.layout.buildDirectory.dir('reports/pitest-weekly-review-replay'))
+        }
+    }
+}

@@ -9,8 +9,10 @@ import { WorkSessionReader } from "./work-session-reader";
 import { Today } from "./today";
 import { Availability } from "./availability";
 import { History } from "./history";
+import { WeeklyReview } from "./weekly-review";
 export function App({ sessionControls }: { sessionControls?: ReactNode }) {
   const route = useRoute();
+  const weeklyReview = /^\/revision-semanal(?:\?[^#]*)?$/.test(route);
   const history = /^\/historial(?:\?[^#]*)?$/.test(route);
   const availability = route === "/disponibilidad";
   const taskRoute = /^\/proyectos\/([^/]+)\/tareas\/([^/?]+)$/.exec(route);
@@ -22,19 +24,23 @@ export function App({ sessionControls }: { sessionControls?: ReactNode }) {
       section={
         route === "/"
           ? "Hoy"
-          : history
-            ? "Historial"
-            : availability
-              ? "Disponibilidad"
-              : route.startsWith("/proyectos")
-                ? "Proyectos"
-                : null
+          : weeklyReview
+            ? "Revisión semanal"
+            : history
+              ? "Historial"
+              : availability
+                ? "Disponibilidad"
+                : route.startsWith("/proyectos")
+                  ? "Proyectos"
+                  : null
       }
     >
       {route === "/" ? (
         <Today />
       ) : route === "/proyectos/nuevo" ? (
         <CreateProjectScreen />
+      ) : weeklyReview ? (
+        <WeeklyReview route={route} />
       ) : history ? (
         <History route={route} />
       ) : availability ? (

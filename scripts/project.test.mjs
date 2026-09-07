@@ -1127,3 +1127,86 @@ test("default Stryker retains history modules and full new integration nodes", (
   assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
   assert.equal(config.thresholds.break, 80);
 });
+
+test("weekly review backend invokes only its fixed PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "weekly_review-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=weekly_review"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
+test("weekly review frontend invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "weekly_review-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.weekly-review.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("weekly review PIT includes complete new modules and wiring with all JUnit candidates", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  const selected = build.match(
+    /val weeklyReviewClasses = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(selected);
+  assert.deepEqual(
+    [...selected.matchAll(/"([^"]+)"/g)].map((entry) => entry[1]),
+    [
+      "application.ReadWeeklyReview",
+      "application.ReadWeeklyReviewUseCase",
+      "application.WeeklyReviewQueries",
+      "domain.WeeklyReview*",
+      "adapter.persistence.PostgresWeeklyReviewQueries*",
+      "adapter.http.WeeklyReviewController*",
+      "adapter.config.ApplicationConfiguration",
+    ].map((name) => `com.apptolast.organization.${name}`),
+  );
+  assert.match(build, /val weeklyReviewOnly = scope == "weekly_review"/);
+  assert.match(build, /weeklyReviewOnly -> weeklyReviewClasses/);
+  assert.match(
+    build,
+    /weeklyReviewOnly -> setOf\("com\.apptolast\.organization\.\*"\)/,
+  );
+  assert.match(build, /else -> [^\n]+ \+ weeklyReviewClasses/);
+  assert.match(
+    build,
+    /if \(weeklyReviewOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-weekly-review"\)\)/,
+  );
+  assert.match(build, /mutationThreshold\.set\(80\)/);
+  assert.match(build, /threads\.set\(4\)/);
+});
+
+test("default PIT exposes weekly review adapter tests for the newly selected classes", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  const selected = build.match(
+    /val weeklyReviewAdapterTests = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(selected);
+  assert.deepEqual(
+    [...selected.matchAll(/"([^"]+)"/g)].map((entry) => entry[1]),
+    [
+      "com.apptolast.organization.adapter.WeeklyReviewApiTest",
+      "com.apptolast.organization.adapter.persistence.WeeklyReview*Test",
+      "com.apptolast.organization.adapter.config.ApplicationWiringTest",
+    ],
+  );
+  assert.match(
+    build,
+    /else -> core \+ authenticationTests[^\n]+ \+ weeklyReviewAdapterTests/,
+  );
+});

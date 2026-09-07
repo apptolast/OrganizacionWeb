@@ -1,0 +1,1017 @@
+{
+  "originalRawSha256": "0FC84106ADDF2EB0A31793DA756242CAC037494731E70A276D64625DC36FBF52",
+  "hashes": [
+    {
+      "path": "frontend/src/weekly-review.tsx",
+      "sha256": "284098F9B523FD289E026C5BFD60C626C9437D9A89354CEC684F4AA2A11FE16C"
+    },
+    {
+      "path": "frontend/src/weekly-review-api.ts",
+      "sha256": "9A9C336BD6946099E23C7CC1CF655C229A698365C38308A8EF1DC8BD94631F76"
+    },
+    {
+      "path": "frontend/src/weekly-review.test.tsx",
+      "sha256": "733647C7452CAB5EB491427D72D58D7B30F07C10014FD94065DB1A7E94B688C9"
+    },
+    {
+      "path": "frontend/src/weekly-review-api.test.ts",
+      "sha256": "C415A2C91C6E24B520ACE691C859C97D2EAE67FA2DF4DD0FEDBB2B55CB49BEA7"
+    },
+    {
+      "path": "frontend/src/styles.scss",
+      "sha256": "53E62F450C3247E8F146B83653A8BBA0F61FDB4ADFF545C04B8374E948689A15"
+    },
+    {
+      "path": "e2e/weekly-review-ux.spec.mjs",
+      "sha256": "DFCCAD42CA435C579FEAD3C284D73D0D8DA93A0B34047177009509A233F75048"
+    },
+    {
+      "path": "frontend/stryker.weekly-review.config.json",
+      "sha256": "13A67790F5034A697B699B91438A48FA0371F89E2F7726A9C402716FF6C91602"
+    }
+  ],
+  "nodes": [
+    {
+      "file": "src/weekly-review.tsx",
+      "range": "37:12-37:51",
+      "kind": "ArrowFunction",
+      "text": "() => () => zoneLookup.current?.abort()"
+    },
+    {
+      "file": "src/weekly-review.tsx",
+      "range": "39:2-45:9",
+      "kind": "ExpressionStatement",
+      "text": "useEffect(() => {\n    const moved = (event: FocusEvent) => {\n      if (event.target !== initiator.current) initiator.current = null;\n    };\n    document.addEventListener(\"focusin\", moved);\n    return () => document.removeEventListener(\"focusin\", moved);\n  }, []);"
+    },
+    {
+      "file": "src/weekly-review.tsx",
+      "range": "51:6-53:46",
+      "kind": "BinaryExpression",
+      "text": "control &&\n      !control.isConnected &&\n      document.activeElement === document.body"
+    },
+    {
+      "file": "src/weekly-review.tsx",
+      "range": "283:29-283:49",
+      "kind": "ArrowFunction",
+      "text": "(value) => value + 1"
+    },
+    {
+      "file": "src/weekly-review-api.ts",
+      "range": "93:6-93:64",
+      "kind": "BinaryExpression",
+      "text": "monday === null || (((monday + 3n) % 7n) + 7n) % 7n !== 0n"
+    },
+    {
+      "file": "src/weekly-review-api.ts",
+      "range": "138:5-142:5",
+      "kind": "CallExpression",
+      "text": "days.every(\n      (day) =>\n        (day.capacityMicroseconds === null) ===\n        (totals.capacityMicroseconds === null),\n    )"
+    },
+    {
+      "file": "src/weekly-review-api.ts",
+      "range": "147:30-147:69",
+      "kind": "BinaryExpression",
+      "text": "sum + BigInt(day.capacityMicroseconds!)"
+    }
+  ],
+  "signatures": [
+    {
+      "file": "src/weekly-review.tsx",
+      "id": "388",
+      "mutatorName": "ArrowFunction",
+      "replacement": "() => undefined",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 28,
+      "coveredBy": [
+        "534",
+        "535",
+        "536",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561"
+      ],
+      "location": {
+        "end": {
+          "column": 52,
+          "line": 37
+        },
+        "start": {
+          "column": 13,
+          "line": 37
+        }
+      },
+      "context": "  const [zoneFailure, setZoneFailure] = useState(false);\n  const zoneLookup = useRef<AbortController | null>(null);\n  useEffect(() => () => zoneLookup.current?.abort(), []);\n  const initiator = useRef<HTMLElement | null>(null);\n  useEffect(() => {"
+    },
+    {
+      "file": "src/weekly-review.tsx",
+      "id": "389",
+      "mutatorName": "ArrowFunction",
+      "replacement": "() => undefined",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 28,
+      "coveredBy": [
+        "534",
+        "535",
+        "536",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561"
+      ],
+      "location": {
+        "end": {
+          "column": 52,
+          "line": 37
+        },
+        "start": {
+          "column": 19,
+          "line": 37
+        }
+      },
+      "context": "  const [zoneFailure, setZoneFailure] = useState(false);\n  const zoneLookup = useRef<AbortController | null>(null);\n  useEffect(() => () => zoneLookup.current?.abort(), []);\n  const initiator = useRef<HTMLElement | null>(null);\n  useEffect(() => {"
+    },
+    {
+      "file": "src/weekly-review.tsx",
+      "id": "392",
+      "mutatorName": "CallExpression",
+      "replacement": ";",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 28,
+      "coveredBy": [
+        "534",
+        "535",
+        "536",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561"
+      ],
+      "location": {
+        "end": {
+          "column": 10,
+          "line": 45
+        },
+        "start": {
+          "column": 3,
+          "line": 39
+        }
+      },
+      "context": "  useEffect(() => () => zoneLookup.current?.abort(), []);\n  const initiator = useRef<HTMLElement | null>(null);\n  useEffect(() => {\n    const moved = (event: FocusEvent) => {\n      if (event.target !== initiator.current) initiator.current = null;\n    };\n    document.addEventListener(\"focusin\", moved);\n    return () => document.removeEventListener(\"focusin\", moved);\n  }, []);\n  useLayoutEffect(() => {\n    if (loading) return;"
+    },
+    {
+      "file": "src/weekly-review.tsx",
+      "id": "393",
+      "mutatorName": "BlockStatement",
+      "replacement": "{}",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 28,
+      "coveredBy": [
+        "534",
+        "535",
+        "536",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561"
+      ],
+      "location": {
+        "end": {
+          "column": 4,
+          "line": 45
+        },
+        "start": {
+          "column": 19,
+          "line": 39
+        }
+      },
+      "context": "  useEffect(() => () => zoneLookup.current?.abort(), []);\n  const initiator = useRef<HTMLElement | null>(null);\n  useEffect(() => {\n    const moved = (event: FocusEvent) => {\n      if (event.target !== initiator.current) initiator.current = null;\n    };\n    document.addEventListener(\"focusin\", moved);\n    return () => document.removeEventListener(\"focusin\", moved);\n  }, []);\n  useLayoutEffect(() => {\n    if (loading) return;"
+    },
+    {
+      "file": "src/weekly-review.tsx",
+      "id": "394",
+      "mutatorName": "BlockStatement",
+      "replacement": "{}",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 28,
+      "coveredBy": [
+        "534",
+        "535",
+        "536",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561"
+      ],
+      "location": {
+        "end": {
+          "column": 6,
+          "line": 42
+        },
+        "start": {
+          "column": 42,
+          "line": 40
+        }
+      },
+      "context": "  const initiator = useRef<HTMLElement | null>(null);\n  useEffect(() => {\n    const moved = (event: FocusEvent) => {\n      if (event.target !== initiator.current) initiator.current = null;\n    };\n    document.addEventListener(\"focusin\", moved);\n    return () => document.removeEventListener(\"focusin\", moved);"
+    },
+    {
+      "file": "src/weekly-review.tsx",
+      "id": "395",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 28,
+      "coveredBy": [
+        "534",
+        "535",
+        "536",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561"
+      ],
+      "location": {
+        "end": {
+          "column": 45,
+          "line": 41
+        },
+        "start": {
+          "column": 11,
+          "line": 41
+        }
+      },
+      "context": "  useEffect(() => {\n    const moved = (event: FocusEvent) => {\n      if (event.target !== initiator.current) initiator.current = null;\n    };\n    document.addEventListener(\"focusin\", moved);"
+    },
+    {
+      "file": "src/weekly-review.tsx",
+      "id": "396",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 28,
+      "coveredBy": [
+        "534",
+        "535",
+        "536",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561"
+      ],
+      "location": {
+        "end": {
+          "column": 45,
+          "line": 41
+        },
+        "start": {
+          "column": 11,
+          "line": 41
+        }
+      },
+      "context": "  useEffect(() => {\n    const moved = (event: FocusEvent) => {\n      if (event.target !== initiator.current) initiator.current = null;\n    };\n    document.addEventListener(\"focusin\", moved);"
+    },
+    {
+      "file": "src/weekly-review.tsx",
+      "id": "397",
+      "mutatorName": "EqualityOperator",
+      "replacement": "event.target === initiator.current",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 28,
+      "coveredBy": [
+        "534",
+        "535",
+        "536",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561"
+      ],
+      "location": {
+        "end": {
+          "column": 45,
+          "line": 41
+        },
+        "start": {
+          "column": 11,
+          "line": 41
+        }
+      },
+      "context": "  useEffect(() => {\n    const moved = (event: FocusEvent) => {\n      if (event.target !== initiator.current) initiator.current = null;\n    };\n    document.addEventListener(\"focusin\", moved);"
+    },
+    {
+      "file": "src/weekly-review.tsx",
+      "id": "399",
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 28,
+      "coveredBy": [
+        "534",
+        "535",
+        "536",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561"
+      ],
+      "location": {
+        "end": {
+          "column": 40,
+          "line": 43
+        },
+        "start": {
+          "column": 31,
+          "line": 43
+        }
+      },
+      "context": "      if (event.target !== initiator.current) initiator.current = null;\n    };\n    document.addEventListener(\"focusin\", moved);\n    return () => document.removeEventListener(\"focusin\", moved);\n  }, []);"
+    },
+    {
+      "file": "src/weekly-review.tsx",
+      "id": "409",
+      "mutatorName": "LogicalOperator",
+      "replacement": "control && !control.isConnected || document.activeElement === document.body",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 27,
+      "coveredBy": [
+        "534",
+        "536",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561"
+      ],
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 53
+        },
+        "start": {
+          "column": 7,
+          "line": 51
+        }
+      },
+      "context": "    initiator.current = null;\n    if (\n      control &&\n      !control.isConnected &&\n      document.activeElement === document.body\n    )\n      heading.current?.focus();"
+    },
+    {
+      "file": "src/weekly-review.tsx",
+      "id": "410",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 27,
+      "coveredBy": [
+        "534",
+        "536",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561"
+      ],
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 52
+        },
+        "start": {
+          "column": 7,
+          "line": 51
+        }
+      },
+      "context": "    initiator.current = null;\n    if (\n      control &&\n      !control.isConnected &&\n      document.activeElement === document.body\n    )"
+    },
+    {
+      "file": "src/weekly-review.tsx",
+      "id": "413",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 11,
+      "coveredBy": [
+        "537",
+        "539",
+        "543",
+        "544",
+        "547",
+        "548",
+        "549",
+        "550",
+        "552",
+        "554",
+        "558"
+      ],
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 53
+        },
+        "start": {
+          "column": 7,
+          "line": 53
+        }
+      },
+      "context": "      control &&\n      !control.isConnected &&\n      document.activeElement === document.body\n    )\n      heading.current?.focus();"
+    },
+    {
+      "file": "src/weekly-review.tsx",
+      "id": "695",
+      "mutatorName": "ArrowFunction",
+      "replacement": "() => undefined",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 2,
+      "coveredBy": [
+        "537",
+        "549"
+      ],
+      "location": {
+        "end": {
+          "column": 50,
+          "line": 283
+        },
+        "start": {
+          "column": 30,
+          "line": 283
+        }
+      },
+      "context": "                  if (event.currentTarget.contains(document.activeElement))\n                    initiator.current = event.currentTarget;\n                  setRefresh((value) => value + 1);\n                }\n              }}"
+    },
+    {
+      "file": "src/weekly-review-api.ts",
+      "id": "155",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 41,
+      "coveredBy": [
+        "534",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561",
+        "711",
+        "723",
+        "724",
+        "725",
+        "726",
+        "728",
+        "729",
+        "730",
+        "731",
+        "732",
+        "733",
+        "734",
+        "742",
+        "747",
+        "748"
+      ],
+      "location": {
+        "end": {
+          "column": 65,
+          "line": 93
+        },
+        "start": {
+          "column": 7,
+          "line": 93
+        }
+      },
+      "context": "    throw new Error(\"Revisión semanal inválida\");\n  const monday = civilDay(value.weekStart);\n  if (monday === null || (((monday + 3n) % 7n) + 7n) % 7n !== 0n)\n    throw new Error(\"Revisión semanal inválida\");\n  if ("
+    },
+    {
+      "file": "src/weekly-review-api.ts",
+      "id": "156",
+      "mutatorName": "LogicalOperator",
+      "replacement": "monday === null && ((monday + 3n) % 7n + 7n) % 7n !== 0n",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 41,
+      "coveredBy": [
+        "534",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561",
+        "711",
+        "723",
+        "724",
+        "725",
+        "726",
+        "728",
+        "729",
+        "730",
+        "731",
+        "732",
+        "733",
+        "734",
+        "742",
+        "747",
+        "748"
+      ],
+      "location": {
+        "end": {
+          "column": 65,
+          "line": 93
+        },
+        "start": {
+          "column": 7,
+          "line": 93
+        }
+      },
+      "context": "    throw new Error(\"Revisión semanal inválida\");\n  const monday = civilDay(value.weekStart);\n  if (monday === null || (((monday + 3n) % 7n) + 7n) % 7n !== 0n)\n    throw new Error(\"Revisión semanal inválida\");\n  if ("
+    },
+    {
+      "file": "src/weekly-review-api.ts",
+      "id": "159",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 41,
+      "coveredBy": [
+        "534",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561",
+        "711",
+        "723",
+        "724",
+        "725",
+        "726",
+        "728",
+        "729",
+        "730",
+        "731",
+        "732",
+        "733",
+        "734",
+        "742",
+        "747",
+        "748"
+      ],
+      "location": {
+        "end": {
+          "column": 65,
+          "line": 93
+        },
+        "start": {
+          "column": 26,
+          "line": 93
+        }
+      },
+      "context": "    throw new Error(\"Revisión semanal inválida\");\n  const monday = civilDay(value.weekStart);\n  if (monday === null || (((monday + 3n) % 7n) + 7n) % 7n !== 0n)\n    throw new Error(\"Revisión semanal inválida\");\n  if ("
+    },
+    {
+      "file": "src/weekly-review-api.ts",
+      "id": "163",
+      "mutatorName": "ArithmeticOperator",
+      "replacement": "(monday + 3n) * 7n",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 41,
+      "coveredBy": [
+        "534",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561",
+        "711",
+        "723",
+        "724",
+        "725",
+        "726",
+        "728",
+        "729",
+        "730",
+        "731",
+        "732",
+        "733",
+        "734",
+        "742",
+        "747",
+        "748"
+      ],
+      "location": {
+        "end": {
+          "column": 46,
+          "line": 93
+        },
+        "start": {
+          "column": 28,
+          "line": 93
+        }
+      },
+      "context": "    throw new Error(\"Revisión semanal inválida\");\n  const monday = civilDay(value.weekStart);\n  if (monday === null || (((monday + 3n) % 7n) + 7n) % 7n !== 0n)\n    throw new Error(\"Revisión semanal inválida\");\n  if ("
+    },
+    {
+      "file": "src/weekly-review-api.ts",
+      "id": "271",
+      "mutatorName": "MethodExpression",
+      "replacement": "days.some(day => day.capacityMicroseconds === null === (totals.capacityMicroseconds === null))",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 34,
+      "coveredBy": [
+        "534",
+        "537",
+        "538",
+        "539",
+        "540",
+        "541",
+        "542",
+        "543",
+        "544",
+        "545",
+        "546",
+        "547",
+        "548",
+        "549",
+        "550",
+        "551",
+        "552",
+        "553",
+        "554",
+        "555",
+        "556",
+        "557",
+        "558",
+        "559",
+        "560",
+        "561",
+        "711",
+        "724",
+        "725",
+        "726",
+        "734",
+        "742",
+        "747",
+        "748"
+      ],
+      "location": {
+        "end": {
+          "column": 6,
+          "line": 142
+        },
+        "start": {
+          "column": 6,
+          "line": 138
+        }
+      },
+      "context": "  }\n  if (\n    !days.every(\n      (day) =>\n        (day.capacityMicroseconds === null) ===\n        (totals.capacityMicroseconds === null),\n    )\n  )\n    throw new Error(\"Revisión semanal inválida\");"
+    },
+    {
+      "file": "src/weekly-review-api.ts",
+      "id": "292",
+      "mutatorName": "ArithmeticOperator",
+      "replacement": "sum - BigInt(day.capacityMicroseconds!)",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 3,
+      "coveredBy": [
+        "555",
+        "725",
+        "726"
+      ],
+      "location": {
+        "end": {
+          "column": 70,
+          "line": 147
+        },
+        "start": {
+          "column": 31,
+          "line": 147
+        }
+      },
+      "context": "  if (\n    totals.capacityMicroseconds !== null &&\n    days.reduce((sum, day) => sum + BigInt(day.capacityMicroseconds!), 0n) !==\n      BigInt(totals.capacityMicroseconds as string)\n  )"
+    }
+  ]
+}

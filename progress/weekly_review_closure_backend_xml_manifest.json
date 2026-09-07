@@ -1,0 +1,390 @@
+[
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.AuthenticationHttpTest.xml",
+    "sha256": "1DB64313B65DAEADD59F9FC5377214EC31108DF50630B2FDFFEA4CAABAD2ED18"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.AvailabilityApiTest.xml",
+    "sha256": "D38A778B839022E9FFE2B7BD28D17CB41A71E251EDCAB4F71DFA0E49127A2D3E"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.BlockChangesApiTest.xml",
+    "sha256": "B68BD00AC98FFC9E120A47E8DD08EE68C145AB8845E8288D3B9CD2CADF4ABFE3"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.broker.RabbitBrokerFailuresTest.xml",
+    "sha256": "C97785266751C9855D20DFF23E97670E313BACBA967ACC758DFAA5E8D136A83F"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.broker.RabbitBrokerPublisherTest.xml",
+    "sha256": "E25843494EBCD5B32D9379B4F95986F4EF44A56F636EF012159A5C87874D6D51"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.CloseWorkSessionApiTest.xml",
+    "sha256": "2FD0EE546B19652F33DA4F5385AAEF773D10C5C2C24224A329F6C96D0688444A"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest.xml",
+    "sha256": "F1731B1992B335855F7D5F905DFDAE8AE4A76E5687EF0992CBB908BA783E5345"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.config.ApplicationWiringTest.xml",
+    "sha256": "63AD64275D2437F516A8666898728B94FBF564B026370D3A87038D1BAD6EC543"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.config.JavaTimeZoneCatalogTest.xml",
+    "sha256": "01A725528DA2E706C604983FA004E18AC461EB961C48B33574635FC9BE8BC700"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.config.ProjectStateConfigurationTest.xml",
+    "sha256": "9E26C5E4B11956644370E18F11CABB9F4436F5A1A2AACCA8BDBB058602393D4A"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.config.PublisherConfigurationTest.xml",
+    "sha256": "3E7D25201D7904A2B648B0EF56F480497FD1122F9FA250760196645637584447"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.config.SecurityConfigurationTest.xml",
+    "sha256": "8CED25308343239FC005D443B25EC79BBD91974ECD66E5769050C45D7ADB5BD3"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.config.SessionCookiePolicyTest.xml",
+    "sha256": "8C3F40FB158213E9DBEE2B737A9E2D15C1E6779514C87859427CF71C525B08D5"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.EditProjectsApiTest.xml",
+    "sha256": "531B242BDB139DD3EA793A46210406FAFC14D8D18D263551B08A3C410EE35F20"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.EndTimeApiTest.xml",
+    "sha256": "197A4885A2263F6F45732E8A942A08E4930E758A21D2FB48EA1798087BF2D188"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.EndTimeIntegrationTest.xml",
+    "sha256": "691B95B49E3FD91A3E3EAC8C939125D9522071304CE6A24A3646136B87A0D59B"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.HistoryApiTest.xml",
+    "sha256": "1C2478FAF372F8A8AE4A4536234329631480F19C6213C2C463B883FD7A367FDA"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.http.SessionAccessDeniedHandlerTest.xml",
+    "sha256": "985C74814753BE7E882EA3A57D46B0685A0CC65162237665845ECED7AE445241"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.http.SessionControllerTest.xml",
+    "sha256": "6176AF2195F73CBC7FACB3A9160BEC06768BE4A1CF06FE0A9E0682D019582726"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.http.SessionFailureFilterTest.xml",
+    "sha256": "537BB7BF9FD648553D8139674AEACC7C2EEB9F8A24D9089076DF3828C09F2750"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.BlockChangeQueriesPersistenceTest.xml",
+    "sha256": "1FB79C063A119CEFB215A6F5CA18A90EA3A82182399F2C02E44A7BD351CF4617"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.xml",
+    "sha256": "D9B43D945401709D53657E4660C767B269954E9A780B03C8F86757412BDEF390"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.HistoryReadTransactionTest.xml",
+    "sha256": "397B7517B772C2BEF648A51ED470133F84495637100D0770DFD3E38963BB78D7"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.OutboxRecoveryTest.xml",
+    "sha256": "06CB3EE770F519E567D1E05A7D824D48988F41BDA9E22DCDBF32427C5728DEFA"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.OutboxWorkTest.xml",
+    "sha256": "FC97F9DB1ACC816C51B366913396EDF5A49E9C0B1330F842F17DA562005A3975"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.RescheduleCoordinationTest.xml",
+    "sha256": "2C606B92EB2195E3CD361BD061A6B03B63DBF9875AE92BE641CFFA46CC583E67"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.RescheduleMigrationTest.xml",
+    "sha256": "E9A5B4A988A1D0FE3D16BE0840B3B39FA7D3CAA197216404C9A70E19071465E4"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.ScheduleBlockPersistenceTest.xml",
+    "sha256": "D53B0555A16D1816A356EDA90D9D55000866C5D540D1B8474DC755C95F6D1026"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.xml",
+    "sha256": "CF535CC4F612C861DDF21D380BD704664988C6A0FD9B2883A76B0AB910E8C5A3"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.WorkSessionClosureMigrationTest.xml",
+    "sha256": "FA116B00BE4E49DE36771A4F30CF66B61E6E91E939116F47554C37564165A7B0"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.WorkSessionEndMigrationTest.xml",
+    "sha256": "F34C4828A31BD4127C2E45248CDD261416379247024BDC93A411E8A4D5E152C8"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.WorkSessionExtensionReceiptTest.xml",
+    "sha256": "6F6BE27D55ACA47AAFC110A9F7459FDDAECE747A863DFBB7AA5DE2B8C4793BDC"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.WorkSessionPersistenceTest.xml",
+    "sha256": "FFF372C9BBB51ADAA244EDF1F959BDA65E6CAD78B861909D1513EF2B0272D08F"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.WorkSessionStoreTest.xml",
+    "sha256": "82A42F9034B87FB828FB1CBD861B62298FF90F1C5ACE026491FDA3F7D8F52FCD"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.WorkSessionTransitionMigrationTest.xml",
+    "sha256": "00E66C8FFC060E862DD83A825521F9CC17169378C8DDB6D89E0054ED8DD81DCE"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.persistence.WorkSessionTransitionStoreTest.xml",
+    "sha256": "3C361F95A819424E03D8AAC079B780FEE6FE469DEBDEE8CA84EAED3C885D901F"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.ProjectApiTest.xml",
+    "sha256": "9922D166CEFECF0C866573E1D5395A257BB296AF44EFFC15DE66C1CCB4155691"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.ProjectStatesApiTest.xml",
+    "sha256": "C5AA66F2573119352814F613E4EE7F4468887E0D0D61F97F6600352B87EBD1FE"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.ReadProjectsApiTest.xml",
+    "sha256": "60543C8A081F0BAEA5CD12850C247F33F7E21C8B4DE99B6A4E2D8AB147978892"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.RescheduleApiTest.xml",
+    "sha256": "EF2CDE7C0152A6F8F2F5D0D14C32F821EB320CDF5D5485143538A36599ED7377"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.RescheduleErrorsApiTest.xml",
+    "sha256": "3A90E5484FC5E05EEB851465C5013F36584111B449FDEF9A6B05AAD5383F3337"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.ScheduleBlockApiTest.xml",
+    "sha256": "EE7031D281B77278590FD231C2D25870E5F7808CA99A82E3190609111219E76C"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.SubtaskApiTest.xml",
+    "sha256": "C9613925CD7808877907C3F27B00AB1F5BC6AA2F46FE7EFD36A031BD9C0BFDD6"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.TaskApiTest.xml",
+    "sha256": "2EB63791E310ED81E0705067BC6CBA3620DC66BCC4A078246273E8C6BD254D69"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.TaskHistoryApiTest.xml",
+    "sha256": "F0F97F67DF8F91043AF09960E90ED15C49F55FB426CA123EF2AA8C1FB03BFFC0"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.TaskStatusApiTest.xml",
+    "sha256": "1C41750F69C34272AC72B44BE62236D032EE4CD136824DD1717ECFFA6D83FBC5"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.TodayApiTest.xml",
+    "sha256": "CCF638D76A035FFA94E0AEDB6FC97DB7D69B0A8CAC5EE6CD5BB34434D894F1AD"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.WeeklyReviewApiTest.xml",
+    "sha256": "3910B10CD3EEC43BB5D2DB48FD06106D2324E3CE33E48E0A7B41B38B9A750677"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.WorkSessionApiTest.xml",
+    "sha256": "1E597639CB82A92185AC5DAD4766CFE5C14E88984E4793F55FBC949C62CA66CD"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.WorkSessionIntegrationTest.xml",
+    "sha256": "B4C4DAE93010132658D57C0FE31090B55D44FD508CDEF56CF46CFA7703D27C74"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.adapter.WorkSessionStateApiTest.xml",
+    "sha256": "416865782714A1E59B0339C2FF4A838C5BBFA93B365C172A7562B800BE24A148"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ChangeProjectStatusTest.xml",
+    "sha256": "9E5299B20C64AACA67C85C49D1367A936FB9190CA1D0E16204711E290589EEEC"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ChangeTaskStatusTest.xml",
+    "sha256": "FB943DBE12B7F0B3A2A4B369B3D97810A681DB58F3243C7FA1C388C7571B3DE0"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ChangeWorkSessionTest.xml",
+    "sha256": "1F62790100302F3D0496F4BA0E259801E9259939D977B651130763DACE26C78E"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.CloseWorkSessionTest.xml",
+    "sha256": "F4BD616D50EDEB0E80C0AB2D7C9B75248DAE7A38A908A9A677526C980632B1C6"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.CreateProjectTest.xml",
+    "sha256": "A2992F9614BA56EF95C9D06BEB1949112296CE8B633F2DD724958E939C205C4C"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.CreateSubtaskTest.xml",
+    "sha256": "5006A85D55DCF64475DD48464E2FF5969553C401C476AECF55C2CFBA29CA026F"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.CreateTaskTest.xml",
+    "sha256": "F120A467293BDFF12FCC17346F505DDE3FBCCA19839763428503C0EEDC961FC1"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.EditProjectTest.xml",
+    "sha256": "DAB77115B6D9DFD3EDF136E72692F31B532286B2007353008DEAA37A169E9FCB"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ExtendWorkSessionTest.xml",
+    "sha256": "5E89D03AD35153032558A0512DBE4AADBF24911921A2E8945073FE1DED48831E"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.MoveBlockTest.xml",
+    "sha256": "995E3DC01F197840FD85951BE739EB5C002FBC427EAE43E4175C932CFC259E9E"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.PlanBlockTest.xml",
+    "sha256": "B704E16C7FDB5F5B31A25B1338E10F78E3916522491EC1CAABD8055ECF9C76E9"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.PublicationAuditTest.xml",
+    "sha256": "9E72B613D4F55873BBF17ABE60CD859BA977AEBB71DC758846035A75545BCC57"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.PublishOutboxTest.xml",
+    "sha256": "AE5885A3912647ACB670695CF6D5D1B53BE648CD4F732B869C0C5C9FB44875C5"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ReadAvailabilityTest.xml",
+    "sha256": "F531CEE316C1929234F82443DC34D3FEB11DA4841DF20BA5B3CF6D07E574E5B0"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ReadBlockChangesTest.xml",
+    "sha256": "669F932C4C3A9762E70982863A449CCF928F9B5B9C8A7047B221437ED0F838CE"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ReadHistoryTest.xml",
+    "sha256": "F66073233E263FA991AB1C50B355762FCCCD028375BF50A36951315C6172AC85"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ReadProjectsTest.xml",
+    "sha256": "42C37115FAFBF9589D7461D318F15D1ABE4098B79684D76A608490DA2E986942"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ReadSubtasksTest.xml",
+    "sha256": "53108EFF2EDB4F5C04ED5D7FC8AB074DE2C6F85052C9DDC349DAE12CF68D720A"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ReadTaskHistoryTest.xml",
+    "sha256": "5118FAEFFD80C9E8FC89B3171451D7B59D2FC9983E9FA39408D5883001465B33"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ReadTasksTest.xml",
+    "sha256": "2CB575F3A11A29EE5B3CB3376E902F1DF347DA3C4D3B2C354FFAF11877A613E0"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ReadWeeklyReviewTest.xml",
+    "sha256": "62A378403D5513DF88D15D68213B2F66366926295D3C50477008B47642C2FDF1"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ReadWorkSessionChangesTest.xml",
+    "sha256": "CD95D6BE34069446F279022F7A72C7C5861DE3717C74DDDF58814645B155BA9F"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ReadWorkSessionEndTest.xml",
+    "sha256": "E6298D2EDDB3BBBDB221FA742355E256FBD36265CF471B6DDBE271516A17EA18"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ReadWorkSessionStateTest.xml",
+    "sha256": "C88BA892F2869C549D0B64C16E74122A7089636AE808BD4A4058698D33D988BF"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.ReadWorkSessionsTest.xml",
+    "sha256": "2CC5BD6A203802043B06F0805A6B2ACCA2A2FAB3A82BC58EF185A22F60634749"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.SaveAvailabilityTest.xml",
+    "sha256": "897C9931D80C03E2B74EA118DBA39968E70081E0AD59E4AD6CB7B3D7DE4353C5"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.StartWorkSessionTest.xml",
+    "sha256": "9BF5467D556DD8F350B7F99EEB9EDCA06E61A925644A413DDAC4950B150062FB"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.application.SubtaskPublicationTest.xml",
+    "sha256": "8489F0948192600BEC8CBC03BF85F1C1604D13F00CB32126A236F81AABFF827C"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.ArchitectureTest.xml",
+    "sha256": "2EEC8000FB5570096ECA2AFC42D62EB2931EDF997E9817BDDD6F19E78EB51F33"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.AvailabilityRevisionTest.xml",
+    "sha256": "8BEAB3BCE03E056A4185FE328D776F3304996DE8E820023D7802CA865F21922E"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.AvailabilityTest.xml",
+    "sha256": "CBF6990B40D2BE7ABFA14EE729F35BDEDC6674D764B335439A1929F49DF392DE"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.BlockBudgetTest.xml",
+    "sha256": "4031FD3A8D494AB6B407C6D5C193C37FE37FF1BD0CACE471E31AAF69F1C36E8B"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.BlockMoveRequestTest.xml",
+    "sha256": "A2C881A1857A110E2228A0E6D384854C28A2AD190C99533493F576FE1FD5346D"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.BlockRequestTest.xml",
+    "sha256": "568C25D3F3C80ED7D4A7E83C871C4E03D6A2FF9A709AC8A0BD7CD4FEA0BE2AA2"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.BlockStateTest.xml",
+    "sha256": "EDD6606E20E160D44AA4319163F9298BC88A2EFAD23CF56A8165D86FB4E842F8"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.PlannedBlockTest.xml",
+    "sha256": "76A1EB29BCAEBF117F684E455A32E97B94D3A58B9E64079C141AB8D8439BED04"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.ProjectStatesTest.xml",
+    "sha256": "92961D00F52E4685A431DFA0986440A343467E9EC08B5949657FB79EFB50294C"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.ProjectTest.xml",
+    "sha256": "A3F895EFB0338B31DA674830A56033E60FB721F616D1682B35FEE0DC63A9360E"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.ResolvedBlockTimeTest.xml",
+    "sha256": "7BE7AF7741EB9F9F96EBF72898F8EFE646752F0858199118249C98BBDE5F8AD9"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.SubtaskEventTest.xml",
+    "sha256": "2CA8B4C8C92A31CA5F45FA0D3E128D0D746BF0AD86DEA11F711B01F4069AA4B1"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.TaskEventTest.xml",
+    "sha256": "3DF18783B5916B8C8840B6408D76C5E6B8BFDFCEB8973C0F53C4442CB3788334"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.TaskStateTest.xml",
+    "sha256": "063A8596C54A56157A0FE3624F5D32D9896E147147FB51889ED4BB7D5A2C176D"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.TaskStatusEventTest.xml",
+    "sha256": "95BEF92866F16F95174BF9CAA2509379F728C1B83F18D4777F9307CB958E6860"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.TaskTest.xml",
+    "sha256": "229CFBF53BA4C4BB538097EEE60F417F51A99069BE9EA6CF0F45DC8594F59CE2"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.TodayWindowTest.xml",
+    "sha256": "969ACB0F7F0535EB8079EF2FAED6599CCF841C1AC49ED3498F5C72E7A2206C41"
+  },
+  {
+    "path": "progress/weekly_review_closure_backend_xml/TEST-com.apptolast.organization.domain.WeeklyReviewWindowTest.xml",
+    "sha256": "2F9920F414251AF4529E0C1CFF9FEF5A7FC4E0656F5E83C6BDFBAD8A3E5A7DD4"
+  }
+]

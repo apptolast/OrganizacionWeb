@@ -19,6 +19,38 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 class ApplicationWiringTest {
+  @Test
+  void weekly_s1_readBeanUsesTheRealQueries() {
+    freshContext()
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              assertThat(context.getBean(WeeklyReviewQueries.class))
+                  .isInstanceOf(
+                      com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries
+                          .class);
+              org.mockito.Mockito.doAnswer(
+                      call -> {
+                        var extractor =
+                            (org.springframework.jdbc.core.ResultSetExtractor<?>)
+                                call.getArgument(1);
+                        return extractor.extractData(mock(java.sql.ResultSet.class));
+                      })
+                  .when(context.getBean(org.springframework.jdbc.core.JdbcTemplate.class))
+                  .query(
+                      org.mockito.ArgumentMatchers.anyString(),
+                      org.mockito.ArgumentMatchers
+                          .<org.springframework.jdbc.core.ResultSetExtractor<?>>any(),
+                      org.mockito.ArgumentMatchers.any(Object[].class));
+              var result =
+                  context
+                      .getBean(ReadWeeklyReviewUseCase.class)
+                      .get("owner", java.time.LocalDate.parse("2026-09-07"), "UTC");
+              assertThat(result.weekStart()).isEqualTo(java.time.LocalDate.parse("2026-09-07"));
+              assertThat(result.days()).hasSize(7);
+            });
+  }
+
   private static final UUID PROJECT = UUID.fromString("00000000-0000-0000-0000-000000000001");
   private static final UUID TASK = UUID.fromString("00000000-0000-0000-0000-000000000002");
 

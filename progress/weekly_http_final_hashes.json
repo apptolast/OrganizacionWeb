@@ -1,0 +1,10 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/http/WeeklyReviewController.java",
+    "sha256": "3CF19F4FAE6FE7E9A3B78BAA4A0A6A779AF73EB1FF9C854DECAD1BA3350E155C"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/WeeklyReviewApiTest.java",
+    "sha256": "989498097300AA08D0EB5A9CAB13BC60A59FBFF35406D9E0FC827032C756B6AA"
+  }
+]

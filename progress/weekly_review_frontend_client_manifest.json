@@ -1,0 +1,10 @@
+[
+  {
+    "path": "frontend/src/weekly-review-api.ts",
+    "sha256": "9A9C336BD6946099E23C7CC1CF655C229A698365C38308A8EF1DC8BD94631F76"
+  },
+  {
+    "path": "frontend/src/weekly-review-api.test.ts",
+    "sha256": "98C015BCA4EEF9F019BD9B9FEF969CF1D476447FF666EF91CBCCE7016400B672"
+  }
+]

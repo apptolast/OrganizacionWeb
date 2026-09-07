@@ -50,7 +50,13 @@
     "src/App.tsx:25:12-31:22",
     "src/App.tsx:38:10-62:7",
     "src/workspace.tsx:55:10-60:22",
-    "src/project-reader.tsx:111:10-116:22"
+    "src/project-reader.tsx:111:10-116:22",
+    "src/weekly-review-api.ts",
+    "src/weekly-review.tsx",
+    "src/App.tsx:15:8-15:69",
+    "src/App.tsx:27:12-35:24",
+    "src/App.tsx:42:10-68:7",
+    "src/workspace.tsx:67:10-72:22"
   ],
   "reporters": ["clear-text", "json", "html"],
   "thresholds": {

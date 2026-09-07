@@ -1,0 +1,72 @@
+[
+  {
+    "path": "progress/weekly_review_pit_replay_final/index.html",
+    "bytes": 3109,
+    "sha256": "E5F7947E651FA1A2CDDB24B0A4B36777D51BBC6E443C65125C19919F1FFFECF9"
+  },
+  {
+    "path": "progress/weekly_review_pit_replay_final/mutations.xml",
+    "bytes": 7920,
+    "sha256": "56A185A97FD9903A748A3CB392526039C70E0B0A78D53446CC9475EC62C77BFA"
+  },
+  {
+    "path": "progress/weekly_review_pit_replay_final/style.css",
+    "bytes": 5839,
+    "sha256": "78EA37FB78E124ACD62B472B0DBDB1F80176D8B4C3353411668797FBF3DB7976"
+  },
+  {
+    "path": "progress/weekly_review_pit_replay_final/com.apptolast.organization.application/index.html",
+    "bytes": 2073,
+    "sha256": "BC832C37D8FF542BA8480185F418C94664168CF0694BA571DD071A932635DC37"
+  },
+  {
+    "path": "progress/weekly_review_pit_replay_final/com.apptolast.organization.application/ReadWeeklyReview.java.html",
+    "bytes": 32285,
+    "sha256": "A082432E432E95F21F6DA13FFCD355EC4BB77D33BF929FB3334FBD33CD201C62"
+  },
+  {
+    "path": "progress/weekly_review_pit_replay_final/com.apptolast.organization.domain/index.html",
+    "bytes": 2072,
+    "sha256": "C239586EF62992C9F2DBCE76D3D3C721DD70C6A26AEDF440FCE427DB7AFD8085"
+  },
+  {
+    "path": "progress/weekly_review_pit_replay_final/com.apptolast.organization.domain/WeeklyReviewWindow.java.html",
+    "bytes": 54914,
+    "sha256": "276101674ED59D1DBFE2885C2C8FED66D3E95817EBE6BD80A5F24404838222EA"
+  },
+  {
+    "path": "progress/weekly_review_pit_replay.log",
+    "bytes": 5192,
+    "sha256": "247415025C535EE7BCA8E51FD42BB9E8781AED53D8B8C115968B7DC46EA9B0B6"
+  },
+  {
+    "path": "progress/weekly_review_pit_replay_exit.txt",
+    "bytes": 7,
+    "sha256": "418A5C17F33C70E99B0CC0A07FCE69191489CFEDC94164BFA903785777C5BD4B"
+  },
+  {
+    "path": "progress/weekly_review_pit_replay_before_hashes.json",
+    "bytes": 73832,
+    "sha256": "303404AAD2699875D4CABABEC248C95CFFBA98EFC6A2810428C0237A4FDF0FFF"
+  },
+  {
+    "path": "progress/weekly_review_pit_replay_after_hashes.json",
+    "bytes": 73832,
+    "sha256": "303404AAD2699875D4CABABEC248C95CFFBA98EFC6A2810428C0237A4FDF0FFF"
+  },
+  {
+    "path": "progress/weekly_review_pit_replay_inventory.json",
+    "bytes": 6197,
+    "sha256": "7931CABF344C116DC10B6B28894B383B827043394210BFB31766A3F1071D46A5"
+  },
+  {
+    "path": "progress/weekly_review_pit_replay_expected.json",
+    "bytes": 5989,
+    "sha256": "92BEECDEF32F7AA9F9DA48D4EBF0D704CB1E9DE526EC1853F523668F49AAA0FD"
+  },
+  {
+    "path": "progress/weekly_review_pit_replay.init.gradle",
+    "bytes": 629,
+    "sha256": "9D0CA14CA04DE7F676338EA8CC9CC4E4F4C43FFBCA50CFDC5399A00BF5EC81E1"
+  }
+]

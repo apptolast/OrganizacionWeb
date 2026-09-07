@@ -292,6 +292,7 @@ it("@s10 distingue historial vacío confirmado de la carga", async () => {
   expect(
     screen.queryByText("Todavía no hay cambios de estado."),
   ).not.toBeInTheDocument();
+  await waitFor(() => expect(finish).toBeTypeOf("function"));
   await act(async () => finish(Response.json({ items: [], nextCursor: null })));
   expect(
     within(

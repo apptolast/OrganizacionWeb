@@ -1,0 +1,80 @@
+{
+  "capturedAtUtc": "2026-09-07T14:30:00.1522522Z",
+  "head": "62c676e869a3009ba5c0f9f138f98c3f3ca5eede",
+  "inputCount": 388,
+  "patterns": [
+    "com.apptolast.organization.application.ReadWeeklyReview",
+    "com.apptolast.organization.application.ReadWeeklyReviewUseCase",
+    "com.apptolast.organization.application.WeeklyReviewQueries",
+    "com.apptolast.organization.domain.WeeklyReview*",
+    "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries*",
+    "com.apptolast.organization.adapter.http.WeeklyReviewController*",
+    "com.apptolast.organization.adapter.config.ApplicationConfiguration"
+  ],
+  "selectedSourceFiles": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+      "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+      "patterns": [
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/WeeklyReviewController.java",
+      "class": "com.apptolast.organization.adapter.http.WeeklyReviewController",
+      "patterns": [
+        "com.apptolast.organization.adapter.http.WeeklyReviewController*"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries.java",
+      "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+      "patterns": [
+        "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries*"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadWeeklyReview.java",
+      "class": "com.apptolast.organization.application.ReadWeeklyReview",
+      "patterns": [
+        "com.apptolast.organization.application.ReadWeeklyReview"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadWeeklyReviewUseCase.java",
+      "class": "com.apptolast.organization.application.ReadWeeklyReviewUseCase",
+      "patterns": [
+        "com.apptolast.organization.application.ReadWeeklyReviewUseCase"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/WeeklyReviewQueries.java",
+      "class": "com.apptolast.organization.application.WeeklyReviewQueries",
+      "patterns": [
+        "com.apptolast.organization.application.WeeklyReviewQueries"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/WeeklyReview.java",
+      "class": "com.apptolast.organization.domain.WeeklyReview",
+      "patterns": [
+        "com.apptolast.organization.domain.WeeklyReview*"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/WeeklyReviewTimeOutOfRangeException.java",
+      "class": "com.apptolast.organization.domain.WeeklyReviewTimeOutOfRangeException",
+      "patterns": [
+        "com.apptolast.organization.domain.WeeklyReview*"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/WeeklyReviewWindow.java",
+      "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+      "patterns": [
+        "com.apptolast.organization.domain.WeeklyReview*"
+      ]
+    }
+  ],
+  "beforeSha256": "1FA459E2E381F0C224623693849954399A49EB9B1CC49800CC94B9936603E67D"
+}

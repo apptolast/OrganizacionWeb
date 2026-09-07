@@ -761,14 +761,14 @@ it("@s35 confirms an explicit extension and refreshes the current end separately
   });
   fireEvent.click(screen.getByRole("button", { name: "Confirmar ampliación" }));
   expect(await screen.findByText("Ampliación confirmada")).toBeVisible();
+  expect(
+    await screen.findByText("Fin acordado actual:", { exact: false }),
+  ).toBeVisible();
   await waitFor(() =>
     expect(
       screen.queryByText("Ha llegado el fin acordado"),
     ).not.toBeInTheDocument(),
   );
-  expect(
-    screen.getByText("Fin acordado actual:", { exact: false }),
-  ).toBeVisible();
   expect(fetcher).toHaveBeenCalledTimes(3);
   expect(fetcher.mock.calls[1][1]).toEqual(
     expect.objectContaining({

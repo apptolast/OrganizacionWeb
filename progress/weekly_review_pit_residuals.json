@@ -1,0 +1,218 @@
+[
+  {
+    "status": "NO_COVERAGE",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "availabilityZoneId",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 9,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/domain/WeeklyReviewWindow::availabilityZoneId",
+    "killingTest": ""
+  },
+  {
+    "status": "NO_COVERAGE",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "budgets",
+    "descriptor": "()Ljava/util/Map;",
+    "line": 9,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with Collections.emptyMap for com/apptolast/organization/domain/WeeklyReviewWindow::budgets",
+    "killingTest": ""
+  },
+  {
+    "status": "NO_COVERAGE",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "date",
+    "descriptor": "()Ljava/time/LocalDate;",
+    "line": 9,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReviewWindow::date",
+    "killingTest": ""
+  },
+  {
+    "status": "NO_COVERAGE",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "serverNow",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 9,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReviewWindow::serverNow",
+    "killingTest": ""
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 31,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "21"
+    ],
+    "blocks": [
+      "5"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": ""
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 31,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "25"
+    ],
+    "blocks": [
+      "7"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": ""
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 35,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "62"
+    ],
+    "blocks": [
+      "19"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": ""
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 29,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "removed call to com/apptolast/organization/domain/WeeklyReviewWindow::requirePublicInstant",
+    "killingTest": ""
+  },
+  {
+    "status": "NO_COVERAGE",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "zoneId",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 9,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/domain/WeeklyReviewWindow::zoneId",
+    "killingTest": ""
+  },
+  {
+    "status": "NO_COVERAGE",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "zoneSource",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 9,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/domain/WeeklyReviewWindow::zoneSource",
+    "killingTest": ""
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 25,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "16"
+    ],
+    "blocks": [
+      "4"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": ""
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 26,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "27"
+    ],
+    "blocks": [
+      "9"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": ""
+  }
+]

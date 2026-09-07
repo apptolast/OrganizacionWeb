@@ -1,0 +1,35 @@
+{
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadWeeklyReview.java",
+      "sha256": "A0DF6F4EB89A3FA5593808B91392EF60A89905B77D853A95B41AE9320929B58A"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadWeeklyReviewUseCase.java",
+      "sha256": "1E073739558F679915CB60652D131D02EF740848CA876A5C1833A2420C7D515F"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/WeeklyReviewQueries.java",
+      "sha256": "D267B442C9991F1FA0EAF1954F950E3BCF1AC4A247DB6CF4183871F2C715CE4B"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/WeeklyReview.java",
+      "sha256": "B2BE451F0BAF01CB0F26389F06D75BBFB5D3ECFC2F13EA7DE8A9E08797C3F2F3"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/WeeklyReviewWindow.java",
+      "sha256": "CA5DC903DDFE2B6767FD69F1BE14B31531976CFA1B17D23D225E99124D3D8AE7"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/application/ReadWeeklyReviewTest.java",
+      "sha256": "073BC1F1ABC09F9605AE362BE67C200076100C732955A96BDEB4CA1E9CF21C93"
+    }
+  ],
+  "xml": {
+    "path": "progress/weekly_review_first_xml/TEST-com.apptolast.organization.application.ReadWeeklyReviewTest.xml",
+    "sha256": "54590D49D13EDE5B61EB709BFA7DEAC2627FD911869F6DFFD1B17C20E42BA308",
+    "tests": 1,
+    "failures": 0
+  },
+  "scope": "Nominal UTC vacío; puerto callback no PG/HTTP"
+}

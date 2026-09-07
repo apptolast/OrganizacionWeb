@@ -35,6 +35,7 @@ pitest {
     pitestVersion.set("1.22.0")
     junit5PluginVersion.set("1.2.3")
     val scope = providers.gradleProperty("mutationScope").orNull
+    val weeklyReviewOnly = scope == "weekly_review"
     val historyOnly = scope == "history"
     val authenticationOnly = scope == "authentication"
     val taskOnly = scope == "create_task"
@@ -255,6 +256,15 @@ pitest {
         "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher",
         "com.apptolast.organization.adapter.config.ApplicationConfiguration"
     )
+    val weeklyReviewClasses = setOf(
+        "com.apptolast.organization.application.ReadWeeklyReview",
+        "com.apptolast.organization.application.ReadWeeklyReviewUseCase",
+        "com.apptolast.organization.application.WeeklyReviewQueries",
+        "com.apptolast.organization.domain.WeeklyReview*",
+        "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries*",
+        "com.apptolast.organization.adapter.http.WeeklyReviewController*",
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration"
+    )
     val historyClasses = setOf(
         "com.apptolast.organization.application.ReadHistory",
         "com.apptolast.organization.application.ReadHistoryUseCase",
@@ -269,11 +279,17 @@ pitest {
         "com.apptolast.organization.adapter.http.HistoryCursorCodec*",
         "com.apptolast.organization.adapter.config.ApplicationConfiguration"
     )
+    val weeklyReviewAdapterTests = setOf(
+        "com.apptolast.organization.adapter.WeeklyReviewApiTest",
+        "com.apptolast.organization.adapter.persistence.WeeklyReview*Test",
+        "com.apptolast.organization.adapter.config.ApplicationWiringTest"
+    )
     val historyAdapterTests = setOf(
         "com.apptolast.organization.adapter.HistoryApiTest",
         "com.apptolast.organization.adapter.persistence.History*Test"
     )
     targetClasses.set(when {
+        weeklyReviewOnly -> weeklyReviewClasses
         historyOnly -> historyClasses
         endTimeNotificationOnly -> endTimeNotificationClasses
         closeWorkSessionOnly -> closeWorkSessionClasses
@@ -288,9 +304,10 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses
     })
     targetTests.set(when {
+        weeklyReviewOnly -> setOf("com.apptolast.organization.*")
         historyOnly -> setOf("com.apptolast.organization.*")
         endTimeNotificationOnly -> setOf("com.apptolast.organization.*")
         closeWorkSessionOnly -> setOf("com.apptolast.organization.*")
@@ -305,8 +322,9 @@ pitest {
         taskStatusOnly -> taskTests + taskStatusAdapterTests
         splitOnly -> taskTests
         taskOnly -> taskTests
-        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests
+        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests + weeklyReviewAdapterTests
     })
+    if (weeklyReviewOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-weekly-review"))
     if (historyOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-history"))
     if (endTimeNotificationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-end-time-notification"))
     if (pauseResumeSessionOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-pause-resume-session"))

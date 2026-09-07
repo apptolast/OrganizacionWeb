@@ -1,0 +1,84 @@
+{
+  "capturedAt": "2026-09-07T14:48:44.136Z",
+  "measurements": 124,
+  "axe": 25,
+  "violations": 0,
+  "evidence": [
+    {
+      "engine": "chromium",
+      "nominal": 26,
+      "recovery": 12,
+      "text200": 3,
+      "axe": 8,
+      "feedbackMs": 4.5999999940395355
+    },
+    {
+      "engine": "firefox",
+      "nominal": 26,
+      "recovery": 12,
+      "text200": 3,
+      "axe": 8,
+      "feedbackMs": 5
+    },
+    {
+      "engine": "webkit",
+      "nominal": 26,
+      "recovery": 12,
+      "text200": 3,
+      "axe": 8,
+      "feedbackMs": 3
+    }
+  ],
+  "native": {
+    "path": ".e2e-work/weekly-review-native/organizationweb-e2e-33332/evidence",
+    "zoom": 2,
+    "baseline": {
+      "dpr": 1.5,
+      "inner": 1426,
+      "outer": 1440
+    },
+    "current": {
+      "dpr": 3,
+      "width": 320,
+      "height": 453
+    }
+  },
+  "files": [
+    {
+      "path": "e2e/weekly-review.spec.mjs",
+      "sha256": "6E8260E5CADAFAB13D990A7A0AA357CF85BB2194FE11A4F4BBF0D1F303CC26CE"
+    },
+    {
+      "path": "e2e/weekly-review-ux.spec.mjs",
+      "sha256": "E19613060312C349B9B608FBCFC5A72FF1CB64678E5C7458C8AB84157705D558"
+    },
+    {
+      "path": "frontend/src/weekly-review.tsx",
+      "sha256": "284098F9B523FD289E026C5BFD60C626C9437D9A89354CEC684F4AA2A11FE16C"
+    },
+    {
+      "path": "frontend/src/weekly-review.test.tsx",
+      "sha256": "EDD426B8371C1FB7DA0497D3797AB972074F5CEBAAC4C63D5CF9492D7EDED1FC"
+    },
+    {
+      "path": "frontend/src/styles.scss",
+      "sha256": "14C3181F1096DBCFF09A58077640A9B7703F19F3C886206F8D35D82EE95FD9C1"
+    },
+    {
+      "path": "frontend/stryker.weekly-review.config.json",
+      "sha256": "13A67790F5034A697B699B91438A48FA0371F89E2F7726A9C402716FF6C91602"
+    },
+    {
+      "path": "frontend/stryker.config.json",
+      "sha256": "9CDA0F327F08B7717CCDBEB02BE5D4D2DE923D5E61404E94ACE070C45A780A38"
+    },
+    {
+      "path": "progress/weekly_review_mutation_scope_parser.mjs",
+      "sha256": "77A3CFF0DB8ECBEE136A6511EEA2B554D6164117C6AD68F6927D6033F9AF8FAA"
+    },
+    {
+      "path": "progress/weekly_review_mutation_scope_nodes.json",
+      "sha256": "8DE78AB424699E302D0AE42F839DBE74B33DA2816889EAB913534FFEE42F83CA"
+    }
+  ]
+}

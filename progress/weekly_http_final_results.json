@@ -1,0 +1,23 @@
+[
+  {
+    "name": "com.apptolast.organization.adapter.HistoryApiTest",
+    "tests": 75,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "com.apptolast.organization.adapter.TaskHistoryApiTest",
+    "tests": 48,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "com.apptolast.organization.adapter.WeeklyReviewApiTest",
+    "tests": 17,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+]

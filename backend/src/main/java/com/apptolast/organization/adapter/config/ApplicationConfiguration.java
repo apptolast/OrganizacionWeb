@@ -9,6 +9,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  com.apptolast.organization.application.ReadWorkSessionEnd readWorkSessionEnd(
+      com.apptolast.organization.application.WorkSessionEndQueries queries, Clock clock) {
+    return new com.apptolast.organization.application.ReadWorkSessionEnd(queries, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ExtendWorkSession extendWorkSession(
+      com.apptolast.organization.application.WorkSessionExtending store, Clock clock) {
+    return new com.apptolast.organization.application.ExtendWorkSession(store, clock);
+  }
+
+  @Bean
   com.apptolast.organization.application.ReadWorkSessionChanges readWorkSessionChanges(
       com.apptolast.organization.application.WorkSessionTransitionQueries queries) {
     return new com.apptolast.organization.application.ReadWorkSessionChanges(queries);

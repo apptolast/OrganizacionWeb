@@ -179,3 +179,11 @@ La estimación vigente es2–4horas de software desde los hitos comprobados al t
 Init de cierre33489 EXIT0 0b3990:2.217Java/93suites sin fallos/errores/omitidos,1.899frontend/40suites y47Node. XML preservado history_closure_backend_xml y contadoa695bb; logSHAFC2006AFBC2135CBE0435BC2E08A5B0813E2576562F2646B1CC1E91200656972. E2Eglobal31187 EXIT0 2c5d89,129/129 en13,4min; logSHAF54A994AE897C22A1E4F842287DFCD218C728435BE518F6FE91D667E08DA279C. Ambos procesos terminados; ningún rootrunner activo.
 
 ReplayA EXIT0 3a2a66:17=15K2S; seisobjetivosK y376inputs idénticos, root551477. PaqueteA integrado18e19fb. Backend/UI/HTTP/UX, trazabilidad y ambos replays aprobados; judge_history_final.md consolida el cierre local con límites. Feature18 done técnico local;19–30pending. Pendientes publicar corte final, CI/fusión/CIposterior y despliegue condicionado; no se atribuyen resultados remotos futuros. La estimación para integraciónremota es1–2horas y despliegue4–8adicionales, según plan actualizado.
+
+## Fusión18 y corrección de sincronización de una prueba
+
+PR17 fusionada d0fb20e2458a5cb37ea9f80e6ff6e946ead3bf7a; CI previa34115700428 SUCCESS sobre a3106b3, watch14220EXIT0 f13ada. Árbol del squash idéntico d4c99a3c0bbdb5d2b096f2a3b19ef767c7334298 (1bd5c0). PR18 cerrada como referencia ya integrada.
+
+CI posterior34117519068 falló una prueba de Reader entre1.899frontend; Java y arnés pasaron. Watch54463 EXIT1 75a968; log history_main_ci_failure.log SHA692030DB287CFCE27D0751DC9A9DB0AC4C846C99B84575FA3386A272064C1839. No se atribuye éxito a esa ejecución ni se la reintenta sin diagnóstico.
+
+Rama correctiva codex/session-reader-ci desde d0fb20e. El fixture dependía del orden entre GETstate y GETend-time: el cierre abortaba E aún pendiente y el oráculo buscaba Ampliar sin haber preparado ese snapshot. B reprodujo el mismo fallo con E diferido5d171d y explicitó su resolución antes del cierre. Root revisó contrato y DOM5815fa/5b21bc, diff e14ad5 y hash557111. No cambia producción, tiempos de espera ni aserciones finales. Reader47/47, frontend1.899/1.899 y lint verdes;134inputs idénticos durante el pase. Informe fix_session_reader_ci.md. Corrección aprobada para publicar; CI remota pendiente. No procesos root activos ni nuevo trabajo de features19–30.

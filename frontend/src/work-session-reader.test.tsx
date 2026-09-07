@@ -141,6 +141,7 @@ function closedResponse() {
 it("@s36 feature17 releases a definitively rejected closure so the user can choose extension after refresh", async () => {
   const headers = { "Work-Session-Revision": `work-session-${session.id}-1` };
   let extensions = 0;
+  let deliverEnd!: () => void;
   vi.stubGlobal("fetch", (url: string) => {
     if (url.endsWith("/state"))
       return Promise.resolve(
@@ -150,16 +151,19 @@ it("@s36 feature17 releases a definitively rejected closure so the user can choo
         ),
       );
     if (url.endsWith("/end-time"))
-      return Promise.resolve(
-        Response.json(
-          {
-            state: before,
-            serverNow: session.startedAt,
-            effectiveEndAt: session.plannedEndAt,
-          },
-          { headers },
-        ),
-      );
+      return new Promise<Response>((resolve) => {
+        deliverEnd = () =>
+          resolve(
+            Response.json(
+              {
+                state: before,
+                serverNow: session.startedAt,
+                effectiveEndAt: session.plannedEndAt,
+              },
+              { headers },
+            ),
+          );
+      });
     if (url.endsWith("/close"))
       return Promise.resolve(
         Response.json(
@@ -182,7 +186,13 @@ it("@s36 feature17 releases a definitively rejected closure so the user can choo
   fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
     target: { value: "Avance conservado" },
   });
+  await waitFor(() => expect(deliverEnd).toBeTypeOf("function"));
+  await act(async () => deliverEnd());
+  expect(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  ).toBeVisible();
   fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
+
   fireEvent.click(
     await screen.findByRole("button", { name: "Consultar estado actual" }),
   );

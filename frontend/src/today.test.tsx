@@ -17,7 +17,7 @@ afterEach(() => {
 });
 it("@s21 loads then confirms the empty day with known capacity and project link", async () => {
   const request = deferred<Response>();
-  vi.stubGlobal("fetch", vi.fn().mockReturnValue(request.promise));
+  stubBusinessFetch(vi.fn().mockReturnValue(request.promise));
   render(<Today />);
   expect(screen.getByRole("status")).toHaveTextContent("Cargando Hoy");
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -49,8 +49,7 @@ it("@s18 presents readable planned reservations and the real closing date as tex
     projectName: "<script>privado</script>",
     taskTitle: "Otra tarea",
   };
-  vi.stubGlobal(
-    "fetch",
+  stubBusinessFetch(
     vi.fn().mockResolvedValue(
       Response.json({
         ...value,
@@ -90,8 +89,7 @@ it("@s18 presents readable planned reservations and the real closing date as tex
 it.each(["UNCONFIGURED", "UNAVAILABLE"])(
   "@s19 explains %s without pretending zero capacity",
   async (zoneSource) => {
-    vi.stubGlobal(
-      "fetch",
+    stubBusinessFetch(
       vi.fn().mockResolvedValue(
         Response.json({
           ...agendaToday(),
@@ -131,7 +129,7 @@ it.each(["effective", "historical"])(
       value.zoneId = "Server/Only";
       value.availabilityZoneId = "Server/Only";
     }
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(value)));
+    stubBusinessFetch(vi.fn().mockResolvedValue(Response.json(value)));
     render(<Today />);
     expect(await screen.findByText("Proyecto personal")).toBeInTheDocument();
     expect(
@@ -153,7 +151,7 @@ it.each(["network", "invalid"])(
       fetch.mockRejectedValueOnce(new TypeError("offline"));
     else fetch.mockResolvedValueOnce(Response.json({}));
     fetch.mockResolvedValueOnce(Response.json(agendaToday()));
-    vi.stubGlobal("fetch", fetch);
+    stubBusinessFetch(fetch);
     const storage = vi.spyOn(Storage.prototype, "setItem");
     render(<Today />);
     expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -174,7 +172,7 @@ it("@s23 @s37 manual refresh retains dated data and the chosen keyboard focus", 
     .fn()
     .mockResolvedValueOnce(Response.json(agendaToday()))
     .mockReturnValueOnce(request.promise);
-  vi.stubGlobal("fetch", fetch);
+  stubBusinessFetch(fetch);
   render(<Today />);
   const link = await screen.findByRole("link", { name: "Escribir" });
   const button = screen.getByRole("button", { name: "Actualizar" });
@@ -206,7 +204,7 @@ it.each(["json", "401"])(
         kind === "json" ? Promise.resolve(old) : pending.promise,
       )
       .mockResolvedValueOnce(Response.json(emptyToday()));
-    vi.stubGlobal("fetch", fetch);
+    stubBusinessFetch(fetch);
     const access = vi.fn();
     observeAccess(access);
     const first = render(<Today />);
@@ -233,7 +231,7 @@ it.each(["idle", "manual", "initial"])(
     if (phase !== "initial")
       fetch.mockResolvedValueOnce(Response.json(emptyToday()));
     fetch.mockReturnValue(request.promise);
-    vi.stubGlobal("fetch", fetch);
+    stubBusinessFetch(fetch);
     render(<Today />);
     if (phase !== "initial")
       await screen.findByText("No hay bloques planificados");
@@ -269,7 +267,7 @@ it.each([
       .fn()
       .mockResolvedValueOnce(Response.json(value))
       .mockReturnValue(new Promise(() => {}));
-    vi.stubGlobal("fetch", fetch);
+    stubBusinessFetch(fetch);
     render(<Today />);
     await act(async () => {});
     expect(vi.getTimerCount()).toBe(1);
@@ -292,7 +290,7 @@ it("@s26 @s27 cancels on hide and rebuilds only from the recovered server snapsh
       Response.json({ ...value, serverNow: "2030-01-07T12:52:00Z" }),
     )
     .mockReturnValue(new Promise(() => {}));
-  vi.stubGlobal("fetch", fetch);
+  stubBusinessFetch(fetch);
   render(<Today />);
   await act(async () => {});
   await act(async () => vi.advanceTimersByTimeAsync(120000));
@@ -328,7 +326,7 @@ it.each([true, false])(
       .mockResolvedValueOnce(Response.json(yesterday))
       .mockResolvedValueOnce(old)
       .mockReturnValueOnce(newDay.promise);
-    vi.stubGlobal("fetch", fetch);
+    stubBusinessFetch(fetch);
     render(<Today />);
     await act(async () => {});
     fireEvent.click(screen.getByRole("button", { name: "Actualizar" }));
@@ -375,7 +373,7 @@ it("@s29 @s37 keeps failed refresh dated without repeating an expired boundary a
         currentBlockId: null,
       }),
     );
-  vi.stubGlobal("fetch", fetch);
+  stubBusinessFetch(fetch);
   render(<Today />);
   await act(async () => {});
   screen.getByRole("link", { name: "Escribir" }).focus();
@@ -402,7 +400,7 @@ it.each([
   async (route) => {
     window.history.replaceState(null, "", route);
     const fetch = vi.fn().mockResolvedValue(Response.json(emptyToday()));
-    vi.stubGlobal("fetch", fetch);
+    stubBusinessFetch(fetch);
     render(<App />);
     if (route === "/") {
       expect(
@@ -429,7 +427,7 @@ it.each(["/", "/proyectos/nuevo", "/disponibilidad"])(
   "@s36 navigation and breadcrumb reflect %s with one active section",
   async (route) => {
     window.history.replaceState(null, "", route);
-    vi.stubGlobal("fetch", vi.fn().mockReturnValue(new Promise(() => {})));
+    stubBusinessFetch(vi.fn().mockReturnValue(new Promise(() => {})));
     render(<App />);
     const expected =
       route === "/"
@@ -473,8 +471,7 @@ it("@s31 logout immediately retires private agenda and a new login loads only th
   let reads = 0;
   const closing = deferred<Response>();
   const nextAgenda = deferred<Response>();
-  vi.stubGlobal(
-    "fetch",
+  stubBusinessFetch(
     vi.fn((url, options) => {
       if (url === "/api/session/logout") {
         signedIn = false;
@@ -529,7 +526,7 @@ it("@s28 returning after midnight retires the old day before the recovered respo
       }),
     )
     .mockReturnValue(new Promise(() => {}));
-  vi.stubGlobal("fetch", fetch);
+  stubBusinessFetch(fetch);
   render(<Today />);
   await act(async () => {});
   vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
@@ -544,8 +541,7 @@ it.each([false, true])(
   "@s33 creation link from populated=%s retains the capture form",
   async (populated) => {
     window.history.replaceState(null, "", "/proyectos");
-    vi.stubGlobal(
-      "fetch",
+    stubBusinessFetch(
       vi.fn().mockResolvedValue(
         Response.json({
           items: populated
@@ -600,7 +596,7 @@ it.each([true, false])(
         return Promise.resolve(Response.json(emptyToday()));
       throw new Error(String(url));
     });
-    vi.stubGlobal("fetch", fetch);
+    stubBusinessFetch(fetch);
     render(<SessionGate />);
     if (!authenticated)
       fireEvent.click(
@@ -627,7 +623,7 @@ it("@s28 @s29 a failed block boundary still retires the old agenda at midnight w
     )
     .mockRejectedValueOnce(new TypeError("offline"))
     .mockReturnValue(new Promise(() => {}));
-  vi.stubGlobal("fetch", fetch);
+  stubBusinessFetch(fetch);
   render(<Today />);
   await act(async () => {});
   await act(async () => vi.advanceTimersByTimeAsync(1000));
@@ -648,7 +644,7 @@ it("@s28 @s30 a pending block-boundary request is replaced at midnight", async (
     )
     .mockReturnValueOnce(old.promise)
     .mockReturnValue(new Promise(() => {}));
-  vi.stubGlobal("fetch", fetch);
+  stubBusinessFetch(fetch);
   render(<Today />);
   await act(async () => {});
   await act(async () => vi.advanceTimersByTimeAsync(1000));
@@ -670,7 +666,7 @@ it("@s24 @s27 @s28 returning visible with a manual request pending keeps only th
     )
     .mockReturnValueOnce(old.promise)
     .mockReturnValue(new Promise(() => {}));
-  vi.stubGlobal("fetch", fetch);
+  stubBusinessFetch(fetch);
   render(<Today />);
   await act(async () => {});
   fireEvent.click(screen.getByRole("button", { name: "Actualizar" }));
@@ -702,7 +698,7 @@ it("@s27 visibility recovery waits for its new snapshot before rearming a block 
       Response.json({ ...agendaToday(), serverNow: "2030-01-07T12:59:58Z" }),
     )
     .mockReturnValueOnce(fresh.promise);
-  vi.stubGlobal("fetch", fetch);
+  stubBusinessFetch(fetch);
   render(<Today />);
   await act(async () => {});
   vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
@@ -730,7 +726,7 @@ it("@s37 update stays focusable but announces unavailability and coalesces repea
     .fn()
     .mockResolvedValueOnce(Response.json(agendaToday()))
     .mockReturnValueOnce(pending.promise);
-  vi.stubGlobal("fetch", fetch);
+  stubBusinessFetch(fetch);
   render(<Today />);
   await screen.findByText("Proyecto personal");
   const update = screen.getByRole("button", { name: "Actualizar" });
@@ -758,7 +754,7 @@ it.each([30, null])(
       remainingSeconds: budgetMinutes === null ? null : 0,
       excessSeconds: budgetMinutes === null ? null : 1800,
     };
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(value)));
+    stubBusinessFetch(vi.fn().mockResolvedValue(Response.json(value)));
     render(<Today />);
     await screen.findByText("Proyecto personal");
     expect(
@@ -787,8 +783,7 @@ it("@s18 labels only the matching current and next reservation and preserves rea
     },
     taskTitle: "Segunda tarea",
   };
-  vi.stubGlobal(
-    "fetch",
+  stubBusinessFetch(
     vi.fn().mockResolvedValue(
       Response.json({
         ...value,
@@ -829,7 +824,7 @@ it("@s30 obsolete failure and finally cannot replace the current loading state",
     .mockResolvedValueOnce(Response.json(value))
     .mockReturnValueOnce(old.promise)
     .mockReturnValueOnce(current.promise);
-  vi.stubGlobal("fetch", fetch);
+  stubBusinessFetch(fetch);
   render(<Today />);
   await act(async () => {});
   fireEvent.click(screen.getByRole("button", { name: "Actualizar" }));
@@ -858,7 +853,7 @@ it("@s26 accepting a response while hidden leaves no scheduled refresh", async (
     .fn()
     .mockReturnValueOnce(pending.promise)
     .mockReturnValue(new Promise(() => {}));
-  vi.stubGlobal("fetch", fetch);
+  stubBusinessFetch(fetch);
   render(<Today />);
   vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
   fireEvent(document, new Event("visibilitychange"));
@@ -876,8 +871,7 @@ it("@s26 accepting a response while hidden leaves no scheduled refresh", async (
 });
 it("@s22 retry removes the old alert while loading and confirms an explicit empty closing", async () => {
   const pending = deferred<Response>();
-  vi.stubGlobal(
-    "fetch",
+  stubBusinessFetch(
     vi
       .fn()
       .mockRejectedValueOnce(new TypeError("offline"))
@@ -904,7 +898,7 @@ it.each([
   async (route) => {
     window.history.replaceState(null, "", route);
     const fetch = vi.fn();
-    vi.stubGlobal("fetch", fetch);
+    stubBusinessFetch(fetch);
     render(<App />);
     const main = screen.getByRole("main");
     expect(
@@ -933,8 +927,7 @@ it.each([
   },
 );
 it("@s18 @s19 keeps a readable boundary between time and zone and between fallback explanation and action", async () => {
-  vi.stubGlobal(
-    "fetch",
+  stubBusinessFetch(
     vi.fn().mockResolvedValue(
       Response.json({
         ...emptyToday(),
@@ -956,7 +949,7 @@ it("@s18 @s19 keeps a readable boundary between time and zone and between fallba
 });
 it("@s35 the recovery links on 404 remain visually distinct text", () => {
   window.history.replaceState(null, "", "/desconocida");
-  vi.stubGlobal("fetch", vi.fn());
+  stubBusinessFetch(vi.fn());
   render(<App />);
   expect(screen.getByRole("main")).toHaveTextContent(/Hoy\s+·\s+Proyectos/);
   window.history.replaceState(null, "", "/");
@@ -966,10 +959,7 @@ it("@s30 unmount releases its visibility and focus subscriptions", async () => {
   const documentRemove = vi.spyOn(document, "removeEventListener");
   const windowAdd = vi.spyOn(window, "addEventListener");
   const windowRemove = vi.spyOn(window, "removeEventListener");
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue(Response.json(agendaToday())),
-  );
+  stubBusinessFetch(vi.fn().mockResolvedValue(Response.json(agendaToday())));
   const { unmount } = render(<Today />);
   await screen.findByText("Proyecto personal");
   const visibility = documentAdd.mock.calls.filter(
@@ -1014,7 +1004,7 @@ it.each(["boundary", "visibility"])(
         }),
       )
       .mockReturnValue(new Promise(() => {}));
-    vi.stubGlobal("fetch", fetch);
+    stubBusinessFetch(fetch);
     render(<Today />);
     await act(async () => {});
     expect(screen.getByText("Proyecto personal")).toBeInTheDocument();
@@ -1045,7 +1035,7 @@ it("@s28 returning exactly at the day deadline retires a pending old-day request
       }),
     )
     .mockReturnValue(new Promise(() => {}));
-  vi.stubGlobal("fetch", fetch);
+  stubBusinessFetch(fetch);
   render(<Today />);
   await act(async () => {});
   fireEvent.click(screen.getByRole("button", { name: "Actualizar" }));
@@ -1072,7 +1062,7 @@ it("@s28 @s30 an obsolete 401 delivered in the deadline turn cannot revoke curre
     )
     .mockReturnValueOnce(old.promise)
     .mockReturnValue(new Promise(() => {}));
-  vi.stubGlobal("fetch", fetch);
+  stubBusinessFetch(fetch);
   const access = vi.fn();
   observeAccess(access);
   try {
@@ -1093,3 +1083,29 @@ it("@s28 @s30 an obsolete 401 delivered in the deadline turn cannot revoke curre
     observeAccess();
   }
 });
+
+// Global appearance GET has its own fixture; business requests and counts
+// are delegated unchanged to the original mock.
+function stubBusinessFetch(mock: unknown) {
+  const traffic = mock as typeof fetch;
+  vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
+    if (
+      input === "/api/v1/me/appearance" &&
+      (init?.method === undefined || init.method === "GET")
+    ) {
+      return Promise.resolve(
+        Response.json(
+          {
+            configured: false,
+            theme: "SYSTEM",
+            accentLight: "#244C3C",
+            accentDark: "#B7E4C7",
+            updatedAt: null,
+          },
+          { headers: { ETag: '"appearance:unconfigured"' } },
+        ),
+      );
+    }
+    return traffic(input, init);
+  });
+}

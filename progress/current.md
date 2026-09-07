@@ -297,3 +297,10 @@ Aceptación HTTPS: GET de defaults sin configuración, PUT200 SYSTEM conservando
 ## Feature21: contrato de vistas y campos, 7 de septiembre 21:50
 
 Init21 sesión94704 EXIT0 ce0f1d: Java2387/102 sin fallos/errores/omitidos (recuento XML64dfee), frontend2058/44 y55 pruebas del arnés verdes. Base main7c1bf80 con cierre20 documental47dd4d4; no código21 escrito. A redactó sección21 y root revisó scopes, tipos, restauración y concurrencia. Se corrigió una revisión fuerte que no incluía cambios de etiquetas: ETag compuesto incorpora configuración y valores, eliminando una segunda cabecera. C destila Gherkin como autor distinto; B delimitó integración contextual. No se inicia TDD hasta revisión del contrato destilado, bajo autorización global vigente.
+
+
+## Feature21 aprobada para TDD, 7 de septiembre 22:03
+
+Contrato Gherkin CA252E2A…36DF07 revisado por root:42 escenarios/42 When/174 ejemplos léxicos, no174 pruebas ejecutadas. Se añadieron primera configuración con defaults y cero campos activos; 404 conserva problem+json sin datos ajenos. No pasos después de Examples. Se aplica autorización global previa del usuario sin repetir aprobación. Init21 ya verde. Estado pasa a in_progress antes de código: A dominio/persistencia/aplicación; B cliente/UI; C HTTP aislado tras handoff de puertos.
+
+CI posterior de main7c1bf80,34156177485, terminó SUCCESS. Documentación operativa20 PR32 fusionada01e33a5 tras CI34156833452 SUCCESS. No hay cambios adicionales del servidor.

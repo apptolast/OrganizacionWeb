@@ -22,6 +22,7 @@ export function createProject(runner = run) {
       target !== "" &&
       (task !== "mutate" ||
         ![
+          "appearance-backend",
           "weekly_review-backend",
           "weekly_review-frontend",
           "history-backend",
@@ -66,6 +67,10 @@ export function createProject(runner = run) {
       mutate: "pitest",
     };
     if (!commands[task]) throw new Error(`Unknown task: ${task}`);
+    if (task === "mutate" && target === "appearance-backend") {
+      backend("pitest", ["-PmutationScope=appearance"]);
+      return;
+    }
     if (task === "mutate" && target === "weekly_review-frontend") {
       runner("pnpm", [
         "--dir",

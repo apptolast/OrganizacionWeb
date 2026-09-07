@@ -1210,3 +1210,68 @@ test("default PIT exposes weekly review adapter tests for the newly selected cla
     /else -> core \+ authenticationTests[^\n]+ \+ weeklyReviewAdapterTests/,
   );
 });
+
+test("appearance backend invokes only its fixed PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "appearance-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=appearance"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
+test("appearance PIT includes all new modules and makes their tests available by default", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  const selected = build.match(
+    /val appearanceClasses = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(selected);
+  assert.deepEqual(
+    [...selected.matchAll(/"([^"]+)"/g)].map((entry) => entry[1]),
+    [
+      "application.ReadAppearance",
+      "application.ReadAppearanceUseCase",
+      "application.SaveAppearance",
+      "application.SaveAppearanceUseCase",
+      "application.AppearanceQueries",
+      "application.AppearanceEditing",
+      "application.AppearanceConflictException",
+      "domain.Appearance*",
+      "adapter.persistence.PostgresAppearanceStore*",
+      "adapter.http.AppearanceController*",
+      "adapter.config.ApplicationConfiguration",
+    ].map((name) => `com.apptolast.organization.${name}`),
+  );
+  assert.match(build, /val appearanceOnly = scope == "appearance"/);
+  assert.match(build, /appearanceOnly -> appearanceClasses/);
+  assert.match(
+    build,
+    /appearanceOnly -> setOf\("com\.apptolast\.organization\.\*"\)/,
+  );
+  assert.match(build, /else -> [^\n]+ \+ appearanceClasses/);
+  const tests = build.match(
+    /val appearanceAdapterTests = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(tests);
+  assert.deepEqual(
+    [...tests.matchAll(/"([^"]+)"/g)].map((entry) => entry[1]),
+    [
+      "com.apptolast.organization.adapter.AppearanceApiTest",
+      "com.apptolast.organization.adapter.persistence.Appearance*Test",
+      "com.apptolast.organization.adapter.config.ApplicationWiringTest",
+    ],
+  );
+  assert.match(
+    build,
+    /else -> core \+ authenticationTests[^\n]+ \+ appearanceAdapterTests/,
+  );
+  assert.match(
+    build,
+    /if \(appearanceOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-appearance"\)\)/,
+  );
+  assert.match(build, /mutationThreshold\.set\(80\)/);
+  assert.match(build, /threads\.set\(4\)/);
+});

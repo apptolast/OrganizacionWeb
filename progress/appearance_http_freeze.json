@@ -1,0 +1,37 @@
+{
+  "base": "4567520",
+  "exitCode": 0,
+  "result": "0a6e89",
+  "tests": 206,
+  "appearanceTests": 55,
+  "availabilityTests": 151,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/AppearanceController.java",
+      "sha256": "581AB8FB1913E8C6E381EA55ABC5F24FFC0E16291AB973C21B90AEB33EC81670"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/AppearanceApiTest.java",
+      "sha256": "D9B19CB450C8CABD1F3FD90323B2216C40A03BF2F6E499B9503C3B354827DEC9"
+    },
+    {
+      "path": "progress/tdd_appearance_http.md",
+      "sha256": "94CBEA78A8AB4B1669B1999572BDEA46AFF67445EB2E9E3144FB8D2B62849039"
+    },
+    {
+      "path": "progress/appearance_http_freeze.log",
+      "sha256": "72DD9F03B8FAF1FDA89272D6438D46D69E9AEB1456DD34AA3C4CCDBAAF53A315"
+    },
+    {
+      "path": "progress/appearance_http_final_xml/TEST-com.apptolast.organization.adapter.AppearanceApiTest.xml",
+      "sha256": "4D9AC1626E6A7723EA7461DBBEEB6C791F6532403389A4D12652A42B58D26ACB"
+    },
+    {
+      "path": "progress/appearance_http_final_xml/TEST-com.apptolast.organization.adapter.AvailabilityApiTest.xml",
+      "sha256": "764BC391202D4B8A95A5CD5A69AA6E90CB52450DBB4E39A7708B5EF153F01C14"
+    }
+  ]
+}

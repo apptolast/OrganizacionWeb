@@ -11,6 +11,55 @@ import org.junit.jupiter.api.Test;
 
 class ReadWeeklyReviewTest {
   @Test
+  void s6_utcClockOutsideRangeCannotBeHiddenByARepresentableLocalDate() {
+    var catalog = mock(ZoneCatalog.class);
+    when(catalog.zones()).thenReturn(Set.of("Etc/GMT-14"));
+    WeeklyReviewQueries queries = (owner, window) -> window.apply(Optional.empty()).emptyReview();
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new ReadWeeklyReview(
+                        queries,
+                        Clock.fixed(Instant.parse("0000-12-31T23:30:00Z"), ZoneOffset.UTC),
+                        catalog)
+                    .get("owner", LocalDate.parse("2026-09-07"), "Etc/GMT-14"))
+        .isInstanceOf(com.apptolast.organization.domain.WeeklyReviewTimeOutOfRangeException.class);
+  }
+
+  @Test
+  void s6_lastCompleteWeekAndClockInYear9999RemainPubliclyValid() {
+    WeeklyReviewQueries queries = (owner, window) -> window.apply(Optional.empty()).emptyReview();
+    var result =
+        new ReadWeeklyReview(
+                queries,
+                Clock.fixed(Instant.parse("9999-12-20T12:00:00Z"), ZoneOffset.UTC),
+                mock(ZoneCatalog.class))
+            .get("owner", LocalDate.parse("9999-12-20"), null);
+    assertThat(result.serverNow()).isEqualTo(Instant.parse("9999-12-20T12:00:00Z"));
+    assertThat(result.weekStart()).isEqualTo(LocalDate.parse("9999-12-20"));
+    assertThat(result.weekEnd()).isEqualTo(LocalDate.parse("9999-12-26"));
+    assertThat(result.startAt()).isEqualTo(Instant.parse("9999-12-20T00:00:00Z"));
+    assertThat(result.endAt()).isEqualTo(Instant.parse("9999-12-27T00:00:00Z"));
+    assertThat(result.days()).hasSize(7);
+  }
+
+  @Test
+  void s6_yearOneClockAndSelectedWeekRemainPubliclyValid() {
+    WeeklyReviewQueries queries = (owner, window) -> window.apply(Optional.empty()).emptyReview();
+    var result =
+        new ReadWeeklyReview(
+                queries,
+                Clock.fixed(Instant.parse("0001-01-01T12:00:00Z"), ZoneOffset.UTC),
+                mock(ZoneCatalog.class))
+            .get("owner", LocalDate.parse("0001-01-01"), null);
+    assertThat(result.serverNow()).isEqualTo(Instant.parse("0001-01-01T12:00:00Z"));
+    assertThat(result.weekStart()).isEqualTo(LocalDate.parse("0001-01-01"));
+    assertThat(result.weekEnd()).isEqualTo(LocalDate.parse("0001-01-07"));
+    assertThat(result.startAt()).isEqualTo(Instant.parse("0001-01-01T00:00:00Z"));
+    assertThat(result.endAt()).isEqualTo(Instant.parse("0001-01-08T00:00:00Z"));
+    assertThat(result.days()).hasSize(7);
+  }
+
+  @Test
   void s6_defaultWeekWhoseSundayExceedsYearRangeIsATemporalConflict() {
     WeeklyReviewQueries queries = (owner, window) -> window.apply(Optional.empty()).emptyReview();
     org.assertj.core.api.Assertions.assertThatThrownBy(

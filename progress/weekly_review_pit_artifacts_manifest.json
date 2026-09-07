@@ -1,0 +1,102 @@
+[
+  {
+    "path": "progress/weekly_review_pit_final/index.html",
+    "bytes": 5328,
+    "sha256": "F064D7805E534D91BCC988FDB7D2E2E35AD157DC205F06851CB854C5F0F2083A"
+  },
+  {
+    "path": "progress/weekly_review_pit_final/mutations.xml",
+    "bytes": 174876,
+    "sha256": "E4AF020394AF9D4518C7E5D0B301D48B8F2BFF0A2FF38B836FAC5C1752FB8DC1"
+  },
+  {
+    "path": "progress/weekly_review_pit_final/style.css",
+    "bytes": 5839,
+    "sha256": "78EA37FB78E124ACD62B472B0DBDB1F80176D8B4C3353411668797FBF3DB7976"
+  },
+  {
+    "path": "progress/weekly_review_pit_final/com.apptolast.organization.adapter.config/ApplicationConfiguration.java.html",
+    "bytes": 128393,
+    "sha256": "265D5F19CE7B9E0AB79877E6D927FA3CAED20638FC24DDCE0CEC6A7A771B524D"
+  },
+  {
+    "path": "progress/weekly_review_pit_final/com.apptolast.organization.adapter.config/index.html",
+    "bytes": 2100,
+    "sha256": "EAC5A6BE62DBB2167528904243BAF35A9E347167E641DBA4EF9743E135122BEF"
+  },
+  {
+    "path": "progress/weekly_review_pit_final/com.apptolast.organization.adapter.http/index.html",
+    "bytes": 2094,
+    "sha256": "B30F1E345FFD0796CFD08238BF02F16458C61F4ECDA501D04842BF5BFCC58A9C"
+  },
+  {
+    "path": "progress/weekly_review_pit_final/com.apptolast.organization.adapter.http/WeeklyReviewController.java.html",
+    "bytes": 62843,
+    "sha256": "649BDB2B31F3B0401275FBEE0B3A0B68E89B5119612F8ABD5B9D7B2DA8F6A66C"
+  },
+  {
+    "path": "progress/weekly_review_pit_final/com.apptolast.organization.adapter.persistence/index.html",
+    "bytes": 2115,
+    "sha256": "FD1F421E39F639CFCFCA605A0C54C89E8625174ED670E3A3F1EFB6BD3533FEF8"
+  },
+  {
+    "path": "progress/weekly_review_pit_final/com.apptolast.organization.adapter.persistence/PostgresWeeklyReviewQueries.java.html",
+    "bytes": 126100,
+    "sha256": "C3092818227546652D6A0967F6336F78728FB53666C887C88D2EA07E12088E08"
+  },
+  {
+    "path": "progress/weekly_review_pit_final/com.apptolast.organization.application/index.html",
+    "bytes": 2073,
+    "sha256": "31BBB3C55B2049F92697D8BB3AE23123A7B23168A6D78C4DD8B926D3140D0357"
+  },
+  {
+    "path": "progress/weekly_review_pit_final/com.apptolast.organization.application/ReadWeeklyReview.java.html",
+    "bytes": 63844,
+    "sha256": "8CBFF3DA6AC1280F27C99FF36E3348B745CEC34E59350C20845D46CB62EAE566"
+  },
+  {
+    "path": "progress/weekly_review_pit_final/com.apptolast.organization.domain/index.html",
+    "bytes": 2726,
+    "sha256": "906A9A488DFAC82B13B48BA0650816D671563B733385CE8F4F4BC69FD7EA5495"
+  },
+  {
+    "path": "progress/weekly_review_pit_final/com.apptolast.organization.domain/WeeklyReview.java.html",
+    "bytes": 35213,
+    "sha256": "694A94D237FA0D5FF8CE16D9A59F3A4F32706BF2BED1239EA75C516F049DCBFB"
+  },
+  {
+    "path": "progress/weekly_review_pit_final/com.apptolast.organization.domain/WeeklyReviewWindow.java.html",
+    "bytes": 122367,
+    "sha256": "691A99D57FBB5E4671129AA5FDF2A84254DAF8FA8861B3765C23715D368506C5"
+  },
+  {
+    "path": "progress/weekly_review_pit.log",
+    "bytes": 7517,
+    "sha256": "92D9B571AACE3147B171C5B7CEF792A2020C652CE7B16A621575737C2E930E73"
+  },
+  {
+    "path": "progress/weekly_review_pit_exit.txt",
+    "bytes": 7,
+    "sha256": "418A5C17F33C70E99B0CC0A07FCE69191489CFEDC94164BFA903785777C5BD4B"
+  },
+  {
+    "path": "progress/weekly_review_pit_before_hashes.json",
+    "bytes": 73677,
+    "sha256": "1FA459E2E381F0C224623693849954399A49EB9B1CC49800CC94B9936603E67D"
+  },
+  {
+    "path": "progress/weekly_review_pit_after_hashes.json",
+    "bytes": 73677,
+    "sha256": "1FA459E2E381F0C224623693849954399A49EB9B1CC49800CC94B9936603E67D"
+  },
+  {
+    "path": "progress/weekly_review_pit_inventory.json",
+    "bytes": 162236,
+    "sha256": "35A749F4218882AF44997A3308AF63C7746EB9445277028D7AB4A332F0E59870"
+  },
+  {
+    "path": "progress/weekly_review_pit_residuals.json",
+    "bytes": 7097,
+    "sha256": "244F982096B57FC23493F797ABE0539F545A6053C4166B11202751551D0EE73E"
+  }
+]

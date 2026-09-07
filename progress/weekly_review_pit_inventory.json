@@ -1,0 +1,3422 @@
+[
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "<init>",
+    "descriptor": "(Lcom/apptolast/organization/adapter/persistence/PostgresAvailabilityStore;Lorg/springframework/jdbc/core/JdbcTemplate;Lorg/springframework/transaction/PlatformTransactionManager;)V",
+    "line": 28,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "indexes": [
+      "28"
+    ],
+    "blocks": [
+      "2"
+    ],
+    "description": "removed call to org/springframework/transaction/support/TransactionTemplate::setReadOnly",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s1_emptyWeekReadsPostgresInReadOnlyRepeatableRead()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "<init>",
+    "descriptor": "(Lcom/apptolast/organization/adapter/persistence/PostgresAvailabilityStore;Lorg/springframework/jdbc/core/JdbcTemplate;Lorg/springframework/transaction/PlatformTransactionManager;)V",
+    "line": 29,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "indexes": [
+      "34"
+    ],
+    "blocks": [
+      "3"
+    ],
+    "description": "removed call to org/springframework/transaction/support/TransactionTemplate::setIsolationLevel",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s1_emptyWeekReadsPostgresInReadOnlyRepeatableRead()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "instant",
+    "descriptor": "(Ljava/sql/ResultSet;Ljava/lang/String;)Ljava/time/Instant;",
+    "line": 171,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "12"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_liveProjectionCannotBeginBeforeTheOriginalSession()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "instant",
+    "descriptor": "(Ljava/sql/ResultSet;Ljava/lang/String;)Ljava/time/Instant;",
+    "line": 171,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "21"
+    ],
+    "blocks": [
+      "4"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries::instant",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_liveProjectionCannotBeginBeforeTheOriginalSession()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 134,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.MathMutator",
+    "indexes": [
+      "261"
+    ],
+    "blocks": [
+      "68"
+    ],
+    "description": "Replaced long addition with subtraction",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s17_legacyClosedSessionsCountOnlyWhenTheirUnknownLifeStartsInTheWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 120,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "165"
+    ],
+    "blocks": [
+      "32"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_liveProjectionCannotBeginBeforeTheOriginalSession()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 121,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "173"
+    ],
+    "blocks": [
+      "36"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_liveProjectionCannotBeginBeforeTheOriginalSession()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 123,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "184"
+    ],
+    "blocks": [
+      "40"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_liveProjectionCannotBeginBeforeTheOriginalSession()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 125,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "200"
+    ],
+    "blocks": [
+      "46"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_liveProjectionCannotBeginBeforeTheOriginalSession()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 126,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "205"
+    ],
+    "blocks": [
+      "48"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_missingEndWithAReceiptIsCorruptionNotUnknownLegacyDuration()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 127,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "213"
+    ],
+    "blocks": [
+      "52"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s18_runningLegacyWithoutRunningSinceUsesItsStartWithoutBackfill()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 130,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "230"
+    ],
+    "blocks": [
+      "57"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_missingEndWithAReceiptIsCorruptionNotUnknownLegacyDuration()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 131,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "235"
+    ],
+    "blocks": [
+      "59"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_missingEndWithAReceiptIsCorruptionNotUnknownLegacyDuration()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 131,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "239"
+    ],
+    "blocks": [
+      "62"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s17_legacyClosedSessionsCountOnlyWhenTheirUnknownLifeStartsInTheWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 131,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "244"
+    ],
+    "blocks": [
+      "64"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_unknownLegacyCannotHideAnUnexplainedAccumulatedDuration()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 140,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "294"
+    ],
+    "blocks": [
+      "79"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s10_pausedSessionCountsClosedIntervalsWithoutAddingItsAccumulatedTotal()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 141,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "302"
+    ],
+    "blocks": [
+      "83"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_intervalAfterClosedSessionEndCannotBeCredited()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 141,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "304"
+    ],
+    "blocks": [
+      "84"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_intervalBeforeSessionStartCannotBeCredited()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 142,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "311"
+    ],
+    "blocks": [
+      "87"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s10_pausedSessionCountsClosedIntervalsWithoutAddingItsAccumulatedTotal()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 152,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "356"
+    ],
+    "blocks": [
+      "98"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_selectedSessionsClosedSumMustMatchItsAccumulatedWork()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 156,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "379"
+    ],
+    "blocks": [
+      "105"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s10_pausedSessionCountsClosedIntervalsWithoutAddingItsAccumulatedTotal()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$0",
+    "descriptor": "(Ljava/util/function/Function;Ljava/lang/String;Lorg/springframework/transaction/TransactionStatus;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 160,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "408"
+    ],
+    "blocks": [
+      "113"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries::lambda$read$0",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s1_emptyWeekReadsPostgresInReadOnlyRepeatableRead()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$1",
+    "descriptor": "(Ljava/sql/ResultSet;I)Lcom/apptolast/organization/domain/WeeklyReviewWindow$Interval;",
+    "line": 48,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "24"
+    ],
+    "blocks": [
+      "5"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries::lambda$read$1",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s9_movedReservationUsesOnlyItsCurrentProjectedInterval()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$2",
+    "descriptor": "(Ljava/sql/ResultSet;)Ljava/util/List;",
+    "line": 72,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "12"
+    ],
+    "blocks": [
+      "3"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s23_commitFailureCannotLeakTheCompletedSummary()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$2",
+    "descriptor": "(Ljava/sql/ResultSet;)Ljava/util/List;",
+    "line": 75,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "31"
+    ],
+    "blocks": [
+      "6"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_liveProjectionCannotBeginBeforeTheOriginalSession()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$2",
+    "descriptor": "(Ljava/sql/ResultSet;)Ljava/util/List;",
+    "line": 77,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "44"
+    ],
+    "blocks": [
+      "10"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s22_selectedUnknownLegacyStillChecksItsDurableDecision()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$2",
+    "descriptor": "(Ljava/sql/ResultSet;)Ljava/util/List;",
+    "line": 78,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "52"
+    ],
+    "blocks": [
+      "13"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_pausedSessionCannotRetainAnOpenTail()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$2",
+    "descriptor": "(Ljava/sql/ResultSet;)Ljava/util/List;",
+    "line": 79,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "58"
+    ],
+    "blocks": [
+      "15"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_pausedSessionCannotRetainAnOpenTail()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$2",
+    "descriptor": "(Ljava/sql/ResultSet;)Ljava/util/List;",
+    "line": 84,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "80"
+    ],
+    "blocks": [
+      "20"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_missingEndWithAReceiptIsCorruptionNotUnknownLegacyDuration()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$2",
+    "descriptor": "(Ljava/sql/ResultSet;)Ljava/util/List;",
+    "line": 85,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "88"
+    ],
+    "blocks": [
+      "23"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_missingEndWithAReceiptIsCorruptionNotUnknownLegacyDuration()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$2",
+    "descriptor": "(Ljava/sql/ResultSet;)Ljava/util/List;",
+    "line": 91,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "128"
+    ],
+    "blocks": [
+      "33"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s10_pausedSessionCountsClosedIntervalsWithoutAddingItsAccumulatedTotal()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$2",
+    "descriptor": "(Ljava/sql/ResultSet;)Ljava/util/List;",
+    "line": 92,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "134"
+    ],
+    "blocks": [
+      "35"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s18_runningLegacyWithoutRunningSinceUsesItsStartWithoutBackfill()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$2",
+    "descriptor": "(Ljava/sql/ResultSet;)Ljava/util/List;",
+    "line": 99,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "172"
+    ],
+    "blocks": [
+      "46"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_liveProjectionCannotBeginBeforeTheOriginalSession()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$2",
+    "descriptor": "(Ljava/sql/ResultSet;)Ljava/util/List;",
+    "line": 106,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "204"
+    ],
+    "blocks": [
+      "56"
+    ],
+    "description": "replaced return value with Collections.emptyList for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries::lambda$read$2",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_liveProjectionCannotBeginBeforeTheOriginalSession()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$3",
+    "descriptor": "(Lcom/apptolast/organization/domain/WeeklyReview;Lcom/apptolast/organization/domain/WeeklyReviewWindow$Interval;)Z",
+    "line": 123,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanFalseReturnValsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "3"
+    ],
+    "description": "replaced boolean return with false for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries::lambda$read$3",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s22_futureIntervalHasTemporalPrecedenceOverInconsistentEarlierMetadata()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$3",
+    "descriptor": "(Lcom/apptolast/organization/domain/WeeklyReview;Lcom/apptolast/organization/domain/WeeklyReviewWindow$Interval;)Z",
+    "line": 123,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "3"
+    ],
+    "description": "replaced boolean return with true for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries::lambda$read$3",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_intervalAfterClosedSessionEndCannotBeCredited()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "lambda$read$4",
+    "descriptor": "(Lcom/apptolast/organization/domain/WeeklyReviewWindow$Interval;)J",
+    "line": 150,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator",
+    "indexes": [
+      "9"
+    ],
+    "blocks": [
+      "3"
+    ],
+    "description": "replaced long return with 0 for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries::lambda$read$4",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s10_pausedSessionCountsClosedIntervalsWithoutAddingItsAccumulatedTotal()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries",
+    "method": "read",
+    "descriptor": "(Ljava/lang/String;Ljava/util/function/Function;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 35,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "12"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries::read",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s1_emptyWeekReadsPostgresInReadOnlyRepeatableRead()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "cancelBlock",
+    "descriptor": "(Lcom/apptolast/organization/application/BlockEditing;Ljava/time/Clock;)Lcom/apptolast/organization/application/CancelBlock;",
+    "line": 115,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::cancelBlock",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[method:reschedule_s12_cancelBeanReachesItsPortInFreshContext()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "changeProjectStatus",
+    "descriptor": "(Lcom/apptolast/organization/application/ProjectStatusEditing;Ljava/time/Clock;Ljava/lang/String;)Lcom/apptolast/organization/application/ChangeProjectStatus;",
+    "line": 162,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "10"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": "com.apptolast.organization.adapter.config.ProjectStateConfigurationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ProjectStateConfigurationTest]/[test-template:s7_capacityIsValidatedAtStartup(java.lang.String, int)]/[test-template-invocation:#2]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "changeProjectStatus",
+    "descriptor": "(Lcom/apptolast/organization/application/ProjectStatusEditing;Ljava/time/Clock;Ljava/lang/String;)Lcom/apptolast/organization/application/ChangeProjectStatus;",
+    "line": 162,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "13"
+    ],
+    "blocks": [
+      "2"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": "com.apptolast.organization.adapter.config.ProjectStateConfigurationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ProjectStateConfigurationTest]/[test-template:s7_capacityIsValidatedAtStartup(java.lang.String, int)]/[test-template-invocation:#3]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "changeProjectStatus",
+    "descriptor": "(Lcom/apptolast/organization/application/ProjectStatusEditing;Ljava/time/Clock;Ljava/lang/String;)Lcom/apptolast/organization/application/ChangeProjectStatus;",
+    "line": 162,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "10"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedReadingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#5]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "changeProjectStatus",
+    "descriptor": "(Lcom/apptolast/organization/application/ProjectStatusEditing;Ljava/time/Clock;Ljava/lang/String;)Lcom/apptolast/organization/application/ChangeProjectStatus;",
+    "line": 162,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "13"
+    ],
+    "blocks": [
+      "2"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedReadingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#5]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "changeProjectStatus",
+    "descriptor": "(Lcom/apptolast/organization/application/ProjectStatusEditing;Ljava/time/Clock;Ljava/lang/String;)Lcom/apptolast/organization/application/ChangeProjectStatus;",
+    "line": 164,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "31"
+    ],
+    "blocks": [
+      "6"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::changeProjectStatus",
+    "killingTest": "com.apptolast.organization.adapter.config.ProjectStateConfigurationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ProjectStateConfigurationTest]/[test-template:s7_capacityIsValidatedAtStartup(java.lang.String, int)]/[test-template-invocation:#3]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "changeTaskStatus",
+    "descriptor": "(Lcom/apptolast/organization/application/TaskStatusEditing;Ljava/time/Clock;)Lcom/apptolast/organization/application/ChangeTaskStatus;",
+    "line": 200,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::changeTaskStatus",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedWritingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#5]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "changeWorkSession",
+    "descriptor": "(Lcom/apptolast/organization/application/WorkSessionChanging;Ljava/time/Clock;)Lcom/apptolast/organization/application/ChangeWorkSession;",
+    "line": 72,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::changeWorkSession",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[method:pause_s2_commandBeanUsesTheRealStore()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "clock",
+    "descriptor": "()Ljava/time/Clock;",
+    "line": 135,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "4"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::clock",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedReadingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#5]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "createProject",
+    "descriptor": "(Lcom/apptolast/organization/application/ProjectCommit;Ljava/time/Clock;)Lcom/apptolast/organization/application/CreateProject;",
+    "line": 140,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::createProject",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedWritingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#1]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "createSubtask",
+    "descriptor": "(Lcom/apptolast/organization/application/SubtaskCommit;Ljava/time/Clock;)Lcom/apptolast/organization/application/CreateSubtask;",
+    "line": 182,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::createSubtask",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedWritingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#3]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "createTask",
+    "descriptor": "(Lcom/apptolast/organization/application/TaskCommit;Ljava/time/Clock;)Lcom/apptolast/organization/application/CreateTask;",
+    "line": 170,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::createTask",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedWritingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#2]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "editProject",
+    "descriptor": "(Lcom/apptolast/organization/application/ProjectEditing;Ljava/time/Clock;)Lcom/apptolast/organization/application/EditProject;",
+    "line": 152,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::editProject",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedWritingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#4]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "extendWorkSession",
+    "descriptor": "(Lcom/apptolast/organization/application/WorkSessionExtending;Ljava/time/Clock;)Lcom/apptolast/organization/application/ExtendWorkSession;",
+    "line": 54,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::extendWorkSession",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[method:end_s1_extensionBeanUsesTheRealStore()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "historyQueries",
+    "descriptor": "(Lorg/springframework/jdbc/core/JdbcTemplate;Lorg/springframework/transaction/PlatformTransactionManager;Lcom/fasterxml/jackson/databind/ObjectMapper;)Lcom/apptolast/organization/adapter/persistence/PostgresHistoryQueries;",
+    "line": 35,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "9"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::historyQueries",
+    "killingTest": "com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest]/[method:s1_s26_httpCloseCommitsAndClosureReadRecoversTheSameDurableFact()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "moveBlock",
+    "descriptor": "(Lcom/apptolast/organization/application/BlockMoving;Lcom/apptolast/organization/application/ZoneCatalog;Ljava/time/Clock;)Lcom/apptolast/organization/application/MoveBlock;",
+    "line": 109,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "9"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::moveBlock",
+    "killingTest": "com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest]/[method:s1_s26_httpCloseCommitsAndClosureReadRecoversTheSameDurableFact()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "planBlock",
+    "descriptor": "(Lcom/apptolast/organization/application/BlockPlanning;Lcom/apptolast/organization/application/BlockCommit;Lcom/apptolast/organization/application/ZoneCatalog;Ljava/time/Clock;)Lcom/apptolast/organization/application/PlanBlock;",
+    "line": 130,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "10"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::planBlock",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[method:s1_blockPlanningBeanReachesItsPortInFreshContext()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "readAvailability",
+    "descriptor": "(Lcom/apptolast/organization/application/AvailabilityQueries;Lcom/apptolast/organization/application/ZoneCatalog;)Lcom/apptolast/organization/application/ReadAvailability;",
+    "line": 213,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::readAvailability",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedReadingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#6]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "readBlockChanges",
+    "descriptor": "(Lcom/apptolast/organization/application/BlockChangeQueries;)Lcom/apptolast/organization/application/ReadBlockChangesUseCase;",
+    "line": 101,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "7"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::readBlockChanges",
+    "killingTest": "com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest]/[method:s1_s26_httpCloseCommitsAndClosureReadRecoversTheSameDurableFact()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "readBlocks",
+    "descriptor": "(Lcom/apptolast/organization/application/BlockQueries;)Lcom/apptolast/organization/application/ReadBlocks;",
+    "line": 121,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "7"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::readBlocks",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[method:s26_blockReadingBeanReachesItsPortInFreshContext()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "readHistory",
+    "descriptor": "(Lcom/apptolast/organization/application/HistoryQueries;)Lcom/apptolast/organization/application/ReadHistory;",
+    "line": 42,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "7"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::readHistory",
+    "killingTest": "com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest]/[method:s1_s26_httpCloseCommitsAndClosureReadRecoversTheSameDurableFact()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "readProjects",
+    "descriptor": "(Lcom/apptolast/organization/application/ProjectQueries;)Lcom/apptolast/organization/application/ReadProjects;",
+    "line": 146,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "7"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::readProjects",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedReadingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#1]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "readSubtasks",
+    "descriptor": "(Lcom/apptolast/organization/application/SubtaskQueries;)Lcom/apptolast/organization/application/ReadSubtasks;",
+    "line": 188,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "7"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::readSubtasks",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedReadingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#3]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "readTaskHistory",
+    "descriptor": "(Lcom/apptolast/organization/application/TaskHistoryQueries;)Lcom/apptolast/organization/application/ReadTaskHistory;",
+    "line": 206,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "7"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::readTaskHistory",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedReadingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#5]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "readTaskStatus",
+    "descriptor": "(Lcom/apptolast/organization/application/TaskStatusQueries;)Lcom/apptolast/organization/application/ReadTaskStatus;",
+    "line": 194,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "7"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::readTaskStatus",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedReadingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#4]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "readTasks",
+    "descriptor": "(Lcom/apptolast/organization/application/TaskQueries;)Lcom/apptolast/organization/application/ReadTasks;",
+    "line": 176,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "7"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::readTasks",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedReadingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#2]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "readToday",
+    "descriptor": "(Lcom/apptolast/organization/application/TodayQueries;Ljava/time/Clock;Lcom/apptolast/organization/application/ZoneCatalog;)Lcom/apptolast/organization/application/ReadToday;",
+    "line": 229,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "9"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::readToday",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[method:today_s1_readingBeanReachesItsPortInFreshContext()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "readWeeklyReview",
+    "descriptor": "(Lcom/apptolast/organization/application/WeeklyReviewQueries;Ljava/time/Clock;Lcom/apptolast/organization/application/ZoneCatalog;)Lcom/apptolast/organization/application/ReadWeeklyReview;",
+    "line": 27,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "9"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::readWeeklyReview",
+    "killingTest": "com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest]/[method:s1_s26_httpCloseCommitsAndClosureReadRecoversTheSameDurableFact()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "readWorkSessionChanges",
+    "descriptor": "(Lcom/apptolast/organization/application/WorkSessionTransitionQueries;)Lcom/apptolast/organization/application/ReadWorkSessionChanges;",
+    "line": 60,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "7"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::readWorkSessionChanges",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[method:pause_s25_receiptBeanUsesTheRealStore()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "readWorkSessionEnd",
+    "descriptor": "(Lcom/apptolast/organization/application/WorkSessionEndQueries;Ljava/time/Clock;)Lcom/apptolast/organization/application/ReadWorkSessionEnd;",
+    "line": 48,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::readWorkSessionEnd",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[method:end_s13_readBeanUsesTheRealStore()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "readWorkSessionState",
+    "descriptor": "(Lcom/apptolast/organization/application/WorkSessionStateQueries;Ljava/time/Clock;)Lcom/apptolast/organization/application/ReadWorkSessionState;",
+    "line": 66,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::readWorkSessionState",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[method:pause_s1_stateBeanUsesTheRealStore()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "readWorkSessions",
+    "descriptor": "(Lcom/apptolast/organization/application/WorkSessionQueries;)Lcom/apptolast/organization/application/ReadWorkSessions;",
+    "line": 95,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "7"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::readWorkSessions",
+    "killingTest": "com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest]/[method:s1_s26_httpCloseCommitsAndClosureReadRecoversTheSameDurableFact()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "saveAvailability",
+    "descriptor": "(Lcom/apptolast/organization/application/AvailabilityEditing;Lcom/apptolast/organization/application/ZoneCatalog;Ljava/time/Clock;)Lcom/apptolast/organization/application/SaveAvailability;",
+    "line": 221,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "9"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::saveAvailability",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedWritingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#6]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "startWorkSession",
+    "descriptor": "(Lcom/apptolast/organization/application/WorkSessionStarting;Ljava/time/Clock;Lcom/apptolast/organization/application/ZoneCatalog;)Lcom/apptolast/organization/application/StartWorkSession;",
+    "line": 89,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "9"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::startWorkSession",
+    "killingTest": "com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest]/[method:s1_s26_httpCloseCommitsAndClosureReadRecoversTheSameDurableFact()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "weeklyReviewQueries",
+    "descriptor": "(Lorg/springframework/jdbc/core/JdbcTemplate;Lorg/springframework/transaction/PlatformTransactionManager;)Lcom/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries;",
+    "line": 15,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "16"
+    ],
+    "blocks": [
+      "3"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::weeklyReviewQueries",
+    "killingTest": "com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.CloseWorkSessionIntegrationTest]/[method:s1_s26_httpCloseCommitsAndClosureReadRecoversTheSameDurableFact()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ApplicationConfiguration.java",
+    "class": "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+    "method": "workSessionStore",
+    "descriptor": "(Lorg/springframework/jdbc/core/JdbcTemplate;Lorg/springframework/transaction/PlatformTransactionManager;Lcom/fasterxml/jackson/databind/ObjectMapper;)Lcom/apptolast/organization/adapter/persistence/PostgresWorkSessionStore;",
+    "line": 80,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "9"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/config/ApplicationConfiguration::workSessionStore",
+    "killingTest": "com.apptolast.organization.adapter.config.ApplicationWiringTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.config.ApplicationWiringTest]/[test-template:sharedReadingBeansReachTheirPortsInFreshContexts(java.lang.String)]/[test-template-invocation:#5]"
+  },
+  {
+    "status": "NO_COVERAGE",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "availabilityZoneId",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 9,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/domain/WeeklyReviewWindow::availabilityZoneId",
+    "killingTest": ""
+  },
+  {
+    "status": "NO_COVERAGE",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "budgets",
+    "descriptor": "()Ljava/util/Map;",
+    "line": 9,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with Collections.emptyMap for com/apptolast/organization/domain/WeeklyReviewWindow::budgets",
+    "killingTest": ""
+  },
+  {
+    "status": "NO_COVERAGE",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "date",
+    "descriptor": "()Ljava/time/LocalDate;",
+    "line": 9,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReviewWindow::date",
+    "killingTest": ""
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "emptyReview",
+    "descriptor": "()Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 17,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "6"
+    ],
+    "blocks": [
+      "2"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReviewWindow::emptyReview",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s15_zeroBudgetRemainsKnownZeroRatherThanUnknown()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "lambda$summarize$0",
+    "descriptor": "(Ljava/time/LocalDate;Ljava/util/List;Ljava/util/List;I)Lcom/apptolast/organization/domain/WeeklyReview$Day;",
+    "line": 64,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.MathMutator",
+    "indexes": [
+      "75"
+    ],
+    "blocks": [
+      "19"
+    ],
+    "description": "Replaced long multiplication with division",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s7_skippedCivilDayHasZeroDurationsButKeepsItsChosenBudget()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "lambda$summarize$0",
+    "descriptor": "(Ljava/time/LocalDate;Ljava/util/List;Ljava/util/List;I)Lcom/apptolast/organization/domain/WeeklyReview$Day;",
+    "line": 64,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "61"
+    ],
+    "blocks": [
+      "14"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s15_zeroBudgetRemainsKnownZeroRatherThanUnknown()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "lambda$summarize$0",
+    "descriptor": "(Ljava/time/LocalDate;Ljava/util/List;Ljava/util/List;I)Lcom/apptolast/organization/domain/WeeklyReview$Day;",
+    "line": 42,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "82"
+    ],
+    "blocks": [
+      "21"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReviewWindow::lambda$summarize$0",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s15_zeroBudgetRemainsKnownZeroRatherThanUnknown()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "lambda$summarize$1",
+    "descriptor": "(Ljava/time/LocalDate;Lcom/apptolast/organization/domain/WeeklyReviewWindow$Interval;)J",
+    "line": 50,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator",
+    "indexes": [
+      "29"
+    ],
+    "blocks": [
+      "8"
+    ],
+    "description": "replaced long return with 0 for com/apptolast/organization/domain/WeeklyReviewWindow::lambda$summarize$1",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s8_plannedIntervalsAreClippedToTheirCivilDays()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "lambda$summarize$2",
+    "descriptor": "(Ljava/time/LocalDate;Lcom/apptolast/organization/domain/WeeklyReviewWindow$Interval;)J",
+    "line": 59,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator",
+    "indexes": [
+      "29"
+    ],
+    "blocks": [
+      "8"
+    ],
+    "description": "replaced long return with 0 for com/apptolast/organization/domain/WeeklyReviewWindow::lambda$summarize$2",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s12_fallTransitionCountsThreeRealHoursInsideTheLongWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "requirePublicInstant",
+    "descriptor": "(Ljava/time/Instant;)V",
+    "line": 88,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "7"
+    ],
+    "blocks": [
+      "2"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s15_zeroBudgetRemainsKnownZeroRatherThanUnknown()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "requirePublicInstant",
+    "descriptor": "(Ljava/time/Instant;)V",
+    "line": 89,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "14"
+    ],
+    "blocks": [
+      "5"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s15_zeroBudgetRemainsKnownZeroRatherThanUnknown()]"
+  },
+  {
+    "status": "NO_COVERAGE",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "serverNow",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 9,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReviewWindow::serverNow",
+    "killingTest": ""
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "sumMicroseconds",
+    "descriptor": "(Ljava/util/stream/LongStream;)J",
+    "line": 94,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator",
+    "indexes": [
+      "7"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced long return with 0 for com/apptolast/organization/domain/WeeklyReviewWindow::sumMicroseconds",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s12_fallTransitionCountsThreeRealHoursInsideTheLongWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 21,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "7"
+    ],
+    "blocks": [
+      "2"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReviewWindow::summarize",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s15_zeroBudgetRemainsKnownZeroRatherThanUnknown()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 25,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReviewWindow::summarize",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s15_zeroBudgetRemainsKnownZeroRatherThanUnknown()]"
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 31,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "21"
+    ],
+    "blocks": [
+      "5"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": ""
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 31,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "25"
+    ],
+    "blocks": [
+      "7"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": ""
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 35,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "56"
+    ],
+    "blocks": [
+      "16"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s11_yearOneDatesUseTheProlepticCalendarInPostgres()]"
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 35,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "62"
+    ],
+    "blocks": [
+      "19"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": ""
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 31,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "21"
+    ],
+    "blocks": [
+      "5"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s15_zeroBudgetRemainsKnownZeroRatherThanUnknown()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 31,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "25"
+    ],
+    "blocks": [
+      "7"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s15_zeroBudgetRemainsKnownZeroRatherThanUnknown()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 34,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "38"
+    ],
+    "blocks": [
+      "10"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s12_fallTransitionCountsThreeRealHoursInsideTheLongWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 35,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "56"
+    ],
+    "blocks": [
+      "16"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s15_zeroBudgetRemainsKnownZeroRatherThanUnknown()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 35,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "62"
+    ],
+    "blocks": [
+      "19"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s15_zeroBudgetRemainsKnownZeroRatherThanUnknown()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 81,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "149"
+    ],
+    "blocks": [
+      "39"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s15_zeroBudgetRemainsKnownZeroRatherThanUnknown()]"
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 29,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "removed call to com/apptolast/organization/domain/WeeklyReviewWindow::requirePublicInstant",
+    "killingTest": ""
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 67,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "indexes": [
+      "96"
+    ],
+    "blocks": [
+      "27"
+    ],
+    "description": "removed call to com/apptolast/organization/domain/WeeklyReviewWindow::requirePublicInstant",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_utcBoundaryBeforeYearOneIsATemporalConflict()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 68,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "170"
+    ],
+    "blocks": [
+      "47"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReviewWindow::summarize",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s15_zeroBudgetRemainsKnownZeroRatherThanUnknown()]"
+  },
+  {
+    "status": "NO_COVERAGE",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "zoneId",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 9,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/domain/WeeklyReviewWindow::zoneId",
+    "killingTest": ""
+  },
+  {
+    "status": "NO_COVERAGE",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "zoneSource",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 9,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/domain/WeeklyReviewWindow::zoneSource",
+    "killingTest": ""
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 24,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "10"
+    ],
+    "blocks": [
+      "2"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_utcBoundaryBeforeYearOneIsATemporalConflict()]"
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 25,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "16"
+    ],
+    "blocks": [
+      "4"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": ""
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 26,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "27"
+    ],
+    "blocks": [
+      "9"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": ""
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 23,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "4"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_explicitWeekBeyondCivilRangeFailsBeforeSnapshot()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 24,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "10"
+    ],
+    "blocks": [
+      "2"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_unrepresentableClockFailsEvenForAnExplicitSafeWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 25,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "16"
+    ],
+    "blocks": [
+      "4"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_unrepresentableClockFailsEvenForAnExplicitSafeWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 26,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "27"
+    ],
+    "blocks": [
+      "9"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_explicitWeekBeyondCivilRangeFailsBeforeSnapshot()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 32,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "48"
+    ],
+    "blocks": [
+      "14"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_unrepresentableClockFailsEvenForAnExplicitSafeWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 32,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "54"
+    ],
+    "blocks": [
+      "17"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_localClockBeyondYearRangeFailsEvenWithExplicitDate()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 35,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "81"
+    ],
+    "blocks": [
+      "23"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/application/ReadWeeklyReview::get",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s2_explicitDateAndZoneSelectTheirCivilWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "lambda$get$0",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/util/Optional;)Lcom/apptolast/organization/domain/WeeklyReviewWindow;",
+    "line": 39,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "13"
+    ],
+    "blocks": [
+      "2"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_localClockBeyondYearRangeFailsEvenWithExplicitDate()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "lambda$get$0",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/util/Optional;)Lcom/apptolast/organization/domain/WeeklyReviewWindow;",
+    "line": 39,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "19"
+    ],
+    "blocks": [
+      "5"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s2_unavailableStoredZoneFallsBackWithoutMovingItsBudget()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "lambda$get$0",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/util/Optional;)Lcom/apptolast/organization/domain/WeeklyReviewWindow;",
+    "line": 40,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "31"
+    ],
+    "blocks": [
+      "8"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_localClockBeyondYearRangeFailsEvenWithExplicitDate()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "lambda$get$0",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/util/Optional;)Lcom/apptolast/organization/domain/WeeklyReviewWindow;",
+    "line": 40,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "37"
+    ],
+    "blocks": [
+      "10"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_defaultWeekWhoseSundayExceedsYearRangeIsATemporalConflict()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "lambda$get$0",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/util/Optional;)Lcom/apptolast/organization/domain/WeeklyReviewWindow;",
+    "line": 45,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "62"
+    ],
+    "blocks": [
+      "15"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s2_explicitDateAndZoneSelectTheirCivilWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "lambda$get$0",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/util/Optional;)Lcom/apptolast/organization/domain/WeeklyReviewWindow;",
+    "line": 47,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "71"
+    ],
+    "blocks": [
+      "17"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s2_unavailableStoredZoneFallsBackWithoutMovingItsBudget()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "lambda$get$0",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/util/Optional;)Lcom/apptolast/organization/domain/WeeklyReviewWindow;",
+    "line": 47,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "77"
+    ],
+    "blocks": [
+      "19"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s2_unavailableStoredZoneFallsBackWithoutMovingItsBudget()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "lambda$get$0",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/util/Optional;)Lcom/apptolast/organization/domain/WeeklyReviewWindow;",
+    "line": 49,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "89"
+    ],
+    "blocks": [
+      "22"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s2_storedZoneUsesItsLocalWeekAndCurrentCapacity()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "lambda$get$0",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/util/Optional;)Lcom/apptolast/organization/domain/WeeklyReviewWindow;",
+    "line": 49,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "93"
+    ],
+    "blocks": [
+      "24"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s15_explicitDifferentZoneKeepsCapacityUnknown()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "lambda$get$0",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/util/Optional;)Lcom/apptolast/organization/domain/WeeklyReviewWindow;",
+    "line": 41,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "110"
+    ],
+    "blocks": [
+      "30"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/application/ReadWeeklyReview::lambda$get$0",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_unrepresentableClockFailsEvenForAnExplicitSafeWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview",
+    "method": "availabilityZoneId",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 7,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/domain/WeeklyReview::availabilityZoneId",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview",
+    "method": "days",
+    "descriptor": "()Ljava/util/List;",
+    "line": 7,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with Collections.emptyList for com/apptolast/organization/domain/WeeklyReview::days",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview",
+    "method": "endAt",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 7,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReview::endAt",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview",
+    "method": "serverNow",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 7,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReview::serverNow",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview",
+    "method": "startAt",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 7,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReview::startAt",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview",
+    "method": "totals",
+    "descriptor": "()Lcom/apptolast/organization/domain/WeeklyReview$Totals;",
+    "line": 7,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReview::totals",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview",
+    "method": "unquantifiedSessionCount",
+    "descriptor": "()J",
+    "line": 7,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced long return with 0 for com/apptolast/organization/domain/WeeklyReview::unquantifiedSessionCount",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s2_explicitSelectionAndLongValuesArePreservedWithoutNormalizingInHttp()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview",
+    "method": "weekEnd",
+    "descriptor": "()Ljava/time/LocalDate;",
+    "line": 7,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReview::weekEnd",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview",
+    "method": "weekStart",
+    "descriptor": "()Ljava/time/LocalDate;",
+    "line": 7,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReview::weekStart",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview",
+    "method": "zoneId",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 7,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/domain/WeeklyReview::zoneId",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview",
+    "method": "zoneSource",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 7,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/domain/WeeklyReview::zoneSource",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$Response",
+    "method": "availabilityZoneId",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 78,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/adapter/http/WeeklyReviewController$Response::availabilityZoneId",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$Response",
+    "method": "days",
+    "descriptor": "()Ljava/util/List;",
+    "line": 78,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with Collections.emptyList for com/apptolast/organization/adapter/http/WeeklyReviewController$Response::days",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$Response",
+    "method": "endAt",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 78,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/http/WeeklyReviewController$Response::endAt",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$Response",
+    "method": "serverNow",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 78,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/http/WeeklyReviewController$Response::serverNow",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$Response",
+    "method": "startAt",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 78,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/http/WeeklyReviewController$Response::startAt",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$Response",
+    "method": "totals",
+    "descriptor": "()Lcom/apptolast/organization/adapter/http/WeeklyReviewController$TotalsResponse;",
+    "line": 78,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/http/WeeklyReviewController$Response::totals",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$Response",
+    "method": "unquantifiedSessionCount",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 78,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/adapter/http/WeeklyReviewController$Response::unquantifiedSessionCount",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$Response",
+    "method": "weekEnd",
+    "descriptor": "()Ljava/time/LocalDate;",
+    "line": 78,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/http/WeeklyReviewController$Response::weekEnd",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$Response",
+    "method": "weekStart",
+    "descriptor": "()Ljava/time/LocalDate;",
+    "line": 78,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/http/WeeklyReviewController$Response::weekStart",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$Response",
+    "method": "zoneId",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 78,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/adapter/http/WeeklyReviewController$Response::zoneId",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$Response",
+    "method": "zoneSource",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 78,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/adapter/http/WeeklyReviewController$Response::zoneSource",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController",
+    "method": "get",
+    "descriptor": "(Ljava/security/Principal;Lorg/springframework/util/MultiValueMap;)Lcom/apptolast/organization/adapter/http/WeeklyReviewController$Response;",
+    "line": 23,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "3"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[test-template:s4_zoneValidationFromApplicationPreservesExactInputAndField(java.lang.String)]/[test-template-invocation:#3]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController",
+    "method": "get",
+    "descriptor": "(Ljava/security/Principal;Lorg/springframework/util/MultiValueMap;)Lcom/apptolast/organization/adapter/http/WeeklyReviewController$Response;",
+    "line": 32,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "34"
+    ],
+    "blocks": [
+      "9"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[test-template:s4_zoneValidationFromApplicationPreservesExactInputAndField(java.lang.String)]/[test-template-invocation:#3]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController",
+    "method": "get",
+    "descriptor": "(Ljava/security/Principal;Lorg/springframework/util/MultiValueMap;)Lcom/apptolast/organization/adapter/http/WeeklyReviewController$Response;",
+    "line": 25,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "indexes": [
+      "20"
+    ],
+    "blocks": [
+      "6"
+    ],
+    "description": "removed call to org/springframework/util/MultiValueMap::forEach",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[test-template:s4_duplicateKnownParameterIsRejected(java.lang.String)]/[test-template-invocation:#2]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController",
+    "method": "get",
+    "descriptor": "(Ljava/security/Principal;Lorg/springframework/util/MultiValueMap;)Lcom/apptolast/organization/adapter/http/WeeklyReviewController$Response;",
+    "line": 36,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "137"
+    ],
+    "blocks": [
+      "41"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/http/WeeklyReviewController::get",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController",
+    "method": "lambda$get$0",
+    "descriptor": "(Ljava/lang/String;)Z",
+    "line": 23,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "8"
+    ],
+    "blocks": [
+      "2"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[test-template:s4_zoneValidationFromApplicationPreservesExactInputAndField(java.lang.String)]/[test-template-invocation:#3]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController",
+    "method": "lambda$get$0",
+    "descriptor": "(Ljava/lang/String;)Z",
+    "line": 23,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "indexes": [
+      "16"
+    ],
+    "blocks": [
+      "5"
+    ],
+    "description": "replaced boolean return with true for com/apptolast/organization/adapter/http/WeeklyReviewController::lambda$get$0",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[test-template:s4_zoneValidationFromApplicationPreservesExactInputAndField(java.lang.String)]/[test-template-invocation:#3]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController",
+    "method": "lambda$get$1",
+    "descriptor": "(Ljava/lang/String;Ljava/util/List;)V",
+    "line": 27,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "6"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[test-template:s4_duplicateKnownParameterIsRejected(java.lang.String)]/[test-template-invocation:#2]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController",
+    "method": "lambda$get$2",
+    "descriptor": "(Lcom/apptolast/organization/domain/WeeklyReview$Day;)Lcom/apptolast/organization/adapter/http/WeeklyReviewController$DayResponse;",
+    "line": 48,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "35"
+    ],
+    "blocks": [
+      "10"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/http/WeeklyReviewController::lambda$get$2",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController",
+    "method": "temporal",
+    "descriptor": "()Lorg/springframework/http/ResponseEntity;",
+    "line": 69,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "20"
+    ],
+    "blocks": [
+      "4"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/http/WeeklyReviewController::temporal",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s6_temporalFailureHasItsOwnRecoverableProblem()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController",
+    "method": "text",
+    "descriptor": "(Ljava/lang/Long;)Ljava/lang/String;",
+    "line": 64,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "4"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController",
+    "method": "text",
+    "descriptor": "(Ljava/lang/Long;)Ljava/lang/String;",
+    "line": 64,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "13"
+    ],
+    "blocks": [
+      "3"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/adapter/http/WeeklyReviewController::text",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries$SessionWork",
+    "method": "changed",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 174,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries$SessionWork::changed",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_liveProjectionCannotBeginBeforeTheOriginalSession()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries$SessionWork",
+    "method": "decision",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 174,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries$SessionWork::decision",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_liveProjectionCannotBeginBeforeTheOriginalSession()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries$SessionWork",
+    "method": "hasChanges",
+    "descriptor": "()Z",
+    "line": 174,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanFalseReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced boolean return with false for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries$SessionWork::hasChanges",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_missingEndWithAReceiptIsCorruptionNotUnknownLegacyDuration()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries$SessionWork",
+    "method": "hasChanges",
+    "descriptor": "()Z",
+    "line": 174,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced boolean return with true for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries$SessionWork::hasChanges",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s17_legacyClosedSessionsCountOnlyWhenTheirUnknownLifeStartsInTheWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries$SessionWork",
+    "method": "intervals",
+    "descriptor": "()Ljava/util/List;",
+    "line": 174,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with Collections.emptyList for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries$SessionWork::intervals",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_intervalAfterClosedSessionEndCannotBeCredited()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries$SessionWork",
+    "method": "runningSince",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 174,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries$SessionWork::runningSince",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s18_runningLegacyWithoutRunningSinceUsesItsStartWithoutBackfill()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries$SessionWork",
+    "method": "started",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 174,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries$SessionWork::started",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_liveProjectionCannotBeginBeforeTheOriginalSession()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries$SessionWork",
+    "method": "unknownEnd",
+    "descriptor": "()Z",
+    "line": 174,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanFalseReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced boolean return with false for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries$SessionWork::unknownEnd",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_missingEndWithAReceiptIsCorruptionNotUnknownLegacyDuration()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries$SessionWork",
+    "method": "unknownEnd",
+    "descriptor": "()Z",
+    "line": 174,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced boolean return with true for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries$SessionWork::unknownEnd",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s10_pausedSessionCountsClosedIntervalsWithoutAddingItsAccumulatedTotal()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "PostgresWeeklyReviewQueries.java",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries$SessionWork",
+    "method": "worked",
+    "descriptor": "()J",
+    "line": 174,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced long return with 0 for com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries$SessionWork::worked",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_unknownLegacyCannotHideAnUnexplainedAccumulatedDuration()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview$Day",
+    "method": "capacityMicroseconds",
+    "descriptor": "()Ljava/lang/Long;",
+    "line": 19,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced Long return value with 0L for com/apptolast/organization/domain/WeeklyReview$Day::capacityMicroseconds",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview$Day",
+    "method": "date",
+    "descriptor": "()Ljava/time/LocalDate;",
+    "line": 19,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReview$Day::date",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview$Day",
+    "method": "endAt",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 19,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReview$Day::endAt",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview$Day",
+    "method": "plannedMicroseconds",
+    "descriptor": "()J",
+    "line": 19,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced long return with 0 for com/apptolast/organization/domain/WeeklyReview$Day::plannedMicroseconds",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s2_explicitSelectionAndLongValuesArePreservedWithoutNormalizingInHttp()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview$Day",
+    "method": "startAt",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 19,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReview$Day::startAt",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_utcBoundaryBeforeYearOneIsATemporalConflict()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview$Day",
+    "method": "workedMicroseconds",
+    "descriptor": "()J",
+    "line": 19,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced long return with 0 for com/apptolast/organization/domain/WeeklyReview$Day::workedMicroseconds",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s12_fallTransitionCountsThreeRealHoursInsideTheLongWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$DayResponse",
+    "method": "capacityMicroseconds",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 91,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/adapter/http/WeeklyReviewController$DayResponse::capacityMicroseconds",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$DayResponse",
+    "method": "date",
+    "descriptor": "()Ljava/time/LocalDate;",
+    "line": 91,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/http/WeeklyReviewController$DayResponse::date",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$DayResponse",
+    "method": "endAt",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 91,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/http/WeeklyReviewController$DayResponse::endAt",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$DayResponse",
+    "method": "plannedMicroseconds",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 91,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/adapter/http/WeeklyReviewController$DayResponse::plannedMicroseconds",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$DayResponse",
+    "method": "startAt",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 91,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/adapter/http/WeeklyReviewController$DayResponse::startAt",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$DayResponse",
+    "method": "workedMicroseconds",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 91,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/adapter/http/WeeklyReviewController$DayResponse::workedMicroseconds",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow$Interval",
+    "method": "between",
+    "descriptor": "(Ljava/time/Instant;Ljava/time/Instant;)J",
+    "line": 99,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "7"
+    ],
+    "blocks": [
+      "1"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s12_fallTransitionCountsThreeRealHoursInsideTheLongWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow$Interval",
+    "method": "between",
+    "descriptor": "(Ljava/time/Instant;Ljava/time/Instant;)J",
+    "line": 100,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "23"
+    ],
+    "blocks": [
+      "5"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s12_fallTransitionCountsThreeRealHoursInsideTheLongWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow$Interval",
+    "method": "between",
+    "descriptor": "(Ljava/time/Instant;Ljava/time/Instant;)J",
+    "line": 101,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator",
+    "indexes": [
+      "38"
+    ],
+    "blocks": [
+      "9"
+    ],
+    "description": "negated conditional",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s12_fallTransitionCountsThreeRealHoursInsideTheLongWeek()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow$Interval",
+    "method": "endAt",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 97,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReviewWindow$Interval::endAt",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_intervalAfterClosedSessionEndCannotBeCredited()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow$Interval",
+    "method": "startAt",
+    "descriptor": "()Ljava/time/Instant;",
+    "line": 97,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with null for com/apptolast/organization/domain/WeeklyReviewWindow$Interval::startAt",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s19_intervalAfterClosedSessionEndCannotBeCredited()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$TotalsResponse",
+    "method": "capacityMicroseconds",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 99,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/adapter/http/WeeklyReviewController$TotalsResponse::capacityMicroseconds",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$TotalsResponse",
+    "method": "plannedMicroseconds",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 99,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/adapter/http/WeeklyReviewController$TotalsResponse::plannedMicroseconds",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewController.java",
+    "class": "com.apptolast.organization.adapter.http.WeeklyReviewController$TotalsResponse",
+    "method": "workedMicroseconds",
+    "descriptor": "()Ljava/lang/String;",
+    "line": 99,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced return value with \"\" for com/apptolast/organization/adapter/http/WeeklyReviewController$TotalsResponse::workedMicroseconds",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview$Totals",
+    "method": "capacityMicroseconds",
+    "descriptor": "()Ljava/lang/Long;",
+    "line": 27,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced Long return value with 0L for com/apptolast/organization/domain/WeeklyReview$Totals::capacityMicroseconds",
+    "killingTest": "com.apptolast.organization.adapter.WeeklyReviewApiTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WeeklyReviewApiTest]/[method:s1_emptyWeekUsesExactPublicShapeAndPrincipalWithoutCsrf()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview$Totals",
+    "method": "plannedMicroseconds",
+    "descriptor": "()J",
+    "line": 27,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced long return with 0 for com/apptolast/organization/domain/WeeklyReview$Totals::plannedMicroseconds",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s8_plannedIntervalsAreClippedToTheirCivilDays()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReview.java",
+    "class": "com.apptolast.organization.domain.WeeklyReview$Totals",
+    "method": "workedMicroseconds",
+    "descriptor": "()J",
+    "line": 27,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "replaced long return with 0 for com/apptolast/organization/domain/WeeklyReview$Totals::workedMicroseconds",
+    "killingTest": "com.apptolast.organization.domain.WeeklyReviewWindowTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.WeeklyReviewWindowTest]/[method:s12_fallTransitionCountsThreeRealHoursInsideTheLongWeek()]"
+  }
+]

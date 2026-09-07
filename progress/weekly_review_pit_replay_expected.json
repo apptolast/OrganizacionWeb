@@ -1,0 +1,164 @@
+[
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 31,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "21"
+    ],
+    "blocks": [
+      "5"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": ""
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 31,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "25"
+    ],
+    "blocks": [
+      "7"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": ""
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 35,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "56"
+    ],
+    "blocks": [
+      "16"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest]/[method:s11_yearOneDatesUseTheProlepticCalendarInPostgres()]"
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 35,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "62"
+    ],
+    "blocks": [
+      "19"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": ""
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 29,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "indexes": [
+      "5"
+    ],
+    "blocks": [
+      "0"
+    ],
+    "description": "removed call to com/apptolast/organization/domain/WeeklyReviewWindow::requirePublicInstant",
+    "killingTest": ""
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "WeeklyReviewWindow.java",
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 67,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "indexes": [
+      "96"
+    ],
+    "blocks": [
+      "27"
+    ],
+    "description": "removed call to com/apptolast/organization/domain/WeeklyReviewWindow::requirePublicInstant",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_utcBoundaryBeforeYearOneIsATemporalConflict()]"
+  },
+  {
+    "status": "KILLED",
+    "detected": "true",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 24,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "10"
+    ],
+    "blocks": [
+      "2"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_utcBoundaryBeforeYearOneIsATemporalConflict()]"
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 25,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "16"
+    ],
+    "blocks": [
+      "4"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": ""
+  },
+  {
+    "status": "SURVIVED",
+    "detected": "false",
+    "sourceFile": "ReadWeeklyReview.java",
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 26,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "27"
+    ],
+    "blocks": [
+      "9"
+    ],
+    "description": "changed conditional boundary",
+    "killingTest": ""
+  }
+]

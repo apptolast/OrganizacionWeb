@@ -237,6 +237,8 @@ async function closeJourney(page, request, options = {}) {
   expect(initial.status()).toBe(201);
   const session = await initial.json();
   await section
+    .getByRole("heading", { name: "Estado de la sesión", exact: true })
+    .locator("..")
     .getByRole("link", { name: "Cerrar sesión de trabajo", exact: true })
     .click();
   await expect(page).toHaveURL(

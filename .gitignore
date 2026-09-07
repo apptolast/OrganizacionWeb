@@ -60,3 +60,5 @@ reports/
 /progress/pause_resume_backend_final_xml/
 /progress/pause_resume_global_init_xml/
 /progress/pause_resume_frontend_mutation_raw.json
+/progress/pause_resume_mutation_preparation_hashes.json
+/progress/pause_resume_pit_process_sample.json

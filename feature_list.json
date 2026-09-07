@@ -167,7 +167,7 @@
       "description": "Pausa y reanudación recuperables, intervalos exactos y estado separado del inicio; contrato revisado y aprobado para TDD bajo autorización global.",
       "acceptance": ["Cumplir el contrato de 39 escenarios en features/pause_resume_session.feature, con evidencia, revisión y umbral de mutación antes del cierre."],
       "sdd": true,
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 16,

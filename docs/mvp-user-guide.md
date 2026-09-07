@@ -1,6 +1,6 @@
 # Usar el MVP para trabajar con un horario
 
-Las funcionalidades 1–19, incluidos Historial y Revisión semanal, están validadas y fusionadas. El estado de despliegue está en [el plan](mvp-delivery-plan.md). La apariencia persistente está en desarrollo; las funcionalidades 21–30 siguen pendientes.
+Las funcionalidades 1–19, incluidos Historial y Revisión semanal, están disponibles en [OrganizationWeb](https://organizacion.apptolast.com). El estado de despliegue está en [el plan](mvp-delivery-plan.md). La apariencia persistente está en desarrollo; las funcionalidades 21–30 siguen pendientes.
 
 ## Preparar el trabajo
 

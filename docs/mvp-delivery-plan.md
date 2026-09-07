@@ -1,6 +1,6 @@
 # Plan de entrega
 
-Actualizado el 7 de septiembre de 2026, a las18:43. Las funcionalidades1–19 están validadas y fusionadas en mainc20105a. La apariencia persistente20 está en desarrollo;21–30 siguen pendientes. Este recuento de funcionalidades no mide un porcentaje de esfuerzo ni garantiza ausencia de errores.
+Actualizado el 7 de septiembre de 2026. Las funcionalidades 1–19 están desplegadas y verificadas en https://organizacion.apptolast.com. La apariencia persistente 20 está en desarrollo; 21–30 siguen pendientes. Este recuento de funcionalidades no mide un porcentaje de esfuerzo ni garantiza ausencia de errores.
 
 ## Estado comprobado
 
@@ -12,17 +12,19 @@ Revisión semanal19: CI34139336203 verde antes de la fusiónPR20; validación lo
 
 SSH/sudo y DNS organizacion.apptolast.com están resueltos. Edge está aplicado y HTTPS funciona. La capacidad dispone de un perfil explícito que conserva los servicios existentes. Las imágenes se publican por digest; las credenciales se conservan protegidas, fuera de Git.
 
-El primer apply creó PostgreSQL y RabbitMQ, pero API/web no convergieron: Swarm descartó los montajes temporales abreviados. Una prueba real detectó además permisos insuficientes de los directorios de Nginx. El corte4d34b9c incluye la revisión semanal y la corrección mínima de la imagen. Infra491e2c2 usa montajes largos;15pruebas focales y lint pasaron. El check real terminó27ok/2changed/0failed. Falta aplicar este corte tras sus verificaciones remotas y ejecutar la aceptación autenticada.
+El corte publicado 4d34b9c incluye la revisión semanal y corrige los permisos de los directorios temporales de Nginx. Infraestructura 491e2c2 utiliza montajes largos compatibles con Swarm. Tras corregir el montaje y repetir el despliegue con la API saludable, la aplicación terminó con 38 tareas correctas, 3 cambios y ningún fallo. Una segunda ejecución convergió con 38 tareas correctas, cero cambios y los mismos cuatro contenedores. PR21 de aplicación y PR29 de infraestructura están fusionadas con CI verde. Se conserva la evidencia de los intentos fallidos anteriores.
 
-Los16servicios anteriores mantienen1/1 y las ocho rutas web conservan sus códigos previos. El ensayo local de restauración PostgreSQL pasó; no acredita por sí mismo copias externas, recuperación RabbitMQ ni escrow del servidor. Estas obligaciones operativas se mantienen visibles.
+La aceptación autenticada por HTTPS comprobó proyecto y tarea persistentes, reserva y cancelación, inicio, pausa, reanudación y cierre de trabajo, recuperación idempotente del cierre, historial y revisión semanal. Los datos sintéticos se conservan identificados; no queda una sesión activa ni una reserva futura de esta aceptación. Los nueve eventos aparecen publicados en el outbox y las colas contienen los recuentos esperados; no se consumieron sus mensajes para acreditar sus cuerpos. Los 16 servicios anteriores mantienen 1/1 y las ocho rutas web conservan sus códigos previos.
+
+Se creó una copia PostgreSQL real en el servidor y se restauró en una instancia local aislada: 18 migraciones, proyecto, tarea, sesión y nueve eventos recuperados, con las huellas de sesión e intervalos coincidentes. El entorno de restauración se retiró. Esto no acredita copias externas automáticas, recuperación RabbitMQ ni custodia externa del servidor. Las credenciales se guardan cifradas fuera del repositorio; el usuario dispone de un ayudante local para copiar su contraseña sin mostrarla en el chat.
 
 ## Orden de trabajo
 
-1. Completar el despliegue corregido y verificar HTTPS, login, proyectos, tareas, planificación, pausa/reanudación/cierre, historial y revisión semanal con datos sintéticos identificados.
-2. Comprobar publicación de eventos, persistencia y convergencia; documentar acceso, respaldo y reversión sin eliminar datos.
+1. Cerrar la mejora de resolución DNS de Nginx para que el proxy arranque y se recupere aunque la API todavía no esté disponible. El ensayo local pasó; CI detectó una incompatibilidad del fixture de cambio de IP que se está corrigiendo. Esta mejora aún no está desplegada.
+2. Conservar la aceptación del MVP y completar las obligaciones operativas de respaldo externo y recuperación que siguen pendientes.
 3. Terminar apariencia20: persistencia y concurrencia, contrato HTTP, estado compartido y formulario, SCSS, integración, pruebas de navegador, UX y mutación.
 4. Continuar21–30 con contratos acotados: vistas/campos, exportación/importación, API de integración, webhooks, calendarios, GitHub, otros conectores y automatizaciones.
 
 ## Estimaciones y límites
 
-El rango anterior de4–8horas era una previsión de despliegue, no una cuenta atrás ni una promesa del proyecto completo. Ahora quedan la convergencia del corte corregido y su aceptación real; cualquier fallo observado se diagnostica antes de publicar un nuevo plazo. Los trabajos avanzados todavía requieren contratos y proveedores concretos, por lo que no hay una estimación total fiable ni una garantía de terminar con una recarga o cuota determinada.
+El MVP ya se puede usar. Apariencia tiene el backend integrado y una regresión de 2.384 pruebas Java verde; la mutación original está en curso y quedan la integración visual, regresiones del frontend, pruebas de navegador, UX y mutación de la interfaz. Los trabajos avanzados requieren contratos y proveedores concretos, por lo que no hay una estimación total fiable ni una garantía de terminar con una recarga o cuota determinada. Los plazos anteriores de despliegue quedan sustituidos por este estado comprobado.

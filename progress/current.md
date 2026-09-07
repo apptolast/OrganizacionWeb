@@ -1,6 +1,6 @@
 # Sesión actual — implementación de pausa/reanudación
 
-Feature 14 está done y fusionada en main 353c9d444b2af8bfeca63b8b166b559848d42963 mediante PR13. CI34070183747 SUCCESS sobre deca259 exacto antes del merge; fetch384a27 confirmó árboles idénticos. Informe ci_start_work_final.md. La CI del nuevo main34070995379 está en seguimiento root, sesión6677 y log en OrganizacionWeb-start-work-final/progress/ci_start_work_final_main.log. No confundirla con el pase previo de PR.
+Feature 14 está done y fusionada en main 353c9d444b2af8bfeca63b8b166b559848d42963 mediante PR13. CI34070183747 SUCCESS sobre deca259 exacto antes del merge; fetch384a27 confirmó árboles idénticos. Informe ci_start_work_final.md. La CI del nuevo main34070995379 terminó SUCCESS, verificada por root5378c7 sobre el SHA completo. Watch6677 acabó EXIT0; el log queda en OrganizacionWeb-start-work-final/progress/ci_start_work_final_main.log.
 
 Cierre14: judge_start_work_final.md APPROVED; 104E2E, smoke real de respuesta perdida/Rabbit/reinicio sin outbox publicado, UX412 medidas y28axe con límites físicos. PIT original340/347 KILLED estrictos (97,9827%),5S/1NC/1TIMEOUT; Stryker483/539 (89,6104%),56S y cero errores. Replay adicional11/11 KILLED, EXIT0,289 hashes idénticos, cinco supervivientes detectados por el oráculo JSON independiente. No se mezclan denominadores ni se ocultan residuos.
 
@@ -14,7 +14,7 @@ Feature15 está in_progress. Especificación e3b61ef/eb1a9bb, contrato a5c556f:3
 
 El traslado C preservó sus tres archivos iniciales y hashes3178a6 en backend/build/handoff/publisher-15 del aislado. Una comparación inicial377b59 se detuvo sin restaurar porque C había avanzado allí el siguiente test. Root028179 verificó copias inmutables y sólo después restauró OutboxMessage/PublishOutboxTest comunes a14 y retiró la bitácora común ya preservada. Los originales también están en el trabajo aislado; no integrar archivos build/handoff. C no escribe common.
 
-Avance parcial: backend pausa/reanudación nominal y forwarding de WorkSessionRevision(UUID,long) pasan3casos; Store aún debe comprobar propiedad→identidad→replay. Lectura capturará reloj dentro del callback transaccional, después del snapshot propio. Frontend lleva validaciones por ciclos focales (estado/snapshot, contexto, token, precisión e invariantes); todavía no declara UI completa. C publica el nuevo evento por ciclos propios; validación aún parcial. No lanzar suites globales por microcheckpoint.
+Avance parcial: backend ya prueba pausa contra PostgreSQL real y lectura read-only REPEATABLE_READ; continúa reintentos, atomicidad y concurrencia. Fixtures legacy actualizan TRUNCATE con hijos explícitos, sin CASCADE nuevo. Cliente frontend47 casos nuevos +43 previos verdes y revisión parcial aprobada; panel en TDD. Publicación15 revisada,209 pruebas acreditadas por el autor y cuatro hashes verificados: commit aislado1233e0a listo para integrar en frontera entre focales de A. HTTP continúa aislado con cinco snapshots de puertos reales excluidos de Git. No lanzar suites globales por microcheckpoint.
 
 ## Próximos pasos
 

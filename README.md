@@ -20,6 +20,8 @@ Replanificar está cerrado: permite mover y cancelar reservas, revisar presupues
 
 El inicio de sesiones de trabajo también está cerrado y fusionado: registra inicio real, duración prevista y fin previsto, conserva un recibo durable y permite recuperar la sesión propia después de recargar. Una reserva planificada sigue siendo distinta del trabajo realizado. El [dictamen de inicio](progress/judge_start_work_final.md) y la [CI posterior a la fusión](progress/ci_start_work_final.md) documentan su validación. Pausa/reanudación está en desarrollo; cierre, aviso e historial de sesiones siguen pendientes. El ciclo completo todavía no está listo para uso habitual.
 
+La implementación de pausa/reanudación está en validación final en la [PR14](https://github.com/apptolast/OrganizacionWeb/pull/14). En **Sesión de trabajo**, **Pausar** detiene la acumulación del tiempo neto y **Reanudar** continúa la misma sesión. El fin previsto no se desplaza. El tiempo mostrado corresponde a la última actualización: **Actualizar estado de la sesión** solicita una nueva consulta. Si no se puede confirmar un cambio, **Comprobar cambio** recupera el recibo guardado; una consulta fallida no revoca una confirmación anterior. Estos controles todavía no incluyen el cierre de sesión.
+
 El límite inicial es de tres proyectos activos por propietario. `APP_MAX_ACTIVE_PROJECTS` permite elegir de 1 a 10 en `.env`; todas las réplicas deben usar el mismo valor. Al alcanzar el límite, el propietario decide qué pausar. Reducirlo no pausa proyectos automáticamente y dos activaciones simultáneas no pueden ocupar la misma última plaza.
 
 ## Ejecutar localmente
@@ -50,7 +52,7 @@ El Compose base mantiene el publicador desactivado. Para habilitar RabbitMQ, com
 docker compose -f docker-compose.yml -f deploy/compose.publisher.yml up --build -d --wait
 ```
 
-El broker usa colas quorum durables para ProjectCreated, ProjectUpdated, ProjectStatusChanged, TaskCreated, SubtaskCreated, TaskStatusChanged y BlockPlanned, con un volumen persistente. AMQP y su administración permanecen en la red interna de Docker. La API puede guardar proyectos, tareas y bloques aunque el broker esté caído; el outbox conserva los eventos y reintenta con espera creciente hasta 60 segundos. La entrega es al menos una vez: un consumidor debe deduplicar por `eventId`.
+El broker usa colas quorum durables para ProjectCreated, ProjectUpdated, ProjectStatusChanged, TaskCreated, SubtaskCreated, TaskStatusChanged, BlockPlanned, BlockChanged, WorkSessionStarted y WorkSessionStateChanged, con un volumen persistente. La última corresponde a pausa/reanudación, aún en validación final. AMQP y su administración permanecen en la red interna de Docker. La API puede guardar cambios aunque el broker esté caído; el outbox conserva los eventos y reintenta con espera creciente hasta 60 segundos. La entrega es al menos una vez: un consumidor debe deduplicar por `eventId`.
 
 Para detener esta instancia conservando sus datos, utiliza los mismos dos argumentos `-f` con `down`, sin `--volumes`. Las credenciales de RabbitMQ inicializan el volumen la primera vez; modificar `.env` no rota un usuario existente.
 

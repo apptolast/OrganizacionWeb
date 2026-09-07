@@ -13,12 +13,12 @@ El corte de entrega corresponde a las funcionalidades 1–18 del roadmap. Las fu
 - Funcionalidades 1–13 cerradas conforme a sus dictámenes y límites registrados. Esto no equivale a despliegue productivo.
 - Replanificar: init integrado con1617 pruebas backend,1498 frontend y22 scripts verdes;98 E2E y9 comprobaciones del publicador aprobadas. Mutación backend98,9446 % (750/758), cero errores/timeouts; frontend86,70 % global con dos errores de herramienta registrados. Recuperación tras reinicio, concurrencia, privacidad, presupuesto y UX cuentan con dictámenes finales; los residuales y límites físicos se conservan explícitos.
 - PR6 fusionada por el usuario en `9623990`; evidencia de cierre publicada en main `d997421`, con CI `34060054467` SUCCESS. Dictamen final en `progress/judge_reschedule_final.md`.
-- Funcionalidad 14 cerrada y fusionada mediante PR13 en main353c9d4, con CI34070995379 SUCCESS. Inicio durable y recuperación real; 104 E2E, mutación backend97,9827% y frontend89,6104%, con residuales explícitos. Replay adicional terminado:11/11 KILLED, separado de las campañas originales. Funcionalidad15 en implementación: PostgreSQL, cliente y publicación avanzan en paralelo;16–18 siguen pendientes.
+- Funcionalidad 14 cerrada y fusionada mediante PR13 en main353c9d4, con CI34070995379 SUCCESS. Inicio durable y recuperación real; 104 E2E, mutación backend97,9827% y frontend89,6104%, con residuales explícitos. Replay adicional terminado:11/11 KILLED, separado de las campañas originales. Funcionalidad15 implementada y en validación final en PR14: revisiones de backend/frontend aprobadas,1890 pruebas Java y1666 frontend verdes, smoke real y515 medidas responsive/35axe0. Campañas de mutación y CI completa todavía pendientes;16–18 siguen sin iniciar.
 - Ningún despliegue productivo acreditado todavía.
 
 ## Trabajo restante y estimación
 
-Camino crítico vigente: contrato y ejecución de15 pausa/reanudación →16 cierre con duración neta y atribución histórica →17 aviso de fin y decisión explícita →18 historial de hechos → validación integrada y despliegue real. Backend y frontend de cada funcionalidad se reparten entre agentes; cada una conserva contrato previo, TDD y validación. La tabla siguiente conserva las partidas de la hipótesis anterior, **no constituye una nueva medición** después de14. No hay evidencia suficiente para prometer el MVP hoy ni para actualizar el total con una cifra menor.
+Camino crítico vigente: cierre de validación de15 pausa/reanudación →16 cierre con duración neta y atribución histórica →17 aviso de fin y decisión explícita →18 historial de hechos → validación integrada y despliegue real. Backend y frontend de cada funcionalidad se reparten entre agentes; cada una conserva contrato previo, TDD y validación. La tabla siguiente conserva las partidas de la hipótesis anterior, **no constituye una nueva medición** después de14. No hay evidencia suficiente para prometer el MVP hoy ni para actualizar el total con una cifra menor.
 
 | Hito | Resultado verificable | Horas efectivas estimadas |
 | --- | --- | ---: |
@@ -38,7 +38,7 @@ Para el conjunto del roadmap, la orientación anterior de 1–3 semanas es de ba
 ## Secuencia de entrega y puntos de revisión
 
 1. Inicio de sesiones (14) completado: contrato trazado, revisión, gates propios y CI posterior al merge verdes. Conservar esa regresión al integrar pausa/reanudación.
-2. Implementar pausa/reanudación (15) y después cierre (16), cada una con su contrato y validación. Comprobar duración real, recuperación y posibilidad de terminar una sesión antes de habilitar el ciclo para uso habitual.
+2. Cerrar la validación de pausa/reanudación (15) en PR14 y después implementar cierre (16), con su contrato previo y validación. Comprobar duración real, recuperación y posibilidad de terminar una sesión antes de habilitar el ciclo para uso habitual.
 3. Añadir aviso de fin (17), conservando el fin previsto y la decisión explícita del usuario sobre continuar o terminar.
 4. Incorporar historial (18): consultar lo realizado con fechas y tiempo real, separado de los bloques planificados.
 5. Validar el recorrido integrado y desplegar: acceso privado, persistencia tras reinicio, responsive, HTTPS, respaldo y restauración verificados en el servidor.

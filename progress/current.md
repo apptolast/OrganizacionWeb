@@ -1,5 +1,7 @@
 # Sesión actual — cierre de inicio y contrato de pausa/reanudación
 
+Fase vigente: feature 15 in_progress. Contrato a5c556f, 39 escenarios y 105 casos declarados, aprobado por juez independiente y root (0bea25/b1eaa4). Normativa eb1a9bb usa Work-Session-Revision propio, no ETag del snapshot variable. Se inicia TDD: resume_backend núcleo y PG; resume_frontend cliente/panel; resume_review HTTP/publicación tras la primera frontera de tipos compilables. Root conserva revisión, Git y CI. Se trabaja en codex/pause-resume-session dentro del árbol común. No iniciar 16 antes del cierre de 15.
+
 Actualización: 14 ya está done. Replay adicional terminado con 11/11 KILLED, EXIT 0, sin errores/timeouts y 289 hashes intactos, verificado por root cfa8a8/c41e81. Backend liberado; no se requiere otra campaña. PR13 publica el cierre y los refuerzos desde codex/start-work-session-final; su CI aún debe comprobarse antes de fusionar. La propuesta normativa15 está en revisión con tres precisiones, y el flujo UX en pause_resume_ux_proposal.md; sin producción15 todavía. Las referencias a la campaña en curso de abajo describen el corte anterior.
 
 El dictamen final de feature 14 está APPROVED en judge_start_work_final.md. El autor registra done y pasa al contrato de feature 15. No se implementan todavía pausa, cierre, aviso o historial sin sus contratos respectivos. No se habilita uso habitual antes de disponer del cierre de sesiones.

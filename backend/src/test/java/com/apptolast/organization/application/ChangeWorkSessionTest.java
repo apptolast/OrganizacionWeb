@@ -200,7 +200,7 @@ class ChangeWorkSessionTest {
   private WorkSessionTransitionConfirmation invoke(
       WorkSessionState state, long expected, Clock clock, boolean pause) {
     WorkSessionChanging store =
-        (owner, session, key, action, token, operation) ->
+        (owner, session, key, action, token, notes, operation) ->
             new WorkSessionTransitionConfirmation(operation.apply(state).receipt(), false);
     var useCase = new ChangeWorkSession(store, clock);
     var token = new WorkSessionRevision(state.session().id(), expected);
@@ -222,7 +222,7 @@ class ChangeWorkSessionTest {
             "UTC");
     var before = new WorkSessionState(start, "paused", 2, start.startedAt(), 0, null);
     WorkSessionChanging store =
-        (owner, session, key, action, expected, operation) -> {
+        (owner, session, key, action, expected, notes, operation) -> {
           operation.apply(before);
           throw new AssertionError("No mutation should be produced");
         };
@@ -275,7 +275,7 @@ class ChangeWorkSessionTest {
             start, "paused", 2, Instant.parse("2026-09-07T10:00:01.123457Z"), 1000001, null);
     var writes = new ArrayList<WorkSessionTransition>();
     WorkSessionChanging store =
-        (owner, session, key, action, expected, operation) -> {
+        (owner, session, key, action, expected, notes, operation) -> {
           assertThat(action).isEqualTo("RESUME");
           var write = operation.apply(before);
           writes.add(write);
@@ -314,7 +314,7 @@ class ChangeWorkSessionTest {
     var key = UUID.randomUUID();
     var writes = new ArrayList<WorkSessionTransition>();
     WorkSessionChanging store =
-        (owner, session, requestKey, action, expected, operation) -> {
+        (owner, session, requestKey, action, expected, notes, operation) -> {
           assertThat(owner).isEqualTo("owner");
           assertThat(session).isEqualTo(start.id());
           assertThat(requestKey).isEqualTo(key);

@@ -1,0 +1,7 @@
+# Revisión del primer corte compilable16
+
+Aprobado únicamente como checkpoint de dependencia para HTTP/publicador, no como implementación completa ni entrega de16. Root882002/0cae1f contrastó los nueve hashes del manifest, la prueba nominal, los tipos concretos y la adaptación de serialización. Autor acredita RED a05bec y GREEN6317cf para17 pruebas core; compatibilidad JSONB15 RED4371d7 por closure:null y GREENfa22fd tras omitir ese campo en el adaptador. Freeze91a10f/Spotless93a62a contiene19 pruebas: una nominal16,16 core anteriores y dos PG15. No se presenta ese conjunto focal como regresión global.
+
+El caso nominal exige suma exacta del último tramo, cierre con notas y atribución UTC, evento independiente con once campos y una sola captura del reloj. Conserva constructores15 de recibo y bundle y adapta sólo la aridad de cuatro fakes anteriores. Los JSONB de PAUSE/RESUME siguen omitiendo closure; el dominio no recibe anotaciones de Jackson.
+
+Pendientes explícitos: cierre paused, normalización/validación de notas, revisión/estado/tiempo y fallback de zona, intención completa en replay, persistencia y outbox de cierre, consulta closure, HTTP/UI y gates integrados. Store sólo adapta la firma y la compatibilidad del recibo: todavía no soporta el cierre durable. Los métodos existentes permiten compilar el trabajo independiente sin stubs ni una implementación alternativa. No habilitar el endpoint completo ni marcar16 done desde este checkpoint.

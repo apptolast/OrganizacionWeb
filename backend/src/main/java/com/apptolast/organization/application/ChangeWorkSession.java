@@ -14,6 +14,50 @@ public final class ChangeWorkSession implements ChangeWorkSessionUseCase {
     this.clock = clock;
   }
 
+  public WorkSessionTransitionConfirmation close(
+      String owner,
+      UUID session,
+      UUID key,
+      WorkSessionRevision expected,
+      com.apptolast.organization.domain.WorkSessionCloseNotes notes) {
+    return store.commit(
+        owner,
+        session,
+        key,
+        "CLOSE",
+        expected,
+        notes,
+        before -> {
+          var now = clock.instant().truncatedTo(ChronoUnit.MICROS);
+          var worked =
+              before.workedMicroseconds() + ChronoUnit.MICROS.between(before.runningSince(), now);
+          var after =
+              new WorkSessionState(
+                  before.session(), "closed", before.revision() + 1, now, worked, null);
+          var zone = java.time.ZoneId.of(before.session().zoneId());
+          var day = now.atZone(zone).toLocalDate();
+          var closure =
+              new WorkSessionClosure(notes.progressNote(), notes.nextStep(), day, zone.getId());
+          var receipt =
+              new WorkSessionTransitionReceipt(
+                  UUID.randomUUID(), session, "CLOSE", now, before, after, closure);
+          var event =
+              new WorkSessionClosed(
+                  UUID.randomUUID(),
+                  session,
+                  owner,
+                  now,
+                  1,
+                  "WorkSessionClosed.v1",
+                  Long.toString(after.revision()),
+                  before.status(),
+                  Long.toString(worked),
+                  day,
+                  zone.getId());
+          return new WorkSessionTransition(receipt, null, event);
+        });
+  }
+
   public WorkSessionTransitionConfirmation pause(
       String owner, UUID session, UUID key, WorkSessionRevision expected) {
     return transition(owner, session, key, expected, true);

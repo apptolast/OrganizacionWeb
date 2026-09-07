@@ -10,7 +10,18 @@ public record WorkSessionTransitionReceipt(
     String action,
     Instant occurredAt,
     WorkSessionState before,
-    WorkSessionState after) {
+    WorkSessionState after,
+    WorkSessionClosure closure) {
+  public WorkSessionTransitionReceipt(
+      UUID id,
+      UUID sessionId,
+      String action,
+      Instant occurredAt,
+      WorkSessionState before,
+      WorkSessionState after) {
+    this(id, sessionId, action, occurredAt, before, after, null);
+  }
+
   public void requireIntent(UUID session, String requestedAction, long expected) {
     if (!sessionId.equals(session)
         || !action.equals(requestedAction)

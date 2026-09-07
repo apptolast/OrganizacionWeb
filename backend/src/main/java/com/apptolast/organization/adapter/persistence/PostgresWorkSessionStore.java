@@ -51,6 +51,7 @@ public final class PostgresWorkSessionStore
       UUID key,
       String action,
       WorkSessionRevision expected,
+      com.apptolast.organization.domain.WorkSessionCloseNotes notes,
       Function<com.apptolast.organization.domain.WorkSessionState, WorkSessionTransition>
           operation) {
     return storage(
@@ -110,7 +111,7 @@ public final class PostgresWorkSessionStore
                             action,
                             expected.value(),
                             Timestamp.from(receipt.occurredAt()),
-                            json.writeValueAsString(receipt))
+                            receiptJson(receipt))
                         != 1) throw new TransitionInsertCollision();
                     var event = change.event();
                     requireOne(
@@ -296,6 +297,12 @@ public final class PostgresWorkSessionStore
                     ? (since == null ? session.startedAt() : since.toInstant())
                     : null);
           };
+
+  private String receiptJson(WorkSessionTransitionReceipt receipt) throws JsonProcessingException {
+    var value = (com.fasterxml.jackson.databind.node.ObjectNode) json.valueToTree(receipt);
+    if (receipt.closure() == null) value.remove("closure");
+    return json.writeValueAsString(value);
+  }
 
   private java.util.Optional<WorkSessionTransitionReceipt> transitionReplay(
       String owner, UUID key) {

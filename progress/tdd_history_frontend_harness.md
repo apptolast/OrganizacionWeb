@@ -45,3 +45,9 @@ Propuesta de replay, no configuración: history_frontend_replay_proposal.json.17
 ## Replay dirigido terminado
 
 Configuración exclusiva autorizada tras revisión de12tests y CSS8092443. Sesión38642, before137entradas662249…EB600; formato inicial de JSON requerido y check finalGREEN antes de iniciar. EXIT0 b57d3d,33mutantes32K/1S/0otros,1min42. Mapping f11ea2 acredita17/17objetivosKilled y15extrasKilled; únicoextra548Survived por contador decreciente equivalente en este uso. After137idénticosb6c3e0. Informe review_history_frontend_replay.md y mapping preservados; original84,15%/3errores no reclasificados. No másrefuerzos/campañas.
+
+## Regresión frontend global final
+
+Sobre paquete cebebeb y CSS8092443, una única ejecución posterior a los12refuerzos. Sesión4154, EXIT0 b45d0c: **1899/1899 pruebas en40suites**,23,64s; ESLint y Prettier globalfrontend EXIT0; tsc/Vite build EXIT0,67módulos,447ms de Vite. Logs history_frontend_final_gate_tests.log, _lint.log y _build.log con sus EXIT_CODE explícitos.
+
+Before/after137entradas de fuentes, tests y configuración idénticas,0diferencias. No arreglos durante el pase, ninguna otra campaña ni Gradle. Manifiestos history_frontend_final_gate_before.json y history_frontend_final_gate_after.json. Esta ejecución reemplaza el conteo1887 anterior para el gate frontend final, sin cambiar el score de las campañas originales ni atribuirse los gates backend/E2E de root/A/C. B queda libre y no amplía trabajo.

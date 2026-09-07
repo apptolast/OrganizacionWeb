@@ -14,6 +14,8 @@ Después17 aviso y18 historial, validación y despliegue del MVP. Hoy sigue sien
 
 ## Coordinación
 
+Actualización 7 septiembre, 05:49 CEST: paquetes revisados e integrados: core nominal db8bb0e, notas y consulta durable 2b1d7d8, publicador 2a3c0ea (207 pruebas), cliente API 17d4a6e (109 pruebas), HTTP 6eb191b (122 pruebas) y despacho de mutación 67f58a5 (36 pruebas Node; DSL validado sin campaña). Son evidencias parciales, no cierre de feature16. Jason termina concurrencia/inicio y lecturas reales; Confucius termina guardas y presentación del lector; Fermat prepara nominal HTTP+PostgreSQL real en árbol aislado sobre dependencias congeladas. Root revisó scopes completos y umbral80 conservado; contrastar fuentes frontend finales antes de mutar. No hay campañas, runner E2E ni PR16 activos todavía. V17 añade índice único de cierre sin reescribir migraciones publicadas.
+
 COMMON OrganizacionWeb-backend es integración. Root controla Git/revisiones/documentación; no escribe producción ni tests. A/C/frontend quedan disponibles para16. pause-http conserva cinco snapshots locales, nunca fusionar su rama entera. start-work-final conserva evidencia14. El merge6b8f360 sólo reconcilió squash14 tras verificar baseline idéntico; no cambió contenido.
 
 Ponytail full/Caveman lite. No tocar .e2e-work/read-review-state.json, .e2e-work/read-review-stop, frontend/.stryker-tmp-availability-replay ni progress/proposal_schedule_block_time.md, ni borrar/mover ascendientes. No force-push, limpieza global ni intervención en stack8080. V14 muestra M sin diff de contenido: no reescribirla. Evidencia raw local preservada; sólo informes/manifiestos versionados.

@@ -1,6 +1,6 @@
 # Plan de entrega del MVP
 
-Estimación provisional actualizada el 6 de septiembre de 2026 tras cerrar Replanificar. Se revisará después de la primera prueba de despliegue. Las horas representan tiempo transcurrido de ejecución efectiva del trabajo coordinado con herramientas disponibles, incluidas pruebas, CI, mutación y revisión. No son la suma de horas de los agentes en paralelo. Excluyen pausas por cuota, falta de acceso o espera de información del usuario; no constituyen una fecha garantizada ni una predicción sobre cuota de la cuenta.
+Estado actualizado el 7 de septiembre de 2026 tras aprobar el inicio de sesiones. Las30–60 horas son la hipótesis de planificación anterior, de baja confianza: no se reducen por proporción de funcionalidades ni por número de agentes. La solicitud de terminar hoy es el objetivo de trabajo, no una fecha garantizada. Las horas representan tiempo transcurrido de ejecución efectiva coordinada, incluidas pruebas, CI, mutación y revisión; excluyen pausas por cuota, acceso o información pendiente. No predicen la cuota de la cuenta.
 
 ## Qué se entregará primero
 
@@ -13,10 +13,12 @@ El corte de entrega corresponde a las funcionalidades 1–18 del roadmap. Las fu
 - Funcionalidades 1–13 cerradas conforme a sus dictámenes y límites registrados. Esto no equivale a despliegue productivo.
 - Replanificar: init integrado con1617 pruebas backend,1498 frontend y22 scripts verdes;98 E2E y9 comprobaciones del publicador aprobadas. Mutación backend98,9446 % (750/758), cero errores/timeouts; frontend86,70 % global con dos errores de herramienta registrados. Recuperación tras reinicio, concurrencia, privacidad, presupuesto y UX cuentan con dictámenes finales; los residuales y límites físicos se conservan explícitos.
 - PR6 fusionada por el usuario en `9623990`; evidencia de cierre publicada en main `d997421`, con CI `34060054467` SUCCESS. Dictamen final en `progress/judge_reschedule_final.md`.
-- Funcionalidad 14 en implementación tras aprobar especificación y contrato de 42 escenarios; funcionalidades 15–18 pendientes de contrato detallado e implementación.
+- Funcionalidad14 aprobada para cierre en progress/judge_start_work_final.md: inicio durable y recuperación real, CI de PR12 y mainae86110 verdes con104E2E, mutación backend97,9827% y frontend89,6104%, con residuales explícitos. Replay adicional de un oráculo en curso al dictamen; producción sin cambios. Funcionalidad15 pasa a contrato;16–18 siguen pendientes.
 - Ningún despliegue productivo acreditado todavía.
 
 ## Trabajo restante y estimación
+
+Camino crítico vigente: contrato y ejecución de15 pausa/reanudación →16 cierre con duración neta y atribución histórica →17 aviso de fin y decisión explícita →18 historial de hechos → validación integrada y despliegue real. Backend y frontend de cada funcionalidad se reparten entre agentes; cada una conserva contrato previo, TDD y validación. La tabla siguiente conserva las partidas de la hipótesis anterior, **no constituye una nueva medición** después de14. No hay evidencia suficiente para prometer el MVP hoy ni para actualizar el total con una cifra menor.
 
 | Hito | Resultado verificable | Horas efectivas estimadas |
 | --- | --- | ---: |

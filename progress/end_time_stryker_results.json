@@ -1,0 +1,31 @@
+{
+  "session": 90337,
+  "exitCode": 0,
+  "exitEvidence": "e73c7b",
+  "durationSeconds": 1542,
+  "inputs": 129,
+  "changedInputs": 0,
+  "total": 1980,
+  "statuses": [
+    {
+      "Name": "Killed",
+      "Count": 1684
+    },
+    {
+      "Name": "NoCoverage",
+      "Count": 3
+    },
+    {
+      "Name": "RuntimeError",
+      "Count": 4
+    },
+    {
+      "Name": "Survived",
+      "Count": 289
+    }
+  ],
+  "scorePercent": 85.22267206477733,
+  "strictAllPercent": 85.05050505050505,
+  "rawSha256": "8E0BF31D8D2CC753700E8946E11516F929ED20A35C7D38D836EC9D8E8FE9EB4A",
+  "logSha256": "9F6C0DCE5DEEEB3CE3A84FBF43A6AB21DC9F22FF2EF8AE0D1EBB3F374E8FE135"
+}

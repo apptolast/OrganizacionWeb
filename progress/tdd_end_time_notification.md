@@ -55,8 +55,8 @@ Contrato `features/end_time_notification.feature`, SHA256 `6BC581725DC0FE4C7B548
 | 40 | B generaciones E↔S, R1 S diferida; Task GET A previo/durante; Reader64/67 | Snapshot vigente antes de decidir y abortos al adquirir/confirmar. Montajes aprobados; no se infiere sólo de AbortController. |
 | 41 | B HTTP401 antiguo E/POST/S/A, coordinador y Task; Reader heredado JSON/clasificación diferidos | Etapas diferenciadas: 401 antes de Response/observador; JSON tardío válido y clasificación no401 en pruebas compartidas. No se afirma 401 diferido después del observador síncrono. |
 | 42 | B GET/POST404,401 actual, E/S/F de contexto ajeno; ciclos71/74/76–79/81 | Retirada completa de fin, identidad, notas, recibo, espera y comandos; S/CLOSE tardíos no restauran datos. Último F: E visible→F ajena, RED c10ff6→47 GREEN a63304, revisión puntual aprobada. |
-| 43 | B feedback/doble submit/foco c83832/e35ad5/91bc8f; encabezado contextual ciclo80; D | Foco DOM y aviso real sin robar foco acreditados. Cota <400ms/recorrido geométrico sólo se cerrarán con dictamen UX final. |
-| 44 | Primer recorrido UX de C comunicado: 155 medidas y cinco análisis axe sin violaciones | **Pendiente** matriz final e inspección independiente de root; no se certifican dispositivos físicos ni todos los principios a partir de axe. |
+| 43 | B feedback/doble submit/foco c83832/e35ad5/91bc8f; encabezado contextual ciclo80; D | Foco DOM y aviso real sin robar foco acreditados. UX aprobado: feedback máximo medido 5ms; no extrapolado a estados no medidos. |
+| 44 | `review_end_time_ux.md` APPROVED, integrado311cd33; consolidación a154e9 | Siete combinaciones motor/modo, 515 medidas, 35 axe sin violaciones; Firefox/WebKit 5/5 cada uno, Chromium con zoom nativo200%. Root inspeccionó capturas/fuentes. Límites detallados debajo. |
 
 ## Límites de recuperación y mutación
 
@@ -66,9 +66,10 @@ PIT original: **616 KILLED/620, cuatro NO_COVERAGE, cero supervivientes/timeouts
 
 ## Gates pendientes de cierre
 
-- Init global del corte integrado: root38720 activo al actualizar este mapa; pendiente de EXIT y revisión. La regresión backend 2074 anterior no lo sustituye.
+- Init integrado **GREEN**: root85135 EXIT0 78e8c6, 2076 Java/89 XML, 1795 frontend/38 archivos y 40 Node. Build root93234 **GREEN**, EXIT0 d1f11e; log verificado668f6a. Estos resultados de root sustituyen la espera anterior; no se repitieron en esta revisión.
 - Stryker17 y análisis de residuos: pendientes; no se infiere cobertura de mutación frontend desde 248 tests.
-- UX17: primera medición disponible, pero matriz final e inspección de root pendientes. No PASS global por cinco axe limpios.
+- UX17 **APPROVED para el alcance medido**: 515 medidas/35 axe, feedback máximo5ms y revisión root. Zoom nativo verificado con tabs.setZoom/getZoom2, DPR1,5 a3 y viewport320CSS. No estudio con personas, dispositivos físicos ni lectores de pantalla reales. Aviso vencido funcional y error de cantidad en componente, sin geometría dedicada; no todas las permutaciones de estados/dispositivos.
+- E2E global: pendiente tras integración de dos fixtures históricos corregidos, foco7/7 informado por root. El foco y los tres E2E propios no sustituyen la suite global.
 - CI del corte final: pendiente de resultado acreditado por root; no reutilizar CI de 16 ni un commit anterior como cierre del último delta.
 
 Las tres ejecuciones E2E y el smoke ya son evidencia real aprobada; los RED iniciales por montaje ausente y los incidentes de selector/fixture permanecen en sus bitácoras. Este maestro sustituye las marcas WIP históricas del mapa anterior sin borrar esos registros de autoría. No autoriza cambios ni nuevas pruebas y no marca done.

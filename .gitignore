@@ -87,3 +87,4 @@ reports/
 /progress/end_time_publisher_replay_final/
 /progress/end_time_publisher_refinement.xml
 /progress/end_time_init_backend_xml/
+/progress/end_time_stryker_original.json

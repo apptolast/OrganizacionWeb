@@ -1,0 +1,24 @@
+# Prioridades de revisión de mutación frontend17
+
+Revisión previa al resultado final, sólo lectura. La campaña root90337 sigue siendo la fuente autorizada del resultado; este documento no interpreta reportes parciales ni atribuye estados a mutantes17. No se ejecutaron pruebas ni campañas durante esta revisión.
+
+Alcance verificado en `frontend/stryker.end-time-notification.config.json`: siete fuentes completas (End API/panel, coordinador local, State API/panel, Reader y WorkSession), Vitest perTest, ocho procesos y umbral global80; reportes/temp propios. Se conserva ignore protegido. Las fuentes compartidas contienen lógica14–16, por lo que un residuo de esos archivos no implica que lo haya introducido17.
+
+| Prioridad si sobrevive una firma diferenciable | Oráculo público que debe distinguirla | Evidencia ya existente y límite |
+| --- | --- | --- |
+| Privacidad antes del observador | Entregar HTTP401 antiguo después de adquirir/confirmar decisión o navegar; observer sin llamadas y contexto actual intacto. Tras404/identidad ajena actual, un S/F/POST pendiente no puede restaurar datos ni disparar E por remontaje. | Reader/End/Task prueban promesas diferidas y retirada; ciclos67,71,74,76–79,81. No basta comprobar sólo signal.aborted ni ausencia final si otro404 oculta una restauración breve; ciclo78 acredita también número de consultas. |
+| Coordinación e intención | Dos decisiones hermanas en el mismo evento transmiten sólo una; S/E de generación vieja no habilita PAUSE/CLOSE/EXTEND durante refresh. Confirmación libera e invalida; rechazo definitivo libera, incertidumbre conserva dueño/key. | Hook2, Task47, State y Reader/End de composición. Si sobrevive incremento→undefined, repetir una segunda decisión/consulta sería diferenciable; incremento→decremento sólo exige analizar si basta cambio de generación, no declararlo defecto automáticamente. |
+| Tiempo exacto y aviso | µs exactos en fórmula max(previousEnd,occurredAt)+minutos; época fuera de precisión Number; plazo >2^31ms fragmentado, fracción positiva sin bucle0; tras suspender, GET confirma antes del aviso. Closed cancela aviso/controles aunque F/E espere. | API17 incluye1600 y diferencias1µs; panel incluye25días,1µs,monotónico/visibilidad; Reader distingue Sclosed de recibo. Un límite aritmético superviviente necesita un dato válido que llegue a esa rama, evitando rechazo por otro validador anterior. |
+| Recuperación y clasificación | POST incierto→K503/problema desconocido no habilita reenvío; sólo K404 reconocido/CSRF permiten acción manual con idéntica intención.412 exige snapshot fresco y nueva decisión explícita. EXTEND recuperado debe corresponder a su cantidad/acción. | Oráculos actuales de K/CSRF/412 y comparación de intención en API. Priorizar firma concreta que cambie estas salidas, no una matriz nueva de todos los códigos heredados. |
+| Hechos históricos y accesibilidad | Recibo EXTEND sigue visible ante CLOSE412/fallo de consulta; ausencia de spinner S tras cierre/retirada no oculta carga E real. Errores asociados, foco sólo si seguía en iniciador y encabezado nativo contextual. | Ciclos66,72,75,79–80 y pruebas16 preservadas. Espacios, acceso opcional de refs montadas y ramas inaccesibles desde controles públicos requieren justificación contextual; no son equivalentes por defecto. |
+
+## Reutilización explícita de16
+
+- `review_close_work_mutation_frontend.md` conserva el resultado original16 (86,59%,169Survived,2NoCoverage,2RuntimeError) y sus límites; no es puntuación ni resultado de17.
+- `review_close_work_mutation_frontend_replay.md` acredita doce firmas dirigidas y tres extras Killed en attempt3. Incluye abort de GETactive tras cierre, aria-invalid/aria-describedby de notas y retry pendiente sin duplicar GET. Los tests siguen presentes; no hace falta repetir ese paquete sin un superviviente17 diferenciable.
+- Ya estaban documentadas familias de guardas tras await, reintentos repetidos, clasificación estricta de problemas, igualdad de notas y restricciones del decoder compartido. Comparar la firma actual por archivo/contexto/mutador/reemplazo; los IDs y líneas16 no son identificadores estables17.
+- Los RuntimeError16 del adaptador Vitest al serializar excepciones quedaron como errores, nunca Killed. Si reaparecen, conservar diagnóstico y separar medición de defecto del producto; no inferir muerte a partir de un stacktrace.
+
+## Criterio de actuación al cierre
+
+Leer únicamente el resultado terminal con hashes de entradas y conteos completos. Primero buscar un observable contractual en las familias anteriores y verificar si el oráculo existente realmente lo aísla. Un refuerzo inicialmenteGREEN se registra como tal; sólo un defecto reproducido del producto justifica cambiar producción. Preservar resultado original y cualquier replay autorizado por separado, sin sumar scores, perseguir100%, excluir ramas difíciles ni multiplicar matrices por mera supervivencia.

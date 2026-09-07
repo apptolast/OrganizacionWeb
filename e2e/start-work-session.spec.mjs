@@ -47,7 +47,10 @@ test("start_work_session: another task's active session links to its real contex
     section.getByText("Duración prevista: 25 minutos", { exact: true }),
   ).toBeVisible();
   await expect(
-    section.locator(`time[datetime="${session.plannedEndAt}"]`),
+    section
+      .getByRole("paragraph")
+      .filter({ hasText: /^Fin previsto:/ })
+      .locator(`time[datetime="${session.plannedEndAt}"]`),
   ).toBeVisible();
   await expect(
     section.getByRole("button", { name: "Empezar a trabajar", exact: true }),
@@ -233,7 +236,10 @@ test("start_work_session: explicit start persists and reload discovers the origi
     section.getByText("Duración prevista: 25 minutos", { exact: true }),
   ).toBeVisible();
   await expect(
-    section.locator(`time[datetime="${session.plannedEndAt}"]`),
+    section
+      .getByRole("paragraph")
+      .filter({ hasText: /^Fin previsto:/ })
+      .locator(`time[datetime="${session.plannedEndAt}"]`),
   ).toBeVisible();
   await expect(
     section.getByRole("button", { name: "Empezar a trabajar", exact: true }),

@@ -1,0 +1,15 @@
+{
+  "exitCode": 0,
+  "exitEvidence": "35d7e9",
+  "tests": 62,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "class": "com.apptolast.organization.adapter.persistence.CustomFieldValuesPersistenceTest",
+  "xmlSha256": "99C1CD3BCDD7B860E272A76085AACF815E369C70290E37C627AE7490676BAA8D",
+  "logSha256": "C7EECE7B1A49C2A56CE87BFD71E4E719D94FA2152DC662E10DD1963B1E793692",
+  "sourceUnchanged": true,
+  "changedFiles": [
+    "backend/src/test/java/com/apptolast/organization/adapter/persistence/CustomFieldValuesPersistenceTest.java"
+  ]
+}

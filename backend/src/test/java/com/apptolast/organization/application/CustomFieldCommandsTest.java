@@ -12,6 +12,38 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class CustomFieldCommandsTest {
+  @ParameterizedTest
+  @ValueSource(strings = {"e\u0301", "dato", "A  B", "\u2003X\u00a0", "sixty-pairs"})
+  void s4_s5_validLabelsKeepUnicodeIdentityAndInsertionOrder(String label) {
+    var input = label.equals("sixty-pairs") ? "\ud83d\ude00".repeat(60) : label;
+    var expected = label.equals("\u2003X\u00a0") ? "X" : input;
+    var first = new CustomFieldDefinition(UUID.randomUUID(), "é", CustomFieldType.TEXT, true);
+    var second = new CustomFieldDefinition(UUID.randomUUID(), "Dato", CustomFieldType.TEXT, false);
+    var previous =
+        new Customization(
+            UUID.randomUUID(),
+            "owner-a",
+            CustomizationScope.PROJECT,
+            List.of(),
+            List.of(first, second),
+            2,
+            Instant.EPOCH);
+    var result =
+        new CreateCustomField(
+                (owner, scope, operation) -> operation.apply(Optional.of(previous)),
+                Clock.fixed(Instant.EPOCH, ZoneOffset.UTC))
+            .create(
+                "owner-a",
+                CustomizationScope.PROJECT,
+                new CustomizationRevision(previous.id(), 2),
+                input,
+                CustomFieldType.TEXT);
+    assertThat(result.customFields()).hasSize(3);
+    assertThat(result.customFields().subList(0, 2)).containsExactly(first, second);
+    assertThat(result.customFields().getLast().label()).isEqualTo(expected);
+    assertThat(result.customFields().getLast().id()).isNotIn(first.id(), second.id());
+  }
+
   @Test
   void s22_updatePreservesPreviousTimeWhenClockGoesBackwards() {
     var field = new CustomFieldDefinition(UUID.randomUUID(), "Dato", CustomFieldType.TEXT, true);

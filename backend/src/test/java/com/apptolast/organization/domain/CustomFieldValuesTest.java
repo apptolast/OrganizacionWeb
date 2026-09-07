@@ -10,6 +10,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class CustomFieldValuesTest {
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(ints = {-1000000000, 0, 1000000000})
+  void s11_exactNumberEndpointsAndZeroAreValid(int number) {
+    assertThat(
+            new CustomFieldInput(UUID.randomUUID(), BigDecimal.valueOf(number))
+                .canonical(CustomFieldType.NUMBER, 0))
+        .isEqualTo(number);
+  }
+
   @ParameterizedTest
   @org.junit.jupiter.params.provider.MethodSource("invalidTexts")
   void s12_invalidTextReportsValueErrorWithoutTrimming(String text) {

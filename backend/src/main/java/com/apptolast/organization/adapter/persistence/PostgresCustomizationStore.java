@@ -47,7 +47,8 @@ public final class PostgresCustomizationStore
       String owner,
       CustomizationScope scope,
       Function<Optional<Customization>, Customization> operation) {
-    return writing.execute(
+    return storedTransaction(
+        writing,
         status -> {
           jdbc.query(
               "SELECT pg_advisory_xact_lock(hashtextextended(?,0))",
@@ -57,15 +58,19 @@ public final class PostgresCustomizationStore
           var changed = operation.apply(previous);
           if (previous.isPresent() && previous.get().equals(changed)) return changed;
           try {
-            jdbc.update(
-                "INSERT INTO customization_preferences (id,owner_id,scope,visible_fields,custom_fields,version,updated_at) VALUES (?,?,?,?::jsonb,?::jsonb,?,?) ON CONFLICT (owner_id,scope) DO UPDATE SET visible_fields=EXCLUDED.visible_fields,custom_fields=EXCLUDED.custom_fields,version=EXCLUDED.version,updated_at=EXCLUDED.updated_at",
-                changed.id(),
-                owner,
-                scope.name(),
-                json.writeValueAsString(changed.visibleFields()),
-                json.writeValueAsString(changed.customFields()),
-                changed.version(),
-                changed.updatedAt().atOffset(java.time.ZoneOffset.UTC));
+            int affected =
+                jdbc.update(
+                    "INSERT INTO customization_preferences (id,owner_id,scope,visible_fields,custom_fields,version,updated_at) VALUES (?,?,?,?::jsonb,?::jsonb,?,?) ON CONFLICT (owner_id,scope) DO UPDATE SET visible_fields=EXCLUDED.visible_fields,custom_fields=EXCLUDED.custom_fields,version=EXCLUDED.version,updated_at=EXCLUDED.updated_at",
+                    changed.id(),
+                    owner,
+                    scope.name(),
+                    json.writeValueAsString(changed.visibleFields()),
+                    json.writeValueAsString(changed.customFields()),
+                    changed.version(),
+                    changed.updatedAt().atOffset(java.time.ZoneOffset.UTC));
+            if (affected != 1)
+              throw new StorageUnavailableException(
+                  new IllegalStateException("Customization write affected no single row"));
           } catch (com.fasterxml.jackson.core.JsonProcessingException error) {
             throw new StorageUnavailableException(error);
           }
@@ -75,7 +80,7 @@ public final class PostgresCustomizationStore
 
   public Optional<Customization> find(String owner, CustomizationScope scope) {
     try {
-      return reading.execute(status -> select(owner, scope));
+      return storedTransaction(reading, status -> select(owner, scope));
     } catch (RuntimeException error) {
       throw new StorageUnavailableException(error);
     }
@@ -91,7 +96,8 @@ public final class PostgresCustomizationStore
               Optional<CustomFieldValuesCollection>,
               CustomFieldValuesCollection>
           operation) {
-    return writing.execute(
+    return storedTransaction(
+        writing,
         status -> {
           requireOwned(owner, scope, projectId, entityId);
           jdbc.query(
@@ -99,7 +105,7 @@ public final class PostgresCustomizationStore
               row -> {},
               "customization:" + owner + ":" + scope.name());
           var configuration = select(owner, scope);
-          var previous = selectValues(owner, scope, entityId);
+          var previous = selectValues(owner, scope, entityId, configuration);
           var changed = operation.apply(configuration, previous);
           if (previous.isPresent() && previous.get().equals(changed))
             return CustomFieldValues.project(scope, entityId, configuration, previous);
@@ -109,20 +115,24 @@ public final class PostgresCustomizationStore
                   : "task_custom_field_values";
           var column = scope == CustomizationScope.PROJECT ? "project_id" : "task_id";
           try {
-            jdbc.update(
-                "INSERT INTO "
-                    + table
-                    + " (id,owner_id,"
-                    + column
-                    + ",field_values,version,updated_at) VALUES (?,?,?,?::jsonb,?,?) ON CONFLICT (owner_id,"
-                    + column
-                    + ") DO UPDATE SET field_values=EXCLUDED.field_values,version=EXCLUDED.version,updated_at=EXCLUDED.updated_at",
-                changed.id(),
-                owner,
-                entityId,
-                json.writeValueAsString(changed.values()),
-                changed.version(),
-                changed.updatedAt().atOffset(java.time.ZoneOffset.UTC));
+            int affected =
+                jdbc.update(
+                    "INSERT INTO "
+                        + table
+                        + " (id,owner_id,"
+                        + column
+                        + ",field_values,version,updated_at) VALUES (?,?,?,?::jsonb,?,?) ON CONFLICT (owner_id,"
+                        + column
+                        + ") DO UPDATE SET field_values=EXCLUDED.field_values,version=EXCLUDED.version,updated_at=EXCLUDED.updated_at",
+                    changed.id(),
+                    owner,
+                    entityId,
+                    json.writeValueAsString(changed.values()),
+                    changed.version(),
+                    changed.updatedAt().atOffset(java.time.ZoneOffset.UTC));
+            if (affected != 1)
+              throw new StorageUnavailableException(
+                  new IllegalStateException("Customization write affected no single row"));
           } catch (com.fasterxml.jackson.core.JsonProcessingException error) {
             throw new StorageUnavailableException(error);
           }
@@ -132,12 +142,13 @@ public final class PostgresCustomizationStore
 
   public CustomFieldValues find(
       String owner, CustomizationScope scope, UUID projectId, UUID entityId) {
-    return reading.execute(
+    return storedTransaction(
+        reading,
         status -> {
           requireOwned(owner, scope, projectId, entityId);
           var configuration = select(owner, scope);
           return CustomFieldValues.project(
-              scope, entityId, configuration, selectValues(owner, scope, entityId));
+              scope, entityId, configuration, selectValues(owner, scope, entityId, configuration));
         });
   }
 
@@ -159,7 +170,10 @@ public final class PostgresCustomizationStore
   }
 
   private Optional<CustomFieldValuesCollection> selectValues(
-      String owner, CustomizationScope scope, UUID entityId) {
+      String owner,
+      CustomizationScope scope,
+      UUID entityId,
+      Optional<Customization> configuration) {
     var table =
         scope == CustomizationScope.PROJECT
             ? "project_custom_field_values"
@@ -170,14 +184,45 @@ public final class PostgresCustomizationStore
             "SELECT * FROM " + table + " WHERE owner_id=? AND " + column + "=?",
             (row, index) -> {
               try {
+                var stored =
+                    json.reader()
+                        .with(
+                            com.fasterxml.jackson.databind.DeserializationFeature
+                                .USE_BIG_DECIMAL_FOR_FLOATS)
+                        .readTree(row.getString("field_values"));
+                if (!stored.isObject())
+                  throw new IllegalArgumentException("Invalid stored values object");
+                var values = new java.util.LinkedHashMap<UUID, Object>();
+                var entries = stored.fields();
+                while (entries.hasNext()) {
+                  var entry = entries.next();
+                  var id = storedUuid(entry.getKey());
+                  var definition =
+                      configuration.orElseThrow().customFields().stream()
+                          .filter(field -> field.id().equals(id))
+                          .findFirst()
+                          .orElseThrow();
+                  var node = entry.getValue();
+                  Object value =
+                      node.isNull()
+                          ? null
+                          : node.isNumber()
+                              ? node.decimalValue()
+                              : node.isTextual()
+                                  ? node.textValue()
+                                  : node.isBoolean() ? node.booleanValue() : node;
+                  values.put(
+                      id,
+                      new com.apptolast.organization.domain.CustomFieldInput(id, value)
+                          .canonical(definition.type(), 0));
+                }
                 return new CustomFieldValuesCollection(
-                    row.getObject("id", UUID.class),
-                    json.readValue(
-                        row.getString("field_values"),
-                        new TypeReference<java.util.Map<UUID, Object>>() {}),
-                    row.getLong("version"),
-                    row.getObject("updated_at", OffsetDateTime.class).toInstant());
-              } catch (com.fasterxml.jackson.core.JsonProcessingException error) {
+                    java.util.Objects.requireNonNull(row.getObject("id", UUID.class)),
+                    values,
+                    storedVersion(row),
+                    storedTime(row.getObject("updated_at", OffsetDateTime.class)));
+              } catch (com.fasterxml.jackson.core.JsonProcessingException
+                  | RuntimeException error) {
                 throw new StorageUnavailableException(error);
               }
             },
@@ -193,18 +238,46 @@ public final class PostgresCustomizationStore
             "SELECT * FROM customization_preferences WHERE owner_id=? AND scope=?",
             (row, index) -> {
               try {
+                var definitions = json.readTree(row.getString("custom_fields"));
+                if (!definitions.isArray() || definitions.size() > 12)
+                  throw new IllegalArgumentException("Invalid stored definitions array");
+                var ids = new java.util.HashSet<UUID>();
+                var labels = new java.util.HashSet<String>();
+                for (var definition : definitions) {
+                  if (!definition.isObject()
+                      || definition.size() != 4
+                      || !definition.path("id").isTextual()
+                      || !definition.path("label").isTextual()
+                      || !definition.path("type").isTextual()
+                      || !definition.path("active").isBoolean())
+                    throw new StorageUnavailableException(
+                        new IllegalArgumentException("Invalid stored custom field shape"));
+                  var id = storedUuid(definition.get("id").textValue());
+                  var label = definition.get("label").textValue();
+                  if (!ids.add(id)
+                      || !labels.add(label)
+                      || !new com.apptolast.organization.domain.CustomFieldLabel(label)
+                          .value()
+                          .equals(label))
+                    throw new IllegalArgumentException("Invalid stored custom field definition");
+                }
+                var view =
+                    new com.apptolast.organization.domain.CustomizationView(
+                        scope,
+                        json.readValue(
+                            row.getString("visible_fields"), new TypeReference<List<String>>() {}));
                 return new Customization(
-                    row.getObject("id", UUID.class),
+                    java.util.Objects.requireNonNull(row.getObject("id", UUID.class)),
                     owner,
                     scope,
-                    json.readValue(
-                        row.getString("visible_fields"), new TypeReference<List<String>>() {}),
+                    view.visibleFields(),
                     json.readValue(
                         row.getString("custom_fields"),
                         new TypeReference<List<CustomFieldDefinition>>() {}),
-                    row.getLong("version"),
-                    row.getObject("updated_at", OffsetDateTime.class).toInstant());
-              } catch (com.fasterxml.jackson.core.JsonProcessingException error) {
+                    storedVersion(row),
+                    storedTime(row.getObject("updated_at", OffsetDateTime.class)));
+              } catch (com.fasterxml.jackson.core.JsonProcessingException
+                  | RuntimeException error) {
                 throw new StorageUnavailableException(error);
               }
             },
@@ -212,5 +285,36 @@ public final class PostgresCustomizationStore
             scope.name())
         .stream()
         .findFirst();
+  }
+
+  private static java.time.Instant storedTime(OffsetDateTime value) {
+    var utc = value.withOffsetSameInstant(java.time.ZoneOffset.UTC);
+    if (utc.getYear() < 1 || utc.getYear() > 9999)
+      throw new IllegalArgumentException("Invalid stored customization timestamp");
+    return utc.toInstant();
+  }
+
+  private static long storedVersion(java.sql.ResultSet row) throws java.sql.SQLException {
+    long version = row.getLong("version");
+    if (row.wasNull() || version < 0)
+      throw new IllegalArgumentException("Invalid stored customization version");
+    return version;
+  }
+
+  private static UUID storedUuid(String text) {
+    var id = UUID.fromString(text);
+    if (!id.toString().equals(text)) throw new IllegalArgumentException("Invalid stored UUID text");
+    return id;
+  }
+
+  private static <T> T storedTransaction(
+      TransactionTemplate transaction,
+      org.springframework.transaction.support.TransactionCallback<T> operation) {
+    try {
+      return transaction.execute(operation);
+    } catch (org.springframework.dao.DataAccessException
+        | org.springframework.transaction.TransactionException error) {
+      throw new StorageUnavailableException(error);
+    }
   }
 }

@@ -425,3 +425,33 @@ organizationweb-customization-ci-34163594795.log, SHA256
 Se puede subir el siguiente checkpoint sin cancelar esa evidencia.
 Soporte de mutación integrado `d48e773`; backend recibió COPYDONE.
 El foco `a5df48` anterior confirmó HTTP134 y wiring tras integrar PUT.
+
+## Feature 21: regresión nominal y revisión final backend
+
+CI `34165164208` sobre `9835bef` terminó SUCCESS: init, build, DNS Docker,
+143 E2E y publicador. Log completo externo
+organizationweb-customization-ci-34165164208.log, SHA256
+D7057D90CBE8363587EE52F6395D1840B0D597F083E72522BC3F7F730A9D4185.
+No cubre los deltas posteriores sin commit ni el formulario 21.
+
+Integrados `a4ab29d` (ocho HTTP/PG reales) y `6080b95` (un E2E de durabilidad
+con respuesta perdida, texto inactivo exacto y reinicio exclusivo de API).
+Root verificó los 569 hashes del replay; no se atribuye cobertura de la UI
+a ese recorrido HTTP. Los dos contenedores de prueba propios se retiraron.
+
+Backend A congeló seis deltas: 315 pruebas focales en once suites, EXIT0
+`372d3e`, 428 entradas sin cambios. Root ha revisado fuentes y pruebas;
+no quedan defectos productivos identificados en ese corte. La auditoría C
+separa evidencia pura, MVC, PG y E2E. Se refuerzan únicamente dos fixtures:
+conservar hechos históricos y valores de proyecto poblados en @s18, y
+rollback de UPDATE con varios valores previos en @s20. Su primera ejecución
+se registrará sin inventar un RED si el producto ya cumple.
+
+Frontend sigue corrigiendo invalidación del esquema y mensajes de error;
+la revisión independiente y las campañas de mutación siguen pendientes.
+Producción conserva las funciones 1–20. No hay declaración de cierre 21.
+
+Los dos refuerzos ya están aprobados por root: 62 pruebas y formato verdes,
+seis hashes/XML verificados en `880f9f`; producción idéntica al freeze anterior.
+Se autoriza PIT backend con el foco revisado y cuatro workers. La campaña
+conservará entradas y reporte original; no editar Java/build mientras corre.

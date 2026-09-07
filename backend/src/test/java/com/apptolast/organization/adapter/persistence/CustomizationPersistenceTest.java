@@ -1,6 +1,7 @@
 package com.apptolast.organization.adapter.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.apptolast.organization.application.SaveCustomizationView;
 import com.apptolast.organization.domain.CustomizationRevision;
@@ -20,6 +21,102 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 class CustomizationPersistenceTest {
+  @Test
+  void s6_eleventhDefinitionCanBecomeTwelfthWithoutConfiguringTask() {
+    var store =
+        new PostgresCustomizationStore(
+            jdbc, manager, new com.fasterxml.jackson.databind.ObjectMapper());
+    var create =
+        new com.apptolast.organization.application.CreateCustomField(
+            store, Clock.fixed(Instant.EPOCH, ZoneOffset.UTC));
+    var revision = new CustomizationRevision(null, 0);
+    for (int index = 0; index < 11; index++) {
+      var saved =
+          create.create(
+              "owner-a",
+              CustomizationScope.PROJECT,
+              revision,
+              "Dato " + index,
+              com.apptolast.organization.domain.CustomFieldType.TEXT);
+      revision = new CustomizationRevision(saved.id(), saved.version());
+    }
+    var result =
+        create.create(
+            "owner-a",
+            CustomizationScope.PROJECT,
+            revision,
+            "Último",
+            com.apptolast.organization.domain.CustomFieldType.BOOLEAN);
+    assertThat(result.customFields()).hasSize(12);
+    assertThat(result.customFields().getLast().label()).isEqualTo("Último");
+    assertThat(store.find("owner-a", CustomizationScope.TASK)).isEmpty();
+    assertThat(jdbc.queryForObject("SELECT count(*) FROM customization_preferences", Integer.class))
+        .isEqualTo(1);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {
+        "null-id",
+        "numeric-label",
+        "blank-label",
+        "trimmed-label",
+        "duplicate-id",
+        "duplicate-label",
+        "extra-property",
+        "invalid-view"
+      })
+  void s20_storedConfigurationRejectsInvalidShapeAndDomainInvariants(String corruption)
+      throws Exception {
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var field =
+        json.createObjectNode()
+            .put("id", java.util.UUID.randomUUID().toString())
+            .put("label", "Dato")
+            .put("type", "TEXT")
+            .put("active", true);
+    var fields = json.createArrayNode().add(field);
+    switch (corruption) {
+      case "null-id" -> field.putNull("id");
+      case "numeric-label" -> field.put("label", 123);
+      case "blank-label" -> field.put("label", " ");
+      case "trimmed-label" -> field.put("label", " Dato ");
+      case "duplicate-id" -> fields.add(field.deepCopy().put("label", "Otro"));
+      case "duplicate-label" ->
+          fields.add(field.deepCopy().put("id", java.util.UUID.randomUUID().toString()));
+      case "extra-property" -> field.put("unexpected", 1);
+      default -> {}
+    }
+    jdbc.update(
+        "INSERT INTO customization_preferences VALUES (?,'owner-a','PROJECT',?::jsonb,?::jsonb,0,'2026-09-07T20:00:00Z')",
+        java.util.UUID.randomUUID(),
+        corruption.equals("invalid-view") ? "[\"estimatedMinutes\"]" : "[]",
+        fields.toString());
+    var store = new PostgresCustomizationStore(jdbc, manager, json);
+    assertThatThrownBy(() -> store.find("owner-a", CustomizationScope.PROJECT))
+        .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(strings = {"null", "missing", "\"false\""})
+  void s20_storedDefinitionRequiresAnExplicitBooleanWithoutJacksonCoercion(String active) {
+    var fieldJson =
+        "[{\"id\":\""
+            + java.util.UUID.randomUUID()
+            + "\",\"label\":\"Dato\",\"type\":\"TEXT\""
+            + (active.equals("missing") ? "" : ",\"active\":" + active)
+            + "}]";
+    jdbc.update(
+        "INSERT INTO customization_preferences VALUES (?,'owner-a','PROJECT','[]'::jsonb,?::jsonb,0,'2026-09-07T20:00:00Z')",
+        java.util.UUID.randomUUID(),
+        fieldJson);
+    var store =
+        new PostgresCustomizationStore(
+            jdbc, manager, new com.fasterxml.jackson.databind.ObjectMapper());
+    assertThatThrownBy(() -> store.find("owner-a", CustomizationScope.PROJECT))
+        .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+  }
+
   @Container
   static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17.9-alpine");
 
@@ -77,8 +174,10 @@ class CustomizationPersistenceTest {
       assertThat(old.queryForObject("SELECT count(*) FROM " + table, Integer.class)).isZero();
   }
 
-  @Test
-  void s9_twoFirstWritesWaitOnTheOwnerScopeLockBeforeClockAndOnlyOneWins() throws Exception {
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+  void s9_twoFirstWritesWaitOnTheOwnerScopeLockBeforeClockAndOnlyOneWins(boolean definitions)
+      throws Exception {
     var store =
         new PostgresCustomizationStore(
             jdbc, manager, new com.fasterxml.jackson.databind.ObjectMapper());
@@ -96,6 +195,14 @@ class CustomizationPersistenceTest {
       java.util.concurrent.Callable<Object> change =
           () -> {
             try {
+              if (definitions)
+                return new com.apptolast.organization.application.CreateCustomField(store, clock)
+                    .create(
+                        "owner-a",
+                        CustomizationScope.PROJECT,
+                        new CustomizationRevision(null, 0),
+                        "Dato",
+                        com.apptolast.organization.domain.CustomFieldType.TEXT);
               return save.save(
                   "owner-a",
                   CustomizationScope.PROJECT,
@@ -138,6 +245,9 @@ class CustomizationPersistenceTest {
                   .count())
           .isEqualTo(1);
       org.mockito.Mockito.verify(clock).instant();
+      var durable = store.find("owner-a", CustomizationScope.PROJECT).orElseThrow();
+      assertThat(durable.version()).isZero();
+      assertThat(durable.customFields()).hasSize(definitions ? 1 : 0);
       assertThat(
               jdbc.queryForObject("SELECT count(*) FROM customization_preferences", Integer.class))
           .isEqualTo(1);

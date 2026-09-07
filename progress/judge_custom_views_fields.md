@@ -160,3 +160,37 @@ final, pruebas integradas, mutación, matriz UX y aceptación tras despliegue.
 
 La producción continúa en `ed00ad4`, con las funciones 1–20 aceptadas.
 No se ha desplegado la feature 21. V14 heredada permanece fuera del trabajo.
+
+## Revisión final de persistencia, 8 de septiembre
+
+Root ha leído el Store y los seis deltas congelados por A. La lectura exige
+JSON y metadatos válidos, UUID canónicos, precisión decimal y calendario
+público. Ambos upserts exigen una fila afectada. Las transacciones traducen
+fallos de almacenamiento y commit a 503 sin confirmar una escritura perdida.
+El bloqueo compartido por propietario/ámbito serializa configuración y
+valores; su granularidad conservadora es suficiente para el uso personal.
+La lectura RR mantiene propiedad, esquema y valores en el mismo snapshot.
+
+Los oráculos nuevos distinguen corrupción inyectada mediante vistas/triggers
+de filas que las constraints admitirían naturalmente. Las carreras observan
+espera real, conservan xmin/ctid en no-op y no prefijan ganador salvo el caso
+que requiere explícitamente que el esquema confirme primero.
+
+Sin hallazgos productivos abiertos en este corte. La regresión final focal
+registra 315 pruebas en once suites, cero fallos y 428 hashes estables.
+La auditoría independiente `review_customization_backend_coverage.md` delimita
+dos fixtures pendientes de refuerzo para @s18 y @s20; no los presenta como
+bugs. El dictamen no acredita todavía mutación ni la UI final.
+
+CI `34165164208` sobre `9835bef` terminó SUCCESS con 143 E2E, build y publicador.
+Log externo SHA256 `D7057D90CBE8363587EE52F6395D1840B0D597F083E72522BC3F7F730A9D4185`.
+Es evidencia del corte nominal, anterior al freeze final de A y frontend.
+
+Refuerzos revisados y aprobados: @s18 genera sesiones, intervalos, recibos,
+historial y eventos reales antes del guardado; compara filas completas y
+valores independientes de proyecto/subtarea. @s20 provoca fallo AFTER UPDATE
+con dos valores activos y uno inactivo previos, y verifica rollback físico.
+Sólo cambia la clase de pruebas. Root verificó seis hashes del manifiesto
+refinado y su XML de 62 casos, cero fallos/errores (`880f9f`). La primera
+regresión 315/11 queda preservada, no se presenta como reejecutada.
+Backend aprobado para iniciar PIT; no es todavía aprobación de mutación.

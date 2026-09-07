@@ -9,6 +9,38 @@ import org.junit.jupiter.api.Test;
 
 class SaveCustomizationTest {
   @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "0001-01-01T00:00:00Z,0001-01-01T00:00:00Z,0001-01-01T00:00:00Z",
+    "9999-12-31T23:59:59.999998Z,9999-12-31T23:59:59.999999Z,9999-12-31T23:59:59.999999Z",
+    "2026-09-07T10:00:00Z,2026-09-07T10:00:01.123456789Z,2026-09-07T10:00:01.123456Z"
+  })
+  void s22_publicCalendarEndpointsAndMicrosecondsConfirmOneRevision(
+      String previousTime, String now, String expected) {
+    var prior =
+        new Customization(
+            UUID.randomUUID(),
+            "owner-a",
+            CustomizationScope.PROJECT,
+            List.of(),
+            List.of(),
+            4,
+            Instant.parse(previousTime));
+    var clock = org.mockito.Mockito.mock(Clock.class);
+    org.mockito.Mockito.when(clock.instant()).thenReturn(Instant.parse(now));
+    var saved =
+        new SaveCustomizationView(
+                (owner, scope, operation) -> operation.apply(Optional.of(prior)), clock)
+            .save(
+                "owner-a",
+                CustomizationScope.PROJECT,
+                new CustomizationRevision(prior.id(), 4),
+                List.of("createdAt"));
+    assertThat(saved.updatedAt()).isEqualTo(Instant.parse(expected));
+    assertThat(saved.version()).isEqualTo(5);
+    org.mockito.Mockito.verify(clock).instant();
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.ValueSource(
       strings = {"0000-12-31T23:59:59Z", "+10000-01-01T00:00:00Z"})
   void s20_unrepresentableClockCannotProduceAPublicConfirmation(String instant) {

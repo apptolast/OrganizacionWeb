@@ -292,3 +292,8 @@ Wrapper oficial sobre infraestructura 8aec158: check EXIT0 27ok/2changed/0failed
 Aceptación HTTPS: GET de defaults sin configuración, PUT200 SYSTEM conservando ambos colores, lectura y nueva sesión recuperan DTO/ETag exactos. Navegador publicado en390/768/1280 sin desbordamiento ni errores; capturas revisadas. Proyecto, sesión cerrada de14062085µs, historial y revisión semanal conservados. Cierre HTTP204 y posterior GET anónimo. Un wait de URL del primer cierre UI excedió el timeout de la herramienta; no se cuenta como prueba de logout y se repitió explícitamente por HTTP con éxito. Evidencia externa deployment-preparation/organizationweb-appearance-acceptance.json y logs check/apply.
 
 20 terminada; comienza especificación de21 Vistas/campos.22–30 siguen pendientes. La copia restaurada y el ensayo de retorno a la API anterior mantienen sus límites documentados. V14 heredada protegida intacta.
+
+
+## Feature21: contrato de vistas y campos, 7 de septiembre 21:50
+
+Init21 sesión94704 EXIT0 ce0f1d: Java2387/102 sin fallos/errores/omitidos (recuento XML64dfee), frontend2058/44 y55 pruebas del arnés verdes. Base main7c1bf80 con cierre20 documental47dd4d4; no código21 escrito. A redactó sección21 y root revisó scopes, tipos, restauración y concurrencia. Se corrigió una revisión fuerte que no incluía cambios de etiquetas: ETag compuesto incorpora configuración y valores, eliminando una segunda cabecera. C destila Gherkin como autor distinto; B delimitó integración contextual. No se inicia TDD hasta revisión del contrato destilado, bajo autorización global vigente.

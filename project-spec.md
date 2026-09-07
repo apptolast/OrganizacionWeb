@@ -1300,3 +1300,236 @@ Lecturas viejas quedan invalidadas al comenzar escritura y al confirmar; una res
 ### Evidencia exigida antes del cierre
 
 TDD individual, HTTP/PG reales con aislamiento de propietarios, no-op/revisión/carreras/rollback y recuperación tras reinicio. E2E guardar, recargar, SYSTEM y reset real; contraste de ambas variantes y colores arbitrarios aceptados en roles efectivos de pantallas existentes (también error/disabled/foco). Revisión de 30 principios completa en informe UX, con todas las filas y límites explícitos. Matriz responsive de docs/ux-requirements: 320–2560 y lados de breakpoints, alturas reducidas, texto/zoom nativo 200 %, teclado y 44×44, Chromium/Firefox/WebKit, movimiento reducido/forced-colors. No atribuir dispositivos físicos o facilidad psicológica universal a emulación o axe. No implementación ni spec_ready hasta revisión root del contrato y Gherkin.
+
+## Feature 21: custom_views_fields — vistas y campos personales
+
+### Objetivo y límites
+
+Personalizar dos superficies existentes: lista de proyectos y listas de tareas
+(incluidas subtareas). La configuración es propia por cuenta y ámbito PROJECT
+o TASK, no por proyecto: TASK se aplica a todas las tareas de esa cuenta.
+El nombre/título enlazado, estado, acciones, contexto y paginación nunca se
+ocultan ni reordenan. Sólo se personalizan metadatos de presentación; no el
+orden de entidades ni los filtros del servidor.
+
+Los campos personales tienen definición por ámbito y valores independientes
+en cada proyecto/tarea propios. Se consultan y editan en los detalles, no en
+cada fila de las listas: no se añade lectura N+1 ni se modifica la paginación.
+Una subtarea no hereda valores del padre ni del proyecto. Un campo llamado
+«Avance» u «Horas» es información declarada, no progreso, estimación, tiempo
+real o hecho histórico. Los contratos y DTO 1–20 permanecen intactos.
+
+Sin tableros, vistas guardadas múltiples, fórmulas, filtros nuevos, opciones
+personalizadas, relaciones, adjuntos, HTML/CSS ejecutable, obligatoriedad de
+campos ni automatizaciones. No exportación/importación anticipadas de 22/23.
+
+### Presentación y definiciones restaurables
+
+Cada ámbito tiene una lista ordenada visibleFields, sin duplicados. PROJECT
+admite createdAt y updatedAt; default [createdAt]. TASK admite
+completionCriterion, estimatedMinutes, createdAt y updatedAt; default
+[completionCriterion,estimatedMinutes]. Lista vacía es válida. El orden del
+array es el orden de lectura visual/DOM de esos metadatos, después de la
+identidad y el estado esenciales. Fechas nativas se presentan en UTC como
+hasta ahora; estimación null sigue siendo «Sin estimación». El criterio se
+oculta sólo en la lista, nunca se elimina del detalle o formulario de tarea.
+
+Hasta 12 definiciones por ámbito, contando activas e inactivas, en este corte.
+Cada una tiene UUID generado por servidor, label, type y active. Orden estable
+de creación, con UUID como desempate; sin orden manual de definiciones.
+Label se recorta por Unicode White_Space exterior, conserva interior y exige
+1–60 puntos de código. Es único por ámbito tras ese recorte, sensible a
+mayúsculas y sin normalización Unicode, también entre inactivas. El tipo es
+inmutable: TEXT, NUMBER, DATE o BOOLEAN. NUMBER representa números enteros
+exactos entre -1000000000 y 1000000000; la UI lo rotula «Número entero».
+No se admiten decimales en 21. La elección evita redondear datos privados.
+
+Crear activa la definición, sin rellenar ninguna entidad. Renombrar sólo
+cambia su etiqueta actual. Desactivar oculta el campo en lectura/edición
+ordinarias, pero conserva definición y valores; reactivar recupera esos
+valores sin conversión. No hay DELETE ni cambio de tipo: la UI explica el
+límite antes de crear y permite gestionar/reactivar las definiciones ocultas.
+No se borran datos por restaurar. «Restaurar vista» prepara sólo visibleFields
+por defecto y requiere Guardar vista; no altera definiciones ni valores.
+«Vaciar» un valor es una decisión explícita sobre ese campo, guardada como
+null, no un reset global de datos.
+
+Valores opcionales: null significa sin valor; NUMBER usa un número JSON cuyo
+valor matemático sea entero exacto dentro del rango. Se admiten 1.0 y 1e3
+como 1 y 1000; se canoniza a entero, sin redondear fracciones ni convertir
+strings. BOOLEAN true/false, DATE string YYYY-MM-DD válida
+en calendario gregoriano 0001–9999 sin hora/zona, TEXT string de hasta 1000
+puntos de código conservando espacios/saltos. TEXT vacío se normaliza a null;
+no recortar texto no vacío. Cero y false nunca se convierten en ausencia.
+No coerción de strings a número/booleano ni de fecha a instante. Labels y
+textos rechazan U+0000 y surrogates UTF-16 aislados; pares válidos cuentan un
+punto. Todo se renderiza como texto seguro.
+
+### API de configuración propia
+
+Rutas bajo /api/v1/me/customization/{scope}, scope exacto PROJECT o TASK,
+sin query ni owner proporcionado por cliente. GET 200 devuelve exactamente
+{configured,visibleFields,customFields,updatedAt}. Cada customFields contiene
+exactamente {id,label,type,active}, incluyendo inactivos en el orden fijado.
+Sin fila: false, defaults, [], null; no inserta. Con fila: true y updatedAt
+UTC canónico con precisión máxima de microsegundos y años 0001–9999.
+
+ETag fuerte: "customization:PROJECT:unconfigured" (o TASK) sin fila;
+"customization:PROJECT:<uuid>:<version>" configurado. UUID minúsculo canónico,
+versión decimal canónica BIGINT no negativa, conforme al patrón de 20.
+GET body/ETag salen del mismo snapshot. No UUID/versión internos en JSON.
+
+Tres comandos, todos con If-Match de esa configuración:
+
+- PUT /api/v1/me/customization/{scope}, body cerrado {visibleFields},
+  reemplaza sólo presentación, devuelve 200 con configuración completa.
+- POST /api/v1/me/customization/{scope}/fields, body {label,type}, crea una
+  definición y devuelve 200 con configuración completa tras commit. Es un
+  comando sobre el agregado; no hay Location ni recibo/idempotency-key.
+- PUT /api/v1/me/customization/{scope}/fields/{fieldId}, body {label,active},
+  actualiza sólo esa definición y devuelve 200 con configuración completa.
+  FieldId inexistente o de otro ámbito/owner devuelve 404 sin revelar datos.
+
+Una revisión compartida por ámbito serializa presentación y definiciones.
+Primera escritura crea configuración versión 0; cada cambio real posterior
+incrementa una vez. Comparar revisión antes de detectar no-op. No-op vigente
+conserva body/tag/fecha y no consulta Clock. Revisión antigua da 412 incluso
+si los valores coinciden. Dos altas desde unconfigured sólo permiten un
+commit; el otro recibe 412. Alta con label ya usado o límite alcanzado da
+400 VALIDATION_ERROR del campo label o customFields, código INVALID_VALUE,
+comprobado bajo el mismo bloqueo después de la revisión vigente.
+
+### Valores por proyecto o tarea
+
+GET/PUT /api/v1/projects/{projectId}/custom-fields y
+/api/v1/projects/{projectId}/tasks/{taskId}/custom-fields. Autorización real
+por joins propios: tarea debe pertenecer a ese proyecto; ajeno/inexistente
+es 404. Se permite editar metadatos también en proyectos y tareas terminados;
+no reabre ni cambia su revisión, estado o updatedAt de negocio.
+
+GET 200 devuelve exactamente {configured,values,updatedAt}. values contiene
+una entrada por definición activa, en orden de definición, exactamente
+{fieldId,label,type,value}; ausente en almacenamiento se representa null.
+No devuelve valores de definiciones inactivas. La ausencia de fila propia
+produce configured:false/updatedAt:null sin insertar; la lista puede contener
+campos activos todos null. La lista vacía no significa que no haya valores
+preservados de campos desactivados.
+
+ETag fuerte de valores compuesto, con un único formato:
+"custom-values:<scope>:<entityId>:schema:<schemaRevision>:values:<valuesRevision>".
+Scope es PROJECT o TASK; entityId es projectId o taskId respectivamente.
+Cada revisión es el literal unconfigured o <uuid>:<version>, con UUID y
+versión canónicos como configuración. Por ejemplo, sin ninguna fila:
+"custom-values:PROJECT:11111111-1111-1111-1111-111111111111:schema:unconfigured:values:unconfigured".
+La revisión schema cambia al renombrar/desactivar/crear/reactivar, por lo que
+una representación con etiquetas o campos distintos nunca conserva el mismo
+ETag. GET lee propiedad, configuración y valores en una sola transacción
+REPEATABLE READ/readOnly; DTO y ETag compuesto salen del mismo snapshot, sin
+Clock ni lecturas por cada definición. No hay otra cabecera de revisión.
+
+PUT exige sólo If-Match con ese ETag compuesto;
+body cerrado {values}, cada entrada exactamente {fieldId,value}. Debe
+contener todos y sólo los IDs activos, una vez cada uno; orden de entrada
+irrelevante. Se valida el valor según su tipo guardado. Omisión no borra un
+campo ni se interpreta como null. Valores inactivos se conservan sin tocar.
+Respuesta 200 tiene la forma y ETag compuesto de GET tras commit. Primera
+escritura, no-op, revisión y límites siguen las reglas anteriores; comparar
+valores canónicos, no orden del array. Guardar todos null puede crear una
+fila configurada; no simula ausencia histórica.
+
+Bloqueo transaccional en orden fijo: configuración propia del ámbito y luego
+valores de la entidad. Calcular y comparar el ETag compuesto vigente antes
+de validar el conjunto activo y los tipos contra esa configuración. Si otra pestaña renombra,
+crea/desactiva/reactiva un campo entre GET y PUT, devuelve 412 y no escribe
+ningún valor. Renombrar/desactivar no cambia las revisiones de cada entidad;
+el componente schema del ETag protege esa concurrencia sin actualizar todas
+las filas. Dos cambios reales competitivos con la misma revisión tienen un
+único ganador; un no-op vigente no consume revisión ni convierte otro no-op
+vigente en conflicto.
+
+### Seguridad, persistencia y errores
+
+Se reutilizan autenticación, CSRF/origen en escrituras, negociación HTTP,
+JSON estricto, problem+json, no-store y precisión temporal de 20. Toda lectura
+restringe owner; no eventos/outbox nuevos: son configuración y metadatos
+privados sin consumidor, no hechos de trabajo. PG y broker anteriores,
+historial, métricas, recibos y datos 1–20 no cambian por esta feature.
+Migración aditiva posterior a V19; dominio puro, puertos/casos de uso y
+adaptadores conforme a la arquitectura vigente. No motor genérico de schemas.
+
+Orden: seguridad; query/ruta; cabeceras requeridas; sintaxis JSON/shape/campos
+independientes del estado; propiedad del recurso/definición; revisión; reglas
+que necesitan configuración vigente; escritura. GET no exige CSRF. Cualquier
+query se rechaza 400 query INVALID_VALUE. Scope inválido: 400 scope
+INVALID_VALUE; UUID de ruta inválido: 400 INVALID_FORMAT. Falta de cabecera
+exigida: 428 PRECONDITION_REQUIRED; tag débil/repetido/lista/no canónico o de
+familia/ámbito distinto: 400 de esa cabecera. Tag válido pero no vigente:
+412 CUSTOMIZATION_CONFLICT (configuración o valores), sin estado ajeno.
+
+JSON malformado/duplicado/concatenado: MALFORMED_JSON. Objeto/campos cerrados;
+extras UNKNOWN_FIELD; ausentes/null donde sean obligatorios REQUIRED; tipo
+incorrecto INVALID_TYPE; enum/rango/duplicado/fecha/formato inválido
+INVALID_VALUE. Se recorre primero raíz, extras léxicos y luego orden de
+campos declarado en cada body; arrays por índice. null es válido sólo para
+valor, no para arrays, definición o flags. Errores de entrada independientes
+del estado no se posponen para devolver 412. Un valor de tipo desconocido
+se valida sólo después de propiedad y revisiones, no por datos del cliente.
+
+Fallo de almacenamiento, fila seleccionada corrupta, versión máxima del recurso
+que debe cambiar o Clock fallido/fuera del rango: 503 STORAGE_UNAVAILABLE, sin parcial.
+updatedAt de cambio real usa max(previo,Clock truncado a microsegundos);
+el no-op no usa Clock. Confirmación sólo después del commit. Defaults sólo
+por ausencia confirmada, nunca por fallo/corrupción. Configuración, definición
+y valores confirmados sobreviven a reinicio y sesión nueva. No se borra
+ninguna fila de valores al desactivar/restaurar presentación.
+
+### Interfaz y recuperación
+
+Gestión contextual «Personalizar vista» en Proyectos y en listas Tareas/
+Subtareas, con ámbito explicado. Controles nativos de mostrar/ocultar y
+Subir/Bajar sin arrastre obligatorio; Guardar vista/Cancelar/Restaurar vista.
+Gestión de campos separada del formulario de presentación, desde esos mismos
+contextos: etiqueta, tipo al crear, y renombrar/desactivar/reactivar después.
+Sin crear rutas globales nuevas ni añadir una GET a todas las pantallas.
+
+En detalles, sección «Campos personales» separada de hechos y acciones de
+negocio. Texto/entero/fecha nativos; booleano permite «Sin valor», «Sí», «No».
+Editar no escribe; Guardar campos confirma el conjunto, Cancelar vuelve al
+snapshot. Desactivar explica que oculta y conserva; reactivar recupera datos.
+La personalización no remonta ni borra formularios de creación de tareas,
+sesiones u otros borradores ajenos. Nombre/estado/acciones siguen presentes
+en todas las configuraciones, incluso sin metadatos opcionales.
+
+Carga fallida no bloquea el resto de negocio. Listas usan provisionalmente
+presentación base, claramente no confirmada, con Reintentar; detalles no
+muestran campos vacíos como si fueran una consulta válida. No valores
+privados en localStorage/URLs ni etiquetas en telemetría. Estado compartido
+sólo entre consumidores de ese scope/recurso y sesión autenticada; no polling.
+Logout/cambio de cuenta o 401/404 de contexto retira datos/errores/borradores
+propios. Invalidar lecturas al comenzar y confirmar escrituras; aborto y
+chequeo de identidad tras cada await y antes del observador401. Respuestas
+viejas de proyecto/tarea/configuración no restauran un recurso retirado.
+
+400 de campo conserva borrador para corregir; 412/red/503/confirmación
+incompatible impiden otra escritura de ese recurso hasta «Recargar guardado»
+manual. Se explica que reemplaza borrador, no que confirma la misma intención.
+El bloqueo de resultado incierto sobrevive a navegación interna mientras la
+sesión siga, también para crear definición; volver no reenvía POST/PUT ni
+consulta automáticamente para liberar ese bloqueo. GET válido reemplaza
+snapshot/ETag y habilita una decisión manual nueva; no reenviar el alta
+sólo porque apareció otra definición de nombre igual. La etiqueta única y la
+revisión impiden una segunda alta inadvertida, sin afirmar recibo idempotente.
+
+Decoder valida objetos cerrados, límites, tipos, IDs únicos y ETag coherente,
+configured/fecha y valores contra tipos recibidos; conserva el orden recibido
+sin deducir una cronología desde UUID sin timestamps. Defaults sólo en ausencia
+coherente. Confirmaciones de escritura deben corresponder a scope/recurso e
+intención normalizada, incluyendo UUID nuevo en alta y conservación del resto
+confirmado; una respuesta incompatible sigue siendo incierta.
+
+Reutilizar tokens de Apariencia20 y docs/ux-requirements.md, con controles
+agrupados por decisión. Foco y anuncios de carga antes de 400 ms, errores asociados, retorno sólo si el iniciador desaparece y el
+usuario no movió foco, teclado/44px/reflow320/texto y zoom200, ambos temas,
+forced-colors y movimiento reducido. La evidencia nueva cubrirá nominal,
+restauración sin pérdida, tipos/null, conflicto y privacidad; las 30 filas UX
+se revisan con límites. No se atribuye esa evidencia antes de implementar.

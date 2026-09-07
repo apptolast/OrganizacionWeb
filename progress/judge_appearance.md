@@ -1,6 +1,6 @@
 # Dictamen de Apariencia
 
-APPROVED: código, pruebas, mutación y gates integrados aprobados para el producto ed00ad4, con refuerzos y fixtures en 1f36315. CI de aplicación34154520811 SUCCESS sobre1f36315 e infraestructura34154628641 SUCCESS, confirmadas por root. La función sigue in_progress hasta cerrar despliegue y aceptación. Este dictamen no declara el proyecto completo terminado.
+APPROVED: código, pruebas, mutación y gates integrados aprobados para el producto ed00ad4, con refuerzos y fixtures en 1f36315. CI de aplicación34154520811 SUCCESS sobre1f36315 e infraestructura34154628641 SUCCESS, confirmadas por root. La función está done tras el despliegue y la aceptación registrados en el cierre de entrega. Este dictamen no declara el proyecto completo terminado.
 
 ## Comportamiento revisado
 
@@ -16,11 +16,11 @@ Preferencias propias durables mediante GET/PUT autenticado, ETag e If-Match. Def
 - Persistencia real: respuesta perdida después del commit, reinicio de API y otro contexto recuperan el mismo recurso/revisión; hechos e historia permanecen. Prueba independiente de los mocks UI.
 - UX: tres motores, matrices de geometría/texto ampliado/medios, teclado y feedback; zoom nativo Chromium2 a320CSS. Matriz de treinta principios revisada con límites de emulación, sin certificación de dispositivos físicos ni estudio humano. Avisos originales de axe en colores forzados preservados; análisis limitado y revisión visual separados.
 
-## Integración aprobada; despliegue y aceptación pendientes
+## Integración aprobada
 
 La CI inicial34152171279 pasó141/143 recorridos y detectó dos fixtures: fullPage incompatible con Linux y listado de peticiones de History anterior a la consulta de Appearance. Se corrigieron sin suprimir oráculos funcionales: captura CDP conservada y exactamente dos GET esperados; focales verdes. La CI34154520811 sobre1f36315 terminó SUCCESS, cerrando el gate integrado y la limitación pendiente de la repetición Linux. No se borra ni reclasifica la CI fallida original.
 
-Infraestructura8aec158 cambia sólo release/API/web; baseline,15 pruebas focales y lint locales verdes, CI34154628641 SUCCESS. Copia fresca PostgreSQL restaurada y compatibilidad API20→API4d946→API20 sobre V19 demostradas localmente. Imágenes candidatas por digest con producto idéntico a los commits posteriores de pruebas/documentación. Root ejecuta el check oficial y coordina apply/aceptación HTTPS; sus resultados siguen pendientes de confirmación en este dictamen. Las CI y pruebas locales no acreditan por sí solas la aceptación de la versión20 desplegada.
+Infraestructura8aec158 cambia sólo release/API/web; baseline,15 pruebas focales y lint locales verdes, CI34154628641 SUCCESS. Copia fresca PostgreSQL restaurada y compatibilidad API20→API4d946→API20 sobre V19 demostradas localmente. Imágenes candidatas por digest con producto idéntico a los commits posteriores de pruebas/documentación. Root completó el check oficial, el apply y la aceptación HTTPS; los resultados se registran debajo. Las CI y pruebas locales no acreditan por sí solas la aceptación de la versión20 desplegada.
 
 
 ## Cierre de entrega: APPROVED, 7 de septiembre 21:41

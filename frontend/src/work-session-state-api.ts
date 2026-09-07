@@ -165,7 +165,7 @@ export async function changeWorkSession(
   return value;
 }
 
-function isChange(value: unknown): value is WorkSessionChange {
+export function isChange(value: unknown): value is WorkSessionChange {
   return (
     ((exact(value, "id sessionId action occurredAt before after closure") &&
       value.action === "CLOSE" &&

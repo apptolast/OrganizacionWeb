@@ -1,0 +1,22 @@
+[
+  {
+    "path": "frontend/src/history-api.ts",
+    "sha256": "768EFA248169C13F2FA07E1BA752A1990D060DF65601F4F500ADCB3FA173DAE0"
+  },
+  {
+    "path": "frontend/src/history-api.test.ts",
+    "sha256": "7485C2FEC8842A807298672CAC18E8636AAE989134A13657BDD894AA718A5DBF"
+  },
+  {
+    "path": "frontend/src/task-status-api.ts",
+    "sha256": "4A388755E135974CCDF85B3DEB59D5060088F0365A59BE31DB6D376563899CEA"
+  },
+  {
+    "path": "frontend/src/reschedule-api.ts",
+    "sha256": "CD71FDF6304A44528835C3CD5591DF6D1728C83FEB997F49AD7EAF8C4CB7CC09"
+  },
+  {
+    "path": "frontend/src/work-session-state-api.ts",
+    "sha256": "2F98191AB9C715600891026D0711E896CBD622930F4755C3010C0F5FD21C0A15"
+  }
+]

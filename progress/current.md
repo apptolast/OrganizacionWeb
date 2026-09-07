@@ -95,3 +95,9 @@ PR16 todavía draft; CI34099273259 sobre f9948dc activa al registrar. Root publi
 COMMON cambió a codex/work-history desde fc36b735719f747e57fe6dc1e6a45dc680171045. PR16 conserva codex/end-time-notification congelada; CI final34100084803 activa sobre fc36b73. No proceso local root activo.17 done técnico local; no merge/CI verde todavía.18 pending, sólo propuesta previa a contrato/Gherkin: C redacta proposal_history.md; A diseña consulta/índices/cursores reutilizables; B diseña vista y estados UX. No producción/tests18 hasta revisión y contrato.
 
 Decisión preliminar de root: hechos durables de sesiones, finalizaciones/reaperturas y replanificación; no outbox ni escrituras de consulta. Keyset no se presenta como snapshot transaccional entre requests: commits tardíos con instante antiguo requieren garantía explícita, sin nueva tabla global o transacción persistente sólo para simular congelación. No19–30 dentro de18.
+
+## Implementación18 autorizada, 10:44
+
+Normativa6384934 y contrato5546278 aprobados por root/B. SHA Gherkin768AA48A5A0495BDC5AA292395F1DC42DADD0BD7702987F50D2FAD4664B72C13:39escenarios/142ejemplos, sin equipararlos a tests.18 pasa in_progress bajo autorización global del usuario, sin nueva pregunta. A posee dominio/caso de uso/PG/wiring; B cliente/página/rutas/SCSS; C HTTP/cursor/E2E/integración en worktree aislado después del contrato. Primeros paquetes nominales revisables antes de campañas globales.
+
+17PR16 fusionada56b91bee09d332eda27a016eea34d20f639992ab el2026-09-07T08:40:55Z, CI34100084803 SUCCESS sobre fc36b73 y watch59029 EXIT0 aa1672. Árbol17fc36b73 y squashmain iguales a899cffbf004c085ad65999c99739e2e69c442e3 (8c06e4). Reconciliación46dc342 preserva árbol de rama18 efe7f6449990d6634d51c932d534b72ee50e823e idéntico antes/después0f93f4. CI posterior main34101887939 ACTIVA, rootwatch12926, log end_time_main_ci_watch.log. No proceso local de test/mutación activo.

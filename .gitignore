@@ -58,3 +58,4 @@ reports/
 /progress/pause_resume_backend_checkpoint_xml/
 /progress/pause_resume_backend_final_xml/
 /progress/pause_resume_global_init_xml/
+/progress/pause_resume_frontend_mutation_raw.json

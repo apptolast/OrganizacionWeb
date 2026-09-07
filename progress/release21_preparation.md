@@ -30,3 +30,23 @@ los hechos del usuario. Confirmar salud, convergencia y rutas existentes.
 Pendientes antes de seleccionar candidato: frontend final, mutación,
 regresión integrada, matriz UX y CI sobre el corte exacto. La comprobación
 de salud anterior no sustituye ninguna de esas puertas.
+
+## Copia previa a la versión 21 verificada
+
+Copia nueva bajo host_global_operation_lock.py, operación organizationweb-backup:
+/var/backups/organizationweb/organization-20260907T233220Z-ab236d773885441f93c15ab05f3fe2ad.dump.
+51.428 bytes, modo0600, SHA256
+883d8dc1750f5ad2f17a1b364fcf1eff1d7ddd6a65b5b3bf9a67da7bfe49f798.
+Transferencia en memoria con hash idéntico y restauración a PostgreSQL vacío
+sin red, usuario70 y capacidades retiradas: EXIT0. Resultado:19 migraciones
+(última19), un proyecto, una tarea, una sesión, nueve eventos y una preferencia
+de apariencia; aún sin tablas21. Se retiraron contenedor/volumen propios y
+se borró el buffer. Evidencia externa organizationweb-customization-backup-restore.json.
+No acredita copia externa, RabbitMQ ni escrituras posteriores al snapshot.
+
+Script operativo organizationweb-v20-rollback.mjs revisado por root (392fe2),
+SHA7169BBE33A63AB1E040A26677EA7799CDF72D99C808F8E85113E01447AC1AB48.
+Preparado para candidato digest/revisión exactos y API20 viva. Ensayo todavía
+no ejecutado: comprobará API21/API20/API21 con ambos ámbitos, valores tipados,
+definiciones inactivas, DTO/ETag y esquema/Flyway preservados. Recursos locales
+propios, puertos efímeros de loopback, sin reparación ni borrado de migraciones.

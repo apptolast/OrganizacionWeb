@@ -1,0 +1,38 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/HistoryCursor.java",
+    "sha256": "F586554505FBFA598EF744CEECF7879A9967646E6923E3CD012B80979F9A54E3"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/HistoryEntry.java",
+    "sha256": "51D8EDD7D60635DC9F82BBE5F4EBA7F0AD841D7C6E2C82228D30E8FB2F04B6A7"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/HistoryFilters.java",
+    "sha256": "40B57D5B5238902241E31C9E0105871748CD2265463100016B2DE773AC4455DA"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/HistoryPage.java",
+    "sha256": "7DC7B48DC8AC3FFD7CC8735D1CBCDE4A296423B8FAFE0C4A47B2E8DAEEB867E0"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/HistoryPosition.java",
+    "sha256": "950C9B1BF3273D3B1DF7596F569D48F6B0108665B3D4F0F232F267A22C8666AC"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/HistoryQueries.java",
+    "sha256": "C5DE3DAB670C6D3A1DF12678C1875306B61FE9B42B41C4DFA92522633F432780"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ReadHistory.java",
+    "sha256": "6AE8FCE7620C54C1A47BAD15531297524965EE6C1C71D117AEC09A44792373E9"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ReadHistoryUseCase.java",
+    "sha256": "54579CE9B5392742FA23EE4BF75E011CA4B135A7A65BA5D9CC9AE2E437A0FBFD"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/ReadHistoryTest.java",
+    "sha256": "405F5F28C69759595F6F1077EC347B7A93CB7C459B5AFC64276996D5BE65C8E3"
+  }
+]

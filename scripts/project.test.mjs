@@ -1264,7 +1264,10 @@ test("default Stryker retains history modules and full new integration nodes", (
     "src/workspace.tsx:55:10-60:22",
     "src/project-reader.tsx:111:10-116:22",
   ])
-    assert.ok(config.mutate.includes(entry), entry);
+    assert.ok(
+      config.mutate.includes(entry) || config.mutate.includes(entry.split(":")[0]),
+      entry,
+    );
   assert.ok(config.mutate.includes("src/task-reader.tsx"));
   assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
   assert.equal(config.thresholds.break, 80);
@@ -1447,9 +1450,9 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     "src/appearance-api.ts",
     "src/appearance-state.tsx",
     "src/appearance.tsx",
-    "src/App.tsx:19:8-19:44",
-    "src/App.tsx:27:8-39:26",
-    "src/App.tsx:42:7-74:7",
+    "src/App.tsx:21:8-21:44",
+    "src/App.tsx:29:8-41:26",
+    "src/App.tsx:44:7-85:7",
     "src/workspace.tsx:74:10-79:22",
     "src/session-gate.tsx:32:2-51:6",
     "src/use-session.ts:177:0-195:1",

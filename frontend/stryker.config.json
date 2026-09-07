@@ -42,12 +42,9 @@
     "src/today.tsx",
     "src/workspace.tsx:27:0-54:22",
     "src/workspace.tsx:85:0-85:64",
-    "src/project-reader.tsx:61:0-61:70",
-    "src/project-reader.tsx:157:0-157:76",
     "src/history-api.ts",
     "src/history.tsx",
     "src/workspace.tsx:55:10-60:22",
-    "src/project-reader.tsx:111:10-116:22",
     "src/weekly-review-api.ts",
     "src/weekly-review.tsx",
     "src/workspace.tsx:67:10-72:22",
@@ -56,11 +53,8 @@
     "src/customization-state.ts",
     "src/customization.tsx",
     "src/custom-fields.tsx",
-    "src/project-reader.tsx:156:10-158:12",
-    "src/project-reader.tsx:198:22-213:25",
-    "src/project-reader.tsx:239:6-245:8",
-    "src/project-reader.tsx:247:8-253:10",
-    "src/App.tsx"
+    "src/App.tsx",
+    "src/project-reader.tsx"
   ],
   "reporters": ["clear-text", "json", "html"],
   "thresholds": {

@@ -146,6 +146,10 @@ No hay campaña ni score 21. Alcance Stryker de montaje todavía pendiente.
    Corregido en `f46200c`: único cambio funcional target("19"), con todas
    las aserciones anteriores conservadas. Hash y XML de veinte pruebas
    verdes verificados por root (`0dd56d`). Nueva CI `34163594795` en curso.
+   Esa CI terminó SUCCESS sobre `f46200c`: init, build, DNS Docker,
+   143 E2E y publicador verdes. Log externo conservado, SHA256
+   `1F2CB731383E27189117F9079B9F9F30E021AE6F57E1D1420B5CA62E35D96E64`.
+   No se atribuye el resultado a los commits posteriores de valores.
 
 ## Puertas pendientes
 

@@ -409,3 +409,19 @@ pruebas HTTP/PG reales en archivo nuevo; B continúa formularios/estado.
 CI 34163594795 sobre `f46200c` superó init, build, DNS Docker y E2E; publicador
 en curso a las 21:56 UTC. Esa CI no incluye los commits locales posteriores.
 Producción conserva `ed00ad4` y funciones 1–20; funciones 22–30 pendientes.
+
+Nota para aceptación productiva 21: no consumir slots de definiciones
+personales de prueba en la cuenta real. El contrato cuenta también los
+inactivos y no ofrece borrado. Altas, tipos, límites y recuperación se
+verificarán exhaustivamente en la base aislada. En producción, usar lecturas
+y guardados de defaults/conjunto vacío cuando correspondan, con baseline
+fresco; no borrar filas a mano para deshacer pruebas ni presumir que los
+datos del usuario siguen iguales al snapshot de Apariencia20.
+
+CI correctiva `34163594795` sobre `f46200c` terminó SUCCESS: init, build,
+DNS Docker, 143 E2E y publicador completados. Log externo
+organizationweb-customization-ci-34163594795.log, SHA256
+1F2CB731383E27189117F9079B9F9F30E021AE6F57E1D1420B5CA62E35D96E64.
+Se puede subir el siguiente checkpoint sin cancelar esa evidencia.
+Soporte de mutación integrado `d48e773`; backend recibió COPYDONE.
+El foco `a5df48` anterior confirmó HTTP134 y wiring tras integrar PUT.

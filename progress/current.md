@@ -157,3 +157,11 @@ Primer intento root de build usó un subcomando no soportado del motor (EXIT2, e
 Fix de foco342f51b y CSS/primerUX372adba integrados. C continúa UX desde su equivalente1e751d8, sin tocar fuentes durante campañas. A inició PIT68186 tras375hashes idénticos9e41dd;12patrones completos y configuración revisada714c12. B inició Stryker56475 tras refrescar metadata para History539B…D8500 y capturar136inputs;741mutantes instrumentados, dry-run verde. Ningún score final se atribuye todavía.
 
 Root inició publisher99577, log history_publisher_verified.log, con stack/puerto efímeros propios. No usa18080 de C ni8080 del usuario. Es la regresión heredada exigida por CI, no un nuevo evento de Historial. No hay otros procesos root activos. El E2E global final espera el último paquete UX de C y la estabilidad del corte.
+
+## Campañas originales terminadas; cierre dirigido
+
+PIT18 terminó EXIT0 f7a179:284 mutantes,263 KILLED,19 SURVIVED y2 NO_COVERAGE; cero errores/timeouts. Root contó XML original793979 y revisó residuos ad1db1. Stryker18 terminó EXIT0 c132ca:741=621Killed+110Survived+7NoCoverage+3RuntimeError. Score oficial621/738=84,1463%; estricto con todos los estados621/741=83,8057%. History.tsx78,33% individual se conserva explícito. Ningún replay se suma a esos originales.
+
+Root autorizó refuerzos test-only acotados: B hasta12 oráculos de forma/DTO/rango/reintento/notas; A seis de página20, vínculoUUID, contexto conjunto, cierre running y dos salidas alcanzables sin cobertura. Ambos deben proponer replay dirigido antes de lanzarlo; no campaña completa repetida ni cambios productivos.
+
+Publisher99577 terminó EXIT0 66a983,13PASS. Log history_publisher_verified.log SHA5AE112227DB7524F6834A71A8D85BCE7566271FB4F53526DD19BBE62B2D57E0A. C completa geometría/axe WebKit mediante clic declarando que el port Windows no acreditó teclado de enlaces; teclado Chromium/Firefox y zoom nativo tienen evidencia separada. No se fabrica un resultado universal. E2E global final aún pendiente; root sin proceso activo.

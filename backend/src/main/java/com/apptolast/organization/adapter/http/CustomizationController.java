@@ -22,6 +22,7 @@ public final class CustomizationController {
   private final CreateCustomFieldUseCase create;
   private final UpdateCustomFieldUseCase update;
   private final ReadCustomFieldValuesUseCase readValues;
+  private final SaveCustomFieldValuesUseCase saveValues;
   private final ObjectMapper json;
 
   public CustomizationController(
@@ -30,12 +31,14 @@ public final class CustomizationController {
       CreateCustomFieldUseCase create,
       UpdateCustomFieldUseCase update,
       ReadCustomFieldValuesUseCase readValues,
+      SaveCustomFieldValuesUseCase saveValues,
       ObjectMapper json) {
     this.read = read;
     this.save = save;
     this.create = create;
     this.update = update;
     this.readValues = readValues;
+    this.saveValues = saveValues;
     this.json = json;
   }
 
@@ -76,10 +79,132 @@ public final class CustomizationController {
     return valuesResponse(readValues.get(principal.getName(), CustomizationScope.PROJECT, id, id));
   }
 
+  @PutMapping(value = "/api/v1/projects/{projectId}/custom-fields", consumes = "application/json")
+  public ResponseEntity<ValuesResponse> putProjectValues(
+      Principal principal,
+      @PathVariable String projectId,
+      @RequestBody(required = false) String raw,
+      @RequestHeader HttpHeaders headers,
+      @RequestParam MultiValueMap<String, String> parameters,
+      HttpServletRequest request)
+      throws JsonProcessingException {
+    acceptable(request);
+    query(parameters);
+    var id = uuid(projectId, "projectId");
+    var expected = valuesPrecondition(headers, CustomizationScope.PROJECT, id);
+    var body = body(raw, Set.of("values"));
+    return valuesResponse(
+        saveValues.save(
+            principal.getName(), CustomizationScope.PROJECT, id, id, expected, inputs(body)));
+  }
+
+  private static CustomFieldValuesRevision valuesPrecondition(
+      HttpHeaders headers, CustomizationScope scope, UUID entityId) {
+    var matches = headers.get("If-Match");
+    if (matches == null) throw new MissingPrecondition();
+    if (matches.size() != 1) throw invalid("If-Match", "INVALID_VALUE");
+    var part =
+        "(unconfigured|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(?:0|[1-9][0-9]*))";
+    var matcher =
+        java.util.regex.Pattern.compile(
+                "\"custom-values:"
+                    + scope
+                    + ":"
+                    + entityId
+                    + ":schema:"
+                    + part
+                    + ":values:"
+                    + part
+                    + "\"")
+            .matcher(matches.getFirst());
+    if (!matcher.matches()) throw invalid("If-Match", "INVALID_VALUE");
+    return new CustomFieldValuesRevision(
+        scope, entityId, parseRevision(matcher.group(1)), parseRevision(matcher.group(2)));
+  }
+
+  private static CustomizationRevision parseRevision(String value) {
+    if (value.equals("unconfigured")) return new CustomizationRevision(null, 0);
+    var parts = value.split(":");
+    try {
+      return new CustomizationRevision(UUID.fromString(parts[0]), Long.parseLong(parts[1]));
+    } catch (NumberFormatException error) {
+      throw invalid("If-Match", "INVALID_VALUE");
+    }
+  }
+
+  @PutMapping(
+      value = "/api/v1/projects/{projectId}/tasks/{taskId}/custom-fields",
+      consumes = "application/json")
+  public ResponseEntity<ValuesResponse> putTaskValues(
+      Principal principal,
+      @PathVariable String projectId,
+      @PathVariable String taskId,
+      @RequestBody(required = false) String raw,
+      @RequestHeader HttpHeaders headers,
+      @RequestParam MultiValueMap<String, String> parameters,
+      HttpServletRequest request)
+      throws JsonProcessingException {
+    acceptable(request);
+    query(parameters);
+    var project = uuid(projectId, "projectId");
+    var task = uuid(taskId, "taskId");
+    var expected = valuesPrecondition(headers, CustomizationScope.TASK, task);
+    return valuesResponse(
+        saveValues.save(
+            principal.getName(),
+            CustomizationScope.TASK,
+            project,
+            task,
+            expected,
+            inputs(body(raw, Set.of("values")))));
+  }
+
+  private static List<CustomFieldInput> inputs(JsonNode body) {
+    var array = body.get("values");
+    if (array == null || array.isNull()) throw invalid("values", "REQUIRED");
+    if (!array.isArray()) throw invalid("values", "INVALID_TYPE");
+    var inputs = new ArrayList<CustomFieldInput>();
+    var seen = new HashSet<UUID>();
+    for (int index = 0; index < array.size(); index++) {
+      var entry = array.get(index);
+      var path = "values[" + index + "]";
+      if (entry.isNull()) throw invalid(path, "REQUIRED");
+      if (!entry.isObject()) throw invalid(path, "INVALID_TYPE");
+      var extras = new TreeSet<String>();
+      entry
+          .fieldNames()
+          .forEachRemaining(
+              field -> {
+                if (!Set.of("fieldId", "value").contains(field)) extras.add(field);
+              });
+      if (!extras.isEmpty()) throw invalid(path + "." + extras.first(), "UNKNOWN_FIELD");
+      var field = entry.get("fieldId");
+      if (field == null || field.isNull()) throw invalid(path + ".fieldId", "REQUIRED");
+      if (!field.isTextual()) throw invalid(path + ".fieldId", "INVALID_TYPE");
+      var fieldId = uuid(field.textValue(), path + ".fieldId", "INVALID_VALUE");
+      if (!seen.add(fieldId)) throw invalid(path + ".fieldId", "INVALID_VALUE");
+      if (!entry.has("value")) throw invalid(path + ".value", "REQUIRED");
+      var value = entry.get("value");
+      if (value.isContainerNode()) throw invalid(path + ".value", "INVALID_TYPE");
+      Object raw =
+          value.isNull()
+              ? null
+              : value.isNumber()
+                  ? value.decimalValue()
+                  : value.isBoolean() ? value.booleanValue() : value.textValue();
+      inputs.add(new CustomFieldInput(fieldId, raw));
+    }
+    return inputs;
+  }
+
   private static UUID uuid(String value, String field) {
+    return uuid(value, field, "INVALID_FORMAT");
+  }
+
+  private static UUID uuid(String value, String field, String code) {
     if (!value.matches(
         "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"))
-      throw invalid(field, "INVALID_FORMAT");
+      throw invalid(field, code);
     return UUID.fromString(value);
   }
 
@@ -177,7 +302,11 @@ public final class CustomizationController {
   private JsonNode body(String raw, Set<String> allowed) throws JsonProcessingException {
     if (raw == null || raw.isBlank()) throw new MalformedBody();
     var body =
-        json.reader().with(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY).readTree(raw);
+        json.reader()
+            .with(
+                DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY,
+                DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+            .readTree(raw);
     if (!body.isObject()) throw invalid("body", "INVALID_TYPE");
     var extras = new TreeSet<String>();
     body.fieldNames()

@@ -199,3 +199,28 @@ Tras commit 0747869, se usa ReadCustomFieldValuesUseCase del bundle b72e6ad. Las
 El DTO público contiene exactamente configured, values y updatedAt. Los IDs/revisiones internos de esquema y fila sólo componen un ETag fuerte; las entradas públicas mantienen fieldId, label, type y value. La lista se proyecta en el orden del puerto, sin consultas por campo ni Clock. Estos slices verifican delegación owner/contexto y traducción de errores; no acreditan joins, filtrado de inactivos, integridad ni snapshot PostgreSQL. PUT valores permanece pendiente del puerto real.
 
 Freeze: formato focal de los dos Java y regresión de CustomizationApiTest, 83/83 sin fallos, errores ni skips; EXIT0 43a02a. Log customization_values_get_final.log y XML backend/build/test-results/test/TEST-com.apptolast.organization.adapter.CustomizationApiTest.xml. Manifest customization_values_get_freeze.json. No suite global, E2E, SQL, mutación ni cambios en modelos/configuración.
+
+### PUT de valores con puertos reales y precondición compuesta
+
+Root autorizó cherry-pick del bundle mínimo 1522d39, incorporado como 0da5a95: UseCase, Revision, Input y prueba pura, sin PG ni wiring. El controlador añade SaveCustomFieldValuesUseCase real. La precisión documental de duplicados b3436fc se incorporó como a27ac73 durante una ventana sin Gradle.
+
+Ambos PUT reutilizan Accept antes de query/ruta, validación UUID, cuerpo cerrado y respuesta GET. If-Match se liga a familia, scope y entityId; cada componente acepta unconfigured o UUID canónico con long canónico. Se comprueba antes del body. Los números se leen con USE_BIG_DECIMAL_FOR_FLOATS en el reader local21 y se entregan como BigDecimal, incluidos enteros y exponentes. No se convierte a double/int ni se valida según un tipo supuesto. No cambia el ObjectMapper transversal. La normalización y el conjunto activo se delegan al puerto tras propiedad/revisión.
+
+| Ciclo individual | Evidencia | Log en progress |
+| --- | --- | --- |
+| Primera escritura PROJECT, [] y confirmación de fila nueva | RED 9e38ec EXIT1; GREEN 984e05 EXIT0 | customization_values_put_red.log / customization_values_put_green.log |
+| TASK con ambas revisiones long, entrada ordenada y decimal 1.0000000000000000000001 entregado intacto al dominio | RED 6ed8af EXIT1; GREEN 013c46 EXIT0 | customization_values_decimal_red.log / customization_values_decimal_green.log |
+| Familia/scope/entidad, weak/lista, UUID de tag y long no canónicos | 8/8 inicialmente GREEN 3ba675 EXIT0 | customization_values_tags_initial.log |
+| If-Match ausente/repetido antes del JSON | 2/2 inicialmente GREEN c2897a EXIT0 | customization_values_header_initial.log |
+| Shape raíz/entrada, extras léxicos y campos por índice | 12/12 inicialmente GREEN 7ae7f5 EXIT0 | customization_values_shape_initial.log |
+| null, false, texto con espacios y números 0/1.0/1e3/1e999 llegan al puerto sin inferir tipo | 7/7 inicialmente GREEN 29da0f EXIT0 | customization_values_primitives_initial.log |
+| Ambas rutas: auth, CSRF, origen, Content-Type, Accept y query antes de delegar | 12/12 inicialmente GREEN d7a5ce EXIT0 | customization_values_write_security_initial.log |
+| fieldId repetido, incluso mayúsculas equivalentes, antes de value ausente y puerto | RED 37b01b EXIT1; GREEN 79481f EXIT0 | customization_values_duplicate_red.log / customization_values_duplicate_green.log |
+| JSON malformado, duplicados raíz/anidados y tokens posteriores | 4/4 inicialmente GREEN 485dd0 EXIT0 | customization_values_json_initial.log |
+| 404/412/503 delegados sin representación privada ni GET previo | Error de import del fixture ffcb66 EXIT1, no RED funcional; corregido al paquete application real, 3/3 inicialmente GREEN 7c8175 EXIT0 | customization_values_write_errors_initial.log / customization_values_write_errors_green.log |
+
+El caso 1e999 acredita transporte exacto al puerto, no validez del NUMBER contractual: el mock devuelve una representación para aislar transporte; la validación de rango real pertenece a CustomFieldInput y al callback de A. El caso decimal casi entero hace que el puerto mock rechace values[0].value y verifica los argumentos exactos, no simula persistencia. HTTP detecta duplicados estructurales con Set auxiliar, pero conserva la lista y sus índices; el código es values[i].fieldId INVALID_VALUE. IDs inactivos/desconocidos, conjunto incompleto y tipos según schema permanecen en dominio. UUID malformado del body usa INVALID_VALUE, el de ruta INVALID_FORMAT.
+
+Refactor en GREEN: parser UUID compartido con código de error explícito. Los tres nombres previos s9 de lectura pasan a s10, como corresponde a @s10; los logs antiguos conservan sus nombres originales. Los conteos MVC no se interpretan como cobertura integral de los escenarios ni de PostgreSQL.
+
+Freeze HTTP final: formato focal y regresión CustomizationApiTest 134/134 sin fallos/errores/skips, EXIT0 1f3297, log customization_values_http_final.log. XML backend/build/test-results/test/TEST-com.apptolast.organization.adapter.CustomizationApiTest.xml. Manifest customization_values_http_freeze.json. Sin cambios en modelos, ApplicationConfiguration ni COMMON; pendiente bean Save real para integración, y gates integrados posteriores coordinados por root.

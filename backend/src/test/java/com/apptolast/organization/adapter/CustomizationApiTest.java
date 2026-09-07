@@ -26,6 +26,362 @@ import org.springframework.test.web.servlet.MockMvc;
     })
 @Import(SecurityConfiguration.class)
 class CustomizationApiTest {
+  @MockitoBean com.apptolast.organization.application.SaveCustomFieldValuesUseCase saveValues;
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "404,RESOURCE_NOT_FOUND",
+    "412,CUSTOMIZATION_CONFLICT",
+    "503,STORAGE_UNAVAILABLE"
+  })
+  void s17_valuesWriteReturnsOnlyTheDelegatedFailureWithoutExtraReads(int expected, String code)
+      throws Exception {
+    var id = java.util.UUID.fromString("abcdefab-1111-1111-1111-111111111111");
+    var revision = new com.apptolast.organization.domain.CustomizationRevision(null, 0);
+    var tag =
+        new com.apptolast.organization.domain.CustomFieldValuesRevision(
+            CustomizationScope.TASK, id, revision, revision);
+    RuntimeException failure =
+        switch (expected) {
+          case 404 -> new com.apptolast.organization.application.ResourceNotFoundException();
+          case 412 -> new com.apptolast.organization.application.CustomizationConflictException();
+          default ->
+              new com.apptolast.organization.application.StorageUnavailableException(
+                  new IllegalStateException("private data"));
+        };
+    when(saveValues.save("owner", CustomizationScope.TASK, id, id, tag, java.util.List.of()))
+        .thenThrow(failure);
+    mvc.perform(
+            put("/api/v1/projects/" + id + "/tasks/" + id + "/custom-fields")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header(
+                    "If-Match",
+                    "\"custom-values:TASK:" + id + ":schema:unconfigured:values:unconfigured\"")
+                .contentType("application/json")
+                .content("{\"values\":[]}"))
+        .andExpect(status().is(expected))
+        .andExpect(jsonPath("$.code").value(code))
+        .andExpect(jsonPath("$.values").doesNotExist())
+        .andExpect(header().doesNotExist("ETag"))
+        .andExpect(
+            content()
+                .string(
+                    org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("private data"))));
+    verify(saveValues).save("owner", CustomizationScope.TASK, id, id, tag, java.util.List.of());
+    verifyNoInteractions(readValues, read, save, create, update);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {
+        "{",
+        "{\"values\":[],\"values\":[]}",
+        "{\"values\":[]} {}",
+        "{\"values\":[{\"fieldId\":\"a\",\"fieldId\":\"b\",\"value\":null}]}"
+      })
+  void s25_valuesMalformedJsonIsRejectedBeforeDelegation(String body) throws Exception {
+    var id = "abcdefab-1111-1111-1111-111111111111";
+    mvc.perform(
+            put("/api/v1/projects/" + id + "/custom-fields")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header(
+                    "If-Match",
+                    "\"custom-values:PROJECT:" + id + ":schema:unconfigured:values:unconfigured\"")
+                .contentType("application/json")
+                .content(body))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("MALFORMED_JSON"));
+    verifyNoInteractions(saveValues, readValues, read, save, create, update);
+  }
+
+  @Test
+  void s25_duplicateFieldIdPrecedesMissingValueAndStaleRevision() throws Exception {
+    var id = "abcdefab-1111-1111-1111-111111111111";
+    mvc.perform(
+            put("/api/v1/projects/" + id + "/custom-fields")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header(
+                    "If-Match",
+                    "\"custom-values:PROJECT:" + id + ":schema:" + id + ":0:values:" + id + ":0\"")
+                .contentType("application/json")
+                .content(
+                    "{\"values\":[{\"fieldId\":\""
+                        + id
+                        + "\",\"value\":null},{\"fieldId\":\""
+                        + id.toUpperCase()
+                        + "\"}]}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].field").value("values[1].fieldId"))
+        .andExpect(jsonPath("$.errors[0].code").value("INVALID_VALUE"));
+    verifyNoInteractions(saveValues, readValues, read, save, create, update);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "PROJECT,anonymous,401", "TASK,anonymous,401",
+    "PROJECT,csrf,403", "TASK,csrf,403",
+    "PROJECT,origin,403", "TASK,origin,403",
+    "PROJECT,content,415", "TASK,content,415",
+    "PROJECT,accept,406", "TASK,accept,406",
+    "PROJECT,query,400", "TASK,query,400"
+  })
+  void s23_valuesWritesRejectSecurityAndNegotiationBeforeDelegation(
+      CustomizationScope scope, String mode, int expected) throws Exception {
+    var id = "abcdefab-1111-1111-1111-111111111111";
+    var request =
+        put("/api/v1/projects/"
+                + id
+                + (scope == CustomizationScope.TASK ? "/tasks/" + id : "")
+                + "/custom-fields")
+            .contentType(mode.equals("content") ? "text/plain" : "application/json")
+            .content("{");
+    if (!mode.equals("anonymous")) request.with(user("owner"));
+    if (!mode.equals("csrf")) request.with(csrf().asHeader());
+    if (mode.equals("origin")) request.header("Origin", "https://foreign.example");
+    if (mode.equals("accept")) request.accept("application/json;q=0, */*;q=1");
+    if (mode.equals("query")) request.queryParam("extra", "1");
+    mvc.perform(request).andExpect(status().is(expected)).andExpect(header().doesNotExist("ETag"));
+    verifyNoInteractions(saveValues, readValues, read, save, create, update);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"null", "false", "\"  texto  \"", "0", "1.0", "1e3", "1e999"})
+  void s11_valuesPrimitivesReachTheDomainWithoutTypeGuessing(String rawValue) throws Exception {
+    var id = java.util.UUID.fromString("abcdefab-1111-1111-1111-111111111111");
+    var revision = new com.apptolast.organization.domain.CustomizationRevision(null, 0);
+    var expected =
+        new com.apptolast.organization.domain.CustomFieldValuesRevision(
+            CustomizationScope.PROJECT, id, revision, revision);
+    when(saveValues.save(
+            eq("owner"), eq(CustomizationScope.PROJECT), eq(id), eq(id), eq(expected), anyList()))
+        .thenAnswer(
+            call -> {
+              java.util.List<com.apptolast.organization.domain.CustomFieldInput> inputs =
+                  call.getArgument(5);
+              org.junit.jupiter.api.Assertions.assertEquals(1, inputs.size());
+              org.junit.jupiter.api.Assertions.assertEquals(id, inputs.getFirst().fieldId());
+              var value = inputs.getFirst().value();
+              if (rawValue.equals("null")) org.junit.jupiter.api.Assertions.assertNull(value);
+              else if (rawValue.equals("false"))
+                org.junit.jupiter.api.Assertions.assertEquals(false, value);
+              else if (rawValue.startsWith("\""))
+                org.junit.jupiter.api.Assertions.assertEquals("  texto  ", value);
+              else {
+                var number =
+                    org.junit.jupiter.api.Assertions.assertInstanceOf(
+                        java.math.BigDecimal.class, value);
+                org.junit.jupiter.api.Assertions.assertEquals(
+                    0, number.compareTo(new java.math.BigDecimal(rawValue)));
+              }
+              return new com.apptolast.organization.domain.CustomFieldValues(
+                  id,
+                  CustomizationScope.PROJECT,
+                  revision,
+                  new com.apptolast.organization.domain.CustomizationRevision(id, 0),
+                  java.util.List.of(),
+                  java.time.Instant.parse("2026-09-07T12:00:00Z"));
+            });
+    mvc.perform(
+            put("/api/v1/projects/" + id + "/custom-fields")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header(
+                    "If-Match",
+                    "\"custom-values:PROJECT:" + id + ":schema:unconfigured:values:unconfigured\"")
+                .contentType("application/json")
+                .content("{\"values\":[{\"fieldId\":\"" + id + "\",\"value\":" + rawValue + "}]}"))
+        .andExpect(status().isOk());
+    verify(saveValues)
+        .save(eq("owner"), eq(CustomizationScope.PROJECT), eq(id), eq(id), eq(expected), anyList());
+    verifyNoInteractions(readValues, read, save, create, update);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource(
+      delimiter = '|',
+      textBlock =
+          """
+      {} | values | REQUIRED
+      {"values":null} | values | REQUIRED
+      {"values":false} | values | INVALID_TYPE
+      {"values":[null]} | values[0] | REQUIRED
+      {"values":[0]} | values[0] | INVALID_TYPE
+      {"values":[{"z":0,"a":0}]} | values[0].a | UNKNOWN_FIELD
+      {"values":[{}]} | values[0].fieldId | REQUIRED
+      {"values":[{"fieldId":false}]} | values[0].fieldId | INVALID_TYPE
+      {"values":[{"fieldId":"1-1-1-1-1"}]} | values[0].fieldId | INVALID_VALUE
+      {"values":[{"fieldId":"abcdefab-1111-1111-1111-111111111111"}]} | values[0].value | REQUIRED
+      {"values":[{"fieldId":"abcdefab-1111-1111-1111-111111111111","value":{}}]} | values[0].value | INVALID_TYPE
+      {"values":[{"fieldId":"abcdefab-1111-1111-1111-111111111111","value":null},{}]} | values[1].fieldId | REQUIRED
+      """)
+  void s25_valuesShapeUsesDeclaredFieldsAndInputIndicesBeforeDelegation(
+      String body, String field, String code) throws Exception {
+    var id = "abcdefab-1111-1111-1111-111111111111";
+    mvc.perform(
+            put("/api/v1/projects/" + id + "/custom-fields")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header(
+                    "If-Match",
+                    "\"custom-values:PROJECT:" + id + ":schema:" + id + ":0:values:" + id + ":0\"")
+                .contentType("application/json")
+                .content(body))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].field").value(field))
+        .andExpect(jsonPath("$.errors[0].code").value(code));
+    verifyNoInteractions(saveValues, readValues, read, save, create, update);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "false,428,PRECONDITION_REQUIRED",
+    "true,400,VALIDATION_ERROR"
+  })
+  void s24_valuesTagMustBePresentExactlyOnce(boolean repeated, int expected, String code)
+      throws Exception {
+    var id = "abcdefab-1111-1111-1111-111111111111";
+    var request =
+        put("/api/v1/projects/" + id + "/tasks/" + id + "/custom-fields")
+            .with(user("owner"))
+            .with(csrf().asHeader())
+            .contentType("application/json")
+            .content("{");
+    if (repeated)
+      request.header(
+          "If-Match",
+          "\"custom-values:TASK:" + id + ":schema:unconfigured:values:unconfigured\"",
+          "\"custom-values:TASK:" + id + ":schema:unconfigured:values:unconfigured\"");
+    mvc.perform(request).andExpect(status().is(expected)).andExpect(jsonPath("$.code").value(code));
+    verifyNoInteractions(saveValues, readValues, read, save, create, update);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {
+        "W/\"custom-values:PROJECT:{id}:schema:unconfigured:values:unconfigured\"",
+        "\"custom-values:TASK:{id}:schema:unconfigured:values:unconfigured\"",
+        "\"custom-values:PROJECT:abcdefab-2222-2222-2222-222222222222:schema:unconfigured:values:unconfigured\"",
+        "\"customization:PROJECT:unconfigured\"",
+        "\"custom-values:PROJECT:{id}:schema:{id}:01:values:unconfigured\"",
+        "\"custom-values:PROJECT:{id}:schema:unconfigured:values:{id}:9223372036854775808\"",
+        "\"custom-values:PROJECT:{id}:schema:ABCDEFAB-1111-1111-1111-111111111111:0:values:unconfigured\"",
+        "\"custom-values:PROJECT:{id}:schema:unconfigured:values:unconfigured\", *"
+      })
+  void s24_valuesTagRejectsNonCanonicalOrUnboundRevisionBeforeBody(String tag) throws Exception {
+    var id = "abcdefab-1111-1111-1111-111111111111";
+    mvc.perform(
+            put("/api/v1/projects/" + id + "/custom-fields")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("If-Match", tag.replace("{id}", id))
+                .contentType("application/json")
+                .content("{"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].field").value("If-Match"))
+        .andExpect(jsonPath("$.errors[0].code").value("INVALID_VALUE"));
+    verifyNoInteractions(saveValues, readValues, read, save, create, update);
+  }
+
+  @Test
+  void s11_taskWritePreservesExactDecimalAndInputOrderForDomainValidation() throws Exception {
+    var project = java.util.UUID.fromString("abcdefab-1111-1111-1111-111111111111");
+    var task = java.util.UUID.fromString("abcdefab-2222-2222-2222-222222222222");
+    var revision =
+        new com.apptolast.organization.domain.CustomizationRevision(project, Long.MAX_VALUE);
+    var expected =
+        new com.apptolast.organization.domain.CustomFieldValuesRevision(
+            CustomizationScope.TASK,
+            task,
+            revision,
+            new com.apptolast.organization.domain.CustomizationRevision(task, 9007199254740993L));
+    var inputs =
+        java.util.List.of(
+            new com.apptolast.organization.domain.CustomFieldInput(
+                task, new java.math.BigDecimal("1.0000000000000000000001")),
+            new com.apptolast.organization.domain.CustomFieldInput(project, null));
+    when(saveValues.save("owner", CustomizationScope.TASK, project, task, expected, inputs))
+        .thenThrow(
+            new com.apptolast.organization.domain.ValidationException(
+                java.util.List.of(
+                    new com.apptolast.organization.domain.FieldError(
+                        "values[0].value", "INVALID_VALUE", "Entero requerido."))));
+    mvc.perform(
+            put("/api/v1/projects/"
+                    + project.toString().toUpperCase()
+                    + "/tasks/"
+                    + task.toString().toUpperCase()
+                    + "/custom-fields")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header(
+                    "If-Match",
+                    "\"custom-values:TASK:"
+                        + task
+                        + ":schema:"
+                        + project
+                        + ":9223372036854775807:values:"
+                        + task
+                        + ":9007199254740993\"")
+                .contentType("application/json")
+                .content(
+                    "{\"values\":[{\"fieldId\":\""
+                        + task
+                        + "\",\"value\":1.0000000000000000000001},{\"fieldId\":\""
+                        + project
+                        + "\",\"value\":null}]}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].field").value("values[0].value"));
+    verify(saveValues).save("owner", CustomizationScope.TASK, project, task, expected, inputs);
+    verifyNoInteractions(readValues, read, save, create, update);
+  }
+
+  @Test
+  void s11_firstProjectValuesWriteUsesTheCompositeRevisionAndConfirmsAfterSave() throws Exception {
+    var id = java.util.UUID.fromString("abcdefab-1111-1111-1111-111111111111");
+    var revision = new com.apptolast.organization.domain.CustomizationRevision(null, 0);
+    var expected =
+        new com.apptolast.organization.domain.CustomFieldValuesRevision(
+            CustomizationScope.PROJECT, id, revision, revision);
+    when(saveValues.save(
+            "owner", CustomizationScope.PROJECT, id, id, expected, java.util.List.of()))
+        .thenReturn(
+            new com.apptolast.organization.domain.CustomFieldValues(
+                id,
+                CustomizationScope.PROJECT,
+                revision,
+                new com.apptolast.organization.domain.CustomizationRevision(id, 0),
+                java.util.List.of(),
+                java.time.Instant.parse("2026-09-07T12:00:00Z")));
+    mvc.perform(
+            put("/api/v1/projects/" + id + "/custom-fields")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header(
+                    "If-Match",
+                    "\"custom-values:PROJECT:" + id + ":schema:unconfigured:values:unconfigured\"")
+                .contentType("application/json")
+                .content("{\"values\":[]}"))
+        .andExpect(status().isOk())
+        .andExpect(
+            header()
+                .string(
+                    "ETag",
+                    "\"custom-values:PROJECT:" + id + ":schema:unconfigured:values:" + id + ":0\""))
+        .andExpect(
+            content()
+                .json(
+                    "{\"configured\":true,\"values\":[],\"updatedAt\":\"2026-09-07T12:00:00Z\"}",
+                    true));
+    verify(saveValues)
+        .save("owner", CustomizationScope.PROJECT, id, id, expected, java.util.List.of());
+    verifyNoInteractions(readValues, read, save, create, update);
+  }
+
   @MockitoBean com.apptolast.organization.application.ReadCustomFieldValuesUseCase readValues;
 
   @Test
@@ -119,7 +475,7 @@ class CustomizationApiTest {
   }
 
   @Test
-  void s9_activeNullValuesDoNotImplyAStoredValuesRow() throws Exception {
+  void s10_activeNullValuesDoNotImplyAStoredValuesRow() throws Exception {
     var id = java.util.UUID.fromString("abcdefab-1111-1111-1111-111111111111");
     when(readValues.get("owner", CustomizationScope.PROJECT, id, id))
         .thenReturn(
@@ -150,7 +506,7 @@ class CustomizationApiTest {
   }
 
   @Test
-  void s9_taskValuesKeepTypedValuesAndBothExactLongRevisions() throws Exception {
+  void s10_taskValuesKeepTypedValuesAndBothExactLongRevisions() throws Exception {
     var project = java.util.UUID.fromString("abcdefab-1111-1111-1111-111111111111");
     var task = java.util.UUID.fromString("abcdefab-2222-2222-2222-222222222222");
     var schema = java.util.UUID.fromString("abcdefab-3333-3333-3333-333333333333");
@@ -221,7 +577,7 @@ class CustomizationApiTest {
   }
 
   @Test
-  void s9_projectValuesWithoutConfigurationHaveOneCompositeRevisionAndClosedBody()
+  void s10_projectValuesWithoutConfigurationHaveOneCompositeRevisionAndClosedBody()
       throws Exception {
     var project = java.util.UUID.fromString("abcdefab-1111-1111-1111-111111111111");
     var absent = new com.apptolast.organization.domain.CustomizationRevision(null, 0);

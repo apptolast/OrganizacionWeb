@@ -1,0 +1,20 @@
+{
+  "scope": "customization HTTP including GET/PUT values; no persistence or wiring",
+  "exit": 0,
+  "output": "1f3297",
+  "tests": 134,
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/CustomizationController.java",
+      "sha256": "F06D29867CE678DCBC234D8848B80F9837B929D598E906B44BDF718BA28DB589"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/CustomizationApiTest.java",
+      "sha256": "A910A6CE1340A519C09A0DD383F2D63C0DE0C73D8F7DAD5FA7971EF566041ED6"
+    },
+    {
+      "path": "progress/tdd_custom_views_fields_http.md",
+      "sha256": "6AC924B1632D056AA736D73B94EC7B002335A88C22AD1A4F58E5C487A810582B"
+    }
+  ]
+}

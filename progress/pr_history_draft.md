@@ -1,7 +1,11 @@
-Permite consultar desde Historial la planificación, los cambios de tarea y las sesiones de trabajo mediante una API de lectura autenticada. Incluye filtros por categoría, contexto y fechas UTC, detalles de los hechos y paginación estable por cursor; distingue planificación de trabajo realizado.
+Permite consultar desde Historial la planificación, los cambios de tarea y las sesiones realizadas mediante una API de lectura autenticada. Una persona puede filtrar por categoría, proyecto/tarea y fechas UTC, abrir detalles y volver a páginas anteriores conservando la URL. Las reservas se distinguen del trabajo real; cerrar una sesión no completa una tarea.
 
-Este es el corte de integración de la funcionalidad 18. El adaptador de la PR 18 ya está incorporado aquí junto con su validación final; no es necesario fusionar ambas ramas de forma independiente.
+La consulta reúne cinco fuentes durables de PostgreSQL, conserva precisión de microsegundos y usa paginación por cursor. Incluye aislamiento por propietario, coherencia de recibos, lectura transaccional, errores recuperables y retirada de datos privados tras perder la sesión. La navegación y los controles usan React y SCSS; no añade dependencias de interfaz.
 
-Estado: borrador. Hay checkpoints revisados de núcleo, PostgreSQL, transacción de lectura, cliente, HTTP y página nominal. Han pasado 79 pruebas focales HTTP/seguridad y dos recorridos E2E de historial. Faltan los últimos cambios de integridad e interacción, el resto de E2E, revisión UX, mutación y validación conjunta sobre un corte final. No hay despliegue productivo acreditado.
+Este es el corte de integración de la funcionalidad 18. El adaptador HTTP de la PR 18 ya está incorporado: esa rama es una referencia y no debe fusionarse aparte.
 
-Contrato y alcance: `project-spec.md`, `features/history.feature` y `progress/plan_history_validation.md`. La estimación y las dependencias del servidor se mantienen en `docs/mvp-delivery-plan.md`.
+Validación completada hasta este borrador: regresión general con 2.211 pruebas Java, 1.887 frontend y 47 del arnés; compilación; 13 comprobaciones del publicador; campañas originales PIT 263/284 y Stryker 621/738, con tres RuntimeError explícitos fuera de su denominador oficial. Los refuerzos posteriores y replays se informarán separadamente. El E2E global final está en curso.
+
+La revisión UX conserva 495 mediciones y 27 análisis axe sin violaciones en evidencia compuesta. Teclado verificado en Chromium y Firefox; WebKit Windows sólo acredita geometría mediante clic y texto ampliado. Zoom nativo verificado en Chromium. Dispositivos y lectores de pantalla físicos siguen sin comprobarse.
+
+Continúa en borrador hasta cerrar la validación integrada. No hay despliegue productivo acreditado. Contrato en project-spec.md y features/history.feature; alcance y dependencias operativas en docs/mvp-delivery-plan.md.

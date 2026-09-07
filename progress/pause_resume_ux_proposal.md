@@ -5,7 +5,7 @@ Mapa de implementación pendiente de la sección normativa15 y Gherkin; no añad
 ## Flujo mínimo
 
 1. Al entrar en una tarea, consultar la actividad global del propietario. Una sesión de otra tarea propia es válida: mostrar contexto y enlace real, sin permitir otro inicio. Una sesión pausada sigue ocupando la plaza única. Pausa y reanudación gestionan la sesión ya abierta incluso si después se completó la tarea o el proyecto; no se reutiliza la guarda de inicio14.
-2. Separar el recibo inmutable de inicio14 del estado operativo15. Mostrar «Inicio confirmado (hecho histórico)» cuando exista recibo y, en un bloque distinto, estado/revisión consultados; recuperar un recibo nunca sustituye por sí solo la lectura actual.
+2. Separar el recibo inmutable de inicio14 del estado operativo15. Mostrar «Inicio confirmado (hecho histórico)» cuando exista recibo y, en un bloque distinto, estado y hora de actualización consultados; recuperar un recibo nunca sustituye por sí solo la lectura actual.
 3. La sesión actual running ofrece «Pausar»; paused ofrece «Reanudar». Estado desconocido, consulta fallida o una operación pendiente no autorizan una transición. Ningún montaje, refresh, foco, llegada del fin o recuperación transmite automáticamente un comando.
 4. Mostrar el fin previsto original sin desplazarlo al pausar o reanudar. Explicar que no cierra automáticamente y que15 todavía no permite cerrar/completar sesión16.
 5. Presentar el neto con etiqueta que describa exactamente el valor del DTO consultado, sin simular segundos ni convertir una instantánea en duración final. El autor de spec concreta un snapshot calculado hasta serverNow: en running incluye el tramo abierto y en paused permanece constante hasta otra transición. Etiqueta propuesta: «Tiempo neto registrado hasta la consulta»; no total final cerrado.
@@ -27,7 +27,7 @@ Mapa de implementación pendiente de la sección normativa15 y Gherkin; no añad
 
 ## Recuperación y privacidad
 
-Reutilizar el tratamiento de JSON cerrado, códigos estables, CSRF manual de SessionGate y pérdida de ACK. La revisión se conserva como texto/BigInt si el contrato usa BIGINT; no convertirla a Number. Los recibos de intención conocida validan identidad/tipo/contexto; GETactive global acepta otra tarea propia. Recuperar un hecho no requiere que la tarea siga siendo elegible para iniciar.
+Reutilizar el tratamiento de JSON cerrado, códigos estables, CSRF manual de SessionGate y pérdida de ACK. La revisión BIGINT y el token `Work-Session-Revision: work-session-{uuid}-{revision}` sin comillas se conservan internamente como texto/BigInt, sin convertirlos a Number ni mostrarlos al usuario. Se valida su correspondencia exacta con state y se reenvía el token en POST; no se usa ETag/If-Match para el snapshot variable. Se mantienen prioridades y códigos428/400/412. Los recibos de intención conocida validan identidad/tipo/contexto; GETactive global acepta otra tarea propia. Recuperar un hecho no requiere que la tarea siga siendo elegible para iniciar.
 
 Cada await necesita comprobar aborto e identidad/generación, también después de clasificar un error o recuperar CSRF. Cambiar tarea, cerrar sesión o retirar contexto aborta antes de que un401 obsoleto llegue al observer. Un GET iniciado antes de un comando confirmado no debe reponer running/paused antiguos ni reabrir el formulario de inicio. Consultas y comandos conservan guardas coordinadas; el último resultado que llegue no gana por llegar último.
 

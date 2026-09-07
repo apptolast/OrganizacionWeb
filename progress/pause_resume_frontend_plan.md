@@ -1,0 +1,36 @@
+# Plan mínimo frontend15
+
+Base: sección15 aprobada en `project-spec.md` (e3b61ef), UI14 y `pause_resume_ux_proposal.md`. Plan de archivos para TDD posterior a Gherkin; no código ni pruebas ejecutables en este corte. Nombres comunicados al autor backend/Gherkin. Se mantienen Ponytail full y Caveman lite.
+
+| Archivo                                                              | Cambio previsto y límite                                                                                                                                                                                                                                                                                                                               |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `frontend/src/work-session-state-api.ts` y `.test.ts` nuevos         | Lectura `/work-sessions/{id}/state`, POST pause/resume, lectura de cambio por id/key; tipos y validación cerrada15, correspondencia con intención, Work-Session-Revision de GETstate reenviado en POST y Location sólo POST. Funciones explícitas en un módulo, sin framework de comandos.                                                             |
+| `frontend/src/work-session-api.ts` y `.test.ts` existentes           | Exportar el validador SessionStart y conversión exactaµs ya existentes si la reutilización lo exige. Conservar las cuatro rutas14 y sus DTO7; no duplicar esos validadores ni modificar la infraestructura apiRequest.                                                                                                                                 |
+| `frontend/src/work-session-state.tsx` y `.test.tsx` nuevos           | Panel acotado de estado/transiciones, neto de snapshot, recibo histórico y recuperación por key. Una intención retenida, consulta manual y guardas de generación; sin tabla general de intervalos ni historial18.                                                                                                                                      |
+| `frontend/src/work-session.tsx`, `.test.tsx` e integración existente | Tras descubrir activa DTO7, montar el panel por identidad de sesión; no deducir running. Mantener inicio/recuperación14 y su recibo separados. Ajustar sólo fixtures que requieran nueva lectura state; conservar sus aserciones de privacidad/foco/recuperación. TaskReader ya monta WorkSession: sin nuevo cableado allí salvo necesidad demostrada. |
+| `frontend/src/work-session.scss` existente                           | Reutilizar campo/formulario/región y botones nativos; modificación sólo por necesidad de presentación comprobada. Sin dependencia, breakpoint ni variante visual anticipada.                                                                                                                                                                           |
+
+## Contratos del cliente
+
+- WorkSessionState exact6: session DTO7, status, revision decimal positiva BIGINT, changedAt, workedMicroseconds decimal no negativa y runningSince condicionado. Validar invariantes exactas y misma identidad; preservar strings/BigInt, sin Number para cantidades o diferenciasµs.
+- Snapshot exact3: state, serverNow, netMicroseconds; neto = acumulado más max(0,now-runningSince) si running y sólo acumulado si paused. Cabecera propia `Work-Session-Revision: work-session-{id}-{revision}`, sin comillas, coherente exactamente con state y contexto; se conserva para enviarla en POST. No es ETag/If-Match ni cambia con serverNow/netMicroseconds; sin Location en GETstate. No comparar con reloj local.
+- WorkSessionChange exact6: id,sessionId,action,occurredAt,before,after. SessionStart inmutable, revisión+1 dentro deBIGINT, transición y aritmética coherentes. POST201/200 valida Location; GET200 no la exige. Recuperación por key compara identidad/acción/revisión retenidas; por id valida id conocido.
+- Reutilizar exact/instant/uuid/sameId y problemas14; añadir únicamente problemas15 reconocidos, con code/type/status HTTP coherentes. No reutilizar el parser ETag de bloques13: su gramática es otra. Error desconocido o respuesta incoherente conserva incertidumbre.
+
+## Composición y estados
+
+GETactive sigue siendo global y descubre running o paused de otra tarea propia. El panel consulta state antes de etiquetar «En curso»/«En pausa» u ofrecer acción. Pausa y reanudación siguen disponibles tras completed del contexto; inicio14 conserva su propia elegibilidad. Recibo de inicio, último cambio confirmado y estado actual tienen rótulos diferentes; una lectura fallida no revoca hechos ni autoriza acciones sobre estado desconocido.
+
+Etiqueta normativa «Tiempo de trabajo hasta la actualización», con hora de actualización; sin segundero ni neto final acreditado. Fin previsto y zona inmutables, Intl sólo para presentación con fallbackUTC heredado. No mostrar lista de intervalos: DTO15 no la expone.
+
+Conservar key/acción/revisión durante envío y comprobación; refresh no confirma una key. Reenvío sólo manual bajo condiciones del contrato, con la misma intención. Un412 permite consultar y decidir con nueva intención, nunca reintento automático. Abortar y verificar después de cada await antes de callbacks401, clasificación y finally; descartar GET anteriores a una confirmación. SessionGate conserva renovación CSRF manual. Botón aria-disabled con guarda real, anuncio de espera y foco al encabezado sólo si el iniciador desaparece y queda BODY.
+
+## Orden y fronteras
+
+Tras contrato aprobado: un caso RED/GREEN por ciclo, primero cliente state nominal, luego invariantes/Work-Session-Revision y comandos/recuperación demandados; después panel y composición14. Focales propios, regresión14 pertinente al cerrar integración; formato/lint/types y freeze para juez. E2E/UX30 y mutación tendrán su gate posterior, sin atribuir evidencia14 a estados15 nuevos.
+
+Backend de dominio/persistencia, HTTP/wiring, eventos/publicador, migraciones, scripts de arnés y configuración de mutación quedan fuera de esta autoría frontend hasta asignación expresa. No se inicia16–18, no Git ni cambios de metadata. Este plan no reserva trabajo paralelo adicional ni crea otra API.
+
+Precisión de producto del coordinador: key, revisión y Work-Session-Revision son internos; no aparecen como diagnóstico ni dato a memorizar. La interfaz presenta estado, hora de actualización, fin previsto y neto legible. Conflictos y recuperación usan lenguaje normal; cualquier referencia anterior a «estado/revisión consultados» describe guardas técnicas, no contenido visible.
+
+Ajuste normativo anterior a TDD: la cabecera de concurrencia15 es Work-Session-Revision; se mantienen prioridades y errores428/400/412. El snapshot contiene serverNow y neto variables, por lo que el token de revisión no se presenta como validador fuerte de esa representación. Los contratos14 y el ETag de bloques13 permanecen intactos.

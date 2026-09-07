@@ -24,6 +24,7 @@ export function createProject(runner = run) {
         ![
           "start_work_session-frontend",
           "start_work_session-backend",
+          "start_work_session-backend-replay",
           "reschedule-frontend",
           "reschedule-backend",
           "today-backend",
@@ -55,6 +56,10 @@ export function createProject(runner = run) {
       mutate: "pitest",
     };
     if (!commands[task]) throw new Error(`Unknown task: ${task}`);
+    if (task === "mutate" && target === "start_work_session-backend-replay") {
+      backend("pitest", ["-PmutationScope=start_work_session_replay"]);
+      return;
+    }
     if (task === "mutate" && target === "start_work_session-backend") {
       backend("pitest", ["-PmutationScope=start_work_session"]);
       return;

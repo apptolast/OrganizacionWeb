@@ -1,0 +1,8471 @@
+{
+  "capturedAt": "2026-09-07T00:04:55.883Z",
+  "stats": {
+    "Killed": 483,
+    "Survived": 56
+  },
+  "byFile": {
+    "src/work-session-api.ts": {
+      "Killed": 198,
+      "Survived": 13
+    },
+    "src/task-reader.tsx": {
+      "Killed": 4,
+      "Survived": 3
+    },
+    "src/work-session.tsx": {
+      "Killed": 281,
+      "Survived": 40
+    }
+  },
+  "total": 539,
+  "mappedStats": {
+    "Survived": 56,
+    "Killed": 25
+  },
+  "mappings": [
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "14",
+      "finalId": "14",
+      "initialLocation": {
+        "end": {
+          "column": 22,
+          "line": 29
+        },
+        "start": {
+          "column": 12,
+          "line": 29
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 22,
+          "line": 29
+        },
+        "start": {
+          "column": 12,
+          "line": 29
+        }
+      },
+      "mutatorName": "ArrowFunction",
+      "original": "() => null",
+      "replacement": "() => undefined",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "29",
+      "finalId": "29",
+      "initialLocation": {
+        "end": {
+          "column": 49,
+          "line": 32
+        },
+        "start": {
+          "column": 5,
+          "line": 32
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 49,
+          "line": 32
+        },
+        "start": {
+          "column": 5,
+          "line": 32
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "value.code === \"WORK_SESSION_ALREADY_ACTIVE\"",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "32",
+      "finalId": "32",
+      "initialLocation": {
+        "end": {
+          "column": 74,
+          "line": 33
+        },
+        "start": {
+          "column": 5,
+          "line": 33
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 74,
+          "line": 33
+        },
+        "start": {
+          "column": 5,
+          "line": 33
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "value.type === \"urn:organization:problem:work_session_already_active\"",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "37",
+      "finalId": "37",
+      "initialLocation": {
+        "end": {
+          "column": 25,
+          "line": 35
+        },
+        "start": {
+          "column": 5,
+          "line": 35
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 25,
+          "line": 35
+        },
+        "start": {
+          "column": 5,
+          "line": 35
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "error.status === 409",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "35",
+      "finalId": "35",
+      "initialLocation": {
+        "end": {
+          "column": 25,
+          "line": 34
+        },
+        "start": {
+          "column": 5,
+          "line": 34
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 25,
+          "line": 34
+        },
+        "start": {
+          "column": 5,
+          "line": 34
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "value.status === 409",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "54",
+      "finalId": "54",
+      "initialLocation": {
+        "end": {
+          "column": 74,
+          "line": 50
+        },
+        "start": {
+          "column": 5,
+          "line": 50
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 74,
+          "line": 50
+        },
+        "start": {
+          "column": 5,
+          "line": 50
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "value.type !== \"urn:organization:problem:\" + value.code.toLowerCase()",
+      "replacement": "false",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "61",
+      "finalId": "61",
+      "initialLocation": {
+        "end": {
+          "column": 80,
+          "line": 54
+        },
+        "start": {
+          "column": 7,
+          "line": 53
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 80,
+          "line": 54
+        },
+        "start": {
+          "column": 7,
+          "line": 53
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "(value.code === \"WORK_SESSION_NOT_FOUND\" && error.status === 404) ||\n      (value.code === \"WORK_SESSION_TIME_OUT_OF_RANGE\" && error.status === 409)",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "58",
+      "finalId": "58",
+      "initialLocation": {
+        "end": {
+          "column": 34,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 51
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 34,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 51
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "value.status !== error.status",
+      "replacement": "false",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "72",
+      "finalId": "72",
+      "initialLocation": {
+        "end": {
+          "column": 79,
+          "line": 54
+        },
+        "start": {
+          "column": 8,
+          "line": 54
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 79,
+          "line": 54
+        },
+        "start": {
+          "column": 8,
+          "line": 54
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "original": "value.code === \"WORK_SESSION_TIME_OUT_OF_RANGE\" && error.status === 409",
+      "replacement": "value.code === \"WORK_SESSION_TIME_OUT_OF_RANGE\" || error.status === 409",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "65",
+      "finalId": "65",
+      "initialLocation": {
+        "end": {
+          "column": 71,
+          "line": 53
+        },
+        "start": {
+          "column": 8,
+          "line": 53
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 71,
+          "line": 53
+        },
+        "start": {
+          "column": 8,
+          "line": 53
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "original": "value.code === \"WORK_SESSION_NOT_FOUND\" && error.status === 404",
+      "replacement": "value.code === \"WORK_SESSION_NOT_FOUND\" || error.status === 404",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "66",
+      "finalId": "66",
+      "initialLocation": {
+        "end": {
+          "column": 47,
+          "line": 53
+        },
+        "start": {
+          "column": 8,
+          "line": 53
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 47,
+          "line": 53
+        },
+        "start": {
+          "column": 8,
+          "line": 53
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "value.code === \"WORK_SESSION_NOT_FOUND\"",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "73",
+      "finalId": "73",
+      "initialLocation": {
+        "end": {
+          "column": 55,
+          "line": 54
+        },
+        "start": {
+          "column": 8,
+          "line": 54
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 55,
+          "line": 54
+        },
+        "start": {
+          "column": 8,
+          "line": 54
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "value.code === \"WORK_SESSION_TIME_OUT_OF_RANGE\"",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "69",
+      "finalId": "69",
+      "initialLocation": {
+        "end": {
+          "column": 71,
+          "line": 53
+        },
+        "start": {
+          "column": 51,
+          "line": 53
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 71,
+          "line": 53
+        },
+        "start": {
+          "column": 51,
+          "line": 53
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "error.status === 404",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "76",
+      "finalId": "76",
+      "initialLocation": {
+        "end": {
+          "column": 79,
+          "line": 54
+        },
+        "start": {
+          "column": 59,
+          "line": 54
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 79,
+          "line": 54
+        },
+        "start": {
+          "column": 59,
+          "line": 54
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "error.status === 409",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "141",
+      "finalId": "141",
+      "initialLocation": {
+        "end": {
+          "column": 44,
+          "line": 134
+        },
+        "start": {
+          "column": 5,
+          "line": 134
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 44,
+          "line": 134
+        },
+        "start": {
+          "column": 5,
+          "line": 134
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "value.plannedMinutes !== plannedMinutes",
+      "replacement": "false",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "174",
+      "finalId": "174",
+      "initialLocation": {
+        "end": {
+          "column": 17,
+          "line": 160
+        },
+        "start": {
+          "column": 5,
+          "line": 159
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 17,
+          "line": 160
+        },
+        "start": {
+          "column": 5,
+          "line": 159
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "start !== null &&\n    end !== null",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "175",
+      "finalId": "175",
+      "initialLocation": {
+        "end": {
+          "column": 17,
+          "line": 160
+        },
+        "start": {
+          "column": 5,
+          "line": 159
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 17,
+          "line": 160
+        },
+        "start": {
+          "column": 5,
+          "line": 159
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "original": "start !== null &&\n    end !== null",
+      "replacement": "start !== null || end !== null",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "176",
+      "finalId": "176",
+      "initialLocation": {
+        "end": {
+          "column": 19,
+          "line": 159
+        },
+        "start": {
+          "column": 5,
+          "line": 159
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 19,
+          "line": 159
+        },
+        "start": {
+          "column": 5,
+          "line": 159
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "start !== null",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "178",
+      "finalId": "178",
+      "initialLocation": {
+        "end": {
+          "column": 17,
+          "line": 160
+        },
+        "start": {
+          "column": 5,
+          "line": 160
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 17,
+          "line": 160
+        },
+        "start": {
+          "column": 5,
+          "line": 160
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "end !== null",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "188",
+      "finalId": "188",
+      "initialLocation": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "mutatorName": "Regex",
+      "original": "/(?:\\.\\d+)?Z$/",
+      "replacement": "/(?:\\.\\d+)?Z/",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "189",
+      "finalId": "189",
+      "initialLocation": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "mutatorName": "Regex",
+      "original": "/(?:\\.\\d+)?Z$/",
+      "replacement": "/(?:\\.\\d+)Z$/",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "190",
+      "finalId": "190",
+      "initialLocation": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "mutatorName": "Regex",
+      "original": "/(?:\\.\\d+)?Z$/",
+      "replacement": "/(?:\\.\\d)?Z$/",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "191",
+      "finalId": "191",
+      "initialLocation": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "mutatorName": "Regex",
+      "original": "/(?:\\.\\d+)?Z$/",
+      "replacement": "/(?:\\.\\D+)?Z$/",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "192",
+      "finalId": "192",
+      "initialLocation": {
+        "end": {
+          "column": 73,
+          "line": 167
+        },
+        "start": {
+          "column": 70,
+          "line": 167
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 73,
+          "line": 167
+        },
+        "start": {
+          "column": 70,
+          "line": 167
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "original": "\"Z\"",
+      "replacement": "\"\"",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "195",
+      "finalId": "195",
+      "initialLocation": {
+        "end": {
+          "column": 43,
+          "line": 168
+        },
+        "start": {
+          "column": 32,
+          "line": 168
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 43,
+          "line": 168
+        },
+        "start": {
+          "column": 32,
+          "line": 168
+        }
+      },
+      "mutatorName": "Regex",
+      "original": "/\\.(\\d+)Z$/",
+      "replacement": "/\\.(\\d+)Z/",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "199",
+      "finalId": "199",
+      "initialLocation": {
+        "end": {
+          "column": 77,
+          "line": 169
+        },
+        "start": {
+          "column": 10,
+          "line": 169
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 77,
+          "line": 169
+        },
+        "start": {
+          "column": 10,
+          "line": 169
+        }
+      },
+      "mutatorName": "ArithmeticOperator",
+      "original": "BigInt(wholeMilliseconds) * 1000n + BigInt(fraction.padEnd(6, \"0\"))",
+      "replacement": "BigInt(wholeMilliseconds) * 1000n - BigInt(fraction.padEnd(6, \"0\"))",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "initialId": "201",
+      "finalId": "201",
+      "initialLocation": {
+        "end": {
+          "column": 75,
+          "line": 169
+        },
+        "start": {
+          "column": 72,
+          "line": 169
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 75,
+          "line": 169
+        },
+        "start": {
+          "column": 72,
+          "line": 169
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "original": "\"0\"",
+      "replacement": "\"\"",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "b50c97b6309b68389257d4a02be132789f3a1b91e082696736166786bc1d87a9"
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "initialId": "6",
+      "finalId": "6",
+      "initialLocation": {
+        "end": {
+          "column": 36,
+          "line": 131
+        },
+        "start": {
+          "column": 19,
+          "line": 131
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 36,
+          "line": 131
+        },
+        "start": {
+          "column": 19,
+          "line": 131
+        }
+      },
+      "mutatorName": "OptionalChaining",
+      "original": "snapshot?.project",
+      "replacement": "snapshot.project",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "0cc6ed956f083fe7262f512da2830f11fb46596191ddd4e6c2da5945e187402a"
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "initialId": "3",
+      "finalId": "3",
+      "initialLocation": {
+        "end": {
+          "column": 49,
+          "line": 130
+        },
+        "start": {
+          "column": 15,
+          "line": 130
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 49,
+          "line": 130
+        },
+        "start": {
+          "column": 15,
+          "line": 130
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "original": "!projectLoading && !projectFailure",
+      "replacement": "!projectLoading || !projectFailure",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "0cc6ed956f083fe7262f512da2830f11fb46596191ddd4e6c2da5945e187402a"
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "initialId": "1",
+      "finalId": "1",
+      "initialLocation": {
+        "end": {
+          "column": 49,
+          "line": 130
+        },
+        "start": {
+          "column": 15,
+          "line": 130
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 49,
+          "line": 130
+        },
+        "start": {
+          "column": 15,
+          "line": 130
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "!projectLoading && !projectFailure",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "0cc6ed956f083fe7262f512da2830f11fb46596191ddd4e6c2da5945e187402a"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "233",
+      "finalId": "233",
+      "initialLocation": {
+        "end": {
+          "column": 29,
+          "line": 29
+        },
+        "start": {
+          "column": 7,
+          "line": 29
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 29,
+          "line": 29
+        },
+        "start": {
+          "column": 7,
+          "line": 29
+        }
+      },
+      "mutatorName": "OptionalChaining",
+      "original": "heading.current?.focus",
+      "replacement": "heading.current.focus",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "236",
+      "finalId": "236",
+      "initialLocation": {
+        "end": {
+          "column": 44,
+          "line": 36
+        },
+        "start": {
+          "column": 42,
+          "line": 36
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 44,
+          "line": 36
+        },
+        "start": {
+          "column": 42,
+          "line": 36
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "original": "\"\"",
+      "replacement": "\"Stryker was here!\"",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "238",
+      "finalId": "238",
+      "initialLocation": {
+        "end": {
+          "column": 49,
+          "line": 38
+        },
+        "start": {
+          "column": 44,
+          "line": 38
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 49,
+          "line": 38
+        },
+        "start": {
+          "column": 44,
+          "line": 38
+        }
+      },
+      "mutatorName": "BooleanLiteral",
+      "original": "false",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "240",
+      "finalId": "240",
+      "initialLocation": {
+        "end": {
+          "column": 51,
+          "line": 41
+        },
+        "start": {
+          "column": 46,
+          "line": 41
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 51,
+          "line": 41
+        },
+        "start": {
+          "column": 46,
+          "line": 41
+        }
+      },
+      "mutatorName": "BooleanLiteral",
+      "original": "false",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "249",
+      "finalId": "249",
+      "initialLocation": {
+        "end": {
+          "column": 39,
+          "line": 48
+        },
+        "start": {
+          "column": 24,
+          "line": 48
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 39,
+          "line": 48
+        },
+        "start": {
+          "column": 24,
+          "line": 48
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "active === null",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "257",
+      "finalId": "257",
+      "initialLocation": {
+        "end": {
+          "column": 38,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 50
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 38,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 50
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "original": "props.taskStatus === \"pending\" &&\n    props.projectStatus !== undefined",
+      "replacement": "props.taskStatus === \"pending\" || props.projectStatus !== undefined",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "258",
+      "finalId": "258",
+      "initialLocation": {
+        "end": {
+          "column": 35,
+          "line": 50
+        },
+        "start": {
+          "column": 5,
+          "line": 50
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 35,
+          "line": 50
+        },
+        "start": {
+          "column": 5,
+          "line": 50
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "props.taskStatus === \"pending\"",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "261",
+      "finalId": "261",
+      "initialLocation": {
+        "end": {
+          "column": 38,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 51
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 38,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 51
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "props.projectStatus !== undefined",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "294",
+      "finalId": "294",
+      "initialLocation": {
+        "end": {
+          "column": 28,
+          "line": 62
+        },
+        "start": {
+          "column": 9,
+          "line": 62
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 28,
+          "line": 62
+        },
+        "start": {
+          "column": 9,
+          "line": 62
+        }
+      },
+      "mutatorName": "EqualityOperator",
+      "original": "Number(minutes) < 1",
+      "replacement": "Number(minutes) <= 1",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "296",
+      "finalId": "296",
+      "initialLocation": {
+        "end": {
+          "column": 31,
+          "line": 63
+        },
+        "start": {
+          "column": 9,
+          "line": 63
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 31,
+          "line": 63
+        },
+        "start": {
+          "column": 9,
+          "line": 63
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "Number(minutes) > 1440",
+      "replacement": "false",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "297",
+      "finalId": "297",
+      "initialLocation": {
+        "end": {
+          "column": 31,
+          "line": 63
+        },
+        "start": {
+          "column": 9,
+          "line": 63
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 31,
+          "line": 63
+        },
+        "start": {
+          "column": 9,
+          "line": 63
+        }
+      },
+      "mutatorName": "EqualityOperator",
+      "original": "Number(minutes) > 1440",
+      "replacement": "Number(minutes) >= 1440",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "305",
+      "finalId": "305",
+      "initialLocation": {
+        "end": {
+          "column": 20,
+          "line": 69
+        },
+        "start": {
+          "column": 18,
+          "line": 69
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 20,
+          "line": 69
+        },
+        "start": {
+          "column": 18,
+          "line": 69
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "original": "\"\"",
+      "replacement": "\"Stryker was here!\"",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "313",
+      "finalId": "313",
+      "initialLocation": {
+        "end": {
+          "column": 36,
+          "line": 83
+        },
+        "start": {
+          "column": 11,
+          "line": 83
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 36,
+          "line": 83
+        },
+        "start": {
+          "column": 11,
+          "line": 83
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "controller.signal.aborted",
+      "replacement": "false",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "273",
+      "finalId": "273",
+      "initialLocation": {
+        "end": {
+          "column": 53,
+          "line": 54
+        },
+        "start": {
+          "column": 51,
+          "line": 54
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 53,
+          "line": 54
+        },
+        "start": {
+          "column": 51,
+          "line": 54
+        }
+      },
+      "mutatorName": "ArrayDeclaration",
+      "original": "[]",
+      "replacement": "[\"Stryker was here\"]",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "314",
+      "finalId": "314",
+      "initialLocation": {
+        "end": {
+          "column": 28,
+          "line": 84
+        },
+        "start": {
+          "column": 7,
+          "line": 84
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 28,
+          "line": 84
+        },
+        "start": {
+          "column": 7,
+          "line": 84
+        }
+      },
+      "mutatorName": "OptionalChaining",
+      "original": "lookup.current?.abort",
+      "replacement": "lookup.current.abort",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "316",
+      "finalId": "316",
+      "initialLocation": {
+        "end": {
+          "column": 23,
+          "line": 85
+        },
+        "start": {
+          "column": 18,
+          "line": 85
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 23,
+          "line": 85
+        },
+        "start": {
+          "column": 18,
+          "line": 85
+        }
+      },
+      "mutatorName": "BooleanLiteral",
+      "original": "false",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "318",
+      "finalId": "318",
+      "initialLocation": {
+        "end": {
+          "column": 28,
+          "line": 86
+        },
+        "start": {
+          "column": 23,
+          "line": 86
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 28,
+          "line": 86
+        },
+        "start": {
+          "column": 23,
+          "line": 86
+        }
+      },
+      "mutatorName": "BooleanLiteral",
+      "original": "false",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "322",
+      "finalId": "322",
+      "initialLocation": {
+        "end": {
+          "column": 25,
+          "line": 89
+        },
+        "start": {
+          "column": 20,
+          "line": 89
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 25,
+          "line": 89
+        },
+        "start": {
+          "column": 20,
+          "line": 89
+        }
+      },
+      "mutatorName": "BooleanLiteral",
+      "original": "false",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "367",
+      "finalId": "367",
+      "initialLocation": {
+        "end": {
+          "column": 59,
+          "line": 108
+        },
+        "start": {
+          "column": 13,
+          "line": 108
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 59,
+          "line": 108
+        },
+        "start": {
+          "column": 13,
+          "line": 108
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "problem.code === \"WORK_SESSION_ALREADY_ACTIVE\"",
+      "replacement": "false",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "369",
+      "finalId": "369",
+      "initialLocation": {
+        "end": {
+          "column": 59,
+          "line": 108
+        },
+        "start": {
+          "column": 30,
+          "line": 108
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 59,
+          "line": 108
+        },
+        "start": {
+          "column": 30,
+          "line": 108
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "original": "\"WORK_SESSION_ALREADY_ACTIVE\"",
+      "replacement": "\"\"",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "370",
+      "finalId": "370",
+      "initialLocation": {
+        "end": {
+          "column": 32,
+          "line": 109
+        },
+        "start": {
+          "column": 11,
+          "line": 109
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 32,
+          "line": 109
+        },
+        "start": {
+          "column": 11,
+          "line": 109
+        }
+      },
+      "mutatorName": "CallExpression",
+      "original": "setActive(undefined);",
+      "replacement": ";",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "375",
+      "finalId": "375",
+      "initialLocation": {
+        "end": {
+          "column": 27,
+          "line": 113
+        },
+        "start": {
+          "column": 22,
+          "line": 113
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 27,
+          "line": 113
+        },
+        "start": {
+          "column": 22,
+          "line": 113
+        }
+      },
+      "mutatorName": "BooleanLiteral",
+      "original": "false",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "384",
+      "finalId": "384",
+      "initialLocation": {
+        "end": {
+          "column": 22,
+          "line": 119
+        },
+        "start": {
+          "column": 11,
+          "line": 118
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 22,
+          "line": 119
+        },
+        "start": {
+          "column": 11,
+          "line": 118
+        }
+      },
+      "mutatorName": "OptionalChaining",
+      "original": "problem.errors.find((error) => error.field === \"plannedMinutes\")\n            ?.message",
+      "replacement": "problem.errors.find(error => error.field === \"plannedMinutes\").message",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "386",
+      "finalId": "386",
+      "initialLocation": {
+        "end": {
+          "column": 74,
+          "line": 118
+        },
+        "start": {
+          "column": 42,
+          "line": 118
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 74,
+          "line": 118
+        },
+        "start": {
+          "column": 42,
+          "line": 118
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "error.field === \"plannedMinutes\"",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "393",
+      "finalId": "393",
+      "initialLocation": {
+        "end": {
+          "column": 27,
+          "line": 123
+        },
+        "start": {
+          "column": 22,
+          "line": 123
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 27,
+          "line": 123
+        },
+        "start": {
+          "column": 22,
+          "line": 123
+        }
+      },
+      "mutatorName": "BooleanLiteral",
+      "original": "false",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "411",
+      "finalId": "411",
+      "initialLocation": {
+        "end": {
+          "column": 71,
+          "line": 132
+        },
+        "start": {
+          "column": 11,
+          "line": 132
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 71,
+          "line": 132
+        },
+        "start": {
+          "column": 11,
+          "line": 132
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "!controller.signal.aborted && command.current === controller",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "413",
+      "finalId": "413",
+      "initialLocation": {
+        "end": {
+          "column": 71,
+          "line": 132
+        },
+        "start": {
+          "column": 11,
+          "line": 132
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 71,
+          "line": 132
+        },
+        "start": {
+          "column": 11,
+          "line": 132
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "original": "!controller.signal.aborted && command.current === controller",
+      "replacement": "!controller.signal.aborted || command.current === controller",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "415",
+      "finalId": "415",
+      "initialLocation": {
+        "end": {
+          "column": 71,
+          "line": 132
+        },
+        "start": {
+          "column": 41,
+          "line": 132
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 71,
+          "line": 132
+        },
+        "start": {
+          "column": 41,
+          "line": 132
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "command.current === controller",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "429",
+      "finalId": "429",
+      "initialLocation": {
+        "end": {
+          "column": 38,
+          "line": 146
+        },
+        "start": {
+          "column": 13,
+          "line": 146
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 38,
+          "line": 146
+        },
+        "start": {
+          "column": 13,
+          "line": 146
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "controller.signal.aborted",
+      "replacement": "false",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "467",
+      "finalId": "467",
+      "initialLocation": {
+        "end": {
+          "column": 32,
+          "line": 182
+        },
+        "start": {
+          "column": 27,
+          "line": 182
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 32,
+          "line": 182
+        },
+        "start": {
+          "column": 27,
+          "line": 182
+        }
+      },
+      "mutatorName": "BooleanLiteral",
+      "original": "false",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "469",
+      "finalId": "469",
+      "initialLocation": {
+        "end": {
+          "column": 42,
+          "line": 183
+        },
+        "start": {
+          "column": 22,
+          "line": 183
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 42,
+          "line": 183
+        },
+        "start": {
+          "column": 22,
+          "line": 183
+        }
+      },
+      "mutatorName": "ArrowFunction",
+      "original": "(value) => value + 1",
+      "replacement": "() => undefined",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "470",
+      "finalId": "470",
+      "initialLocation": {
+        "end": {
+          "column": 42,
+          "line": 183
+        },
+        "start": {
+          "column": 33,
+          "line": 183
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 42,
+          "line": 183
+        },
+        "start": {
+          "column": 33,
+          "line": 183
+        }
+      },
+      "mutatorName": "ArithmeticOperator",
+      "original": "value + 1",
+      "replacement": "value - 1",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "446",
+      "finalId": "446",
+      "initialLocation": {
+        "end": {
+          "column": 39,
+          "line": 159
+        },
+        "start": {
+          "column": 24,
+          "line": 159
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 39,
+          "line": 159
+        },
+        "start": {
+          "column": 24,
+          "line": 159
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "original": "`${id}-heading`",
+      "replacement": "``",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "447",
+      "finalId": "447",
+      "initialLocation": {
+        "end": {
+          "column": 30,
+          "line": 161
+        },
+        "start": {
+          "column": 15,
+          "line": 161
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 30,
+          "line": 161
+        },
+        "start": {
+          "column": 15,
+          "line": 161
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "original": "`${id}-heading`",
+      "replacement": "``",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "494",
+      "finalId": "500",
+      "initialLocation": {
+        "end": {
+          "column": 12,
+          "line": 206
+        },
+        "start": {
+          "column": 12,
+          "line": 201
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 12,
+          "line": 208
+        },
+        "start": {
+          "column": 12,
+          "line": 203
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "!eligible && !uncertain && (\n            <p>\n              Para iniciar trabajo necesitamos confirmar una tarea pendiente y\n              un proyecto no completado.\n            </p>\n          )",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "495",
+      "finalId": "501",
+      "initialLocation": {
+        "end": {
+          "column": 12,
+          "line": 206
+        },
+        "start": {
+          "column": 12,
+          "line": 201
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 12,
+          "line": 208
+        },
+        "start": {
+          "column": 12,
+          "line": 203
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "!eligible && !uncertain && (\n            <p>\n              Para iniciar trabajo necesitamos confirmar una tarea pendiente y\n              un proyecto no completado.\n            </p>\n          )",
+      "replacement": "false",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "502",
+      "finalId": "508",
+      "initialLocation": {
+        "end": {
+          "column": 40,
+          "line": 213
+        },
+        "start": {
+          "column": 17,
+          "line": 213
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 40,
+          "line": 215
+        },
+        "start": {
+          "column": 17,
+          "line": 215
+        }
+      },
+      "mutatorName": "CallExpression",
+      "original": "event.preventDefault();",
+      "replacement": ";",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "500",
+      "finalId": "506",
+      "initialLocation": {
+        "end": {
+          "column": 35,
+          "line": 201
+        },
+        "start": {
+          "column": 25,
+          "line": 201
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 35,
+          "line": 203
+        },
+        "start": {
+          "column": 25,
+          "line": 203
+        }
+      },
+      "mutatorName": "BooleanLiteral",
+      "original": "!uncertain",
+      "replacement": "uncertain",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "504",
+      "finalId": "510",
+      "initialLocation": {
+        "end": {
+          "column": 31,
+          "line": 214
+        },
+        "start": {
+          "column": 21,
+          "line": 214
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 31,
+          "line": 216
+        },
+        "start": {
+          "column": 21,
+          "line": 216
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "!uncertain",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "496",
+      "finalId": "502",
+      "initialLocation": {
+        "end": {
+          "column": 12,
+          "line": 206
+        },
+        "start": {
+          "column": 12,
+          "line": 201
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 12,
+          "line": 208
+        },
+        "start": {
+          "column": 12,
+          "line": 203
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "original": "!eligible && !uncertain && (\n            <p>\n              Para iniciar trabajo necesitamos confirmar una tarea pendiente y\n              un proyecto no completado.\n            </p>\n          )",
+      "replacement": "!eligible && !uncertain || <p>\n              Para iniciar trabajo necesitamos confirmar una tarea pendiente y\n              un proyecto no completado.\n            </p>",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "497",
+      "finalId": "503",
+      "initialLocation": {
+        "end": {
+          "column": 35,
+          "line": 201
+        },
+        "start": {
+          "column": 12,
+          "line": 201
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 35,
+          "line": 203
+        },
+        "start": {
+          "column": 12,
+          "line": 203
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "!eligible && !uncertain",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "498",
+      "finalId": "504",
+      "initialLocation": {
+        "end": {
+          "column": 35,
+          "line": 201
+        },
+        "start": {
+          "column": 12,
+          "line": 201
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 35,
+          "line": 203
+        },
+        "start": {
+          "column": 12,
+          "line": 203
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "original": "!eligible && !uncertain",
+      "replacement": "!eligible || !uncertain",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "499",
+      "finalId": "505",
+      "initialLocation": {
+        "end": {
+          "column": 21,
+          "line": 201
+        },
+        "start": {
+          "column": 12,
+          "line": 201
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 21,
+          "line": 203
+        },
+        "start": {
+          "column": 12,
+          "line": 203
+        }
+      },
+      "mutatorName": "BooleanLiteral",
+      "original": "!eligible",
+      "replacement": "eligible",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "541",
+      "finalId": "547",
+      "initialLocation": {
+        "end": {
+          "column": 23,
+          "line": 297
+        },
+        "start": {
+          "column": 18,
+          "line": 297
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 23,
+          "line": 299
+        },
+        "start": {
+          "column": 18,
+          "line": 299
+        }
+      },
+      "mutatorName": "BooleanLiteral",
+      "original": "false",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "543",
+      "finalId": "549",
+      "initialLocation": {
+        "end": {
+          "column": 48,
+          "line": 300
+        },
+        "start": {
+          "column": 41,
+          "line": 300
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 48,
+          "line": 302
+        },
+        "start": {
+          "column": 41,
+          "line": 302
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "original": "\"es-ES\"",
+      "replacement": "\"\"",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "545",
+      "finalId": "551",
+      "initialLocation": {
+        "end": {
+          "column": 24,
+          "line": 302
+        },
+        "start": {
+          "column": 18,
+          "line": 302
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 24,
+          "line": 304
+        },
+        "start": {
+          "column": 18,
+          "line": 304
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "original": "\"long\"",
+      "replacement": "\"\"",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "546",
+      "finalId": "552",
+      "initialLocation": {
+        "end": {
+          "column": 24,
+          "line": 303
+        },
+        "start": {
+          "column": 18,
+          "line": 303
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 24,
+          "line": 305
+        },
+        "start": {
+          "column": 18,
+          "line": 305
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "original": "\"long\"",
+      "replacement": "\"\"",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "554",
+      "finalId": "560",
+      "initialLocation": {
+        "end": {
+          "column": 20,
+          "line": 316
+        },
+        "start": {
+          "column": 17,
+          "line": 316
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 20,
+          "line": 318
+        },
+        "start": {
+          "column": 17,
+          "line": 318
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "original": "\" \"",
+      "replacement": "\"\"",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "555",
+      "finalId": "561",
+      "initialLocation": {
+        "end": {
+          "column": 26,
+          "line": 323
+        },
+        "start": {
+          "column": 23,
+          "line": 323
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 26,
+          "line": 325
+        },
+        "start": {
+          "column": 23,
+          "line": 325
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "original": "\" \"",
+      "replacement": "\"\"",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "532",
+      "finalId": "538",
+      "initialLocation": {
+        "end": {
+          "column": 34,
+          "line": 269
+        },
+        "start": {
+          "column": 17,
+          "line": 269
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 34,
+          "line": 271
+        },
+        "start": {
+          "column": 17,
+          "line": 271
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "busy || uncertain",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Survived",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    },
+    {
+      "file": "src/work-session.tsx",
+      "initialId": "440",
+      "finalId": "440",
+      "initialLocation": {
+        "end": {
+          "column": 39,
+          "line": 152
+        },
+        "start": {
+          "column": 13,
+          "line": 152
+        }
+      },
+      "finalLocation": {
+        "end": {
+          "column": 39,
+          "line": 152
+        },
+        "start": {
+          "column": 13,
+          "line": 152
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "original": "!controller.signal.aborted",
+      "replacement": "true",
+      "initialStatus": "Survived",
+      "finalStatus": "Killed",
+      "sourceSha256": "47a35f19c2e47e35c633a3d60c0880a1822dbdd5c130ed326177892646c66005"
+    }
+  ],
+  "residuals": [
+    {
+      "file": "src/work-session-api.ts",
+      "id": "14",
+      "mutatorName": "ArrowFunction",
+      "replacement": "() => undefined",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 27,
+      "coveredBy": [
+        "453",
+        "455",
+        "456",
+        "457",
+        "459",
+        "463",
+        "464",
+        "470",
+        "472",
+        "476",
+        "480",
+        "481",
+        "486",
+        "487",
+        "488",
+        "642",
+        "643",
+        "644",
+        "645",
+        "646",
+        "647",
+        "648",
+        "649",
+        "650",
+        "651",
+        "653",
+        "657"
+      ],
+      "location": {
+        "end": {
+          "column": 22,
+          "line": 29
+        },
+        "start": {
+          "column": 12,
+          "line": 29
+        }
+      },
+      "original": "() => null",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "175",
+      "mutatorName": "LogicalOperator",
+      "replacement": "start !== null || end !== null",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 35,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "463",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "479",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641",
+        "652",
+        "654",
+        "655",
+        "661",
+        "662",
+        "663",
+        "664",
+        "666",
+        "667",
+        "668",
+        "671",
+        "672",
+        "673",
+        "674",
+        "678",
+        "683",
+        "684"
+      ],
+      "location": {
+        "end": {
+          "column": 17,
+          "line": 160
+        },
+        "start": {
+          "column": 5,
+          "line": 159
+        }
+      },
+      "original": "start !== null &&\n    end !== null",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "176",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 35,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "463",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "479",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641",
+        "652",
+        "654",
+        "655",
+        "661",
+        "662",
+        "663",
+        "664",
+        "666",
+        "667",
+        "668",
+        "671",
+        "672",
+        "673",
+        "674",
+        "678",
+        "683",
+        "684"
+      ],
+      "location": {
+        "end": {
+          "column": 19,
+          "line": 159
+        },
+        "start": {
+          "column": 5,
+          "line": 159
+        }
+      },
+      "original": "start !== null",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "174",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 35,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "463",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "479",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641",
+        "652",
+        "654",
+        "655",
+        "661",
+        "662",
+        "663",
+        "664",
+        "666",
+        "667",
+        "668",
+        "671",
+        "672",
+        "673",
+        "674",
+        "678",
+        "683",
+        "684"
+      ],
+      "location": {
+        "end": {
+          "column": 17,
+          "line": 160
+        },
+        "start": {
+          "column": 5,
+          "line": 159
+        }
+      },
+      "original": "start !== null &&\n    end !== null",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "178",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 34,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "463",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "479",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641",
+        "652",
+        "654",
+        "661",
+        "662",
+        "663",
+        "664",
+        "666",
+        "667",
+        "668",
+        "671",
+        "672",
+        "673",
+        "674",
+        "678",
+        "683",
+        "684"
+      ],
+      "location": {
+        "end": {
+          "column": 17,
+          "line": 160
+        },
+        "start": {
+          "column": 5,
+          "line": 160
+        }
+      },
+      "original": "end !== null",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "188",
+      "mutatorName": "Regex",
+      "replacement": "/(?:\\.\\d+)?Z/",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 34,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "463",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "479",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641",
+        "652",
+        "654",
+        "661",
+        "662",
+        "663",
+        "664",
+        "666",
+        "667",
+        "668",
+        "671",
+        "672",
+        "673",
+        "674",
+        "678",
+        "683",
+        "684"
+      ],
+      "location": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "original": "/(?:\\.\\d+)?Z$/",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "189",
+      "mutatorName": "Regex",
+      "replacement": "/(?:\\.\\d+)Z$/",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 34,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "463",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "479",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641",
+        "652",
+        "654",
+        "661",
+        "662",
+        "663",
+        "664",
+        "666",
+        "667",
+        "668",
+        "671",
+        "672",
+        "673",
+        "674",
+        "678",
+        "683",
+        "684"
+      ],
+      "location": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "original": "/(?:\\.\\d+)?Z$/",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "190",
+      "mutatorName": "Regex",
+      "replacement": "/(?:\\.\\d)?Z$/",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 34,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "463",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "479",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641",
+        "652",
+        "654",
+        "661",
+        "662",
+        "663",
+        "664",
+        "666",
+        "667",
+        "668",
+        "671",
+        "672",
+        "673",
+        "674",
+        "678",
+        "683",
+        "684"
+      ],
+      "location": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "original": "/(?:\\.\\d+)?Z$/",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "191",
+      "mutatorName": "Regex",
+      "replacement": "/(?:\\.\\D+)?Z$/",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 34,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "463",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "479",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641",
+        "652",
+        "654",
+        "661",
+        "662",
+        "663",
+        "664",
+        "666",
+        "667",
+        "668",
+        "671",
+        "672",
+        "673",
+        "674",
+        "678",
+        "683",
+        "684"
+      ],
+      "location": {
+        "end": {
+          "column": 68,
+          "line": 167
+        },
+        "start": {
+          "column": 54,
+          "line": 167
+        }
+      },
+      "original": "/(?:\\.\\d+)?Z$/",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "192",
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 34,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "463",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "479",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641",
+        "652",
+        "654",
+        "661",
+        "662",
+        "663",
+        "664",
+        "666",
+        "667",
+        "668",
+        "671",
+        "672",
+        "673",
+        "674",
+        "678",
+        "683",
+        "684"
+      ],
+      "location": {
+        "end": {
+          "column": 73,
+          "line": 167
+        },
+        "start": {
+          "column": 70,
+          "line": 167
+        }
+      },
+      "original": "\"Z\"",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "195",
+      "mutatorName": "Regex",
+      "replacement": "/\\.(\\d+)Z/",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 34,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "463",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "479",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641",
+        "652",
+        "654",
+        "661",
+        "662",
+        "663",
+        "664",
+        "666",
+        "667",
+        "668",
+        "671",
+        "672",
+        "673",
+        "674",
+        "678",
+        "683",
+        "684"
+      ],
+      "location": {
+        "end": {
+          "column": 43,
+          "line": 168
+        },
+        "start": {
+          "column": 32,
+          "line": 168
+        }
+      },
+      "original": "/\\.(\\d+)Z$/",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "199",
+      "mutatorName": "ArithmeticOperator",
+      "replacement": "BigInt(wholeMilliseconds) * 1000n - BigInt(fraction.padEnd(6, \"0\"))",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 34,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "463",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "479",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641",
+        "652",
+        "654",
+        "661",
+        "662",
+        "663",
+        "664",
+        "666",
+        "667",
+        "668",
+        "671",
+        "672",
+        "673",
+        "674",
+        "678",
+        "683",
+        "684"
+      ],
+      "location": {
+        "end": {
+          "column": 77,
+          "line": 169
+        },
+        "start": {
+          "column": 10,
+          "line": 169
+        }
+      },
+      "original": "BigInt(wholeMilliseconds) * 1000n + BigInt(fraction.padEnd(6, \"0\"))",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session-api.ts",
+      "id": "201",
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 34,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "463",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "479",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641",
+        "652",
+        "654",
+        "661",
+        "662",
+        "663",
+        "664",
+        "666",
+        "667",
+        "668",
+        "671",
+        "672",
+        "673",
+        "674",
+        "678",
+        "683",
+        "684"
+      ],
+      "location": {
+        "end": {
+          "column": 75,
+          "line": 169
+        },
+        "start": {
+          "column": 72,
+          "line": 169
+        }
+      },
+      "original": "\"0\"",
+      "initialResidual": true
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "id": "6",
+      "mutatorName": "OptionalChaining",
+      "replacement": "snapshot.project",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 183,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 131
+        },
+        "start": {
+          "column": 19,
+          "line": 131
+        }
+      },
+      "original": "snapshot?.project",
+      "initialResidual": true
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "id": "3",
+      "mutatorName": "LogicalOperator",
+      "replacement": "!projectLoading || !projectFailure",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 190,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "171",
+        "172",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "227",
+        "228",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "246",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 49,
+          "line": 130
+        },
+        "start": {
+          "column": 15,
+          "line": 130
+        }
+      },
+      "original": "!projectLoading && !projectFailure",
+      "initialResidual": true
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "id": "1",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 190,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "171",
+        "172",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "227",
+        "228",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "246",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 49,
+          "line": 130
+        },
+        "start": {
+          "column": 15,
+          "line": 130
+        }
+      },
+      "original": "!projectLoading && !projectFailure",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "233",
+      "mutatorName": "OptionalChaining",
+      "replacement": "heading.current.focus",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 32,
+      "coveredBy": [
+        "453",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "463",
+        "464",
+        "465",
+        "467",
+        "468",
+        "469",
+        "470",
+        "472",
+        "473",
+        "474",
+        "475",
+        "476",
+        "477",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490"
+      ],
+      "location": {
+        "end": {
+          "column": 29,
+          "line": 29
+        },
+        "start": {
+          "column": 7,
+          "line": 29
+        }
+      },
+      "original": "heading.current?.focus",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "236",
+      "mutatorName": "StringLiteral",
+      "replacement": "\"Stryker was here!\"",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 232,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "171",
+        "172",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "227",
+        "228",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "246",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "453",
+        "454",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "466",
+        "467",
+        "468",
+        "469",
+        "470",
+        "471",
+        "472",
+        "473",
+        "474",
+        "475",
+        "476",
+        "477",
+        "478",
+        "479",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "491",
+        "492",
+        "493",
+        "494",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 36
+        },
+        "start": {
+          "column": 42,
+          "line": 36
+        }
+      },
+      "original": "\"\"",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "238",
+      "mutatorName": "BooleanLiteral",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 232,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "171",
+        "172",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "227",
+        "228",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "246",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "453",
+        "454",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "466",
+        "467",
+        "468",
+        "469",
+        "470",
+        "471",
+        "472",
+        "473",
+        "474",
+        "475",
+        "476",
+        "477",
+        "478",
+        "479",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "491",
+        "492",
+        "493",
+        "494",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 49,
+          "line": 38
+        },
+        "start": {
+          "column": 44,
+          "line": 38
+        }
+      },
+      "original": "false",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "240",
+      "mutatorName": "BooleanLiteral",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 232,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "171",
+        "172",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "227",
+        "228",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "246",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "453",
+        "454",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "466",
+        "467",
+        "468",
+        "469",
+        "470",
+        "471",
+        "472",
+        "473",
+        "474",
+        "475",
+        "476",
+        "477",
+        "478",
+        "479",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "491",
+        "492",
+        "493",
+        "494",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 51,
+          "line": 41
+        },
+        "start": {
+          "column": 46,
+          "line": 41
+        }
+      },
+      "original": "false",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "249",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 232,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "171",
+        "172",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "227",
+        "228",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "246",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "453",
+        "454",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "466",
+        "467",
+        "468",
+        "469",
+        "470",
+        "471",
+        "472",
+        "473",
+        "474",
+        "475",
+        "476",
+        "477",
+        "478",
+        "479",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "491",
+        "492",
+        "493",
+        "494",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 48
+        },
+        "start": {
+          "column": 24,
+          "line": 48
+        }
+      },
+      "original": "active === null",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "294",
+      "mutatorName": "EqualityOperator",
+      "replacement": "Number(minutes) <= 1",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 33,
+      "coveredBy": [
+        "453",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "467",
+        "468",
+        "469",
+        "470",
+        "472",
+        "473",
+        "474",
+        "476",
+        "477",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 28,
+          "line": 62
+        },
+        "start": {
+          "column": 9,
+          "line": 62
+        }
+      },
+      "original": "Number(minutes) < 1",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "296",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 32,
+      "coveredBy": [
+        "453",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "467",
+        "468",
+        "469",
+        "470",
+        "472",
+        "473",
+        "474",
+        "476",
+        "477",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 63
+        },
+        "start": {
+          "column": 9,
+          "line": 63
+        }
+      },
+      "original": "Number(minutes) > 1440",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "297",
+      "mutatorName": "EqualityOperator",
+      "replacement": "Number(minutes) >= 1440",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 32,
+      "coveredBy": [
+        "453",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "467",
+        "468",
+        "469",
+        "470",
+        "472",
+        "473",
+        "474",
+        "476",
+        "477",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 63
+        },
+        "start": {
+          "column": 9,
+          "line": 63
+        }
+      },
+      "original": "Number(minutes) > 1440",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "305",
+      "mutatorName": "StringLiteral",
+      "replacement": "\"Stryker was here!\"",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 32,
+      "coveredBy": [
+        "453",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "467",
+        "468",
+        "469",
+        "470",
+        "472",
+        "473",
+        "474",
+        "476",
+        "477",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 69
+        },
+        "start": {
+          "column": 18,
+          "line": 69
+        }
+      },
+      "original": "\"\"",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "313",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 10,
+      "coveredBy": [
+        "456",
+        "458",
+        "462",
+        "463",
+        "465",
+        "467",
+        "473",
+        "488",
+        "489",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 83
+        },
+        "start": {
+          "column": 11,
+          "line": 83
+        }
+      },
+      "original": "controller.signal.aborted",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "316",
+      "mutatorName": "BooleanLiteral",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 9,
+      "coveredBy": [
+        "456",
+        "458",
+        "462",
+        "465",
+        "467",
+        "473",
+        "488",
+        "489",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 23,
+          "line": 85
+        },
+        "start": {
+          "column": 18,
+          "line": 85
+        }
+      },
+      "original": "false",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "314",
+      "mutatorName": "OptionalChaining",
+      "replacement": "lookup.current.abort",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 9,
+      "coveredBy": [
+        "456",
+        "458",
+        "462",
+        "465",
+        "467",
+        "473",
+        "488",
+        "489",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 28,
+          "line": 84
+        },
+        "start": {
+          "column": 7,
+          "line": 84
+        }
+      },
+      "original": "lookup.current?.abort",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "318",
+      "mutatorName": "BooleanLiteral",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 9,
+      "coveredBy": [
+        "456",
+        "458",
+        "462",
+        "465",
+        "467",
+        "473",
+        "488",
+        "489",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 28,
+          "line": 86
+        },
+        "start": {
+          "column": 23,
+          "line": 86
+        }
+      },
+      "original": "false",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "273",
+      "mutatorName": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 232,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "171",
+        "172",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "227",
+        "228",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "246",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "453",
+        "454",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "466",
+        "467",
+        "468",
+        "469",
+        "470",
+        "471",
+        "472",
+        "473",
+        "474",
+        "475",
+        "476",
+        "477",
+        "478",
+        "479",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "491",
+        "492",
+        "493",
+        "494",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 53,
+          "line": 54
+        },
+        "start": {
+          "column": 51,
+          "line": 54
+        }
+      },
+      "original": "[]",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "322",
+      "mutatorName": "BooleanLiteral",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 9,
+      "coveredBy": [
+        "456",
+        "458",
+        "462",
+        "465",
+        "467",
+        "473",
+        "488",
+        "489",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 89
+        },
+        "start": {
+          "column": 20,
+          "line": 89
+        }
+      },
+      "original": "false",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "375",
+      "mutatorName": "BooleanLiteral",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 4,
+      "coveredBy": [
+        "480",
+        "481",
+        "482",
+        "483"
+      ],
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 113
+        },
+        "start": {
+          "column": 22,
+          "line": 113
+        }
+      },
+      "original": "false",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "384",
+      "mutatorName": "OptionalChaining",
+      "replacement": "problem.errors.find(error => error.field === \"plannedMinutes\").message",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 1,
+      "coveredBy": [
+        "484"
+      ],
+      "location": {
+        "end": {
+          "column": 22,
+          "line": 119
+        },
+        "start": {
+          "column": 11,
+          "line": 118
+        }
+      },
+      "original": "problem.errors.find((error) => error.field === \"plannedMinutes\")\n            ?.message",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "386",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 1,
+      "coveredBy": [
+        "484"
+      ],
+      "location": {
+        "end": {
+          "column": 74,
+          "line": 118
+        },
+        "start": {
+          "column": 42,
+          "line": 118
+        }
+      },
+      "original": "error.field === \"plannedMinutes\"",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "393",
+      "mutatorName": "BooleanLiteral",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 1,
+      "coveredBy": [
+        "484"
+      ],
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 123
+        },
+        "start": {
+          "column": 22,
+          "line": 123
+        }
+      },
+      "original": "false",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "411",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 30,
+      "coveredBy": [
+        "453",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "467",
+        "468",
+        "469",
+        "470",
+        "472",
+        "473",
+        "476",
+        "477",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "486",
+        "487",
+        "488",
+        "489",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 71,
+          "line": 132
+        },
+        "start": {
+          "column": 11,
+          "line": 132
+        }
+      },
+      "original": "!controller.signal.aborted && command.current === controller",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "413",
+      "mutatorName": "LogicalOperator",
+      "replacement": "!controller.signal.aborted || command.current === controller",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 30,
+      "coveredBy": [
+        "453",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "467",
+        "468",
+        "469",
+        "470",
+        "472",
+        "473",
+        "476",
+        "477",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "486",
+        "487",
+        "488",
+        "489",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 71,
+          "line": 132
+        },
+        "start": {
+          "column": 11,
+          "line": 132
+        }
+      },
+      "original": "!controller.signal.aborted && command.current === controller",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "415",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 28,
+      "coveredBy": [
+        "453",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "462",
+        "463",
+        "464",
+        "465",
+        "467",
+        "468",
+        "469",
+        "470",
+        "472",
+        "473",
+        "476",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "486",
+        "487",
+        "488",
+        "489",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 71,
+          "line": 132
+        },
+        "start": {
+          "column": 41,
+          "line": 132
+        }
+      },
+      "original": "command.current === controller",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "470",
+      "mutatorName": "ArithmeticOperator",
+      "replacement": "value - 1",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 9,
+      "coveredBy": [
+        "454",
+        "467",
+        "475",
+        "476",
+        "478",
+        "480",
+        "489",
+        "491",
+        "640"
+      ],
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 183
+        },
+        "start": {
+          "column": 33,
+          "line": 183
+        }
+      },
+      "original": "value + 1",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "469",
+      "mutatorName": "ArrowFunction",
+      "replacement": "() => undefined",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 9,
+      "coveredBy": [
+        "454",
+        "467",
+        "475",
+        "476",
+        "478",
+        "480",
+        "489",
+        "491",
+        "640"
+      ],
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 183
+        },
+        "start": {
+          "column": 22,
+          "line": 183
+        }
+      },
+      "original": "(value) => value + 1",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "446",
+      "mutatorName": "StringLiteral",
+      "replacement": "``",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 232,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "171",
+        "172",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "227",
+        "228",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "246",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "453",
+        "454",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "466",
+        "467",
+        "468",
+        "469",
+        "470",
+        "471",
+        "472",
+        "473",
+        "474",
+        "475",
+        "476",
+        "477",
+        "478",
+        "479",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "491",
+        "492",
+        "493",
+        "494",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 159
+        },
+        "start": {
+          "column": 24,
+          "line": 159
+        }
+      },
+      "original": "`${id}-heading`",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "447",
+      "mutatorName": "StringLiteral",
+      "replacement": "``",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 232,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "171",
+        "172",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "227",
+        "228",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "246",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "453",
+        "454",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "466",
+        "467",
+        "468",
+        "469",
+        "470",
+        "471",
+        "472",
+        "473",
+        "474",
+        "475",
+        "476",
+        "477",
+        "478",
+        "479",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "491",
+        "492",
+        "493",
+        "494",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 30,
+          "line": 161
+        },
+        "start": {
+          "column": 15,
+          "line": 161
+        }
+      },
+      "original": "`${id}-heading`",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "506",
+      "mutatorName": "BooleanLiteral",
+      "replacement": "uncertain",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 54,
+      "coveredBy": [
+        "2",
+        "21",
+        "22",
+        "52",
+        "53",
+        "54",
+        "58",
+        "60",
+        "61",
+        "64",
+        "65",
+        "73",
+        "79",
+        "81",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "178",
+        "181",
+        "183",
+        "185",
+        "186",
+        "187",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "206",
+        "207",
+        "209",
+        "211",
+        "216",
+        "217",
+        "220",
+        "225",
+        "226",
+        "233",
+        "234",
+        "249",
+        "254",
+        "255",
+        "264",
+        "456",
+        "474"
+      ],
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 203
+        },
+        "start": {
+          "column": 25,
+          "line": 203
+        }
+      },
+      "original": "!uncertain",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "500",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 221,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "453",
+        "454",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "467",
+        "468",
+        "469",
+        "470",
+        "472",
+        "473",
+        "474",
+        "475",
+        "476",
+        "477",
+        "479",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "491",
+        "493",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 208
+        },
+        "start": {
+          "column": 12,
+          "line": 203
+        }
+      },
+      "original": "!eligible && !uncertain && (\n            <p>\n              Para iniciar trabajo necesitamos confirmar una tarea pendiente y\n              un proyecto no completado.\n            </p>\n          )",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "501",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 221,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "453",
+        "454",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "467",
+        "468",
+        "469",
+        "470",
+        "472",
+        "473",
+        "474",
+        "475",
+        "476",
+        "477",
+        "479",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "491",
+        "493",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 208
+        },
+        "start": {
+          "column": 12,
+          "line": 203
+        }
+      },
+      "original": "!eligible && !uncertain && (\n            <p>\n              Para iniciar trabajo necesitamos confirmar una tarea pendiente y\n              un proyecto no completado.\n            </p>\n          )",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "502",
+      "mutatorName": "LogicalOperator",
+      "replacement": "!eligible && !uncertain || <p>\n              Para iniciar trabajo necesitamos confirmar una tarea pendiente y\n              un proyecto no completado.\n            </p>",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 221,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "453",
+        "454",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "467",
+        "468",
+        "469",
+        "470",
+        "472",
+        "473",
+        "474",
+        "475",
+        "476",
+        "477",
+        "479",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "491",
+        "493",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 208
+        },
+        "start": {
+          "column": 12,
+          "line": 203
+        }
+      },
+      "original": "!eligible && !uncertain && (\n            <p>\n              Para iniciar trabajo necesitamos confirmar una tarea pendiente y\n              un proyecto no completado.\n            </p>\n          )",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "503",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 221,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "453",
+        "454",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "467",
+        "468",
+        "469",
+        "470",
+        "472",
+        "473",
+        "474",
+        "475",
+        "476",
+        "477",
+        "479",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "491",
+        "493",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 203
+        },
+        "start": {
+          "column": 12,
+          "line": 203
+        }
+      },
+      "original": "!eligible && !uncertain",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "505",
+      "mutatorName": "BooleanLiteral",
+      "replacement": "eligible",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 221,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "453",
+        "454",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "467",
+        "468",
+        "469",
+        "470",
+        "472",
+        "473",
+        "474",
+        "475",
+        "476",
+        "477",
+        "479",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "491",
+        "493",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 203
+        },
+        "start": {
+          "column": 12,
+          "line": 203
+        }
+      },
+      "original": "!eligible",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "504",
+      "mutatorName": "LogicalOperator",
+      "replacement": "!eligible || !uncertain",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 221,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "453",
+        "454",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "467",
+        "468",
+        "469",
+        "470",
+        "472",
+        "473",
+        "474",
+        "475",
+        "476",
+        "477",
+        "479",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "491",
+        "493",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 203
+        },
+        "start": {
+          "column": 12,
+          "line": 203
+        }
+      },
+      "original": "!eligible && !uncertain",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "547",
+      "mutatorName": "BooleanLiteral",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 16,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 23,
+          "line": 299
+        },
+        "start": {
+          "column": 18,
+          "line": 299
+        }
+      },
+      "original": "false",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "549",
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 16,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 48,
+          "line": 302
+        },
+        "start": {
+          "column": 41,
+          "line": 302
+        }
+      },
+      "original": "\"es-ES\"",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "551",
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 16,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 24,
+          "line": 304
+        },
+        "start": {
+          "column": 18,
+          "line": 304
+        }
+      },
+      "original": "\"long\"",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "552",
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 16,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 24,
+          "line": 305
+        },
+        "start": {
+          "column": 18,
+          "line": 305
+        }
+      },
+      "original": "\"long\"",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "560",
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 16,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 318
+        },
+        "start": {
+          "column": 17,
+          "line": 318
+        }
+      },
+      "original": "\" \"",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "561",
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 16,
+      "coveredBy": [
+        "456",
+        "457",
+        "458",
+        "462",
+        "465",
+        "467",
+        "471",
+        "473",
+        "476",
+        "478",
+        "480",
+        "488",
+        "489",
+        "492",
+        "640",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 26,
+          "line": 325
+        },
+        "start": {
+          "column": 23,
+          "line": 325
+        }
+      },
+      "original": "\" \"",
+      "initialResidual": true
+    },
+    {
+      "file": "src/work-session.tsx",
+      "id": "538",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "static": false,
+      "testsCompleted": 221,
+      "coveredBy": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "223",
+        "224",
+        "225",
+        "226",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "453",
+        "454",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "461",
+        "462",
+        "463",
+        "464",
+        "465",
+        "467",
+        "468",
+        "469",
+        "470",
+        "472",
+        "473",
+        "474",
+        "475",
+        "476",
+        "477",
+        "479",
+        "480",
+        "481",
+        "482",
+        "483",
+        "484",
+        "485",
+        "486",
+        "487",
+        "488",
+        "489",
+        "490",
+        "491",
+        "493",
+        "641"
+      ],
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 271
+        },
+        "start": {
+          "column": 17,
+          "line": 271
+        }
+      },
+      "original": "busy || uncertain",
+      "initialResidual": true
+    }
+  ]
+}

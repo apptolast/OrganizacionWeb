@@ -661,3 +661,33 @@ test("reschedule backend rejects non-mutation task before execution", () => {
   assert.throws(() => project("test", "reschedule-backend"), /Invalid target/);
   assert.deepEqual(calls, []);
 });
+
+test("start work replay limits PIT to its event record without replacing the original report", () => {
+  const { calls, project } = capture();
+  project("mutate", "start_work_session-backend-replay");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=start_work_session_replay"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  assert.match(
+    build,
+    /val startWorkSessionReplayOnly = scope == "start_work_session_replay"/,
+  );
+  assert.match(
+    build,
+    /startWorkSessionReplayOnly -> setOf\("com\.apptolast\.organization\.application\.WorkSessionStarted"\)/,
+  );
+  assert.match(
+    build,
+    /startWorkSessionReplayOnly -> setOf\("com\.apptolast\.organization\.\*"\)/,
+  );
+  assert.match(
+    build,
+    /if \(startWorkSessionReplayOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-start-work-session-replay"\)\)/,
+  );
+  assert.match(build, /mutationThreshold\.set\(80\)/);
+});

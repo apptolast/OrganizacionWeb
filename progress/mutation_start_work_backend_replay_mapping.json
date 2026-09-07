@@ -1,0 +1,123 @@
+[
+  {
+    "identity": "com.apptolast.organization.application.WorkSessionStarted|aggregateId|()Ljava/util/UUID;|6|org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator|5",
+    "killingTest": [
+      "com.apptolast.organization.adapter.WorkSessionIntegrationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WorkSessionIntegrationTest]/[method:s1_httpStartCommitsSessionAndEventWithMicroseconds()]"
+    ],
+    "matches": 1,
+    "replayStatus": [
+      "KILLED"
+    ],
+    "originalStatus": "KILLED"
+  },
+  {
+    "identity": "com.apptolast.organization.application.WorkSessionStarted|eventId|()Ljava/util/UUID;|6|org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator|5",
+    "killingTest": [
+      "com.apptolast.organization.application.StartWorkSessionTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.StartWorkSessionTest]/[method:s1_recordsOneRealStartAndEventWithFixedEnd()]"
+    ],
+    "matches": 1,
+    "replayStatus": [
+      "KILLED"
+    ],
+    "originalStatus": "KILLED"
+  },
+  {
+    "identity": "com.apptolast.organization.application.WorkSessionStarted|occurredAt|()Ljava/time/Instant;|6|org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator|5",
+    "killingTest": [
+      "com.apptolast.organization.adapter.WorkSessionIntegrationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WorkSessionIntegrationTest]/[method:s1_httpStartCommitsSessionAndEventWithMicroseconds()]"
+    ],
+    "matches": 1,
+    "replayStatus": [
+      "KILLED"
+    ],
+    "originalStatus": "KILLED"
+  },
+  {
+    "identity": "com.apptolast.organization.application.WorkSessionStarted|ownerId|()Ljava/lang/String;|6|org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator|5",
+    "killingTest": [
+      "com.apptolast.organization.adapter.persistence.WorkSessionPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WorkSessionPersistenceTest]/[method:s1_commitsRealStartAndEventWithoutChangingPlanning()]"
+    ],
+    "matches": 1,
+    "replayStatus": [
+      "KILLED"
+    ],
+    "originalStatus": "SURVIVED"
+  },
+  {
+    "identity": "com.apptolast.organization.application.WorkSessionStarted|plannedEndAt|()Ljava/time/Instant;|6|org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator|5",
+    "killingTest": [
+      "com.apptolast.organization.adapter.WorkSessionIntegrationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WorkSessionIntegrationTest]/[method:s1_httpStartCommitsSessionAndEventWithMicroseconds()]"
+    ],
+    "matches": 1,
+    "replayStatus": [
+      "KILLED"
+    ],
+    "originalStatus": "KILLED"
+  },
+  {
+    "identity": "com.apptolast.organization.application.WorkSessionStarted|plannedMinutes|()I|6|org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator|5",
+    "killingTest": [
+      "com.apptolast.organization.adapter.persistence.WorkSessionPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WorkSessionPersistenceTest]/[method:s1_commitsRealStartAndEventWithoutChangingPlanning()]"
+    ],
+    "matches": 1,
+    "replayStatus": [
+      "KILLED"
+    ],
+    "originalStatus": "SURVIVED"
+  },
+  {
+    "identity": "com.apptolast.organization.application.WorkSessionStarted|projectId|()Ljava/util/UUID;|6|org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator|5",
+    "killingTest": [
+      "com.apptolast.organization.adapter.persistence.WorkSessionPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WorkSessionPersistenceTest]/[method:s1_commitsRealStartAndEventWithoutChangingPlanning()]"
+    ],
+    "matches": 1,
+    "replayStatus": [
+      "KILLED"
+    ],
+    "originalStatus": "SURVIVED"
+  },
+  {
+    "identity": "com.apptolast.organization.application.WorkSessionStarted|schemaVersion|()I|6|org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator|5",
+    "killingTest": [
+      "com.apptolast.organization.adapter.persistence.WorkSessionPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WorkSessionPersistenceTest]/[method:s1_commitsRealStartAndEventWithoutChangingPlanning()]"
+    ],
+    "matches": 1,
+    "replayStatus": [
+      "KILLED"
+    ],
+    "originalStatus": "KILLED"
+  },
+  {
+    "identity": "com.apptolast.organization.application.WorkSessionStarted|taskId|()Ljava/util/UUID;|6|org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator|5",
+    "killingTest": [
+      "com.apptolast.organization.adapter.persistence.WorkSessionPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WorkSessionPersistenceTest]/[method:s1_commitsRealStartAndEventWithoutChangingPlanning()]"
+    ],
+    "matches": 1,
+    "replayStatus": [
+      "KILLED"
+    ],
+    "originalStatus": "SURVIVED"
+  },
+  {
+    "identity": "com.apptolast.organization.application.WorkSessionStarted|type|()Ljava/lang/String;|6|org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator|5",
+    "killingTest": [
+      "com.apptolast.organization.adapter.WorkSessionIntegrationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.WorkSessionIntegrationTest]/[method:s1_httpStartCommitsSessionAndEventWithMicroseconds()]"
+    ],
+    "matches": 1,
+    "replayStatus": [
+      "KILLED"
+    ],
+    "originalStatus": "KILLED"
+  },
+  {
+    "identity": "com.apptolast.organization.application.WorkSessionStarted|zoneId|()Ljava/lang/String;|6|org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator|5",
+    "killingTest": [
+      "com.apptolast.organization.adapter.persistence.WorkSessionPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.WorkSessionPersistenceTest]/[method:s1_commitsRealStartAndEventWithoutChangingPlanning()]"
+    ],
+    "matches": 1,
+    "replayStatus": [
+      "KILLED"
+    ],
+    "originalStatus": "SURVIVED"
+  }
+]

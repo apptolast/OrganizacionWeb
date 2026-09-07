@@ -44,6 +44,7 @@ pitest {
     val todayOnly = scope == "today"
     val rescheduleOnly = scope == "reschedule"
     val startWorkSessionOnly = scope == "start_work_session"
+    val startWorkSessionReplayOnly = scope == "start_work_session_replay"
     val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
     val authenticationClasses = setOf(
         "com.apptolast.organization.adapter.http.SessionController",
@@ -206,6 +207,7 @@ pitest {
         "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher"
     )
     targetClasses.set(when {
+        startWorkSessionReplayOnly -> setOf("com.apptolast.organization.application.WorkSessionStarted")
         startWorkSessionOnly -> startWorkSessionClasses
         rescheduleOnly -> rescheduleClasses
         todayOnly -> todayClasses
@@ -218,6 +220,7 @@ pitest {
         else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses
     })
     targetTests.set(when {
+        startWorkSessionReplayOnly -> setOf("com.apptolast.organization.*")
         startWorkSessionOnly -> setOf("com.apptolast.organization.*")
         rescheduleOnly -> rescheduleTests
         todayOnly -> todayTests
@@ -231,6 +234,7 @@ pitest {
     })
     if (rescheduleOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-reschedule"))
     if (startWorkSessionOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-start-work-session"))
+    if (startWorkSessionReplayOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-start-work-session-replay"))
     if (todayOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-today"))
     if (availabilityOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-availability"))
     if (scheduleBlockOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-schedule-block"))

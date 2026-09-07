@@ -155,10 +155,10 @@
       "id": 14,
       "name": "start_work_session",
       "title": "Iniciar sesión de trabajo",
-      "description": "Iniciar trabajo propio con duración explícita, fin previsto fijo y recibo inmutable recuperable; contrato14 revisado y aprobado, implementación en curso sin pausa ni cierre.",
-      "acceptance": ["Cumplir @s1–@s42 de features/start_work_session.feature, incluidos los contratos comunes heredados, antes de cerrar; cada ejemplo requiere evidencia propia sin atribuir su declaración a una prueba ejecutada."],
+      "description": "Inicio propio con duración explícita, fin previsto fijo y recibo inmutable recuperable, validado y aprobado en judge_start_work_final.md; pausa y cierre pertenecen a15–16, sin habilitación de uso habitual ni despliegue.",
+      "acceptance": ["Contrato @s1–@s42 acreditado por start_work_contract_evidence.md y revisión de evidencia compuesta; no se equiparan ejemplos declarados a pruebas ejecutadas.", "Pruebas integradas, API/PostgreSQL/Rabbit, recuperación y UX revisadas; campañas completas PIT y Stryker superiores al80%, con residuos y límites preservados en judge_start_work_final.md."],
       "sdd": true,
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 15,

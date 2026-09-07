@@ -1229,3 +1229,74 @@ no afirman descanso; zona inválida explícita400, preferencia desaparecidaUTC;
 clock atrasado409; datos ajenos excluidos; writer entre lecturas no mezcla
 snapshot; reinicio/outbox retirado conservan resultado salvo serverNow live;
 respuesta antigua tras cambio de semana o logout no repuebla la pantalla.
+
+## Feature 20 — apariencia: contrato propuesto para revisión
+
+### Propósito y límite
+
+Personalizar la presentación propia sin cambiar proyectos, tareas, planificación, trabajo, presupuesto ni hechos históricos. Se conservan los contratos 1–19. Este incremento admite exactamente tres preferencias editables: `theme`, `accentLight` y `accentDark`. Tema LIGHT/DARK/SYSTEM; dos colores de acento libres validados. La personalización amplia sigue incremental: densidad, tipografía, disposición, vistas/campos, plantillas y automatizaciones no se implementan ni se declaran cubiertas en 20. Sin CSS/HTML, nombres de color, imágenes, transparencias o código aportados por el usuario.
+
+### Colores, roles y contraste
+
+Entradas de color: cadena exacta `#[0-9a-fA-F]{6}`, sin recorte; se normaliza a mayúsculas al confirmar. No se aceptan #RGB, alfa, rgb(), var(), URL ni cadenas vacías. Defaults: `SYSTEM`, `#244C3C` para claro y `#B7E4C7` para oscuro. No se aclara/oscurece silenciosamente un color inválido.
+
+El acento efectivo cambia sólo: texto de enlaces de acción (incluida navegación), relleno de la acción primaria y su indicador, borde/indicador de selección y contorno de foco. El estado seleccionado sigue identificado mediante texto/semántica y forma/borde, nunca sólo color. Enlaces mantienen distinción no cromática. Error, advertencia, éxito, texto normal y texto secundario usan roles semánticos seguros del tema, no el acento del usuario. No modifica dimensiones, orden, visibilidad ni contenido.
+
+Superficies opacas sobre las que puede aparecer el acento:
+
+| Rol | Claro | Oscuro |
+| --- | --- | --- |
+| Lienzo | #F8F9F5 | #111827 |
+| Panel | #FFFFFF | #1F2937 |
+| Control editable | #FDFEFB | #182232 |
+| Navegación secundaria | #EEF1E9 | #0B1220 |
+| Selección | #DFE8D9 | #28394A |
+| Hover | #D0DFC9 | #33485C |
+
+Cada acento debe alcanzar contraste **≥4,5:1 contra las seis superficies de su tema**, incluso si ese tema no está activo. Esto protege su uso como texto y supera el mínimo interno de 3:1 para indicadores/foco. Los acentos no se dibujan encima de otros fondos sin una de estas superficies; en particular avisos semánticos y tarjetas decorativas conservan sus colores seguros y colocan acciones en una superficie definida. La acción primaria utiliza el acento como fondo; su texto es #000000 o #FFFFFF, el que dé mayor contraste (empate: negro), y debe alcanzar 4,5:1. Hover no mezcla/transluce el acento: cambia la superficie neutral o añade una señal de forma, preservando los contrastes.
+
+Se usa luminancia relativa sRGB: canal c=byte/255; si c≤0,04045, cLineal=c/12,92, en otro caso ((c+0,055)/1,055)^2,4. L=0,2126R+0,7152G+0,0722B. Contraste=(max(L1,L2)+0,05)/(min(L1,L2)+0,05). Comparar el valor completo con 4,5, sin redondeo ni tolerancia para aceptar. Referencia primaria: [WCAG 2.2, contraste mínimo](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum). La elección uniforme de roles/superficies es del producto, no una certificación automática de accesibilidad.
+
+Claro/oscuro se aplican a todas las superficies existentes, incluidas login, formularios, errores, listas, sesión, historial y revisión semanal. Se reutilizan tokens SCSS; no rediseño de layouts ni filtros CSS de inversión. Texto normal/secundario y errores conservan contraste al menos 4,5:1; bordes indispensables, controles y foco al menos 3:1 sobre sus fondos reales. No se colorean arbitrariamente los valores históricos. Controles nativos usan `color-scheme` coherente. Preferencia `prefers-reduced-motion` y forced-colors se respetan; sin animación obligatoria ni desactivar colores forzados del usuario.
+
+El anillo de foco se dibuja fuera del botón acentuado, separado por superficie neutral/offset; nunca se valida acento contra su propio relleno. Con colores forzados se permiten los colores del sistema operativo, preservando visibilidad y semántica, sin imponer el color guardado.
+
+### Recurso privado y concurrencia
+
+GET y PUT `/api/v1/me/appearance`, sin parámetros de consulta. Propietario únicamente desde Principal; no owner en DTO, query, ruta o cuerpo. Sesión, origen, CSRF de PUT, JSON estricto, problem+json y no-store reutilizan los contratos comunes. GET no necesita CSRF. No hay ruta por identificador ajeno.
+
+GET 200 devuelve exactamente `{configured,theme,accentLight,accentDark,updatedAt}`. Sin fila: false, SYSTEM, #244C3C, #B7E4C7 y null, con ETag fuerte literal `"appearance:unconfigured"`; no inserta. Configurada: true, los tres valores canónicos y updatedAt UTC en años 0001–9999 con precisión máxima de microsegundos; ETag `"appearance:<uuid canónico minúsculo>:<versión decimal canónica BIGINT no negativa>"`. No se serializa la versión como número JSON. UUID/versión son internos, no texto de interfaz. El tag y cuerpo salen del mismo snapshot.
+
+PUT reemplaza exactamente los tres campos, exige un único If-Match fuerte con el formato anterior. Devuelve 200 con la misma forma de GET y el nuevo ETag después del commit; sin Location ni clave de idempotencia. No hay PATCH/DELETE/reset separado. Restaurar defaults usa este mismo PUT con los tres valores por defecto: conserva fila y control de revisión, no simula que jamás existió configuración.
+
+Una fila por owner_id UNIQUE, UUID propio, versión BIGINT, tres valores y updatedAt. Primer guardado versión 0; cambio real incrementa una vez. Primero comprobar identidad/revisión propia en la transacción, después comparar valores canónicos. No-op con revisión vigente conserva exactamente cuerpo/tag/fecha; incluso distinta capitalización de entrada es no-op tras normalizar. Revisión antigua produce 412 aunque los valores ya coincidan. Dos altas desde ausencia producen un 200 y un 412. Actualización usa bloqueo/condición por propietario, no bloqueo global. Guardado real con versión máxima o almacenamiento incapaz de confirmar produce 503 y ninguna modificación; no-op máximo válido no incrementa. updatedAt es máximo entre instante previo y reloj truncado a microsegundos. El límite temporal no se desborda al emitir DTO.
+
+Fallo PostgreSQL antes del commit revierte; pérdida de respuesta después puede haber confirmado. Reinicio del proceso y nuevo navegador recuperan la preferencia propia. No hay localStorage como autoridad, ni persistencia privada anterior al login. No se crea evento/outbox en 20, conforme al precedente de disponibilidad: no existe consumidor de preferencia personal; no se inventa un proyecto/agregado ni se altera la historia. No se anuncia un cambio EDA inexistente. Migración aditiva, sin reescribir migraciones anteriores ni hechos 1–19.
+
+El no-op válido no consulta el reloj, también en versión máxima. En alta o cambio real, reloj que falla o cuyo instante queda fuera de años 0001–9999 produce 503 STORAGE_UNAVAILABLE sin escritura; no se recorta al límite ni se serializa año ampliado. Una fila existente corrupta o incompatible al leer produce 503 STORAGE_UNAVAILABLE, nunca defaults. Validación de los tres valores precede a acceso transaccional; identidad/revisión se comprueban bajo la exclusión propia antes del no-op y de capturar tiempo nuevo.
+
+### Validación y errores
+
+Precedencia: seguridad y negociación HTTP heredadas (incluido 415) antes del handler; query desconocida/repetida, If-Match, JSON/campos, revisión en almacenamiento. Cualquier query: 400 VALIDATION_ERROR de query, incluso con falta de If-Match. If-Match ausente: 428 PRECONDITION_REQUIRED; débil, lista, repetido, otro recurso, UUID no canónico o versión fuera de BIGINT: 400 VALIDATION_ERROR campo If-Match. Tag bien formado que no coincide con fila propia: 412 APPEARANCE_CONFLICT, sin datos ajenos. Fallo de lectura/guardado: 503 STORAGE_UNAVAILABLE, nunca defaults presentados como ausencia confirmada. Campos/códigos usan la forma problem existente, sin SQL/stack/secretos.
+
+JSON ausente/vacío/malformado/duplicado/concatenado: 400 MALFORMED_JSON. Objeto obligatorio. Orden de validación: forma body; extras raíz en orden léxico; theme; accentLight; accentDark. Ausente/null: REQUIRED; tipo distinto de cadena: INVALID_TYPE; extra: UNKNOWN_FIELD; enum/formato inválidos: INVALID_VALUE; color bien formado con contraste insuficiente: INSUFFICIENT_CONTRAST. Cada fallo se asocia a su campo. Theme distingue mayúsculas exactas. Revisión se comprueba antes de no-op pero después de validar la entrada.
+
+Decoder cliente comprueba JSON cerrado, booleano configured, tres valores/contrastes, updatedAt y ETag coherentes con configured. false requiere exactamente defaults/null y tag unconfigured; true requiere timestamp/tag configurado válidos. No reinterpreta una respuesta configurada inválida como defaults. PUT válido exige además que valores canónicos coincidan con la intención enviada. Problemas se clasifican sólo si HTTP/status/code/type son coherentes; errores desconocidos no se convierten en éxito ni ausencia. Mantener guards después de cada await y antes del observador de acceso, también HTTP 401 tardío.
+
+### Presentación y recuperación
+
+Ruta exacta `/apariencia`, accesible desde Principal como Apariencia y conservada en retorno tras login/Back/recarga. Una carga propia por sesión activa, compartida entre shell/página para no crear lecturas incompatibles al navegar. Al iniciar sin snapshot, se usa provisionalmente SYSTEM/defaults seguros; fallo de GET se anuncia como no cargado con Reintentar, no como preferencia guardada. Tras 401/logout se retiran snapshot y borrador propios y se vuelve a defaults; un login distinto no hereda preferencias del anterior. No bloquear el acceso al resto del producto por un fallo de apariencia.
+
+Con SYSTEM, la apariencia efectiva sigue `prefers-color-scheme: dark`; si no se puede consultar, claro. Cambio del sistema mientras montado actualiza sólo presentación, no PUT ni preferencia guardada. LIGHT/DARK ignoran ese cambio. Navegación interna conserva preferencia confirmada sin recargarla por cada ruta. Al volver de suspensión/visibilidad, se resuelve el valor actual del medio sin temporizadores de sondeo.
+
+Formulario con grupo Tema (Claro, Oscuro, Sistema), dos controles de color nativos acompañados de entradas hexadecimales etiquetadas, Guardar apariencia y Restaurar valores predeterminados. Los dos controles de cada color representan un solo valor. Vista previa local rotulada muestra ambos temas, enlace, botón y foco; no aplica borrador al shell ni guarda al editar. Un color inválido conserva texto, muestra error y no se aplica ni a la muestra; muestra conserva último color seguro con explicación. Ayuda en español normal, sin diagnósticos de ETag/owner/SQL. La muestra no ejecuta operaciones de negocio.
+
+Restaurar prepara SYSTEM y los dos defaults, anuncia cambios pendientes y requiere Guardar; es reversible antes de guardar. Aviso de que salir pierde cambios sin guardar; Cancelar cambios vuelve al snapshot confirmado sin HTTP. Guardar espera valores válidos y versión leída, anuncia carga antes de 400 ms, bloquea duplicados y conserva foco cuando el control sigue. Confirmación válida actualiza snapshot, formulario y shell juntos. No éxito optimista, ni cambiar tareas, fechas o trabajo.
+
+400 de campo conserva borrador y permite corregir. 412, red, 503 o confirmación inválida dejan estado sin confirmar y prohíben otro PUT hasta Recargar versión guardada; texto explica que esta consulta reemplazará el borrador. Sólo GET válido reemplaza juntos valores/ETag/borrador y libera una nueva intención manual. Fallo de esa consulta conserva borrador y mantiene incertidumbre. No GET/PUT de reenvío automático, no comparación que convierta igualdad en recibo de una intención perdida; no se afirma quién guardó los valores recuperados.
+
+Lecturas viejas quedan invalidadas al comenzar escritura y al confirmar; una respuesta anterior no restaura el tema/ETag ni borra el borrador actual. Lecturas/PUT cancelados al salir de la sesión no aplican datos ni disparan observador 401 sobre otra sesión. Nueva ruta no descarta la apariencia global confirmada, pero sí el borrador local abandonado. Foco del encabezado al entrar; tras desaparecer un iniciador se devuelve al encabezado sólo si el usuario no movió el foco deliberadamente. Errores de campo enlazan descripción y aria-invalid; estados de espera y recuperación son anunciados.
+
+### Evidencia exigida antes del cierre
+
+TDD individual, HTTP/PG reales con aislamiento de propietarios, no-op/revisión/carreras/rollback y recuperación tras reinicio. E2E guardar, recargar, SYSTEM y reset real; contraste de ambas variantes y colores arbitrarios aceptados en roles efectivos de pantallas existentes (también error/disabled/foco). Revisión de 30 principios completa en informe UX, con todas las filas y límites explícitos. Matriz responsive de docs/ux-requirements: 320–2560 y lados de breakpoints, alturas reducidas, texto/zoom nativo 200 %, teclado y 44×44, Chromium/Firefox/WebKit, movimiento reducido/forced-colors. No atribuir dispositivos físicos o facilidad psicológica universal a emulación o axe. No implementación ni spec_ready hasta revisión root del contrato y Gherkin.

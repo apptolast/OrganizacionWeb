@@ -2,9 +2,9 @@
 
 ## Estado
 
-Feature16 close_work_session está done y su dictamen final APPROVED: progress/judge_close_work_session_final.md. Contrato41 escenarios/113 ejemplos declarados, sin equipararlos al número de tests. Feature15 está fusionada en main b2ea1f211068e7d93c74d0a8d7e8717ec04323c3, CI34078825723 SUCCESS. Feature17 aviso/ampliación y18 historial siguen pendientes;19–30 autorizadas después del MVP. Hoy es objetivo, no garantía ni predicción de cuota. A revisa la estimación tras cerrar16.
+Feature16 close_work_session está done y su dictamen final APPROVED: progress/judge_close_work_session_final.md. Contrato41 escenarios/113 ejemplos declarados, sin equipararlos al número de tests. Feature15 está fusionada en main b2ea1f211068e7d93c74d0a8d7e8717ec04323c3, CI34078825723 SUCCESS. Feature17 aviso/ampliación y18 historial siguen pendientes;19–30 autorizadas después del MVP. Hoy es objetivo, no garantía ni predicción de cuota. Estimación revisada:8–15hsoftware y4–8hdespliegue condicionado, docs/mvp-delivery-plan.md.
 
-COMMON OrganizacionWeb-backend, rama codex/close-work-session. PR15 draft: root publica el corte final tras integrar602cf39 y documentos. Última CI34082838516 SUCCESS sobre910f405, init/build/E2E/publicador. La nueva publicación requiere su CI antes de ready/merge y comprobación posterior de main. User realiza squash desde GitHub; Claude parado, no volver a preguntar por origen. Root sólo revisión/documentación/Git; agentes escriben producción/tests.
+COMMON OrganizacionWeb-backend, rama codex/end-time-notification desde6c0a2bf. PR15 draft conserva rama codex/close-work-session en6c0a2bf; CI34084817356 activo, watchroot77261, init/build ya verdes y E2E en curso. No publicar cambios17 en esa rama. Última CI34082838516 SUCCESS sobre910f405, init/build/E2E/publicador. La nueva publicación requiere su CI antes de ready/merge y comprobación posterior de main. User realiza squash desde GitHub; Claude parado, no volver a preguntar por origen. Root sólo revisión/documentación/Git; agentes escriben producción/tests.
 
 ## Gates finales16
 
@@ -18,7 +18,7 @@ Refuerzos revisados8ecf0f8/602cf39 no cambian producción. ReplayPIT7/7K EXIT0e0
 
 ## Trabajo17
 
-C Fermat convierte propuesta_end_time_notification.md en sección normativa17, todavía sin código ni Gherkin. Root ratificó fin efectivo separado, plannedEndAt original inmutable, ampliación explícita1–1440minutos desde max(fin,now), revisión compartida, changedAt/runningSince/intervalos intactos, marca interna de última decisión para validar reloj sin relajar State6. Revisar normativa antes de Gherkin y revisión independiente. B terminó cierre16; A prepara revisión de estimación restante. No implementación17 hasta contrato previo revisado, autorización global vigente sin preguntar otra vez.
+Normativa17 revisada e integrada en63edc64, project-spec SHA2F44F439F7ED17E19CAE470B911257A3C380321EF20E41E75F09B35FB10ACE02. B retiró CHANGES_REQUESTED y aprobó para Gherkin; A Jason destila ahora escenarios. C Fermat terminó normativa. Todavía no hay implementación17. Root ratificó fin efectivo separado, plannedEndAt original inmutable, ampliación explícita1–1440minutos desde max(fin,now), revisión compartida, changedAt/runningSince/intervalos intactos, marca interna de última decisión para validar reloj sin relajar State6. Revisar normativa antes de Gherkin y revisión independiente. B prepara integración frontend mínima y revisará Gherkin de A; C prepara dependencias/compilación en OrganizacionWeb-end-http rama codex/end-time-http desde63edc64. La estimación revisada ya está en28f299c. No implementación17 hasta contrato previo revisado, autorización global vigente sin preguntar otra vez.
 
 ## Despliegue y seguridad operativa
 

@@ -83,6 +83,32 @@ function fixture(
             headers: { Location: `/api/v1/work-sessions/${projectId}` },
           },
         );
+      if (url === `/api/v1/work-sessions/${projectId}/state`)
+        return Response.json(
+          {
+            state: {
+              session: {
+                id: projectId,
+                projectId,
+                taskId,
+                startedAt: time,
+                plannedMinutes: 25,
+                plannedEndAt: "2026-09-06T10:25:00Z",
+                zoneId: "UTC",
+              },
+              status: "running",
+              revision: "1",
+              changedAt: time,
+              workedMicroseconds: "0",
+              runningSince: time,
+            },
+            serverNow: time,
+            netMicroseconds: "0",
+          },
+          {
+            headers: { "Work-Session-Revision": `work-session-${projectId}-1` },
+          },
+        );
       unexpected.push(url);
       throw new Error("Unexpected request " + url);
     }),

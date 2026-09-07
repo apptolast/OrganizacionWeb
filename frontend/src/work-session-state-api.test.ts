@@ -870,14 +870,12 @@ it("@s32 ignores a contradictory status in a recognized change problem", async (
 it("@s16 accepts an unchanged replay receipt at HTTP200", async () => {
   vi.stubGlobal(
     "fetch",
-    vi
-      .fn()
-      .mockResolvedValue(
-        Response.json(receipt, {
-          status: 200,
-          headers: { Location: `/api/v1/work-session-changes/${receipt.id}` },
-        }),
-      ),
+    vi.fn().mockResolvedValue(
+      Response.json(receipt, {
+        status: 200,
+        headers: { Location: `/api/v1/work-session-changes/${receipt.id}` },
+      }),
+    ),
   );
   await expect(
     changeWorkSession({ state, token, key, action: "PAUSE" }),

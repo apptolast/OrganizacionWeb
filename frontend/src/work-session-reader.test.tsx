@@ -7,6 +7,7 @@ import {
   screen,
   fireEvent,
   act,
+  waitFor,
 } from "@testing-library/react";
 import { WorkSessionReader } from "./work-session-reader";
 const session = {
@@ -1072,4 +1073,170 @@ it("@s40 a disappearing focused confirm button transfers focus to the session he
   expect(
     screen.getByRole("heading", { name: "Sesión de trabajo" }),
   ).toHaveFocus();
+});
+
+it("@s38 a late active HTTP401 after confirmed close cannot revoke the new reader access", async () => {
+  let finishActive!: (response: Response) => void;
+  const pendingActive = new Promise<Response>((resolve) => {
+    finishActive = resolve;
+  });
+  const nextSession = {
+    ...session,
+    id: "62345678-1234-1234-1234-123456789abc",
+  };
+  const fetcher = vi.fn().mockImplementation((url: string) => {
+    if (url === "/api/v1/work-sessions/active") return pendingActive;
+    if (url === `/api/v1/work-sessions/${session.id}/close`)
+      return Promise.resolve(
+        Response.json(receipt, {
+          status: 201,
+          headers: { Location: `/api/v1/work-session-changes/${receipt.id}` },
+        }),
+      );
+    if (
+      url === `/api/v1/work-sessions/${session.id}/state` ||
+      url === `/api/v1/work-sessions/${nextSession.id}/state`
+    ) {
+      const selected = url.includes(nextSession.id) ? nextSession : session;
+      return Promise.resolve(
+        Response.json(
+          {
+            state: { ...before, session: selected },
+            serverNow: before.changedAt,
+            netMicroseconds: "0",
+          },
+          {
+            headers: {
+              "Work-Session-Revision": `work-session-${selected.id}-1`,
+            },
+          },
+        ),
+      );
+    }
+    throw new Error(`Unexpected request ${url}`);
+  });
+  vi.stubGlobal("fetch", fetcher);
+  const access = vi.fn();
+  observeAccess(access);
+  const view = render(<WorkSessionReader {...props} />);
+  fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
+    target: { value: closure.progressNote },
+  });
+  fireEvent.change(screen.getByLabelText("Siguiente paso (opcional)"), {
+    target: { value: closure.nextStep },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
+  expect(await screen.findByText("Sesión cerrada")).toBeVisible();
+  expect(screen.getByText("Consultando sesión abierta")).toBeVisible();
+  await waitFor(() =>
+    expect(
+      fetcher.mock.calls.filter(
+        ([url]) => url === "/api/v1/work-sessions/active",
+      ),
+    ).toHaveLength(1),
+  );
+  view.rerender(<WorkSessionReader {...props} id={nextSession.id} />);
+  const currentNote = await screen.findByLabelText("Avance anotado (opcional)");
+  fireEvent.change(currentNote, { target: { value: "Nueva nota segura" } });
+  await act(async () => {
+    finishActive(new Response(null, { status: 401 }));
+    await pendingActive;
+  });
+  expect(access).not.toHaveBeenCalled();
+  expect(currentNote).toHaveValue("Nueva nota segura");
+  expect(screen.queryByText(closure.progressNote)).not.toBeInTheDocument();
+  expect(screen.queryByText("Sesión cerrada")).not.toBeInTheDocument();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+});
+
+it("@s5 associates a progress-only note error without marking the valid next step invalid", async () => {
+  const fetcher = vi.fn().mockResolvedValue(
+    Response.json(
+      {
+        state: before,
+        serverNow: before.changedAt,
+        netMicroseconds: "0",
+      },
+      { headers: { "Work-Session-Revision": `work-session-${session.id}-1` } },
+    ),
+  );
+  vi.stubGlobal("fetch", fetcher);
+  render(<WorkSessionReader {...props} />);
+  const progress = await screen.findByLabelText("Avance anotado (opcional)");
+  const next = screen.getByLabelText("Siguiente paso (opcional)");
+  fireEvent.change(progress, { target: { value: "🧭".repeat(2001) } });
+  fireEvent.change(next, { target: { value: "Continuar mañana" } });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
+  const error = screen.getByRole("alert");
+  expect(progress).toHaveAttribute("aria-invalid", "true");
+  expect(next).toHaveAttribute("aria-invalid", "false");
+  expect(progress).toHaveAttribute("aria-describedby", error.id);
+  expect(progress).toHaveAccessibleDescription(error.textContent!);
+  expect(next).toHaveValue("Continuar mañana");
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});
+
+it("@s40 retrying the active lookup announces pending and coalesces another click", async () => {
+  let activeCalls = 0;
+  const fetcher = vi.fn().mockImplementation((url: string) => {
+    if (url === "/api/v1/work-sessions/active") {
+      activeCalls += 1;
+      return activeCalls === 1
+        ? Promise.resolve(new Response(null, { status: 503 }))
+        : new Promise<Response>(() => {});
+    }
+    if (url === `/api/v1/work-sessions/${session.id}/state`)
+      return Promise.resolve(
+        Response.json(
+          {
+            state: before,
+            serverNow: before.changedAt,
+            netMicroseconds: "0",
+          },
+          {
+            headers: {
+              "Work-Session-Revision": `work-session-${session.id}-1`,
+            },
+          },
+        ),
+      );
+    if (url === `/api/v1/work-sessions/${session.id}/close`)
+      return Promise.resolve(
+        Response.json(receipt, {
+          status: 201,
+          headers: { Location: `/api/v1/work-session-changes/${receipt.id}` },
+        }),
+      );
+    throw new Error(`Unexpected request ${url}`);
+  });
+  vi.stubGlobal("fetch", fetcher);
+  render(<WorkSessionReader {...props} />);
+  fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
+    target: { value: closure.progressNote },
+  });
+  fireEvent.change(screen.getByLabelText("Siguiente paso (opcional)"), {
+    target: { value: closure.nextStep },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
+  await screen.findByText(
+    "No se ha podido consultar si hay otra sesión abierta.",
+  );
+  const retry = screen.getByRole("button", {
+    name: "Consultar sesión abierta",
+  });
+  retry.focus();
+  fireEvent.click(retry);
+  expect(screen.getByText("Consultando sesión abierta")).toHaveAttribute(
+    "role",
+    "status",
+  );
+  expect(retry).toHaveAttribute("aria-disabled", "true");
+  expect(retry).toHaveFocus();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  fireEvent.click(retry);
+  await waitFor(() => expect(activeCalls).toBe(2));
+  expect(
+    fetcher.mock.calls.filter(([url]) => url.endsWith("/close")),
+  ).toHaveLength(1);
+  expect(screen.getByText(closure.progressNote)).toBeVisible();
 });

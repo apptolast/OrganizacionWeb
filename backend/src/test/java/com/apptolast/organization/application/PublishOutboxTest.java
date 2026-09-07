@@ -13,6 +13,16 @@ import org.junit.jupiter.api.Test;
 
 class PublishOutboxTest {
   @Test
+  void closeWork_s29_publishesFirstValidCalendarYear() throws Exception {
+    var source = closedAt(Instant.parse("0001-01-01T00:00:00Z"));
+    var payload = new HashMap<>(source.payload());
+    payload.put("workDate", "0001-01-01");
+    payload.put("closeZoneId", "UTC");
+    payload.put("workedMicroseconds", "0");
+    assertStartedPublished(stateChangedWith(source, payload));
+  }
+
+  @Test
   void closeWork_s29_redeliversAfterLostConfirmation() throws Exception {
     assertEventRetry(closedMessage(), DeliveryOutcome.CONFIRM_TIMEOUT);
   }

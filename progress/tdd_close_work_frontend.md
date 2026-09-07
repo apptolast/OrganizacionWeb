@@ -102,3 +102,17 @@ Validación del corte: 306/306 en8 archivos GREEN7d6cdd. El comando también men
 - @s41: SCSS/marcado preparados, evidencia UX real pendiente. No feature17/18.
 
 Se entrega implementación para revisión independiente, no aprobación global de feature16. Producción frontend congelada al comunicar hashes; sólo documentación puede ampliarse mientras review.
+
+## Refuerzo dirigido después de Stryker16
+
+Root conservó la campaña original y sus90hashes antes de autorizar este cambio. Se añade **un solo oráculo público**, correspondiente al superviviente611: tras CLOSE201 válido, GETactive permanece pendiente; se cambia de recurso, se escribe en el lector nuevo y se entrega el HTTP401 antiguo. El observer de acceso no se invoca, el borrador nuevo permanece y no reaparecen recibo/errores anteriores. Es HTTP pendiente, no un401 simulado dentro deJSON.
+
+Primera ejecución focal inicialmente GREENb56cc4. Al ejecutar el archivo completo,8ec604 detectó una sincronización insuficiente del nuevo fixture: el anuncio puede estar renderizado antes de que el efecto lanceGETactive. Se espera explícitamente que esa petición haya comenzado antes de navegar, preservando el mismo oráculo. No defecto de producción ni RED de mutante afirmado. Suite30/30 GREEN1ac7d7; formato/ESLint85495e. Sólo import waitFor y un test añadido (75líneas); no se modifican otros casos ni fuentes.
+
+Freeze del test: SHA256A39F55F09EF9F4F57F6A31FA9D989DC6464CF07804CB039F7EEED7833038243D. Reader productivo conservaC7FB07A1B05B47938ADD0B46EE41E5728687DC92BA7D608970D5C22B9097E4F2. El resultado original de mutación permanece intacto; replay dirigido y revisión corresponden a A/root, no se ejecutaron aquí. Sin Gradle, globales ni runner18080.
+
+### Dos refuerzos finales de Reader autorizados
+
+Se añadieron uno a uno, sin producción ni otros casos: primero progressNote de2001puntos con nextStep válido, aria-invalid diferenciado, aria-describedby y descripción accesible enlazadas al error, texto válido conservado y ningún POST: inicialmente GREEN385bbf. Después cierre201 y A503, reintento GETactive pendiente con anuncio de carga, foco/aria-disabled y segundo clic sin duplicar consulta, conservando recibo: inicialmente GREEN3b5e46.
+
+Formato y archivo completo32/32 GREEN8dea17; ESLint ea2a76. No se afirma que hayan matado mutantes antes del replay dirigido. Freeze renovado test SHA FE9CFF2684A1E51EC8BA3EF9AFFE197CE29E6942CFEF704D51825EC39369ACDF; Reader productivo conservaC7FB07A1B05B47938ADD0B46EE41E5728687DC92BA7D608970D5C22B9097E4F2. Campaña original intacta, sin Gradle/global/E2E propio.

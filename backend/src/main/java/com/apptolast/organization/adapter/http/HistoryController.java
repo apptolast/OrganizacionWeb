@@ -10,7 +10,11 @@ import org.springframework.web.bind.annotation.*;
 public final class HistoryController {
   private final ReadHistoryUseCase history;
 
-  public HistoryController(ReadHistoryUseCase history) {
+  private final com.fasterxml.jackson.databind.ObjectMapper json;
+
+  public HistoryController(
+      ReadHistoryUseCase history, com.fasterxml.jackson.databind.ObjectMapper json) {
+    this.json = json;
     this.history = history;
   }
 
@@ -19,7 +23,8 @@ public final class HistoryController {
   @GetMapping
   public PageResponse list(
       Principal principal,
-      @RequestParam org.springframework.util.MultiValueMap<String, String> parameters) {
+      @RequestParam org.springframework.util.MultiValueMap<String, String> parameters)
+      throws com.fasterxml.jackson.core.JsonProcessingException {
     if (parameters.keySet().stream()
         .anyMatch(
             key ->
@@ -29,17 +34,31 @@ public final class HistoryController {
         (field, values) -> {
           if (values.size() != 1) throw BlockController.invalid(field, "INVALID_VALUE");
         });
+    if (parameters.containsKey("category")
+        && !List.of("sessions", "task-status", "planning")
+            .contains(parameters.getFirst("category")))
+      throw BlockController.invalid("category", "INVALID_VALUE");
+    var filters =
+        new HistoryFilters(
+            parameters.getFirst("category"),
+            identifier(parameters, "projectId"),
+            identifier(parameters, "taskId"),
+            date(parameters, "from"),
+            date(parameters, "to"));
+    if (filters.taskId() != null && filters.projectId() == null)
+      throw BlockController.invalid("taskId", "INVALID_VALUE");
+    if (filters.from() != null && filters.to() != null && filters.from().isAfter(filters.to()))
+      throw BlockController.invalid("to", "INVALID_VALUE");
     var page =
         history.list(
             principal.getName(),
-            new HistoryFilters(
-                parameters.getFirst("category"),
-                identifier(parameters, "projectId"),
-                identifier(parameters, "taskId"),
-                date(parameters, "from"),
-                date(parameters, "to")),
-            null);
-    return new PageResponse(page.items().stream().map(HistoryController::entry).toList(), null);
+            filters,
+            parameters.containsKey("cursor")
+                ? HistoryCursorCodec.decode(json, parameters.getFirst("cursor"))
+                : null);
+    return new PageResponse(
+        page.items().stream().map(HistoryController::entry).toList(),
+        HistoryCursorCodec.encode(json, page.next()));
   }
 
   private static HistoryEntry<?> entry(HistoryEntry<?> entry) {
@@ -75,8 +94,18 @@ public final class HistoryController {
 
   private static java.time.LocalDate date(
       org.springframework.util.MultiValueMap<String, String> parameters, String field) {
-    return parameters.containsKey(field)
-        ? java.time.LocalDate.parse(parameters.getFirst(field))
-        : null;
+    return parameters.containsKey(field) ? date(parameters.getFirst(field), field) : null;
+  }
+
+  static java.time.LocalDate date(String value, String field) {
+    try {
+      if (!value.matches("[0-9]{4}-[0-9]{2}-[0-9]{2}"))
+        throw BlockController.invalid(field, "INVALID_VALUE");
+      var date = java.time.LocalDate.parse(value);
+      if (date.getYear() < 1) throw BlockController.invalid(field, "INVALID_VALUE");
+      return date;
+    } catch (java.time.DateTimeException error) {
+      throw BlockController.invalid(field, "INVALID_VALUE");
+    }
   }
 }

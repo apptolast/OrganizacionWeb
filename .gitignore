@@ -93,3 +93,4 @@ reports/
 /progress/history_queries_checkpoint/
 /progress/history_wiring_checkpoint/
 /progress/history_http_checkpoint_xml/
+/progress/history_http_final_xml/

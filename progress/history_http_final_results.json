@@ -1,0 +1,18 @@
+[
+  {
+    "suite": "com.apptolast.organization.adapter.config.SecurityConfigurationTest",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "A9C605EF68058C21FD3AA2B405BA6B8BD6A00A7823F5A4F777B27CFD0CC40C17"
+  },
+  {
+    "suite": "com.apptolast.organization.adapter.HistoryApiTest",
+    "tests": 75,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "B17AB67F5D7069D7C05D93A36AF7F51BF69B1EB1191DC82D271964EA7752685E"
+  }
+]

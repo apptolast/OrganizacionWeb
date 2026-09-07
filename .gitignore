@@ -92,3 +92,4 @@ reports/
 /progress/end_time_stryker_replay_original.json
 /progress/history_queries_checkpoint/
 /progress/history_wiring_checkpoint/
+/progress/history_http_checkpoint_xml/

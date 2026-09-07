@@ -34,4 +34,94 @@ class ReadHistoryTest {
     verify(queries).list("owner", filters, cursor);
     verifyNoMoreInteractions(queries);
   }
+
+  @Test
+  void s6_lookaheadCreatesACursorFromTheLastDeliveredFact() {
+    var filters = new HistoryFilters(null, null, null, null, null);
+    var at = Instant.parse("2026-09-07T10:00:00Z");
+    var project = UUID.randomUUID();
+    var task = UUID.randomUUID();
+    List<HistoryEntry<?>> rows =
+        java.util.stream.IntStream.range(0, 21)
+            .<HistoryEntry<?>>mapToObj(
+                n -> {
+                  var start =
+                      new SessionStart(
+                          UUID.randomUUID(),
+                          project,
+                          task,
+                          at.minusSeconds(n),
+                          25,
+                          at.minusSeconds(n).plusSeconds(1500),
+                          "UTC");
+                  return new HistoryEntry<>(
+                      start.id(),
+                      "SESSION_STARTED",
+                      start.startedAt(),
+                      project,
+                      "P",
+                      task,
+                      "T",
+                      start);
+                })
+            .toList();
+    var queries = mock(HistoryQueries.class);
+    when(queries.list("owner", filters, null)).thenReturn(rows);
+    var page = new ReadHistory(queries).list("owner", filters, null);
+    assertThat(page.items()).isEqualTo(rows.subList(0, 20));
+    assertThat(page.next())
+        .isEqualTo(
+            new HistoryCursor(
+                "owner",
+                filters,
+                new HistoryPosition(
+                    rows.getFirst().occurredAt(), "SESSION_STARTED", rows.getFirst().id()),
+                new HistoryPosition(
+                    rows.get(19).occurredAt(), "SESSION_STARTED", rows.get(19).id())));
+  }
+
+  @Test
+  void s14_continuationKeepsTheInitialUpperInsteadOfTheCurrentFirstRow() {
+    var filters = new HistoryFilters(null, null, null, null, null);
+    var at = Instant.parse("2026-09-07T10:00:00Z");
+    var upper = new HistoryPosition(at.plusSeconds(7200), "SESSION_STARTED", UUID.randomUUID());
+    var cursor =
+        new HistoryCursor(
+            "owner",
+            filters,
+            upper,
+            new HistoryPosition(at.plusSeconds(3600), "SESSION_STARTED", UUID.randomUUID()));
+    var project = UUID.randomUUID();
+    var task = UUID.randomUUID();
+    List<HistoryEntry<?>> rows =
+        java.util.stream.IntStream.range(0, 21)
+            .<HistoryEntry<?>>mapToObj(
+                n -> {
+                  var start =
+                      new SessionStart(
+                          UUID.randomUUID(),
+                          project,
+                          task,
+                          at.minusSeconds(n),
+                          25,
+                          at.minusSeconds(n).plusSeconds(1500),
+                          "UTC");
+                  return new HistoryEntry<>(
+                      start.id(),
+                      "SESSION_STARTED",
+                      start.startedAt(),
+                      project,
+                      "P",
+                      task,
+                      "T",
+                      start);
+                })
+            .toList();
+    var queries = mock(HistoryQueries.class);
+    when(queries.list("owner", filters, cursor)).thenReturn(rows);
+    var page = new ReadHistory(queries).list("owner", filters, cursor);
+    assertThat(page.next().upper()).isEqualTo(upper);
+    assertThat(page.items()).isEqualTo(rows.subList(0, 20));
+    assertThat(page.next().after().id()).isEqualTo(rows.get(19).id());
+  }
 }

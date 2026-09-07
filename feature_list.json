@@ -209,7 +209,7 @@
       "description": "Comparar plan vigente, intervalos reales y presupuesto actual de siete días; contrato aprobado por autorización global en features/weekly_review.feature.",
       "acceptance": ["Cumplir @s1–@s34 con revisión, pruebas y mutación antes del cierre."],
       "sdd": true,
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 20,

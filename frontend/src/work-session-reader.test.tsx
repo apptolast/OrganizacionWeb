@@ -226,6 +226,17 @@ it("@s5 preserves an overlong draft and rejects it before transmitting", async (
   );
   expect(input).toHaveValue(text);
   expect(input).toHaveAttribute("aria-invalid", "true");
+  expect(screen.getByLabelText("Avance anotado (opcional)")).toHaveAttribute(
+    "aria-invalid",
+    "false",
+  );
+  expect(input).toHaveAttribute(
+    "aria-describedby",
+    screen.getByRole("alert").id,
+  );
+  expect(input).toHaveAccessibleDescription(
+    "Cada nota admite hasta 2.000 caracteres válidos.",
+  );
   expect(fetcher).toHaveBeenCalledTimes(1);
 });
 it("@s35 checks an uncertain close by its retained key without another POST", async () => {

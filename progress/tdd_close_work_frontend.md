@@ -116,3 +116,9 @@ Freeze del test: SHA256A39F55F09EF9F4F57F6A31FA9D989DC6464CF07804CB039F7EEED7833
 Se añadieron uno a uno, sin producción ni otros casos: primero progressNote de2001puntos con nextStep válido, aria-invalid diferenciado, aria-describedby y descripción accesible enlazadas al error, texto válido conservado y ningún POST: inicialmente GREEN385bbf. Después cierre201 y A503, reintento GETactive pendiente con anuncio de carga, foco/aria-disabled y segundo clic sin duplicar consulta, conservando recibo: inicialmente GREEN3b5e46.
 
 Formato y archivo completo32/32 GREEN8dea17; ESLint ea2a76. No se afirma que hayan matado mutantes antes del replay dirigido. Freeze renovado test SHA FE9CFF2684A1E51EC8BA3EF9AFFE197CE29E6942CFEF704D51825EC39369ACDF; Reader productivo conservaC7FB07A1B05B47938ADD0B46EE41E5728687DC92BA7D608970D5C22B9097E4F2. Campaña original intacta, sin Gradle/global/E2E propio.
+
+### Refuerzo mínimo del caso nextStep inválido
+
+Después del replay corregido12K/3S comunicado por root, se fortaleció únicamente el caso existente @s5 de nextStep demasiado largo: progressNote vacío válido conserva aria-invalid=false y nextStep inválido enlaza el alert mediante aria-describedby y descripción accesible. Todos los asserts previos se conservan, sin nuevos casos ni producción.
+
+Primera ejecución inicialmente GREEN6a5750:32/32. Prettier detectó sólo ajuste de formato14cbeb; escritura y check focal, ESLint y diffcheck focal GREENe63989. El diffcheck global accidental de14cbeb detectó una línea vacía final en progress/history.md ajena al paquete; no se modificó. Test congelado SHA83F1931C3C95088550EA67BFF00368F4A480458F03DEE7438E23E266712ECD13; Reader productivo C7FB07A1B05B47938ADD0B46EE41E5728687DC92BA7D608970D5C22B9097E4F2 intacto. No globals ni replay ejecutados aquí; la nueva detección queda pendiente del replay de A.

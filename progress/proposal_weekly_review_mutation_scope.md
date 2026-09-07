@@ -24,3 +24,9 @@ Antes de campaña: revisión de config, freeze integrado, actualización del inv
 ## Configuración aplicada tras aprobación del coordinador
 
 Target confirmado con A: `weekly_review-frontend`. Config propia SHA256 `13A67790F5034A697B699B91438A48FA0371F89E2F7726A9C402716FF6C91602`; default `9CDA0F327F08B7717CCDBEB02BE5D4D2DE923D5E61404E94ACE070C45A780A38`. Verificación estructural `484fed`: ajustes iguales a History, seis scopes añadidos al final del default sin retirar ni modificar entradas o ajustes anteriores. Prettier inicialmente señaló ambos JSON recién serializados; write/check focal dejó formato GREEN `df75c2`. Ninguna campaña ejecutada.
+
+## Preflight tras UX y corrección final de foco
+
+Parser actualizado `42944e`: fuente WeeklyReview `284098F9B523FD289E026C5BFD60C626C9437D9A89354CEC684F4AA2A11FE16C`, mismos cuatro nodos externos; módulos siguen completos. El parser `.mjs` se conserva como herramienta de evidencia reproducible, no test del producto. Configuración no cambia.
+
+Frontend completo y lint posterior al arreglo: `666856`, EXIT0, 1.965 tests/42 archivos (22,92 s), ESLint y Prettier completos verdes. Logs `weekly_review_frontend_final_gate.log` y `weekly_review_frontend_final_lint.log`. Manifiestos `weekly_review_frontend_final_before.json`/`weekly_review_frontend_final_after.json`: 141 entradas idénticas, cero diferencias (`eb64bc`). Incluyen todo `frontend/src`, configuración superior de frontend, paquetes/lock y scripts/project/harness.config; excluyen documentación, E2E y .gitignore. No Gradle, build ni mutación repetidos por este preflight. Se capturará un before efectivo nuevo inmediatamente antes de la campaña autorizada.

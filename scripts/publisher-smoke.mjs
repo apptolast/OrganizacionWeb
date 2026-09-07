@@ -179,6 +179,7 @@ function outbox(id, type = "ProjectCreated.v1", taskId, revision) {
       "WorkSessionStarted.v1",
       "WorkSessionStateChanged.v1",
       "WorkSessionClosed.v1",
+      "WorkSessionExtended.v1",
     ].includes(type),
   );
   assert.match(id, /^[0-9a-f-]{36}$/i);
@@ -189,7 +190,10 @@ function outbox(id, type = "ProjectCreated.v1", taskId, revision) {
   ].includes(type);
   if (taskEvent) assert.match(taskId, /^[0-9a-f-]{36}$/i);
   const taskFilter = taskEvent ? ` AND payload->>'taskId'='${taskId}'` : "";
-  const transitionEvent = type === "WorkSessionStateChanged.v1";
+  const transitionEvent = [
+    "WorkSessionStateChanged.v1",
+    "WorkSessionExtended.v1",
+  ].includes(type);
   if (transitionEvent) assert.match(revision, /^[1-9][0-9]*$/);
   const revisionFilter = transitionEvent
     ? ` AND payload->>'revision'='${revision}'`
@@ -251,6 +255,13 @@ function assertMessage(row, received) {
   assert.ok(message, "Original event must remain available in RabbitMQ");
   assert.deepEqual(JSON.parse(message.payload), row.payload);
   const specificFields = {
+    "WorkSessionExtended.v1": [
+      "revision",
+      "additionalMinutes",
+      "previousEndAt",
+      "effectiveEndAt",
+      "status",
+    ],
     "ProjectCreated.v1": ["name"],
     "ProjectUpdated.v1": ["name"],
     "ProjectStatusChanged.v1": ["fromStatus", "toStatus"],
@@ -1014,7 +1025,7 @@ try {
   assert.deepEqual(workCounts(), { sessions: 1, events: 0 });
   assert.equal(outbox(recoveredStart.id, "WorkSessionStarted.v1"), undefined);
   console.log(
-    "PASS start_work_session @s25/@s26: lost HTTP response, owner/key recovery, real Rabbit retry/publication, restart without published outbox",
+    "PASS start_work_session: lost HTTP response, owner/key recovery, real Rabbit retry/publication, restart without published outbox",
   );
   const sessionStatePath = `/api/v1/work-sessions/${recoveredStart.id}/state`;
   const initialStateResponse = await application.get(sessionStatePath);
@@ -1248,7 +1259,7 @@ try {
   );
   assert.deepEqual(transitionCounts(), countsBeforeRecovery);
   console.log(
-    "PASS pause_resume_session @s25/@s26: lost PAUSE ACK, later RESUME, two exact persistent events, real backend restart and immutable C/K recovery without outbox",
+    "PASS pause_resume_session: lost PAUSE ACK, later RESUME, two exact persistent events, real backend restart and immutable C/K recovery without outbox",
   );
   const closePath = `/api/v1/work-sessions/${recoveredStart.id}/close`;
   const closeKey = randomUUID();
@@ -1467,7 +1478,288 @@ try {
   );
   assert.deepEqual(closureCounts(), afterClosePublication);
   console.log(
-    "PASS close_work_session @s29/@s41: lost CLOSE ACK, broker outage/retry, exact private-note-free event on quorum11, API restart and C/K/F recovery plus identical replay without published outbox",
+    "PASS close_work_session: lost CLOSE ACK, broker outage/retry, exact private-note-free event on quorum11, API restart and C/K/F recovery plus identical replay without published outbox",
+  );
+  // Feature17 starts a new session after the complete historical CLOSE checks above.
+  const extensionStartResponse = await application.post(workPath, {
+    headers: {
+      ...(await csrfHeaders(application)),
+      Origin: origin,
+      "Idempotency-Key": randomUUID(),
+    },
+    data: { plannedMinutes: 25 },
+  });
+  assert.equal(extensionStartResponse.status(), 201);
+  const extensionStart = await extensionStartResponse.json();
+  const endPath = `/api/v1/work-sessions/${extensionStart.id}/end-time`;
+  const initialEndResponse = await application.get(endPath);
+  assert.equal(initialEndResponse.status(), 200);
+  const initialEnd = await initialEndResponse.json();
+  assert.equal(initialEnd.effectiveEndAt, extensionStart.plannedEndAt);
+  const extensionKey = randomUUID();
+  const extensionPath = `/api/v1/work-sessions/${extensionStart.id}/extend`;
+  const extensionToken = initialEndResponse.headers()["work-session-revision"];
+  docker(["stop", "rabbitmq"], undefined, 30000);
+  await postWithLostAck(
+    extensionPath,
+    {
+      ...(await csrfHeaders(application)),
+      Origin: origin,
+      "Idempotency-Key": extensionKey,
+      "Work-Session-Revision": extensionToken,
+    },
+    { additionalMinutes: 15 },
+  );
+  const extensionLookup = `/api/v1/work-session-changes/by-request/${extensionKey}`;
+  const extensionResponse = await application.get(extensionLookup);
+  assert.equal(extensionResponse.status(), 200);
+  const extensionReceipt = await extensionResponse.json();
+  assert.deepEqual(Object.keys(extensionReceipt).sort(), [
+    "action",
+    "after",
+    "before",
+    "extension",
+    "id",
+    "occurredAt",
+    "sessionId",
+  ]);
+  assert.equal(extensionReceipt.sessionId, extensionStart.id);
+  assert.equal(extensionReceipt.action, "EXTEND");
+  assert.deepEqual(extensionReceipt.before, initialEnd.state);
+  assert.deepEqual(extensionReceipt.after, {
+    ...initialEnd.state,
+    revision: "2",
+  });
+  assert.equal(extensionReceipt.extension.additionalMinutes, 15);
+  assert.equal(
+    extensionReceipt.extension.previousEndAt,
+    extensionStart.plannedEndAt,
+  );
+  const extensionType = "WorkSessionExtended.v1";
+  const extensionPending = await eventually(
+    "EXTEND retries while Rabbit is stopped",
+    () => {
+      const row = outbox(extensionStart.id, extensionType, undefined, "2");
+      return row?.status === "pending" && row.attempts >= 1 ? row : false;
+    },
+  );
+  assert.equal(extensionPending.last_error_code, "BROKER_UNAVAILABLE");
+  assert.equal(extensionPending.published_at, null);
+  assert.notEqual(extensionPending.event_id, extensionStart.id);
+  assert.deepEqual(extensionPending.payload, {
+    eventId: extensionPending.event_id,
+    aggregateId: extensionStart.id,
+    ownerId: env.APP_AUTH_USERNAME,
+    occurredAt: extensionReceipt.occurredAt,
+    schemaVersion: 1,
+    type: extensionType,
+    revision: "2",
+    additionalMinutes: 15,
+    previousEndAt: extensionReceipt.extension.previousEndAt,
+    effectiveEndAt: extensionReceipt.extension.effectiveEndAt,
+    status: "running",
+  });
+  assert.match(extensionStart.id, /^[0-9a-f-]{36}$/i);
+  function extensionFacts() {
+    return JSON.parse(
+      docker([
+        "exec",
+        "-T",
+        "postgres",
+        "psql",
+        "-U",
+        env.DB_USERNAME,
+        "-d",
+        "organization",
+        "-At",
+        "-c",
+        `SELECT json_build_object('revision',revision::text,'original',planned_end_at::text,'end',effective_end_at::text,'worked',worked_microseconds::text,'changes',(SELECT count(*) FROM work_session_changes WHERE session_id=s.id),'intervals',(SELECT count(*) FROM work_session_intervals WHERE session_id=s.id),'events',(SELECT count(*) FROM outbox_events WHERE aggregate_id=s.id AND event_type='WorkSessionExtended.v1'),'formula',(SELECT bool_and((r.receipt->'extension'->>'effectiveEndAt')::timestamptz=greatest((r.receipt->'extension'->>'previousEndAt')::timestamptz,r.occurred_at)+(r.receipt->'extension'->>'additionalMinutes')::int*interval '1 minute') FROM work_session_changes r WHERE r.session_id=s.id AND r.action='EXTEND')) FROM work_sessions s WHERE id='${extensionStart.id}'`,
+      ]),
+    );
+  }
+  const firstFacts = extensionFacts();
+  assert.equal(firstFacts.formula, true);
+  assert.equal(firstFacts.revision, "2");
+  assert.equal(firstFacts.changes, 1);
+  assert.equal(firstFacts.intervals, 0);
+  assert.equal(firstFacts.worked, "0");
+  const nextEndResponse = await application.get(endPath);
+  assert.equal(nextEndResponse.status(), 200);
+  const nextResponse = await application.post(extensionPath, {
+    headers: {
+      ...(await csrfHeaders(application)),
+      Origin: origin,
+      "Idempotency-Key": randomUUID(),
+      "Work-Session-Revision":
+        nextEndResponse.headers()["work-session-revision"],
+    },
+    data: { additionalMinutes: 1 },
+  });
+  assert.equal(nextResponse.status(), 201);
+  const laterReceipt = await nextResponse.json();
+  assert.equal(
+    laterReceipt.extension.previousEndAt,
+    extensionReceipt.extension.effectiveEndAt,
+  );
+  assert.deepEqual(laterReceipt.after, {
+    ...extensionReceipt.after,
+    revision: "3",
+  });
+  docker(["start", "rabbitmq"], undefined, 30000);
+  const extensionPublished = await eventually(
+    "EXTEND original payload published after recovery",
+    () => {
+      const row = outbox(extensionStart.id, extensionType, undefined, "2");
+      return row?.status === "published" ? row : false;
+    },
+  );
+  assert.equal(extensionPublished.event_id, extensionPending.event_id);
+  assert.deepEqual(extensionPublished.payload, extensionPending.payload);
+  assert.ok(extensionPublished.attempts > extensionPending.attempts);
+  await eventually(
+    "later EXTEND also published",
+    () =>
+      outbox(extensionStart.id, extensionType, undefined, "3")?.status ===
+      "published",
+  );
+  const beforeRabbitRestart = serviceSnapshot("rabbitmq");
+  docker(["restart", "rabbitmq"], undefined, 30000);
+  await eventually("Rabbit management after EXTEND restart", () => {
+    try {
+      return management("overview");
+    } catch {
+      return false;
+    }
+  });
+  const rabbitAfter = serviceSnapshot("rabbitmq");
+  assert.equal(rabbitAfter.id, beforeRabbitRestart.id);
+  assert.notEqual(rabbitAfter.startedAt, beforeRabbitRestart.startedAt);
+  assert.deepEqual(rabbitAfter.mounts, beforeRabbitRestart.mounts);
+  const extensionQueue = "organization.work-session-extended.v1";
+  const extensionMessages = await eventually(
+    "twelfth queue retains original EXTEND",
+    () => {
+      const messages = management(`queues/organization/${extensionQueue}/get`, {
+        count: 100,
+        ackmode: "ack_requeue_true",
+        encoding: "auto",
+        truncate: 1000000,
+      });
+      return messages.some(
+        (item) => item.properties.message_id === extensionPublished.event_id,
+      )
+        ? messages
+        : false;
+    },
+  );
+  assertMessage(extensionPublished, extensionMessages);
+  const extensionTopology = management(`queues/organization/${extensionQueue}`);
+  assert.equal(extensionTopology.durable, true);
+  assert.equal(extensionTopology.type, "quorum");
+  assert.ok(
+    management(
+      `bindings/organization/e/organization.events/q/${extensionQueue}`,
+    ).some((binding) => binding.routing_key === "work-session.extended.v1"),
+  );
+  assert.match(extensionPublished.event_id, /^[0-9a-f-]{36}$/i);
+  docker([
+    "exec",
+    "-T",
+    "postgres",
+    "psql",
+    "-U",
+    env.DB_USERNAME,
+    "-d",
+    "organization",
+    "-At",
+    "-c",
+    `DELETE FROM outbox_events WHERE event_id='${extensionPublished.event_id}' AND status='published'`,
+  ]);
+  const extensionCloseResponse = await application.post(
+    `/api/v1/work-sessions/${extensionStart.id}/close`,
+    {
+      headers: {
+        ...(await csrfHeaders(application)),
+        Origin: origin,
+        "Idempotency-Key": randomUUID(),
+        "Work-Session-Revision": `work-session-${extensionStart.id}-3`,
+      },
+      data: { progressNote: "Fin ampliado conservado", nextStep: "" },
+    },
+  );
+  assert.equal(extensionCloseResponse.status(), 201);
+  const extensionClose = await extensionCloseResponse.json();
+  assert.equal(extensionClose.action, "CLOSE");
+  assert.deepEqual(extensionClose.before, laterReceipt.after);
+  assert.equal(extensionClose.after.status, "closed");
+  assert.equal(extensionClose.after.revision, "4");
+  assert.deepEqual(extensionClose.after.session, extensionStart);
+  const closedEndResponse = await application.get(endPath);
+  assert.equal(closedEndResponse.status(), 200);
+  const closedEnd = await closedEndResponse.json();
+  assert.deepEqual(closedEnd.state, extensionClose.after);
+  assert.equal(closedEnd.effectiveEndAt, laterReceipt.extension.effectiveEndAt);
+  const beforeRecovery = extensionFacts();
+  assert.equal(beforeRecovery.revision, "4");
+  assert.equal(beforeRecovery.changes, 3);
+  assert.equal(beforeRecovery.events, 1);
+  assert.equal(beforeRecovery.intervals, 1);
+  assert.equal(beforeRecovery.worked, extensionClose.after.workedMicroseconds);
+  assert.equal(beforeRecovery.formula, true);
+  assert.equal(beforeRecovery.original, firstFacts.original);
+  const apiBefore = serviceSnapshot("backend");
+  const dbBefore = serviceSnapshot("postgres");
+  docker(["restart", "backend"], undefined, 30000);
+  await eventually(
+    "EXTEND receipt survives API restart without its outbox",
+    async () => {
+      const response = await application
+        .get(extensionLookup, { timeout: 2000 })
+        .catch(() => null);
+      if (!response || response.status() !== 200) return false;
+      assert.deepEqual(await response.json(), extensionReceipt);
+      return true;
+    },
+  );
+  assert.equal(serviceSnapshot("backend").id, apiBefore.id);
+  assert.notEqual(serviceSnapshot("backend").startedAt, apiBefore.startedAt);
+  assert.deepEqual(serviceSnapshot("postgres"), dbBefore);
+  for (const path of [
+    extensionLookup,
+    `/api/v1/work-session-changes/${extensionReceipt.id}`,
+  ]) {
+    const response = await application.get(path);
+    assert.equal(response.status(), 200);
+    assert.equal(response.headers().location, undefined);
+    assert.deepEqual(await response.json(), extensionReceipt);
+  }
+  const finalEndResponse = await application.get(endPath);
+  assert.equal(finalEndResponse.status(), 200);
+  const finalEnd = await finalEndResponse.json();
+  assert.deepEqual(finalEnd.state, extensionClose.after);
+  assert.equal(finalEnd.effectiveEndAt, laterReceipt.extension.effectiveEndAt);
+  assert.notEqual(
+    finalEnd.effectiveEndAt,
+    extensionReceipt.extension.effectiveEndAt,
+  );
+  const extensionReplay = await application.post(extensionPath, {
+    headers: {
+      ...(await csrfHeaders(application)),
+      Origin: origin,
+      "Idempotency-Key": extensionKey,
+      "Work-Session-Revision": extensionToken,
+    },
+    data: { additionalMinutes: 15 },
+  });
+  assert.equal(extensionReplay.status(), 200);
+  assert.equal(
+    extensionReplay.headers().location,
+    `/api/v1/work-session-changes/${extensionReceipt.id}`,
+  );
+  assert.deepEqual(await extensionReplay.json(), extensionReceipt);
+  assert.deepEqual(extensionFacts(), beforeRecovery);
+  console.log(
+    "PASS end_time_notification @s23/@s24: lost EXTEND ACK after upstream201, later extension, exact eleven-field quorum12 event and same-volume broker/API restart; original C/K survives removal of only its published outbox",
   );
 } catch (error) {
   console.error(

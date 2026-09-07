@@ -9,6 +9,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  com.apptolast.organization.adapter.persistence.PostgresCustomizationStore customizationStore(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions,
+      com.fasterxml.jackson.databind.ObjectMapper json) {
+    return new com.apptolast.organization.adapter.persistence.PostgresCustomizationStore(
+        jdbc, transactions, json);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReadCustomization readCustomization(
+      com.apptolast.organization.application.CustomizationQueries queries) {
+    return new com.apptolast.organization.application.ReadCustomization(queries);
+  }
+
+  @Bean
   com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries weeklyReviewQueries(
       org.springframework.jdbc.core.JdbcTemplate jdbc,
       org.springframework.transaction.PlatformTransactionManager transactions) {

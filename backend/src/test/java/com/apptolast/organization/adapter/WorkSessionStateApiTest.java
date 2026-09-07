@@ -657,6 +657,8 @@ class WorkSessionStateApiTest {
   @Autowired MockMvc mvc;
   @Autowired ObjectMapper json;
   @MockitoBean ChangeWorkSessionUseCase change;
+  @MockitoBean ExtendWorkSessionUseCase extensions;
+  @MockitoBean ReadWorkSessionEndUseCase ends;
   @MockitoBean ReadWorkSessionStateUseCase states;
   @MockitoBean ReadWorkSessionChangesUseCase receipts;
   final UUID id = UUID.randomUUID(), project = UUID.randomUUID(), task = UUID.randomUUID();

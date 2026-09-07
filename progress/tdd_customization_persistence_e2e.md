@@ -1,0 +1,23 @@
+# E2E de persistencia de personalización21
+
+Corte b2b96a8 del aislado OrganizacionWeb-customization-integration, derivado del backend nominal e617a09 y HTTP134. Único archivo nuevo e2e/customization-persistence.spec.mjs. No cambios de producto, configuración, helpers ni UI de B. Dependencias raíz instaladas con pnpm install --frozen-lockfile (EXIT0 ef4ccd); formato y sintaxis focales EXIT0 94646d antes del recorrido, con formato final aplicado antes del snapshot.
+
+Comando: node scripts/e2e.mjs e2e/customization-persistence.spec.mjs. Stack propio organizationweb-e2e-35796, puerto18080; 8080 no usado. El runner construyó imágenes Docker propias y ejecutó un único test sin retries. Resultado inicialmente GREEN:1/1,15,0s del caso y19,3s de Playwright; EXIT propio0 1c1f39. Log íntegro progress/customization_persistence_e2e_initial.log y archivo de salida customization_persistence_e2e_initial.exit. No RED artificial ni corrección tras fallo.
+
+El recorrido crea proyecto/tarea reales y cuatro definiciones TASK (TEXT/NUMBER/DATE/BOOLEAN). Envía valores tipados por fetch real desde el contexto autenticado. Intercepta sólo ese PUT, route.fetch alcanza el servidor real y exige200 antes de leer su cuerpo/ETag y abortar la entrega al cliente. El cliente ve fallo de transporte y el contador de ese PUT queda1. GET posterior recupera la representación durable; el comentario y el informe no le atribuyen una intención perdida. El test conoce la respuesta real únicamente como oráculo externo, no como confirmación recibida por el cliente.
+
+Después guarda vista[] y desactiva la definición TEXT: el GET omite ese campo, conserva los otros tipos, y SQL conserva su valor. El ETag mantiene la revisión de valores y cambia esquema. El helper existente reinicia sólo backend, comprueba StartedAt nuevo de API y mismo StartedAt/Mounts PostgreSQL. Una sesión nueva autenticada recupera configuración y valores con exactamente los mismos IDs/ETags/cuerpos; las filas privadas completas permanecen idénticas al snapshot anterior al reinicio. Esto acredita @s11 y @s26 en este corte.
+
+Los hechos de negocio medidos son filas completas de proyecto/tarea creados por el fixture y todas las filas de outbox, comparadas antes de personalizar y después del reinicio: mismas identidades/payloads y sin eventos nuevos. Compose heredado establece OUTBOX_PUBLISHER_ENABLED=false, así que tampoco hay cambios de metadatos de entrega. No se atribuye aquí regresión completa de sesiones/bloques no creados por este caso, ni revisión visual de UI21.
+
+Evidencia de entradas:569 hashes en customization_persistence_e2e_before.json y customization_persistence_e2e_after.json; cero diferencias (b22296). Incluye backend, frontend existente, build/deploy/scripts/helpers y spec. El archivo de integración Java permanece intacto. Los cuerpos privados utilizados son sólo datos del fixture y no se imprimen credenciales; el helper de sesión usa únicamente credenciales e2e conocidas.
+
+Limpieza: authenticated-test elimina exclusivamente metadata del owner e2e-user en el stack efímero; el runner ejecutó down --volumes --remove-orphans únicamente para su proyecto y retiró contenedores, volumen y red. Consulta Docker posterior filtrada por ese label devolvió cero contenedores y volúmenes. No cleanup global, movimientos ni borrado de evidencia protegida. Puerto18080 liberado. No Gradle host, PIT/Stryker ni campaña E2E global. Freeze separado en customization_persistence_e2e_freeze.json.
+
+## Oráculo exacto del campo inactivo tras revisión
+
+La primera pasada usaba ->> con helper sql(), que aplica trim(). Por tanto su comprobación individual del inactivo no acreditaba los espacios exteriores; se conserva esa limitación y toda la evidencia inicial (incluido customization_persistence_e2e_initial_freeze.json y copia de esta bitácora anterior). No cambia el helper ni el producto.
+
+Corrección mínima: SELECT field_values -> fieldId devuelve el string JSON; JSON.parse conserva sus espacios interiores y exige exactamente "  texto privado  ". Repetido sólo el mismo caso: inicialmente GREEN con el oráculo reforzado, 1/1,13,2s del caso/15,4s Playwright, EXIT0 67906e. Stack propio organizationweb-e2e-47840; log customization_persistence_e2e_exact.log y archivo exact.exit. Sus569 inputs exact_before/exact_after son idénticos (3df846), sin cambios durante ejecución. La única diferencia respecto al primer snapshot es el spec por este oráculo; ninguna fuente de producto cambió.
+
+Lifecycle del runner terminó retirando contenedores, volumen y red de ese stack; consultas filtradas de contenedores/volúmenes vacías. Puerto18080 libre. Freeze final actualizado con hashes del spec/bitácora y de la evidencia exact; originales no sobrescritos. No campañas adicionales.

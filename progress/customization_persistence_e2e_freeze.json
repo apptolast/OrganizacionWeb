@@ -1,0 +1,38 @@
+{
+  "head": "b2b96a8",
+  "exit": 0,
+  "output": "67906e",
+  "tests": 1,
+  "stack": "organizationweb-e2e-47840",
+  "port": 18080,
+  "inputs": 569,
+  "changedInputs": 0,
+  "files": [
+    {
+      "path": "e2e/customization-persistence.spec.mjs",
+      "sha256": "A12D18F04E2584356527D1AB212C1E2C9966BE3C3C9C2455C6BCDF134A3EAD8D"
+    },
+    {
+      "path": "progress/tdd_customization_persistence_e2e.md",
+      "sha256": "EF4752EB641746E96B5148C5A990F6E88487E38CA6990CB356584EC51FA0D97A"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "progress/customization_persistence_e2e_exact_before.json",
+      "sha256": "0B4F276E2F700AB93659247D34FBC37835B084C482747C7CB5F8C0AFE9D1521C"
+    },
+    {
+      "path": "progress/customization_persistence_e2e_exact_after.json",
+      "sha256": "0B4F276E2F700AB93659247D34FBC37835B084C482747C7CB5F8C0AFE9D1521C"
+    },
+    {
+      "path": "progress/customization_persistence_e2e_exact.log",
+      "sha256": "D9A2624B532969391A6C8A10314DB04A23B70FE2071462ACF857967AA67F5504"
+    },
+    {
+      "path": "progress/customization_persistence_e2e_exact.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+    }
+  ]
+}

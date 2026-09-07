@@ -1,0 +1,38 @@
+{
+  "head": "b2b96a8",
+  "exit": 0,
+  "output": "1c1f39",
+  "tests": 1,
+  "stack": "organizationweb-e2e-35796",
+  "port": 18080,
+  "inputs": 569,
+  "changedInputs": 0,
+  "files": [
+    {
+      "path": "e2e/customization-persistence.spec.mjs",
+      "sha256": "741315000949592456205B221ED8D09210F492CC187AE44CEA17762783D0627D"
+    },
+    {
+      "path": "progress/tdd_customization_persistence_e2e.md",
+      "sha256": "3065FEFD7F75639FA51F83D5BCAC7C5E5E2AA3FBC4D38D5891375849B37D7F14"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "progress/customization_persistence_e2e_before.json",
+      "sha256": "C584872540722D23E6557B753DDF62450D53692F3364B943C9D50AD07ACD5A7F"
+    },
+    {
+      "path": "progress/customization_persistence_e2e_after.json",
+      "sha256": "C584872540722D23E6557B753DDF62450D53692F3364B943C9D50AD07ACD5A7F"
+    },
+    {
+      "path": "progress/customization_persistence_e2e_initial.log",
+      "sha256": "EDA0DE017CB646D731A6E712977DD077C05F0453E3EE0CE0121A06EA772C865A"
+    },
+    {
+      "path": "progress/customization_persistence_e2e_initial.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+    }
+  ]
+}

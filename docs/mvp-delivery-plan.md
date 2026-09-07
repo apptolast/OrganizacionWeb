@@ -10,7 +10,7 @@ Las funcionalidades 1–17 están cerradas técnicamente y fusionadas. La PR 16 
 
 La validación local de la funcionalidad 17 incluye 2.076 pruebas Java, 1.802 frontend, 40 del arnés, build, 121 E2E y 13 comprobaciones del publisher. La revisión UX documenta 515 mediciones, 35 análisis axe sin incidencias y pruebas en tres motores, con límites explícitos. PIT obtuvo 616/620; Stryker, 1.684/1.976 (85,22 %), con cuatro errores fuera de ese denominador. Los replays dirigidos se registran por separado. Véase `progress/judge_end_time_notification_final.md`.
 
-La funcionalidad 18, Historial, está en implementación con tres agentes. El contrato aprobado contiene 39 escenarios y 142 ejemplos; estos no equivalen a pruebas ejecutadas. El primer núcleo nominal está revisado en `2e60131`. Persistencia, cliente, HTTP y página siguen en desarrollo.
+La funcionalidad 18, Historial, está en implementación con tres agentes. El contrato aprobado contiene 39 escenarios y 142 ejemplos; estos no equivalen a pruebas ejecutadas. Núcleo, consulta nominal PostgreSQL, transacción de lectura, cliente, HTTP/cursor y página nominal ya tienen checkpoints revisados e integrados. Los 79 tests focales HTTP/seguridad y los primeros dos E2E reales de historial han pasado. Siguen pendientes el freeze final de integridad de persistencia y de interacción de la página, paginación E2E, validación UX, campañas de mutación y regresión conjunta. Estos resultados parciales no acreditan todavía el cierre de 18.
 
 ## Trabajo pendiente
 

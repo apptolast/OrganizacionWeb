@@ -1,0 +1,101 @@
+{
+  "scope": "First geometry only; partial UI",
+  "exit": 0,
+  "exitEvidence": "d31dff",
+  "tests": 1,
+  "measurements": 62,
+  "controlBoxes": 868,
+  "axeViolations": 0,
+  "inputs": 578,
+  "changedInputs": 0,
+  "files": [
+    {
+      "path": "frontend/src/styles.scss",
+      "sha256": "04EC25C3A6718576CDABF06003472D22436A1D959D0F465660400496DF87661E"
+    },
+    {
+      "path": "e2e/customization-ux.spec.mjs",
+      "sha256": "69E66DFA526343E0F1ECAA5C7DE5B2D494D006F6B96B097FD5FD1D583A31F681"
+    },
+    {
+      "path": "progress/tdd_customization_ux.md",
+      "sha256": "AA8137465293AA5B36EC5E230DBCA0988D122EADCDE64EDE9AC34E31A18FDEB8"
+    },
+    {
+      "path": "progress/customization_ux_geometry_red_before.json",
+      "sha256": "3311D0E7B60050DAF02A335AF16CE24ADF6A6FC0DCD730700F7AD09BE78D8864"
+    },
+    {
+      "path": "progress/customization_ux_geometry_red_after.json",
+      "sha256": "3311D0E7B60050DAF02A335AF16CE24ADF6A6FC0DCD730700F7AD09BE78D8864"
+    },
+    {
+      "path": "progress/customization_ux_geometry_red.log",
+      "sha256": "7CDA6BB61F2ACB3BE811B382191CFF0ED6E5D9687FCA9C8615C21ADD389EB46B"
+    },
+    {
+      "path": "progress/customization_ux_geometry_red.exit",
+      "sha256": "F1B2F662800122BED0FF255693DF89C4487FBDCF453D3524A42D4EC20C3D9C04"
+    },
+    {
+      "path": "progress/customization_ux_geometry_green_before.json",
+      "sha256": "164D58609013236D0EEA6363280E9488D0E1CD0A6F180EE89CC36671CA1B54F8"
+    },
+    {
+      "path": "progress/customization_ux_geometry_green_after.json",
+      "sha256": "164D58609013236D0EEA6363280E9488D0E1CD0A6F180EE89CC36671CA1B54F8"
+    },
+    {
+      "path": "progress/customization_ux_geometry_green.log",
+      "sha256": "CDC0FD9CC5427C3E52ED2A1BCE7924FBF4CB7452CAD1EA5F5964626883D830A5"
+    },
+    {
+      "path": "progress/customization_ux_geometry_green.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+    },
+    {
+      "path": "progress/customization_ux_geometry_target_before.json",
+      "sha256": "2387CF0A2BAB09E7B93AE80F38F7C0A0AE7A70F70565A49AA06BDC31615B8AB5"
+    },
+    {
+      "path": "progress/customization_ux_geometry_target_after.json",
+      "sha256": "2387CF0A2BAB09E7B93AE80F38F7C0A0AE7A70F70565A49AA06BDC31615B8AB5"
+    },
+    {
+      "path": "progress/customization_ux_geometry_target.log",
+      "sha256": "38892DA94F0517A7B70491A1DE060E30E1F37A8B30F56949B41AD4F68D0EA8B5"
+    },
+    {
+      "path": "progress/customization_ux_geometry_target.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+    },
+    {
+      "path": "progress/customization_ux_geometry_final_evidence/geometry.json",
+      "sha256": "8A58F6CAA0E11ED114AD1A2AA0343E39B2B092A10DF0DABC2C17E46C9E679838"
+    },
+    {
+      "path": "progress/customization_ux_geometry_final_evidence/typed-values-1440.png",
+      "sha256": "2657B2661E614E757C896D24FF4383C5318BE4B09B077C7CD85E4B44378B8350"
+    },
+    {
+      "path": "progress/customization_ux_geometry_final_evidence/typed-values-320.png",
+      "sha256": "C02A08C9AFBA3554BE341F2868784E8B5376015911559D132EEBC0D78CFEDD2A"
+    },
+    {
+      "path": "progress/customization_ux_geometry_final_evidence/typed-values-axe.json",
+      "sha256": "4F53CDA18C2BAA0C0354BB5F9A3ECBE5ED12AB4D8E11BA873C2F11161202B945"
+    },
+    {
+      "path": "progress/customization_ux_geometry_final_evidence/view-definitions-1440.png",
+      "sha256": "4F54DEC35E192151ACAAF4F9FC032423397B3F723D24A330CB5E184772AE9DDA"
+    },
+    {
+      "path": "progress/customization_ux_geometry_final_evidence/view-definitions-320.png",
+      "sha256": "1FDDF83D042D66777064B9904B344F6E32AE4B3D17C158E8818B52A93D590BB8"
+    },
+    {
+      "path": "progress/customization_ux_geometry_final_evidence/view-definitions-axe.json",
+      "sha256": "4F53CDA18C2BAA0C0354BB5F9A3ECBE5ED12AB4D8E11BA873C2F11161202B945"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "path": "scripts/project.mjs",
+    "sha256": "FDDE0B8DAAC3D262F0747FAAC81D5D999B6E47EFB9A8E44A5DEB2749187948B1"
+  },
+  {
+    "path": "scripts/project.test.mjs",
+    "sha256": "1A9BE74C65E04D57E4BB223FB9FE61364FACE80C230586B68E753B9B08BFEF13"
+  },
+  {
+    "path": "frontend/stryker.appearance.config.json",
+    "sha256": "5FEEA29C20949B4E9AEC592DAB6E876A8715CEF743C2F6A92D8E8B71E849EA27"
+  },
+  {
+    "path": ".gitignore",
+    "sha256": "A34933A970657D39C15F0923BA02443F4FEC178937B958FF617EA0176F55236B"
+  },
+  {
+    "path": "progress/tdd_appearance_stryker_support.md",
+    "sha256": "7BCCC8E54F8C86C1F65FB3E4EDB97322292A17DB07DB47836876E0EC0DF26429"
+  }
+]

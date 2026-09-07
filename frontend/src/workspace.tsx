@@ -13,6 +13,7 @@ export function Workspace({
     | "Disponibilidad"
     | "Historial"
     | "Revisión semanal"
+    | "Apariencia"
     | null;
 }) {
   return (
@@ -69,6 +70,12 @@ export function Workspace({
             aria-current={section === "Revisión semanal" ? "page" : undefined}
           >
             Revisión semanal
+          </RouteLink>
+          <RouteLink
+            href="/apariencia"
+            aria-current={section === "Apariencia" ? "page" : undefined}
+          >
+            Apariencia
           </RouteLink>
         </nav>
         <div className="sidebar-note">

@@ -1,0 +1,14 @@
+[
+  {
+    "path": "frontend/src/create-task.test.tsx",
+    "sha256": "8873F4B5A54053A5D0483C8D0ADDF9E4A33C4365F56850E40574E7DF92C91D12"
+  },
+  {
+    "path": "frontend/src/today.test.tsx",
+    "sha256": "63C1DDCEBD09D655D33613DFBB30C9197D0F81E0D864D1252F15E2EE90985B36"
+  },
+  {
+    "path": "frontend/src/work-session-integration.test.tsx",
+    "sha256": "8E7C8E3A402EF44D556DF5605235885885FDE57672704828756F02C761A21B16"
+  }
+]

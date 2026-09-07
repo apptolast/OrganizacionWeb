@@ -1,0 +1,34 @@
+[
+  {
+    "path": "frontend/src/appearance-api.ts",
+    "sha256": "CEA492E9795510120A4935BD93372CE4F6A27468E2C6B703EA9EF83AE885A23C"
+  },
+  {
+    "path": "frontend/src/appearance-api.test.ts",
+    "sha256": "466116AB50D919C78B64EB309C4B8CA6A8377AE806C9F5DD977212A6D5108B0A"
+  },
+  {
+    "path": "frontend/src/appearance-state.tsx",
+    "sha256": "E3A539E3DA3FF046A2D931357B758857562B0A997864668697BB528646B885C7"
+  },
+  {
+    "path": "frontend/src/App.tsx",
+    "sha256": "D167A1DAB65E8AF66905F6646C0FEDFBEEFB4F64C5D558BB30F02F457E3262E1"
+  },
+  {
+    "path": "frontend/src/workspace.tsx",
+    "sha256": "C378CE81336D7525A5F2AC849C5D6FCA4E48D1FE6A8D5087504B63F3C0625B7D"
+  },
+  {
+    "path": "frontend/src/session-gate.tsx",
+    "sha256": "F2FBA3305BA6729EE0F84EAB17DC03903CA7D1D47440F079E41DC4018ED3D79D"
+  },
+  {
+    "path": "frontend/src/use-session.ts",
+    "sha256": "38BB8103CC4142F49933896E4D1FD6F62A8145F96A42B09EADB38A9A35D90F74"
+  },
+  {
+    "path": "frontend/src/authentication.test.tsx",
+    "sha256": "E57E781FAE64E1BE02F166759D7665B5218D414D3B3860C04F6D7A30A323CFD6"
+  }
+]

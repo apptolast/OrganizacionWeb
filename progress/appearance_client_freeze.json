@@ -1,0 +1,16 @@
+{
+  "files": [
+    {
+      "sha256": "CB40786792CDCADF3D9C6FF58295319B6C54416D722A8E2C7B78CD91E27F940D",
+      "path": "frontend/src/appearance-api.ts"
+    },
+    {
+      "sha256": "466116AB50D919C78B64EB309C4B8CA6A8377AE806C9F5DD977212A6D5108B0A",
+      "path": "frontend/src/appearance-api.test.ts"
+    }
+  ],
+  "tests": 30,
+  "lintLog": "progress/appearance_client_lint.log",
+  "testLog": "progress/appearance_client_checkpoint.log",
+  "typeLog": "progress/appearance_client_types.log"
+}

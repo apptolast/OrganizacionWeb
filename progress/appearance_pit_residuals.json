@@ -1,0 +1,68 @@
+[
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.domain.AppearanceValues",
+    "method": "channel",
+    "line": 62,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "index": "20",
+    "block": "2",
+    "description": "changed conditional boundary",
+    "testsRun": "41"
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.domain.AppearanceValues",
+    "method": "channel",
+    "line": 62,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.MathMutator",
+    "index": "23",
+    "block": "3",
+    "description": "Replaced double division with multiplication",
+    "testsRun": "18"
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.domain.AppearanceValues",
+    "method": "color",
+    "line": 40,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "index": "44",
+    "block": "12",
+    "description": "changed conditional boundary",
+    "testsRun": "41"
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.domain.AppearanceValues",
+    "method": "contrast",
+    "line": 53,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.MathMutator",
+    "index": "16",
+    "block": "3",
+    "description": "Replaced double addition with subtraction",
+    "testsRun": "41"
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresAppearanceStore",
+    "method": "lambda$select$0",
+    "line": 45,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "index": "88",
+    "block": "24",
+    "description": "changed conditional boundary",
+    "testsRun": "7"
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.application.SaveAppearance",
+    "method": "timestamp",
+    "line": 66,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "index": "23",
+    "block": "5",
+    "description": "changed conditional boundary",
+    "testsRun": "12"
+  }
+]

@@ -1210,3 +1210,163 @@ test("default PIT exposes weekly review adapter tests for the newly selected cla
     /else -> core \+ authenticationTests[^\n]+ \+ weeklyReviewAdapterTests/,
   );
 });
+
+test("appearance backend invokes only its fixed PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "appearance-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=appearance"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
+test("appearance PIT includes all new modules and makes their tests available by default", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  const selected = build.match(
+    /val appearanceClasses = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(selected);
+  assert.deepEqual(
+    [...selected.matchAll(/"([^"]+)"/g)].map((entry) => entry[1]),
+    [
+      "application.ReadAppearance",
+      "application.ReadAppearanceUseCase",
+      "application.SaveAppearance",
+      "application.SaveAppearanceUseCase",
+      "application.AppearanceQueries",
+      "application.AppearanceEditing",
+      "application.AppearanceConflictException",
+      "domain.Appearance*",
+      "adapter.persistence.PostgresAppearanceStore*",
+      "adapter.http.AppearanceController*",
+      "adapter.config.ApplicationConfiguration",
+    ].map((name) => `com.apptolast.organization.${name}`),
+  );
+  assert.match(build, /val appearanceOnly = scope == "appearance"/);
+  assert.match(build, /appearanceOnly -> appearanceClasses/);
+  assert.match(
+    build,
+    /appearanceOnly -> setOf\("com\.apptolast\.organization\.\*"\)/,
+  );
+  assert.match(build, /else -> [^\n]+ \+ appearanceClasses/);
+  const tests = build.match(
+    /val appearanceAdapterTests = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(tests);
+  assert.deepEqual(
+    [...tests.matchAll(/"([^"]+)"/g)].map((entry) => entry[1]),
+    [
+      "com.apptolast.organization.adapter.AppearanceApiTest",
+      "com.apptolast.organization.adapter.persistence.Appearance*Test",
+      "com.apptolast.organization.adapter.config.ApplicationWiringTest",
+    ],
+  );
+  assert.match(
+    build,
+    /else -> core \+ authenticationTests[^\n]+ \+ appearanceAdapterTests/,
+  );
+  assert.match(
+    build,
+    /if \(appearanceOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-appearance"\)\)/,
+  );
+  assert.match(build, /mutationThreshold\.set\(80\)/);
+  assert.match(build, /threads\.set\(4\)/);
+});
+
+test("appearance frontend invokes only its fixed Stryker configuration", () => {
+  const { project, calls } = capture();
+  project("mutate", "appearance-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.appearance.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("appearance Stryker preserves all candidates and reviewed integration nodes", () => {
+  const config = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.appearance.config.json"),
+      "utf8",
+    ),
+  );
+  assert.deepEqual(config.mutate, [
+    "src/appearance-api.ts",
+    "src/appearance-state.tsx",
+    "src/appearance.tsx",
+    "src/App.tsx:19:8-19:44",
+    "src/App.tsx:27:8-39:26",
+    "src/App.tsx:42:7-74:7",
+    "src/workspace.tsx:74:10-79:22",
+    "src/session-gate.tsx:32:2-51:6",
+    "src/use-session.ts:177:0-195:1",
+  ]);
+  assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
+  assert.equal(config.concurrency, 8);
+  assert.equal(config.coverageAnalysis, "perTest");
+  assert.deepEqual(config.vitest, { configFile: "vite.config.ts" });
+  assert.deepEqual(config.plugins, ["@stryker-mutator/vitest-runner"]);
+  assert.equal(config.tempDirName, ".stryker-tmp-appearance");
+  assert.equal(
+    config.jsonReporter.fileName,
+    "reports/mutation-appearance/mutation.json",
+  );
+  assert.equal(
+    config.htmlReporter.fileName,
+    "reports/mutation-appearance/mutation.html",
+  );
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  assert.match(
+    readFileSync(resolve(root, "frontend/vite.config.ts"), "utf8"),
+    /src\/\*\*\/\*\.test\.\{ts,tsx\}/,
+  );
+  const expectedStarts = [
+    "appearance =",
+    "appearance",
+    "appearance",
+    "<RouteLink",
+    "if (session?.authenticated",
+    "function isPrivateRoute",
+  ];
+  for (const [index, selector] of config.mutate.slice(3).entries()) {
+    const [, path, startLine, startColumn, endLine, endColumn] = selector.match(
+      /^(.+):(\d+):(\d+)-(\d+):(\d+)$/,
+    );
+    const lines = readFileSync(resolve(root, "frontend", path), "utf8").split(
+      /\r?\n/,
+    );
+    const selected = lines.slice(Number(startLine) - 1, Number(endLine));
+    selected[selected.length - 1] = selected.at(-1).slice(0, Number(endColumn));
+    selected[0] = selected[0].slice(Number(startColumn));
+    assert.ok(selected.join("\n").startsWith(expectedStarts[index]), selector);
+    assert.ok(
+      selected
+        .join("\n")
+        .includes(
+          index === 4
+            ? "AppearanceProvider"
+            : index === 5
+              ? "/apariencia"
+              : index === 3
+                ? "/apariencia"
+                : index === 0
+                  ? "/apariencia"
+                  : index === 1
+                    ? "Apariencia"
+                    : "<Appearance />",
+        ),
+      selector,
+    );
+  }
+});

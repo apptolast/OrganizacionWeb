@@ -35,6 +35,7 @@ pitest {
     pitestVersion.set("1.22.0")
     junit5PluginVersion.set("1.2.3")
     val scope = providers.gradleProperty("mutationScope").orNull
+    val appearanceOnly = scope == "appearance"
     val weeklyReviewOnly = scope == "weekly_review"
     val historyOnly = scope == "history"
     val authenticationOnly = scope == "authentication"
@@ -256,6 +257,24 @@ pitest {
         "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher",
         "com.apptolast.organization.adapter.config.ApplicationConfiguration"
     )
+    val appearanceClasses = setOf(
+        "com.apptolast.organization.application.ReadAppearance",
+        "com.apptolast.organization.application.ReadAppearanceUseCase",
+        "com.apptolast.organization.application.SaveAppearance",
+        "com.apptolast.organization.application.SaveAppearanceUseCase",
+        "com.apptolast.organization.application.AppearanceQueries",
+        "com.apptolast.organization.application.AppearanceEditing",
+        "com.apptolast.organization.application.AppearanceConflictException",
+        "com.apptolast.organization.domain.Appearance*",
+        "com.apptolast.organization.adapter.persistence.PostgresAppearanceStore*",
+        "com.apptolast.organization.adapter.http.AppearanceController*",
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration"
+    )
+    val appearanceAdapterTests = setOf(
+        "com.apptolast.organization.adapter.AppearanceApiTest",
+        "com.apptolast.organization.adapter.persistence.Appearance*Test",
+        "com.apptolast.organization.adapter.config.ApplicationWiringTest"
+    )
     val weeklyReviewClasses = setOf(
         "com.apptolast.organization.application.ReadWeeklyReview",
         "com.apptolast.organization.application.ReadWeeklyReviewUseCase",
@@ -289,6 +308,7 @@ pitest {
         "com.apptolast.organization.adapter.persistence.History*Test"
     )
     targetClasses.set(when {
+        appearanceOnly -> appearanceClasses
         weeklyReviewOnly -> weeklyReviewClasses
         historyOnly -> historyClasses
         endTimeNotificationOnly -> endTimeNotificationClasses
@@ -304,9 +324,10 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses
     })
     targetTests.set(when {
+        appearanceOnly -> setOf("com.apptolast.organization.*")
         weeklyReviewOnly -> setOf("com.apptolast.organization.*")
         historyOnly -> setOf("com.apptolast.organization.*")
         endTimeNotificationOnly -> setOf("com.apptolast.organization.*")
@@ -322,8 +343,9 @@ pitest {
         taskStatusOnly -> taskTests + taskStatusAdapterTests
         splitOnly -> taskTests
         taskOnly -> taskTests
-        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests + weeklyReviewAdapterTests
+        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests + weeklyReviewAdapterTests + appearanceAdapterTests
     })
+    if (appearanceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-appearance"))
     if (weeklyReviewOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-weekly-review"))
     if (historyOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-history"))
     if (endTimeNotificationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-end-time-notification"))

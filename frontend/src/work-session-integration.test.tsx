@@ -24,8 +24,7 @@ function fixture(
     undefined,
 ) {
   const unexpected: string[] = [];
-  vi.stubGlobal(
-    "fetch",
+  stubBusinessFetch(
     vi.fn(async (url: string, options?: RequestInit) => {
       const custom = override(url);
       if (custom) return custom;
@@ -208,3 +207,29 @@ it("history18 @s28 discovers history from the existing task detail", async () =>
   await screen.findByLabelText("Duración prevista (minutos)");
   expect(unexpected).toEqual([]);
 });
+
+// Global appearance GET has its own fixture; business requests and counts
+// are delegated unchanged to the original mock.
+function stubBusinessFetch(mock: unknown) {
+  const traffic = mock as typeof fetch;
+  vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
+    if (
+      input === "/api/v1/me/appearance" &&
+      (init?.method === undefined || init.method === "GET")
+    ) {
+      return Promise.resolve(
+        Response.json(
+          {
+            configured: false,
+            theme: "SYSTEM",
+            accentLight: "#244C3C",
+            accentDark: "#B7E4C7",
+            updatedAt: null,
+          },
+          { headers: { ETag: '"appearance:unconfigured"' } },
+        ),
+      );
+    }
+    return traffic(input, init);
+  });
+}

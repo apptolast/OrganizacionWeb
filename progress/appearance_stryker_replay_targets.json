@@ -1,0 +1,1933 @@
+{
+  "originalSha256": "56D3A57C3393400EFDD98CA463CFB2B0C0E5274D4E878793FBA15EBB49D60122",
+  "freeze119Sha256": "2824262006AA837B4A5D03D93CD88BD881A3EE62EC70A3D80394594DF580DFAE",
+  "targets": [
+    {
+      "file": "src/appearance-state.tsx",
+      "id": "352",
+      "location": {
+        "end": {
+          "column": 18,
+          "line": 68
+        },
+        "start": {
+          "column": 5,
+          "line": 68
+        }
+      },
+      "mutatorName": "CallExpression",
+      "replacement": ";",
+      "status": "Survived",
+      "selector": "src/appearance-state.tsx:68:4-68:17"
+    },
+    {
+      "file": "src/appearance-state.tsx",
+      "id": "412",
+      "location": {
+        "end": {
+          "column": 61,
+          "line": 125
+        },
+        "start": {
+          "column": 31,
+          "line": 125
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "selector": "src/appearance-state.tsx:125:30-125:60"
+    },
+    {
+      "file": "src/appearance-state.tsx",
+      "id": "441",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 144
+        },
+        "start": {
+          "column": 34,
+          "line": 144
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "selector": "src/appearance-state.tsx:144:33-144:41"
+    },
+    {
+      "file": "src/appearance-state.tsx",
+      "id": "443",
+      "location": {
+        "end": {
+          "column": 54,
+          "line": 145
+        },
+        "start": {
+          "column": 36,
+          "line": 145
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "selector": "src/appearance-state.tsx:145:35-145:53"
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "623",
+      "location": {
+        "end": {
+          "column": 54,
+          "line": 197
+        },
+        "start": {
+          "column": 42,
+          "line": 197
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "status": "NoCoverage",
+      "selector": "src/appearance.tsx:197:41-197:53"
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "642",
+      "location": {
+        "end": {
+          "column": 92,
+          "line": 216
+        },
+        "start": {
+          "column": 13,
+          "line": 216
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "status": "NoCoverage",
+      "selector": "src/appearance.tsx:216:12-216:91"
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "527",
+      "location": {
+        "end": {
+          "column": 58,
+          "line": 86
+        },
+        "start": {
+          "column": 35,
+          "line": 86
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "selector": "src/appearance.tsx:86:34-86:57"
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "620",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 193
+        },
+        "start": {
+          "column": 19,
+          "line": 193
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^#[0-9a-f]$/i",
+      "status": "Survived",
+      "selector": "src/appearance.tsx:193:18-193:35"
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "633",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 208
+        },
+        "start": {
+          "column": 11,
+          "line": 208
+        }
+      },
+      "mutatorName": "BooleanLiteral",
+      "replacement": "darkValid",
+      "status": "Survived",
+      "selector": "src/appearance.tsx:208:10-208:20"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "61",
+      "location": {
+        "end": {
+          "column": 24,
+          "line": 34
+        },
+        "start": {
+          "column": 9,
+          "line": 34
+        }
+      },
+      "mutatorName": "ArithmeticOperator",
+      "replacement": "channel * 12.92",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:34:8-34:23"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "73",
+      "location": {
+        "end": {
+          "column": 32,
+          "line": 40
+        },
+        "start": {
+          "column": 7,
+          "line": 40
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:40:6-40:31"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "77",
+      "location": {
+        "end": {
+          "column": 53,
+          "line": 40
+        },
+        "start": {
+          "column": 37,
+          "line": 40
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/#[0-9A-F]{6}$/",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:40:36-40:52"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "78",
+      "location": {
+        "end": {
+          "column": 53,
+          "line": 40
+        },
+        "start": {
+          "column": 37,
+          "line": 40
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^#[0-9A-F]{6}/",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:40:36-40:52"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "115",
+      "location": {
+        "end": {
+          "column": 30,
+          "line": 93
+        },
+        "start": {
+          "column": 7,
+          "line": 93
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:93:6-93:29"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "120",
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 98
+        },
+        "start": {
+          "column": 5,
+          "line": 98
+        }
+      },
+      "mutatorName": "OptionalChaining",
+      "replacement": "signal.throwIfAborted",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:98:4-98:26"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "154",
+      "location": {
+        "end": {
+          "column": 8,
+          "line": 122
+        },
+        "start": {
+          "column": 7,
+          "line": 108
+        }
+      },
+      "mutatorName": "MethodExpression",
+      "replacement": "problem.errors.some(entry => exact(entry, \"field code message\") && [\"theme\", \"accentLight\", \"accentDark\"].includes(entry.field as string) && [\"REQUIRED\", \"INVALID_TYPE\", \"INVALID_VALUE\", \"INSUFFICIENT_CONTRAST\"].includes(entry.code as string) && typeof entry.message === \"string\" && entry.message.trim())",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:108:6-122:7"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "156",
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 121
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:108:6-122:7"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "158",
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 121
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "replacement": "exact(entry, \"field code message\") && [\"theme\", \"accentLight\", \"accentDark\"].includes(entry.field as string) && [\"REQUIRED\", \"INVALID_TYPE\", \"INVALID_VALUE\", \"INSUFFICIENT_CONTRAST\"].includes(entry.code as string) && typeof entry.message === \"string\" || entry.message.trim()",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:108:6-122:7"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "160",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 120
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "replacement": "exact(entry, \"field code message\") && [\"theme\", \"accentLight\", \"accentDark\"].includes(entry.field as string) && [\"REQUIRED\", \"INVALID_TYPE\", \"INVALID_VALUE\", \"INSUFFICIENT_CONTRAST\"].includes(entry.code as string) || typeof entry.message === \"string\"",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:108:6-122:7"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "159",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 120
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:108:6-122:7"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "161",
+      "location": {
+        "end": {
+          "column": 43,
+          "line": 119
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:108:6-122:7"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "162",
+      "location": {
+        "end": {
+          "column": 43,
+          "line": 119
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "replacement": "exact(entry, \"field code message\") && [\"theme\", \"accentLight\", \"accentDark\"].includes(entry.field as string) || [\"REQUIRED\", \"INVALID_TYPE\", \"INVALID_VALUE\", \"INSUFFICIENT_CONTRAST\"].includes(entry.code as string)",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:108:6-122:7"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "163",
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 113
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:108:6-122:7"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "164",
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 113
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "replacement": "exact(entry, \"field code message\") || [\"theme\", \"accentLight\", \"accentDark\"].includes(entry.field as string)",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:108:6-122:7"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "174",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 118
+        },
+        "start": {
+          "column": 13,
+          "line": 118
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:108:6-122:7"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "235",
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 158
+        },
+        "start": {
+          "column": 7,
+          "line": 158
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:158:6-158:36"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "238",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 159
+        },
+        "start": {
+          "column": 7,
+          "line": 159
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:159:6-159:35"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "243",
+      "location": {
+        "end": {
+          "column": 67,
+          "line": 161
+        },
+        "start": {
+          "column": 7,
+          "line": 161
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:161:6-161:66"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "284",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^\"appearance:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(0|[1-9][0-9]{0,18})\"/",
+      "status": "Survived",
+      "selector": "src/appearance-api.ts:180:6-180:104"
+    },
+    {
+      "file": "src/session-gate.tsx",
+      "id": "705",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 36
+        },
+        "start": {
+          "column": 34,
+          "line": 36
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "status": "Survived",
+      "selector": "src/session-gate.tsx:36:33-36:40"
+    },
+    {
+      "file": "src/session-gate.tsx",
+      "id": "707",
+      "location": {
+        "end": {
+          "column": 73,
+          "line": 37
+        },
+        "start": {
+          "column": 71,
+          "line": 37
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"Stryker was here!\"",
+      "status": "Survived",
+      "selector": "src/session-gate.tsx:37:70-37:72"
+    }
+  ],
+  "selectors": [
+    "src/appearance-api.ts:34:8-34:23",
+    "src/appearance-api.ts:40:6-40:31",
+    "src/appearance-api.ts:40:36-40:52",
+    "src/appearance-api.ts:93:6-93:29",
+    "src/appearance-api.ts:98:4-98:26",
+    "src/appearance-api.ts:108:6-122:7",
+    "src/appearance-api.ts:158:6-158:36",
+    "src/appearance-api.ts:159:6-159:35",
+    "src/appearance-api.ts:161:6-161:66",
+    "src/appearance-api.ts:180:6-180:104",
+    "src/appearance-state.tsx:68:4-68:17",
+    "src/appearance-state.tsx:125:30-125:60",
+    "src/appearance-state.tsx:144:33-144:41",
+    "src/appearance-state.tsx:145:35-145:53",
+    "src/appearance.tsx:86:34-86:57",
+    "src/appearance.tsx:193:18-193:35",
+    "src/appearance.tsx:197:41-197:53",
+    "src/appearance.tsx:208:10-208:20",
+    "src/appearance.tsx:216:12-216:91",
+    "src/session-gate.tsx:36:33-36:40",
+    "src/session-gate.tsx:37:70-37:72"
+  ],
+  "originalMutantsContained": [
+    {
+      "file": "src/appearance-state.tsx",
+      "id": "352",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 18,
+          "line": 68
+        },
+        "start": {
+          "column": 5,
+          "line": 68
+        }
+      },
+      "mutatorName": "CallExpression",
+      "replacement": ";"
+    },
+    {
+      "file": "src/appearance-state.tsx",
+      "id": "412",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 61,
+          "line": 125
+        },
+        "start": {
+          "column": 31,
+          "line": 125
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-state.tsx",
+      "id": "441",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 144
+        },
+        "start": {
+          "column": 34,
+          "line": 144
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-state.tsx",
+      "id": "443",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 54,
+          "line": 145
+        },
+        "start": {
+          "column": 36,
+          "line": 145
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "623",
+      "status": "NoCoverage",
+      "location": {
+        "end": {
+          "column": 54,
+          "line": 197
+        },
+        "start": {
+          "column": 42,
+          "line": 197
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "642",
+      "status": "NoCoverage",
+      "location": {
+        "end": {
+          "column": 92,
+          "line": 216
+        },
+        "start": {
+          "column": 13,
+          "line": 216
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "528",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 58,
+          "line": 86
+        },
+        "start": {
+          "column": 35,
+          "line": 86
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "527",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 58,
+          "line": 86
+        },
+        "start": {
+          "column": 35,
+          "line": 86
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "529",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 58,
+          "line": 86
+        },
+        "start": {
+          "column": 35,
+          "line": 86
+        }
+      },
+      "mutatorName": "EqualityOperator",
+      "replacement": "field !== \"accentLight\""
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "530",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 58,
+          "line": 86
+        },
+        "start": {
+          "column": 45,
+          "line": 86
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "619",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 193
+        },
+        "start": {
+          "column": 19,
+          "line": 193
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^#[0-9a-f]{6}/i"
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "618",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 193
+        },
+        "start": {
+          "column": 19,
+          "line": 193
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/#[0-9a-f]{6}$/i"
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "620",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 193
+        },
+        "start": {
+          "column": 19,
+          "line": 193
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^#[0-9a-f]$/i"
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "621",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 193
+        },
+        "start": {
+          "column": 19,
+          "line": 193
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^#[^0-9a-f]{6}$/i"
+    },
+    {
+      "file": "src/appearance.tsx",
+      "id": "633",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 208
+        },
+        "start": {
+          "column": 11,
+          "line": 208
+        }
+      },
+      "mutatorName": "BooleanLiteral",
+      "replacement": "darkValid"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "61",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 24,
+          "line": 34
+        },
+        "start": {
+          "column": 9,
+          "line": 34
+        }
+      },
+      "mutatorName": "ArithmeticOperator",
+      "replacement": "channel * 12.92"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "74",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 32,
+          "line": 40
+        },
+        "start": {
+          "column": 7,
+          "line": 40
+        }
+      },
+      "mutatorName": "EqualityOperator",
+      "replacement": "typeof value === \"string\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "75",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 32,
+          "line": 40
+        },
+        "start": {
+          "column": 24,
+          "line": 40
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "79",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 53,
+          "line": 40
+        },
+        "start": {
+          "column": 37,
+          "line": 40
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^#[0-9A-F]$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "80",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 53,
+          "line": 40
+        },
+        "start": {
+          "column": 37,
+          "line": 40
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^#[^0-9A-F]{6}$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "73",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 32,
+          "line": 40
+        },
+        "start": {
+          "column": 7,
+          "line": 40
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "77",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 53,
+          "line": 40
+        },
+        "start": {
+          "column": 37,
+          "line": 40
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/#[0-9A-F]{6}$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "78",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 53,
+          "line": 40
+        },
+        "start": {
+          "column": 37,
+          "line": 40
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^#[0-9A-F]{6}/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "116",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 30,
+          "line": 93
+        },
+        "start": {
+          "column": 7,
+          "line": 93
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "117",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 30,
+          "line": 93
+        },
+        "start": {
+          "column": 7,
+          "line": 93
+        }
+      },
+      "mutatorName": "EqualityOperator",
+      "replacement": "response.status !== 400"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "115",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 30,
+          "line": 93
+        },
+        "start": {
+          "column": 7,
+          "line": 93
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "120",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 98
+        },
+        "start": {
+          "column": 5,
+          "line": 98
+        }
+      },
+      "mutatorName": "OptionalChaining",
+      "replacement": "signal.throwIfAborted"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "155",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 121
+        },
+        "start": {
+          "column": 9,
+          "line": 109
+        }
+      },
+      "mutatorName": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "154",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 8,
+          "line": 122
+        },
+        "start": {
+          "column": 7,
+          "line": 108
+        }
+      },
+      "mutatorName": "MethodExpression",
+      "replacement": "problem.errors.some(entry => exact(entry, \"field code message\") && [\"theme\", \"accentLight\", \"accentDark\"].includes(entry.field as string) && [\"REQUIRED\", \"INVALID_TYPE\", \"INVALID_VALUE\", \"INSUFFICIENT_CONTRAST\"].includes(entry.code as string) && typeof entry.message === \"string\" && entry.message.trim())"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "156",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 121
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "157",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 121
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "158",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 121
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "replacement": "exact(entry, \"field code message\") && [\"theme\", \"accentLight\", \"accentDark\"].includes(entry.field as string) && [\"REQUIRED\", \"INVALID_TYPE\", \"INVALID_VALUE\", \"INSUFFICIENT_CONTRAST\"].includes(entry.code as string) && typeof entry.message === \"string\" || entry.message.trim()"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "160",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 120
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "replacement": "exact(entry, \"field code message\") && [\"theme\", \"accentLight\", \"accentDark\"].includes(entry.field as string) && [\"REQUIRED\", \"INVALID_TYPE\", \"INVALID_VALUE\", \"INSUFFICIENT_CONTRAST\"].includes(entry.code as string) || typeof entry.message === \"string\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "159",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 120
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "161",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 43,
+          "line": 119
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "162",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 43,
+          "line": 119
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "replacement": "exact(entry, \"field code message\") && [\"theme\", \"accentLight\", \"accentDark\"].includes(entry.field as string) || [\"REQUIRED\", \"INVALID_TYPE\", \"INVALID_VALUE\", \"INSUFFICIENT_CONTRAST\"].includes(entry.code as string)"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "163",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 113
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "164",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 113
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "replacement": "exact(entry, \"field code message\") || [\"theme\", \"accentLight\", \"accentDark\"].includes(entry.field as string)"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "165",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 110
+        },
+        "start": {
+          "column": 24,
+          "line": 110
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "166",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 49,
+          "line": 111
+        },
+        "start": {
+          "column": 11,
+          "line": 111
+        }
+      },
+      "mutatorName": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "167",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 19,
+          "line": 111
+        },
+        "start": {
+          "column": 12,
+          "line": 111
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "168",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 111
+        },
+        "start": {
+          "column": 21,
+          "line": 111
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "169",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 48,
+          "line": 111
+        },
+        "start": {
+          "column": 36,
+          "line": 111
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "170",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 119
+        },
+        "start": {
+          "column": 11,
+          "line": 114
+        }
+      },
+      "mutatorName": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "173",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 28,
+          "line": 117
+        },
+        "start": {
+          "column": 13,
+          "line": 117
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "171",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 23,
+          "line": 115
+        },
+        "start": {
+          "column": 13,
+          "line": 115
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "172",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 116
+        },
+        "start": {
+          "column": 13,
+          "line": 116
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "174",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 118
+        },
+        "start": {
+          "column": 13,
+          "line": 118
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "176",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 120
+        },
+        "start": {
+          "column": 11,
+          "line": 120
+        }
+      },
+      "mutatorName": "EqualityOperator",
+      "replacement": "typeof entry.message !== \"string\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "177",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 120
+        },
+        "start": {
+          "column": 36,
+          "line": 120
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "175",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 120
+        },
+        "start": {
+          "column": 11,
+          "line": 120
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "178",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 121
+        },
+        "start": {
+          "column": 11,
+          "line": 121
+        }
+      },
+      "mutatorName": "MethodExpression",
+      "replacement": "entry.message"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "236",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 158
+        },
+        "start": {
+          "column": 7,
+          "line": 158
+        }
+      },
+      "mutatorName": "EqualityOperator",
+      "replacement": "data.accentLight === \"#244C3C\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "237",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 158
+        },
+        "start": {
+          "column": 28,
+          "line": 158
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "239",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 159
+        },
+        "start": {
+          "column": 7,
+          "line": 159
+        }
+      },
+      "mutatorName": "EqualityOperator",
+      "replacement": "data.accentDark === \"#B7E4C7\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "240",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 159
+        },
+        "start": {
+          "column": 27,
+          "line": 159
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "244",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 67,
+          "line": 161
+        },
+        "start": {
+          "column": 7,
+          "line": 161
+        }
+      },
+      "mutatorName": "EqualityOperator",
+      "replacement": "response.headers.get(\"ETag\") === '\"appearance:unconfigured\"'"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "245",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 34,
+          "line": 161
+        },
+        "start": {
+          "column": 28,
+          "line": 161
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "246",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 67,
+          "line": 161
+        },
+        "start": {
+          "column": 40,
+          "line": 161
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "235",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 158
+        },
+        "start": {
+          "column": 7,
+          "line": 158
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "238",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 159
+        },
+        "start": {
+          "column": 7,
+          "line": 159
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "243",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 67,
+          "line": 161
+        },
+        "start": {
+          "column": 7,
+          "line": 161
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "283",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/\"appearance:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(0|[1-9][0-9]{0,18})\"$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "285",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^\"appearance:[0-9a-f]-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(0|[1-9][0-9]{0,18})\"$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "286",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^\"appearance:[^0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(0|[1-9][0-9]{0,18})\"$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "287",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^\"appearance:[0-9a-f]{8}-[0-9a-f]-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(0|[1-9][0-9]{0,18})\"$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "288",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^\"appearance:[0-9a-f]{8}-[^0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(0|[1-9][0-9]{0,18})\"$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "289",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^\"appearance:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]-[0-9a-f]{4}-[0-9a-f]{12}:(0|[1-9][0-9]{0,18})\"$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "291",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^\"appearance:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]-[0-9a-f]{12}:(0|[1-9][0-9]{0,18})\"$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "290",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^\"appearance:[0-9a-f]{8}-[0-9a-f]{4}-[^0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(0|[1-9][0-9]{0,18})\"$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "292",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^\"appearance:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[^0-9a-f]{4}-[0-9a-f]{12}:(0|[1-9][0-9]{0,18})\"$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "293",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^\"appearance:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]:(0|[1-9][0-9]{0,18})\"$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "294",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^\"appearance:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[^0-9a-f]{12}:(0|[1-9][0-9]{0,18})\"$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "296",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^\"appearance:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(0|[1-9][0-9])\"$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "297",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^\"appearance:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(0|[1-9][^0-9]{0,18})\"$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "295",
+      "status": "Killed",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^\"appearance:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(0|[^1-9][0-9]{0,18})\"$/"
+    },
+    {
+      "file": "src/appearance-api.ts",
+      "id": "284",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "replacement": "/^\"appearance:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(0|[1-9][0-9]{0,18})\"/"
+    },
+    {
+      "file": "src/session-gate.tsx",
+      "id": "705",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 36
+        },
+        "start": {
+          "column": 34,
+          "line": 36
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": "src/session-gate.tsx",
+      "id": "707",
+      "status": "Survived",
+      "location": {
+        "end": {
+          "column": 73,
+          "line": 37
+        },
+        "start": {
+          "column": 71,
+          "line": 37
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    }
+  ],
+  "note": "Prevalidation only; exact replay signatures and all extra outcomes must be verified after one authorized run."
+}

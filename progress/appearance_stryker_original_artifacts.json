@@ -1,0 +1,42 @@
+[
+  {
+    "path": "progress/appearance_stryker_original/mutation.json",
+    "bytes": 5155690,
+    "sha256": "56D3A57C3393400EFDD98CA463CFB2B0C0E5274D4E878793FBA15EBB49D60122"
+  },
+  {
+    "path": "progress/appearance_stryker_original/mutation.html",
+    "bytes": 5493542,
+    "sha256": "71C8385A47DC72842D65DB3CDD326B83259452572D30EEA9A639BCBDD73FB0BF"
+  },
+  {
+    "path": "progress/appearance_stryker_original/run.log",
+    "bytes": 139582,
+    "sha256": "9A0D14E3CD86993DD2ABE131212E8B4E5852C4000C1381E6B4ECFE1B6072335F"
+  },
+  {
+    "path": "progress/appearance_stryker_original_before.json",
+    "bytes": 16817,
+    "sha256": "70BA634628612859D779FADE72E857D10DD526A5F6DD357C1552949192C3FB3C"
+  },
+  {
+    "path": "progress/appearance_stryker_original_after.json",
+    "bytes": 16817,
+    "sha256": "70BA634628612859D779FADE72E857D10DD526A5F6DD357C1552949192C3FB3C"
+  },
+  {
+    "path": "progress/appearance_stryker_original_inventory.json",
+    "bytes": 4946432,
+    "sha256": "D4745580128E7970014045AA85A064F71D71973F3AE5CBE8B22DD1CDB697D287"
+  },
+  {
+    "path": "progress/appearance_stryker_original_residues.json",
+    "bytes": 106411,
+    "sha256": "7C9A52CCA747ADFD1B805A81A5E219226A00EAA838EA569DFC454DDF668EDE6E"
+  },
+  {
+    "path": "frontend/stryker.appearance.config.json",
+    "bytes": 961,
+    "sha256": "5CA42254882AAE51702093BE0A28450C1E765E3711265DB3FFB5CF7115E60625"
+  }
+]

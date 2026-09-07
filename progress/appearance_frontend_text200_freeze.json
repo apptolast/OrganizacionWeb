@@ -1,0 +1,62 @@
+[
+  {
+    "path": "frontend/src/appearance-api.ts",
+    "sha256": "CEA492E9795510120A4935BD93372CE4F6A27468E2C6B703EA9EF83AE885A23C",
+    "changedSincePreviousFreeze": false
+  },
+  {
+    "path": "frontend/src/appearance-api.test.ts",
+    "sha256": "466116AB50D919C78B64EB309C4B8CA6A8377AE806C9F5DD977212A6D5108B0A",
+    "changedSincePreviousFreeze": false
+  },
+  {
+    "path": "frontend/src/appearance-state.tsx",
+    "sha256": "773B9F96B377D1AE2EA279C45A8F9CD233C1D136F8EB3106F3AD0F1656164B3C",
+    "changedSincePreviousFreeze": false
+  },
+  {
+    "path": "frontend/src/appearance.tsx",
+    "sha256": "F221223CA940B000E393864E599FD2B6E522341D33CFA8C3662EA7794EEADA68",
+    "changedSincePreviousFreeze": false
+  },
+  {
+    "path": "frontend/src/appearance.test.tsx",
+    "sha256": "D147293E8853435E2C35956A278E423EBAA07D58E3FE67EB56B5A949AF82EBBB",
+    "changedSincePreviousFreeze": false
+  },
+  {
+    "path": "frontend/src/App.tsx",
+    "sha256": "D167A1DAB65E8AF66905F6646C0FEDFBEEFB4F64C5D558BB30F02F457E3262E1",
+    "changedSincePreviousFreeze": false
+  },
+  {
+    "path": "frontend/src/workspace.tsx",
+    "sha256": "CA66EC25E493BD4E4A1DD53F11C63DB9C5F265702FD7FD4776EBCB4530713EB5",
+    "changedSincePreviousFreeze": false
+  },
+  {
+    "path": "frontend/src/session-gate.tsx",
+    "sha256": "F2FBA3305BA6729EE0F84EAB17DC03903CA7D1D47440F079E41DC4018ED3D79D",
+    "changedSincePreviousFreeze": false
+  },
+  {
+    "path": "frontend/src/use-session.ts",
+    "sha256": "38BB8103CC4142F49933896E4D1FD6F62A8145F96A42B09EADB38A9A35D90F74",
+    "changedSincePreviousFreeze": false
+  },
+  {
+    "path": "frontend/src/authentication.test.tsx",
+    "sha256": "E57E781FAE64E1BE02F166759D7665B5218D414D3B3860C04F6D7A30A323CFD6",
+    "changedSincePreviousFreeze": false
+  },
+  {
+    "path": "frontend/src/styles.scss",
+    "sha256": "54BB0E4339CCBA5FD54451A4F39495C13049D046552969EF0A776BA9D0756DD6",
+    "changedSincePreviousFreeze": true
+  },
+  {
+    "path": "e2e/appearance.spec.mjs",
+    "sha256": "63CD63073C920877223081DE1BDF5EB144B6D51DECBED0D0B1C1A0E7D96F38C4",
+    "changedSincePreviousFreeze": false
+  }
+]

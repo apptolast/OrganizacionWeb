@@ -32,11 +32,14 @@ const task = {
 };
 const route = `/proyectos/${project.id}`;
 const tasksUrl = `/api/v1/projects/${project.id}/tasks`;
-afterEach(() => window.history.replaceState(null, "", "/"));
+afterEach(() => {
+  window.history.replaceState(null, "", "/");
+  vi.unstubAllGlobals();
+});
 it("confirmación recibida y clic de reintento antes del commit React no cancelan GET", async () => {
   window.history.replaceState(null, "", route);
   let resolve!: (response: Response) => void;
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -77,7 +80,7 @@ it("al visitar tareas antiguas conserva la tarjeta de la creación confirmada", 
     id: "7c5dbd10-9ad5-4000-8000-000000000099",
     title: "Antigua",
   };
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -103,7 +106,7 @@ it("al visitar tareas antiguas conserva la tarjeta de la creación confirmada", 
 it("reintento y confirmación en el mismo ciclo no cancelan la actualización de lista", async () => {
   window.history.replaceState(null, "", route);
   let resolve!: (response: Response) => void;
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -136,8 +139,7 @@ it("reintento y confirmación en el mismo ciclo no cancelan la actualización de
 it("un reintento de lista durante POST no impide refrescar al confirmar la creación", async () => {
   window.history.replaceState(null, "", route);
   let resolve!: (response: Response) => void;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -168,7 +170,7 @@ it("una revisión tardía no restaura proyecto retirado por un 404 de sus accion
   window.history.replaceState(null, "", route);
   let resolve!: (response: Response) => void;
   let reviewSignal: AbortSignal | null | undefined;
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -215,8 +217,7 @@ it("una segunda creación pendiente no conserva confirmación antigua y refresca
   window.history.replaceState(null, "", route);
   let resolve!: (response: Response) => void;
   let resolveRead!: (response: Response) => void;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -265,8 +266,7 @@ it("una segunda creación pendiente no conserva confirmación antigua y refresca
 it("la revisión pendiente bloquea acciones repetidas y retira el aviso tras recuperarse", async () => {
   window.history.replaceState(null, "", route);
   let resolve!: (response: Response) => void;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -318,7 +318,7 @@ it.each([
   "un problema no aplicable no inventa conflictos ni errores de campo %#",
   async (status, body) => {
     window.history.replaceState(null, "", route);
-    vi.spyOn(globalThis, "fetch")
+    mockBusinessTraffic()
       .mockResolvedValueOnce(
         Response.json(project, { headers: { ETag: '"version"' } }),
       )
@@ -342,7 +342,7 @@ it.each([
 );
 it("varios errores del servidor se asocian en orden visual ignorando entradas ajenas", async () => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -375,8 +375,7 @@ it("varios errores del servidor se asocian en orden visual ignorando entradas aj
 });
 it("permite dos reintentos de lectura fallidos antes de la recuperación", async () => {
   window.history.replaceState(null, "", route);
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -398,7 +397,7 @@ it("permite dos reintentos de lectura fallidos antes de la recuperación", async
 it("cancela el submit nativo y limpia el error mientras reintenta guardar", async () => {
   window.history.replaceState(null, "", route);
   let resolve!: (response: Response) => void;
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -423,7 +422,7 @@ it("cancela el submit nativo y limpia el error mientras reintenta guardar", asyn
 it("al paginar retira la página anterior y conserva el contexto tras clic en texto", async () => {
   window.history.replaceState(null, "", route);
   let resolve!: (response: Response) => void;
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -453,7 +452,7 @@ it("al paginar retira la página anterior y conserva el contexto tras clic en te
 });
 it("inicia campos vacíos y válidos con encabezado fuera del orden de tabulación", async () => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -496,7 +495,7 @@ it.each([
   "asocia la descripción accesible del error en %s",
   async (label, value, message) => {
     window.history.replaceState(null, "", route);
-    vi.spyOn(globalThis, "fetch")
+    mockBusinessTraffic()
       .mockResolvedValueOnce(
         Response.json(project, { headers: { ETag: '"version"' } }),
       )
@@ -515,7 +514,7 @@ it.each([null, 30])(
   "la tarjeta confirmada conserva estimación %s cuando falla GET",
   async (estimatedMinutes) => {
     window.history.replaceState(null, "", route);
-    vi.spyOn(globalThis, "fetch")
+    mockBusinessTraffic()
       .mockResolvedValueOnce(
         Response.json(project, { headers: { ETag: '"version"' } }),
       )
@@ -546,7 +545,7 @@ it("una lista con varias tareas incluye la confirmada una sola vez", async () =>
     id: "7c5dbd10-9ad5-4000-8000-000000000099",
     title: "Anterior",
   };
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -577,7 +576,7 @@ it.each(["resolve", "reject"])(
   async (outcome) => {
     let resolve!: (response: Response) => void;
     let reject!: (error: Error) => void;
-    vi.spyOn(globalThis, "fetch")
+    mockBusinessTraffic()
       .mockImplementationOnce(
         () =>
           new Promise((done, fail) => {
@@ -618,8 +617,7 @@ it("@s10 un CSRF caducado conserva borrador y recupera token sin repetir POST", 
     csrfToken: "old",
     csrfHeaderName: "X-CSRF-TOKEN",
   };
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(Response.json(session))
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
@@ -651,8 +649,7 @@ it("@s10 un CSRF caducado conserva borrador y recupera token sin repetir POST", 
 });
 it("@s14 revisar estado fallido conserva borrador y permite reintento GET", async () => {
   window.history.replaceState(null, "", route);
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -689,7 +686,7 @@ it("@s14 revisar estado fallido conserva borrador y permite reintento GET", asyn
 it("@s33 no desplaza el foco elegido mientras llega otra página", async () => {
   window.history.replaceState(null, "", route);
   let resolve!: (response: Response) => void;
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -723,8 +720,7 @@ it("@s2 @s3 @s5 admite límites Unicode suplementarios y texto literal sin trunc
     completionCriterion: criterion,
     estimatedMinutes: null,
   };
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -762,7 +758,7 @@ it("@s32 un 401 vigente retira lista y borrador mediante SessionGate real", asyn
     csrfToken: "token",
     csrfHeaderName: "X-CSRF-TOKEN",
   };
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(Response.json(session))
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
@@ -786,7 +782,7 @@ it("@s32 un 401 vigente retira lista y borrador mediante SessionGate real", asyn
 });
 it("@s29 volver a recientes limpia el error de página sin quitar las acciones", async () => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -811,7 +807,7 @@ it("@s29 volver a recientes limpia el error de página sin quitar las acciones",
 });
 it("@s33 la paginación devuelve foco al encabezado cuando desaparece el botón", async () => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -828,7 +824,7 @@ it("@s33 la paginación devuelve foco al encabezado cuando desaparece el botón"
 });
 it("@s27 @s33 los errores de campo del servidor mantienen valores y foco semántico", async () => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -864,8 +860,7 @@ it("@s27 @s33 los errores de campo del servidor mantienen valores y foco semánt
 });
 it("@s7 distingue entrada numérica incompleta de estimación vacía voluntaria", async () => {
   window.history.replaceState(null, "", route);
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -889,8 +884,7 @@ it("@s7 distingue entrada numérica incompleta de estimación vacía voluntaria"
 });
 it("@s14 conserva borrador en 409 y revisa estado sólo por decisión explícita", async () => {
   window.history.replaceState(null, "", route);
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -942,8 +936,7 @@ it("@s26 mantiene tarea confirmada aunque refrescar desde página antigua falle"
     id: "7c5dbd10-9ad5-4000-8000-000000000099",
     title: "Nueva confirmada",
   };
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -979,8 +972,7 @@ it("@s32 cancela POST al salir y un 401 tardío no invalida la sesión vigente",
     csrfToken: "token",
     csrfHeaderName: "X-CSRF-TOKEN",
   };
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(Response.json(session))
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
@@ -1008,8 +1000,7 @@ it("@s32 cancela POST al salir y un 401 tardío no invalida la sesión vigente",
 it("@s31 aborta una lectura antigua al navegar y no acepta su respuesta tardía", async () => {
   window.history.replaceState(null, "", route);
   let resolve!: (response: Response) => void;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -1068,8 +1059,7 @@ it.each([
   "@s33 valida %s y enfoca el primer campo sin enviar",
   async (label, value, message) => {
     window.history.replaceState(null, "", route);
-    const fetcher = vi
-      .spyOn(globalThis, "fetch")
+    const fetcher = mockBusinessTraffic()
       .mockResolvedValueOnce(
         Response.json(project, { headers: { ETag: '"version"' } }),
       )
@@ -1094,8 +1084,7 @@ it("@s21 @s35 navega con cursor opaco sin mezclar páginas ni perder borrador", 
     id: "7c5dbd10-9ad5-4000-8000-000000000003",
     title: "Antigua",
   };
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -1135,7 +1124,7 @@ it("@s21 @s35 navega con cursor opaco sin mezclar páginas ni perder borrador", 
 });
 it("@s30 un proyecto terminado conserva tareas y sólo permite crear tras reabrir", async () => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(
         { ...project, status: "completed" },
@@ -1167,8 +1156,7 @@ it("@s30 un proyecto terminado conserva tareas y sólo permite crear tras reabri
 it("@s28 bloquea doble envío y anuncia espera sin confirmar antes del servidor", async () => {
   window.history.replaceState(null, "", route);
   let resolve!: (response: Response) => void;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -1198,8 +1186,7 @@ it.each([400, 503, "network"])(
   "@s27 conserva el borrador exacto tras escritura fallida %s",
   async (status) => {
     window.history.replaceState(null, "", route);
-    const fetcher = vi
-      .spyOn(globalThis, "fetch")
+    const fetcher = mockBusinessTraffic()
       .mockResolvedValueOnce(
         Response.json(project, { headers: { ETag: '"version"' } }),
       )
@@ -1236,8 +1223,7 @@ it.each([400, 503, "network"])(
 );
 it("@s26 guarda una tarea y actualiza la colección tras confirmación real", async () => {
   window.history.replaceState(null, "", route);
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -1276,8 +1262,7 @@ it("@s26 guarda una tarea y actualiza la colección tras confirmación real", as
 });
 it("@s29 la carga de tareas no impide usar las acciones del proyecto", async () => {
   window.history.replaceState(null, "", route);
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -1295,7 +1280,7 @@ it("@s29 la carga de tareas no impide usar las acciones del proyecto", async () 
 });
 it("@s19 @s29 una colección vacía ofrece creación sin inventar tareas", async () => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -1316,7 +1301,7 @@ it("@s19 @s29 una colección vacía ofrece creación sin inventar tareas", async
 });
 it("@s20 @s23 muestra los datos confirmados como tareas pendientes y estimación", async () => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockBusinessTraffic()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )
@@ -1335,11 +1320,9 @@ it.each([503, "network"])(
   "@s25 @s29 lectura fallida %s conserva acciones y se recupera sin falso vacío",
   async (status) => {
     window.history.replaceState(null, "", route);
-    const fetcher = vi
-      .spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(
-        Response.json(project, { headers: { ETag: '"version"' } }),
-      );
+    const fetcher = mockBusinessTraffic().mockResolvedValueOnce(
+      Response.json(project, { headers: { ETag: '"version"' } }),
+    );
     if (typeof status === "number")
       fetcher.mockResolvedValueOnce(
         Response.json({ title: "SQL private" }, { status }),
@@ -1366,3 +1349,35 @@ it.each([503, "network"])(
     expect(fetcher).toHaveBeenCalledTimes(3);
   },
 );
+
+function mockBusinessTraffic() {
+  const traffic = vi.fn<typeof fetch>(globalThis.fetch);
+  stubBusinessFetch(traffic);
+  return traffic;
+}
+
+// Global appearance GET has its own fixture; business requests and counts
+// are delegated unchanged to the original mock.
+function stubBusinessFetch(mock: unknown) {
+  const traffic = mock as typeof fetch;
+  vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
+    if (
+      input === "/api/v1/me/appearance" &&
+      (init?.method === undefined || init.method === "GET")
+    ) {
+      return Promise.resolve(
+        Response.json(
+          {
+            configured: false,
+            theme: "SYSTEM",
+            accentLight: "#244C3C",
+            accentDark: "#B7E4C7",
+            updatedAt: null,
+          },
+          { headers: { ETag: '"appearance:unconfigured"' } },
+        ),
+      );
+    }
+    return traffic(input, init);
+  });
+}

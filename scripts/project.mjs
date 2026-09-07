@@ -22,6 +22,8 @@ export function createProject(runner = run) {
       target !== "" &&
       (task !== "mutate" ||
         ![
+          "appearance-backend",
+          "appearance-frontend",
           "weekly_review-backend",
           "weekly_review-frontend",
           "history-backend",
@@ -54,6 +56,17 @@ export function createProject(runner = run) {
         [taskName, "--no-daemon", ...args],
         { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
       );
+    if (task === "mutate" && target === "appearance-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.appearance.config.json",
+      ]);
+      return;
+    }
     if (task === "install") {
       runner("pnpm", ["install", "--frozen-lockfile"]);
       runner("pnpm", ["--dir", "frontend", "install", "--frozen-lockfile"]);
@@ -66,6 +79,10 @@ export function createProject(runner = run) {
       mutate: "pitest",
     };
     if (!commands[task]) throw new Error(`Unknown task: ${task}`);
+    if (task === "mutate" && target === "appearance-backend") {
+      backend("pitest", ["-PmutationScope=appearance"]);
+      return;
+    }
     if (task === "mutate" && target === "weekly_review-frontend") {
       runner("pnpm", [
         "--dir",

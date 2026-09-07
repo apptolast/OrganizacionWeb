@@ -1,0 +1,345 @@
+{
+  "originalSha256": "56D3A57C3393400EFDD98CA463CFB2B0C0E5274D4E878793FBA15EBB49D60122",
+  "targets": [
+    {
+      "location": {
+        "end": {
+          "column": 24,
+          "line": 34
+        },
+        "start": {
+          "column": 9,
+          "line": 34
+        }
+      },
+      "mutatorName": "ArithmeticOperator",
+      "file": "src/appearance-api.ts",
+      "id": "61",
+      "status": "Survived",
+      "replacement": "channel * 12.92"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 32,
+          "line": 40
+        },
+        "start": {
+          "column": 7,
+          "line": 40
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "file": "src/appearance-api.ts",
+      "id": "73",
+      "status": "Survived",
+      "replacement": "false"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 53,
+          "line": 40
+        },
+        "start": {
+          "column": 37,
+          "line": 40
+        }
+      },
+      "mutatorName": "Regex",
+      "file": "src/appearance-api.ts",
+      "id": "77",
+      "status": "Survived",
+      "replacement": "/#[0-9A-F]{6}$/"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 53,
+          "line": 40
+        },
+        "start": {
+          "column": 37,
+          "line": 40
+        }
+      },
+      "mutatorName": "Regex",
+      "file": "src/appearance-api.ts",
+      "id": "78",
+      "status": "Survived",
+      "replacement": "/^#[0-9A-F]{6}/"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 30,
+          "line": 93
+        },
+        "start": {
+          "column": 7,
+          "line": 93
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "file": "src/appearance-api.ts",
+      "id": "115",
+      "status": "Survived",
+      "replacement": "true"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 27,
+          "line": 98
+        },
+        "start": {
+          "column": 5,
+          "line": 98
+        }
+      },
+      "mutatorName": "OptionalChaining",
+      "file": "src/appearance-api.ts",
+      "id": "120",
+      "status": "Survived",
+      "replacement": "signal.throwIfAborted"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 8,
+          "line": 122
+        },
+        "start": {
+          "column": 7,
+          "line": 108
+        }
+      },
+      "mutatorName": "MethodExpression",
+      "file": "src/appearance-api.ts",
+      "id": "154",
+      "status": "Survived",
+      "replacement": "problem.errors.some(entry => exact(entry, \"field code message\") && [\"theme\", \"accentLight\", \"accentDark\"].includes(entry.field as string) && [\"REQUIRED\", \"INVALID_TYPE\", \"INVALID_VALUE\", \"INSUFFICIENT_CONTRAST\"].includes(entry.code as string) && typeof entry.message === \"string\" && entry.message.trim())"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 121
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "file": "src/appearance-api.ts",
+      "id": "156",
+      "status": "Survived",
+      "replacement": "true"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 121
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "file": "src/appearance-api.ts",
+      "id": "158",
+      "status": "Survived",
+      "replacement": "exact(entry, \"field code message\") && [\"theme\", \"accentLight\", \"accentDark\"].includes(entry.field as string) && [\"REQUIRED\", \"INVALID_TYPE\", \"INVALID_VALUE\", \"INSUFFICIENT_CONTRAST\"].includes(entry.code as string) && typeof entry.message === \"string\" || entry.message.trim()"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 120
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "file": "src/appearance-api.ts",
+      "id": "160",
+      "status": "Survived",
+      "replacement": "exact(entry, \"field code message\") && [\"theme\", \"accentLight\", \"accentDark\"].includes(entry.field as string) && [\"REQUIRED\", \"INVALID_TYPE\", \"INVALID_VALUE\", \"INSUFFICIENT_CONTRAST\"].includes(entry.code as string) || typeof entry.message === \"string\""
+    },
+    {
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 120
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "file": "src/appearance-api.ts",
+      "id": "159",
+      "status": "Survived",
+      "replacement": "true"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 43,
+          "line": 119
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "file": "src/appearance-api.ts",
+      "id": "161",
+      "status": "Survived",
+      "replacement": "true"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 43,
+          "line": 119
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "file": "src/appearance-api.ts",
+      "id": "162",
+      "status": "Survived",
+      "replacement": "exact(entry, \"field code message\") && [\"theme\", \"accentLight\", \"accentDark\"].includes(entry.field as string) || [\"REQUIRED\", \"INVALID_TYPE\", \"INVALID_VALUE\", \"INSUFFICIENT_CONTRAST\"].includes(entry.code as string)"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 113
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "file": "src/appearance-api.ts",
+      "id": "163",
+      "status": "Survived",
+      "replacement": "true"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 12,
+          "line": 113
+        },
+        "start": {
+          "column": 11,
+          "line": 110
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "file": "src/appearance-api.ts",
+      "id": "164",
+      "status": "Survived",
+      "replacement": "exact(entry, \"field code message\") || [\"theme\", \"accentLight\", \"accentDark\"].includes(entry.field as string)"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 118
+        },
+        "start": {
+          "column": 13,
+          "line": 118
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "file": "src/appearance-api.ts",
+      "id": "174",
+      "status": "Survived",
+      "replacement": "\"\""
+    },
+    {
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 158
+        },
+        "start": {
+          "column": 7,
+          "line": 158
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "file": "src/appearance-api.ts",
+      "id": "235",
+      "status": "Survived",
+      "replacement": "false"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 159
+        },
+        "start": {
+          "column": 7,
+          "line": 159
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "file": "src/appearance-api.ts",
+      "id": "238",
+      "status": "Survived",
+      "replacement": "false"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 67,
+          "line": 161
+        },
+        "start": {
+          "column": 7,
+          "line": 161
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "file": "src/appearance-api.ts",
+      "id": "243",
+      "status": "Survived",
+      "replacement": "false"
+    },
+    {
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 180
+        },
+        "start": {
+          "column": 7,
+          "line": 180
+        }
+      },
+      "mutatorName": "Regex",
+      "file": "src/appearance-api.ts",
+      "id": "284",
+      "status": "Survived",
+      "replacement": "/^\"appearance:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(0|[1-9][0-9]{0,18})\"/"
+    }
+  ]
+}

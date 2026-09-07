@@ -1,0 +1,14 @@
+[
+  {
+    "path": "frontend/src/appearance-state.tsx",
+    "sha256": "773B9F96B377D1AE2EA279C45A8F9CD233C1D136F8EB3106F3AD0F1656164B3C"
+  },
+  {
+    "path": "frontend/src/appearance.tsx",
+    "sha256": "0CDCD419BEEAB3E906BBDD86C1EC9AE73E31D33025C3513528A3A67866AB1B5F"
+  },
+  {
+    "path": "frontend/src/appearance.test.tsx",
+    "sha256": "D2391A4936B383714DCB8B5A8CE3F18E3DC80348DBBFFCEE9CED2DEA076A666F"
+  }
+]

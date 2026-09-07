@@ -186,6 +186,7 @@ function isPrivateRoute(path: string, search: string) {
     !search &&
     (path === "/" ||
       path === "/disponibilidad" ||
+      path === "/apariencia" ||
       path === "/proyectos/nuevo" ||
       /^\/proyectos\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\/editar|\/tareas\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\/sesiones\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?)?$/i.test(
         path,

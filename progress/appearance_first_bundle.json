@@ -1,0 +1,46 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/AppearanceConflictException.java",
+    "sha256": "EF5A5DB6A0DF3C518FB0116F2816D72820CBCFC12BFAD8CEBECF845C6D684EC3"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/AppearanceEditing.java",
+    "sha256": "DD33CC136332A4E70384DE091AFABCFA5D64B18769F325AC9DC3F85412096B1C"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/AppearanceQueries.java",
+    "sha256": "55AC396CE65D4C77E07473687E0BB22B6587855CFF16F97D10A2ED11D47BE9D9"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ReadAppearance.java",
+    "sha256": "DC2761E7CD99247D35E5FE30A59CA0C2F9751E63908D704853CE0E82DA7840A0"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ReadAppearanceUseCase.java",
+    "sha256": "9ECC281BDD0AE26C0FD28B232F85D16E14863E430459103998BD7AFCDADE314A"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/SaveAppearance.java",
+    "sha256": "83533AEBCB40D2F5FEDD41669CBF4CC10FDE20740BF4434B76DEEE275869DE1F"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/SaveAppearanceUseCase.java",
+    "sha256": "2CE63BC01CA368BB50D5244370F18E82AF581ECABEA286853126D8267470343D"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/domain/Appearance.java",
+    "sha256": "752C7E2E8627905A991B9AA981E4E0E9F10AF49004B8989EF41318F1F176D9AF"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/domain/AppearanceRevision.java",
+    "sha256": "2427A60DC80EF4C0D52EB0B908DBF642207E3AB3F2C6DB73826763EDDDF4BD24"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/ReadAppearanceTest.java",
+    "sha256": "5466E415CCDF09A16EB3D2A89249F4C4771110043D71DD30BD47D5931BA71716"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/SaveAppearanceTest.java",
+    "sha256": "56EED673DE5F05F07F707BE43E39BD8F7F29AE32EEEA8EF82E0578D881D44230"
+  }
+]

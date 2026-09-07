@@ -140,4 +140,22 @@ reports/
 /progress/weekly_review_ux_before_outline/
 /frontend/.stryker-tmp-weekly-review-refined/
 /progress/weekly_review_stryker_replay.json
+/frontend/.stryker-tmp-appearance/
 /.build/web-dns/
+# Evidencia local original de apariencia; informes finales y manifiestos versionados.
+/progress/appearance_backend_final_xml/
+/progress/appearance_ux_red_geometry/
+/progress/appearance_ux_red_nominal/
+/progress/appearance_ux_red_text200/
+/progress/appearance_stryker_original/
+/progress/appearance_stryker_original_inventory.json
+/progress/appearance_ux_*_before.json
+/progress/appearance_ux_*_after.json
+/progress/appearance_ux_*_exit.txt
+/progress/appearance_ux_*.exit
+/progress/appearance_nominal_isolation_before.json
+/progress/appearance_nominal_isolation_after.json
+/progress/appearance_legacy_before.json
+/frontend/.stryker-tmp-appearance-replay/
+/progress/appearance_stryker_replay_original/
+/progress/appearance_ci_*.exit

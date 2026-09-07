@@ -1,0 +1,15 @@
+# Revisión integrada del backend de apariencia
+
+APPROVED, limitado al backend y a la persistencia comprobada. Feature20 sigue en curso por la interfaz y sus gates pendientes.
+
+Root revisó dominio, persistencia y HTTP; el corte e3df0e1 contiene el backend funcional completo. Gate aislado: 2.384 pruebas Java, 102 suites, cero fallos/errores/omitidos. La campaña original produjo 159 mutantes: 153 Killed y 6 Survived (96,2264 %), con 391 entradas antes/después iguales. Root contrastó XML y manifiestos directamente.
+
+Tres refuerzos públicos, inicialmente verdes, añaden colores válidos sensibles a la fórmula y alta/lectura del último microsegundo del año9999 en PostgreSQL. El replay separado produjo 15 mutantes: 13 Killed y 2 Survived, con 392 entradas iguales. Root comprobó correspondencia única de las quince firmas por clase, método, descriptor, línea, mutador, índice y bloque (b4231e). Cuatro objetivos antes supervivientes ahora se detectan; el umbral exacto4.5 conserva su límite sin afirmar equivalencia. El boundary del canal no es alcanzable con un byte entero. Los nueve acompañantes antes Killed continúan Killed. No se suman campañas ni se recalifica el resultado original.
+
+Paquete C238931b integrado como7342086. Los dos tests y la configuración diagnóstica conservan bytes exactos. Doce documentos/manifiestos difieren únicamente por la normalización CRLF a LF de .gitattributes; los quince originales coinciden con sus hashes de entrega. appearance_pit_integration_manifest.json conserva ambas huellas y la comprobación de texto normalizado. Los logs y XML originales permanecen preservados en el checkout de validación OrganizacionWeb-appearance-http; no se sustituyen ni se reinterpretan por esta normalización.
+
+E2E real2ad8a3d revisado: un PUT confirmado por la API se aborta hacia el navegador, se reinicia la API mediante el helper existente y un contexto nuevo autentica y recupera la misma preferencia, fecha y ETag. Filas de proyecto/tarea/reserva/sesión/intervalos/recibos, disponibilidad, historial y outbox se conservan. Un caso inicialmente verde, EXIT0; el relay está deshabilitado y no se atribuye publicación Rabbit a esta prueba. Sintaxis/formato y hashes del test y log verificados. Se retiran sólo recursos del runner aislado.
+
+Quedan pendientes los gates integrados con el frontend final, su mutación, pruebas visuales y aceptación de la feature20 completa. Ninguna de estas pruebas locales acredita su despliegue; producción continúa con las funcionalidades1–19.
+
+Cierre Java posterior a los tres refuerzos: test + spotlessCheck EXIT0, 5m17s, ejecución97022/028c63 sobre el backend final aislado238931b. Conteo XML independiente4ec745: 2.387 pruebas/102 suites, cero fallos/errores/omitidos. Log SHA2568FFD93B8FD104A7472F5031CE566969931F61AC1781C1ADA8FFF2DAE6AD69FB8; XML preservados en appearance_backend_closure_xml del checkout de validación. appearance_backend_closure_results.json detalla cada suite y huella. No se repitió mutación ni se alteró producción.

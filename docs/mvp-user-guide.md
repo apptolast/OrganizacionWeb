@@ -1,6 +1,6 @@
 # Usar el MVP para trabajar con un horario
 
-El MVP de las funcionalidades 1–18, incluido Historial, está validado y fusionado. El estado de despliegue está en [el plan](mvp-delivery-plan.md). La revisión semanal se incorpora en la siguiente entrega; la personalización avanzada y los conectores de las funcionalidades 20–30 siguen pendientes.
+Las funcionalidades 1–19, incluidos Historial y Revisión semanal, están disponibles en [OrganizationWeb](https://organizacion.apptolast.com). El estado de despliegue está en [el plan](mvp-delivery-plan.md). La apariencia persistente está en desarrollo; las funcionalidades 21–30 siguen pendientes.
 
 ## Preparar el trabajo
 
@@ -29,7 +29,7 @@ Cada página contiene hasta20hechos. **Más antiguos** sustituye la página actu
 
 Un error de consulta no significa que el historial esté vacío. El reintento sólo repite la lectura. Si caduca la sesión de acceso, vuelve a identificarte; la aplicación retira los datos privados de la pantalla.
 
-## Comparar la semana (siguiente entrega)
+## Comparar la semana
 
 Abre **Revisión semanal** para ver siete días de lunes a domingo. La fecha y la zona se aplican al pulsar **Mostrar semana**; cambiar un campo no inicia una consulta. Los enlaces de semana anterior, siguiente y actual permiten moverte sin perder la zona elegida. Atrás y recargar conservan la selección aplicada.
 
@@ -38,6 +38,18 @@ Abre **Revisión semanal** para ver siete días de lunes a domingo. La fecha y l
 Las semanas pasadas también reflejan cambios actuales de reservas o disponibilidad. Un presupuesto de cero indica descanso planificado, no demuestra que hayas descansado ni genera una deuda. Si la disponibilidad no puede usarse para la zona seleccionada, el presupuesto aparece como desconocido.
 
 La hora de consulta indica hasta cuándo se ha contado una sesión en curso. Pulsa **Actualizar** para leer de nuevo. Durante la espera o un error, los datos anteriores están identificados; **Reintentar** repite la consulta sin modificar tus tareas, reservas o sesiones.
+
+## Personalizar la apariencia
+
+Esta opción estará disponible cuando se despliegue la funcionalidad 20; todavía no forma parte de la versión publicada indicada al comienzo de esta guía.
+
+Abre **Apariencia** y elige **Claro**, **Oscuro** o **Sistema**. Sistema sigue la preferencia de tu dispositivo. Puedes elegir un color de acento para el tema claro y otro para el oscuro, mediante el selector o escribiendo su código de color. Ambos deben conservar un contraste legible, aunque sólo estés usando uno de los temas.
+
+Las dos muestras permiten revisar enlaces y botones antes de aplicar cambios. Si un color no es válido, el campo conserva lo escrito y explica cómo corregirlo; la muestra mantiene el último color seguro. Editar sólo cambia el borrador. **Guardar apariencia** aplica los valores confirmados a la aplicación y los conserva para tu cuenta, también al volver a entrar.
+
+**Restaurar valores predeterminados** prepara Sistema y los dos colores seguros iniciales; pulsa Guardar si quieres conservarlos. **Cancelar cambios** vuelve a la última apariencia confirmada sin guardar. Al salir de esta pantalla se descarta el borrador sin guardar.
+
+Si no se puede confirmar un guardado, no lo repitas. Usa **Recargar versión guardada** para consultar qué valores conserva tu cuenta: esa acción reemplazará el borrador cuando la consulta termine correctamente. Después podrás decidir si haces otro cambio. Si falla la carga inicial, la aplicación usa temporalmente valores seguros y permite seguir trabajando o reintentar la consulta.
 
 ## Datos y servidor
 

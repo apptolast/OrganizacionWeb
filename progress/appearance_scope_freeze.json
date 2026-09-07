@@ -1,0 +1,25 @@
+{
+  "base": "4567520",
+  "dispatcherTests": 53,
+  "exitCode": 0,
+  "result": "eb967f",
+  "gradleHelpResult": "a0c1bf",
+  "files": [
+    {
+      "path": "scripts/project.mjs",
+      "sha256": "1F2E810D0329889C754253379E1F969A9A4B06FEC20FD8A5D0E54862D85232D4"
+    },
+    {
+      "path": "scripts/project.test.mjs",
+      "sha256": "C3F37D78C009A3B8B47A0004A8F5FE9D660E81716A632CABD154BCC419731F4F"
+    },
+    {
+      "path": "backend/build.gradle.kts",
+      "sha256": "BB31E316CA7CBD7EA6E0444308E0824D71FA442EBCE57FF5F8B5386FE2317944"
+    },
+    {
+      "path": "progress/tdd_appearance_scope.md",
+      "sha256": "C4F5A22329192E6DDCBA4A744F1BC6A41B0C0627E6E3DC9A99C7B20204680ED7"
+    }
+  ]
+}

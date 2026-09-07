@@ -13,6 +13,188 @@ import org.junit.jupiter.api.Test;
 
 class PublishOutboxTest {
   @Test
+  void closeWork_s29_redeliversAfterLostConfirmation() throws Exception {
+    assertEventRetry(closedMessage(), DeliveryOutcome.CONFIRM_TIMEOUT);
+  }
+
+  @Test
+  void closeWork_s29_retriesUnavailableBrokerWithOriginalEvent() throws Exception {
+    assertEventRetry(closedMessage(), DeliveryOutcome.BROKER_UNAVAILABLE);
+  }
+
+  @Test
+  void closeWork_s29_preservesMaximumCalendarAndExactLongWorkedTime() throws Exception {
+    var source = closedAt(Instant.parse("9999-12-31T23:59:59.999999Z"));
+    var payload = new HashMap<>(source.payload());
+    payload.put("workDate", "9999-12-31");
+    payload.put("closeZoneId", "UTC");
+    payload.put("workedMicroseconds", "315537897599999999");
+    assertStartedPublished(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void closeWork_s29_blocksPrivateNotesInEvent() throws Exception {
+    var source = closedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("progressNote", "Private progress");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void closeWork_s29_blocksEventIdentityReusedAsSession() throws Exception {
+    var source = closedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("eventId", source.aggregateId().toString());
+    var changed =
+        new OutboxMessage(
+            source.aggregateId(),
+            source.aggregateId(),
+            source.ownerId(),
+            source.occurredAt(),
+            source.type(),
+            1,
+            source.json(),
+            payload,
+            0);
+    assertStartedBlocked(stateChangedWith(changed, payload));
+  }
+
+  @Test
+  void closeWork_s29_blocksBlankAttributedZone() throws Exception {
+    var source = closedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("closeZoneId", " ");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void closeWork_s29_blocksAttributedYearZero() throws Exception {
+    var source = closedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("workDate", "0000-12-31");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void closeWork_s29_blocksAttributedYearBeyond9999() throws Exception {
+    var source = closedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("workDate", "+10000-01-01");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void closeWork_s29_blocksImpossibleAttributedDate() throws Exception {
+    var source = closedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("workDate", "2026-02-30");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void closeWork_s29_blocksYearZeroOccurrence() throws Exception {
+    assertStartedBlocked(closedAt(Instant.parse("0000-12-31T23:59:59.999999Z")));
+  }
+
+  @Test
+  void closeWork_s29_blocksSubmicrosecondOccurrence() throws Exception {
+    var source = closedMessage();
+    assertStartedBlocked(closedAt(source.occurredAt().plusNanos(1)));
+  }
+
+  static OutboxMessage closedAt(Instant when) throws Exception {
+    var source = closedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("occurredAt", when.toString());
+    return new OutboxMessage(
+        source.eventId(),
+        source.aggregateId(),
+        source.ownerId(),
+        when,
+        source.type(),
+        1,
+        new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(payload),
+        payload,
+        0);
+  }
+
+  @Test
+  void closeWork_s29_blocksNoncanonicalWorkedTime() throws Exception {
+    var source = closedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("workedMicroseconds", "01");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void closeWork_s29_blocksRevisionBeyondBigint() throws Exception {
+    var source = closedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("revision", "9223372036854775808");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void closeWork_s29_blocksNoncanonicalRevision() throws Exception {
+    var source = closedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("revision", "04");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void closeWork_s29_blocksUnknownSourceStatus() throws Exception {
+    var source = closedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("fromStatus", "closed");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void closeWork_s29_publishesPausedZeroWithHistoricalZoneAndMaximumRevision() throws Exception {
+    var source = closedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("fromStatus", "paused");
+    payload.put("workedMicroseconds", "0");
+    payload.put("revision", "9223372036854775807");
+    payload.put("closeZoneId", "Historical/Unavailable");
+    assertStartedPublished(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void closeWork_s29_publishesOriginalClosureWithoutNotes() throws Exception {
+    assertStartedPublished(closedMessage());
+  }
+
+  static OutboxMessage closedMessage() throws Exception {
+    var eventId = UUID.randomUUID();
+    var sessionId = UUID.randomUUID();
+    var when = Instant.parse("2026-09-07T22:30:00.123456Z");
+    var payload = new HashMap<String, Object>();
+    payload.put("eventId", eventId.toString());
+    payload.put("aggregateId", sessionId.toString());
+    payload.put("ownerId", "owner");
+    payload.put("occurredAt", when.toString());
+    payload.put("schemaVersion", 1);
+    payload.put("type", "WorkSessionClosed.v1");
+    payload.put("revision", "4");
+    payload.put("fromStatus", "running");
+    payload.put("workedMicroseconds", "61000000");
+    payload.put("workDate", "2026-09-08");
+    payload.put("closeZoneId", "Europe/Madrid");
+    return new OutboxMessage(
+        eventId,
+        sessionId,
+        "owner",
+        when,
+        "WorkSessionClosed.v1",
+        1,
+        new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(payload),
+        payload,
+        0);
+  }
+
+  @Test
   void pauseResume_s26_redeliversAfterLostConfirmation() throws Exception {
     assertEventRetry(stateChangedMessage(), DeliveryOutcome.CONFIRM_TIMEOUT);
   }

@@ -28,13 +28,15 @@ public record OutboxMessage(
             && !"BlockPlanned.v1".equals(type)
             && !"BlockChanged.v1".equals(type)
             && !"WorkSessionStarted.v1".equals(type)
-            && !"WorkSessionStateChanged.v1".equals(type))
+            && !"WorkSessionStateChanged.v1".equals(type)
+            && !"WorkSessionClosed.v1".equals(type))
         || schemaVersion != 1) return "UNSUPPORTED_EVENT";
     boolean taskStatusChanged = "TaskStatusChanged.v1".equals(type);
     boolean blockPlanned = "BlockPlanned.v1".equals(type);
     boolean blockChanged = "BlockChanged.v1".equals(type);
     boolean workSessionStarted = "WorkSessionStarted.v1".equals(type);
     boolean workSessionStateChanged = "WorkSessionStateChanged.v1".equals(type);
+    boolean workSessionClosed = "WorkSessionClosed.v1".equals(type);
     boolean statusChanged = "ProjectStatusChanged.v1".equals(type);
     boolean subtaskCreated = "SubtaskCreated.v1".equals(type);
     boolean taskCreated = "TaskCreated.v1".equals(type) || subtaskCreated;
@@ -135,6 +137,20 @@ public record OutboxMessage(
               "toStatus",
               "workedMicroseconds",
               "runningSince");
+    if (workSessionClosed)
+      expected =
+          java.util.Set.of(
+              "eventId",
+              "aggregateId",
+              "ownerId",
+              "occurredAt",
+              "schemaVersion",
+              "type",
+              "revision",
+              "fromStatus",
+              "workedMicroseconds",
+              "workDate",
+              "closeZoneId");
     if (!expected.equals(payload.keySet())
         || !eventId.toString().equals(payload.get("eventId"))
         || !aggregateId.toString().equals(payload.get("aggregateId"))
@@ -146,6 +162,32 @@ public record OutboxMessage(
       if (!occurredAt.equals(Instant.parse(timestamp))) return "INVALID_EVENT";
     } catch (java.time.format.DateTimeParseException error) {
       return "INVALID_EVENT";
+    }
+    if (workSessionClosed) {
+      if (eventId.equals(aggregateId)) return "INVALID_EVENT";
+      if (!(payload.get("closeZoneId") instanceof String zone) || zone.isBlank())
+        return "INVALID_EVENT";
+      if (!(payload.get("workDate") instanceof String date)
+          || !date.matches("[0-9]{4}-[0-9]{2}-[0-9]{2}")) return "INVALID_EVENT";
+      try {
+        if (java.time.LocalDate.parse(date).getYear() < 1) return "INVALID_EVENT";
+      } catch (java.time.DateTimeException invalid) {
+        return "INVALID_EVENT";
+      }
+      if (!workSessionTimestamp(timestamp)
+          || occurredAt.isBefore(Instant.parse("0001-01-01T00:00:00Z"))) return "INVALID_EVENT";
+      if (!(payload.get("workedMicroseconds") instanceof String worked)
+          || !worked.matches("0|[1-9][0-9]*")) return "INVALID_EVENT";
+      if (!(payload.get("revision") instanceof String revision) || !revision.matches("[1-9][0-9]*"))
+        return "INVALID_EVENT";
+      try {
+        Long.parseLong(revision);
+      } catch (NumberFormatException invalid) {
+        return "INVALID_EVENT";
+      }
+      if (!"running".equals(payload.get("fromStatus"))
+          && !"paused".equals(payload.get("fromStatus"))) return "INVALID_EVENT";
+      return null;
     }
     if (workSessionStateChanged) {
       if (eventId.equals(aggregateId)) return "INVALID_EVENT";

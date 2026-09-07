@@ -38,3 +38,16 @@ No se detecta otro bloqueo contractual. Tras incorporar las dos concreciones y s
 ## Verificación del delta normativo
 
 Lectura acotada719e25: montaje explícito en detalle14 y URL16; identidad de active de otra tarea frente a ruta estricta; esperas positivas acotadas a2^31−1ms, fracción mínima1ms y rearme sin GET antes de vencer. También incorpora decisiones hermanas coordinadas, invalidación de snapshots anteriores y recibos separados. Las relaciones aditivas del fin preservan paused y State6 sin exponer la marca interna. Las recomendaciones anteriores quedan resueltas por estas precisiones; se retira CHANGES_REQUESTED. Sólo este informe se actualizó, sin init, fuentes, tests ni edición normativa.
+
+## Revisión de Gherkin17
+
+Lectura completa94b125 del freeze F0E32CF7392C399D2D9E6B560AA47C5EE74F5B028D5A213FF0552DC92EF95A63:44 escenarios/132 ejemplos declarados por autor. CHANGES_REQUESTED únicamente para dos precisiones; el dictamen normativo anterior sigue aprobado.
+
+- @s2: «incluso si completed» en Then no prepara esa condición. Establecer tarea/proyecto completed en Given antes del envío, manteniendo ambas filas running/paused y resultados exactos. No hace falta un escenario nuevo.
+- @s20: conservar la regla de recuperación postrollback, pero delimitar su evidencia heredada. El bloqueo de sesión serializa peticiones de la misma sesión: ganador idéntico tardío no debe transformarse en obligación de inventar dos sesiones abiertas del propietario. Explicitar reutilización de la frontera de recuperación por puerto y de UNIQUE real con A cerrada/B única abierta para intención distinta, más replay normal/concurrente de @s7/@s18. No afirmar que todas las filas representen carreras naturales reproducidas en PostgreSQL ni fabricar cobertura de una rama imposible en ese montaje.
+
+El resto revisado es coherente: @s28 monta ambos recorridos y admite active de otra tarea propia; @s36 bloquea decisiones hermanas; @s30–35 comprueba antes de avisar, fragmenta plazos y fracciones, coalesce visibilidad y conserva hechos; @s40 descarta snapshots anteriores y @s41 entrega HTTP401 antes del observador; @s42 distingue propiedad de ausenciaK. EXTEND preserva State6 y sus invariantes, sin relajar P/R/C; @s26/@s27 conservan microsegundos y acción/intención. No se detecta otro bloqueo ni se pide expansión de matrices. No Gherkin, producto ni tests editados por este revisor; pendiente comprobar sólo el delta de autor.
+
+## Dictamen final de Gherkin17
+
+**APPROVED para abrir TDD17**, tras delta puntual ddda1b. Feature SHA256 E2680B4210D5278D7C2D679D250C379F4043A8BF69393979AFF2AB7A78EA13C6 verificado. @s2 prepara completed antes del When y verifica conservación en ambas filas; el handoff gherkin_end_time_notification.md explicita la frontera de recuperación de @s20 y evidencia compuesta sin fabricar dos sesiones abiertas ni carrera natural. Las dos reservas quedan retiradas.44 escenarios/132 ejemplos conservados por el autor; no se presentan como pruebas ejecutadas. No hay otro bloqueo observado, ni cambios de alcance o producto en esta revisión.

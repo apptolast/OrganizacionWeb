@@ -1,0 +1,22 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/http/HistoryController.java",
+    "sha256": "26C5442E77ED0569B1170F050DC7BC8B5FF8E4EB4A612AFE98A56D0F65B88C62"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/http/HistoryCursorCodec.java",
+    "sha256": "43C267022C7AB4DFCA5F3F08D0133D3F5322EBB82971B35FA5F500CFE43238ED"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/HistoryApiTest.java",
+    "sha256": "356E83BE8F86B938C0D8F1C53B86B64708964009D6E1D415970BC840B2821DAB"
+  },
+  {
+    "path": "progress/tdd_history_http.md",
+    "sha256": "3DC797E71312CD61BC307275F70DCC1DA2A40C5AB99EA45FE9052CED0BFD981A"
+  },
+  {
+    "path": "progress/history_http_final_results.json",
+    "sha256": "992973CB06467A51EF0B3174CCA545B766FA8E4D6D90F50189692C5963D84303"
+  }
+]

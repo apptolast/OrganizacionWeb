@@ -125,7 +125,7 @@ export async function readTaskHistory(
     throw new Error("Respuesta de historial de tarea inválida");
   return data as TaskHistoryPage;
 }
-function isHistoryEntry(value: unknown): value is TaskHistoryEntry {
+export function isHistoryEntry(value: unknown): value is TaskHistoryEntry {
   return (
     isRecord(value) &&
     Object.keys(value).length === 4 &&

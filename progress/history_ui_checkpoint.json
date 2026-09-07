@@ -1,0 +1,22 @@
+[
+  {
+    "path": "frontend/src/history.tsx",
+    "sha256": "64807FBABA82722FC6809D92CB51ECE8381B1EA509233325760DD39F3A244E2C"
+  },
+  {
+    "path": "frontend/src/history.test.tsx",
+    "sha256": "0C650DE313FF179642165053F98DA21C252D971A6DA868D9D99714A764EA092E"
+  },
+  {
+    "path": "frontend/src/history.scss",
+    "sha256": "B91E6A8BFDEB115B3550B871CA6404ACDF9C548C92B0ADB4B9CAC480E40EE705"
+  },
+  {
+    "path": "frontend/src/App.tsx",
+    "sha256": "B8CBB8190F25DAAC325EC09DDC40A611BC8A5564B0CFC73396F4FE7536A7BF18"
+  },
+  {
+    "path": "frontend/src/workspace.tsx",
+    "sha256": "D1CAE44816F05EA9D29C788249DED63C261929A6C0D00D8E8ECB005A6F2AED61"
+  }
+]

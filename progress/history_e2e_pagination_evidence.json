@@ -1,0 +1,362 @@
+{
+  "recent": {
+    "items": [
+      {
+        "id": "587e7567-5bad-41f7-b968-45ecdddab41a",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.736931Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "587e7567-5bad-41f7-b968-45ecdddab41a",
+          "fromStatus": "pending",
+          "toStatus": "completed",
+          "occurredAt": "2026-09-07T10:02:16.736931Z"
+        }
+      },
+      {
+        "id": "e26e5077-8f9f-420d-9375-d575369355f1",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.696586Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "e26e5077-8f9f-420d-9375-d575369355f1",
+          "fromStatus": "completed",
+          "toStatus": "pending",
+          "occurredAt": "2026-09-07T10:02:16.696586Z"
+        }
+      },
+      {
+        "id": "26df96a2-924b-4019-8316-d739b592e54f",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.662578Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "26df96a2-924b-4019-8316-d739b592e54f",
+          "fromStatus": "pending",
+          "toStatus": "completed",
+          "occurredAt": "2026-09-07T10:02:16.662578Z"
+        }
+      },
+      {
+        "id": "088c7c7e-ccaa-46cc-95e2-1a81a3d7afb8",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.627Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "088c7c7e-ccaa-46cc-95e2-1a81a3d7afb8",
+          "fromStatus": "completed",
+          "toStatus": "pending",
+          "occurredAt": "2026-09-07T10:02:16.627Z"
+        }
+      },
+      {
+        "id": "9b6816b3-cb27-4012-8cb8-69727aaad616",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.593907Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "9b6816b3-cb27-4012-8cb8-69727aaad616",
+          "fromStatus": "pending",
+          "toStatus": "completed",
+          "occurredAt": "2026-09-07T10:02:16.593907Z"
+        }
+      },
+      {
+        "id": "6bc2fdfa-1cde-4aac-b2fa-2cd1a6a45379",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.555322Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "6bc2fdfa-1cde-4aac-b2fa-2cd1a6a45379",
+          "fromStatus": "completed",
+          "toStatus": "pending",
+          "occurredAt": "2026-09-07T10:02:16.555322Z"
+        }
+      },
+      {
+        "id": "7ec1184d-a826-4793-a139-9138a2f56d0f",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.515754Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "7ec1184d-a826-4793-a139-9138a2f56d0f",
+          "fromStatus": "pending",
+          "toStatus": "completed",
+          "occurredAt": "2026-09-07T10:02:16.515754Z"
+        }
+      },
+      {
+        "id": "d38a1d4c-eb98-4d2c-ab96-ce14ddfbff53",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.467116Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "d38a1d4c-eb98-4d2c-ab96-ce14ddfbff53",
+          "fromStatus": "completed",
+          "toStatus": "pending",
+          "occurredAt": "2026-09-07T10:02:16.467116Z"
+        }
+      },
+      {
+        "id": "84dc43ba-9ef4-4252-9923-967ef84799bd",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.430726Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "84dc43ba-9ef4-4252-9923-967ef84799bd",
+          "fromStatus": "pending",
+          "toStatus": "completed",
+          "occurredAt": "2026-09-07T10:02:16.430726Z"
+        }
+      },
+      {
+        "id": "f3a06066-2263-47bf-b892-dee93f21e9d3",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.390065Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "f3a06066-2263-47bf-b892-dee93f21e9d3",
+          "fromStatus": "completed",
+          "toStatus": "pending",
+          "occurredAt": "2026-09-07T10:02:16.390065Z"
+        }
+      },
+      {
+        "id": "91ba3d3a-632f-4263-bbdc-a66628c6ad46",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.341154Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "91ba3d3a-632f-4263-bbdc-a66628c6ad46",
+          "fromStatus": "pending",
+          "toStatus": "completed",
+          "occurredAt": "2026-09-07T10:02:16.341154Z"
+        }
+      },
+      {
+        "id": "4c2345bc-6da4-4b21-8918-2fcb6cac4f79",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.294169Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "4c2345bc-6da4-4b21-8918-2fcb6cac4f79",
+          "fromStatus": "completed",
+          "toStatus": "pending",
+          "occurredAt": "2026-09-07T10:02:16.294169Z"
+        }
+      },
+      {
+        "id": "50910a3b-b769-4aad-8fb3-9f7a0e00e811",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.258269Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "50910a3b-b769-4aad-8fb3-9f7a0e00e811",
+          "fromStatus": "pending",
+          "toStatus": "completed",
+          "occurredAt": "2026-09-07T10:02:16.258269Z"
+        }
+      },
+      {
+        "id": "ca504657-7c94-4db4-87f3-99b490762937",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.218212Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "ca504657-7c94-4db4-87f3-99b490762937",
+          "fromStatus": "completed",
+          "toStatus": "pending",
+          "occurredAt": "2026-09-07T10:02:16.218212Z"
+        }
+      },
+      {
+        "id": "a1d7ad23-8c00-45fd-80a3-6dabc55ce0bd",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.166386Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "a1d7ad23-8c00-45fd-80a3-6dabc55ce0bd",
+          "fromStatus": "pending",
+          "toStatus": "completed",
+          "occurredAt": "2026-09-07T10:02:16.166386Z"
+        }
+      },
+      {
+        "id": "1831b85a-3885-4f77-8a7f-118fac73abd3",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.114821Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "1831b85a-3885-4f77-8a7f-118fac73abd3",
+          "fromStatus": "completed",
+          "toStatus": "pending",
+          "occurredAt": "2026-09-07T10:02:16.114821Z"
+        }
+      },
+      {
+        "id": "dd8bbb76-51a9-4896-b8e8-713ed92c8aa3",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.054203Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "dd8bbb76-51a9-4896-b8e8-713ed92c8aa3",
+          "fromStatus": "pending",
+          "toStatus": "completed",
+          "occurredAt": "2026-09-07T10:02:16.054203Z"
+        }
+      },
+      {
+        "id": "4c879ed6-6792-4015-8032-154c3ada3ae0",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:16.008723Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "4c879ed6-6792-4015-8032-154c3ada3ae0",
+          "fromStatus": "completed",
+          "toStatus": "pending",
+          "occurredAt": "2026-09-07T10:02:16.008723Z"
+        }
+      },
+      {
+        "id": "8f858b18-2ed0-4159-9d73-84f1fd4f242a",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:15.963533Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "8f858b18-2ed0-4159-9d73-84f1fd4f242a",
+          "fromStatus": "pending",
+          "toStatus": "completed",
+          "occurredAt": "2026-09-07T10:02:15.963533Z"
+        }
+      },
+      {
+        "id": "4bf02164-3b82-40fb-af9e-5b5eaa4eb704",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:15.911470Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "4bf02164-3b82-40fb-af9e-5b5eaa4eb704",
+          "fromStatus": "completed",
+          "toStatus": "pending",
+          "occurredAt": "2026-09-07T10:02:15.911470Z"
+        }
+      }
+    ],
+    "nextCursor": "eyJ2ZXJzaW9uIjoxLCJvd25lciI6ImUyZS11c2VyIiwiZmlsdGVycyI6eyJjYXRlZ29yeSI6InRhc2stc3RhdHVzIiwicHJvamVjdElkIjpudWxsLCJ0YXNrSWQiOm51bGwsImZyb20iOm51bGwsInRvIjpudWxsfSwidXBwZXIiOnsib2NjdXJyZWRBdCI6IjIwMjYtMDktMDdUMTA6MDI6MTYuNzM2OTMxWiIsInR5cGUiOiJUQVNLX1NUQVRVU19DSEFOR0VEIiwiaWQiOiI1ODdlNzU2Ny01YmFkLTQxZjctYjk2OC00NWVjZGRkYWI0MWEifSwiYWZ0ZXIiOnsib2NjdXJyZWRBdCI6IjIwMjYtMDktMDdUMTA6MDI6MTUuOTExNDcwWiIsInR5cGUiOiJUQVNLX1NUQVRVU19DSEFOR0VEIiwiaWQiOiI0YmYwMjE2NC0zYjgyLTQwZmItYWY5ZS01YjVlYWE0ZWI3MDQifX0"
+  },
+  "older": {
+    "items": [
+      {
+        "id": "a2c1b5ad-a53b-4644-b81b-f62984531e67",
+        "type": "TASK_STATUS_CHANGED",
+        "occurredAt": "2026-09-07T10:02:15.863383Z",
+        "projectId": "dea6177a-3d32-4568-b76c-e65fa73cb831",
+        "projectName": "Veintiún hechos verificables",
+        "taskId": "c8666e2d-96ca-4fa1-be8a-a98d0d61fe37",
+        "taskTitle": "Paginar hechos propios",
+        "details": {
+          "id": "a2c1b5ad-a53b-4644-b81b-f62984531e67",
+          "fromStatus": "pending",
+          "toStatus": "completed",
+          "occurredAt": "2026-09-07T10:02:15.863383Z"
+        }
+      }
+    ],
+    "nextCursor": null
+  },
+  "keys": [
+    "TASK_STATUS_CHANGED:587e7567-5bad-41f7-b968-45ecdddab41a",
+    "TASK_STATUS_CHANGED:e26e5077-8f9f-420d-9375-d575369355f1",
+    "TASK_STATUS_CHANGED:26df96a2-924b-4019-8316-d739b592e54f",
+    "TASK_STATUS_CHANGED:088c7c7e-ccaa-46cc-95e2-1a81a3d7afb8",
+    "TASK_STATUS_CHANGED:9b6816b3-cb27-4012-8cb8-69727aaad616",
+    "TASK_STATUS_CHANGED:6bc2fdfa-1cde-4aac-b2fa-2cd1a6a45379",
+    "TASK_STATUS_CHANGED:7ec1184d-a826-4793-a139-9138a2f56d0f",
+    "TASK_STATUS_CHANGED:d38a1d4c-eb98-4d2c-ab96-ce14ddfbff53",
+    "TASK_STATUS_CHANGED:84dc43ba-9ef4-4252-9923-967ef84799bd",
+    "TASK_STATUS_CHANGED:f3a06066-2263-47bf-b892-dee93f21e9d3",
+    "TASK_STATUS_CHANGED:91ba3d3a-632f-4263-bbdc-a66628c6ad46",
+    "TASK_STATUS_CHANGED:4c2345bc-6da4-4b21-8918-2fcb6cac4f79",
+    "TASK_STATUS_CHANGED:50910a3b-b769-4aad-8fb3-9f7a0e00e811",
+    "TASK_STATUS_CHANGED:ca504657-7c94-4db4-87f3-99b490762937",
+    "TASK_STATUS_CHANGED:a1d7ad23-8c00-45fd-80a3-6dabc55ce0bd",
+    "TASK_STATUS_CHANGED:1831b85a-3885-4f77-8a7f-118fac73abd3",
+    "TASK_STATUS_CHANGED:dd8bbb76-51a9-4896-b8e8-713ed92c8aa3",
+    "TASK_STATUS_CHANGED:4c879ed6-6792-4015-8032-154c3ada3ae0",
+    "TASK_STATUS_CHANGED:8f858b18-2ed0-4159-9d73-84f1fd4f242a",
+    "TASK_STATUS_CHANGED:4bf02164-3b82-40fb-af9e-5b5eaa4eb704",
+    "TASK_STATUS_CHANGED:a2c1b5ad-a53b-4644-b81b-f62984531e67"
+  ],
+  "filtered": {
+    "items": [],
+    "nextCursor": null
+  },
+  "restart": {
+    "backendId": "f0c696d77672ebeb3e5c4adb8a16a99c5104c8d8504232d3bb0c48e0f5a70a76",
+    "databaseId": "acee63c0f3cdefb9fa33844a9a9054d573397c613edd3f5214750899999ce0d3",
+    "beforeBackend": "2026-09-07T10:02:07.725944655Z",
+    "afterBackend": "2026-09-07T10:02:20.470642075Z",
+    "beforeDatabase": "2026-09-07T10:02:04.013770844Z",
+    "afterDatabase": "2026-09-07T10:02:04.013770844Z"
+  }
+}

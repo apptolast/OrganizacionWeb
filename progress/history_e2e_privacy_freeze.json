@@ -1,0 +1,18 @@
+[
+  {
+    "path": "e2e/history.spec.mjs",
+    "sha256": "898A9E160E6CF46BE1E6D68EC2E14FF2DD80839E8F9A9D3401FFCE51EC69BED1"
+  },
+  {
+    "path": "progress/tdd_history_e2e.md",
+    "sha256": "BE2B3AA6D363AC2C737C5C5E40145E6CD6C799E7F10ACFC466789EBB7AB35B2A"
+  },
+  {
+    "path": "progress/history_e2e_privacy_before.json",
+    "sha256": "715D93BBF4372BE5D706DB13F6E8EC4D6C952B9952C7107CD472DBB0C363B396"
+  },
+  {
+    "path": "progress/history_e2e_privacy_after.json",
+    "sha256": "715D93BBF4372BE5D706DB13F6E8EC4D6C952B9952C7107CD472DBB0C363B396"
+  }
+]

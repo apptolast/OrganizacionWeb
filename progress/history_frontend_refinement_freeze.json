@@ -1,0 +1,22 @@
+[
+  {
+    "path": "frontend/src/history-api.test.ts",
+    "sha256": "C974D6D08D1FCBBCF264173FB96EAF84029F8DE9C0A26DF760AFC58BAE7E2EF5"
+  },
+  {
+    "path": "frontend/src/history.test.tsx",
+    "sha256": "8C8DD2713755EF28974ABFECAA0C073F1507DC22B716D5CA03C86A1A7D1493D7"
+  },
+  {
+    "path": "frontend/src/history-api.ts",
+    "sha256": "768EFA248169C13F2FA07E1BA752A1990D060DF65601F4F500ADCB3FA173DAE0"
+  },
+  {
+    "path": "frontend/src/history.tsx",
+    "sha256": "539B0F7B2C07E6DA35FD1CFB6F85452FA6BD93BA3904E2160C591410226D8500"
+  },
+  {
+    "path": "progress/history_frontend_replay_proposal.json",
+    "sha256": "0B70DD93DD98E65629D99AEAF5759128732E7889F0D4ED70AEFA2D32916720EE"
+  }
+]

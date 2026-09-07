@@ -1,55 +1,33 @@
 # Plan de entrega del MVP
 
-Actualizado el7 de septiembre de2026 tras cerrar técnicamente las sesiones (feature16). Previsión revisada: **8–15 horas efectivas para las funciones restantes y su validación integrada**, más **4–8 horas para desplegar y comprobar el servidor**, cuando haya acceso, dominio y entorno utilizables. Confianza media-baja en software y baja en despliegue. Terminar hoy sigue siendo el objetivo; no hay garantía de fecha ni predicción de cuota. Las esperas externas no tienen una cota conocida.
-
-## Alcance de entrega
-
-El MVP corresponde a1–18: acceso privado, proyectos y subtareas, disponibilidad, planificación y replanificación, Hoy, sesiones con pausa/reanudación/cierre, aviso de fin y consulta de lo realizado. React/TypeScript/pnpm/SCSS, Java/Spring Boot hexagonal/EDA, PostgreSQL/RabbitMQ en monorepo, desplegado en el servidor del usuario.
-
-19–30 siguen autorizadas para después: revisión semanal, personalización, vistas/campos, importación/exportación, API de integración, webhooks, calendarios, GitHub, otros conectores y automatizaciones. Su inventario por proveedor todavía debe acotarse antes de estimar el proyecto completo.
+Actualizado el 7 de septiembre de 2026, tras el cierre técnico local de Historial. **Software del MVP1–18 terminado y validado localmente.** Pendiente: CI, fusión y CI posterior en GitHub; estimación orientativa **1–2 horas**, incluida corrección de incidencias remotas, sin garantía. El despliegue mantiene **4–8 horas adicionales**, condicionado a acceso, hostname y capacidad. No es una predicción de cuota ni garantía de ausencia de errores.
 
 ## Estado comprobado
 
-- 1–13 cerradas con sus dictámenes; Replanificar fusionado y CI verde, incluido control de concurrencia, presupuesto y recuperación. Las PR alternativas y checkpoints anteriores están resueltos; detalle histórico en Git y progress/history.md.
-- 14 inicio y15 pausa/reanudación cerradas y fusionadas. Main b2ea1f211068e7d93c74d0a8d7e8717ec04323c3 tiene CI34078825723 SUCCESS.
-- 16 cierre: dictamen final APPROVED y estado done. Init final1.985 pruebas Java,1.721 frontend y36 del arnés; build correcto.115 E2E y12 pasos smoke, recuperación tras reinicio y pérdida de respuesta. UX515 medidas/35axe sin violaciones, tres motores y zoom real, con límites físicos/humanos documentados. PIT original516/520=99,23 % y Stryker1104/1275=86,59 % con dos errores de herramienta explícitos; replays dirigidos7/7 y15/15 sin cambiar los resultados originales. Corte final6c0a2bf publicado en PR15; CI34084817356 SUCCESS, fusionado como fede342 y CI posterior main34085908723 SUCCESS. La CI anterior34082838516 pasó sobre la misma producción antes de los refuerzos de tests/documentación.
-- 17 aviso y ampliación: contrato aprobado de44 escenarios/132 ejemplos; implementación en curso con tres agentes. Backend completo, persistencia, HTTP y Rabbit revisados: 2.074 pruebas Java verdes. Smoke de reinicios y recuperación después de cerrar aprobado,13 PASS. Panel corregido revisado y guardado; integración final de interfaz, navegador y gates pendientes. PIT backend activo.18 historial pendiente de contrato.
-- No hay despliegue productivo acreditado.
+El MVP incluye acceso privado, proyectos y tareas/subtareas, disponibilidad, planificación y replanificación, Hoy, sesiones con pausa/reanudación/cierre, aviso de fin, ampliación e historial. Conserva React, TypeScript, pnpm y SCSS; Java/Spring Boot con arquitectura hexagonal y EDA; PostgreSQL y RabbitMQ en un monorepo.
 
-## Plan y estimación pendiente
+Las funcionalidades1–17 están fusionadas. La PR16 incorporó17 en56b91bee09d332eda27a016eea34d20f639992ab; CI previa34100084803 y posterior34101887939 verdes. La funcionalidad18 está cerrada técnicamente en la rama de PR17, aún sin atribuir fusión ni CI final. Su dictamen está en progress/judge_history_final.md.
 
-| Hito | Resultado verificable | Horas efectivas |
-| --- | --- | ---: |
-|17 Aviso de fin y ampliación deliberada | Aviso comprobado, fin efectivo persistido y decisión explícita sin reescribir el inicio ni sumar trabajo ficticio; contrato, TDD y gates |3–5|
-|18 Historial | Hechos propios con fechas, tiempo real y acceso al detalle; filtros/orden y paginación acotados por contrato; gates |2,5–4,5|
-|Validación integrada del software | Recorrido completo, revisión y CI del corte conjunto; sin repetir campañas aprobadas por cambios sólo documentales |1–2|
-|Margen de correcciones | Hallazgos de contrato, integración, oráculos o herramientas |1,5–3|
-|Software restante | Rango redondeado de8–14,5 |**8–15**|
-|Despliegue condicionado | Imágenes/configuración de infraestructura, HTTPS/acceso, salud, persistencia, reinicio, respaldo/restauración y reversión comprobados |**4–8 adicionales**|
+Validación final local18:2.217 pruebas Java/93suites,1.899frontend/40suites y47Node; lint y build;129E2E completos y13comprobaciones del publicador. Los39escenarios y142ejemplos del contrato no son un recuento de pruebas. PIT original263/284 y Stryker original621/738 superan80; Stryker conserva tres RuntimeError fuera de su denominador oficial. Replays separados15/17 y32/33 detectan los seis y diecisiete objetivos respectivos. No se suman campañas ni se ocultan supervivientes.
 
-Son horas transcurridas de ejecución coordinada, incluyendo revisión y esperas técnicas; no horas-persona ni un total que deba dividirse entre agentes. La nueva estimación sustituye la hipótesis anterior30–60. Su base observable es el ciclo16: contrato05:02:31, implementación integrada05:54:01 y cierre local06:54:12, aproximadamente112 minutos. Es una sola muestra y no incluye toda la preparación previa ni acredita un ritmo futuro garantizado. Los márgenes por novedad de17 y contrato abierto18 son juicio de planificación, no coeficientes estadísticos. El desglose y las duraciones reales de gates están en [la revisión de estimación](../progress/review_mvp_estimate_after_close.md).
+UX conserva495mediciones y27axe sin incidencias en evidencia compuesta; teclado Chromium/Firefox y zoom nativo Chromium. WebKit Windows acredita geometría por clic y texto200, no teclado de enlaces. No hay pruebas de dispositivos/lectores físicos ni estudios humanos que certifiquen universalmente las30leyes.
 
-## Secuencia y dependencias
+## Trabajo pendiente
 
-1. Completado: PR15 fusionada y CI posterior de main correcta.
-2. En curso: implementar17 sobre contrato aprobado, con reparto backend/frontend/HTTP y revisión independiente de paquetes. Conservar hora original, tiempo trabajado y recuperación.
-3. Acotar18, implementar historial de hechos y validar el recorrido conjunto. No incluir silenciosamente estadísticas semanales, edición retrospectiva ni exportación dentro de este contrato.
-4. Desplegar y comprobar en el servidor. El acceso SSH y el dominio ya están preguntados; el último intento rechazó publickey. No se ha hecho una nueva conexión ni se infieren credenciales.
+| Hito | Resultado verificable | Estimación |
+| --- | --- | --- |
+| Integración remota | CI del corte final, fusión y CI posterior sin incidencias | 1–2 horas orientativas |
+| Despliegue condicionado | Imágenes inmutables, Swarm, HTTPS, persistencia, respaldo/restauración y reversión | 4–8 horas adicionales |
+| Esperas externas | Acceso, hostname, DNS o capacidad que requieran intervención | Duración desconocida |
 
-La capacidad documentada45MiB era margen de un presupuesto histórico de límites, no RAM libre medida. Hay que comprobar capacidad, catálogo Swarm, volúmenes, secrets y respaldo reales. Compose y CI de aplicación no equivalen a imágenes publicadas ni a un servicio productivo. Ampliación de recursos, adopción DNS o respaldo inexistente requerirían estimación adicional al observarlos. Detalles en [pendientes de despliegue](../progress/mvp_deployment_remaining.md).
+Este rango sustituye las2–4horas anteriores por los hitos ya acreditados: refuerzos, replays, UX,129E2E y nuevo init final. No se descuenta automáticamente tiempo ni se divide entre agentes. No quedan cambios funcionales pendientes del contrato18.
 
-Se revisará el rango tras17, al aprobar el contrato18 y al conseguir la primera comprobación autenticada del servidor. No se promete finalizar antes del reinicio de cuota ni se presenta un porcentaje de proyecto terminado.
+## Dependencias del despliegue
 
-## Criterio de entrega
+Todavía no hay despliegue productivo acreditado. El accesoSSH y hostname definitivo ya están solicitados; el último intento aadmin@159.195.156.57 terminó Permission denied(publickey). No existe medición remota nueva. Los45MiB del documento de infraestructura son margen de límites presupuestados, no memoria libre actual.
 
-Los recorridos del MVP deben funcionar contra API y base de datos reales, conservar datos al reiniciar, proteger privacidad, recuperar errores y evitar duplicados. Planificación y trabajo real permanecen separados. Deben pasar contrato, revisión, tests y mutación, además de criterios responsive/accesibilidad con evidencia y límites explícitos. La entrega completa requiere HTTPS, acceso y respaldo/restauración comprobados en el servidor. Esto no equivale a ausencia absoluta de errores ni a certificación universal de las30 leyes UX por herramientas automáticas.
+Existen Dockerfiles, Compose y overlayRabbitMQ. Falta publicar imágenes, integrarlas en el catálogoSwarm y verificar recursos actuales, DNS, HTTPS, secrets, persistencia y recuperación. La ruta/healthz deNginx no acredita por sí sola API, PostgreSQL o broker. Véanse docs/deployment-readiness.md y progress/review_mvp_deployment_handoff.md.
 
-## Reestimación tras el cierre técnico local17, 7 de septiembre, 10:20
+## Alcance posterior
 
-Esta actualización sustituye el rango de8–15 horas de software pendiente indicado al cerrar16: quedan **5–9 horas efectivas** para18 y la validación integrada final, con confianza media-baja. Despliegue conserva **4–8 horas adicionales condicionadas** a acceso, hostname y capacidad utilizables; esperas externas sin cota. Hoy sigue siendo objetivo, no garantía.
-
-17 está done técnicamente en local: init2076Java/1802frontend/40Node, build,121E2E, smoke13, UX515/35axe y campañas/revisiones aprobadas con límites. PR16 y CI final todavía pendientes; no se presenta como fusionada ni desplegada. Los cambios posteriores a producción son refuerzos de tests, fixtures y documentación.
-
-Desglose restante: contrato e implementación18,2,5–4,5h; integración/CI del MVP,1–2h; margen de correcciones,1,5–2,5h. Total5–9h, sin dividirlo de nuevo entre agentes. Se preparará18 en una rama separada mientras CI valida17, evitando modificar la PR que está ejecutándose. No se añaden revisión semanal, personalización avanzada ni conectores19–30 al MVP por inferencia.
-
-Base de revisión:17 requirió más trabajo de integración que la única muestra previa16, especialmente coordinación entre decisiones y recuperación. Sus gates medidos incluyen PIT38m55, Stryker25m42, globalE2E corregido11,3min y replay2m12; se solaparon y no deben sumarse como ruta crítica. Este rango es juicio de planificación, no extrapolación estadística ni predicción de cuota. Se volverá a revisar al fijar el contrato18.
+Las funcionalidades19–30 siguen autorizadas después del MVP: revisión semanal, personalización, vistas/campos, importación/exportación, API de integración, webhooks, calendarios, GitHub, conectores y automatizaciones. Necesitan contratos propios. El inventario de proveedores debe acotarse antes de estimar el proyecto completo. No se incluyen silenciosamente en la entrega1–18 ni se promete completarlas con una recarga concreta.

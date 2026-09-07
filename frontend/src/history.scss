@@ -1,0 +1,33 @@
+.history .history-note {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.history {
+  form,
+  fieldset {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+  }
+  input,
+  select {
+    min-height: 44px;
+    min-width: 44px;
+    max-width: 100%;
+    font: inherit;
+  }
+  a,
+  summary {
+    scroll-margin-block: 16px;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    min-width: 44px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  summary {
+    display: list-item;
+    cursor: pointer;
+  }
+}

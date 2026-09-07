@@ -1,0 +1,10 @@
+[
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/ReadHistoryTest.java",
+    "sha256": "5740DE1E394741A8E157ED840EB66658F58F4F714D35353B999DD3D1F3FEA2F6"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/HistoryQueriesPersistenceTest.java",
+    "sha256": "B22F856B8F77E569D7F5E9A8C44032DF57883C879D677B8E87B8D0D68FB3CB94"
+  }
+]

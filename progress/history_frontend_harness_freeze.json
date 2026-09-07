@@ -1,0 +1,22 @@
+[
+  {
+    "path": "scripts/project.mjs",
+    "sha256": "D51F1D14E63E866E56A120794AD603538C0CA39EA0FBACB8132ADD9889B10361"
+  },
+  {
+    "path": "scripts/project.test.mjs",
+    "sha256": "4E77FC095625A900D62E95A0DF7751D3B4850EF5271188693095437B76EA13D1"
+  },
+  {
+    "path": "frontend/stryker.history.config.json",
+    "sha256": "4E7C7CD9CD3F338EDDEE36D384CBF79DA74A5789D8573D933B0C5C657ACCADC7"
+  },
+  {
+    "path": "frontend/stryker.config.json",
+    "sha256": "6D5AFB4E962005F53E98EA41BA85B84FDFB6DE186AD90B83AC74D3AFF1BA781C"
+  },
+  {
+    "path": "progress/start_work_frontend_historical_snapshot.json",
+    "sha256": "AD3305C642CCACE9067B1D1D0A13CA2805BB71000BA557239B5C0650BAF00BEB"
+  }
+]

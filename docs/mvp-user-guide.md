@@ -1,0 +1,36 @@
+# Usar el MVP para trabajar con un horario
+
+Esta guía describe las funciones implementadas del corte MVP. Historial sigue en validación final; el estado de entrega y las dependencias del servidor están en [el plan](mvp-delivery-plan.md). La personalización avanzada y los conectores de las funcionalidades19–30 pertenecen a entregas posteriores.
+
+## Preparar el trabajo
+
+1. Entra con la cuenta configurada para tu instancia. En **Disponibilidad**, elige tu zona horaria y los minutos que quieres dedicar cada día; puedes reservar días de descanso con cero minutos.
+2. Crea un proyecto y añade una tarea con un resultado pequeño y comprobable. Puedes dividirla en subtareas y estimarlas por separado. Activa los proyectos en los que vayas a trabajar; el límite inicial de proyectos activos es tres y la instancia puede configurarlo.
+3. Desde una tarea pendiente, abre **Planificar bloque** e indica objetivo, fecha, inicio y fin. Revisa el presupuesto antes de guardar. Una reserva organiza el horario; no registra por sí sola tiempo trabajado.
+4. Abre **Hoy** para consultar las reservas del día. Si necesitas cambiar un hueco, replanifica o cancela la reserva desde su tarea. Los cambios conservan su historial.
+
+## Trabajar y parar
+
+Inicia una sesión desde el detalle de la tarea y elige su duración prevista. **Pausar** detiene la acumulación del tiempo neto; **Reanudar** continúa la misma sesión. La pausa no desplaza la hora de fin prevista.
+
+Cuando llega el fin, el aviso permite decidir si cierras o usas **Ampliar tiempo**. Ampliar requiere una decisión explícita y no añade tiempo trabajado por sí mismo. El aviso depende de que el navegador pueda consultar el servidor: no es una alarma externa con la pestaña cerrada.
+
+Usa **Cerrar sesión de trabajo** para registrar el cierre, anotar el avance y dejar el siguiente paso. Completar una tarea es una acción independiente. Cerrar la pestaña o llegar a la hora prevista no cierra automáticamente la sesión de trabajo.
+
+Si una respuesta se pierde, utiliza la acción de comprobación que ofrezca la pantalla. La aplicación consulta el resultado guardado para recuperar una decisión; evita crear otra intención para resolver una respuesta incierta. La URL de una sesión permite volver a consultarla, incluso después de cerrarla.
+
+## Consultar lo ocurrido
+
+**Historial** reúne cinco tipos de hechos: reservas originales, cambios de reserva, cambios de estado de tarea, inicios de sesión y cambios de sesión. Una tarea reabierta conserva también su finalización anterior. Los detalles del cierre muestran sus notas, tiempo neto y día atribuido; los de una ampliación muestran el cambio de fin previsto.
+
+Puedes entrar desde la navegación principal o desde el detalle de un proyecto o tarea. Los filtros visibles son categoría y fechas **Desde/Hasta en UTC**; se aplican al pulsar **Aplicar filtros**. Filtran la fecha en que ocurrió el hecho, no la fecha futura de una reserva ni el día atribuido al cierre. **Limpiar filtros** vuelve al historial global; **Quitar filtro de contexto** conserva la categoría y fechas.
+
+Cada página contiene hasta20hechos. **Más antiguos** sustituye la página actual; **Volver a recientes**, Atrás y recargar conservan una navegación basada en la URL. Los nombres de proyecto y tarea son los actuales; los detalles guardados del hecho permanecen históricos. Si varios hechos coinciden en el instante, su orden visual no demuestra una relación causal.
+
+Un error de consulta no significa que el historial esté vacío. El reintento sólo repite la lectura. Si caduca la sesión de acceso, vuelve a identificarte; la aplicación retira los datos privados de la pantalla.
+
+## Datos y servidor
+
+La base de datos conserva proyectos, planificación y recibos de trabajo. El historial puede leerse sin depender de que el publicador RabbitMQ esté disponible. Las copias de seguridad y la restauración del servidor deben configurarse y comprobarse como parte del despliegue; tener un volumen de Docker no sustituye un respaldo.
+
+Para ejecutar la instancia local consulta [el README](../README.md). Para la API, el contrato de lectura es `GET /api/v1/history`, autenticado con la sesión de la aplicación; sus parámetros y formato están en la sección18 de [la especificación](../project-spec.md). No se admiten notas privadas en URLs ni almacenamiento web para recuperar el historial.

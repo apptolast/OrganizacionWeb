@@ -1,0 +1,18 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ReadHistory.java",
+    "sha256": "4CFF8AE808FC5B96788C10829FC7BEAB8CD70B793F5DF525A3F5A530F0B55955"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresHistoryQueries.java",
+    "sha256": "6EA2931874E871C6387947FB2ADC1E2E0A399DBD1F81E27CC35073AD6C5AC447"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/ReadHistoryTest.java",
+    "sha256": "98E5573FB6FCB91E33214A5168BF1DA759B7F6510FA747CB2B41E3C2F0226CA7"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/HistoryQueriesPersistenceTest.java",
+    "sha256": "589F3B144B3CFCCA5985B134199CB3AA4CB36CE864EAD1892BF9993B518DCF16"
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "path": "scripts/project.mjs",
+    "sha256": "BF72EA5B05D86A077E23F0D46B56500B298381F412C2C2E286E167E12F5CCFF9"
+  },
+  {
+    "path": "scripts/project.test.mjs",
+    "sha256": "877853E3B89D7F3A79D7CE620894880C6489AAE9E2A431E1117575C2F2BD5488"
+  },
+  {
+    "path": "backend/build.gradle.kts",
+    "sha256": "6C456339AF988238A6F9316B988112651492A05BEC91012E6A773D00686FA9A3"
+  },
+  {
+    "path": "progress/tdd_history_mutation_support.md",
+    "sha256": "4B451CCEF1AD0625CA5A5BD77801CED53389E1DC97F1ACCFAC2159D33731FB30"
+  }
+]

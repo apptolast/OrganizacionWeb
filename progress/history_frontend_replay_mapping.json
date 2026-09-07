@@ -1,0 +1,635 @@
+{
+  "originalReportSha256": "21F58FA90232A5C85FB5A78AE889F75FC718FB2739D150684867655E6BC65FF5",
+  "replayReportSha256": "4038BB17D5BBE2CB2037C1CADDBC9366C596CC48F7B23A3EA05EC4E9887DE727",
+  "targets": [
+    {
+      "originalId": "76",
+      "replayId": "0",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 22,
+          "line": 70
+        },
+        "start": {
+          "column": 9,
+          "line": 66
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "originalStatus": "Survived",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "77",
+      "replayId": "1",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 22,
+          "line": 70
+        },
+        "start": {
+          "column": 9,
+          "line": 66
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "replacement": "exact(item, \"id type occurredAt projectId projectName taskId taskTitle details\") || uuid(item.id)",
+      "originalStatus": "Survived",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "125",
+      "replayId": "5",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 86
+        },
+        "start": {
+          "column": 12,
+          "line": 86
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "originalStatus": "Survived",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "124",
+      "replayId": "4",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 87
+        },
+        "start": {
+          "column": 12,
+          "line": 86
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "replacement": "item.type === \"TASK_STATUS_CHANGED\" || isHistoryEntry(item.details)",
+      "originalStatus": "Survived",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "136",
+      "replayId": "8",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 63,
+          "line": 92
+        },
+        "start": {
+          "column": 12,
+          "line": 91
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "originalStatus": "Survived",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "137",
+      "replayId": "9",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 63,
+          "line": 92
+        },
+        "start": {
+          "column": 12,
+          "line": 91
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "replacement": "item.type === \"BLOCK_PLANNED\" || isBlock(item.details, item.projectId, item.taskId)",
+      "originalStatus": "Survived",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "138",
+      "replayId": "10",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 91
+        },
+        "start": {
+          "column": 12,
+          "line": 91
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "originalStatus": "Survived",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "150",
+      "replayId": "14",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 69,
+          "line": 97
+        },
+        "start": {
+          "column": 12,
+          "line": 96
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "replacement": "item.type === \"BLOCK_CHANGED\" || isBlockChange(item.details, item.projectId, item.taskId)",
+      "originalStatus": "Survived",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "151",
+      "replayId": "15",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 96
+        },
+        "start": {
+          "column": 12,
+          "line": 96
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "originalStatus": "Survived",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "166",
+      "replayId": "18",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 102
+        },
+        "start": {
+          "column": 12,
+          "line": 101
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "originalStatus": "Survived",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "167",
+      "replayId": "19",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 102
+        },
+        "start": {
+          "column": 12,
+          "line": 101
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "replacement": "item.type === \"SESSION_CHANGED\" || isSessionChange(item.details)",
+      "originalStatus": "Survived",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "168",
+      "replayId": "20",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 43,
+          "line": 101
+        },
+        "start": {
+          "column": 12,
+          "line": 101
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "originalStatus": "Survived",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "302",
+      "replayId": "28",
+      "file": "src/history.tsx",
+      "location": {
+        "end": {
+          "column": 69,
+          "line": 27
+        },
+        "start": {
+          "column": 49,
+          "line": 27
+        }
+      },
+      "mutatorName": "CallExpression",
+      "replacement": ";",
+      "originalStatus": "NoCoverage",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "692",
+      "replayId": "31",
+      "file": "src/history.tsx",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 411
+        },
+        "start": {
+          "column": 27,
+          "line": 411
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "originalStatus": "NoCoverage",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "696",
+      "replayId": "32",
+      "file": "src/history.tsx",
+      "location": {
+        "end": {
+          "column": 55,
+          "line": 416
+        },
+        "start": {
+          "column": 27,
+          "line": 416
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "originalStatus": "NoCoverage",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "298",
+      "replayId": "24",
+      "file": "src/history.tsx",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 27
+        },
+        "start": {
+          "column": 7,
+          "line": 27
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "originalStatus": "Survived",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "547",
+      "replayId": "29",
+      "file": "src/history.tsx",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 233
+        },
+        "start": {
+          "column": 24,
+          "line": 233
+        }
+      },
+      "mutatorName": "ArrowFunction",
+      "replacement": "() => undefined",
+      "originalStatus": "Survived",
+      "replayStatus": "Killed"
+    }
+  ],
+  "extras": [
+    {
+      "originalId": "127",
+      "replayId": "7",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 86
+        },
+        "start": {
+          "column": 26,
+          "line": 86
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "originalStatus": "Killed",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "126",
+      "replayId": "6",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 86
+        },
+        "start": {
+          "column": 12,
+          "line": 86
+        }
+      },
+      "mutatorName": "EqualityOperator",
+      "replacement": "item.type !== \"TASK_STATUS_CHANGED\"",
+      "originalStatus": "Killed",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "78",
+      "replayId": "2",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 78,
+          "line": 68
+        },
+        "start": {
+          "column": 11,
+          "line": 68
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "originalStatus": "Killed",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "123",
+      "replayId": "3",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 87
+        },
+        "start": {
+          "column": 12,
+          "line": 86
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "originalStatus": "Killed",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "139",
+      "replayId": "11",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 91
+        },
+        "start": {
+          "column": 12,
+          "line": 91
+        }
+      },
+      "mutatorName": "EqualityOperator",
+      "replacement": "item.type !== \"BLOCK_PLANNED\"",
+      "originalStatus": "Killed",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "140",
+      "replayId": "12",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 91
+        },
+        "start": {
+          "column": 26,
+          "line": 91
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "originalStatus": "Killed",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "149",
+      "replayId": "13",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 69,
+          "line": 97
+        },
+        "start": {
+          "column": 12,
+          "line": 96
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "originalStatus": "Killed",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "152",
+      "replayId": "16",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 96
+        },
+        "start": {
+          "column": 12,
+          "line": 96
+        }
+      },
+      "mutatorName": "EqualityOperator",
+      "replacement": "item.type !== \"BLOCK_CHANGED\"",
+      "originalStatus": "Killed",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "153",
+      "replayId": "17",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 96
+        },
+        "start": {
+          "column": 26,
+          "line": 96
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "originalStatus": "Killed",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "169",
+      "replayId": "21",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 43,
+          "line": 101
+        },
+        "start": {
+          "column": 12,
+          "line": 101
+        }
+      },
+      "mutatorName": "EqualityOperator",
+      "replacement": "item.type !== \"SESSION_CHANGED\"",
+      "originalStatus": "Killed",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "170",
+      "replayId": "22",
+      "file": "src/history-api.ts",
+      "location": {
+        "end": {
+          "column": 43,
+          "line": 101
+        },
+        "start": {
+          "column": 26,
+          "line": 101
+        }
+      },
+      "mutatorName": "StringLiteral",
+      "replacement": "\"\"",
+      "originalStatus": "Killed",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "297",
+      "replayId": "23",
+      "file": "src/history.tsx",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 27
+        },
+        "start": {
+          "column": 7,
+          "line": 27
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "originalStatus": "Killed",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "299",
+      "replayId": "25",
+      "file": "src/history.tsx",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 27
+        },
+        "start": {
+          "column": 7,
+          "line": 27
+        }
+      },
+      "mutatorName": "LogicalOperator",
+      "replacement": "rangeError || rangeError.route !== route",
+      "originalStatus": "Killed",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "300",
+      "replayId": "26",
+      "file": "src/history.tsx",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 27
+        },
+        "start": {
+          "column": 21,
+          "line": 27
+        }
+      },
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "originalStatus": "Killed",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "301",
+      "replayId": "27",
+      "file": "src/history.tsx",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 27
+        },
+        "start": {
+          "column": 21,
+          "line": 27
+        }
+      },
+      "mutatorName": "EqualityOperator",
+      "replacement": "rangeError.route === route",
+      "originalStatus": "Killed",
+      "replayStatus": "Killed"
+    },
+    {
+      "originalId": "548",
+      "replayId": "30",
+      "file": "src/history.tsx",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 233
+        },
+        "start": {
+          "column": 35,
+          "line": 233
+        }
+      },
+      "mutatorName": "ArithmeticOperator",
+      "replacement": "value - 1",
+      "originalStatus": "Survived",
+      "replayStatus": "Survived"
+    }
+  ]
+}

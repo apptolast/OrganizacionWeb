@@ -35,6 +35,7 @@ pitest {
     pitestVersion.set("1.22.0")
     junit5PluginVersion.set("1.2.3")
     val scope = providers.gradleProperty("mutationScope").orNull
+    val historyOnly = scope == "history"
     val authenticationOnly = scope == "authentication"
     val taskOnly = scope == "create_task"
     val splitOnly = scope == "split_task"
@@ -254,7 +255,26 @@ pitest {
         "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher",
         "com.apptolast.organization.adapter.config.ApplicationConfiguration"
     )
+    val historyClasses = setOf(
+        "com.apptolast.organization.application.ReadHistory",
+        "com.apptolast.organization.application.ReadHistoryUseCase",
+        "com.apptolast.organization.application.HistoryQueries",
+        "com.apptolast.organization.application.HistoryEntry",
+        "com.apptolast.organization.application.HistoryFilters",
+        "com.apptolast.organization.application.HistoryCursor",
+        "com.apptolast.organization.application.HistoryPosition",
+        "com.apptolast.organization.application.HistoryPage",
+        "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries*",
+        "com.apptolast.organization.adapter.http.HistoryController*",
+        "com.apptolast.organization.adapter.http.HistoryCursorCodec*",
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration"
+    )
+    val historyAdapterTests = setOf(
+        "com.apptolast.organization.adapter.HistoryApiTest",
+        "com.apptolast.organization.adapter.persistence.History*Test"
+    )
     targetClasses.set(when {
+        historyOnly -> historyClasses
         endTimeNotificationOnly -> endTimeNotificationClasses
         closeWorkSessionOnly -> closeWorkSessionClasses
         pauseResumeSessionOnly -> pauseResumeSessionClasses
@@ -268,9 +288,10 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses
     })
     targetTests.set(when {
+        historyOnly -> setOf("com.apptolast.organization.*")
         endTimeNotificationOnly -> setOf("com.apptolast.organization.*")
         closeWorkSessionOnly -> setOf("com.apptolast.organization.*")
         pauseResumeSessionOnly -> setOf("com.apptolast.organization.*")
@@ -284,8 +305,9 @@ pitest {
         taskStatusOnly -> taskTests + taskStatusAdapterTests
         splitOnly -> taskTests
         taskOnly -> taskTests
-        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests
+        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests
     })
+    if (historyOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-history"))
     if (endTimeNotificationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-end-time-notification"))
     if (pauseResumeSessionOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-pause-resume-session"))
     if (closeWorkSessionOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-close-work-session"))
@@ -316,3 +338,5 @@ pitest {
 }
 
 spotless { java { googleJavaFormat("1.31.0") } }
+
+

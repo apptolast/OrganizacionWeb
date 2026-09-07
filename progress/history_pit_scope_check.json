@@ -1,0 +1,94 @@
+{
+  "head": "bb3910a833491585e6899dc4a68b4a2e7cd14819",
+  "baseline": "56b91bee09d332eda27a016eea34d20f639992ab",
+  "patterns": [
+    "com.apptolast.organization.application.ReadHistory",
+    "com.apptolast.organization.application.ReadHistoryUseCase",
+    "com.apptolast.organization.application.HistoryQueries",
+    "com.apptolast.organization.application.HistoryEntry",
+    "com.apptolast.organization.application.HistoryFilters",
+    "com.apptolast.organization.application.HistoryCursor",
+    "com.apptolast.organization.application.HistoryPosition",
+    "com.apptolast.organization.application.HistoryPage",
+    "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries*",
+    "com.apptolast.organization.adapter.http.HistoryController*",
+    "com.apptolast.organization.adapter.http.HistoryCursorCodec*",
+    "com.apptolast.organization.adapter.config.ApplicationConfiguration"
+  ],
+  "mapping": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+      "pattern": [
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/HistoryController.java",
+      "pattern": [
+        "com.apptolast.organization.adapter.http.HistoryController*"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/HistoryCursorCodec.java",
+      "pattern": [
+        "com.apptolast.organization.adapter.http.HistoryCursorCodec*"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresHistoryQueries.java",
+      "pattern": [
+        "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries*"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/HistoryCursor.java",
+      "pattern": [
+        "com.apptolast.organization.application.HistoryCursor"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/HistoryEntry.java",
+      "pattern": [
+        "com.apptolast.organization.application.HistoryEntry"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/HistoryFilters.java",
+      "pattern": [
+        "com.apptolast.organization.application.HistoryFilters"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/HistoryPage.java",
+      "pattern": [
+        "com.apptolast.organization.application.HistoryPage"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/HistoryPosition.java",
+      "pattern": [
+        "com.apptolast.organization.application.HistoryPosition"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/HistoryQueries.java",
+      "pattern": [
+        "com.apptolast.organization.application.HistoryQueries"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadHistory.java",
+      "pattern": [
+        "com.apptolast.organization.application.ReadHistory"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadHistoryUseCase.java",
+      "pattern": [
+        "com.apptolast.organization.application.ReadHistoryUseCase"
+      ]
+    }
+  ],
+  "inputCount": 375,
+  "manifestSha256": "319030010F70B1241E9EE1C5F8B7F4F2CE78C3721388532F6F571BFF811490A2"
+}

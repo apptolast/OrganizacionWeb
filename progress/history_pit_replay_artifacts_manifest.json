@@ -1,0 +1,34 @@
+[
+  {
+    "path": "progress/history_pit_replay_final/com.apptolast.organization.adapter.persistence/index.html",
+    "sha256": "16DB770D67F976B204E3F90BCBF98FA449691FF2240B4822ACA720964656A4F1"
+  },
+  {
+    "path": "progress/history_pit_replay_final/com.apptolast.organization.adapter.persistence/PostgresHistoryQueries.java.html",
+    "sha256": "045FB43C94DAD4EEBB12B2C7953EEC5B2AB25A6C93B88D9D984909A9CB3E4F9E"
+  },
+  {
+    "path": "progress/history_pit_replay_final/com.apptolast.organization.application/index.html",
+    "sha256": "08590AA8F7DD0BA939CB91589F36E83C4A81C4994ECCC755015B7227F855EAF7"
+  },
+  {
+    "path": "progress/history_pit_replay_final/com.apptolast.organization.application/ReadHistory.java.html",
+    "sha256": "E58AC02147AAA717EEF63FA3E46AB406602CEC97503F7F0329F0FAD180783E31"
+  },
+  {
+    "path": "progress/history_pit_replay_final/history_pit_replay.log",
+    "sha256": "5E045F6377702A58A1D9984A0253C8BDA3A10FC878851AAA285B7FB75AE65324"
+  },
+  {
+    "path": "progress/history_pit_replay_final/index.html",
+    "sha256": "09651FEA7E1A6798FC4E84E486B97B022D673500AD91857EB6C3F9CB077EAEDA"
+  },
+  {
+    "path": "progress/history_pit_replay_final/mutations.xml",
+    "sha256": "AF8A632A85DF718097364B88420536D4F21CFF5A42B5CBCA5FB87BB89F407F49"
+  },
+  {
+    "path": "progress/history_pit_replay_final/style.css",
+    "sha256": "78EA37FB78E124ACD62B472B0DBDB1F80176D8B4C3353411668797FBF3DB7976"
+  }
+]

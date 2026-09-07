@@ -89,3 +89,93 @@ PR16 draft https://github.com/apptolast/OrganizacionWeb/pull/16 publicada. CI340
 Dictamen APPROVED con límites y estado17 done. Todos los gates locales completados: init49155 EXIT0 (2076Java/1802frontend/40Node/lint), build93234 EXIT0,121E2E96039 EXIT0 y revisión C aprobada, smoke13 y UX515/35axe aprobados. Replay47243 EXIT0:39K/5S/1RuntimeError sobre45,13de14objetivosK y228error;130hashes idénticos y revisión independiente aprobada. Original1980 y sus estados intactos, sin sumar scores. No más procesos locales activos.
 
 PR16 todavía draft; CI34099273259 sobre f9948dc activa al registrar. Root publicará este cierre documental para una CI final y no fusionará hasta comprobar resultado. El estado done es técnico local, no afirmación de CI/merge/despliegue. Se autoriza preparar contrato18 en rama separada, sin cambiar producción17 ni la PR durante sus gates. Estimación revisada en docs/mvp-delivery-plan.md:5–9hsoftware y4–8hdespliegue condicionado; objetivo hoy sin garantía. SSH/dominio siguen pendientes, no repetir preguntas durante trabajo independiente.
+
+## Preparación18 en rama separada, 10:24
+
+COMMON cambió a codex/work-history desde fc36b735719f747e57fe6dc1e6a45dc680171045. PR16 conserva codex/end-time-notification congelada; CI final34100084803 activa sobre fc36b73. No proceso local root activo.17 done técnico local; no merge/CI verde todavía.18 pending, sólo propuesta previa a contrato/Gherkin: C redacta proposal_history.md; A diseña consulta/índices/cursores reutilizables; B diseña vista y estados UX. No producción/tests18 hasta revisión y contrato.
+
+Decisión preliminar de root: hechos durables de sesiones, finalizaciones/reaperturas y replanificación; no outbox ni escrituras de consulta. Keyset no se presenta como snapshot transaccional entre requests: commits tardíos con instante antiguo requieren garantía explícita, sin nueva tabla global o transacción persistente sólo para simular congelación. No19–30 dentro de18.
+
+## Implementación18 autorizada, 10:44
+
+Normativa6384934 y contrato5546278 aprobados por root/B. SHA Gherkin768AA48A5A0495BDC5AA292395F1DC42DADD0BD7702987F50D2FAD4664B72C13:39escenarios/142ejemplos, sin equipararlos a tests.18 pasa in_progress bajo autorización global del usuario, sin nueva pregunta. A posee dominio/caso de uso/PG/wiring; B cliente/página/rutas/SCSS; C HTTP/cursor/E2E/integración en worktree aislado después del contrato. Primeros paquetes nominales revisables antes de campañas globales.
+
+17PR16 fusionada56b91bee09d332eda27a016eea34d20f639992ab el2026-09-07T08:40:55Z, CI34100084803 SUCCESS sobre fc36b73 y watch59029 EXIT0 aa1672. Árbol17fc36b73 y squashmain iguales a899cffbf004c085ad65999c99739e2e69c442e3 (8c06e4). Reconciliación46dc342 preserva árbol de rama18 efe7f6449990d6634d51c932d534b72ee50e823e idéntico antes/después0f93f4. CI posterior main34101887939 ACTIVA, rootwatch12926, log end_time_main_ci_watch.log. No proceso local de test/mutación activo.
+
+## Historial en desarrollo, 10:58
+
+El paquete nominal `2e60131` está revisado. A continúa persistencia y paginación en COMMON; B implementa el cliente y la página, reutilizando validadores mediante exportaciones mínimas. Sus ciclos focales verdes no acreditan todavía el historial completo.
+
+C completó init del árbol aislado `OrganizacionWeb-history-http`: EXIT0, herramienta 891b81, con 2.076 pruebas Java, 1.802 frontend y 40 del arnés. Se conserva el primer EXIT1 por dependencias ausentes. Root incorporó el paquete nominal como `99ddbb0` (d190bb); C continúa HTTP/cursor y el primer E2E. El puerto 18080 queda reservado para ese recorrido cuando C lo arranque; 8080 no se toca.
+
+CI posterior de main 34101887939 sigue activa sobre 56b91bee09d332eda27a016eea34d20f639992ab: init, build y E2E verdes; publisher en ejecución (b29cdd). Root mantiene watch12926. No se atribuye éxito final antes de su resultado. El plan de entrega se consolida en una sola estimación vigente; siguen pendientes el cierre del historial, la validación integrada y el despliegue condicionado.
+
+## CI posterior de main verificada
+
+Watch root12926 terminó EXIT0 (93b922). GitHub confirma `34101887939` completed/success sobre `56b91bee09d332eda27a016eea34d20f639992ab` (f8c94b). La funcionalidad 17 queda acreditada localmente, fusionada y con CI posterior verde. No quedan procesos root activos; el historial sigue en desarrollo por A/B/C.
+
+## Checkpoints de historial revisados, 11:22
+
+Root aprobó y versionó el cliente en `99f2971`: 53 pruebas nuevas y 475 regresiones, total 528 verdes; formato y tipos verificados por B. Cinco hashes contrastados (55289b). La página y los controles siguen en TDD por B, con privacidad post-await y UX aún pendientes.
+
+Consulta duradera y aplicación aprobadas como checkpoint en `06bd830`: 21 pruebas PostgreSQL y 3 de aplicación, XML y cuatro hashes verificados (f1b654). Cinco fuentes, filtros y paginación por cursor ya disponibles; A continúa RR/read-only, integridad, errores, commits tardíos y wiring. Su nuevo oráculo de read-only está RED real (0a6047); las fuentes quedan liberadas después del commit.
+
+El adaptador HTTP nominal se revisó y versionó en el árbol aislado como `342ef0d`, rama `codex/history-http` publicada. Once pruebas y cuatro hashes comprobados (1a7426); sigue pendiente integrar en COMMON cuando exista el bean de aplicación. C continúa validación y cursor. E2E inicial RED por enlace Historial ausente, puerto 18080 libre. No hay procesos root activos ni campañas globales de la funcionalidad 18. Las entregas parciales no acreditan todavía su cierre.
+
+## API completa y montaje nominal integrados, 11:50
+
+HTTP/cursor aprobado en 5578514 e integrado como 4ef385c. Root verificó cinco hashes y dos XML (24c59e): 75 pruebas HTTP y 4 de seguridad, todas verdes. El contrato aclarado por be25c5c/5e2ad1e conserva 39 escenarios y 142 ejemplos; SHA actual de history.feature C9AB1D0486E98FB3F7B868EB5074DFD8C1EEE2EADC463B47C9032749F87B5D0D. No cambia la política de seguridad.
+
+Montaje UI nominal aprobado e integrado en 9fa0e58: 20 pruebas, cinco hashes contrastados (cfe985), lint/tipos y formato acreditados. C recibió PG, wiring, cliente y UI mediante commits 6d5906d, 71585ee, adbf189 y e3cf6d2 en su árbol aislado; puede ejecutar el primer E2E real. A conserva en COMMON las correcciones temporales e integridad todavía en WIP; no se atribuyen al snapshot aislado. B continúa enlaces, foco y UX. No campañas activas de root.
+
+El usuario ha reiterado que dispone de una última recarga y pide terminar hoy. Se mantiene prioridad al cierre probado del MVP con tres agentes; no se promete completar también 19–30 ni un despliegue sin acceso y dominio. La propuesta PIT de C está aprobada con 12 patrones y la configuración habitual; el dispatcher se implementará por TDD antes de usarlo. No se rebajan gates ni se repiten campañas heredadas sin una causa concreta.
+
+## Soporte de mutación y PR de integración
+
+Soporte PIT aprobado en C6b513f6 e integrado en COMMON222725e durante ventana sin Gradle de A. Cuatro hashes verificados cd736a; 43 Node y validación DSL verdes f9ffae. PIT quedó SKIPPED en dry-run: ninguna campaña18 ejecutada todavía. El default también incluye los tests nuevos de adaptador tras hallazgo de revisión. El alcance se contrastará con el freeze final antes de ejecutar.
+
+GitHub muestra PR17 para codex/work-history y PR18 para codex/history-http, creadas fuera de las operaciones root de esta sesión. No se vuelve a preguntar su origen: el usuario ya explicó que opera desde GitHub. Se convirtieron ambas en borrador (707007). PR17 concentra la integración; PR18 conserva el checkpoint HTTP ya incorporado. Se añadieron títulos y descripciones con validaciones y límites. Main sigue success34101887939 (4a174c). Rama común publicada hasta222725e, con A/B todavía en WIP.
+
+C acredita dos E2E reales verdes 2e7881: vacío con texto visible y diez hechos de las cinco fuentes, detalle literal, SQL y enlace a sesión. El snapshot sigue siendo nominal; la paginación y el reinicio están en curso. B informa154 pruebas focales verdes, pero reabre únicamente History/test para corregir el rango de fechas invertido; no se presenta ese freeze provisional como final. A cierra la forma de recibos corruptos antes de su regresión final. Tres agentes activos, sin nuevas funcionalidades ni despliegue.
+
+## Fuentes finales integradas y gates en marcha
+
+Frontend final aprobado0fa1729 (14hashes ee14b2); rango invertido corregido,30 History verdes. Soporte Stryker769d3ea aprobado con ternarios App completos,47Node y snapshot histórico14. Backend final06f9233 aprobado:14hashes y seisXML verificados81af72,163 pruebas focales verdes; incluye rechazo503 del JSON literal null tras RED6206b1/GREENe97112. Rama común publicada hasta06f9233.
+
+Cuatro E2E de historial revisados e integrados en190eff8/f273a08, ejecutados en focos2/2+1/1+1/1 con sus límites. Paginación21hechos, reinicioAPI manteniendoPG, retiradaoutbox,503transporte y401/404 reales; el EXIT del foco de paginación no se recuperó, aunque log registra1/1 y cleanup. No se convierte ese dato en un EXIT inventado.
+
+C recibió todas las fuentes finales en b639336 y f03ce2f. El primer UX fue RED5d013a a320 por controles menores44px; geometría/captura preservadas. La copiaPG posterior al lifecycle ocurrió durante la captura after de C:322hashes iguales y1PG distinto explicado por esa copia; no se afirma identidad total. C corrige CSS medido en su árbol, sin tocar TS/TSX. Los cuatro E2E funcionales permanecen independientes del archivo UX.
+
+Root inició init global en COMMON, proceso32293 y log history_init_final.log sobre06f9233, sin campañas PIT/Stryker todavía. A/B quedan para esas campañas tras init/build; C ejecuta UX en su árbol. La funcionalidad18 y el despliegue siguen abiertos, con acceso/hostname pendientes ya solicitados.
+
+## Regresión verde y campañas18 activas
+
+Init32293 terminó EXIT0 (92313d). XML global preservado en history_init_backend_xml:93suites/2.211Java, sin fallos/errores/omitidos (a669ac);47Node y1.887frontend. Log SHA CB435125F8344C3047A21793F3D063B7913D97FD2CFA06C795279263024572D3. Como el fix de foco coincidió con esa ejecución, se repitió únicamente frontend sobre el corte fijo:51454EXIT0/6aba8f,1.887tests/40suites y lint/formato. Backend no cambió.
+
+Primer intento root de build usó un subcomando no soportado del motor (EXIT2, ee17fa), conservado en history_build_final.log; no falló código. Se ejecutó el comando configurado node scripts/project.mjs build:17127EXIT0/80876c, log history_build_verified.log SHA005094941DA4497848A181F95819682953BC9058F1DCCBD408EEEF1A1C1CFC3E. Después del CSS de UX se repitió build frontend y formato focal,2b7d6eEXIT0.
+
+Fix de foco342f51b y CSS/primerUX372adba integrados. C continúa UX desde su equivalente1e751d8, sin tocar fuentes durante campañas. A inició PIT68186 tras375hashes idénticos9e41dd;12patrones completos y configuración revisada714c12. B inició Stryker56475 tras refrescar metadata para History539B…D8500 y capturar136inputs;741mutantes instrumentados, dry-run verde. Ningún score final se atribuye todavía.
+
+Root inició publisher99577, log history_publisher_verified.log, con stack/puerto efímeros propios. No usa18080 de C ni8080 del usuario. Es la regresión heredada exigida por CI, no un nuevo evento de Historial. No hay otros procesos root activos. El E2E global final espera el último paquete UX de C y la estabilidad del corte.
+
+## Campañas originales terminadas; cierre dirigido
+
+PIT18 terminó EXIT0 f7a179:284 mutantes,263 KILLED,19 SURVIVED y2 NO_COVERAGE; cero errores/timeouts. Root contó XML original793979 y revisó residuos ad1db1. Stryker18 terminó EXIT0 c132ca:741=621Killed+110Survived+7NoCoverage+3RuntimeError. Score oficial621/738=84,1463%; estricto con todos los estados621/741=83,8057%. History.tsx78,33% individual se conserva explícito. Ningún replay se suma a esos originales.
+
+Root autorizó refuerzos test-only acotados: B hasta12 oráculos de forma/DTO/rango/reintento/notas; A seis de página20, vínculoUUID, contexto conjunto, cierre running y dos salidas alcanzables sin cobertura. Ambos deben proponer replay dirigido antes de lanzarlo; no campaña completa repetida ni cambios productivos.
+
+Publisher99577 terminó EXIT0 66a983,13PASS. Log history_publisher_verified.log SHA5AE112227DB7524F6834A71A8D85BCE7566271FB4F53526DD19BBE62B2D57E0A. C completa geometría/axe WebKit mediante clic declarando que el port Windows no acreditó teclado de enlaces; teclado Chromium/Firefox y zoom nativo tienen evidencia separada. No se fabrica un resultado universal. E2E global final aún pendiente; root sin proceso activo.
+
+## Integración final18 en ejecución
+
+Último UX de C integrado8092443, cuatro hashes verificados3897b6 y141 artefactos copiados con SHA idéntico50cac4. Revisión root review_history_ux_final.md y trazabilidad review_history_traceability_final.md aceptadas con límites explícitos:39escenarios/142ejemplos,495medidas/27axe en evidencia compuesta; tecladoWebKitWindows y dispositivos físicos no acreditados.
+
+Root inició E2E global31187, log history_e2e_global_final.log, sobre producto final8092443; los agentes sólo modifican refuerzos de tests/configuraciones de replay, sin producción. Backend replay90185 sigue activo. Frontend replay38642 terminóEXIT0:33=32K1S,17/17objetivosK y15extrasK,unextraSurvived con contador decremental observacionalmente equivalente; mapping comprobado por rootb00293.137inputs idénticos y raworiginal intacto. PaqueteB versionadocebebeb. B repite una vez la regresión frontend completa con los12refuerzos y últimoCSS, lint/build; no mutación adicional.
+
+La estimación vigente es2–4horas de software desde los hitos comprobados al terminar campañas originales, más4–8condicionales de despliegue; ver docs/mvp-delivery-plan.md. PR17 continúa borrador/OPEN/CLEAN ymain mantieneCIverde34101887939 (020b1e). No nuevafeature ni despliegue ejecutados.
+
+## Historial18 cerrado técnicamente en local
+
+Init de cierre33489 EXIT0 0b3990:2.217Java/93suites sin fallos/errores/omitidos,1.899frontend/40suites y47Node. XML preservado history_closure_backend_xml y contadoa695bb; logSHAFC2006AFBC2135CBE0435BC2E08A5B0813E2576562F2646B1CC1E91200656972. E2Eglobal31187 EXIT0 2c5d89,129/129 en13,4min; logSHAF54A994AE897C22A1E4F842287DFCD218C728435BE518F6FE91D667E08DA279C. Ambos procesos terminados; ningún rootrunner activo.
+
+ReplayA EXIT0 3a2a66:17=15K2S; seisobjetivosK y376inputs idénticos, root551477. PaqueteA integrado18e19fb. Backend/UI/HTTP/UX, trazabilidad y ambos replays aprobados; judge_history_final.md consolida el cierre local con límites. Feature18 done técnico local;19–30pending. Pendientes publicar corte final, CI/fusión/CIposterior y despliegue condicionado; no se atribuyen resultados remotos futuros. La estimación para integraciónremota es1–2horas y despliegue4–8adicionales, según plan actualizado.

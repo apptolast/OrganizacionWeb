@@ -195,10 +195,12 @@
       "id": 18,
       "name": "history",
       "title": "Historial",
-      "description": "Historial: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
-      "acceptance": [],
+      "description": "Consultar hechos propios durables con filtros, paginación y detalles históricos sin confundir planificación con trabajo realizado.",
+      "acceptance": [
+        "Cumplir los escenarios @s1–@s39 de features/history.feature con revisión, pruebas y mutación."
+      ],
       "sdd": true,
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": 19,

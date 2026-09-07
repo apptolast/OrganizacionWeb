@@ -262,7 +262,7 @@ export async function readBlockChanges(
   return page;
 }
 
-function isChange(
+export function isChange(
   value: unknown,
   projectId: string,
   taskId: string,

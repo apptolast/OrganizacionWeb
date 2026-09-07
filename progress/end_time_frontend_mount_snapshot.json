@@ -1,0 +1,58 @@
+[
+  {
+    "sha256": "A7BD65AA29827DE31BE60286C528E55710ACA53F2A968C4B11F6454D267CFCE6",
+    "path": "frontend/src/work-session-end-api.ts"
+  },
+  {
+    "sha256": "2498D8174C1C35B0FD09291C2D6F7FB3C441118FC33FD3977FAF93BD68127F19",
+    "path": "frontend/src/work-session-end-api.test.ts"
+  },
+  {
+    "sha256": "929352B95B730B05D62F6C578541AC61D4F98C3A84B75CEC8F2C2F0B5B6CFAB8",
+    "path": "frontend/src/work-session-state-api.ts"
+  },
+  {
+    "sha256": "F7B72E82E722114EA02237B344CD82EE5BB0F9C3CB831AA96B766361EBF191C7",
+    "path": "frontend/src/work-session-state-api.test.ts"
+  },
+  {
+    "sha256": "73A4080426664BF3D02CBB10EBA232A0E07D9D66356DC3946C857698E535DE44",
+    "path": "frontend/src/work-session-end.tsx"
+  },
+  {
+    "sha256": "652DC75718012A11FFB79872962CF9BE8EF2DFB1B319E9D46BE5D5A3CA434BD6",
+    "path": "frontend/src/work-session-end.test.tsx"
+  },
+  {
+    "sha256": "A17E547AE2CF14CE074B8BD4C51EF32592573837F5C56D213FCDC2CC2FF8060B",
+    "path": "frontend/src/use-work-session-decision.ts"
+  },
+  {
+    "sha256": "DC08F965BB101F67A565E626B9DDBF2CEF9C3716BA4A5D2F1EE6B18174CB1BB4",
+    "path": "frontend/src/use-work-session-decision.test.tsx"
+  },
+  {
+    "sha256": "3EBB7CDAC83986BC0A55FD2423B8BAC67A570F2E8035E0846E1E73E6DFCE2ACD",
+    "path": "frontend/src/work-session-state.tsx"
+  },
+  {
+    "sha256": "37C5B049F57D647231CF4CCF49E45D09D76C70E598ADFBFD0491A766CFB49180",
+    "path": "frontend/src/work-session-state.test.tsx"
+  },
+  {
+    "sha256": "113D20EADD6313AEB590235EA86D1E13B79F17A518E7C5841C40BDD42AEE3E7D",
+    "path": "frontend/src/work-session.tsx"
+  },
+  {
+    "sha256": "C80AB50632093BF88F253638CF34847AF247AEA609D7100DF87E3FB23589A50A",
+    "path": "frontend/src/work-session.test.tsx"
+  },
+  {
+    "sha256": "9AAA005BD7AE967A102B3B2FDED93039BF00158E06EB30DD1DA6E39D1799A77E",
+    "path": "frontend/src/work-session-reader.tsx"
+  },
+  {
+    "sha256": "E56AD2076EDFE15AA003835E7D437CE38565A93B2AD0673836A19C43F36DA5F1",
+    "path": "frontend/src/work-session-reader.test.tsx"
+  }
+]

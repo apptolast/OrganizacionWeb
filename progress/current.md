@@ -55,3 +55,9 @@ Panel corregido aprobado por A después de los tres hallazgos: seis hashes verif
 Smoke17 final ac63df EXIT0,13 PASS, revisado por root932596/fb1437:249 hashes actuales y before/after iguales. Ahora acredita en un recorrido originalEXTEND, segundaEXTEND, CLOSE, reinicioAPI, recuperación originalC/K y replay sin escrituras, además de Rabbit reiniciado y evento original persistente/quorum12. Commit aislado133572c incorporado como5998c54. Primera ejecución abierta y su evidencia se conservan separadas. No hay smoke activo ni E2E activo; C prepara plan de evidencia17 mientras espera montaje íntegro.
 
 PIT root24839 continúa activo, backend congelado. A queda disponible para revisar el montaje final; B posee los deltas frontend.17 continúa in_progress,18 pendiente; no despliegue ni nueva PR parcial.
+
+## PIT concluido y navegador en paralelo, 08:56
+
+PIT17 root24839 terminó EXIT0 b598f3:38m55s,620 mutantes,616K/4NO_COVERAGE, sin supervivientes ni errores. Score616/620=99,3548387 %. Rootb5b17b verificó348 entradas antes/después idénticas y preservó XML en progress/end_time_pit_final/mutations.xml, SHA5006D78E0A06DED7B153EC1E6480E5CD4703704ED5ABBB978B8A8275487FC681. A analiza los cuatro residuos sin reclasificar el resultado original; no otra campaña activa.
+
+B entregó snapshot nominal de14fuentes/tests,158 focales verdes20f336,lint/tipos/formato. Root d795f6 comprobó/copió exactamente el manifiesto end_time_frontend_mount_snapshot.json al aislado C. C ejecuta primer E2E real sobre ese corte; B continúa exclusivamente COMMON con casos de cierre externo, conservación del recibo y validación de contexto. El snapshot nominal no se declara cierre frontend ni gate global. Aprobación parcial del montaje Task en review_end_time_task_mount.md.

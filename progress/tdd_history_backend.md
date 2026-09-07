@@ -118,3 +118,22 @@ Mapa compacto de evidencia ejecutada (prefijos s corresponden a métodos de Hist
 No se añadieron tabla, migración, índice, Clock ni consumidor. Los 39 escenarios y 142 ejemplos contractuales no equivalen al número de pruebas. El paquete queda listo para revisión; init/build global, mutación, UX/E2E y CI se acreditan por separado, sin declarar feature terminada.
 
 Formato real y regresión focal final: EXIT 0, 12c2e4 (28 s). Se preservan seis XML, 163/163: 52 PG consultas, 4 PG transacción, 3 aplicación, 22 wiring, 7 configuración y 75 HTTP de C; cero fallos, errores u omitidos. Manifiesto de 14 archivos y XML en progress/history_backend_final_manifest.json. El corte anterior de 162 precedía exclusivamente al oráculo JSON null. Fuentes y tests congelados; no más Gradle por este autor hasta coordinación root.
+
+## Refuerzos posteriores a PIT original — seis oráculos autorizados
+
+No cambios de producción. Cada oráculo se añadió y ejecutó individualmente; todos fueron inicialmente GREEN sobre fuente original. El contraste rojo pendiente será la medición dirigida, no se inventa RED funcional.
+
+| Caso | Resultado inicial | Firma original objetivo |
+| --- | --- | --- |
+| ReadHistoryTest.s6_exactlyTwentyFactsHaveNoNextCursor | 28c4a5 | ReadHistory.list:15 Boundary |
+| HistoryQueriesPersistenceTest.s17_afterUuidCannotExceedUpperAtEqualTimeAndFamily | dc6518 | PostgresHistoryQueries.lambda$compare$1:215 Empty |
+| s23_coherentSnapshotContextCannotOverrideDurableTask | 8b6d08 | sessionContext:229 BooleanTrue |
+| s1_runningCloseRetainsItsPositiveFinalInterval | eb5542 | validTransition:286 Math |
+| s23_extensionPreviousEndCannotPrecedeOriginalPlannedEnd | 443164 | validTransition:258 BooleanTrue, NC original |
+| s23_unknownDurableActionAndReceiptRemainUnavailable | cb6886 | validTransition:300 BooleanTrue, NC original |
+
+Incidente de preparación 1e889e: ruta relativa con backend duplicado impidió escribir el primer test y el filtro no encontró tests. No fue RED funcional; corregida la ruta, primer resultado real 28c4a5.
+
+El contexto corrupto cambia el mismo taskId conjuntamente en before y after, sin modificar sessionId ni metadata durable: evita que la igualdad del after haga de oráculo sustituto. CLOSE utiliza RESUME real seguido de CLOSE 500000 microsegundos después: el acumulado leído es 1500000. Extensión corrupta fija previousEnd exactamente un microsegundo antes del plannedEnd y conserva fórmula de effectiveEnd coherente, aislando el guard. UNKNOWN modifica action SQL y JSON conjuntamente; no es una operación soportada ni se crea sesión imposible.
+
+Formato real y regresión focal 486504 EXIT0, 19s: 61/61 (57 PG y 4 aplicación), cero fallos. XML en progress/history_reinforcement_xml; dos hashes en history_reinforcement_freeze.json. Comparación de los 375 inputs originales b46c66: sólo cambiaron esos dos tests. Los 284 resultados originales, sus 19S/2NC y hashes quedan intactos; ningún replay iniciado.

@@ -1,0 +1,74 @@
+[
+  {
+    "path": "progress/history_pit_final/com.apptolast.organization.adapter.config/ApplicationConfiguration.java.html",
+    "sha256": "BA5791BF94C50D382B6B52C831D222188D01D7B1B7D2FAE5C7B8B6958D359F68"
+  },
+  {
+    "path": "progress/history_pit_final/com.apptolast.organization.adapter.config/index.html",
+    "sha256": "DCD5E1042E83EC33885DBB6FC3D16DAD5C1F9E8E5766D8601F163FA42A97FE89"
+  },
+  {
+    "path": "progress/history_pit_final/com.apptolast.organization.adapter.http/HistoryController.java.html",
+    "sha256": "295158B85C31F0AD148C86B137E816FE4608059B31C46EE49C73FE394DE73A26"
+  },
+  {
+    "path": "progress/history_pit_final/com.apptolast.organization.adapter.http/HistoryCursorCodec.java.html",
+    "sha256": "8F84FECF20BA233A81C0EE34BBC361B9394EED8A05AA94B1D1443EB23B2A814A"
+  },
+  {
+    "path": "progress/history_pit_final/com.apptolast.organization.adapter.http/index.html",
+    "sha256": "AA7948F73A1A22CE5A9A65A8C8930BFA4451D120F7DB488073E0DEAB08F318C2"
+  },
+  {
+    "path": "progress/history_pit_final/com.apptolast.organization.adapter.persistence/index.html",
+    "sha256": "14F7C762DACCB4D8F79E69712FF636CBDC23F7DBE305999E3889C32CE483B705"
+  },
+  {
+    "path": "progress/history_pit_final/com.apptolast.organization.adapter.persistence/PostgresHistoryQueries.java.html",
+    "sha256": "4A608BD0C16279D63C67B1759F654E17B0857DD048EF700B1B1512C318EC0CA7"
+  },
+  {
+    "path": "progress/history_pit_final/com.apptolast.organization.application/HistoryCursor.java.html",
+    "sha256": "37D6F8417E77F2CFCC54B1CA364A400CD0FE4FFE897D73CC57CB1301E9B4646C"
+  },
+  {
+    "path": "progress/history_pit_final/com.apptolast.organization.application/HistoryEntry.java.html",
+    "sha256": "9726F0845A14020B9698EFD2DB5F52A55EC51D6580B41A88EA3E3519D9080E1D"
+  },
+  {
+    "path": "progress/history_pit_final/com.apptolast.organization.application/HistoryFilters.java.html",
+    "sha256": "BEA229D55F7C157485D7207BDAC677853322FC45CFC3C344C04D2AD532C71F93"
+  },
+  {
+    "path": "progress/history_pit_final/com.apptolast.organization.application/HistoryPage.java.html",
+    "sha256": "122B636207BD45B90CEF73390F6527287A65B121E13976EC0BF5C3C2B5BA9E57"
+  },
+  {
+    "path": "progress/history_pit_final/com.apptolast.organization.application/HistoryPosition.java.html",
+    "sha256": "8BEA1E9C645F4670C40F5D1B94F3448A8F1B898E492B0864E6DC7F22C383A249"
+  },
+  {
+    "path": "progress/history_pit_final/com.apptolast.organization.application/index.html",
+    "sha256": "4B6DD11F49136675FF292B97BFE92F6AB621183C763957EAF0F7EC5169A66338"
+  },
+  {
+    "path": "progress/history_pit_final/com.apptolast.organization.application/ReadHistory.java.html",
+    "sha256": "1DAA31E57AF5668B3D49826ECC96DBAC66A529CBF3BA7D7812AAD41C4C8D316E"
+  },
+  {
+    "path": "progress/history_pit_final/history_pit.log",
+    "sha256": "F186369DB9C2B446232FAF09D64CCDC0AA143EAAC9986753F8F92906341D986D"
+  },
+  {
+    "path": "progress/history_pit_final/index.html",
+    "sha256": "D6A521BFA2900028E7084946F7E10EF81014555FE852CAE7BD3D0CD45D1F023F"
+  },
+  {
+    "path": "progress/history_pit_final/mutations.xml",
+    "sha256": "D8E242C11763F095BDEAA23167184E4C77C441D3D430E74D285F0E08397610D5"
+  },
+  {
+    "path": "progress/history_pit_final/style.css",
+    "sha256": "78EA37FB78E124ACD62B472B0DBDB1F80176D8B4C3353411668797FBF3DB7976"
+  }
+]

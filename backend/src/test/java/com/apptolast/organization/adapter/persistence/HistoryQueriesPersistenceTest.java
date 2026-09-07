@@ -1511,4 +1511,129 @@ class HistoryQueriesPersistenceTest {
                     .list("owner", new HistoryFilters(null, null, null, null, null), null))
         .isInstanceOf(StorageUnavailableException.class);
   }
+
+  @Test
+  void s17_afterUuidCannotExceedUpperAtEqualTimeAndFamily() {
+    var block = plannedBlock();
+    var filters = new HistoryFilters(null, project, task, null, null);
+    var upper = new HistoryPosition(block.createdAt(), "BLOCK_PLANNED", new UUID(0, 1));
+    var after =
+        new HistoryPosition(
+            block.createdAt(),
+            "BLOCK_PLANNED",
+            UUID.fromString("ffffffff-ffff-ffff-ffff-ffffffffffff"));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", filters, new HistoryCursor("owner", filters, upper, after)))
+        .isInstanceOf(com.apptolast.organization.domain.ValidationException.class);
+  }
+
+  @Test
+  void s23_coherentSnapshotContextCannotOverrideDurableTask() throws Exception {
+    fiveFamilyHistory();
+    var otherTask = UUID.randomUUID().toString();
+    jdbc.update(
+        "UPDATE work_session_changes SET receipt=jsonb_set(jsonb_set(receipt,'{before,session,taskId}',to_jsonb(?::text)),'{after,session,taskId}',to_jsonb(?::text))",
+        otherTask,
+        otherTask);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s1_runningCloseRetainsItsPositiveFinalInterval() throws Exception {
+    fiveFamilyHistory();
+    var id = jdbc.queryForObject("SELECT id FROM work_sessions", UUID.class);
+    var store =
+        new PostgresWorkSessionStore(
+            jdbc,
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                jdbc.getDataSource()),
+            json);
+    var at = Instant.parse("2026-09-07T10:00:05.123456Z");
+    new ChangeWorkSession(
+            store, java.time.Clock.fixed(at.minusMillis(500), java.time.ZoneOffset.UTC))
+        .resume("owner", id, UUID.randomUUID(), new WorkSessionRevision(id, 2));
+    var receipt =
+        new ChangeWorkSession(store, java.time.Clock.fixed(at, java.time.ZoneOffset.UTC))
+            .close(
+                "owner",
+                id,
+                UUID.randomUUID(),
+                new WorkSessionRevision(id, 3),
+                new com.apptolast.organization.domain.WorkSessionCloseNotes(
+                    "Nota\ncon avance", "Seguir 🧭"))
+            .receipt();
+    assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events", Integer.class))
+        .isEqualTo(2);
+    jdbc.execute("TRUNCATE outbox_events");
+    var rows =
+        new PostgresHistoryQueries(
+                jdbc,
+                new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                    jdbc.getDataSource()),
+                json)
+            .list("owner", new HistoryFilters("sessions", null, null, null, null), null);
+    assertThat(rows).hasSize(4);
+    assertThat(rows.getFirst().details()).isEqualTo(receipt);
+    assertThat(receipt.closure().progressNote()).isEqualTo("Nota\ncon avance");
+    assertThat(receipt.after().workedMicroseconds()).isEqualTo(1500000);
+    assertThat(rows.getLast().details()).isEqualTo(receipt.before().session());
+  }
+
+  @Test
+  void s23_extensionPreviousEndCannotPrecedeOriginalPlannedEnd() throws Exception {
+    fiveFamilyHistory();
+    var id = jdbc.queryForObject("SELECT id FROM work_sessions", UUID.class);
+    var store =
+        new PostgresWorkSessionStore(
+            jdbc,
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                jdbc.getDataSource()),
+            json);
+    new ExtendWorkSession(
+            store,
+            java.time.Clock.fixed(
+                Instant.parse("2026-09-07T10:00:05.123456Z"), java.time.ZoneOffset.UTC))
+        .extend("owner", id, UUID.randomUUID(), new WorkSessionRevision(id, 2), 5);
+    jdbc.update(
+        "UPDATE work_session_changes SET receipt=jsonb_set(jsonb_set(receipt,'{extension,previousEndAt}',to_jsonb('2026-09-07T10:25:03.123455Z'::text)),'{extension,effectiveEndAt}',to_jsonb('2026-09-07T10:30:03.123455Z'::text)) WHERE action='EXTEND'");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s23_unknownDurableActionAndReceiptRemainUnavailable() throws Exception {
+    fiveFamilyHistory();
+    jdbc.update(
+        "UPDATE work_session_changes SET action='UNKNOWN',receipt=jsonb_set(receipt,'{action}',to_jsonb('UNKNOWN'::text))");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
 }

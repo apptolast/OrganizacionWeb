@@ -124,4 +124,29 @@ class ReadHistoryTest {
     assertThat(page.items()).isEqualTo(rows.subList(0, 20));
     assertThat(page.next().after().id()).isEqualTo(rows.get(19).id());
   }
+
+  @Test
+  void s6_exactlyTwentyFactsHaveNoNextCursor() {
+    var queries = mock(HistoryQueries.class);
+    var filters = new HistoryFilters(null, null, null, null, null);
+    var at = Instant.parse("2026-09-07T10:00:00Z");
+    List<HistoryEntry<?>> rows =
+        java.util.stream.IntStream.range(0, 20)
+            .<HistoryEntry<?>>mapToObj(
+                n ->
+                    new HistoryEntry<>(
+                        new UUID(0, n + 1),
+                        "TASK_STATUS_CHANGED",
+                        at.minusSeconds(n),
+                        UUID.randomUUID(),
+                        "P",
+                        UUID.randomUUID(),
+                        "T",
+                        "detail"))
+            .toList();
+    when(queries.list("owner", filters, null)).thenReturn(rows);
+    var page = new ReadHistory(queries).list("owner", filters, null);
+    assertThat(page.items()).containsExactlyElementsOf(rows);
+    assertThat(page.next()).isNull();
+  }
 }

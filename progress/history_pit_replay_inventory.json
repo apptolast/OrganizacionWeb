@@ -1,0 +1,172 @@
+[
+  {
+    "target": true,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "lambda$compare$1",
+    "line": 215,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": "6",
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest]/[method:s17_afterUuidCannotExceedUpperAtEqualTimeAndFamily()]"
+  },
+  {
+    "target": false,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "list",
+    "line": 29,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": "13",
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest]/[method:s11_firstSupportedUtcYearSurvivesPostgresAndDateFiltering()]"
+  },
+  {
+    "target": true,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "sessionContext",
+    "line": 229,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "indexes": "44",
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest]/[method:s23_coherentSnapshotContextCannotOverrideDurableTask()]"
+  },
+  {
+    "target": false,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 256,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": "54",
+    "status": "SURVIVED",
+    "killingTest": ""
+  },
+  {
+    "target": false,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 257,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": "60",
+    "status": "SURVIVED",
+    "killingTest": ""
+  },
+  {
+    "target": false,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 272,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.MathMutator",
+    "indexes": "137",
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest]/[method:s1_extensionIsItsOwnFactAndPreservesTheOriginalStart()]"
+  },
+  {
+    "target": true,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 286,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.MathMutator",
+    "indexes": "221",
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest]/[method:s1_runningCloseRetainsItsPositiveFinalInterval()]"
+  },
+  {
+    "target": false,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 295,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.MathMutator",
+    "indexes": "250",
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest]/[method:s1_runningCloseRetainsItsPositiveFinalInterval()]"
+  },
+  {
+    "target": false,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 310,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.MathMutator",
+    "indexes": "342",
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest]/[method:s1_readsADurablePauseAlongsideItsOriginalStart()]"
+  },
+  {
+    "target": false,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 319,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.MathMutator",
+    "indexes": "381",
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest]/[method:s1_readsADurablePauseAlongsideItsOriginalStart()]"
+  },
+  {
+    "target": false,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 248,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "indexes": "9",
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest]/[method:s23_negativeBeforeWorkedTimeCannotHideBehindAConsistentSum()]"
+  },
+  {
+    "target": true,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 258,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "indexes": "74",
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest]/[method:s23_extensionPreviousEndCannotPrecedeOriginalPlannedEnd()]"
+  },
+  {
+    "target": false,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 265,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "indexes": "163",
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest]/[method:s23_extensionCannotChangeTheWorkStateTimestamp()]"
+  },
+  {
+    "target": false,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 287,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "indexes": "270",
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest]/[method:s23_closeFromPausedCannotIncreaseTheFinalWorkedTime()]"
+  },
+  {
+    "target": true,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 300,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "indexes": "286",
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest]/[method:s23_unknownDurableActionAndReceiptRemainUnavailable()]"
+  },
+  {
+    "target": false,
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 311,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "indexes": "412",
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest]/[method:s23_resumeReceiptCannotCountThePauseAsWorkedTime()]"
+  },
+  {
+    "target": true,
+    "class": "com.apptolast.organization.application.ReadHistory",
+    "method": "list",
+    "line": 15,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": "28",
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.application.ReadHistoryTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadHistoryTest]/[method:s6_exactlyTwentyFactsHaveNoNextCursor()]"
+  }
+]

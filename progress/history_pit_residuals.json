@@ -1,0 +1,317 @@
+[
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "instantInRange",
+    "line": 362,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "description": "replaced boolean return with true for com/apptolast/organization/adapter/persistence/PostgresHistoryQueries::instantInRange",
+    "testsRun": 16,
+    "indexes": [
+      "34"
+    ],
+    "blocks": [
+      "11"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "lambda$compare$1",
+    "line": 215,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "description": "replaced return value with \"\" for com/apptolast/organization/adapter/persistence/PostgresHistoryQueries::lambda$compare$1",
+    "testsRun": 2,
+    "indexes": [
+      "6"
+    ],
+    "blocks": [
+      "2"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "sessionContext",
+    "line": 229,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "description": "replaced boolean return with true for com/apptolast/organization/adapter/persistence/PostgresHistoryQueries::sessionContext",
+    "testsRun": 19,
+    "indexes": [
+      "44"
+    ],
+    "blocks": [
+      "18"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validBefore",
+    "line": 338,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "testsRun": 16,
+    "indexes": [
+      "12"
+    ],
+    "blocks": [
+      "2"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validBefore",
+    "line": 342,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "testsRun": 16,
+    "indexes": [
+      "36"
+    ],
+    "blocks": [
+      "13"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validBefore",
+    "line": 343,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "testsRun": 16,
+    "indexes": [
+      "42"
+    ],
+    "blocks": [
+      "15"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validClosure",
+    "line": 371,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "testsRun": 2,
+    "indexes": [
+      "16"
+    ],
+    "blocks": [
+      "5"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validClosure",
+    "line": 372,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "testsRun": 2,
+    "indexes": [
+      "23"
+    ],
+    "blocks": [
+      "8"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 256,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "testsRun": 2,
+    "indexes": [
+      "54"
+    ],
+    "blocks": [
+      "17"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 257,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "testsRun": 2,
+    "indexes": [
+      "60"
+    ],
+    "blocks": [
+      "19"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 286,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.MathMutator",
+    "description": "Replaced long addition with subtraction",
+    "testsRun": 3,
+    "indexes": [
+      "221"
+    ],
+    "blocks": [
+      "69"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 251,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "description": "removed call to com/apptolast/organization/domain/WorkSessionState::requireClose",
+    "testsRun": 2,
+    "indexes": [
+      "28"
+    ],
+    "blocks": [
+      "9"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 252,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "description": "removed call to com/apptolast/organization/domain/WorkSessionState::requireTime",
+    "testsRun": 2,
+    "indexes": [
+      "34"
+    ],
+    "blocks": [
+      "11"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 264,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "description": "removed call to com/apptolast/organization/domain/WorkSessionState::requireTime",
+    "testsRun": 2,
+    "indexes": [
+      "110"
+    ],
+    "blocks": [
+      "35"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 279,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "description": "removed call to com/apptolast/organization/domain/WorkSessionState::requireClose",
+    "testsRun": 3,
+    "indexes": [
+      "182"
+    ],
+    "blocks": [
+      "57"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 280,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "description": "removed call to com/apptolast/organization/domain/WorkSessionState::requireTime",
+    "testsRun": 3,
+    "indexes": [
+      "188"
+    ],
+    "blocks": [
+      "59"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 303,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "description": "removed call to com/apptolast/organization/domain/WorkSessionState::requireTransition",
+    "testsRun": 12,
+    "indexes": [
+      "306"
+    ],
+    "blocks": [
+      "95"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 304,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "description": "removed call to com/apptolast/organization/domain/WorkSessionState::requireTime",
+    "testsRun": 12,
+    "indexes": [
+      "312"
+    ],
+    "blocks": [
+      "97"
+    ]
+  },
+  {
+    "status": "NO_COVERAGE",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 258,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "description": "replaced boolean return with true for com/apptolast/organization/adapter/persistence/PostgresHistoryQueries::validTransition",
+    "testsRun": 0,
+    "indexes": [
+      "74"
+    ],
+    "blocks": [
+      "25"
+    ]
+  },
+  {
+    "status": "NO_COVERAGE",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresHistoryQueries",
+    "method": "validTransition",
+    "line": 300,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "description": "replaced boolean return with true for com/apptolast/organization/adapter/persistence/PostgresHistoryQueries::validTransition",
+    "testsRun": 0,
+    "indexes": [
+      "286"
+    ],
+    "blocks": [
+      "90"
+    ]
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.application.ReadHistory",
+    "method": "list",
+    "line": 15,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "testsRun": 7,
+    "indexes": [
+      "28"
+    ],
+    "blocks": [
+      "5"
+    ]
+  }
+]

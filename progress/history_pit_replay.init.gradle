@@ -1,0 +1,19 @@
+// Directed history18 replay; original scope and report remain unchanged.
+allprojects {
+    afterEvaluate { project ->
+        def pit = project.extensions.findByName('pitest')
+        if (pit != null) {
+            pit.targetClasses.set([
+                'com.apptolast.organization.application.ReadHistory',
+                'com.apptolast.organization.adapter.persistence.PostgresHistoryQueries'
+            ] as Set)
+            pit.mutators.set(['CONDITIONALS_BOUNDARY', 'EMPTY_RETURNS', 'TRUE_RETURNS', 'MATH'] as Set)
+            pit.excludedMethods.set([
+                'equals', 'hashCode', 'toString', '<init>', 'blockContext', 'compare',
+                'instantInRange', 'lambda$compare$0', 'lambda$list$0', 'lambda$read$0',
+                'position', 'rank', 'read', 'sameFact', 'sourceMatches', 'validBefore', 'validClosure'
+            ] as Set)
+            pit.reportDir.set(project.layout.buildDirectory.dir('reports/pitest-history-replay'))
+        }
+    }
+}

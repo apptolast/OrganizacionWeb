@@ -962,3 +962,72 @@ test("start work replay limits PIT to its event record without replacing the ori
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
 });
+
+test("history backend invokes only its fixed PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "history-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=history"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
+test("history PIT includes complete new modules and wiring with all JUnit candidates", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  const selected = build.match(
+    /val historyClasses = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(selected);
+  assert.deepEqual(
+    [...selected.matchAll(/"([^"]+)"/g)].map((entry) => entry[1]),
+    [
+      "application.ReadHistory",
+      "application.ReadHistoryUseCase",
+      "application.HistoryQueries",
+      "application.HistoryEntry",
+      "application.HistoryFilters",
+      "application.HistoryCursor",
+      "application.HistoryPosition",
+      "application.HistoryPage",
+      "adapter.persistence.PostgresHistoryQueries*",
+      "adapter.http.HistoryController*",
+      "adapter.http.HistoryCursorCodec*",
+      "adapter.config.ApplicationConfiguration",
+    ].map((name) => `com.apptolast.organization.${name}`),
+  );
+  assert.match(build, /val historyOnly = scope == "history"/);
+  assert.match(build, /historyOnly -> historyClasses/);
+  assert.match(
+    build,
+    /historyOnly -> setOf\("com\.apptolast\.organization\.\*"\)/,
+  );
+  assert.match(build, /else -> [^\n]+ \+ historyClasses/);
+  assert.match(
+    build,
+    /if \(historyOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-history"\)\)/,
+  );
+  assert.match(build, /mutationThreshold\.set\(80\)/);
+  assert.match(build, /threads\.set\(4\)/);
+});
+
+test("default PIT exposes history adapter tests for the newly selected classes", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  const selected = build.match(
+    /val historyAdapterTests = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(selected);
+  assert.deepEqual(
+    [...selected.matchAll(/"([^"]+)"/g)].map((entry) => entry[1]),
+    [
+      "com.apptolast.organization.adapter.HistoryApiTest",
+      "com.apptolast.organization.adapter.persistence.History*Test",
+    ],
+  );
+  assert.match(
+    build,
+    /else -> core \+ authenticationTests[^\n]+ \+ historyAdapterTests/,
+  );
+});

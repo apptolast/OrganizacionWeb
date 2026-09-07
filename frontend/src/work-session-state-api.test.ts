@@ -881,3 +881,18 @@ it("@s16 accepts an unchanged replay receipt at HTTP200", async () => {
     changeWorkSession({ state, token, key, action: "PAUSE" }),
   ).resolves.toEqual(receipt);
 });
+
+it("@s32 rejects an internally valid opposite action recovered for the retained key", async () => {
+  const before = { ...state, status: "paused", runningSince: null };
+  const after = {
+    ...state,
+    revision: "2",
+    changedAt: snapshot.serverNow,
+    runningSince: snapshot.serverNow,
+  };
+  const result = { ...receipt, action: "RESUME", before, after };
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(result)));
+  await expect(
+    recoverWorkSessionChange({ state, token, key, action: "PAUSE" }),
+  ).rejects.toThrow("Cambio de sesión inválido");
+});

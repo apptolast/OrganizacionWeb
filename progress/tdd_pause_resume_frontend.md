@@ -171,3 +171,14 @@ Reportes propios `reports/mutation-pause-resume-session/mutation.json`/`mutation
 ## Delta de revisión root antes de navegador completo
 
 Hallazgo de espera533026 reproducido con snapshot existente → refresh503 → reintentoGET diferido: nuevo UI33 REDdee656 → GREEN9e23ec. El reintento ahora activa loading. Variante de la misma espera tras recuperar un recibo: ampliación del caso30 con GETstate diferido produjo REDc0ddd0 porque conservaba error del refresco anterior; mínimo limpia ese error y activa loading al confirmar antes de consultar. GREENbb708e33/33. Formato, ESLint y tipos29c10b verdes. Nuevo freeze: panel SHA4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599; test C203284CCE4FF7F5C5664D840C5ABD4946ACE7DA27451AD379254B90908F9046. El resto de hashes de producto permanece igual. La próxima imagen E2E incorpora este delta; no se repite smoke backend por un cambio exclusivamente frontend.
+
+## Refuerzo acotado tras mutación original
+
+Dos oráculos adicionales, introducidos y ejecutados uno a uno; no se modificó producción ni se ejecutó mutación. El resultado original de861 mutantes permanece independiente de este refuerzo.
+
+1. Panel @s32: POST incierto seguido de GET por key con503 y problema desconocido. La incertidumbre permanece, Comprobar sigue disponible y no aparece Reenviar ni Pausar; se verifica key retenida y exactamente un POST. Primera ejecución válida inicialmente GREEN1b3364 (1 nuevo/33 filtrados). Incidente previo04905e: ruta de escritura duplicaba frontend, no se añadió el test y Vitest omitió33 por filtro; no se cuenta como ejecución del nuevo oráculo ni RED.
+2. Cliente @s32: recuperación por key devuelve RESUME internamente coherente frente a intención PAUSE, conservando SessionStart y revisión esperada1. El recibo pasa las relaciones internas de RESUME (paused→running, revisión2, acumulado0, mismo occurredAt/runningSince) y se rechaza por intención opuesta. Primera ejecución inicialmente GREEN69dbcb (1 nuevo/47 filtrados). No se alteró el recibo para provocar un rechazo trivial de esquema.
+
+Después: Prettier focal c661be EXIT0; ambos archivos completos82/82 GREEN34f600; ESLint focal f6c143 EXIT0; diffcheck c23294 EXIT0. Diff limitado a57 líneas añadidas en los dos tests. No campaña global ni backend Gradle.
+
+Freeze de pruebas: work-session-state.test.tsx SHA25692ABFCB589938D32CAD198AF605BC7B42E9A39BB75BC489C8D87046A36086FC5; work-session-state-api.test.ts SHA256F7B72E82E722114EA02237B344CD82EE5BB0F9C3CB831AA96B766361EBF191C7. Fuentes intactas: panel4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599; API38743D9B82869708BD53C98850DF8C71FAEFB7CD0BE5348519679D8E32AB2FAA. Los IDs candidatos401/409/410 y266/267/269 no se declaran Killed hasta medición independiente.

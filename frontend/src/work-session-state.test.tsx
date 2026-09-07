@@ -1108,3 +1108,45 @@ it("@s37 retry after a failed refresh announces the next lookup while retaining 
     screen.getByRole("button", { name: "Actualizar estado de la sesión" }),
   ).toHaveAttribute("aria-disabled", "true");
 });
+
+it("@s32 a failed by-key check remains uncertain without authorizing resend", async () => {
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(response())
+    .mockResolvedValueOnce(new Response(null, { status: 503 }))
+    .mockResolvedValueOnce(
+      Response.json(
+        {
+          type: "urn:organization:problem:unknown_storage_failure",
+          title: "Consulta no disponible",
+          status: 503,
+          code: "UNKNOWN_STORAGE_FAILURE",
+        },
+        { status: 503 },
+      ),
+    );
+  vi.stubGlobal("fetch", fetcher);
+  render(<WorkSessionStatePanel session={session} onAccessFailure={vi.fn()} />);
+  fireEvent.click(await screen.findByRole("button", { name: "Pausar" }));
+  const check = await screen.findByRole("button", { name: "Comprobar cambio" });
+  const key = fetcher.mock.calls[1][1].headers["Idempotency-Key"];
+  fireEvent.click(check);
+  await waitFor(() => expect(check).toHaveAttribute("aria-disabled", "false"));
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "No podemos confirmar el cambio",
+  );
+  expect(check).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Reenviar cambio" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Pausar" }),
+  ).not.toBeInTheDocument();
+  expect(fetcher).toHaveBeenCalledTimes(3);
+  expect(fetcher.mock.calls[2][0]).toBe(
+    `/api/v1/work-session-changes/by-request/${key}`,
+  );
+  expect(
+    fetcher.mock.calls.filter(([, init]) => init.method === "POST"),
+  ).toHaveLength(1);
+});

@@ -10,6 +10,7 @@ build/
 # Mutación / tests
 .stryker-tmp/
 /frontend/.stryker-tmp-pause-resume-session/
+/frontend/.stryker-tmp-pause-resume-session-replay/
 .coverage
 htmlcov/
 coverage/

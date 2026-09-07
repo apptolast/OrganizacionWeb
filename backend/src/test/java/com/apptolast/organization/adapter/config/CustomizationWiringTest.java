@@ -38,6 +38,36 @@ class CustomizationWiringTest {
   @Autowired JdbcTemplate jdbc;
 
   @Test
+  void s42_realValuesWriteBeanPersistsAnEmptyFirstCollectionWithoutCreatingSchema() {
+    var project = UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'wiring-empty-owner','P','','active',now(),now())",
+        project);
+    var save =
+        context.getBean(com.apptolast.organization.application.SaveCustomFieldValuesUseCase.class);
+    var result =
+        save.save(
+            "wiring-empty-owner",
+            CustomizationScope.PROJECT,
+            project,
+            project,
+            new com.apptolast.organization.domain.CustomFieldValuesRevision(
+                CustomizationScope.PROJECT,
+                project,
+                new com.apptolast.organization.domain.CustomizationRevision(null, 0),
+                new com.apptolast.organization.domain.CustomizationRevision(null, 0)),
+            java.util.List.of());
+    assertThat(result.revision().id()).isNotNull();
+    assertThat(result.revision().version()).isZero();
+    assertThat(result.schema().id()).isNull();
+    assertThat(
+            context
+                .getBean(com.apptolast.organization.application.ReadCustomFieldValuesUseCase.class)
+                .get("wiring-empty-owner", CustomizationScope.PROJECT, project, project))
+        .isEqualTo(result);
+  }
+
+  @Test
   void s10_realValuesReadBeanChecksOwnedEntityAndReturnsAnAbsentSnapshot() {
     var project = UUID.randomUUID();
     jdbc.update(

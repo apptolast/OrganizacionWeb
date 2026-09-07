@@ -167,7 +167,7 @@ class CustomFieldCommandsTest {
   }
 
   @Test
-  void s26_missingDefinitionPrecedesStaleRevisionAndClock() {
+  void s17_missingDefinitionPrecedesStaleRevisionAndClock() {
     var previous =
         new Customization(
             UUID.randomUUID(),

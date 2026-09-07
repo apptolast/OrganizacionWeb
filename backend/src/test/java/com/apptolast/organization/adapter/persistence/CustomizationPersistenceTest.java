@@ -27,6 +27,57 @@ class CustomizationPersistenceTest {
   static DataSourceTransactionManager manager;
 
   @Test
+  void additiveUpgradeFrom19PreservesExistingSchemaBusinessFactsAndAppearance() {
+    var source =
+        new DriverManagerDataSource(
+            postgres.getJdbcUrl() + "?currentSchema=customization_upgrade",
+            postgres.getUsername(),
+            postgres.getPassword());
+    Flyway.configure()
+        .dataSource(source)
+        .schemas("customization_upgrade")
+        .target("19")
+        .load()
+        .migrate();
+    var old = new JdbcTemplate(source);
+    var project = java.util.UUID.randomUUID();
+    old.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'owner-a','Existing','Preserved','idea','2026-09-07T20:00:00Z','2026-09-07T20:00:00Z')",
+        project);
+    old.update(
+        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at) VALUES (?,?,'Existing task','Preserved','pending','2026-09-07T20:00:00Z','2026-09-07T20:00:00Z')",
+        java.util.UUID.randomUUID(),
+        project);
+    old.update(
+        "INSERT INTO appearance_preferences VALUES (?,'owner-a','LIGHT','#0000FF','#00FFFF',3,'2026-09-07T20:00:00Z')",
+        java.util.UUID.randomUUID());
+    var columns =
+        "SELECT table_name,column_name,data_type,is_nullable,column_default FROM information_schema.columns WHERE table_schema='customization_upgrade' AND table_name NOT IN ('flyway_schema_history','customization_preferences','project_custom_field_values','task_custom_field_values') ORDER BY table_name,ordinal_position";
+    var beforeSchema = old.queryForList(columns);
+    var beforeProjects = old.queryForList("SELECT * FROM projects");
+    var beforeTasks = old.queryForList("SELECT * FROM tasks");
+    var beforeAppearance = old.queryForList("SELECT * FROM appearance_preferences");
+    Flyway.configure()
+        .dataSource(source)
+        .schemas("customization_upgrade")
+        .target("20")
+        .load()
+        .migrate();
+    assertThat(old.queryForList(columns)).isEqualTo(beforeSchema);
+    assertThat(old.queryForList("SELECT * FROM projects")).isEqualTo(beforeProjects);
+    assertThat(old.queryForList("SELECT * FROM tasks")).isEqualTo(beforeTasks);
+    assertThat(old.queryForList("SELECT * FROM appearance_preferences"))
+        .isEqualTo(beforeAppearance);
+    for (var table :
+        List.of(
+            "customization_preferences",
+            "project_custom_field_values",
+            "task_custom_field_values",
+            "outbox_events"))
+      assertThat(old.queryForObject("SELECT count(*) FROM " + table, Integer.class)).isZero();
+  }
+
+  @Test
   void s9_twoFirstWritesWaitOnTheOwnerScopeLockBeforeClockAndOnlyOneWins() throws Exception {
     var store =
         new PostgresCustomizationStore(

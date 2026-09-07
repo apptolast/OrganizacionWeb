@@ -1,14 +1,14 @@
 package com.apptolast.organization.adapter.persistence;
 
+import com.apptolast.organization.application.CustomFieldValuesEditing;
 import com.apptolast.organization.application.CustomFieldValuesQueries;
 import com.apptolast.organization.application.CustomizationEditing;
 import com.apptolast.organization.application.CustomizationQueries;
 import com.apptolast.organization.application.StorageUnavailableException;
 import com.apptolast.organization.domain.CustomFieldDefinition;
-import com.apptolast.organization.domain.CustomFieldValue;
 import com.apptolast.organization.domain.CustomFieldValues;
+import com.apptolast.organization.domain.CustomFieldValuesCollection;
 import com.apptolast.organization.domain.Customization;
-import com.apptolast.organization.domain.CustomizationRevision;
 import com.apptolast.organization.domain.CustomizationScope;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +23,10 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 public final class PostgresCustomizationStore
-    implements CustomizationQueries, CustomizationEditing, CustomFieldValuesQueries {
+    implements CustomizationQueries,
+        CustomizationEditing,
+        CustomFieldValuesQueries,
+        CustomFieldValuesEditing {
   private final JdbcTemplate jdbc;
   private final ObjectMapper json;
   private final TransactionTemplate reading;
@@ -78,85 +81,111 @@ public final class PostgresCustomizationStore
     }
   }
 
+  public CustomFieldValues changeValues(
+      String owner,
+      CustomizationScope scope,
+      UUID projectId,
+      UUID entityId,
+      java.util.function.BiFunction<
+              Optional<Customization>,
+              Optional<CustomFieldValuesCollection>,
+              CustomFieldValuesCollection>
+          operation) {
+    return writing.execute(
+        status -> {
+          requireOwned(owner, scope, projectId, entityId);
+          jdbc.query(
+              "SELECT pg_advisory_xact_lock(hashtextextended(?,0))",
+              row -> {},
+              "customization:" + owner + ":" + scope.name());
+          var configuration = select(owner, scope);
+          var previous = selectValues(owner, scope, entityId);
+          var changed = operation.apply(configuration, previous);
+          if (previous.isPresent() && previous.get().equals(changed))
+            return CustomFieldValues.project(scope, entityId, configuration, previous);
+          var table =
+              scope == CustomizationScope.PROJECT
+                  ? "project_custom_field_values"
+                  : "task_custom_field_values";
+          var column = scope == CustomizationScope.PROJECT ? "project_id" : "task_id";
+          try {
+            jdbc.update(
+                "INSERT INTO "
+                    + table
+                    + " (id,owner_id,"
+                    + column
+                    + ",field_values,version,updated_at) VALUES (?,?,?,?::jsonb,?,?) ON CONFLICT (owner_id,"
+                    + column
+                    + ") DO UPDATE SET field_values=EXCLUDED.field_values,version=EXCLUDED.version,updated_at=EXCLUDED.updated_at",
+                changed.id(),
+                owner,
+                entityId,
+                json.writeValueAsString(changed.values()),
+                changed.version(),
+                changed.updatedAt().atOffset(java.time.ZoneOffset.UTC));
+          } catch (com.fasterxml.jackson.core.JsonProcessingException error) {
+            throw new StorageUnavailableException(error);
+          }
+          return CustomFieldValues.project(scope, entityId, configuration, Optional.of(changed));
+        });
+  }
+
   public CustomFieldValues find(
       String owner, CustomizationScope scope, UUID projectId, UUID entityId) {
     return reading.execute(
         status -> {
-          if (!Boolean.TRUE.equals(
-              jdbc.queryForObject(
-                  "SELECT EXISTS(SELECT 1 FROM projects WHERE id=? AND owner_id=?)",
-                  Boolean.class,
-                  projectId,
-                  owner)))
-            throw new com.apptolast.organization.application.ResourceNotFoundException();
-          if (scope == CustomizationScope.TASK
-              && !Boolean.TRUE.equals(
-                  jdbc.queryForObject(
-                      "SELECT EXISTS(SELECT 1 FROM tasks WHERE id=? AND project_id=?)",
-                      Boolean.class,
-                      entityId,
-                      projectId)))
-            throw new com.apptolast.organization.application.ResourceNotFoundException();
+          requireOwned(owner, scope, projectId, entityId);
           var configuration = select(owner, scope);
-          var valuesTable =
-              scope == CustomizationScope.PROJECT
-                  ? "project_custom_field_values"
-                  : "task_custom_field_values";
-          var entityColumn = scope == CustomizationScope.PROJECT ? "project_id" : "task_id";
-          var stored =
-              jdbc
-                  .query(
-                      "SELECT * FROM "
-                          + valuesTable
-                          + " WHERE owner_id=? AND "
-                          + entityColumn
-                          + "=?",
-                      (row, index) -> {
-                        try {
-                          return new StoredValues(
-                              new CustomizationRevision(
-                                  row.getObject("id", UUID.class), row.getLong("version")),
-                              row.getObject("updated_at", OffsetDateTime.class).toInstant(),
-                              json.readValue(
-                                  row.getString("field_values"),
-                                  new TypeReference<java.util.Map<String, Object>>() {}));
-                        } catch (com.fasterxml.jackson.core.JsonProcessingException error) {
-                          throw new StorageUnavailableException(error);
-                        }
-                      },
-                      owner,
-                      entityId)
-                  .stream()
-                  .findFirst();
-          var fields =
-              configuration.map(Customization::customFields).orElse(List.of()).stream()
-                  .filter(CustomFieldDefinition::active)
-                  .map(
-                      field ->
-                          new CustomFieldValue(
-                              field.id(),
-                              field.label(),
-                              field.type(),
-                              stored
-                                  .map(value -> value.values().get(field.id().toString()))
-                                  .orElse(null)))
-                  .toList();
-          return new CustomFieldValues(
-              entityId,
-              scope,
-              configuration
-                  .map(value -> new CustomizationRevision(value.id(), value.version()))
-                  .orElse(new CustomizationRevision(null, 0)),
-              stored.map(StoredValues::revision).orElse(new CustomizationRevision(null, 0)),
-              fields,
-              stored.map(StoredValues::updatedAt).orElse(null));
+          return CustomFieldValues.project(
+              scope, entityId, configuration, selectValues(owner, scope, entityId));
         });
   }
 
-  private record StoredValues(
-      CustomizationRevision revision,
-      java.time.Instant updatedAt,
-      java.util.Map<String, Object> values) {}
+  private void requireOwned(String owner, CustomizationScope scope, UUID projectId, UUID entityId) {
+    if (!Boolean.TRUE.equals(
+        jdbc.queryForObject(
+            "SELECT EXISTS(SELECT 1 FROM projects WHERE id=? AND owner_id=?)",
+            Boolean.class,
+            projectId,
+            owner))) throw new com.apptolast.organization.application.ResourceNotFoundException();
+    if (scope == CustomizationScope.TASK
+        && !Boolean.TRUE.equals(
+            jdbc.queryForObject(
+                "SELECT EXISTS(SELECT 1 FROM tasks WHERE id=? AND project_id=?)",
+                Boolean.class,
+                entityId,
+                projectId)))
+      throw new com.apptolast.organization.application.ResourceNotFoundException();
+  }
+
+  private Optional<CustomFieldValuesCollection> selectValues(
+      String owner, CustomizationScope scope, UUID entityId) {
+    var table =
+        scope == CustomizationScope.PROJECT
+            ? "project_custom_field_values"
+            : "task_custom_field_values";
+    var column = scope == CustomizationScope.PROJECT ? "project_id" : "task_id";
+    return jdbc
+        .query(
+            "SELECT * FROM " + table + " WHERE owner_id=? AND " + column + "=?",
+            (row, index) -> {
+              try {
+                return new CustomFieldValuesCollection(
+                    row.getObject("id", UUID.class),
+                    json.readValue(
+                        row.getString("field_values"),
+                        new TypeReference<java.util.Map<UUID, Object>>() {}),
+                    row.getLong("version"),
+                    row.getObject("updated_at", OffsetDateTime.class).toInstant());
+              } catch (com.fasterxml.jackson.core.JsonProcessingException error) {
+                throw new StorageUnavailableException(error);
+              }
+            },
+            owner,
+            entityId)
+        .stream()
+        .findFirst();
+  }
 
   private Optional<Customization> select(String owner, CustomizationScope scope) {
     return jdbc

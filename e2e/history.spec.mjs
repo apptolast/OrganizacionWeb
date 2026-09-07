@@ -155,7 +155,11 @@ test("history: five durable sources keep their original details after later chan
   const reading = page.waitForResponse(
     (r) => new URL(r.url()).pathname === "/api/v1/history",
   );
+  const appearanceReading = page.waitForResponse(
+    (r) => new URL(r.url()).pathname === "/api/v1/me/appearance",
+  );
   await page.goto("/historial");
+  expect((await appearanceReading).status()).toBe(200);
   const response = await reading;
   expect(response.status(), await response.text()).toBe(200);
   const history = await response.json();
@@ -225,7 +229,10 @@ test("history: five durable sources keep their original details after later chan
       exact: true,
     }),
   ).toBeVisible();
-  expect(requests).toEqual([{ method: "GET", path: "/api/v1/history" }]);
+  expect([...requests].sort((a, b) => a.path.localeCompare(b.path))).toEqual([
+    { method: "GET", path: "/api/v1/history" },
+    { method: "GET", path: "/api/v1/me/appearance" },
+  ]);
   expect(
     sql(
       "SELECT (SELECT count(*) FROM planned_blocks) + (SELECT count(*) FROM block_changes) + (SELECT count(*) FROM task_status_history) + (SELECT count(*) FROM work_sessions) + (SELECT count(*) FROM work_session_changes)",

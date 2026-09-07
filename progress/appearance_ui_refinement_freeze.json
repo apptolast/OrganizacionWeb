@@ -1,0 +1,12 @@
+[
+  {
+    "Algorithm": "SHA256",
+    "Hash": "90D67A1869150DEF406E867A83F3D01ECE2F604C8C86E7F1EB058CF36D7C91CA",
+    "Path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\OrganizacionWeb-backend\\frontend\\src\\appearance.test.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "79B6A9A37A1EC1E646ADDCF3E84E2E6E635DD47E9D05AE00B5A90A0E13BF8FA3",
+    "Path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\OrganizacionWeb-backend\\frontend\\src\\authentication.test.tsx"
+  }
+]

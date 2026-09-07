@@ -168,3 +168,64 @@ C reprodujo RED371ff8 al ampliar texto200% a320CSS: scrollWidth408, inputs/boton
 Tras esa frontera, root autorizó sólo CSS. Se elimina el mínimo intrínseco de las columnas del formulario y muestras (minmax(0,1fr)), se permite encoger inputs y cortar palabras largas dentro de Apariencia. Cuatro declaraciones; sin cambio de color, 44px, TS ni tests. Formato5ecdc6, SCSS SHA54BB0E4339CCBA5FD54451A4F39495C13049D046552969EF0A776BA9D0756DD6. C repetirá el mismo recorrido; resultado todavía pendiente. El manifiesto frontend anterior se conserva como snapshot previo al deltaCSS, no se sobrescribe.
 
 Mismo caso texto200 GREEN380077:24 medidas (2temas,4rutas,3anchos) y8axe sin violaciones;347 entradas idénticasada021. Incluye Apariencia, sesión real, Historial y revisión semanal. Ningún ajuste adicional necesario. A recibe la frontera para lint/build del CSS final; no se repiten2046 tests por este cambio exclusivamente visual. C continúa modalidades/zoom/motores sobre ese mismo producto.
+
+### Refuerzos autorizados después de Stryker original
+
+Sólo appearance.test.tsx y authentication.test.tsx; cinco ciclos, sin cambios
+productivos ni configuración. Se conservan las variantes originales al añadir
+SYSTEM al desmontaje y401 durantePUT al caso de lectura anterior.
+
+1. Cleanup de SYSTEM tras desmontar: eventos antiguos change y visibilitychange
+   no restauran overrides. Dos filas (DARK original ySYSTEM), inicialmenteGREEN
+   0daf01. Objetivos originales441/443.
+2. matchMedia distingue la query contractual de una cadena distinta; el tema
+   visible sigue dark y cambia con su evento. InicialmenteGREEN6ff053. Objetivo412.
+3. GET401 anterior termina mientras PUT permanece pendiente: observeAccess no
+   recibe revocación; después se confirma DARK. Se conserva200 después dePUT.
+   Dos filas inicialmenteGREEN57d42c. Objetivo352.
+4. Selector oscuro: color válido modifica muestra y posterior negro inválido
+   conserva hex/picker, muestra segura, aria-invalid y descripción accesible.
+   Caso existente reforzado, inicialmenteGREEN71a8ee. Objetivos527/620/623/633;
+   el mismo oráculo alcanza el mensaje local642NC, sin nueva fila.
+5. Aviso CSRF del caso heredado identificado por texto exacto y rolealert.
+   Primer intento92e34f falló por consulta global de rolealert ambigua (dos
+   alertas legítimas), no por producto. El conjunto lanzado antes de inspeccionar
+   ese fallo también falla por la misma aserción (f5b962); no cuenta como gate.
+   Consulta precisa del aviso pasa30f271 sin producción. Objetivo705.
+
+Formato/ESLint9673af; conjunto final124/124 (50UI+74auth), EXIT0890d69,
+appearance_ui_refinement_focal_final.log. No global frontend duplicado.
+Comparación contra original:62 archivos src no-test idénticos, b9b2a3.
+Freeze de los dos tests en appearance_ui_refinement_freeze.json:
+appearance.test.tsx90D67A1869150DEF406E867A83F3D01ECE2F604C8C86E7F1EB058CF36D7C91CA;
+authentication.test.tsx79B6A9A37A1EC1E646ADDCF3E84E2E6E635DD47E9D05AE00B5A90A0E13BF8FA3.
+
+Para un único replay coordinado, firmas originales de B:
+- appearance-state.tsx:352 CallExpression68;412 StringLiteral125;
+  441 StringLiteral144;443 StringLiteral145.
+- appearance.tsx:527 ConditionalExpression86;620 Regex193;
+  623 StringLiteral197;633 BooleanLiteral208;642 StringLiteral216.
+- session-gate.tsx:705 StringLiteral36.
+Locations y replacements completos están en el raw preservado, SHA56D3A57C…D60122;
+A debe mapear por firma, no por nuevoID. No se ha ejecutado replay ni se promete
+que todos resultenK antes de medir. Resto de residuosP2 permanece documentado.
+
+### Regresión global de los tres tests reforzados
+
+Única ejecución frontend completa final:2058/44GREEN, EXIT091f538, duración
+40,81s. appearance_refined_global_test.log.119inputs antes/después idénticos
+373ea2; manifiestos appearance_refined_global_before/after.json. No Java,
+build ni mutación repetidos por B.
+
+Lint inicial EXIT1658e55: ESLint pasa, Prettier global identifica únicamente
+appearance-api.test.ts. Esto difiere del pase focal de formato comunicado por
+C; no se atribuye a deriva de dependencias sin evidencia. C cedió sólo formato
+tras preservar119after. Se usó `pnpm --dir frontend exec prettier --write
+src/appearance-api.test.ts`, mismo paquete/config del lint real. Lint completo
+posterior pasa (appearance_refined_global_lint_final.log), sin cambios lógicos.
+
+Freeze119 final appearance_refined_final_freeze.json: único delta respecto a
+la regresión es formato de appearance-api.test.ts, SHA
+F0A6047EB8F93AD8E2BA55593568CC3B1F74CD390D9E71B7F929D73108F2818C.
+Los dos tests B conservan sus hashes del freeze anterior. Se cede la frontera
+para revisión/configuración de un replay dirigido de A; original intacto.

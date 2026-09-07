@@ -366,6 +366,12 @@ it("@s17 CSRF inválido recupera token por decisión y conserva borrador sin rep
   const recover = await screen.findByRole("button", {
     name: "Recuperar acceso",
   });
+  expect(
+    screen.getByText(
+      "La protección de tu sesión necesita renovarse. Recupera el acceso y decide si vuelves a enviar los cambios.",
+      { exact: true },
+    ),
+  ).toHaveAttribute("role", "alert");
   expect(fetcher).toHaveBeenCalledTimes(2);
   expect(screen.getByDisplayValue("Borrador conservado")).toBeVisible();
   fireEvent.click(recover);

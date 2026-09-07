@@ -1,0 +1,21 @@
+{
+  "result": "40/40 initially GREEN; targets are not replay outcomes",
+  "files": [
+    {
+      "path": "frontend/src/appearance-api.test.ts",
+      "sha256": "0F7CED2888606A5A8EB21D1CA3F99FFF5E23090476B1B4FD900EC4D0812E62FF"
+    },
+    {
+      "path": "frontend/src/appearance-api.ts",
+      "sha256": "CEA492E9795510120A4935BD93372CE4F6A27468E2C6B703EA9EF83AE885A23C"
+    },
+    {
+      "path": "progress/tdd_appearance_api_refinement.md",
+      "sha256": "37A8B1E9D896798CCFFBACA301A1129D3D7AB6C1C9BCBBFCB537BC6EAE3A1C80"
+    },
+    {
+      "path": "progress/appearance_api_refinement_targets.json",
+      "sha256": "4EE22EFD7E77E85E6D50CABA678780627352234F5A97F27B863EABD13FBC5F97"
+    }
+  ]
+}

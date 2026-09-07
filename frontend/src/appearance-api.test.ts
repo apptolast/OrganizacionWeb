@@ -1,5 +1,9 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { readAppearance, saveAppearance } from "./appearance-api";
+import {
+  AppearanceValidationError,
+  readAppearance,
+  saveAppearance,
+} from "./appearance-api";
 import { observeAccess, setCsrfToken } from "./api-client";
 
 afterEach(() => {
@@ -15,6 +19,128 @@ const defaults = {
   updatedAt: null,
 };
 const emptyTag = '"appearance:unconfigured"';
+const contrastProblem = {
+  type: "urn:organization:problem:validation_error",
+  title: "Campos inválidos",
+  status: 400,
+  code: "VALIDATION_ERROR",
+  errors: [
+    {
+      field: "accentLight",
+      code: "INSUFFICIENT_CONTRAST",
+      message: "Elige un color con contraste suficiente.",
+    },
+  ],
+};
+it.each([
+  [
+    "mixed",
+    400,
+    {
+      ...contrastProblem,
+      errors: [
+        ...contrastProblem.errors,
+        {
+          field: "alien",
+          code: "INVALID_VALUE",
+          message: "No es un campo de apariencia.",
+        },
+      ],
+    },
+  ],
+  ["status", 503, contrastProblem],
+] as const)(
+  "@s27 refinement keeps an untrusted problem as its original response %s",
+  async (_name, status, body) => {
+    const response = Response.json(body, { status });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
+    await expect(
+      saveAppearance(
+        { theme: "DARK", accentLight: "#FFFFFF", accentDark: "#B7E4C7" },
+        emptyTag,
+      ),
+    ).rejects.toBe(response);
+  },
+);
+it("@s27 refinement preserves a genuine contrast field problem without a signal", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(Response.json(contrastProblem, { status: 400 })),
+  );
+  const error = await saveAppearance(
+    { theme: "DARK", accentLight: "#FFFFFF", accentDark: "#B7E4C7" },
+    emptyTag,
+  ).catch((failure: unknown) => failure);
+  expect(error).toBeInstanceOf(AppearanceValidationError);
+  expect(error).toMatchObject({
+    fields: { accentLight: contrastProblem.errors[0].message },
+  });
+});
+it("@s11 refinement accepts a valid accent with a low nonzero channel", async () => {
+  const value = { ...configured, accentLight: "#0002D0" };
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValue(
+        Response.json(value, { headers: { ETag: configuredTag } }),
+      ),
+  );
+  await expect(readAppearance()).resolves.toEqual({
+    ...value,
+    etag: configuredTag,
+  });
+});
+it.each(["#0000FFsuffix", "#0000FF#0000FF"])(
+  "@s18 refinement rejects a noncanonical HEX %s",
+  async (accentLight) => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          Response.json(
+            { ...configured, accentLight },
+            { headers: { ETag: configuredTag } },
+          ),
+        ),
+    );
+    await expect(readAppearance()).rejects.toThrow(
+      "Respuesta de apariencia inválida",
+    );
+  },
+);
+it("@s18 refinement rejects a configured revision with a trailing token", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json(configured, {
+        headers: { ETag: configuredTag + "suffix" },
+      }),
+    ),
+  );
+  await expect(readAppearance()).rejects.toThrow(
+    "Respuesta de apariencia inválida",
+  );
+});
+it.each([
+  ["light", { ...defaults, accentLight: "#0000FF" }, emptyTag],
+  ["dark", { ...defaults, accentDark: "#00FFFF" }, emptyTag],
+  ["etag", defaults, '"appearance:11111111-1111-1111-1111-111111111111:0"'],
+] as const)(
+  "@s18 refinement rejects incompatible unconfigured %s",
+  async (_name, value, etag) => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(Response.json(value, { headers: { ETag: etag } })),
+    );
+    await expect(readAppearance()).rejects.toThrow(
+      "Respuesta de apariencia inválida",
+    );
+  },
+);
 it("@s28 preserves a PUT conflict for manual recovery instead of confirming it", async () => {
   const response = Response.json(
     { code: "APPEARANCE_CONFLICT" },

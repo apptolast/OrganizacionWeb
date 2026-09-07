@@ -13,8 +13,10 @@ import userEvent from "@testing-library/user-event";
 import { StrictMode } from "react";
 import { App } from "./App";
 import { SessionGate } from "./session-gate";
+import { observeAccess } from "./api-client";
 
 afterEach(() => {
+  observeAccess();
   vi.unstubAllGlobals();
   window.history.replaceState(null, "", "/");
 });
@@ -323,66 +325,98 @@ it("@s25 warns about leaving a draft and restores only confirmed values on Back"
     fetcher.mock.calls.filter(([url]) => url === "/api/v1/me/appearance"),
   ).toHaveLength(1);
 });
-it("@s30 does not let a preceding shared read replace a confirmed save", async () => {
-  let deliver!: (response: Response) => void;
-  const fetcher = vi
-    .fn()
-    .mockResolvedValueOnce(
-      Response.json({ ...stored, theme: "LIGHT" }, { headers: { ETag: tag } }),
-    )
-    .mockReturnValueOnce(
-      new Promise<Response>((resolve) => {
-        deliver = resolve;
-      }),
-    )
-    .mockResolvedValueOnce(
-      Response.json(stored, { headers: { ETag: tag.replace(":0", ":1") } }),
+it.each([200, 401])(
+  "@s30 does not let a preceding shared read replace a confirmed save: %s",
+  async (oldStatus) => {
+    let deliver!: (response: Response) => void;
+    let confirm!: (response: Response) => void;
+    const observer = vi.fn();
+    observeAccess(observer);
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json(
+          { ...stored, theme: "LIGHT" },
+          { headers: { ETag: tag } },
+        ),
+      )
+      .mockReturnValueOnce(
+        new Promise<Response>((resolve) => {
+          deliver = resolve;
+        }),
+      )
+      .mockImplementationOnce(() =>
+        oldStatus === 401
+          ? new Promise<Response>((resolve) => {
+              confirm = resolve;
+            })
+          : Promise.resolve(
+              Response.json(stored, {
+                headers: { ETag: tag.replace(":0", ":1") },
+              }),
+            ),
+      );
+    function SharedConsumer() {
+      const { snapshot, reload, save } = useAppearance();
+      return (
+        <>
+          <output>{snapshot?.theme}</output>
+          <button
+            onClick={() => {
+              void reload().catch(() => {});
+            }}
+          >
+            Consultar
+          </button>
+          <button
+            onClick={() => {
+              void save({
+                theme: "DARK",
+                accentLight: stored.accentLight,
+                accentDark: stored.accentDark,
+              });
+            }}
+          >
+            Guardar
+          </button>
+        </>
+      );
+    }
+    vi.stubGlobal("fetch", fetcher);
+    render(
+      <AppearanceProvider>
+        <SharedConsumer />
+      </AppearanceProvider>,
     );
-  function SharedConsumer() {
-    const { snapshot, reload, save } = useAppearance();
-    return (
-      <>
-        <output>{snapshot?.theme}</output>
-        <button
-          onClick={() => {
-            void reload().catch(() => {});
-          }}
-        >
-          Consultar
-        </button>
-        <button
-          onClick={() => {
-            void save({
-              theme: "DARK",
-              accentLight: stored.accentLight,
-              accentDark: stored.accentDark,
-            });
-          }}
-        >
-          Guardar
-        </button>
-      </>
-    );
-  }
-  vi.stubGlobal("fetch", fetcher);
-  render(
-    <AppearanceProvider>
-      <SharedConsumer />
-    </AppearanceProvider>,
-  );
-  await screen.findByText("LIGHT");
-  await userEvent.click(screen.getByRole("button", { name: "Consultar" }));
-  await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
-  await screen.findByText("DARK");
-  await act(async () => {
-    deliver(
-      Response.json({ ...stored, theme: "LIGHT" }, { headers: { ETag: tag } }),
-    );
-  });
-  expect(screen.getByRole("status")).toHaveTextContent("DARK");
-  expect(document.documentElement.style.colorScheme).toBe("dark");
-  expect(fetcher.mock.calls[1][1].signal.aborted).toBe(true);
-});
+    await screen.findByText("LIGHT");
+    await userEvent.click(screen.getByRole("button", { name: "Consultar" }));
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    if (oldStatus === 401) {
+      await act(async () => deliver(new Response(null, { status: 401 })));
+      expect(observer).not.toHaveBeenCalled();
+      expect(screen.getByRole("status")).toHaveTextContent("LIGHT");
+      await act(async () =>
+        confirm(
+          Response.json(stored, { headers: { ETag: tag.replace(":0", ":1") } }),
+        ),
+      );
+    }
+    await screen.findByText("DARK");
+    if (oldStatus === 200)
+      await act(async () => {
+        deliver(
+          Response.json(
+            { ...stored, theme: "LIGHT" },
+            { headers: { ETag: tag } },
+          ),
+        );
+      });
+    expect(screen.getByRole("status")).toHaveTextContent("DARK");
+    expect(document.documentElement.style.colorScheme).toBe("dark");
+    expect(fetcher.mock.calls[1][1].signal.aborted).toBe(true);
+    expect(observer).not.toHaveBeenCalled();
+  },
+);
 it("@s27 associates a server theme error with its native group and clears it on correction", async () => {
   vi.stubGlobal(
     "fetch",
@@ -788,6 +822,27 @@ it("@s21 synchronizes native color selectors with hexadecimal drafts", async () 
     { target: { value: "#B7E4C7" } },
   );
   expect(dark).toHaveValue("#b7e4c7");
+  fireEvent.change(dark, { target: { value: "#ffffff" } });
+  expect(
+    screen.getByRole("region", { name: "Vista previa oscura" }),
+  ).toHaveStyle({
+    "--accent": "#FFFFFF",
+  });
+  fireEvent.change(dark, { target: { value: "#000000" } });
+  expect(dark).toHaveValue("#000000");
+  const darkField = screen.getByRole("textbox", {
+    name: "Color de acento oscuro",
+  });
+  expect(darkField).toHaveValue("#000000");
+  expect(darkField).toHaveAttribute("aria-invalid", "true");
+  expect(darkField).toHaveAccessibleDescription(
+    "Elige un color con más contraste. La muestra conserva el último color válido.",
+  );
+  expect(
+    screen.getByRole("region", { name: "Vista previa oscura" }),
+  ).toHaveStyle({
+    "--accent": "#FFFFFF",
+  });
   fireEvent.change(light, { target: { value: "#ffffff" } });
   expect(light).toHaveValue("#ffffff");
   expect(
@@ -1192,7 +1247,14 @@ it("@s24 refreshes the system scheme after suspension without polling or writing
 });
 it("@s24 follows a system color-scheme change without persisting another preference", async () => {
   const media = Object.assign(new EventTarget(), { matches: true });
-  vi.stubGlobal("matchMedia", vi.fn().mockReturnValue(media));
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn((query: string) =>
+      query === "(prefers-color-scheme: dark)"
+        ? media
+        : Object.assign(new EventTarget(), { matches: false }),
+    ),
+  );
   const fetcher = vi
     .fn()
     .mockResolvedValue(
@@ -1216,24 +1278,46 @@ it("@s24 follows a system color-scheme change without persisting another prefere
   );
   expect(fetcher).toHaveBeenCalledTimes(1);
 });
-it("@s32 removes private theme overrides when the authenticated boundary is removed", async () => {
-  vi.stubGlobal(
-    "fetch",
-    vi
-      .fn()
-      .mockResolvedValue(Response.json(stored, { headers: { ETag: tag } })),
-  );
-  const view = render(
-    <AppearanceProvider>
-      <Appearance />
-    </AppearanceProvider>,
-  );
-  await screen.findByRole("radio", { name: "Oscuro" });
-  view.unmount();
-  expect(document.documentElement.dataset.theme).toBeUndefined();
-  expect(document.documentElement.style.colorScheme).toBe("");
-  expect(document.documentElement.style.getPropertyValue("--accent")).toBe("");
-});
+it.each(["DARK", "SYSTEM"])(
+  "@s32 removes private theme overrides when the authenticated boundary is removed: %s",
+  async (theme) => {
+    const media = Object.assign(new EventTarget(), { matches: true });
+    vi.stubGlobal("matchMedia", vi.fn().mockReturnValue(media));
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          Response.json({ ...stored, theme }, { headers: { ETag: tag } }),
+        ),
+    );
+    const view = render(
+      <AppearanceProvider>
+        <Appearance />
+      </AppearanceProvider>,
+    );
+    await screen.findByRole("radio", {
+      name: theme === "DARK" ? "Oscuro" : "Sistema",
+    });
+    view.unmount();
+    expect(document.documentElement.dataset.theme).toBeUndefined();
+    expect(document.documentElement.style.colorScheme).toBe("");
+    expect(document.documentElement.style.getPropertyValue("--accent")).toBe(
+      "",
+    );
+    for (const [target, event] of [
+      [media, "change"],
+      [document, "visibilitychange"],
+    ] as const) {
+      await act(async () => target.dispatchEvent(new Event(event)));
+      expect(document.documentElement.dataset.theme).toBeUndefined();
+      expect(document.documentElement.style.colorScheme).toBe("");
+      expect(document.documentElement.style.getPropertyValue("--accent")).toBe(
+        "",
+      );
+    }
+  },
+);
 it("@s23 applies the confirmed dark scheme and accent to the document", async () => {
   vi.stubGlobal(
     "fetch",

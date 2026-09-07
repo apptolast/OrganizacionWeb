@@ -135,10 +135,6 @@ test("appearance audit: nativeZoom200 preserves both previews at 320 CSS pixels 
       resolve(folder, "zoom.json"),
       JSON.stringify({ zoom, baseline, geometry }, null, 2),
     );
-    await page.screenshot({
-      path: resolve(folder, "zoom200-320.png"),
-      fullPage: true,
-    });
     const cdp = await context.newCDPSession(page);
     const viewport = await cdp.send("Page.captureScreenshot", {
       format: "png",

@@ -28,14 +28,27 @@ public final class ChangeWorkSession implements ChangeWorkSessionUseCase {
         expected,
         notes,
         before -> {
+          before.requireClose(expected.value());
           var now = clock.instant().truncatedTo(ChronoUnit.MICROS);
+          before.requireTime(now);
           var worked =
-              before.workedMicroseconds() + ChronoUnit.MICROS.between(before.runningSince(), now);
+              before.workedMicroseconds()
+                  + (before.status().equals("running")
+                      ? ChronoUnit.MICROS.between(before.runningSince(), now)
+                      : 0);
           var after =
               new WorkSessionState(
                   before.session(), "closed", before.revision() + 1, now, worked, null);
-          var zone = java.time.ZoneId.of(before.session().zoneId());
+          java.time.ZoneId zone;
+          try {
+            zone = java.time.ZoneId.of(before.session().zoneId());
+          } catch (java.time.DateTimeException unknownZone) {
+            zone = java.time.ZoneId.of("UTC");
+          }
           var day = now.atZone(zone).toLocalDate();
+          if (day.getYear() < 1 || day.getYear() > 9999)
+            throw new com.apptolast.organization.domain.WorkSessionTransitionException(
+                "WORK_SESSION_TIME_OUT_OF_RANGE");
           var closure =
               new WorkSessionClosure(notes.progressNote(), notes.nextStep(), day, zone.getId());
           var receipt =

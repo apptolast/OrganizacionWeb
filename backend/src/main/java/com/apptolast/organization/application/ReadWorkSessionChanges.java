@@ -16,4 +16,8 @@ public final class ReadWorkSessionChanges implements ReadWorkSessionChangesUseCa
   public WorkSessionTransitionReceipt byRequest(String owner, UUID key) {
     return queries.changeByRequest(owner, key).orElseThrow(WorkSessionChangeNotFoundException::new);
   }
+
+  public WorkSessionTransitionReceipt closure(String owner, UUID session) {
+    return queries.closure(owner, session).orElseThrow(WorkSessionChangeNotFoundException::new);
+  }
 }

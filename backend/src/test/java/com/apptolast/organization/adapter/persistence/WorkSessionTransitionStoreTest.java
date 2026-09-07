@@ -986,4 +986,150 @@ class WorkSessionTransitionStoreTest {
                 "SELECT * FROM outbox_events WHERE event_id=?", originalEvent.get("event_id")))
         .isEqualTo(originalEvent);
   }
+
+  @Test
+  void s1_closeCommitsLastIntervalReceiptAndIndependentEvent() throws Exception {
+    var original =
+        new StartWorkSession(
+                store,
+                Clock.fixed(Instant.parse("2026-09-07T10:00:00.123456Z"), ZoneOffset.UTC),
+                () -> Set.of("UTC"))
+            .start(owner, project, task, UUID.randomUUID(), 25)
+            .session();
+    var originalEvent =
+        jdbc.queryForMap("SELECT * FROM outbox_events WHERE aggregate_id=?", original.id());
+    var key = UUID.randomUUID();
+    var result =
+        new ChangeWorkSession(
+                store, Clock.fixed(Instant.parse("2026-09-07T10:00:01.123457999Z"), ZoneOffset.UTC))
+            .close(
+                owner,
+                original.id(),
+                key,
+                new WorkSessionRevision(original.id(), 1),
+                new com.apptolast.organization.domain.WorkSessionCloseNotes("Avance", "Siguiente"));
+    assertThat(result.replayed()).isFalse();
+    assertThat(store.detail(owner, original.id())).contains(original);
+    var state =
+        jdbc.queryForMap(
+            "SELECT status,revision,worked_microseconds,running_since,changed_at FROM work_sessions WHERE id=?",
+            original.id());
+    assertThat(state)
+        .containsEntry("status", "closed")
+        .containsEntry("revision", 2L)
+        .containsEntry("worked_microseconds", 1000001L)
+        .containsEntry("running_since", null);
+    assertThat(((java.sql.Timestamp) state.get("changed_at")).toInstant())
+        .isEqualTo(Instant.parse("2026-09-07T10:00:01.123457Z"));
+    var intervals =
+        jdbc.queryForList(
+            "SELECT start_at,end_at FROM work_session_intervals WHERE session_id=?", original.id());
+    assertThat(intervals).hasSize(1);
+    assertThat(((java.sql.Timestamp) intervals.getFirst().get("start_at")).toInstant())
+        .isEqualTo(original.startedAt());
+    assertThat(((java.sql.Timestamp) intervals.getFirst().get("end_at")).toInstant())
+        .isEqualTo(Instant.parse("2026-09-07T10:00:01.123457Z"));
+    var receiptRow =
+        jdbc.queryForMap(
+            "SELECT * FROM work_session_changes WHERE owner_id=? AND request_key=?", owner, key);
+    assertThat(receiptRow)
+        .containsEntry("id", result.receipt().id())
+        .containsEntry("session_id", original.id());
+    var expectedStart =
+        json.createObjectNode()
+            .put("id", original.id().toString())
+            .put("projectId", project.toString())
+            .put("taskId", task.toString())
+            .put("startedAt", "2026-09-07T10:00:00.123456Z")
+            .put("plannedMinutes", 25)
+            .put("plannedEndAt", "2026-09-07T10:25:00.123456Z")
+            .put("zoneId", "UTC");
+    var before =
+        json.createObjectNode()
+            .put("status", "running")
+            .put("revision", 1)
+            .put("changedAt", "2026-09-07T10:00:00.123456Z")
+            .put("workedMicroseconds", 0)
+            .put("runningSince", "2026-09-07T10:00:00.123456Z");
+    before.set("session", expectedStart);
+    var after =
+        json.createObjectNode()
+            .put("status", "closed")
+            .put("revision", 2)
+            .put("changedAt", "2026-09-07T10:00:01.123457Z")
+            .put("workedMicroseconds", 1000001)
+            .putNull("runningSince");
+    after.set("session", expectedStart);
+    var receipt =
+        json.createObjectNode()
+            .put("id", receiptRow.get("id").toString())
+            .put("sessionId", original.id().toString())
+            .put("action", "CLOSE")
+            .put("occurredAt", "2026-09-07T10:00:01.123457Z");
+    receipt.set("before", before);
+    receipt.set("after", after);
+    receipt.set(
+        "closure",
+        json.createObjectNode()
+            .put("progressNote", "Avance")
+            .put("nextStep", "Siguiente")
+            .put("workDate", "2026-09-07")
+            .put("closeZoneId", "UTC"));
+    assertThat(json.readTree(receiptRow.get("receipt").toString())).isEqualTo(receipt);
+    var event =
+        jdbc.queryForMap(
+            "SELECT * FROM outbox_events WHERE aggregate_id=? AND event_type='WorkSessionClosed.v1'",
+            original.id());
+    assertThat(json.readTree(event.get("payload").toString()))
+        .isEqualTo(
+            json.createObjectNode()
+                .put("eventId", event.get("event_id").toString())
+                .put("aggregateId", original.id().toString())
+                .put("ownerId", owner)
+                .put("occurredAt", "2026-09-07T10:00:01.123457Z")
+                .put("schemaVersion", 1)
+                .put("type", "WorkSessionClosed.v1")
+                .put("revision", "2")
+                .put("fromStatus", "running")
+                .put("workedMicroseconds", "1000001")
+                .put("workDate", "2026-09-07")
+                .put("closeZoneId", "UTC"));
+    assertThat(
+            jdbc.queryForMap(
+                "SELECT * FROM outbox_events WHERE event_id=?", originalEvent.get("event_id")))
+        .isEqualTo(originalEvent);
+  }
+
+  @Test
+  void s26_readsClosureBySessionAfterOutboxRemoval() {
+    var original = startOwn();
+    var result =
+        new ChangeWorkSession(
+                store, Clock.fixed(original.startedAt().plusSeconds(1), ZoneOffset.UTC))
+            .close(
+                owner,
+                original.id(),
+                UUID.randomUUID(),
+                new WorkSessionRevision(original.id(), 1),
+                new com.apptolast.organization.domain.WorkSessionCloseNotes(
+                    "  Avance\n", "Después"));
+    jdbc.update("DELETE FROM outbox_events WHERE aggregate_id=?", original.id());
+    var previous = jdbc.queryForMap("SELECT * FROM work_sessions WHERE id=?", original.id());
+    assertThat(store.closure(owner, original.id())).contains(result.receipt());
+    assertThat(jdbc.queryForMap("SELECT * FROM work_sessions WHERE id=?", original.id()))
+        .isEqualTo(previous);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM outbox_events WHERE aggregate_id=?",
+                Integer.class,
+                original.id()))
+        .isZero();
+  }
+
+  @Test
+  void s26_closureOfForeignSessionHidesItsExistence() {
+    var original = startOwn();
+    assertThatThrownBy(() -> store.closure("other-owner", original.id()))
+        .isInstanceOf(WorkSessionNotFoundException.class);
+  }
 }

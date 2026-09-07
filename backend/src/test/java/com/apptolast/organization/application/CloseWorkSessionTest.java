@@ -73,4 +73,378 @@ class CloseWorkSessionTest {
     verify(clock).instant();
     verifyNoMoreInteractions(clock);
   }
+
+  @Test
+  void s2_closesPausedWithoutCountingTheRest() {
+    var start =
+        new SessionStart(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            Instant.parse("2026-09-07T09:00:00Z"),
+            25,
+            Instant.parse("2026-09-07T09:25:00Z"),
+            "UTC");
+    var before =
+        new WorkSessionState(
+            start, "paused", 2, Instant.parse("2026-09-07T09:01:00Z"), 60000000, null);
+    WorkSessionChanging store =
+        (owner, session, key, action, revision, notes, operation) ->
+            new WorkSessionTransitionConfirmation(operation.apply(before).receipt(), false);
+    var at = Instant.parse("2026-09-08T10:00:00Z");
+    var result =
+        new ChangeWorkSession(store, Clock.fixed(at, ZoneOffset.UTC))
+            .close(
+                "owner",
+                start.id(),
+                UUID.randomUUID(),
+                new WorkSessionRevision(start.id(), 2),
+                new WorkSessionCloseNotes("", ""));
+    assertThat(result.receipt().after())
+        .isEqualTo(new WorkSessionState(start, "closed", 3, at, 60000000, null));
+    assertThat(result.receipt().closure().workDate()).isEqualTo(LocalDate.of(2026, 9, 8));
+  }
+
+  @Test
+  void s13_staleRevisionPrecedesClosedStateAndClock() {
+    var start =
+        new SessionStart(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            Instant.parse("2026-09-07T09:00:00Z"),
+            25,
+            Instant.parse("2026-09-07T09:25:00Z"),
+            "UTC");
+    var before =
+        new WorkSessionState(
+            start, "closed", 3, Instant.parse("2026-09-07T09:01:00Z"), 60000000, null);
+    WorkSessionChanging store =
+        (owner, session, key, action, revision, notes, operation) ->
+            new WorkSessionTransitionConfirmation(operation.apply(before).receipt(), false);
+    var clock = mock(Clock.class);
+    assertThatThrownBy(
+            () ->
+                new ChangeWorkSession(store, clock)
+                    .close(
+                        "owner",
+                        start.id(),
+                        UUID.randomUUID(),
+                        new WorkSessionRevision(start.id(), 2),
+                        new WorkSessionCloseNotes("", "")))
+        .isInstanceOfSatisfying(
+            WorkSessionTransitionException.class,
+            error -> assertThat(error.code()).isEqualTo("PRECONDITION_FAILED"));
+    verifyNoInteractions(clock);
+  }
+
+  @Test
+  void s13_closedSessionRejectsNewCloseBeforeClock() {
+    var start =
+        new SessionStart(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            Instant.parse("2026-09-07T09:00:00Z"),
+            25,
+            Instant.parse("2026-09-07T09:25:00Z"),
+            "UTC");
+    var before =
+        new WorkSessionState(
+            start, "closed", 3, Instant.parse("2026-09-07T09:01:00Z"), 60000000, null);
+    WorkSessionChanging store =
+        (owner, session, key, action, revision, notes, operation) ->
+            new WorkSessionTransitionConfirmation(operation.apply(before).receipt(), false);
+    var clock = mock(Clock.class);
+    assertThatThrownBy(
+            () ->
+                new ChangeWorkSession(store, clock)
+                    .close(
+                        "owner",
+                        start.id(),
+                        UUID.randomUUID(),
+                        new WorkSessionRevision(start.id(), 3),
+                        new WorkSessionCloseNotes("", "")))
+        .isInstanceOfSatisfying(
+            WorkSessionTransitionException.class,
+            error -> assertThat(error.code()).isEqualTo("WORK_SESSION_STATE_CONFLICT"));
+    verifyNoInteractions(clock);
+  }
+
+  @Test
+  void s14_exhaustedRevisionPrecedesClock() {
+    var start =
+        new SessionStart(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            Instant.parse("2026-09-07T09:00:00Z"),
+            25,
+            Instant.parse("2026-09-07T09:25:00Z"),
+            "UTC");
+    var before =
+        new WorkSessionState(
+            start, "paused", Long.MAX_VALUE, Instant.parse("2026-09-07T09:01:00Z"), 60000000, null);
+    WorkSessionChanging store =
+        (owner, session, key, action, revision, notes, operation) ->
+            new WorkSessionTransitionConfirmation(operation.apply(before).receipt(), false);
+    var clock = mock(Clock.class);
+    assertThatThrownBy(
+            () ->
+                new ChangeWorkSession(store, clock)
+                    .close(
+                        "owner",
+                        start.id(),
+                        UUID.randomUUID(),
+                        new WorkSessionRevision(start.id(), Long.MAX_VALUE),
+                        new WorkSessionCloseNotes("", "")))
+        .isInstanceOfSatisfying(
+            WorkSessionTransitionException.class,
+            error -> assertThat(error.code()).isEqualTo("WORK_SESSION_REVISION_EXHAUSTED"));
+    verifyNoInteractions(clock);
+  }
+
+  @Test
+  void s7_rejectsClockBeforeLastChange() {
+    var start =
+        new SessionStart(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            Instant.parse("2026-09-07T09:00:00Z"),
+            25,
+            Instant.parse("2026-09-07T09:25:00Z"),
+            "UTC");
+    var before =
+        new WorkSessionState(
+            start, "paused", 2, Instant.parse("2026-09-07T09:01:00Z"), 60000000, null);
+    WorkSessionChanging store =
+        (owner, session, key, action, revision, notes, operation) ->
+            new WorkSessionTransitionConfirmation(operation.apply(before).receipt(), false);
+    var clock = mock(Clock.class);
+    when(clock.instant()).thenReturn(Instant.parse("2026-09-07T09:00:59.999999Z"));
+    assertThatThrownBy(
+            () ->
+                new ChangeWorkSession(store, clock)
+                    .close(
+                        "owner",
+                        start.id(),
+                        UUID.randomUUID(),
+                        new WorkSessionRevision(start.id(), 2),
+                        new WorkSessionCloseNotes("", "")))
+        .isInstanceOfSatisfying(
+            WorkSessionTransitionException.class,
+            error -> assertThat(error.code()).isEqualTo("WORK_SESSION_TIME_OUT_OF_RANGE"));
+    verify(clock).instant();
+  }
+
+  @Test
+  void s7_rejectsClockOutsideFourDigitUtc() {
+    var start =
+        new SessionStart(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            Instant.parse("2026-09-07T09:00:00Z"),
+            25,
+            Instant.parse("2026-09-07T09:25:00Z"),
+            "UTC");
+    var before =
+        new WorkSessionState(
+            start, "paused", 2, Instant.parse("2026-09-07T09:01:00Z"), 60000000, null);
+    WorkSessionChanging store =
+        (owner, session, key, action, revision, notes, operation) ->
+            new WorkSessionTransitionConfirmation(operation.apply(before).receipt(), false);
+    var clock = mock(Clock.class);
+    when(clock.instant()).thenReturn(Instant.parse("+10000-01-01T00:00:00Z"));
+    assertThatThrownBy(
+            () ->
+                new ChangeWorkSession(store, clock)
+                    .close(
+                        "owner",
+                        start.id(),
+                        UUID.randomUUID(),
+                        new WorkSessionRevision(start.id(), 2),
+                        new WorkSessionCloseNotes("", "")))
+        .isInstanceOfSatisfying(
+            WorkSessionTransitionException.class,
+            error -> assertThat(error.code()).isEqualTo("WORK_SESSION_TIME_OUT_OF_RANGE"));
+    verify(clock).instant();
+  }
+
+  @Test
+  void s9_usesUtcWhenHistoricalZoneCannotResolve() {
+    var start =
+        new SessionStart(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            Instant.parse("2026-09-07T09:00:00Z"),
+            25,
+            Instant.parse("2026-09-07T09:25:00Z"),
+            "Removed/Zone");
+    var before =
+        new WorkSessionState(
+            start, "paused", 2, Instant.parse("2026-09-07T09:01:00Z"), 60000000, null);
+    WorkSessionChanging store =
+        (owner, session, key, action, revision, notes, operation) ->
+            new WorkSessionTransitionConfirmation(operation.apply(before).receipt(), false);
+    var at = Instant.parse("2026-09-08T10:00:00Z");
+    var result =
+        new ChangeWorkSession(store, Clock.fixed(at, ZoneOffset.UTC))
+            .close(
+                "owner",
+                start.id(),
+                UUID.randomUUID(),
+                new WorkSessionRevision(start.id(), 2),
+                new WorkSessionCloseNotes("", ""));
+    assertThat(result.receipt().after())
+        .isEqualTo(new WorkSessionState(start, "closed", 3, at, 60000000, null));
+    assertThat(result.receipt().closure().closeZoneId()).isEqualTo("UTC");
+    assertThat(result.receipt().after().session().zoneId()).isEqualTo("Removed/Zone");
+    assertThat(result.receipt().closure().workDate()).isEqualTo(LocalDate.of(2026, 9, 8));
+  }
+
+  @Test
+  void s10_rejectsLocalYearOverflowWithoutUtcFallback() {
+    var start =
+        new SessionStart(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            Instant.parse("2026-09-07T09:00:00Z"),
+            25,
+            Instant.parse("2026-09-07T09:25:00Z"),
+            "Etc/GMT-14");
+    var before =
+        new WorkSessionState(
+            start, "paused", 2, Instant.parse("2026-09-07T09:01:00Z"), 60000000, null);
+    WorkSessionChanging store =
+        (owner, session, key, action, revision, notes, operation) ->
+            new WorkSessionTransitionConfirmation(operation.apply(before).receipt(), false);
+    var clock = mock(Clock.class);
+    when(clock.instant()).thenReturn(Instant.parse("9999-12-31T23:59:59.999999Z"));
+    assertThatThrownBy(
+            () ->
+                new ChangeWorkSession(store, clock)
+                    .close(
+                        "owner",
+                        start.id(),
+                        UUID.randomUUID(),
+                        new WorkSessionRevision(start.id(), 2),
+                        new WorkSessionCloseNotes("", "")))
+        .isInstanceOfSatisfying(
+            WorkSessionTransitionException.class,
+            error -> assertThat(error.code()).isEqualTo("WORK_SESSION_TIME_OUT_OF_RANGE"));
+    verify(clock).instant();
+  }
+
+  @Test
+  void s10_rejectsLocalYearZeroWithoutUtcFallback() {
+    var start =
+        new SessionStart(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            Instant.parse("0001-01-01T00:00:00Z"),
+            25,
+            Instant.parse("0001-01-01T00:25:00Z"),
+            "Etc/GMT+12");
+    var before =
+        new WorkSessionState(start, "paused", 2, Instant.parse("0001-01-01T00:00:00Z"), 0, null);
+    WorkSessionChanging store =
+        (owner, session, key, action, revision, notes, operation) ->
+            new WorkSessionTransitionConfirmation(operation.apply(before).receipt(), false);
+    var clock = mock(Clock.class);
+    when(clock.instant()).thenReturn(Instant.parse("0001-01-01T00:01:00Z"));
+    assertThatThrownBy(
+            () ->
+                new ChangeWorkSession(store, clock)
+                    .close(
+                        "owner",
+                        start.id(),
+                        UUID.randomUUID(),
+                        new WorkSessionRevision(start.id(), 2),
+                        new WorkSessionCloseNotes("", "")))
+        .isInstanceOfSatisfying(
+            WorkSessionTransitionException.class,
+            error -> assertThat(error.code()).isEqualTo("WORK_SESSION_TIME_OUT_OF_RANGE"));
+    verify(clock).instant();
+  }
+
+  @Test
+  void s4_nullNotesNormalizeToEmptyIntent() {
+    assertThat(new WorkSessionCloseNotes(null, null)).isEqualTo(new WorkSessionCloseNotes("", ""));
+  }
+
+  @Test
+  void s5_rejectsProgressBeyondTwoThousandCodePoints() {
+    assertThatThrownBy(() -> new WorkSessionCloseNotes("a".repeat(2001), ""))
+        .isInstanceOfSatisfying(
+            ValidationException.class,
+            error ->
+                assertThat(error.errors())
+                    .extracting(FieldError::field, FieldError::code)
+                    .containsExactly(tuple("progressNote", "INVALID_VALUE")));
+  }
+
+  @Test
+  void s5_rejectsNextStepBeyondTwoThousandEmoji() {
+    assertThatThrownBy(() -> new WorkSessionCloseNotes("", "😀".repeat(2001)))
+        .isInstanceOfSatisfying(
+            ValidationException.class,
+            error ->
+                assertThat(error.errors())
+                    .extracting(FieldError::field, FieldError::code)
+                    .containsExactly(tuple("nextStep", "INVALID_VALUE")));
+  }
+
+  @Test
+  void s5_rejectsDecodedNullCharacter() {
+    assertThatThrownBy(() -> new WorkSessionCloseNotes("a" + (char) 0 + "b", ""))
+        .isInstanceOfSatisfying(
+            ValidationException.class,
+            error ->
+                assertThat(error.errors())
+                    .extracting(FieldError::field, FieldError::code)
+                    .containsExactly(tuple("progressNote", "INVALID_VALUE")));
+  }
+
+  @Test
+  void s5_rejectsIsolatedHighSurrogate() {
+    assertThatThrownBy(() -> new WorkSessionCloseNotes("", "a" + (char) 0xD800 + "b"))
+        .isInstanceOfSatisfying(
+            ValidationException.class,
+            error ->
+                assertThat(error.errors())
+                    .extracting(FieldError::field, FieldError::code)
+                    .containsExactly(tuple("nextStep", "INVALID_VALUE")));
+  }
+
+  @Test
+  void s5_rejectsIsolatedLowSurrogate() {
+    assertThatThrownBy(() -> new WorkSessionCloseNotes("a" + (char) 0xDFFF + "b", ""))
+        .isInstanceOfSatisfying(
+            ValidationException.class,
+            error ->
+                assertThat(error.errors())
+                    .extracting(FieldError::field, FieldError::code)
+                    .containsExactly(tuple("progressNote", "INVALID_VALUE")));
+  }
+
+  @Test
+  void s4_preservesTwoThousandValidEmoji() {
+    var text = "😀".repeat(2000);
+    var notes = new WorkSessionCloseNotes(text, text);
+    assertThat(notes.progressNote()).isEqualTo(text);
+    assertThat(notes.nextStep()).isEqualTo(text);
+  }
+
+  @Test
+  void s4_preservesWhitespaceAndLineBreaks() {
+    var text = "  revisión\n siguiente paso  ";
+    var notes = new WorkSessionCloseNotes(text, text);
+    assertThat(notes.progressNote()).isEqualTo(text);
+    assertThat(notes.nextStep()).isEqualTo(text);
+  }
 }

@@ -11,3 +11,13 @@ Replay complementario: root7d93d5 contrastó archivo, posición completa, mutado
 El replay generó18 mutantes:17 Killed y1 RuntimeError adicional, sin supervivientes, NoCoverage o timeouts. El error del runner al representar una excepción no se cuenta como detección ni se oculta tras el100% mostrado por Stryker. No altera el éxito de las seis firmas ni la campaña completa previa sin errores. No se requiere repetir el complemento: no ha revelado un defecto en producción y los oráculos solicitados quedan acreditados. La configuración reproducible sólo fue formateada después del snapshot final, con semántica conservada.
 
 La matriz contractual conserva los límites de evidencia compuesta y de dispositivos físicos. Esta revisión no promete ausencia de errores ni sustituye el cierre de sesión, aviso, historial o despliegue del MVP.
+
+## Cota conservadora tras corregir el fixture flaky @s37
+
+Lectura independiente7bdcce/a8c78b del JSON original intacto. testFiles identifica inequívocamente testID489 en src/work-session.test.tsx como «@s37 confirms the original end and preserves the receipt if active refresh fails». No se interpreta489 como línea ni ID de mutante.
+
+Hay exactamente tres mutantes con status Killed y killedBy que contiene489, todos en work-session.tsx y con killedBy=["489"]:649 (línea70, StringLiteral sobre setRejection("")),666 (línea90, BooleanLiteral sobre setUncertain(false)) y823 (línea195, ConditionalExpression sobre presentación de la activa distinta del recibo). killedBy registra la prueba detectada por Stryker; no demuestra que ninguna otra prueba pudiera detectarlos, y no se presupone esa detección alternativa.
+
+Retirando conservadoramente los tres del numerador, sin reducir el denominador ni reclasificar el raw: (741−3)/861 =738/861 =85,7142857142857%, todavía superior al80. Por tanto el gate sigue defendible incluso sin acreditar ninguna detección al fixture defectuoso. No se requiere repetir la campaña para sostener esa puerta; esta cota sólo analiza la atribución registrada al test489, no promete inmunidad universal a flakiness.
+
+El JSON original sigue SHA2560F0F92DD7FA76E1548CA024CD4904ED766D91877BC08A79938381E3CF8DBA246. No se cambian sus741K/119S/1NC, ni se inventan tres Survived. El fixture corregido conserva su revisión y resultados propios. No ejecución de mutación ni edición de producción en este análisis.

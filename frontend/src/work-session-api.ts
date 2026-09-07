@@ -140,7 +140,7 @@ export async function startWorkSession(
   return value;
 }
 
-function isSessionStart(value: unknown): value is SessionStart {
+export function isSessionStart(value: unknown): value is SessionStart {
   if (
     !exact(
       value,
@@ -162,7 +162,7 @@ function isSessionStart(value: unknown): value is SessionStart {
   );
 }
 
-function microseconds(value: unknown): bigint | null {
+export function microseconds(value: unknown): bigint | null {
   if (!instant(value)) return null;
   const wholeMilliseconds = Date.parse(value.replace(/(?:\.\d+)?Z$/, "Z"));
   const fraction = value.match(/\.(\d+)Z$/)?.[1] ?? "";

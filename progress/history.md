@@ -430,3 +430,9 @@ Wiring revisado e integrado97e7a0a:75/75, cuatro hashes verificados47e2fe. Smoke
 Init global58795e/sesión46298 terminó EXIT0438035:1751Java/1571frontend/29scripts, lint/Spotless verdes. XML73suites Java verificado d0b518, sin fallos/errores/skips. PITbackend iniciadof0b0b1/sesión2804, quince unidades pre-scan, todavía sin resultado. Fuente/test/config backend congelados, snapshot y log propios.
 
 Los tres agentes siguen con trabajo disjunto: E2E/UX14, seis grupos de refuerzos API/UItests tras dictamen81residuales, y mapa contractual42. Los refuerzos frontend empezarán después del initverde y no alteran backend. Campaña Strykeroriginal84,8030% se conserva; no se descuenta ningún residual del score. Hubo errores de cuota en los agentes; consulta posterior devolvió0%consumido y los tres reanudaron sin consumir un reset por herramienta.
+
+## 7 de septiembre de 2026 — cierre local de pausa/reanudación15
+
+Dictamen judge_pause_resume_final.md APPROVED. Pausar/reanudar conserva fin histórico, cuenta microsegundos exactos, mantiene una sola sesión abierta y recupera cambios con revisión/key. Revisiones independientes de backend/frontend y gates; root HTTP/publicación/smoke/E2E. Init local1890Java/1666frontend/32Node, corrección de formato y CI34075064014 SUCCESS6b8f360 con108E2E/smoke; CI34076019493 de los dos oráculos posteriores sigue en curso. PR14 draft, sin despliegue.
+
+PIT523/525K (99,6190476%),2NC y0S/errores/timeouts,315hashesidénticos. Stryker741/861K (86,06271777%),119S/1NC y0errores/timeouts,89hashesidénticos. Refuerzo2tests82/82green; replay seisfirmasK,17/18K con1RuntimeError separado,90hashesidénticos. UX515medidas35axe0, tresmotores/texto200/zoomnativo, límitesfísicosexplícitos. No hay100%inventado ni campaña renombrada. Próximo contrato16 cierre de sesión;17aviso/18historial yservidor siguenpendientes.

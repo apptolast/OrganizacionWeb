@@ -27,12 +27,14 @@ public record OutboxMessage(
             && !"TaskStatusChanged.v1".equals(type)
             && !"BlockPlanned.v1".equals(type)
             && !"BlockChanged.v1".equals(type)
-            && !"WorkSessionStarted.v1".equals(type))
+            && !"WorkSessionStarted.v1".equals(type)
+            && !"WorkSessionStateChanged.v1".equals(type))
         || schemaVersion != 1) return "UNSUPPORTED_EVENT";
     boolean taskStatusChanged = "TaskStatusChanged.v1".equals(type);
     boolean blockPlanned = "BlockPlanned.v1".equals(type);
     boolean blockChanged = "BlockChanged.v1".equals(type);
     boolean workSessionStarted = "WorkSessionStarted.v1".equals(type);
+    boolean workSessionStateChanged = "WorkSessionStateChanged.v1".equals(type);
     boolean statusChanged = "ProjectStatusChanged.v1".equals(type);
     boolean subtaskCreated = "SubtaskCreated.v1".equals(type);
     boolean taskCreated = "TaskCreated.v1".equals(type) || subtaskCreated;
@@ -118,6 +120,21 @@ public record OutboxMessage(
               "plannedMinutes",
               "plannedEndAt",
               "zoneId");
+    if (workSessionStateChanged)
+      expected =
+          java.util.Set.of(
+              "eventId",
+              "aggregateId",
+              "ownerId",
+              "occurredAt",
+              "schemaVersion",
+              "type",
+              "action",
+              "revision",
+              "fromStatus",
+              "toStatus",
+              "workedMicroseconds",
+              "runningSince");
     if (!expected.equals(payload.keySet())
         || !eventId.toString().equals(payload.get("eventId"))
         || !aggregateId.toString().equals(payload.get("aggregateId"))
@@ -129,6 +146,36 @@ public record OutboxMessage(
       if (!occurredAt.equals(Instant.parse(timestamp))) return "INVALID_EVENT";
     } catch (java.time.format.DateTimeParseException error) {
       return "INVALID_EVENT";
+    }
+    if (workSessionStateChanged) {
+      if (eventId.equals(aggregateId)) return "INVALID_EVENT";
+      if (!workSessionTimestamp(timestamp)
+          || occurredAt.isBefore(Instant.parse("0001-01-01T00:00:00Z"))) return "INVALID_EVENT";
+      if (!"PAUSE".equals(payload.get("action")) && !"RESUME".equals(payload.get("action")))
+        return "INVALID_EVENT";
+      boolean pause = "PAUSE".equals(payload.get("action"));
+      if (!(pause ? "running" : "paused").equals(payload.get("fromStatus"))) return "INVALID_EVENT";
+      if (!(pause ? "paused" : "running").equals(payload.get("toStatus"))) return "INVALID_EVENT";
+      if (pause && payload.get("runningSince") != null) return "INVALID_EVENT";
+      if (!pause) {
+        if (!(payload.get("runningSince") instanceof String since) || !workSessionTimestamp(since))
+          return "INVALID_EVENT";
+        try {
+          if (!occurredAt.equals(Instant.parse(since))) return "INVALID_EVENT";
+        } catch (java.time.DateTimeException invalid) {
+          return "INVALID_EVENT";
+        }
+      }
+      if (!(payload.get("workedMicroseconds") instanceof String worked)
+          || !worked.matches("0|[1-9][0-9]*")) return "INVALID_EVENT";
+      if (!(payload.get("revision") instanceof String revision) || !revision.matches("[1-9][0-9]*"))
+        return "INVALID_EVENT";
+      try {
+        Long.parseLong(revision);
+      } catch (NumberFormatException invalid) {
+        return "INVALID_EVENT";
+      }
+      return null;
     }
     if (workSessionStarted) {
       if (eventId.equals(aggregateId)) return "INVALID_EVENT";

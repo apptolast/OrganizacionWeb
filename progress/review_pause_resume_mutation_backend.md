@@ -1,0 +1,11 @@
+# Dictamen independiente del gate PIT15
+
+**APPROVED del gate backend y aceptación del riesgo residual descrito**, sin cerrar por sí solo la feature. Lectura final4d7cb9/58e388:525 mutantes,523 KILLED estrictos,2 NO_COVERAGE,0 SURVIVED/Timeout/errores;523/525 =99,6190476%, superior al80. XML SHA256 `F0B68A866A3BBBF29BC96284062A9EDDC2BFF2A81153654430BA9023EADC0D51`, idéntico al informe de A. No se ejecutó otra prueba o campaña.
+
+El inventario del XML confirma presencia de ChangeWorkSession, las dos lecturas15, WorkSessionState, Store, tipos/recibos/evento15 y controller/DTO15, además de wiring y publicador compartidos. No es una campaña14 renombrada. La integridad315 hashes comunicada y comprobada por root queda referenciada en mutation_pause_resume_backend.md; no se mezclan los3338 test executions de PIT con los1890 casos del init.
+
+Los dos NC son NullReturnValsMutator del Store: `lambda$commit$0`, línea132/índice35, y `lambda$commit$2`, línea138/índice31. Ambos afectan el retorno exitoso de recuperación **después de colisión**, no el replay normal. No los reclasifico como Killed ni como equivalentes universales: devolver null sería observable si se alcanzara esa salida.
+
+En el protocolo actual la misma intención implica la misma sesión. Su fila permanece bajo FOR UPDATE desde antes de consultar key hasta commit; la segunda petición ve el recibo durable y retorna por replay ordinario antes de intentar INSERT. Las carreras reales same-key/distintas keys acreditan esa serialización. La colisión controlada de intención diferente llega a UNIQUE real, revierte y devuelve409 en una transacción nueva; supresión sin ganador conserva503. Esas rutas sí están cubiertas. Alcanzar la salida exitosa residual exige alterar artificialmente la visibilidad y/o el estado ya confirmado; no se identifica una secuencia de comandos15 autorizados que la necesite. No solicito dos sesiones abiertas propias ni un fixture inválido para subir a100%.
+
+La aceptación se limita a este protocolo de locks/propiedad/replay y debe revisarse si cambia. No hay riesgo contractual bloqueante demostrado en los dos residuos; permanecen explícitos en el raw. Optimización de Testcontainers queda como propuesta futura, sin cambios durante este gate. Ponytail full/Caveman lite; ninguna edición de producto/tests/config.

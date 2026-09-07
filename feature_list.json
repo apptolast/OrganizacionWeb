@@ -164,10 +164,10 @@
       "id": 15,
       "name": "pause_resume_session",
       "title": "Pausar y reanudar",
-      "description": "Pausar y reanudar: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
-      "acceptance": [],
+      "description": "Pausa y reanudación recuperables, intervalos exactos y estado separado del inicio; contrato revisado y aprobado para TDD bajo autorización global.",
+      "acceptance": ["Cumplir el contrato de 39 escenarios en features/pause_resume_session.feature, con evidencia, revisión y umbral de mutación antes del cierre."],
       "sdd": true,
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": 16,

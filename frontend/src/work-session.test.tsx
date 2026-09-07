@@ -153,7 +153,10 @@ it("@s33 recovers a retained start after the task becomes completed", async () =
   fireEvent.click(screen.getByRole("button", { name: "Comprobar inicio" }));
   expect(await screen.findByText("Sesión iniciada")).toBeVisible();
   expect(fetcher.mock.calls[2][0]).toContain("/by-request/");
-  expect(fetcher).toHaveBeenCalledTimes(3);
+  expect(fetcher).toHaveBeenCalledTimes(4);
+  expect(fetcher.mock.calls[3][0]).toBe(
+    `/api/v1/work-sessions/${receipt.id}/state`,
+  );
 });
 it("@s36 rediscovers active work after remount without recovering an in-memory key", async () => {
   const fetcher = vi
@@ -181,7 +184,10 @@ it("@s36 rediscovers active work after remount without recovering an in-memory k
     screen.queryByRole("button", { name: "Empezar a trabajar" }),
   ).not.toBeInTheDocument();
   expect(fetcher.mock.calls[2][0]).toBe("/api/v1/work-sessions/active");
-  expect(fetcher).toHaveBeenCalledTimes(3);
+  expect(fetcher).toHaveBeenCalledTimes(4);
+  expect(fetcher.mock.calls[3][0]).toBe(
+    `/api/v1/work-sessions/${receipt.id}/state`,
+  );
 });
 it("@s30 keeps an incompatible success uncertain and checks the original intention", async () => {
   const fetcher = vi
@@ -338,7 +344,10 @@ it("@s40 supports keyboard submission without stealing focus from another contro
   );
   expect(await screen.findByText("Sesión iniciada")).toBeVisible();
   expect(refreshButton).toHaveFocus();
-  expect(fetcher).toHaveBeenCalledTimes(2);
+  expect(fetcher).toHaveBeenCalledTimes(3);
+  expect(fetcher.mock.calls[2][0]).toBe(
+    `/api/v1/work-sessions/${receipt.id}/state`,
+  );
 });
 it("@s38 ignores recovered JSON after the task route changes", async () => {
   const json = deferred<unknown>();
@@ -449,7 +458,10 @@ it("@s32 retains the exact intention after an idempotency conflict", async () =>
     `/api/v1/work-sessions/by-request/${requestKey}`,
   );
   expect(fetcher.mock.calls[2][1].method).toBeUndefined();
-  expect(fetcher).toHaveBeenCalledTimes(3);
+  expect(fetcher).toHaveBeenCalledTimes(4);
+  expect(fetcher.mock.calls[3][0]).toBe(
+    `/api/v1/work-sessions/${receipt.id}/state`,
+  );
 });
 it("@s42 rejects an incompatible active envelope without offering a new start", async () => {
   vi.stubGlobal(
@@ -503,7 +515,10 @@ it("@s36 ignores an older active lookup after a start confirmation", async () =>
     screen.queryByRole("button", { name: "Empezar a trabajar" }),
   ).not.toBeInTheDocument();
   expect(screen.getByText("Sesión iniciada")).toBeVisible();
-  expect(fetcher).toHaveBeenCalledTimes(3);
+  expect(fetcher).toHaveBeenCalledTimes(4);
+  expect(fetcher.mock.calls[3][0]).toBe(
+    `/api/v1/work-sessions/${receipt.id}/state`,
+  );
 });
 it("@s35 removes a task context rejected as RESOURCE_NOT_FOUND", async () => {
   vi.stubGlobal(
@@ -769,6 +784,27 @@ it("@s39 removes visible work data on a current unauthorized lookup", async () =
     vi
       .fn()
       .mockResolvedValueOnce(Response.json({ session: receipt }))
+      .mockResolvedValueOnce(
+        Response.json(
+          {
+            state: {
+              session: receipt,
+              status: "running",
+              revision: "1",
+              changedAt: receipt.startedAt,
+              workedMicroseconds: "0",
+              runningSince: receipt.startedAt,
+            },
+            serverNow: receipt.startedAt,
+            netMicroseconds: "0",
+          },
+          {
+            headers: {
+              "Work-Session-Revision": `work-session-${receipt.id}-1`,
+            },
+          },
+        ),
+      )
       .mockResolvedValueOnce(new Response(null, { status: 401 })),
   );
   render(<Gate />);
@@ -1112,19 +1148,61 @@ it("@s32 @s33 keeps an uncertain intention and confirms it only through its key"
   expect(fetcher.mock.calls[2][0]).toBe(
     `/api/v1/work-sessions/by-request/${key}`,
   );
-  expect(fetcher).toHaveBeenCalledTimes(3);
+  expect(fetcher).toHaveBeenCalledTimes(4);
+  expect(fetcher.mock.calls[3][0]).toBe(
+    `/api/v1/work-sessions/${receipt.id}/state`,
+  );
 });
 it("@s37 confirms the original end and preserves the receipt if active refresh fails", async () => {
+  let activeReads = 0;
   const fetcher = vi
     .fn()
-    .mockResolvedValueOnce(Response.json({ session: null }))
-    .mockResolvedValueOnce(
-      Response.json(receipt, {
-        status: 201,
-        headers: { Location: `/api/v1/work-sessions/${receipt.id}` },
-      }),
-    )
-    .mockResolvedValueOnce(new Response(null, { status: 503 }));
+    .mockImplementation((url: string, init: RequestInit) => {
+      if (url === "/api/v1/work-sessions/active") {
+        activeReads += 1;
+        return Promise.resolve(
+          activeReads === 1
+            ? Response.json({ session: null })
+            : new Response(null, { status: 503 }),
+        );
+      }
+      if (url === `/api/v1/work-sessions/${receipt.id}/state`) {
+        return Promise.resolve(
+          Response.json(
+            {
+              state: {
+                session: receipt,
+                status: "running",
+                revision: "1",
+                changedAt: receipt.startedAt,
+                workedMicroseconds: "0",
+                runningSince: receipt.startedAt,
+              },
+              serverNow: receipt.startedAt,
+              netMicroseconds: "0",
+            },
+            {
+              headers: {
+                "Work-Session-Revision": `work-session-${receipt.id}-1`,
+              },
+            },
+          ),
+        );
+      }
+      if (
+        url ===
+          `/api/v1/projects/${props.projectId}/tasks/${props.taskId}/work-sessions` &&
+        init.method === "POST"
+      ) {
+        return Promise.resolve(
+          Response.json(receipt, {
+            status: 201,
+            headers: { Location: `/api/v1/work-sessions/${receipt.id}` },
+          }),
+        );
+      }
+      throw new Error(`Unexpected request: ${init.method ?? "GET"} ${url}`);
+    });
   vi.stubGlobal("fetch", fetcher);
   render(<WorkSession {...props} />);
   fireEvent.change(
@@ -1142,7 +1220,15 @@ it("@s37 confirms the original end and preserves the receipt if active refresh f
   fireEvent.click(
     screen.getByRole("button", { name: "Actualizar sesión activa" }),
   );
-  await screen.findByRole("alert");
+  await screen.findByText("No se ha podido consultar la sesión activa.");
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "No se ha podido consultar la sesión activa.",
+  );
+  expect(await screen.findByText("En curso")).toBeVisible();
+  expect(activeReads).toBe(2);
+  expect(
+    fetcher.mock.calls.filter(([, init]) => init.method === "POST"),
+  ).toHaveLength(1);
   expect(screen.getByText("Sesión iniciada")).toBeVisible();
   expect(
     screen.queryByRole("button", { name: "Empezar a trabajar" }),
@@ -1247,4 +1333,44 @@ it("@s29 announces an active lookup while pending without starting work", () => 
   expect(fetcher).toHaveBeenCalledTimes(1);
   expect(fetcher.mock.calls[0][0]).toBe("/api/v1/work-sessions/active");
   expect(fetcher.mock.calls[0][1].method).toBeUndefined();
+});
+it("@s29 integrates paused state from active discovery even for a completed task", async () => {
+  const state = {
+    session: receipt,
+    status: "paused",
+    revision: "2",
+    changedAt: "2026-09-06T10:01:00.123456Z",
+    workedMicroseconds: "60000000",
+    runningSince: null,
+  };
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(Response.json({ session: receipt }))
+    .mockResolvedValueOnce(
+      Response.json(
+        {
+          state,
+          serverNow: "2026-09-06T10:02:00.123456Z",
+          netMicroseconds: "60000000",
+        },
+        {
+          headers: { "Work-Session-Revision": `work-session-${receipt.id}-2` },
+        },
+      ),
+    );
+  vi.stubGlobal("fetch", fetcher);
+  render(
+    <WorkSession {...props} taskStatus="completed" projectStatus="completed" />,
+  );
+  expect(await screen.findByText("En pausa", {})).toBeVisible();
+  expect(screen.getByRole("button", { name: "Reanudar" })).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Pausar" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByText("La pausa no desplaza el fin previsto de la sesión."),
+  ).toBeVisible();
+  expect(fetcher.mock.calls[1][0]).toBe(
+    `/api/v1/work-sessions/${receipt.id}/state`,
+  );
 });

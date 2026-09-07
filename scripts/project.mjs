@@ -22,6 +22,8 @@ export function createProject(runner = run) {
       target !== "" &&
       (task !== "mutate" ||
         ![
+          "pause_resume_session-backend",
+          "pause_resume_session-frontend",
           "start_work_session-frontend",
           "start_work_session-backend",
           "start_work_session-backend-replay",
@@ -56,6 +58,21 @@ export function createProject(runner = run) {
       mutate: "pitest",
     };
     if (!commands[task]) throw new Error(`Unknown task: ${task}`);
+    if (task === "mutate" && target === "pause_resume_session-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.pause-resume-session.config.json",
+      ]);
+      return;
+    }
+    if (task === "mutate" && target === "pause_resume_session-backend") {
+      backend("pitest", ["-PmutationScope=pause_resume_session"]);
+      return;
+    }
     if (task === "mutate" && target === "start_work_session-backend-replay") {
       backend("pitest", ["-PmutationScope=start_work_session_replay"]);
       return;

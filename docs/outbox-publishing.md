@@ -63,6 +63,11 @@ La ejecución local opcional se documenta en el README del repositorio. El despl
 | SubtaskCreated.v1 | subtask.created.v1 | organization.subtask-created.v1 |
 | TaskStatusChanged.v1 | task.status-changed.v1 | organization.task-status-changed.v1 |
 | BlockPlanned.v1 | block.planned.v1 | organization.block-planned.v1 |
+| BlockChanged.v1 | block.changed.v1 | organization.block-changed.v1 |
+| WorkSessionStarted.v1 | work-session.started.v1 | organization.work-session-started.v1 |
+| WorkSessionStateChanged.v1 | work-session.state-changed.v1 | organization.work-session-state-changed.v1 |
+
+Las nueve primeras rutas pertenecen a entregas cerradas. La décima está integrada y revisada en la rama de pausa/reanudación, con pruebas del publicador; la funcionalidad15 completa sigue en desarrollo. Su evento describe PAUSE o RESUME confirmado, con revisión y microsegundos acumulados como cadenas decimales. El recibo durable y el estado de la sesión se guardan aparte del outbox, y el broker no participa en el commit HTTP. El estado vigente de entrega está en el roadmap.
 
 TaskCreated conserva aggregateId del proyecto y taskId de la tarea nueva. Su payload incluye título, pero excluye criterio y estimación. Crear una tarea confirma tarea y evento en la misma transacción, sin cambiar la representación o versión del proyecto. El estado final de validación se registra en create_task dentro del roadmap.
 
@@ -86,7 +91,7 @@ Estado, historial y outbox se guardan en una transacción PostgreSQL. El histori
 
 ## Bloques planificados
 
-El contrato schedule_block incorpora BlockPlanned.v1 y su séptima ruta. Bloque y evento se confirman en la misma transacción; un replay por clave devuelve el bloque original sin otro evento. La revisión de presupuesto no escribe outbox. El estado de calidad de esta entrega permanece en el roadmap y su dictamen, con mutación todavía en curso.
+El contrato schedule_block incorpora BlockPlanned.v1 y su séptima ruta. Bloque y evento se confirman en la misma transacción; un replay por clave devuelve el bloque original sin otro evento. La revisión de presupuesto no escribe outbox. Esta entrega está cerrada; el roadmap y su dictamen conservan las pruebas y los límites de calidad.
 
 Su payload cerrado contiene eventId, aggregateId, ownerId, occurredAt, schemaVersion, type, blockId, taskId, startAt, endAt, zoneId y durationMinutes. aggregateId sigue identificando el proyecto. No incluye objetivo privado, clave de idempotencia ni aceptación del exceso. Los extremos son instantes UTC y la zona original se conserva aunque deje de estar disponible en el catálogo posterior; el publicador no vuelve a calcular horarios históricos.
 

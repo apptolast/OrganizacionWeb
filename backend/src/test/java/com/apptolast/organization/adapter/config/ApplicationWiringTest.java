@@ -86,6 +86,53 @@ class ApplicationWiringTest {
   }
 
   @Test
+  void pause_s25_receiptBeanUsesTheRealStore() {
+    freshContext()
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              assertThatThrownBy(
+                      () ->
+                          context
+                              .getBean(ReadWorkSessionChangesUseCase.class)
+                              .byRequest("owner", UUID.randomUUID()))
+                  .isInstanceOf(WorkSessionChangeNotFoundException.class);
+            });
+  }
+
+  @Test
+  void pause_s1_stateBeanUsesTheRealStore() {
+    freshContext()
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              assertThatThrownBy(
+                      () ->
+                          context
+                              .getBean(ReadWorkSessionStateUseCase.class)
+                              .read("owner", UUID.randomUUID()))
+                  .isInstanceOf(WorkSessionNotFoundException.class);
+            });
+  }
+
+  @Test
+  void pause_s2_commandBeanUsesTheRealStore() {
+    freshContext()
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              var id = UUID.randomUUID();
+              assertThatThrownBy(
+                      () ->
+                          context
+                              .getBean(ChangeWorkSessionUseCase.class)
+                              .pause(
+                                  "owner", id, UUID.randomUUID(), new WorkSessionRevision(id, 1)))
+                  .isInstanceOf(WorkSessionNotFoundException.class);
+            });
+  }
+
+  @Test
   void reschedule_s12_cancelBeanReachesItsPortInFreshContext() {
     freshContext()
         .run(

@@ -1,3 +1,4 @@
+import { WorkSessionStatePanel } from "./work-session-state";
 import { useEffect, useState, useRef, useLayoutEffect, useId } from "react";
 import {
   readActiveWorkSession,
@@ -193,6 +194,15 @@ function Session(props: Props) {
       )}
       {active && active.id !== confirmed?.id && (
         <SessionFacts session={active} />
+      )}
+      {active && (
+        <>
+          <p>La pausa no desplaza el fin previsto de la sesión.</p>
+          <WorkSessionStatePanel
+            session={active}
+            onAccessFailure={props.onAccessFailure}
+          />
+        </>
       )}
       {(active === null || uncertain || busy) && (
         <>

@@ -83,6 +83,25 @@ function docker(args, input, timeout = 30000) {
     );
   return result.stdout.trim();
 }
+function serviceSnapshot(service) {
+  const id = docker(["ps", "-q", service]);
+  assert.match(id, /^[0-9a-f]+$/);
+  const result = spawnSync(
+    "docker",
+    ["inspect", "--format", "{{json .State.StartedAt}} {{json .Mounts}}", id],
+    {
+      encoding: "utf8",
+      timeout: 10000,
+    },
+  );
+  assert.equal(result.status, 0, "Inspect only the isolated smoke service");
+  const [startedAt, ...mounts] = result.stdout.trim().split(" ");
+  return {
+    id,
+    startedAt: JSON.parse(startedAt),
+    mounts: JSON.parse(mounts.join(" ")),
+  };
+}
 const pause = () => new Promise((done) => setTimeout(done, 1000));
 async function eventually(label, operation, seconds = 90) {
   const deadline = Date.now() + seconds * 1000;
@@ -108,7 +127,47 @@ async function createProject(name) {
   );
   return response.json();
 }
-function outbox(id, type = "ProjectCreated.v1", taskId) {
+async function postWithLostAck(path, headers, data) {
+  let upstreamStatus;
+  const relay = createHttpServer(async (incoming, outgoing) => {
+    try {
+      const chunks = [];
+      for await (const chunk of incoming) chunks.push(chunk);
+      const upstream = await fetch(`${origin}${path}`, {
+        method: "POST",
+        headers: { ...incoming.headers, host: new URL(origin).host },
+        body: Buffer.concat(chunks),
+        redirect: "manual",
+        signal: AbortSignal.timeout(4500),
+      });
+      upstreamStatus = upstream.status;
+      await upstream.arrayBuffer();
+    } catch {
+      upstreamStatus = undefined;
+    } finally {
+      outgoing.destroy();
+    }
+  });
+  await new Promise((done) => relay.listen(0, "127.0.0.1", done));
+  try {
+    await assert.rejects(() =>
+      application.post(`http://127.0.0.1:${relay.address().port}${path}`, {
+        headers,
+        data,
+        maxRetries: 0,
+        timeout: 6000,
+      }),
+    );
+    assert.equal(
+      upstreamStatus,
+      201,
+      "API committed before relay discarded its response",
+    );
+  } finally {
+    await new Promise((done) => relay.close(done));
+  }
+}
+function outbox(id, type = "ProjectCreated.v1", taskId, revision) {
   assert.ok(
     [
       "ProjectCreated.v1",
@@ -118,6 +177,7 @@ function outbox(id, type = "ProjectCreated.v1", taskId) {
       "SubtaskCreated.v1",
       "TaskStatusChanged.v1",
       "WorkSessionStarted.v1",
+      "WorkSessionStateChanged.v1",
     ].includes(type),
   );
   assert.match(id, /^[0-9a-f-]{36}$/i);
@@ -128,6 +188,11 @@ function outbox(id, type = "ProjectCreated.v1", taskId) {
   ].includes(type);
   if (taskEvent) assert.match(taskId, /^[0-9a-f-]{36}$/i);
   const taskFilter = taskEvent ? ` AND payload->>'taskId'='${taskId}'` : "";
+  const transitionEvent = type === "WorkSessionStateChanged.v1";
+  if (transitionEvent) assert.match(revision, /^[1-9][0-9]*$/);
+  const revisionFilter = transitionEvent
+    ? ` AND payload->>'revision'='${revision}'`
+    : "";
   const value = docker([
     "exec",
     "-T",
@@ -139,7 +204,7 @@ function outbox(id, type = "ProjectCreated.v1", taskId) {
     "organization",
     "-At",
     "-c",
-    `SELECT row_to_json(e) FROM outbox_events e WHERE aggregate_id='${id}' AND event_type='${type}'${taskFilter}`,
+    `SELECT row_to_json(e) FROM outbox_events e WHERE aggregate_id='${id}' AND event_type='${type}'${taskFilter}${revisionFilter}`,
   ]);
   return value ? JSON.parse(value) : undefined;
 }
@@ -197,6 +262,14 @@ function assertMessage(row, received) {
       "plannedMinutes",
       "plannedEndAt",
       "zoneId",
+    ],
+    "WorkSessionStateChanged.v1": [
+      "action",
+      "revision",
+      "fromStatus",
+      "toStatus",
+      "workedMicroseconds",
+      "runningSince",
     ],
   }[row.event_type];
   assert.ok(specificFields, "Only approved event schemas are accepted");
@@ -790,44 +863,7 @@ try {
     Origin: origin,
     "Idempotency-Key": workKey,
   };
-  let upstreamStatus;
-  const relay = createHttpServer(async (incoming, outgoing) => {
-    try {
-      const chunks = [];
-      for await (const chunk of incoming) chunks.push(chunk);
-      const upstream = await fetch(`${origin}${workPath}`, {
-        method: "POST",
-        headers: { ...incoming.headers, host: new URL(origin).host },
-        body: Buffer.concat(chunks),
-        redirect: "manual",
-        signal: AbortSignal.timeout(4500),
-      });
-      upstreamStatus = upstream.status;
-      await upstream.arrayBuffer();
-    } catch {
-      upstreamStatus = undefined;
-    } finally {
-      outgoing.destroy();
-    }
-  });
-  await new Promise((done) => relay.listen(0, "127.0.0.1", done));
-  try {
-    await assert.rejects(() =>
-      application.post(`http://127.0.0.1:${relay.address().port}${workPath}`, {
-        headers: workHeaders,
-        data: { plannedMinutes: 25 },
-        maxRetries: 0,
-        timeout: 6000,
-      }),
-    );
-    assert.equal(
-      upstreamStatus,
-      201,
-      "API committed before relay discarded its response",
-    );
-  } finally {
-    await new Promise((done) => relay.close(done));
-  }
+  await postWithLostAck(workPath, workHeaders, { plannedMinutes: 25 });
   const workLookup = `/api/v1/work-sessions/by-request/${workKey}`;
   const recoveredStartResponse = await application.get(workLookup);
   assert.equal(recoveredStartResponse.status(), 200);
@@ -971,6 +1007,240 @@ try {
   assert.equal(outbox(recoveredStart.id, "WorkSessionStarted.v1"), undefined);
   console.log(
     "PASS start_work_session @s25/@s26: lost HTTP response, owner/key recovery, real Rabbit retry/publication, restart without published outbox",
+  );
+  const sessionStatePath = `/api/v1/work-sessions/${recoveredStart.id}/state`;
+  const initialStateResponse = await application.get(sessionStatePath);
+  assert.equal(initialStateResponse.status(), 200);
+  const initialState = await initialStateResponse.json();
+  assert.equal(initialState.state.status, "running");
+  assert.equal(initialState.state.revision, "1");
+  assert.deepEqual(initialState.state.session, recoveredStart);
+  const pauseKey = randomUUID();
+  docker(["stop", "rabbitmq"], undefined, 30000);
+  await postWithLostAck(
+    `/api/v1/work-sessions/${recoveredStart.id}/pause`,
+    {
+      ...(await csrfHeaders(application)),
+      Origin: origin,
+      "Idempotency-Key": pauseKey,
+      "Work-Session-Revision":
+        initialStateResponse.headers()["work-session-revision"],
+    },
+    {},
+  );
+  const pauseLookup = `/api/v1/work-session-changes/by-request/${pauseKey}`;
+  const pauseResponse = await application.get(pauseLookup);
+  assert.equal(pauseResponse.status(), 200);
+  const pauseReceipt = await pauseResponse.json();
+  assert.deepEqual(
+    Object.keys(pauseReceipt).sort(),
+    ["id", "sessionId", "action", "occurredAt", "before", "after"].sort(),
+  );
+  assert.equal(pauseReceipt.sessionId, recoveredStart.id);
+  assert.equal(pauseReceipt.action, "PAUSE");
+  assert.deepEqual(pauseReceipt.before, initialState.state);
+  assert.equal(pauseReceipt.after.status, "paused");
+  assert.equal(pauseReceipt.after.revision, "2");
+  assert.equal(pauseReceipt.after.runningSince, null);
+  assert.equal(pauseReceipt.after.changedAt, pauseReceipt.occurredAt);
+  assert.deepEqual(pauseReceipt.after.session, recoveredStart);
+  const pausedStateResponse = await application.get(sessionStatePath);
+  assert.equal(pausedStateResponse.status(), 200);
+  assert.deepEqual(
+    (await pausedStateResponse.json()).state,
+    pauseReceipt.after,
+  );
+  const resumeResponse = await application.post(
+    `/api/v1/work-sessions/${recoveredStart.id}/resume`,
+    {
+      headers: {
+        ...(await csrfHeaders(application)),
+        Origin: origin,
+        "Idempotency-Key": randomUUID(),
+        "Work-Session-Revision":
+          pausedStateResponse.headers()["work-session-revision"],
+      },
+      data: {},
+    },
+  );
+  assert.equal(resumeResponse.status(), 201);
+  const resumeReceipt = await resumeResponse.json();
+  assert.equal(
+    resumeResponse.headers().location,
+    `/api/v1/work-session-changes/${resumeReceipt.id}`,
+  );
+  assert.equal(resumeReceipt.action, "RESUME");
+  assert.deepEqual(resumeReceipt.before, pauseReceipt.after);
+  assert.equal(resumeReceipt.after.status, "running");
+  assert.equal(resumeReceipt.after.revision, "3");
+  assert.equal(resumeReceipt.after.runningSince, resumeReceipt.occurredAt);
+  assert.equal(
+    resumeReceipt.after.workedMicroseconds,
+    pauseReceipt.after.workedMicroseconds,
+  );
+  assert.deepEqual(resumeReceipt.after.session, recoveredStart);
+  const changeType = "WorkSessionStateChanged.v1";
+  const pendingChanges = [];
+  for (const receipt of [pauseReceipt, resumeReceipt]) {
+    const row = await eventually(
+      "transition remains pending while RabbitMQ is unavailable",
+      () => {
+        const value = outbox(
+          recoveredStart.id,
+          changeType,
+          undefined,
+          receipt.after.revision,
+        );
+        return value?.status === "pending" && value.attempts >= 1
+          ? value
+          : false;
+      },
+      30,
+    );
+    assert.equal(row.last_error_code, "BROKER_UNAVAILABLE");
+    assert.equal(row.published_at, null);
+    assert.deepEqual(row.payload, {
+      eventId: row.event_id,
+      aggregateId: recoveredStart.id,
+      ownerId: env.APP_AUTH_USERNAME,
+      occurredAt: receipt.occurredAt,
+      schemaVersion: 1,
+      type: changeType,
+      action: receipt.action,
+      revision: receipt.after.revision,
+      fromStatus: receipt.before.status,
+      toStatus: receipt.after.status,
+      workedMicroseconds: receipt.after.workedMicroseconds,
+      runningSince: receipt.after.runningSince,
+    });
+    pendingChanges.push(row);
+  }
+  docker(["start", "rabbitmq"], undefined, 30000);
+  const publishedChanges = [];
+  for (const pending of pendingChanges) {
+    const row = await eventually(
+      "original transition is published after broker recovery",
+      () => {
+        const value = outbox(
+          recoveredStart.id,
+          changeType,
+          undefined,
+          pending.payload.revision,
+        );
+        return value?.status === "published" ? value : false;
+      },
+    );
+    assert.equal(row.event_id, pending.event_id);
+    assert.deepEqual(row.payload, pending.payload);
+    assert.ok(row.attempts > pending.attempts);
+    publishedChanges.push(row);
+  }
+  const changeQueue = "organization.work-session-state-changed.v1";
+  const changeMessages = await eventually(
+    "tenth route receives both original transitions",
+    () => {
+      const received = management(`queues/organization/${changeQueue}/get`, {
+        count: 100,
+        ackmode: "ack_requeue_true",
+        encoding: "auto",
+        truncate: 1000000,
+      });
+      return publishedChanges.every((row) =>
+        received.some((item) => item.properties.message_id === row.event_id),
+      )
+        ? received
+        : false;
+    },
+  );
+  for (const row of publishedChanges) assertMessage(row, changeMessages);
+  const changeTopology = management(`queues/organization/${changeQueue}`);
+  assert.equal(changeTopology.durable, true);
+  assert.equal(changeTopology.type, "quorum");
+  assert.ok(
+    management(
+      `bindings/organization/e/organization.events/q/${changeQueue}`,
+    ).some(
+      (binding) => binding.routing_key === "work-session.state-changed.v1",
+    ),
+  );
+  function transitionCounts() {
+    return JSON.parse(
+      docker([
+        "exec",
+        "-T",
+        "postgres",
+        "psql",
+        "-U",
+        env.DB_USERNAME,
+        "-d",
+        "organization",
+        "-At",
+        "-c",
+        `SELECT json_build_object('changes',(SELECT count(*) FROM work_session_changes WHERE session_id='${recoveredStart.id}'),'intervals',(SELECT count(*) FROM work_session_intervals WHERE session_id='${recoveredStart.id}'),'events',(SELECT count(*) FROM outbox_events WHERE aggregate_id='${recoveredStart.id}' AND event_type='WorkSessionStateChanged.v1'))`,
+      ]),
+    );
+  }
+  assert.deepEqual(transitionCounts(), { changes: 2, intervals: 1, events: 2 });
+  for (const row of publishedChanges) {
+    assert.match(row.event_id, /^[0-9a-f-]{36}$/i);
+    docker([
+      "exec",
+      "-T",
+      "postgres",
+      "psql",
+      "-U",
+      env.DB_USERNAME,
+      "-d",
+      "organization",
+      "-At",
+      "-c",
+      `DELETE FROM outbox_events WHERE event_id='${row.event_id}' AND status='published'`,
+    ]);
+  }
+  const countsBeforeRecovery = transitionCounts();
+  assert.deepEqual(countsBeforeRecovery, {
+    changes: 2,
+    intervals: 1,
+    events: 0,
+  });
+  const backendBefore = serviceSnapshot("backend");
+  const postgresBefore = serviceSnapshot("postgres");
+  docker(["restart", "backend"], undefined, 30000);
+  await eventually(
+    "historical pause receipt survives restart and later resume without outbox",
+    async () => {
+      const response = await application
+        .get(pauseLookup, { timeout: 2000 })
+        .catch(() => null);
+      if (!response || response.status() !== 200) return false;
+      assert.deepEqual(await response.json(), pauseReceipt);
+      return true;
+    },
+  );
+  // The compose service restart preserves both container identities and PostgreSQL storage.
+  const backendAfter = serviceSnapshot("backend");
+  assert.equal(backendAfter.id, backendBefore.id);
+  assert.notEqual(backendAfter.startedAt, backendBefore.startedAt);
+  assert.deepEqual(serviceSnapshot("postgres"), postgresBefore);
+  const byId = await application.get(
+    `/api/v1/work-session-changes/${pauseReceipt.id}`,
+  );
+  assert.equal(byId.status(), 200);
+  assert.equal(byId.headers().location, undefined);
+  assert.deepEqual(await byId.json(), pauseReceipt);
+  const currentStateResponse = await application.get(sessionStatePath);
+  assert.equal(currentStateResponse.status(), 200);
+  assert.deepEqual(
+    (await currentStateResponse.json()).state,
+    resumeReceipt.after,
+  );
+  assert.deepEqual(
+    await (await application.get(workLookup)).json(),
+    recoveredStart,
+  );
+  assert.deepEqual(transitionCounts(), countsBeforeRecovery);
+  console.log(
+    "PASS pause_resume_session @s25/@s26: lost PAUSE ACK, later RESUME, two exact persistent events, real backend restart and immutable C/K recovery without outbox",
   );
 } catch (error) {
   console.error(

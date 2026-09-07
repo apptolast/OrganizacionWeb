@@ -1,0 +1,98 @@
+[
+  {
+    "originalId": "401",
+    "file": "src/work-session-state.tsx",
+    "location": {
+      "end": {
+        "column": 71,
+        "line": 85
+      },
+      "start": {
+        "column": 9,
+        "line": 84
+      }
+    },
+    "mutator": "ConditionalExpression",
+    "replacement": "true"
+  },
+  {
+    "originalId": "409",
+    "file": "src/work-session-state.tsx",
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 85
+      },
+      "start": {
+        "column": 12,
+        "line": 85
+      }
+    },
+    "mutator": "LogicalOperator",
+    "replacement": "check || problem?.code === \"WORK_SESSION_CHANGE_NOT_FOUND\""
+  },
+  {
+    "originalId": "410",
+    "file": "src/work-session-state.tsx",
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 85
+      },
+      "start": {
+        "column": 21,
+        "line": 85
+      }
+    },
+    "mutator": "ConditionalExpression",
+    "replacement": "true"
+  },
+  {
+    "originalId": "267",
+    "file": "src/work-session-state-api.ts",
+    "location": {
+      "end": {
+        "column": 35,
+        "line": 196
+      },
+      "start": {
+        "column": 5,
+        "line": 195
+      }
+    },
+    "mutator": "LogicalOperator",
+    "replacement": "!isChange(value) && value.action !== intent.action"
+  },
+  {
+    "originalId": "266",
+    "file": "src/work-session-state-api.ts",
+    "location": {
+      "end": {
+        "column": 35,
+        "line": 196
+      },
+      "start": {
+        "column": 5,
+        "line": 195
+      }
+    },
+    "mutator": "ConditionalExpression",
+    "replacement": "false"
+  },
+  {
+    "originalId": "269",
+    "file": "src/work-session-state-api.ts",
+    "location": {
+      "end": {
+        "column": 35,
+        "line": 196
+      },
+      "start": {
+        "column": 5,
+        "line": 196
+      }
+    },
+    "mutator": "ConditionalExpression",
+    "replacement": "false"
+  }
+]

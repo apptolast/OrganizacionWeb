@@ -9,6 +9,24 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  com.apptolast.organization.application.ReadWorkSessionChanges readWorkSessionChanges(
+      com.apptolast.organization.application.WorkSessionTransitionQueries queries) {
+    return new com.apptolast.organization.application.ReadWorkSessionChanges(queries);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReadWorkSessionState readWorkSessionState(
+      com.apptolast.organization.application.WorkSessionStateQueries queries, Clock clock) {
+    return new com.apptolast.organization.application.ReadWorkSessionState(queries, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ChangeWorkSession changeWorkSession(
+      com.apptolast.organization.application.WorkSessionChanging store, Clock clock) {
+    return new com.apptolast.organization.application.ChangeWorkSession(store, clock);
+  }
+
+  @Bean
   com.apptolast.organization.adapter.persistence.PostgresWorkSessionStore workSessionStore(
       org.springframework.jdbc.core.JdbcTemplate jdbc,
       org.springframework.transaction.PlatformTransactionManager transactions,

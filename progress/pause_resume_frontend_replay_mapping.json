@@ -1,0 +1,110 @@
+[
+  {
+    "originalId": "401",
+    "replayId": "5",
+    "file": "src/work-session-state.tsx",
+    "location": {
+      "end": {
+        "column": 71,
+        "line": 85
+      },
+      "start": {
+        "column": 9,
+        "line": 84
+      }
+    },
+    "mutator": "ConditionalExpression",
+    "replacement": "true",
+    "status": "Killed"
+  },
+  {
+    "originalId": "409",
+    "replayId": "13",
+    "file": "src/work-session-state.tsx",
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 85
+      },
+      "start": {
+        "column": 12,
+        "line": 85
+      }
+    },
+    "mutator": "LogicalOperator",
+    "replacement": "check || problem?.code === \"WORK_SESSION_CHANGE_NOT_FOUND\"",
+    "status": "Killed"
+  },
+  {
+    "originalId": "410",
+    "replayId": "14",
+    "file": "src/work-session-state.tsx",
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 85
+      },
+      "start": {
+        "column": 21,
+        "line": 85
+      }
+    },
+    "mutator": "ConditionalExpression",
+    "replacement": "true",
+    "status": "Killed"
+  },
+  {
+    "originalId": "267",
+    "replayId": "1",
+    "file": "src/work-session-state-api.ts",
+    "location": {
+      "end": {
+        "column": 35,
+        "line": 196
+      },
+      "start": {
+        "column": 5,
+        "line": 195
+      }
+    },
+    "mutator": "LogicalOperator",
+    "replacement": "!isChange(value) && value.action !== intent.action",
+    "status": "Killed"
+  },
+  {
+    "originalId": "266",
+    "replayId": "0",
+    "file": "src/work-session-state-api.ts",
+    "location": {
+      "end": {
+        "column": 35,
+        "line": 196
+      },
+      "start": {
+        "column": 5,
+        "line": 195
+      }
+    },
+    "mutator": "ConditionalExpression",
+    "replacement": "false",
+    "status": "Killed"
+  },
+  {
+    "originalId": "269",
+    "replayId": "3",
+    "file": "src/work-session-state-api.ts",
+    "location": {
+      "end": {
+        "column": 35,
+        "line": 196
+      },
+      "start": {
+        "column": 5,
+        "line": 196
+      }
+    },
+    "mutator": "ConditionalExpression",
+    "replacement": "false",
+    "status": "Killed"
+  }
+]

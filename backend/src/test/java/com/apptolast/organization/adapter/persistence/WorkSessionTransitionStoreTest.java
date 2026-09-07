@@ -315,6 +315,14 @@ class WorkSessionTransitionStoreTest {
   private List<Object> racePause(
       com.apptolast.organization.domain.SessionStart original, UUID firstKey, UUID secondKey)
       throws Exception {
+    return raceTransitions(
+        original, List.of(() -> pauseOwn(original, firstKey), () -> pauseOwn(original, secondKey)));
+  }
+
+  private List<Object> raceTransitions(
+      com.apptolast.organization.domain.SessionStart original,
+      List<java.util.function.Supplier<WorkSessionTransitionConfirmation>> operations)
+      throws Exception {
     try (var workers = java.util.concurrent.Executors.newFixedThreadPool(2)) {
       var futures = new ArrayList<java.util.concurrent.Future<Object>>();
       new org.springframework.transaction.support.TransactionTemplate(manager)
@@ -324,12 +332,12 @@ class WorkSessionTransitionStoreTest {
                     "SELECT id FROM work_sessions WHERE id=? FOR UPDATE",
                     UUID.class,
                     original.id());
-                for (var key : List.of(firstKey, secondKey)) {
+                for (var operation : operations) {
                   futures.add(
                       workers.submit(
                           () -> {
                             try {
-                              return pauseOwn(original, key);
+                              return operation.get();
                             } catch (RuntimeException error) {
                               return error;
                             }
@@ -510,6 +518,14 @@ class WorkSessionTransitionStoreTest {
   }
 
   private void assertSuppressedWriteRollsBack(String table, String operation) {
+    assertSuppressedWriteRollsBack(
+        table, operation, original -> pauseOwn(original, UUID.randomUUID()));
+  }
+
+  private void assertSuppressedWriteRollsBack(
+      String table,
+      String operation,
+      java.util.function.Consumer<com.apptolast.organization.domain.SessionStart> change) {
     var original = startOwn();
     var before = jdbc.queryForMap("SELECT * FROM work_sessions WHERE id=?", original.id());
     jdbc.execute(
@@ -521,7 +537,7 @@ class WorkSessionTransitionStoreTest {
             + table
             + " FOR EACH ROW EXECUTE FUNCTION suppress_transition_write()");
     try {
-      assertThatThrownBy(() -> pauseOwn(original, UUID.randomUUID()))
+      assertThatThrownBy(() -> change.accept(original))
           .isInstanceOf(StorageUnavailableException.class);
     } finally {
       jdbc.execute("DROP TRIGGER suppress_transition_write ON " + table);
@@ -1131,5 +1147,725 @@ class WorkSessionTransitionStoreTest {
     var original = startOwn();
     assertThatThrownBy(() -> store.closure("other-owner", original.id()))
         .isInstanceOf(WorkSessionNotFoundException.class);
+  }
+
+  @Test
+  void s16_replayRejectsDifferentProgressNoteBeforeClock() {
+    var original = startOwn();
+    var key = UUID.randomUUID();
+    new ChangeWorkSession(store, Clock.fixed(original.startedAt().plusSeconds(1), ZoneOffset.UTC))
+        .close(
+            owner,
+            original.id(),
+            key,
+            new WorkSessionRevision(original.id(), 1),
+            new com.apptolast.organization.domain.WorkSessionCloseNotes("Original", "Después"));
+    var clock = org.mockito.Mockito.mock(Clock.class);
+    assertThatThrownBy(
+            () ->
+                new ChangeWorkSession(store, clock)
+                    .close(
+                        owner,
+                        original.id(),
+                        key,
+                        new WorkSessionRevision(original.id(), 1),
+                        new com.apptolast.organization.domain.WorkSessionCloseNotes(
+                            "Distinto", "Después")))
+        .isInstanceOf(WorkSessionIdempotencyConflictException.class);
+    org.mockito.Mockito.verifyNoInteractions(clock);
+  }
+
+  @Test
+  void s16_replayRejectsDifferentNextStepBeforeClock() {
+    var original = startOwn();
+    var key = UUID.randomUUID();
+    new ChangeWorkSession(store, Clock.fixed(original.startedAt().plusSeconds(1), ZoneOffset.UTC))
+        .close(
+            owner,
+            original.id(),
+            key,
+            new WorkSessionRevision(original.id(), 1),
+            new com.apptolast.organization.domain.WorkSessionCloseNotes("Original", "Después"));
+    var clock = org.mockito.Mockito.mock(Clock.class);
+    assertThatThrownBy(
+            () ->
+                new ChangeWorkSession(store, clock)
+                    .close(
+                        owner,
+                        original.id(),
+                        key,
+                        new WorkSessionRevision(original.id(), 1),
+                        new com.apptolast.organization.domain.WorkSessionCloseNotes(
+                            "Original", "Otro paso")))
+        .isInstanceOf(WorkSessionIdempotencyConflictException.class);
+    org.mockito.Mockito.verifyNoInteractions(clock);
+  }
+
+  @Test
+  void s15_replaysOriginalCloseAfterAnotherSessionStarts() {
+    var original = startOwn();
+    var key = UUID.randomUUID();
+    var first =
+        new ChangeWorkSession(
+                store, Clock.fixed(original.startedAt().plusSeconds(1), ZoneOffset.UTC))
+            .close(
+                owner,
+                original.id(),
+                key,
+                new WorkSessionRevision(original.id(), 1),
+                new com.apptolast.organization.domain.WorkSessionCloseNotes(null, null));
+    var next = startOwn();
+    var nextRow = jdbc.queryForMap("SELECT * FROM work_sessions WHERE id=?", next.id());
+    var clock = org.mockito.Mockito.mock(Clock.class);
+    var replay =
+        new ChangeWorkSession(store, clock)
+            .close(
+                owner,
+                original.id(),
+                key,
+                new WorkSessionRevision(original.id(), 1),
+                new com.apptolast.organization.domain.WorkSessionCloseNotes("", ""));
+    assertThat(replay.replayed()).isTrue();
+    assertThat(replay.receipt()).isEqualTo(first.receipt());
+    assertThat(store.active(owner)).contains(next);
+    assertThat(store.detail(owner, original.id())).contains(original);
+    assertThat(jdbc.queryForMap("SELECT * FROM work_sessions WHERE id=?", next.id()))
+        .isEqualTo(nextRow);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_changes WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(1);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM outbox_events WHERE aggregate_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(2);
+    org.mockito.Mockito.verifyNoInteractions(clock);
+  }
+
+  @Test
+  void s23_databaseRejectsASecondDurableClosureForTheSameSession() {
+    var original = startOwn();
+    var receipt =
+        new ChangeWorkSession(
+                store, Clock.fixed(original.startedAt().plusSeconds(1), ZoneOffset.UTC))
+            .close(
+                owner,
+                original.id(),
+                UUID.randomUUID(),
+                new WorkSessionRevision(original.id(), 1),
+                new com.apptolast.organization.domain.WorkSessionCloseNotes("", ""))
+            .receipt();
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "INSERT INTO work_session_changes(id,owner_id,session_id,request_key,action,expected_revision,occurred_at,receipt) SELECT ?,owner_id,session_id,?,action,expected_revision,occurred_at,receipt FROM work_session_changes WHERE id=?",
+                    UUID.randomUUID(),
+                    UUID.randomUUID(),
+                    receipt.id()))
+        .isInstanceOf(org.springframework.dao.DuplicateKeyException.class);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_changes WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(1);
+  }
+
+  @Test
+  void s21_closeSuppressedStatePreservesItsPlace() {
+    assertSuppressedWriteRollsBack("work_sessions", "UPDATE", this::closeOwn);
+  }
+
+  private WorkSessionTransitionConfirmation closeOwn(
+      com.apptolast.organization.domain.SessionStart session) {
+    return new ChangeWorkSession(
+            store, Clock.fixed(session.startedAt().plusSeconds(1), ZoneOffset.UTC))
+        .close(
+            owner,
+            session.id(),
+            UUID.randomUUID(),
+            new WorkSessionRevision(session.id(), 1),
+            new com.apptolast.organization.domain.WorkSessionCloseNotes("", ""));
+  }
+
+  @Test
+  void s21_closeSuppressedIntervalRollsBackState() {
+    assertSuppressedWriteRollsBack("work_session_intervals", "INSERT", this::closeOwn);
+  }
+
+  @Test
+  void s21_closeSuppressedReceiptWithoutWinnerRollsBack() {
+    assertSuppressedWriteRollsBack("work_session_changes", "INSERT", this::closeOwn);
+  }
+
+  @Test
+  void s21_closeSuppressedOutboxRollsBackEverything() {
+    assertSuppressedWriteRollsBack("outbox_events", "INSERT", this::closeOwn);
+  }
+
+  @Test
+  void s21_closeCommitFailureRetainsTheOpenPlace() {
+    var original = startOwn();
+    var before = jdbc.queryForMap("SELECT * FROM work_sessions WHERE id=?", original.id());
+    jdbc.execute(
+        "CREATE FUNCTION reject_transition_commit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'forced commit failure'; END $$");
+    jdbc.execute(
+        "CREATE CONSTRAINT TRIGGER reject_transition_commit AFTER INSERT ON work_session_changes DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION reject_transition_commit()");
+    try {
+      assertThatThrownBy(() -> closeOwn(original)).isInstanceOf(StorageUnavailableException.class);
+    } finally {
+      jdbc.execute("DROP TRIGGER reject_transition_commit ON work_session_changes");
+      jdbc.execute("DROP FUNCTION reject_transition_commit()");
+    }
+    assertThat(store.active(owner)).contains(original);
+    assertThat(jdbc.queryForMap("SELECT * FROM work_sessions WHERE id=?", original.id()))
+        .isEqualTo(before);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_intervals WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_changes WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM outbox_events WHERE aggregate_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(1);
+  }
+
+  @Test
+  void s18_sameCloseKeyRaceReturnsOneOriginalReceipt() throws Exception {
+    var original = startOwn();
+    var key = UUID.randomUUID();
+    java.util.function.Supplier<WorkSessionTransitionConfirmation> close =
+        () ->
+            new ChangeWorkSession(
+                    store, Clock.fixed(original.startedAt().plusSeconds(1), ZoneOffset.UTC))
+                .close(
+                    owner,
+                    original.id(),
+                    key,
+                    new WorkSessionRevision(original.id(), 1),
+                    new com.apptolast.organization.domain.WorkSessionCloseNotes("Nota", "Después"));
+    var results = raceTransitions(original, List.of(close, close));
+    assertThat(results).allMatch(WorkSessionTransitionConfirmation.class::isInstance);
+    var first = (WorkSessionTransitionConfirmation) results.get(0);
+    var second = (WorkSessionTransitionConfirmation) results.get(1);
+    assertThat(first.receipt()).isEqualTo(second.receipt());
+    assertThat(List.of(first.replayed(), second.replayed())).containsExactlyInAnyOrder(false, true);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_changes WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(1);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM outbox_events WHERE aggregate_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(2);
+  }
+
+  @Test
+  void s18_distinctCloseKeysRaceAtOneRevision() throws Exception {
+    var original = startOwn();
+    var results =
+        raceTransitions(original, List.of(() -> closeOwn(original), () -> closeOwn(original)));
+    assertOneTransitionAndOneStale(original, results, 2, 1);
+  }
+
+  private void assertOneTransitionAndOneStale(
+      com.apptolast.organization.domain.SessionStart original,
+      List<Object> results,
+      long revision,
+      int changes) {
+    assertThat(results.stream().filter(WorkSessionTransitionConfirmation.class::isInstance))
+        .hasSize(1);
+    var failures =
+        results.stream()
+            .filter(
+                com.apptolast.organization.domain.WorkSessionTransitionException.class::isInstance)
+            .toList();
+    assertThat(failures).hasSize(1);
+    assertThat(
+            ((com.apptolast.organization.domain.WorkSessionTransitionException) failures.getFirst())
+                .code())
+        .isEqualTo("PRECONDITION_FAILED");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_changes WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(changes);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT revision FROM work_sessions WHERE id=?", Long.class, original.id()))
+        .isEqualTo(revision);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM outbox_events WHERE aggregate_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(changes + 1);
+  }
+
+  @Test
+  void s18_closeAndPauseRaceAtOneRevision() throws Exception {
+    var original = startOwn();
+    var results =
+        raceTransitions(
+            original,
+            List.of(() -> closeOwn(original), () -> pauseOwn(original, UUID.randomUUID())));
+    assertOneTransitionAndOneStale(original, results, 2, 1);
+  }
+
+  @Test
+  void s18_closeAndResumeRaceFromPaused() throws Exception {
+    var original = startOwn();
+    var paused = pauseOwn(original, UUID.randomUUID()).receipt();
+    var command =
+        new ChangeWorkSession(
+            store, Clock.fixed(paused.occurredAt().plusSeconds(1), ZoneOffset.UTC));
+    var token = new WorkSessionRevision(original.id(), 2);
+    var results =
+        raceTransitions(
+            original,
+            List.of(
+                () ->
+                    command.close(
+                        owner,
+                        original.id(),
+                        UUID.randomUUID(),
+                        token,
+                        new com.apptolast.organization.domain.WorkSessionCloseNotes("", "")),
+                () -> command.resume(owner, original.id(), UUID.randomUUID(), token)));
+    assertOneTransitionAndOneStale(original, results, 3, 2);
+  }
+
+  @Test
+  void s26_openOwnedSessionHasNoClosureReceipt() {
+    var original = startOwn();
+    assertThatThrownBy(() -> new ReadWorkSessionChanges(store).closure(owner, original.id()))
+        .isInstanceOf(WorkSessionChangeNotFoundException.class);
+    assertThat(store.active(owner)).contains(original);
+  }
+
+  @Test
+  void s27_closureReadCommitFailureIsNotAbsence() {
+    var original = startOwn();
+    var failing = new PostgresWorkSessionStore(jdbc, failingReadEnd(), json);
+    assertThatThrownBy(() -> new ReadWorkSessionChanges(failing).closure(owner, original.id()))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s27_closureSqlFailureIsNotAbsence() {
+    var original = startOwn();
+    jdbc.execute("ALTER TABLE work_session_changes RENAME TO unavailable_changes");
+    try {
+      assertThatThrownBy(() -> new ReadWorkSessionChanges(store).closure(owner, original.id()))
+          .isInstanceOf(StorageUnavailableException.class);
+    } finally {
+      jdbc.execute("ALTER TABLE unavailable_changes RENAME TO work_session_changes");
+    }
+  }
+
+  @Test
+  void s24_closedSnapshotKeepsFinalNetWhenClockMovesBackwards() {
+    var original = startOwn();
+    var receipt = closeOwn(original).receipt();
+    var previous = jdbc.queryForMap("SELECT * FROM work_sessions WHERE id=?", original.id());
+    var at = original.startedAt().minusSeconds(1);
+    var snapshot =
+        new ReadWorkSessionState(store, Clock.fixed(at, ZoneOffset.UTC)).read(owner, original.id());
+    assertThat(snapshot.state()).isEqualTo(receipt.after());
+    assertThat(snapshot.netMicroseconds()).isEqualTo(1000000);
+    assertThat(snapshot.serverNow()).isEqualTo(at);
+    assertThat(jdbc.queryForMap("SELECT * FROM work_sessions WHERE id=?", original.id()))
+        .isEqualTo(previous);
+  }
+
+  @Test
+  void s22_crossSessionCollisionRollsBackBeforeFreshIntentLookup() {
+    var first = startOwn();
+    var key = UUID.randomUUID();
+    var closed =
+        new ChangeWorkSession(store, Clock.fixed(first.startedAt().plusSeconds(1), ZoneOffset.UTC))
+            .close(
+                owner,
+                first.id(),
+                key,
+                new WorkSessionRevision(first.id(), 1),
+                new com.apptolast.organization.domain.WorkSessionCloseNotes("Original", ""));
+    var next = startOwn();
+    var previous = jdbc.queryForMap("SELECT * FROM work_sessions WHERE id=?", next.id());
+    var transactions = new ArrayList<Long>();
+    var firstLookup = new java.util.concurrent.atomic.AtomicBoolean(true);
+    var connection =
+        new JdbcTemplate(jdbc.getDataSource()) {
+          @Override
+          public <T> List<T> query(
+              String sql, org.springframework.jdbc.core.RowMapper<T> mapper, Object... args) {
+            if (sql.equals(
+                "SELECT receipt FROM work_session_changes WHERE owner_id=? AND request_key=?")) {
+              transactions.add(queryForObject("SELECT txid_current()", Long.class));
+              if (firstLookup.getAndSet(false)) return List.of();
+            }
+            return super.query(sql, mapper, args);
+          }
+        };
+    var contender = new PostgresWorkSessionStore(connection, manager, json);
+    assertThatThrownBy(
+            () ->
+                new ChangeWorkSession(
+                        contender, Clock.fixed(next.startedAt().plusSeconds(1), ZoneOffset.UTC))
+                    .close(
+                        owner,
+                        next.id(),
+                        key,
+                        new WorkSessionRevision(next.id(), 1),
+                        new com.apptolast.organization.domain.WorkSessionCloseNotes(
+                            "Original", "")))
+        .isInstanceOf(WorkSessionIdempotencyConflictException.class);
+    assertThat(transactions).hasSize(2).doesNotHaveDuplicates();
+    assertThat(jdbc.queryForMap("SELECT * FROM work_sessions WHERE id=?", next.id()))
+        .isEqualTo(previous);
+    assertThat(store.active(owner)).contains(next);
+    assertThat(store.changeByRequest(owner, key)).contains(closed.receipt());
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_changes WHERE session_id=?",
+                Integer.class,
+                next.id()))
+        .isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_intervals WHERE session_id=?",
+                Integer.class,
+                next.id()))
+        .isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM outbox_events WHERE aggregate_id=?",
+                Integer.class,
+                next.id()))
+        .isEqualTo(1);
+  }
+
+  @Test
+  void s25_snapshotExcludesAConcurrentCloseThatCommitsBeforeClock() {
+    var original = startOwn();
+    var clock = org.mockito.Mockito.mock(Clock.class);
+    try (var worker = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+      org.mockito.Mockito.when(clock.instant())
+          .thenAnswer(
+              call -> {
+                var writer = worker.submit(() -> closeOwn(original));
+                assertThat(
+                        writer
+                            .get(5, java.util.concurrent.TimeUnit.SECONDS)
+                            .receipt()
+                            .after()
+                            .status())
+                    .isEqualTo("closed");
+                assertThat(
+                        jdbc.queryForObject(
+                            "SELECT status FROM work_sessions WHERE id=?",
+                            String.class,
+                            original.id()))
+                    .isEqualTo("running");
+                return original.startedAt().plusSeconds(2);
+              });
+      var snapshot = new ReadWorkSessionState(store, clock).read(owner, original.id());
+      assertThat(snapshot.state().status()).isEqualTo("running");
+      assertThat(snapshot.state().revision()).isEqualTo(1);
+      assertThat(snapshot.netMicroseconds()).isEqualTo(2000000);
+      org.mockito.Mockito.verify(clock).instant();
+      org.mockito.Mockito.verifyNoMoreInteractions(clock);
+    }
+    var fresh =
+        new ReadWorkSessionState(
+                store, Clock.fixed(original.startedAt().plusSeconds(3), ZoneOffset.UTC))
+            .read(owner, original.id());
+    assertThat(fresh.state().status()).isEqualTo("closed");
+    assertThat(fresh.state().revision()).isEqualTo(2);
+    assertThat(fresh.netMicroseconds()).isEqualTo(1000000);
+  }
+
+  @Test
+  void s19_startCannotConsumeAPlaceBeforeCloseCommits() throws Exception {
+    var original = startOwn();
+    var written = new java.util.concurrent.CountDownLatch(1);
+    var release = new java.util.concurrent.CountDownLatch(1);
+    try (var worker = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+      var closing =
+          worker.submit(
+              () ->
+                  new org.springframework.transaction.support.TransactionTemplate(manager)
+                      .execute(
+                          status -> {
+                            var result = closeOwn(original);
+                            written.countDown();
+                            try {
+                              if (!release.await(10, java.util.concurrent.TimeUnit.SECONDS))
+                                throw new AssertionError("close release timed out");
+                            } catch (InterruptedException interrupted) {
+                              Thread.currentThread().interrupt();
+                              throw new AssertionError(interrupted);
+                            }
+                            return result;
+                          }));
+      try {
+        assertThat(written.await(10, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+        assertThat(closing).isNotDone();
+        assertThatThrownBy(this::startOwn).isInstanceOf(WorkSessionAlreadyActiveException.class);
+        assertThat(store.active(owner)).contains(original);
+      } finally {
+        release.countDown();
+      }
+      assertThat(closing.get(10, java.util.concurrent.TimeUnit.SECONDS).receipt().after().status())
+          .isEqualTo("closed");
+    }
+    var next = startOwn();
+    assertThat(store.active(owner)).contains(next);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_sessions WHERE owner_id=? AND status IN ('running','paused')",
+                Integer.class,
+                owner))
+        .isEqualTo(1);
+  }
+
+  @Test
+  void s19_rolledBackCloseKeepsPlaceAgainstConcurrentStart() throws Exception {
+    var original = startOwn();
+    var written = new java.util.concurrent.CountDownLatch(1);
+    var release = new java.util.concurrent.CountDownLatch(1);
+    try (var worker = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+      var closing =
+          worker.submit(
+              () ->
+                  new org.springframework.transaction.support.TransactionTemplate(manager)
+                      .execute(
+                          status -> {
+                            var result = closeOwn(original);
+                            status.setRollbackOnly();
+                            written.countDown();
+                            try {
+                              if (!release.await(10, java.util.concurrent.TimeUnit.SECONDS))
+                                throw new AssertionError("close release timed out");
+                            } catch (InterruptedException interrupted) {
+                              Thread.currentThread().interrupt();
+                              throw new AssertionError(interrupted);
+                            }
+                            return result;
+                          }));
+      try {
+        assertThat(written.await(10, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+        assertThat(closing).isNotDone();
+        assertThatThrownBy(this::startOwn).isInstanceOf(WorkSessionAlreadyActiveException.class);
+        assertThat(store.active(owner)).contains(original);
+      } finally {
+        release.countDown();
+      }
+      assertThat(closing.get(10, java.util.concurrent.TimeUnit.SECONDS).receipt().after().status())
+          .isEqualTo("closed");
+    }
+    assertThatThrownBy(this::startOwn).isInstanceOf(WorkSessionAlreadyActiveException.class);
+    assertThat(store.active(owner)).contains(original);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_sessions WHERE owner_id=? AND status IN ('running','paused')",
+                Integer.class,
+                owner))
+        .isEqualTo(1);
+  }
+
+  @Test
+  void s20_otherOwnerAndContextLocksDoNotBlockMyClose() {
+    var mine = startOwn();
+    var otherOwner = UUID.randomUUID().toString();
+    var otherProject = UUID.randomUUID();
+    var otherTask = UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,?,'Other','','active',now(),now())",
+        otherProject,
+        otherOwner);
+    jdbc.update(
+        "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at) VALUES (?,?,'Other','','pending',now(),now())",
+        otherTask,
+        otherProject);
+    var other =
+        new StartWorkSession(store, Clock.systemUTC(), () -> Set.of("UTC"))
+            .start(otherOwner, otherProject, otherTask, UUID.randomUUID(), 25)
+            .session();
+    try (var worker = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+      new org.springframework.transaction.support.TransactionTemplate(manager)
+          .execute(
+              status -> {
+                jdbc.queryForObject(
+                    "SELECT id FROM work_sessions WHERE id=? FOR UPDATE", UUID.class, other.id());
+                jdbc.queryForObject(
+                    "SELECT id FROM projects WHERE id=? FOR UPDATE", UUID.class, project);
+                jdbc.queryForObject("SELECT id FROM tasks WHERE id=? FOR UPDATE", UUID.class, task);
+                var result = worker.submit(() -> closeOwn(mine));
+                try {
+                  assertThat(
+                          result
+                              .get(5, java.util.concurrent.TimeUnit.SECONDS)
+                              .receipt()
+                              .after()
+                              .status())
+                      .isEqualTo("closed");
+                } catch (Exception error) {
+                  throw new AssertionError(error);
+                }
+                return null;
+              });
+    }
+  }
+
+  @Test
+  void s15_startPauseAndResumeReplaysSurviveCloseAndNewActiveSession() {
+    var original = startOwn();
+    var startKey =
+        jdbc.queryForObject(
+            "SELECT request_key FROM work_sessions WHERE id=?", UUID.class, original.id());
+    var pauseKey = UUID.randomUUID();
+    var resumeKey = UUID.randomUUID();
+    var pause = pauseOwn(original, pauseKey).receipt();
+    var resume =
+        new ChangeWorkSession(store, Clock.fixed(pause.occurredAt().plusSeconds(1), ZoneOffset.UTC))
+            .resume(owner, original.id(), resumeKey, new WorkSessionRevision(original.id(), 2))
+            .receipt();
+    new ChangeWorkSession(store, Clock.fixed(resume.occurredAt().plusSeconds(1), ZoneOffset.UTC))
+        .close(
+            owner,
+            original.id(),
+            UUID.randomUUID(),
+            new WorkSessionRevision(original.id(), 3),
+            new com.apptolast.organization.domain.WorkSessionCloseNotes("", ""));
+    var next = startOwn();
+    var clock = org.mockito.Mockito.mock(Clock.class);
+    var replay = new ChangeWorkSession(store, clock);
+    assertThat(
+            replay.pause(owner, original.id(), pauseKey, new WorkSessionRevision(original.id(), 1)))
+        .isEqualTo(new WorkSessionTransitionConfirmation(pause, true));
+    assertThat(
+            replay.resume(
+                owner, original.id(), resumeKey, new WorkSessionRevision(original.id(), 2)))
+        .isEqualTo(new WorkSessionTransitionConfirmation(resume, true));
+    assertThat(
+            new StartWorkSession(
+                    store,
+                    clock,
+                    () -> {
+                      throw new AssertionError("catalog not needed");
+                    })
+                .start(owner, project, task, startKey, original.plannedMinutes()))
+        .isEqualTo(new WorkSessionConfirmation(original, true));
+    assertThat(store.active(owner)).contains(next);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_changes WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(3);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM outbox_events WHERE aggregate_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(4);
+    org.mockito.Mockito.verifyNoInteractions(clock);
+  }
+
+  @Test
+  void s27_closureUsesOneReadOnlySnapshotAcrossSessionAndReceipt() {
+    var original = startOwn();
+    try (var worker = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+      var connection =
+          new JdbcTemplate(jdbc.getDataSource()) {
+            @Override
+            public <T> List<T> query(
+                String sql, org.springframework.jdbc.core.RowMapper<T> mapper, Object... args) {
+              if (sql.contains("action='CLOSE'")) {
+                assertThat(queryForObject("SHOW transaction_read_only", String.class))
+                    .isEqualTo("on");
+                assertThat(queryForObject("SHOW transaction_isolation", String.class))
+                    .isEqualTo("repeatable read");
+                try {
+                  assertThat(
+                          worker
+                              .submit(() -> closeOwn(original))
+                              .get(5, java.util.concurrent.TimeUnit.SECONDS)
+                              .receipt()
+                              .after()
+                              .status())
+                      .isEqualTo("closed");
+                } catch (Exception error) {
+                  throw new AssertionError(error);
+                }
+              }
+              return super.query(sql, mapper, args);
+            }
+          };
+      var reader =
+          new ReadWorkSessionChanges(new PostgresWorkSessionStore(connection, manager, json));
+      assertThatThrownBy(() -> reader.closure(owner, original.id()))
+          .isInstanceOf(WorkSessionChangeNotFoundException.class);
+    }
+    assertThat(store.closure(owner, original.id())).isPresent();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_changes WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(1);
+  }
+
+  @Test
+  void s21_closeSqlErrorRollsBackEarlierWrites() {
+    var original = startOwn();
+    var previous = jdbc.queryForMap("SELECT * FROM work_sessions WHERE id=?", original.id());
+    jdbc.execute("ALTER TABLE outbox_events RENAME TO unavailable_outbox");
+    try {
+      assertThatThrownBy(() -> closeOwn(original)).isInstanceOf(StorageUnavailableException.class);
+    } finally {
+      jdbc.execute("ALTER TABLE unavailable_outbox RENAME TO outbox_events");
+    }
+    assertThat(jdbc.queryForMap("SELECT * FROM work_sessions WHERE id=?", original.id()))
+        .isEqualTo(previous);
+    assertThat(store.active(owner)).contains(original);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_changes WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_intervals WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM outbox_events WHERE aggregate_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(1);
   }
 }

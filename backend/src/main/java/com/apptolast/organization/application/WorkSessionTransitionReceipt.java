@@ -27,4 +27,16 @@ public record WorkSessionTransitionReceipt(
         || !action.equals(requestedAction)
         || before.revision() != expected) throw new WorkSessionIdempotencyConflictException();
   }
+
+  public void requireIntent(
+      UUID session,
+      String requestedAction,
+      long expected,
+      com.apptolast.organization.domain.WorkSessionCloseNotes notes) {
+    requireIntent(session, requestedAction, expected);
+    if (action.equals("CLOSE")
+        && !new com.apptolast.organization.domain.WorkSessionCloseNotes(
+                closure.progressNote(), closure.nextStep())
+            .equals(notes)) throw new WorkSessionIdempotencyConflictException();
+  }
 }

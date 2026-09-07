@@ -75,7 +75,7 @@ public final class PostgresWorkSessionStore
                   var prior = transitionReplay(owner, key);
                   if (prior.isPresent()) {
                     var receipt = prior.orElseThrow();
-                    receipt.requireIntent(session, action, expected.value());
+                    receipt.requireIntent(session, action, expected.value(), notes);
                     return new WorkSessionTransitionConfirmation(receipt, true);
                   }
                   var change = operation.apply(before);
@@ -138,7 +138,7 @@ public final class PostgresWorkSessionStore
                   var receipt =
                       transitionReplay(owner, key)
                           .orElseThrow(() -> new StorageUnavailableException(collision));
-                  receipt.requireIntent(session, action, expected.value());
+                  receipt.requireIntent(session, action, expected.value(), notes);
                   return new WorkSessionTransitionConfirmation(receipt, true);
                 });
           }

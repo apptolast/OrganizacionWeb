@@ -37,3 +37,65 @@ Formato Spotless real y regresión core 424a34 GREEN. WorkSessionCloseNotes qued
 Corrección de fixture solicitada por root: @s10 año local cero ahora parte de pausa inmediata con acumulado0, coherente con startedAt==changedAt; inicialmente GREEN 5bf7a4. Sin cambio de producción por ese ajuste.
 
 @s26 propiedad de sesión ajena: RED e1097a, GREEN bc6213 tras consultar propiedad dentro de la misma plantilla RR antes del recibo. Bundle concreto de lectura y dependencias compilables: ReadWorkSessionChangesUseCase, ReadWorkSessionChanges, WorkSessionTransitionQueries, PostgresWorkSessionStore. Para reproducir los nuevos PG nominales también ChangeWorkSession, WorkSessionState y WorkSessionCloseNotes (el último ya copiado a C). Receipt/Transition/evento pertenecen al checkpoint db8bb0e; no tienen delta posterior. Regresión focal y formato d8c267 GREEN. Manifest close_work_closure_bundle_hashes.json fija esos siete Java; es checkpoint parcial, aún sin declarar reproducción/atomicidad completa del cierre.
+
+## Intención de replay y cierre único
+
+@s16 progressNote diferente con key confirmada: RED 4c54d6, GREEN ab046c. Receipt conserva requireIntent15 y añade overload con notas16; ambos caminos de Store (lookup y colisión tras rollback) pasan notas antes de negocio. @s16 nextStep distinto inicialmente GREEN 309e9a. @s15 replay CLOSE con null/vacío normalizados después de iniciar B inicialmente GREEN 755681; comprueba recibo exacto, inicio original, B intacta, conteos y reloj no consultado. Este caso no sustituye todavía replays históricos PAUSE/RESUME/inicio.
+
+V17 aditiva aprobada por root: @s23 segundo cierre durable de la misma sesión por SQL directo RED 5d872d, índice único parcial session_id/CLOSE, GREEN bea9c1. Sin modificar V14–V16, filas ni tablas nuevas. La escritura SQL del test es una entrada inválida deliberada para verificar terminalidad; no se presenta como transición de negocio válida. Upgrade14/15 sigue pendiente del siguiente caso.
+
+## Upgrade y atomicidad heredada conectados a CLOSE
+
+@s23 WorkSessionClosureMigrationTest.s23_upgradePreservesRunningPausedAndAllPublishedFacts inicialmente GREEN 134404: migración real target16→17 con dos propietarios, running y paused, recibo15/intervalo/outbox; compara filas completas antes/después y GET sin escrituras, luego cierra ambos con neto correcto y sin intervalo extra para paused.
+
+Refactor del helper de supresión para aceptar la operación pública, cuatro casos15 GREEN 910706. Después se añadió individualmente cada conexión CLOSE @s21, todas inicialmente GREEN: estado449ed4, intervalo e00b34, recibo sin ganador1a67ea, outbox902507. Conservan filas, intervalos, recibos y outbox anteriores mediante el mismo fixture SQL real. Fallo diferido al commit CLOSE inicialmente GREEN564d4b, incluyendo active todavía ocupado. No se cambia producción para fabricar RED: reutilizan atomicidad y conteo de filas15, ahora ejecutando el nuevo comando16.
+
+## Carreras sobre una sesión
+
+Refactor mínimo racePause→raceTransitions permite operaciones públicas manteniendo la barrera PostgreSQL existente: ambas sesiones observadas en pg_stat_activity esperando Lock, ambos futuros pendientes antes de liberar; regresión15 de dos carreras GREEN57a256. Después cada fila16 @s18 se añadió por separado y resultó inicialmente GREEN: mismo CLOSE/key a21850 (un recibo, replay false/true); CLOSE keys distintas b522aa; CLOSE/PAUSE cff8db; CLOSE/RESUME desde paused6c54ab. Revisión, cambios y outbox acreditan una sola transición ganadora; no se fuerza preferencia del scheduler ni se convierten clics en dos revisiones consecutivas.
+
+## Lecturas y colisión con estado alcanzable
+
+Conexiones individuales inicialmente GREEN: @s26 propia abierta devuelve WorkSessionChangeNotFound d31973; @s27 cierre de transacción de lectura falla como5038f994b y falloSQL de recibos como5036866e4; @s24 estado closed con reloj anterior conserva neto final y fila d0262d. No se usa active=null como prueba de ausencia de cierre.
+
+@s22 colisión entre sesiones alcanzables, e1ad7b inicialmente GREEN: A cerrada, B única abierta; se oculta sólo el primer lookup de key en el JdbcTemplate de prueba para alcanzar INSERT real owner/key, y se observan dos txid distintos al recuperar ganador después del rollback. Se comprueba409 por intención ajena y B/intervalos/eventos intactos. La colisión es inyectada en el lookup, no una carrera natural afirmada; no se fabrican dos sesiones abiertas. El replay200 de intención idéntica se acredita por vía normal y carrera misma sesión; el lock de esa sesión impide reproducir naturalmente esa misma intención por la rama de colisión tardía.
+
+## Cierre de conexiones temporales y transaccionales
+
+Refuerzos individuales inicialmente GREEN: @s8 rangoUTC completo con315537897599999999µs945095; @s9 día local Madrid distinto del díaUTC3d98c1. @s25 snapshot running fija su lectura, writer CLOSE confirma antes del reloj y posterior GET ve closed44eb01. @s19 nuevo inicio durante cierre aún sin commit rechaza mientras A ocupa plaza, luego inicio deliberado prospera b01a25; variante rollback d2588d conserva A. El fixture mantiene abierta la transacción exterior, libera latch en finally y distingue el resultado interno aún no confirmado del éxito del comando real.
+
+@s20 cierre no espera locks de otro propietario ni de su proyecto/tarea e4d3b4. @s15 replays históricos de inicio, PAUSE y RESUME después de CLOSE y nueva B12fa9d conservan hechos/conteos, sin reloj ni catálogo. @s27 GETclosure demuestra SHOW read-only/RR y snapshot coherente incluso con CLOSE confirmado entre consulta de propiedad y recibo a69391. @s21 falloSQL real del INSERT de outbox después de escrituras anteriores revierte todas56abae. No se cambió producción durante estos refuerzos.
+
+## Freeze A+B
+
+Regresión focal final f5ba7c EXIT0, después de SpotlessApply real: 115 pruebas, ocho suites, cero fallos/errores/omitidos. XML preservados en progress/close_work_backend_xml y recuentos en close_work_backend_results.json (1c05b3). Manifest close_work_backend_hashes.json fija 19 archivos: 13 Java de producción, V17 y cinco Java de prueba. No más Gradle tras esta frontera, según coordinación root; la suite backend completa y el check global de formato pertenecen al gate integrado.
+
+No se añade bean16: ChangeWorkSessionUseCase y ReadWorkSessionChangesUseCase ya están enlazados a las mismas implementaciones; se amplían métodos y DTO internos preservando consumidores15. HTTP/publicador de C se verifican en sus propios informes, no se infieren desde estas pruebas.
+
+### Mapa contractual A+B
+
+| Escenarios16 | Evidencia ejecutada o reutilizada |
+| --- | --- |
+| s1–s2 | CloseWorkSessionTest nominal running/paused; Store s1_closeCommitsLastIntervalReceiptAndIndependentEvent; upgrade cierra paused sin intervalo adicional. |
+| s3 | Compuesto: aritmética16 running/paused y requireTime compartido; ChangeWorkSessionTest.s4_pauseInTheSameMicrosecondAddsZero / resumeInTheSameMicrosecondAddsZero. No caso CLOSE cero dedicado. |
+| s4–s5 | Ocho casos de notas en CloseWorkSessionTest; tipos/raíz JSON pertenecen a HTTP de C. |
+| s6 | Frontera HTTP de C; se conserva puerto con token completo y notas antes del callback. |
+| s7–s10 | CloseWorkSessionTest guardas de tiempo, rango total, fallback histórico, fecha Madrid, límites locales; añoUTC0 se rechaza por ser anterior al changedAt válido, año10000 tiene caso directo. |
+| s11 | Store s26_readsClosureBySessionAfterOutboxRemoval compara recibo durable completo; lectura no recibe catálogo/reloj ni reproyecta zona. No se simula instalar otro TZDB. |
+| s12 | Store15 s12_foreignCommandPrecedesTokenAndReplay y tokenIdentityPrecedesExistingReplay recorren el mismo commit; CLOSE replay exacto y nota distinta tienen casos16. |
+| s13–s14 | CloseWorkSessionTest revisión/closed/máximo y regresión ChangeWorkSessionTest de guardas compartidas; PAUSE/RESUME sobre closed se rechazan por la compatibilidad exacta del mismo WorkSessionState. |
+| s15 | Store s15_replaysOriginalCloseAfterAnotherSessionStarts y s15_startPauseAndResumeReplaysSurviveCloseAndNewActiveSession. |
+| s16–s17 | Store dos notas distintas; identity guard compartida y s22_crossSessionCollisionRollsBackBeforeFreshIntentLookup con A closed/B única abierta. Acción/revisión forman parte de requireIntent15 ya probado; no se redefine namespace. |
+| s18 | Cuatro carreras CLOSE/keys/P/R, ambos workers observados esperando Lock antes de liberar. |
+| s19 | Dos intercalados inicio/cierre con commit o rollback, más nuevo inicio después de cierre confirmado. |
+| s20 | Store s20_otherOwnerAndContextLocksDoNotBlockMyClose; misma ruta de lock no lee elegibilidad. El caso15 completedProjectAndTaskStillAllowPauseAndResume acredita esa frontera común; no caso CLOSE completed separado. |
+| s21 | Cuatro supresiones CLOSE, falloSQL tras escrituras y fallo diferido al commit, todos con rollback verificable. |
+| s22 | Colisión UNIQUE real con lookup inicial controlado, txid diferentes; límites de evidencia descritos arriba. Cero sin ganador se cubre con supresión de recibo. |
+| s23 | V17 índice único parcial y WorkSessionClosureMigrationTest real target16→17, sin reescritura. |
+| s24–s25 | Closed neto fijo con reloj anterior, errores de rango y rama no-running de ReadWorkSessionState reutilizadas; snapshot concurrente CLOSE con writer terminado antes del reloj. |
+| s26–s27 | Recuperación por sesión durable, propiedad/abierta, SQL/cierre503, SHOW read-only/RR y dos consultas en un único snapshot. |
+| s28 | Query/seguridad/formato HTTP de C. |
+| s29–s30 | Evento11 independiente en core/PG; validación y Rabbit reales pertenecen al paquete C. |
+| s31–s41 | UI/cliente, integración y smoke coordinados por root; no acreditados por este paquete Java. |
+
+Límites: este freeze no es aprobación global ni campaña de mutación. Los casos compuestos anteriores se declaran como reutilización, no como nuevas filas ejecutadas. La rama tardía de colisión con intención idéntica no se fuerza mediante un estado imposible: el replay normal y la carrera misma key sí acreditan200. La revisión independiente decidirá cualquier refuerzo diferenciable antes de gates; no se añaden variantes para perseguir un porcentaje.

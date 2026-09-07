@@ -447,4 +447,65 @@ class CloseWorkSessionTest {
     assertThat(notes.progressNote()).isEqualTo(text);
     assertThat(notes.nextStep()).isEqualTo(text);
   }
+
+  @Test
+  void s8_preservesExactMicrosecondsAcrossTheWholeUtcRange() {
+    var at = Instant.parse("0001-01-01T00:00:00Z");
+    var start =
+        new SessionStart(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            at,
+            25,
+            at.plusSeconds(1500),
+            "UTC");
+    var before = new WorkSessionState(start, "running", 1, at, 0, at);
+    WorkSessionChanging store =
+        (owner, session, key, action, revision, notes, operation) ->
+            new WorkSessionTransitionConfirmation(operation.apply(before).receipt(), false);
+    var clock = Clock.fixed(Instant.parse("9999-12-31T23:59:59.999999Z"), ZoneOffset.UTC);
+    var receipt =
+        new ChangeWorkSession(store, clock)
+            .close(
+                "owner",
+                start.id(),
+                UUID.randomUUID(),
+                new WorkSessionRevision(start.id(), 1),
+                new WorkSessionCloseNotes("", ""))
+            .receipt();
+    assertThat(receipt.after().workedMicroseconds()).isEqualTo(315537897599999999L);
+    assertThat(receipt.closure().workDate()).isEqualTo(LocalDate.of(9999, 12, 31));
+  }
+
+  @Test
+  void s9_attributesTheLocalClosingDayInTheHistoricalZone() {
+    var at = Instant.parse("2026-09-07T22:00:00Z");
+    var start =
+        new SessionStart(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            at,
+            25,
+            at.plusSeconds(1500),
+            "Europe/Madrid");
+    var before = new WorkSessionState(start, "running", 1, at, 0, at);
+    WorkSessionChanging store =
+        (owner, session, key, action, revision, notes, operation) ->
+            new WorkSessionTransitionConfirmation(operation.apply(before).receipt(), false);
+    var receipt =
+        new ChangeWorkSession(
+                store, Clock.fixed(Instant.parse("2026-09-07T22:30:00Z"), ZoneOffset.UTC))
+            .close(
+                "owner",
+                start.id(),
+                UUID.randomUUID(),
+                new WorkSessionRevision(start.id(), 1),
+                new WorkSessionCloseNotes("", ""))
+            .receipt();
+    assertThat(receipt.closure().workDate()).isEqualTo(LocalDate.of(2026, 9, 8));
+    assertThat(receipt.closure().closeZoneId()).isEqualTo("Europe/Madrid");
+    assertThat(receipt.after().session()).isSameAs(start);
+  }
 }

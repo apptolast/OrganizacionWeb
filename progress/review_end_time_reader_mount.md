@@ -36,3 +36,12 @@ Delta semántico verificado `e08416`: End recibe `headingLevel?:2|3`, default3; 
 Cuatro hashes finales de `end_time_frontend_reader_freeze.json` (5df5ff) comprobados idénticos en e08416: Reader6B0B0DDF00A55D047F035210687AD35A8E7EDD4B9D98CB7F3D9D4D57CB53E9D5, test593AB44C7121E998ACCAF0879114F589D4564BF168F04AF2D0743A101E6F88AC, End667FA2EEBA44225BD2CB19A9E7DA02BFE664AB158F7212EF106CE1872CEDFBFA, testDEF535E69DA0DBD1C8F4513468B4C404A2BE687475903469EB3C1F9690DE9D1B.
 
 No quedan cambios solicitados en este paquete. Reader y End quedan liberados para integración/gates coordinados; esta aprobación no certifica aún la feature17 completa ni afirma pruebas físicas, axe o campañas no realizadas.
+## Delta posterior: identidad ajena de F — APPROVED
+
+Se conserva el dictamen anterior como revisión del snapshot 5df5ff. Root detectó después una rama diferenciable: S closed incorpora identidad y snapshot antes de esperar F, por lo que un rechazo de contexto de F que sólo mostraba el error dejaba visible el panel End. El delta revisado cambia esa rama a `inaccessible()` (`work-session-reader.tsx:178`), que aborta lecturas/comando, limpia carga, identidad, snapshot, recibo y borradores. No se incorpora el cierre ajeno ni queda el panel montado.
+
+El caso existente de F con otra tarea ahora difiere F y exige que el fin propio de E sea visible antes de resolver el recibo incompatible. Después exige error y ausencia del fin, heading End, cierre/notas y anuncio de carga. Así observa la retirada de información que sí estaba montada, sin depender de que F llegue antes de E. B documenta RED c10ff6 → Reader 47/47 GREEN a63304, formato 9f1835 y lint b62ae3 en ciclo 81; esta revisión no ejecutó suites.
+
+Manifiesto 02d9dd comprobado contra los cuatro archivos en lectura 2f89d5: Reader FD83DD0B37EC1B3CDDED8857B4D8E512EDDD4A53C27A4817BEE4A4B0E8F54153; test 4893F2F542CE15462659D9A33AFCB2F6C1B0A1FF80EE6DFA1B13F48AF805DE14. End y su test mantienen exactamente los hashes del apartado anterior. Lecturas b777de y d9463d verifican rama y retirada compartida.
+
+APPROVED para este delta puntual de privacidad @s42. Sin cambios solicitados; se liberan los archivos para los gates coordinados. No se amplía la revisión a otras matrices de 16 ni se atribuye una nueva ejecución de las 248 pruebas al cambio posterior.

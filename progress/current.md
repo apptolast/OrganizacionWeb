@@ -147,3 +147,13 @@ Cuatro E2E de historial revisados e integrados en190eff8/f273a08, ejecutados en 
 C recibió todas las fuentes finales en b639336 y f03ce2f. El primer UX fue RED5d013a a320 por controles menores44px; geometría/captura preservadas. La copiaPG posterior al lifecycle ocurrió durante la captura after de C:322hashes iguales y1PG distinto explicado por esa copia; no se afirma identidad total. C corrige CSS medido en su árbol, sin tocar TS/TSX. Los cuatro E2E funcionales permanecen independientes del archivo UX.
 
 Root inició init global en COMMON, proceso32293 y log history_init_final.log sobre06f9233, sin campañas PIT/Stryker todavía. A/B quedan para esas campañas tras init/build; C ejecuta UX en su árbol. La funcionalidad18 y el despliegue siguen abiertos, con acceso/hostname pendientes ya solicitados.
+
+## Regresión verde y campañas18 activas
+
+Init32293 terminó EXIT0 (92313d). XML global preservado en history_init_backend_xml:93suites/2.211Java, sin fallos/errores/omitidos (a669ac);47Node y1.887frontend. Log SHA CB435125F8344C3047A21793F3D063B7913D97FD2CFA06C795279263024572D3. Como el fix de foco coincidió con esa ejecución, se repitió únicamente frontend sobre el corte fijo:51454EXIT0/6aba8f,1.887tests/40suites y lint/formato. Backend no cambió.
+
+Primer intento root de build usó un subcomando no soportado del motor (EXIT2, ee17fa), conservado en history_build_final.log; no falló código. Se ejecutó el comando configurado node scripts/project.mjs build:17127EXIT0/80876c, log history_build_verified.log SHA005094941DA4497848A181F95819682953BC9058F1DCCBD408EEEF1A1C1CFC3E. Después del CSS de UX se repitió build frontend y formato focal,2b7d6eEXIT0.
+
+Fix de foco342f51b y CSS/primerUX372adba integrados. C continúa UX desde su equivalente1e751d8, sin tocar fuentes durante campañas. A inició PIT68186 tras375hashes idénticos9e41dd;12patrones completos y configuración revisada714c12. B inició Stryker56475 tras refrescar metadata para History539B…D8500 y capturar136inputs;741mutantes instrumentados, dry-run verde. Ningún score final se atribuye todavía.
+
+Root inició publisher99577, log history_publisher_verified.log, con stack/puerto efímeros propios. No usa18080 de C ni8080 del usuario. Es la regresión heredada exigida por CI, no un nuevo evento de Historial. No hay otros procesos root activos. El E2E global final espera el último paquete UX de C y la estabilidad del corte.

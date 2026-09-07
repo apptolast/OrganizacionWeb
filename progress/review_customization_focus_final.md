@@ -1,0 +1,11 @@
+# Revisión independiente del foco164
+
+**APPROVED parcial** de los dos manejadores de foco, sin hallazgos abiertos en este delta. Sólo lectura; no suites, producto ni campañas nuevas.
+
+Manifiesto customization_frontend_focus_final_freeze.json SHAA93D7A20BDDC4C120B07E28C013E76E97829ED7EC64305F840BD44A1220DDD73:14/14 hashes comprobados iguales31eb5a. Fuentes revisadas: customization.tsx SHA3734C32B4C1D47C9C4ADD218D68EE46553CB11A59D4C34124D221091D713D5C5; custom-fields.tsx SHA40D34D084EE6A5DF8500D845DD48EBC5CD5205163F22DCF9E35E269AC851910A.
+
+Ambos onBlurCapture (customization.tsx:73; custom-fields.tsx:84) conservan el iniciador sólo si es un botón efectivamente deshabilitado. matches(':disabled') incluye fieldset disabled, a diferencia de consultar únicamente la propiedad disabled del botón. Resuelve el blur automático que Chromium emite estando el botón todavía conectado. El listener focusin sigue retirando el iniciador ante otro destino y se limpia al desmontar. La restauración exige luego que el control desaparezca y document.activeElement sea body; no roba foco a un control elegido por el usuario. Se mantienen los destinos accesibles con tabIndex=-1 (sección de configuración/encabezado de campos).
+
+Oráculo DOM de valores en custom-fields.test.tsx:797 emite focusOut del botón ya disabled antes del ACK, comprueba una sola recuperación y foco final en Campos personales. El caso de configuración s34 mantiene el movimiento voluntario a otro botón y blur al body; la confirmación debe dejar body enfocado. No se ha borrado esa defensa para hacer pasar el caso automático.
+
+Evidencia de autores leída en TDD y review_customization_ui.md: RED físico14c758; RED DOM66c5eb y GREEN55/55 081fab de B. C repitió el mismo E2E Chromium con hashes exactos: GREENaccb98, encabezado enfocado, outline3px/top300.25, feedback3.5ms y una escritura real;578inputs iguales903426. No atribuyo esa prueba física a A ni extrapolo otros motores/modalidades. Configuración comparte la misma guarda, pero la prueba física aquí citada recorre recuperación de valores. El dictamen no aprueba por sí solo toda UI21 ni su matriz UX/global/mutación.

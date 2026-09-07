@@ -485,3 +485,28 @@ estados, con dos axe limpios. Doce campos/texto ampliado también pasaron allí;
 las modalidades restantes y la aceptación final siguen en curso. CSS sólo
 afecta a personalización y usa los tokens existentes. El skip-link de las
 capturas fullPage se comprobó fuera del viewport en una captura real a scroll0.
+
+## Integración frontend y validación en navegadores
+
+Frontend integrado en 32fdcbb y estilos/E2E de C en 433aced. Root verificó
+los catorce hashes funcionales (d57287). Revisión independiente de fixtures
+finales y foco164 aprobada. Global frontend: 2209/2209 en 49 suites;
+build y lint previos a mutación verdes. El helper recibió después un ajuste
+exacto de rutas y limpieza de imports, documentados por separado.
+
+El fallo físico de foco queda resuelto: mismo recorrido Chromium accb98
+restaura el encabezado tras recuperación manual sin repetir la escritura.
+Firefox pasó cuatro recorridos; WebKit está en curso. Zoom nativo Chromium
+200 % y modalidades accesibles tienen evidencia aislada; falta el dictamen
+UX final y su transferencia. No se acreditan dispositivos físicos.
+
+Stryker frontend original en curso con 1824 mutantes y ocho workers.
+No modificar JS/tests/config durante la campaña. La integración SCSS de root
+se registra expresamente como diferencia respecto al inventario anterior;
+no se presentará una igualdad de todos los archivos que no ha ocurrido.
+
+Init 7f9acc detectó dos tests del arnés que aún exigen rangos literales App
+sustituidos por cobertura del archivo completo. A corrige esos oráculos sin
+reducir cobertura. Lint también encontró el sandbox Stryker activo; no se
+borra ni modifica durante la campaña y se repetirá init al terminar.
+Producción conserva las funciones 1–20; no se ha desplegado la función 21.

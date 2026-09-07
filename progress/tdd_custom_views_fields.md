@@ -222,3 +222,7 @@ Resultado final: EXIT0 372d3e, spotlessJavaCheck y once suites con315 pruebas, c
 88. @s20 oráculo adicional único de UPDATE de colección previa: dos valores activos cambian y uno inactivo debe permanecer; un trigger AFTER UPDATE provoca fallo SQL real y el rollback conserva colección/UUID/revisión/fecha/xmin/ctid, esquema y negocio, sin eventos. Inicialmente GREEN8ad999, sin modificación productiva. Log customization_88_initial.log. Se conservan los casos anteriores de fallo INSERT y commit diferido.
 
 Focal de la única clase modificada y formato:62/62, cero fallos/errores/omisiones, EXIT0 35d7e9. Nuevo manifest customization_backend_refined_manifest.json, XML customization_backend_refined_green.xml y resultados customization_backend_refined_results.json. Sólo cambia CustomFieldValuesPersistenceTest respecto al freeze anterior; producción idéntica. Se preservan intactos la regresión anterior315/11 y sus hashes; no se afirma haberla repetido.
+
+### Ciclos89–91: refuerzos puros tras original PIT
+
+Autorización root tras original 378K/3S/5NC. Uno a uno:89 TEXT U+DFFF inicialmente GREEN ea9915;90 label U+DFFF inicialmente GREEN 7a1a39;91 Clock posterior con updatedAt µs/revisión/consulta única inicialmente GREEN b55990. Ningún RED inventado ni producción cambiada. Focal de tres clases + spotlessJavaApply/Check EXIT0 554ff8,77/77 XML preservados. Detalle, hashes y propuesta de replay aún sin ejecutar en progress/mutation_custom_views_fields_backend.md y customization_pit_refinement_manifest.json.

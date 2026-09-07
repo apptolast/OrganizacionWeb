@@ -1,0 +1,33 @@
+{
+  "exit": 0,
+  "exitEvidence": "5962df",
+  "tests": 1,
+  "inputs": 577,
+  "changedInputs": 0,
+  "files": [
+    {
+      "path": "e2e/customization-task-ui.spec.mjs",
+      "sha256": "714BAD0847CD4326D13A3C22E51E82C7E38D94523AFBB6D22B464064C61DD557"
+    },
+    {
+      "path": "progress/tdd_customization_task_ui.md",
+      "sha256": "69D4C36E414BE6951F07BF28355C54DAB2BC9285BD069701F00A1F7FF0F60D11"
+    },
+    {
+      "path": "progress/customization_task_ui_before.json",
+      "sha256": "DB85DF4C669797CB85EFDAB7F55186D7F2A7FBA5EF135D80941F42D7E854CD08"
+    },
+    {
+      "path": "progress/customization_task_ui_after.json",
+      "sha256": "DB85DF4C669797CB85EFDAB7F55186D7F2A7FBA5EF135D80941F42D7E854CD08"
+    },
+    {
+      "path": "progress/customization_task_ui_initial.log",
+      "sha256": "B14E8C181D2097AB1ED9849A58E9D7CA0A0F906AEF71F08A4D20750041706C85"
+    },
+    {
+      "path": "progress/customization_task_ui_initial.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+    }
+  ]
+}

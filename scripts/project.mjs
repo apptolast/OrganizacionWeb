@@ -23,6 +23,7 @@ export function createProject(runner = run) {
       (task !== "mutate" ||
         ![
           "appearance-backend",
+          "appearance-frontend",
           "weekly_review-backend",
           "weekly_review-frontend",
           "history-backend",
@@ -55,6 +56,17 @@ export function createProject(runner = run) {
         [taskName, "--no-daemon", ...args],
         { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
       );
+    if (task === "mutate" && target === "appearance-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.appearance.config.json",
+      ]);
+      return;
+    }
     if (task === "install") {
       runner("pnpm", ["install", "--frozen-lockfile"]);
       runner("pnpm", ["--dir", "frontend", "install", "--frozen-lockfile"]);

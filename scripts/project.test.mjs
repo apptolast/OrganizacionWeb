@@ -1275,3 +1275,98 @@ test("appearance PIT includes all new modules and makes their tests available by
   assert.match(build, /mutationThreshold\.set\(80\)/);
   assert.match(build, /threads\.set\(4\)/);
 });
+
+test("appearance frontend invokes only its fixed Stryker configuration", () => {
+  const { project, calls } = capture();
+  project("mutate", "appearance-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.appearance.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("appearance Stryker preserves all candidates and reviewed integration nodes", () => {
+  const config = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.appearance.config.json"),
+      "utf8",
+    ),
+  );
+  assert.deepEqual(config.mutate, [
+    "src/appearance-api.ts",
+    "src/appearance-state.tsx",
+    "src/appearance.tsx",
+    "src/App.tsx:19:8-19:44",
+    "src/App.tsx:27:8-39:26",
+    "src/App.tsx:42:7-74:7",
+    "src/workspace.tsx:35:10-40:22",
+    "src/session-gate.tsx:32:2-51:6",
+    "src/use-session.ts:177:0-195:1",
+  ]);
+  assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
+  assert.equal(config.concurrency, 8);
+  assert.equal(config.coverageAnalysis, "perTest");
+  assert.deepEqual(config.vitest, { configFile: "vite.config.ts" });
+  assert.deepEqual(config.plugins, ["@stryker-mutator/vitest-runner"]);
+  assert.equal(config.tempDirName, ".stryker-tmp-appearance");
+  assert.equal(
+    config.jsonReporter.fileName,
+    "reports/mutation-appearance/mutation.json",
+  );
+  assert.equal(
+    config.htmlReporter.fileName,
+    "reports/mutation-appearance/mutation.html",
+  );
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  assert.match(
+    readFileSync(resolve(root, "frontend/vite.config.ts"), "utf8"),
+    /src\/\*\*\/\*\.test\.\{ts,tsx\}/,
+  );
+  const expectedStarts = [
+    "appearance =",
+    "appearance",
+    "appearance",
+    "<RouteLink",
+    "if (session?.authenticated",
+    "function isPrivateRoute",
+  ];
+  for (const [index, selector] of config.mutate.slice(3).entries()) {
+    const [, path, startLine, startColumn, endLine, endColumn] = selector.match(
+      /^(.+):(\d+):(\d+)-(\d+):(\d+)$/,
+    );
+    const lines = readFileSync(resolve(root, "frontend", path), "utf8").split(
+      /\r?\n/,
+    );
+    const selected = lines.slice(Number(startLine) - 1, Number(endLine));
+    selected[selected.length - 1] = selected.at(-1).slice(0, Number(endColumn));
+    selected[0] = selected[0].slice(Number(startColumn));
+    assert.ok(selected.join("\n").startsWith(expectedStarts[index]), selector);
+    assert.ok(
+      selected
+        .join("\n")
+        .includes(
+          index === 4
+            ? "AppearanceProvider"
+            : index === 5
+              ? "/apariencia"
+              : index === 3
+                ? "/apariencia"
+                : index === 0
+                  ? "/apariencia"
+                  : index === 1
+                    ? "Apariencia"
+                    : "<Appearance />",
+        ),
+      selector,
+    );
+  }
+});

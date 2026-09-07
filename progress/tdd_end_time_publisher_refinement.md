@@ -22,3 +22,9 @@ Comando previsto desde backend:
 Se preservarán before/after y XML del replay separados. El inventario incluirá todos los EMPTY_RETURNS generados en OutboxMessage, no sólo los dos objetivos. Se exige localizar las firmas originales validationCode196/207 EmptyObjectReturnValsMutator mediante clase/método/línea/mutador; ni el porcentaje general ni kills de otras líneas prueban esas dos firmas. La campaña original permanece616K/4NC/620. Los retornos heredados Store253/259 quedan con la justificación de serialización y recuperación controlada ya documentada; no se amplían pruebas de concurrencia ni se declaran equivalentes.
 
 Root revisará configuración y test antes de autorizar ejecución.
+
+## Replay ejecutado y verificado
+
+Root96267 terminó EXIT0 1e6077,3m14s de Gradle. Verificación ee30d9:64/64 KILLED, cero otros estados,349 hashes before/after idénticos. Las firmas validationCode196 y207 EmptyObjectReturnValsMutator están presentes y detectadas específicamente por los dos oráculos añadidos. Los62 mutantes adicionales del mismo mutador también están inventariados; no se suman al denominador original620.
+
+XML propio preservado en end_time_publisher_replay_final/mutations.xml, SHA71F17C95236A770BA3C2724352062844EF52AD448F6964390780018B0BB464CC. Original17 sigue intacto SHA5006D78E0A06DED7B153EC1E6480E5CD4703704ED5ABBB978B8A8275487FC681,616K/4NC. El replay resuelve los dos huecos de validación de tipo/calendario; los dos retornos del fallback heredado conservan el límite documentado, sin equivalencia ni exclusión ficticia. No producción modificada ni campaña completa repetida.

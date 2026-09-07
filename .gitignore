@@ -84,3 +84,5 @@ reports/
 /frontend/.stryker-tmp-end-time-notification/
 /progress/end_time_backend_global_xml/
 /progress/end_time_pit_final/
+/progress/end_time_publisher_replay_final/
+/progress/end_time_publisher_refinement.xml

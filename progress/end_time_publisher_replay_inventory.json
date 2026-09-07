@@ -1,0 +1,706 @@
+[
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "json",
+    "line": "7",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:s1_acceptsMaximumUnicodeNameAndPreservesBrokerEnvelope()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "ownerId",
+    "line": "7",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:states_s13_publishesExactStatusEnvelope()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "payload",
+    "line": "7",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:states_s13_publishesExactStatusEnvelope()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "type",
+    "line": "7",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "5"
+    ],
+    "killingTest": "com.apptolast.organization.adapter.broker.RabbitBrokerFailuresTest.[engine:junit-jupiter]/[class:com.apptolast.organization.adapter.broker.RabbitBrokerFailuresTest]/[method:s5_confirmTimeoutKeepsRetryClassification()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "34",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "95"
+    ],
+    "killingTest": "com.apptolast.organization.domain.TaskEventTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.TaskEventTest]/[test-template:s18_blocksIncompatibleTaskEvents(java.lang.String)]/[test-template-invocation:#8]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "176",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "701"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:states_s13_blocksIncompatibleStatusPayload(java.lang.String)]/[test-template-invocation:#7]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "178",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "713"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:s15_blocksValidTimestampThatDiffersFromStoredColumn()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "180",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "725"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:s15_blocksIncompatiblePayloadWithoutSending(java.lang.String)]/[test-template-invocation:#4]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "183",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "740"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:endTime_s25_blocksEventIdentityReusedAsSession()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "184",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "760"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:endTime_s25_blocksFractionalMinutes()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "185",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "775"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:endTime_s25_blocksZeroMinutesWithCoherentEnd()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "187",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "799"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:endTime_s25_blocksNoncanonicalRevision()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "191",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "816"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:endTime_s25_blocksRevisionBeyondBigint()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "194",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "837"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:endTime_s25_blocksClosedStatus()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "196",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "870"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:endTime_s25_blocksNonStringPreviousEnd()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "199",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "890"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:endTime_s25_blocksSubmicrosecondPreviousEnd()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "203",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "916"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:endTime_s25_blocksPreviousEndInYearZero()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "205",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "949"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:endTime_s25_blocksOneMicrosecondFormulaMismatch()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "207",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "961"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:endTime_s25_blocksImpossibleCalendarEndWithValidUtcShape()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "209",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "966"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:endTime_s24_publishesOriginalExtension()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "212",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "981"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:closeWork_s29_blocksEventIdentityReusedAsSession()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "214",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1004"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:closeWork_s29_blocksBlankAttributedZone()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "216",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1029"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:closeWork_s29_blocksAttributedYearBeyond9999()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "218",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1040"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:closeWork_s29_blocksAttributedYearZero()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "220",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1052"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:closeWork_s29_blocksImpossibleAttributedDate()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "223",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1070"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:closeWork_s29_blocksSubmicrosecondOccurrence()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "225",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1095"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:closeWork_s29_blocksNoncanonicalWorkedTime()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "227",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1119"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:closeWork_s29_blocksNoncanonicalRevision()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "231",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1136"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:closeWork_s29_blocksRevisionBeyondBigint()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "234",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1157"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:closeWork_s29_blocksUnknownSourceStatus()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "235",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1162"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:closeWork_s29_publishesOriginalClosureWithoutNotes()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "238",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1177"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:pauseResume_s26_blocksSessionIdentityReusedAsEvent()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "240",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1195"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:pauseResume_s26_blocksYearZeroOccurrence()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "242",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1216"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:pauseResume_s26_blocksUnknownAction()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "244",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1245"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:pauseResume_s26_blocksPauseFromPaused()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "245",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1265"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:pauseResume_s26_blocksPauseToRunning()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "246",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1277"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:pauseResume_s26_blocksPauseWithAnOpenInterval()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "249",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1304"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:pauseResume_s26_blocksResumeWithoutAnOpenInstant()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "251",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1316"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:pauseResume_s26_blocksResumeWithDifferentOpenInstant()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "253",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1328"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:pauseResume_s26_blocksImpossibleResumeCalendar()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "257",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1353"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:pauseResume_s26_blocksNegativeWorkedMicroseconds()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "259",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1377"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:pauseResume_s26_blocksNumericRevision()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "263",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1394"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:pauseResume_s26_blocksRevisionAboveBigint()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "265",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1399"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:pauseResume_s26_retriesUnavailableBrokerWithOriginalPayload()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "268",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1414"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:workSession_s27_requiresEventIdentityIndependentFromSession()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "272",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1456"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:workSession_s27_blocksMalformedProjectIdentity()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "283",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1549"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:workSession_s27_blocksStringDuration()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "286",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1589"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:workSession_s26_acceptsOneMinuteAtYearOneWithMicroseconds()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "291",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1597"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:workSession_s27_blocksImpossibleCalendarDateWithValidUtcShape()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "298",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1644"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:s27_changedIdentityIsCanonicalAndEventIsDistinct(java.lang.String)]/[test-template-invocation:#1]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "300",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1663"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:s27_changedIdentityIsCanonicalAndEventIsDistinct(java.lang.String)]/[test-template-invocation:#4]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "303",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1693"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:s27_changedRevisionMustBePositiveBigint(java.lang.String)]/[test-template-invocation:#4]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "308",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1747"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:s27_changedKindMatchesAfter(java.lang.String)]/[test-template-invocation:#1]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "309",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1783"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:s27_changedIntervalsHaveClosedTypedShape(java.lang.String, java.lang.String)]/[test-template-invocation:#1]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "325",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1903"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:block_s37_blocksInvalidEnvelopeWithoutPublishing(java.lang.String)]/[test-template-invocation:#4]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "333",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1929"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:block_s36_s37_publishesHistoricalZoneWithoutCatalogResolution(int)]/[test-template-invocation:#3]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "335",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1937"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:block_s37_blocksInvalidEnvelopeWithoutPublishing(java.lang.String)]/[test-template-invocation:#15]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "341",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "1970"
+    ],
+    "killingTest": "com.apptolast.organization.domain.TaskEventTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.TaskEventTest]/[test-template:s18_blocksIncompatibleTaskEvents(java.lang.String)]/[test-template-invocation:#1]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "346",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "2012"
+    ],
+    "killingTest": "com.apptolast.organization.application.SubtaskPublicationTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.SubtaskPublicationTest]/[test-template:s22_blocksEveryIncompatibleDivisionWithoutSending(java.lang.String)]/[test-template-invocation:#7]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "348",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "2078"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:taskStatus_s32_blocksEveryIncompatibleEnvelopeWithoutSending(java.lang.String)]/[test-template-invocation:#6]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "357",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "2128"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:states_s13_blocksIncompatibleStatusPayload(java.lang.String)]/[test-template-invocation:#2]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "364",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "2157"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:s15_blocksIncompatiblePayloadWithoutSending(java.lang.String)]/[test-template-invocation:#7]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "367",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "2193"
+    ],
+    "killingTest": "com.apptolast.organization.domain.TaskEventTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.TaskEventTest]/[test-template:s18_blocksIncompatibleTaskEvents(java.lang.String)]/[test-template-invocation:#5]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "368",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "indexes": [
+      "2198"
+    ],
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:publicationTimesKeepPostgresPrecision(com.apptolast.organization.application.DeliveryOutcome)]/[test-template-invocation:#2]"
+  }
+]

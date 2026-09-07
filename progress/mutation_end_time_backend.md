@@ -26,3 +26,7 @@ No se ha encontrado un bug de producto al leer estos residuos: los rechazos de t
 Si root decide reforzar, los candidatos mínimos son dos casos individuales en PublishOutboxTest (tipo temporal y calendario) y, sólo si se considera pertinente reforzar la recuperación heredada, un caso controlado que cubra ambos retornos de commit. No hace falta perseguir100%, duplicar la matriz ni repetir38min de campaña completa automáticamente. Cualquier nueva medición se conservará aparte: el resultado original seguirá siendo616K/4NC sobre620.
 
 Este dictamen mide el backend congelado17. No cierra por sí solo la feature ni acredita frontend, smoke o UX. La decisión de gates posteriores corresponde al juez/root.
+
+## Refuerzo posterior
+
+Los dos rechazos de Outbox196/207 ahora tienen oráculos y medición dirigida: replay64/64 KILLED, EXIT0 1e6077,349 hashes idénticos ee30d9. Véase tdd_end_time_publisher_refinement.md e inventario separado. Se preserva el resultado original616/620; no se modifica ningún estado original ni se reclasifica como Killed la ruta heredada Store253/259. El juez acepta ese límite excepcional ya justificado por la serialización, sin afirmar equivalencia universal.

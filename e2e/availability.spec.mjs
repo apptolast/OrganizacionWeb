@@ -53,7 +53,7 @@ async function open(page) {
 
 test.beforeEach(() =>
   sql(
-    "TRUNCATE work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
   ),
 );
 

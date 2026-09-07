@@ -1,0 +1,26 @@
+[
+  {
+    "path": "frontend/src/weekly-review-api.ts",
+    "sha256": "9A9C336BD6946099E23C7CC1CF655C229A698365C38308A8EF1DC8BD94631F76"
+  },
+  {
+    "path": "frontend/src/weekly-review-api.test.ts",
+    "sha256": "98C015BCA4EEF9F019BD9B9FEF969CF1D476447FF666EF91CBCCE7016400B672"
+  },
+  {
+    "path": "frontend/src/weekly-review.tsx",
+    "sha256": "81DE439D954E7202F3388D635AA6066A8B8246CE5C0D1951F69BF94EA0B22627"
+  },
+  {
+    "path": "frontend/src/weekly-review.test.tsx",
+    "sha256": "8B0293842BEA47F4F6878655BB205F260D3C9F976D7EAFBEF694FD4D56EB927E"
+  },
+  {
+    "path": "frontend/src/App.tsx",
+    "sha256": "D8F64EB9C8305CE334EDFBA269D44BBC249F54EE63F5F5B51F2F6924633A3AAC"
+  },
+  {
+    "path": "frontend/src/workspace.tsx",
+    "sha256": "3FEF8760F2DB65D5FE09967A1F3AB27D30BDB773BBC933FF2FF9B18EAF2478E3"
+  }
+]

@@ -7,7 +7,13 @@ export function Workspace({
 }: {
   children: ReactNode;
   sessionControls?: ReactNode;
-  section: "Hoy" | "Proyectos" | "Disponibilidad" | "Historial" | null;
+  section:
+    | "Hoy"
+    | "Proyectos"
+    | "Disponibilidad"
+    | "Historial"
+    | "Revisión semanal"
+    | null;
 }) {
   return (
     <div className="workspace">
@@ -57,6 +63,12 @@ export function Workspace({
             aria-current={section === "Historial" ? "page" : undefined}
           >
             Historial
+          </RouteLink>
+          <RouteLink
+            href="/revision-semanal"
+            aria-current={section === "Revisión semanal" ? "page" : undefined}
+          >
+            Revisión semanal
           </RouteLink>
         </nav>
         <div className="sidebar-note">

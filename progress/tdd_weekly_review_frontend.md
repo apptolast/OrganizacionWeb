@@ -78,3 +78,50 @@ Manifiesto `weekly_review_frontend_client_manifest.json`:
 - `frontend/src/weekly-review-api.test.ts`: `98C015BCA4EEF9F019BD9B9FEF969CF1D476447FF666EF91CBCCE7016400B672`.
 
 Sólo esos dos archivos de código quedan congelados. Se reutilizan apiRequest, exact/text/instant y microseconds sin modificar sus fuentes; no se repite su matriz histórica. El cliente preserva Response no200 para que UI gestione400/409/503; los códigos por campo y recuperación visible se probarán al montar UI. AbortController en montaje, foco, URL/Back, formularios, estados y treinta criterios UX siguen pendientes de implementación/evidencia. No afirmar cobertura de todos los escenarios backend ni de UI por estas38 pruebas; no se ejecutaron campañas globales o mutación del corte completo.
+
+## Montaje UI — ciclos 39–66, 15:44–16:12 Europe/Madrid
+
+Cliente aprobado como checkpoint por root antes de comenzar; sus dos hashes permanecen idénticos. Se añadieron sólo WeeklyReview/test y la ruta/enlace en App/Workspace. Ningún cambio SCSS aún: se reutilizan estilos existentes y la revisión física decidirá el ajuste mínimo mediante evidencia real.
+
+| Ciclo | Recorrido individual | Evidencia |
+| --- | --- | --- |
+| 39 / @s27 | Principal, ruta privada, siete días, resumen y foco inicial | RED eb80b3; GREEN a996f2 |
+| 40 / @s29 | Carga inicial sin ceros provisionales | RED 1f8b50; GREEN e8ce05 |
+| 41 / @s30 | 503 sin vacío falso ni carga infinita | RED a09189; GREEN e12a53 |
+| 42 / @s30 | Reintento manual pendiente sin duplicado | RED 3197be; GREEN b3ff92 |
+| 43 / @s28 | Fecha borrador no consulta; Mostrar semana actualiza URL y retira anterior | RED 953b71; GREEN 5fd25f |
+| 44 / @s28 | Catálogo y zona explícita, lectura sólo al aplicar | RED 5c26b0; GREEN e40c46 |
+| 45 / @s28 | Semanas anterior/siguiente y Esta semana conservan zona | RED 873454; GREEN fb5e93 |
+| 46 / @s29 | Actualizar conserva snapshot fechado y marcado anterior | RED 993abc; GREEN 369446 |
+| 47 / @s32 | 401 vigente retira página y controles privados | RED 916f64; GREEN 87b2d0 |
+| 48 / @s31 | HTTP401 antiguo abortado no revoca acceso actual | Inicialmente GREEN 7a9c90 |
+| 49 / @s28 | Back restaura fecha aplicada | Inicialmente GREEN 5537ac |
+| 50 / @s28 | Anterior no navegable en primera semana0001 | RED d98099; GREEN e82345 |
+| 51 / @s28 | Siguiente no navegable cuando domingo sale de9999 | RED 5e9d94; GREEN 7440c7 |
+| 52 / @s30 | 400date con descripción asociada y corrección | RED 7d2f34; GREEN 192670 |
+| 53 / @s30 | 400zoneId asociado y vuelta a disponibilidad | RED 8519bd; GREEN 255edd |
+| 54 / @s30 | 409 temporal explicado y recuperable por GET | RED a3c77c; GREEN 813cd5 |
+| 55 / @s30 | 400query corregible mediante formulario, sin repetir query inválida | RED a62809; GREEN c24d37 |
+| 56 / @s30 | Catálogo fallido recuperable sin recargar semana | RED b935ba; GREEN 40e70c |
+| 57 / @s33 | Foco al encabezado si Apply retira iniciador aún enfocado | RED c9ce6e; GREEN 75a3cb |
+| 58 / @s33 | Foco deliberadamente apartado permanece allí | Inicialmente GREEN ab16e1 |
+| 59 / @s33 | Navegación de semana retira iniciador y recupera foco | RED dd1dfd; GREEN 83b3f3 |
+| 60 / @s34 | Duración legible exacta, presupuesto cero y descanso sin logro falso | RED c0af62; GREEN a9a4ea |
+| 61 / @s17 | Sesiones antiguas no cuantificables y disponibilidad ausente | RED 3975fa; GREEN 6e250b; texto ajustado a gramática neutra |
+| 62 / @s2 | Zona guardada desaparecida explica fallbackUTC | RED d0f176; GREEN c9c387 |
+| 63 / @s31 | Clasificación400 tardía no restaura error de selección anterior | Inicialmente GREEN 465d78 |
+| 64 / @s34 | Espera anunciada al consultar catálogo desde selector nativo | RED 91f7b8; GREEN e7f4b8 |
+| 65 / @s28 | Back durante otra lectura pendiente no revive snapshot anterior | RED 616313; GREEN 4eec36 |
+| 66 / @s32 | Desmontaje aborta consulta pendiente antes de HTTP401 tardío | Inicialmente GREEN f14973 |
+
+Logs por ciclo `weekly_review_frontend_cycleN_red.log` y `_green.log`; casos inicialmente verdes usan `_initial.log`. La pérdida de tipos en mock de Back se detectó en tsc (6dce8f) y corrigió sólo su firma. Foco conjunto previo112 verde1e835e; al descubrir el caso65 se añadió el oráculo antes del mínimo de retirar result/settled/failed durante un cambio de URL. No se rehizo una matriz heredada. Refactor pedido por root elimina el onClickCapture sin consumidor de la rama401; el main navegable conserva su captura local y modificadores.
+
+### Freeze UI para revisión y primer recorrido real
+
+- Suite propia: 28 UI +38 API. Foco con App15 e History33: **114/114 en cuatro archivos, EXIT0 3196df** (`weekly_review_frontend_ui_final_focal.log`).
+- ESLint focal, tsc --noEmit y Prettier check de los cuatro archivos UI/integración: EXIT0, secuencia fd0e48/3196df. Logs `weekly_review_frontend_ui_final_{lint,types,format_check}.log`.
+- `weekly_review_frontend_ui_manifest.json` (010727) contiene seis hashes reales, incluidos cliente y test ya aprobados sin cambio. UI `81DE439D954E7202F3388D635AA6066A8B8246CE5C0D1951F69BF94EA0B22627`; testUI `8B0293842BEA47F4F6878655BB205F260D3C9F976D7EAFBEF694FD4D56EB927E`; App `D8F64EB9C8305CE334EDFBA269D44BBC249F54EE63F5F5B51F2F6924633A3AAC`; Workspace `3FEF8760F2DB65D5FE09967A1F3AB27D30BDB773BBC933FF2FF9B18EAF2478E3`.
+
+Pendiente de evidencia: HTTP/PG real19 en navegador, adaptación física del quinto enlace/controles/agenda, treinta criterios UX con límites, responsive y motores pertinentes. No afirmar UX19 validada por los tests DOM ni copiar la matriz18 como resultado nuevo. El selector consulta el catálogo existente al recibir foco; permite primer uso sin consulta de configuración ni cambio de preferencia. Fechas de navegación usan Date UTC exclusivamente como calendario civil (0001–9999 y domingo completo), sin recalcular fronteras de zona ni duraciones reales.
+
+Reutilización explícita: RouteLink conserva Back/modificadores; SessionGate mantiene logout/autenticación; apiRequest y abort guardan observer; SnapshotTime aporta Intl/fallbackUTC; seconds conserva fracciones visuales. En UI se ejercitaron401 vigente/tardío y desmontaje, no se repitió toda la matriz de login ni cada variante de decoder. Falta campaña19, diseño de scope/config Stryker y gates integrados, todos sujetos al freeze y coordinación de root. No proceso de B ni runner18080 activo al entregar.

@@ -1,0 +1,14 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/SaveCustomizationViewUseCase.java",
+    "sha256": "346816482AF0B260CA2D5F9A0B1CACAE0C943ACD41EC5BC19748243786176114"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/domain/CustomizationRevision.java",
+    "sha256": "CCCB48CDD30CD1C1F6114D6F5DD16A016740FECA9891E1CFFCC0507B25E3B6EB"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/CustomizationConflictException.java",
+    "sha256": "30B2F3F50DCE16C487E4196A7F4C85F2036C882C4FEA3CC1110B390A9B143910"
+  }
+]

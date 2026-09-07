@@ -156,6 +156,7 @@ it("retira snapshot anterior hasta confirmar proyecto después de un reintento d
     screen.queryByRole("button", { name: "Pausar" }),
   ).not.toBeInTheDocument();
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  await waitFor(() => expect(finish).toBeTypeOf("function"));
   await act(async () =>
     finish(Response.json(project, { headers: { ETag: '"version"' } })),
   );

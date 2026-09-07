@@ -228,4 +228,24 @@ public class ApplicationConfiguration {
       com.apptolast.organization.application.ZoneCatalog catalog) {
     return new com.apptolast.organization.application.ReadToday(queries, clock, catalog);
   }
+
+  @Bean
+  com.apptolast.organization.adapter.persistence.PostgresAppearanceStore appearanceStore(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions) {
+    return new com.apptolast.organization.adapter.persistence.PostgresAppearanceStore(
+        jdbc, new org.springframework.transaction.support.TransactionTemplate(transactions));
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReadAppearance readAppearance(
+      com.apptolast.organization.application.AppearanceQueries queries) {
+    return new com.apptolast.organization.application.ReadAppearance(queries);
+  }
+
+  @Bean
+  com.apptolast.organization.application.SaveAppearance saveAppearance(
+      com.apptolast.organization.application.AppearanceEditing store, Clock clock) {
+    return new com.apptolast.organization.application.SaveAppearance(store, clock);
+  }
 }

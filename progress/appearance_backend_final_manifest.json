@@ -1,0 +1,74 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresAppearanceStore.java",
+    "sha256": "CC192447E23C30D366AE3C879129EC0F472130590136EC3977D844103A26FB72"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/AppearanceConflictException.java",
+    "sha256": "DB7DA357C30908A5ED890544152559B51741D81A9DC14DE3F54ECA3351836EF5"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/AppearanceEditing.java",
+    "sha256": "77597F02944121950EF38B00F85CC5E0DD22B9A6A485398D26145B653DE335EA"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/AppearanceQueries.java",
+    "sha256": "A18E6993D00D37CE01E6E122F8D83D4CAC2E8731D00CCA70C562202848AF436E"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ReadAppearance.java",
+    "sha256": "FE99A211A3F4D6F56A63CD58973DFDEDE223CF72932893045EE45F5E93D4CD11"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ReadAppearanceUseCase.java",
+    "sha256": "C1F187A42C22FB239DA4BCB7BA090DA16B224D661FBE4E3195DB6F9A1C03CE6C"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/SaveAppearance.java",
+    "sha256": "ACA38995CB7DC6D0FB7C87EDBA9D5D92300A8973A1A7DA9AA58BD065601ED5F2"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/SaveAppearanceUseCase.java",
+    "sha256": "5B04AC035DDD7AE0074B2186FFA0DB6F39E016DAC9B3B05EE6F11EB58F0D2A87"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/domain/Appearance.java",
+    "sha256": "2B993181668B35603938D45EDF7F6794A08AEB194E273154F0DB165D602F88E7"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/domain/AppearanceRevision.java",
+    "sha256": "DCFE8A442F0BA1E2CE2C2316DD947A4960B0187D89C741B0F1DC015F2325199E"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/domain/AppearanceValues.java",
+    "sha256": "C37F1D67D5B37D5FAFF9B44DC903344B5BCA8FEE4F24139BDDA0B7624E134B27"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/AppearancePersistenceTest.java",
+    "sha256": "8737C93EB20033364E9197536E13D1CB0FF8AF70A82E3DB44FECBF9F6D283B00"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/ReadAppearanceTest.java",
+    "sha256": "D79B87BB93D5EE073BEE2AFD8E819BD8527FA8EFDBD5173B15E0566CA414A235"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/SaveAppearanceTest.java",
+    "sha256": "FC495BAF3D7C62A5FCE8278560B6BA453784384D1922624932F3B5673C81F5DB"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/domain/AppearanceValuesTest.java",
+    "sha256": "90B1DE790AA85E16EB95ECAE3ED5B958D9F4E68E7CA464F122BF8AC677C6CF1F"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+    "sha256": "1C3B7BC629DD5A3011015740472AC7A43CD5963779D3FAFD893B8D3AD5E707D1"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/config/ApplicationWiringTest.java",
+    "sha256": "9FAAF972FF95A59D324D1A3A23325ADF227943FBE3A51B70D91720CCAAB73B68"
+  },
+  {
+    "path": "backend/src/main/resources/db/migration/V19__appearance_preferences.sql",
+    "sha256": "E06668099B0CB38370AEBF373CB90E8A1AC66F9C359A543E6F36D365F004F735"
+  }
+]

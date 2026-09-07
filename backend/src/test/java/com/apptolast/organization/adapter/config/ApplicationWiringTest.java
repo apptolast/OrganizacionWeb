@@ -417,4 +417,37 @@ class ApplicationWiringTest {
                   .isInstanceOf(ResourceNotFoundException.class);
             });
   }
+
+  @Test
+  void appearance_s1_s2_realReadAndSaveBeansReachTheSamePostgresAdapter() {
+    freshContext()
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              assertThat(context.getBean(AppearanceQueries.class))
+                  .isSameAs(context.getBean(AppearanceEditing.class))
+                  .isInstanceOf(
+                      com.apptolast.organization.adapter.persistence.PostgresAppearanceStore.class);
+              assertThat(context.getBean(ReadAppearanceUseCase.class).get("owner")).isEmpty();
+              org.mockito.Mockito.when(
+                      context
+                          .getBean(org.springframework.jdbc.core.JdbcTemplate.class)
+                          .update(
+                              org.mockito.ArgumentMatchers.anyString(),
+                              org.mockito.ArgumentMatchers.any(Object[].class)))
+                  .thenReturn(1);
+              var result =
+                  context
+                      .getBean(SaveAppearanceUseCase.class)
+                      .execute(
+                          "owner",
+                          new com.apptolast.organization.domain.AppearanceRevision(null, 0),
+                          "DARK",
+                          "#0000ff",
+                          "#00ffff");
+              assertThat(result.theme()).isEqualTo("DARK");
+              assertThat(result.accentLight()).isEqualTo("#0000FF");
+              assertThat(result.version()).isZero();
+            });
+  }
 }

@@ -37,3 +37,43 @@ Corrección de evidencia de formato: el hook focal de fc1b25 terminó sin reform
 17. @s35 relojUTC fuera de1..9999 (dos extremos): RED6e0420→GREEN083ca4.
 18. @s35 falloClock→503: RED64bbc9→GREENf09d8a.
 Logs appearance_11..18_red/green.log. Regresión core y formato real27e6da en appearance_core_green.log. No evidencia PG aún. Segundo corte de fuentes dominio/app mantiene firmas públicas; preparado para que C use validación real, mientras A inicia PG en nuevos archivos.
+
+## Persistencia real en nuevos archivos
+
+19. @s1 ausencia sin INSERT: RED7d13d0→GREENfed6bc; añade V19 nueva y Store consultaowner, JDBC OffsetDateTime.
+20. @s2/@s8/@s9 alta real, instancia nueva, aislamientoowner, µs en año0001 y sinoutbox: RED0835ee→GREENade3fb. READ_COMMITTED explícito en plantilla propia; alta nominal únicamente.
+21. @s2 actualización mismaID/version+1 y una fila: RED944899→GREEN8f77c6.
+22. @s3 no-op no ejecuta UPDATE, trigger de rechazo como oráculo: RED6e11e9→GREENbed9ba.
+23. @s16 tabla temporalmente inaccesible→503 y nunca ausencia: REDed9a19→GREENf92243.
+24. @s35 fila con contraste inválido pero CHECK SQL compatible→503: RED83d03e→GREEN391edb, reutiliza AppearanceValues al mapear.
+Logs appearance_19..24_red/green.log. Store aún WIP: pendientes bloqueo/carreras, todas filasafectadas/commiterror, integridad de metadata y wiring. No freeze ni aprobación funcional atribuida a estos nominales.
+
+25. @s35 timestamp persistido año10000→503: RED40b382→GREEN0967cc.
+26. @s7 UPDATE suprimido→503 y fila intacta: RED1891f9→GREEN377f52.
+27. @s7 error de commit diferido real PostgreSQL revierte alta: RED198ae3→GREEN270798.
+Refactor de campos solicitado por C: validadores static theme/light/dark reutilizados por constructor para que HTTP valide cada campo antes de extraer el siguiente; GREEN17/17f0da1e, fuente versionada8482d10. No se inventó RED de refactor.
+28. @s11 vector independiente #645F61, contraste mínimo4.499799974 contra#D0DFC9: inicialmenteGREENff88af; no producción modificada ni RED atribuido.
+29. @s5 dos altas desde ausencia mediante barrera de ambas lecturas: REDd4a7f2→GREEN188dc3. Intento intermedio16c864 fallócompilación por sustitución textual que duplicó declaración; preservado appearance_29_green.log; GREENreal appearance_29_green_actual.log. Un ganador y un conflicto, ganador no prefijado.
+30. @s7 INSERT suprimido sin ganador durable→503: RED59b58e→GREEN7a3c9a. Distingue la carrera legítima del ciclo29 de un trigger que descarta la escritura.
+31. @s5 dos cambios esperan lock propio antes de Clock y releen revisión: RED96cc14→GREEN19b00d. PostgreSQL pg_stat_activity acredita2esperasLock antes de liberar transacción retenedora; Clock0antes/1después, un200aplicación y unconflicto sin ganador prefijado. No conteosHTTP atribuidos al testPG.
+32. Wiring nominal Read/Save comparten adaptador real: RED850872→GREENcdc257. JdbcTemplate/transaction manager simulados en ApplicationContextRunner; NO HTTP+PostgreSQL real por este test. La evidencia PG pertenece a AppearancePersistenceTest.
+33. @s35 metadata corrupta seleccionada: RED96d619→GREEN2af4c8 (6ejemplos). Tema inválido ya rechazaba; restantes NULL/canonicalización/versionnegativa/idNULL quedan detectados. Vista temporal controlada simula corrupción que constraints normalmente impiden, no se afirma que el DDL permita filasNULL/enum inválido. Tabla original restaurada enfinally. Timestamp extremo/contraste incoherente reales se probaron por separado.
+34. @s9 upgrade V18→V19 en esquema aislado: inicialmenteGREENa07dd4. Preserva columnas de todas tablas anteriores y datos de proyecto representativo; tabla nueva vacía y ningún evento. No se alteran ni reescriben migraciones anteriores. No es prueba exhaustiva de restauración de todos hechos1–19.
+
+## Freeze backend funcional para revisión
+
+spotlessJavaApply + test focal/regresión e51b75 EXIT0, progress/appearance_backend_final.log. XML conservados en progress/appearance_backend_final_xml/:70ejecuciones =24ApplicationWiring+7ProjectStateConfiguration+19PG+2Read+11Save+7Values. Cero fallos/errores/omitidos. Son conteos de pruebas, no37escenarios ni112ejemplosdelGherkin. Manifiesto18fuentes/pruebas/SQL en appearance_backend_final_manifest.json, SHA A405AC5D1AB488B7D94910231645FCB524F78E951BED00BE470A8F9A7ED01416.
+
+### Mapa compacto de evidencia A
+
+- @s1: ReadAppearanceTest.s1 + AppearancePersistenceTest.s1 + wiring appearance_s1_s2; defaults/ETag/no-store quedan HTTP.
+- @s2: Read.s2,Save.s2_creates/s2_updates,PG.s2_s8_s9/s2_updates; exactitud de GET/PUTHTTP es C.
+- @s3: Save.s3_s35 yPG.s3(noUPDATE contrigger); @s4 Save.s4; @s5 PG.s5_twoCreations y s5_updatesWait; @s6 Save.s6 amboscasos+owneraisladoPG.s2_s8_s9.
+- @s7: PG.s7_suppressedUpdate/s7_suppressedInsert/s7_deferredCommitFailure; @s8 PG.s2_s8_s9 acredita reconstrucción del Store sobreDBdurable, NO reinicio de proceso/navegador ni respuesta perdida real.
+- @s9: PG.s2_s8_s9 y s9_additiveUpgrade; ausenciaoutbox medida, sin refactor de historial.
+- @s10: Values.s10 y Save.s10; tiposJSON/ausencia/extra/ordenmezclado entre campos son C con validadores reales. @s11: Values.s11 ambos temas + vector umbral inicialmenteGREEN.
+- @s12–15: adaptadorHTTP fueraA; @s16: PG.s16 para503 (seguridadHTTP C).
+- @s35: Save.s35/no-opMAX y PG.s35 (contraste/rango/metadata con vista controlada), límites temporales ydeversión explícitos.
+- UI/decoder/restantes@s17–34/36–37: B/C, no atribuidos a mocks o dominio A. Sin declaración de aprobación feature ni gatesglobales/mutación/E2E.
+
+Pendientes para integración de equipo: HTTP+C yfrontendB, pruebaHTTPPG si el juez la exige como ruta integrada, gatesglobales y mutación posteriores. Ninguna campaña nueva ejecutada. No hay proceso Gradle activo deA alfreeze.

@@ -84,4 +84,16 @@ class AppearanceValuesTest {
     assertThat(values.accentLight()).isEqualTo("#244C3C");
     assertThat(values.accentDark()).isEqualTo("#B7E4C7");
   }
+
+  @Test
+  void s11_doesNotRoundTheNearThresholdContrastUpToFourPointFive() {
+    // Independent contract vector: worst surface #D0DFC9 gives 4.499799974...
+    assertThatThrownBy(() -> new AppearanceValues("LIGHT", "#645F61", "#00FFFF"))
+        .isInstanceOfSatisfying(
+            ValidationException.class,
+            error ->
+                assertThat(error.errors())
+                    .extracting(FieldError::code)
+                    .containsExactly("INSUFFICIENT_CONTRAST"));
+  }
 }

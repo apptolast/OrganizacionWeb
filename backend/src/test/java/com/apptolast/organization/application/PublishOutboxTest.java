@@ -13,6 +13,22 @@ import org.junit.jupiter.api.Test;
 
 class PublishOutboxTest {
   @Test
+  void endTime_s25_blocksImpossibleCalendarEndWithValidUtcShape() throws Exception {
+    var source = extendedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("effectiveEndAt", "2026-02-30T10:20:00.123456Z");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void endTime_s25_blocksNonStringPreviousEnd() throws Exception {
+    var source = extendedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("previousEndAt", 17);
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
   void endTime_s24_retriesOriginalExtensionAfterLostConfirmation() throws Exception {
     assertEventRetry(extendedMessage(), DeliveryOutcome.CONFIRM_TIMEOUT);
   }

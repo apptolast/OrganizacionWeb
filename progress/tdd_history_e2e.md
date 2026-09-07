@@ -31,3 +31,13 @@ El recorrido genera 21 cambios de tarea mediante HTTP real; verifica páginas 20
 Evidencia copiada, sin mover el original, a `history_e2e_pagination_evidence.json` (SHA256 `693357DAD5909E00CBE7D15AD9949F2F78FEDDFFCE5F3D7A9CD1C62EAD0565DC`). Log SHA256 `354F98789568F1BB33E7513C78D5449F63AD3ECDE46B8A77A0FB9E21F98BDDD6`. Manifiestos pagination before/after: 322 entradas idénticas (`bd0c14`). Test congelado SHA256 `B4857C4AF136E353EFFC39E4EDBF7591512DF054E78453D58DC0432F5D1149BF`.
 
 Los tres casos funcionales tienen resultado GREEN compuesto de dos ejecuciones (2/2 y 1/1), no una campaña global nueva. Quedan UI final, privacidad y matriz UX para el corte posterior revisado. Puerto 18080 y Gradle libres; ningún cambio de producción.
+
+## Preparación final: privacidad y error (sin ejecución)
+
+Caso individual preparado sobre UI final 241a2f0. Crea inicio/cierre reales con nota, inyecta sólo una respuesta de error503 en el transporte de H y exige retirada de datos/reintento GET idéntico; consulta contexto inexistente real404 y retira contexto; borra cookies y exige H401 real, retirada privada y recuperación de sesión heredada. No se atribuyen resultados antes de ejecutar. Las respuestas exitosas proceden de la API real. Espera el delta PG final; no stack iniciado.
+
+## Privacidad/error: GREEN del corte nominal PG
+
+Corte 241a2f0, UI final y PG nominal anterior al delta final de A. Tras corregir el oráculo previo a ejecución (esperar revoked y comprobar login heredado), el único caso nuevo pasa inicialmente GREEN094109: sesión52860, EXIT0 explícito, 1/1, caso2,8s/Playwright4,7s. Error503 deliberado sólo de transporte; reintento devuelve respuesta real. 404 de contexto inexistente y 401 tras retirada de cookies son respuestas reales; no se atribuye contexto de un segundo propietario ni respuesta obsoleta al caso. Conserva recuentos de sesiones/recibos/outbox y retira notas y lista privada. La recuperación de sesión se observa en Iniciar sesión, sin exigir una alerta del componente ya desmontado.
+
+Log history_e2e_privacy.log incluye RUN_EXIT=0. Before/after preservados, 322 entradas idénticas. Stack18864 retirado por lifecycle; 18080 y Gradle libres para COPY final. Los cuatro E2E se repetirán sobre finalPG sólo en global coordinado, no mediante otro foco por la copia.

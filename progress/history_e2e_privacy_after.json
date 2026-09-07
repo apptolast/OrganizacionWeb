@@ -1,0 +1,1290 @@
+[
+  {
+    "path": "backend/build.gradle.kts",
+    "sha256": "6C456339AF988238A6F9316B988112651492A05BEC91012E6A773D00686FA9A3"
+  },
+  {
+    "path": "backend/Dockerfile",
+    "sha256": "226A5A18ACEA949D03E11C904F5BE8469D5CA8D95C440D27A3702230DDEEA83A"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\broker\\RabbitBrokerPublisher.java",
+    "sha256": "7AD1EC76204D79ACEE2CA4A2C43B80101FB7DB06F0D31870EA392C4D7AA5F58A"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\config\\ApplicationConfiguration.java",
+    "sha256": "B378379822253A9229D710B1B5C85878DBB8F4949AE7C33ED841D9BB06362852"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\config\\JavaTimeZoneCatalog.java",
+    "sha256": "864D1C6A5D9A1EB0D0B92A61CC357C4116383AF1FB562E91597571845A22EF7F"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\config\\PublisherConfiguration.java",
+    "sha256": "BA0941623EDB2BE5D591CE85F5DBED5C04B4C338F3D8615F3BDAA2542E2CC0A5"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\config\\PublisherSchedule.java",
+    "sha256": "77B15CC3B7A5FEA8B302BD784A5CAE33FABF0DFCC800BD116B05D42DF2E831EA"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\config\\SecurityConfiguration.java",
+    "sha256": "6DC575D942F73CE57BC3BED02C7937652359C66AA38F5027EB82E7A9629AE907"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\config\\SessionCookiePolicy.java",
+    "sha256": "A8A8C74362D663BEA6D0C60ED7D44C3928A838BF86912F2A6CAF2DF95B8CEB8C"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\ApiErrors.java",
+    "sha256": "F34E369002B7AEB2678C971D44DB2D639D7487803BB5B0BF78F9B18BE523B96A"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\AvailabilityController.java",
+    "sha256": "159CDE879B8F6CF455CC1E538C6C22EB190BFE12B25533EEFDBD47D81CA61FFC"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\BlockChangesController.java",
+    "sha256": "F34EFFA01CD21AF4DE264B169FAF30CACFB0DEC8A30EB8380B7F6CE72ECEF483"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\BlockController.java",
+    "sha256": "05D02BD0118E23AB3CF34B3C07324622669725F32986DFD1685F1907A87DBBE7"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\BlockCursor.java",
+    "sha256": "8217BEB6B26EB046D70CF66D5E142121E11F5673DC2DEFEE7F7AFA2C87E0E630"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\HistoryController.java",
+    "sha256": "26C5442E77ED0569B1170F050DC7BC8B5FF8E4EB4A612AFE98A56D0F65B88C62"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\HistoryCursorCodec.java",
+    "sha256": "43C267022C7AB4DFCA5F3F08D0133D3F5322EBB82971B35FA5F500CFE43238ED"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\OriginGuard.java",
+    "sha256": "91E7CEF8B137009A652B9217ADA9313D17C07544378752665ED3F87DEBB7D45B"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\ProjectController.java",
+    "sha256": "B15CDD1233021BB446F1AB09F41EE9701AE0F19AEEF30F3ADB0BEB240087D71D"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\ProjectEditController.java",
+    "sha256": "0AA17AEA4CE26C5CB87472DDDFADEE2250D3486BD4AC760B54313D49E505C21E"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\ProjectReadController.java",
+    "sha256": "D634E3A51123E8E444CEA494922622FD86779C3B4679F40D38916BC25C5D8921"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\RescheduleController.java",
+    "sha256": "2178AF54AA8FCC3F84DE1BA974B6C8D95C7BCCE38D848128058525E0A8DED3D5"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\SessionAccessDeniedHandler.java",
+    "sha256": "35C33C62F1557D17BBB3D7EB6FF053D76180AD33B06D3ADA808CB7366F97CC33"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\SessionController.java",
+    "sha256": "F0814DDDC6E028849186C6B293CDC89802207E01E028F9F7B33371E599006BE1"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\SessionFailureFilter.java",
+    "sha256": "1C50F22B9815C7F5F937CD195453A734D600B5A80ECF54D411E643CFF89FA589"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\TaskController.java",
+    "sha256": "0BB20B96E3D01563862C2C8A1C4FD0A6363674C929C345B91D6745BE03085311"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\TaskHistoryController.java",
+    "sha256": "B1697CEA63F6B4619D6BE22EC968694802560107A471DF97B5E7F679E27A54BE"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\TaskStatusController.java",
+    "sha256": "F468DE174F961AC9B6F61DBDE6128AD18C116A6D3B9B3889DBAC59C5C9D14D2D"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\TodayController.java",
+    "sha256": "8F336F0DD847E8FE0AEA7AD6BCF820A68B2A87435EDE2B5C36B1742E09CB62E1"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\WorkSessionController.java",
+    "sha256": "20C0CA344C54C8367451B2AA472627F22BAA2639C8270973E7BAA3CF10196EF1"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\http\\WorkSessionStateController.java",
+    "sha256": "644334362BA156CF56E13F19E9A0D8ECA41F091A899BA29C4746F55DB7F727DE"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\logging\\Slf4jPublicationAudit.java",
+    "sha256": "085D8D522EE8551AD80FA97747160FF24F3BEBBFA3084A233CF5DF5102792501"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\persistence\\PostgresAvailabilityStore.java",
+    "sha256": "295461234C8532D3B17F454BFEE8CF4787DB19D53D03EE7410C3A86A8A5C9101"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\persistence\\PostgresBlockChangeQueries.java",
+    "sha256": "36B60D1FDCCDA6D020C74A8C6442A5BCF183AA6563D09B675CA78FA35B9AE257"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\persistence\\PostgresBlockStore.java",
+    "sha256": "A0AB035C9C568DE8156066BD10B541E7B619CB1738F24E6F1FA0EF53D7F3022C"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\persistence\\PostgresHistoryQueries.java",
+    "sha256": "16BE9241407612E9DF908C031CF18E589DDE1069AED55101FEE0CEE739657B99"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\persistence\\PostgresOutboxWork.java",
+    "sha256": "A5B608B5A11E54FC39E129373A291C659B4EFA4949643B6C25779B7AB0F8230E"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\persistence\\PostgresProjectCommit.java",
+    "sha256": "3EF8FBD4E87F0714FD8797A1E2463F1D03E8E086FA7E53B253B49D690DD53064"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\persistence\\PostgresProjectEditing.java",
+    "sha256": "B8AB3D1CF2C386A4AFBF99F957AC2B56940BB0B2B0DCA34EABE630F5F682F776"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\persistence\\PostgresProjectQueries.java",
+    "sha256": "E1A66288B45CE73B752E6522BBE575E24AD7D41432668F8A980BF0F2AF7603DC"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\persistence\\PostgresProjectStatusEditing.java",
+    "sha256": "7ED2D59EE6D9220DD2029FBF0B5C588F35B0844EDC9C53A2D5F8525849DFA367"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\persistence\\PostgresTaskCommit.java",
+    "sha256": "1F0B26D3B66073D4B108CCD3CE5F1668E8D25532C84223D14DAA62EA4158895D"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\persistence\\PostgresTaskHistoryQueries.java",
+    "sha256": "94160FA4E72374FB44C378D48A6D6EA2BB868B6A7CB82CD580A80B27406BA464"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\persistence\\PostgresTaskQueries.java",
+    "sha256": "04E35CF0D82F4483A7F9F4DC0AFC60E0A534A750D9B4580B61507E3C968DD207"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\persistence\\PostgresTaskStatusStore.java",
+    "sha256": "9AD33294F9C94A4E06BC43541ED149A5FF69D592318CF6947ADAD7667DD88F97"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\persistence\\PostgresTodayQueries.java",
+    "sha256": "81ADDA7169B24B2239A686D4D50E74516F26A95D324083260ABF2C704FF32576"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\adapter\\persistence\\PostgresWorkSessionStore.java",
+    "sha256": "932A8730EF873E68FDBED17BD2AB13AECFCCFE7F4086C1405E3514A815EBED83"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ActiveProjectLimitException.java",
+    "sha256": "F8E5EECD2F3D6A2924160E0AD2AB1915C43A5F8219BA38AF70B48A0166C1FB78"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\AvailabilityConflictException.java",
+    "sha256": "BE6AB1E626A3DB959C84CE5FEC1444875F8591390DDD5ADF06014079D397DC9A"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\AvailabilityEditing.java",
+    "sha256": "11420AB5BA40C95EBB3312D8AC53DC631823B4155CB6D48C45228022F3A652A6"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\AvailabilityQueries.java",
+    "sha256": "41DDF3AD47477F49472A68B75CE156E3AB2984374BF012C218DEF0F528BDF4CF"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\AvailabilityRequiredException.java",
+    "sha256": "CE0B603FCC4B6C68DBA4258ABC65CCCB4B24D38ECF193D8DE642016780CF376C"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\AvailabilityZoneUnavailableException.java",
+    "sha256": "46DE949E1F41BB5BF0F639F068504CAA5E100744915F9BCD423F5BC2713B61A5"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BlockBudgetExceededException.java",
+    "sha256": "0463D9279CECAB7C0D1E67818B8CB5EF7B05DCBE1B9AF7A0EB459F1EC43324F8"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BlockChange.java",
+    "sha256": "DCC5A4B2B235D453B6D111767D850A776D6DD96BEDBED0B214E523B18FD82F05"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BlockChanged.java",
+    "sha256": "220EA72BF6662C68E2B52E60E1196E33E6102E3E3B1118C606E66A64193C415D"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BlockChangeNotFoundException.java",
+    "sha256": "A783F260056A5FAAB51E2A1E41405F2169FAC979FEEB8076960BBEEB05253E61"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BlockChangeQueries.java",
+    "sha256": "F3114EEC8A003C9D8AFDBEF1BEA23587ADB28895F7CBD60150C68DAB9E238BE3"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BlockCommit.java",
+    "sha256": "ACAD444B417BADFB347D47DDE183B1FF850FE3A6033AFCDAA93C111F9154048B"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BlockEditing.java",
+    "sha256": "B62DA69E373842F6580D98A5F3B2B1DC24954B637DD0942450DCABB277CE5015"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BlockIdempotencyConflictException.java",
+    "sha256": "9280C1CD13AE95418412A14583C3E38D8A89EA9256300570C85D12148FB6448F"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BlockMoving.java",
+    "sha256": "0EE02493B765D645D0E696B4D81E04DAA2C74038933F9430948BE18105EC9F9C"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BlockMutation.java",
+    "sha256": "35411500F5E74B2F96CFACE2E7EF164E21A61A2937751C05066BE7D439ECB8F0"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BlockNotFoundException.java",
+    "sha256": "0906EE9A9737E5EF7F49DD2BF0078E5DEF9B62FB3DFB9F6B7EDF5D50E75B7F49"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BlockOverlapException.java",
+    "sha256": "69F91BBA69FA31C84EF52568B99D64CC2FBB2115EF1C2A8D819D8F7239492D41"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BlockPlanned.java",
+    "sha256": "0F292B8DBA77411AA3B75668563F8AE194788BB91894DB55DA07A368AFE2A73D"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BlockPlanning.java",
+    "sha256": "1B7767076620D062FE4D9BD7D572D72CCEEC21D86415BCA7A2FB012BCCD42D09"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BlockQueries.java",
+    "sha256": "0CF571681D02E2DFDA62CFC027E9C152482BD08EEBDEF568A16B1DFFE89F3FA3"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\BrokerPublisher.java",
+    "sha256": "5EB7094FD924C5EF76969443E22AB929D1AAE7435D860958C7810AB9F5D2D43E"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\CancelBlock.java",
+    "sha256": "6044FF3852E2662E4B1C04341DD2FE19E6C93DFCB86DD80DE43295A781F0B818"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\CancelBlockUseCase.java",
+    "sha256": "A41105ED62C8AD7417A8825E086EC5C770554DB64056A0B44CEBE610562BC7A3"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ChangeProjectStatus.java",
+    "sha256": "C9FD5242CCE0C6972A718ABBD073C2CD1B60B172C1F934388D065B5AE163BF8C"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ChangeProjectStatusUseCase.java",
+    "sha256": "C6F7DE5504617BC5694B6B70DC4B07E813CC43C2C9F325CD2D9D82F0A06E368C"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ChangeTaskStatus.java",
+    "sha256": "4ACA51AF6870B8EB2C83BD04C810E1B808F03FE70EADDFF1BB3C2451BF3164FE"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ChangeTaskStatusUseCase.java",
+    "sha256": "6E1FDB81CC3859546DC5521686F871AF8317B65319218C7F317A14E090584DE1"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ChangeWorkSession.java",
+    "sha256": "593DB572A21847D1CD6B1FC4CA70C114C7FECCB49F4C27DBC8DE17283598FC3E"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ChangeWorkSessionUseCase.java",
+    "sha256": "E9552869D33AC7D5CDA46D226D77E095D80A4FEE9C637C8CB4C6990DB62E46FA"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\CreateProject.java",
+    "sha256": "70F98A17654C97375801B73989A2D08FA1AE863EF4C8EFA4A481C57252BA6101"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\CreateProjectUseCase.java",
+    "sha256": "1554D7C9D761CCFD7B649777CB4D9A23770569EC69066955D650AAA18E29AC0C"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\CreateSubtask.java",
+    "sha256": "66084C0DEC7DF2299C83F3F890D92A95565741429C03BADE615A00730CE58C58"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\CreateSubtaskUseCase.java",
+    "sha256": "58F9FC6CAB94A93D4F89DB82299D75D1618D8C6547207982AFE765722EAAF4DA"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\CreateTask.java",
+    "sha256": "99389027DDDBEF5D1EA1EEC11C97C5FF81246E20DFF97B1250637CE7E009E441"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\CreateTaskUseCase.java",
+    "sha256": "E5B54F1DD974128F35D254D7F15199F53C30EB5F2D9821D35E438D6DFDA59516"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\DeliveryOutcome.java",
+    "sha256": "4594FED9F9171FEBD5E047A9299A36614AB8B1B4709601881FD8967BDE71795F"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\EditProject.java",
+    "sha256": "BCBCE1A8A826738025D39141E5B5E8CADA6437ED851F6BBB29CF48AD135E4F3D"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\EditProjectUseCase.java",
+    "sha256": "F577C6ABFF27274DCA947E1D331C55E014B41BD65DEFE2E81963ED45F2AFFC74"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ExtendWorkSession.java",
+    "sha256": "0967253B22592C0B5792A23D9E5EF58274AB6612B44677E8AFB66DDB5F41D982"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ExtendWorkSessionUseCase.java",
+    "sha256": "FE074ABB57D3C2A4571E641451A97B234C66F5F1EFD54B221F088C70BFAEEE00"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\HistoryCursor.java",
+    "sha256": "F586554505FBFA598EF744CEECF7879A9967646E6923E3CD012B80979F9A54E3"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\HistoryEntry.java",
+    "sha256": "51D8EDD7D60635DC9F82BBE5F4EBA7F0AD841D7C6E2C82228D30E8FB2F04B6A7"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\HistoryFilters.java",
+    "sha256": "40B57D5B5238902241E31C9E0105871748CD2265463100016B2DE773AC4455DA"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\HistoryPage.java",
+    "sha256": "7DC7B48DC8AC3FFD7CC8735D1CBCDE4A296423B8FAFE0C4A47B2E8DAEEB867E0"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\HistoryPosition.java",
+    "sha256": "950C9B1BF3273D3B1DF7596F569D48F6B0108665B3D4F0F232F267A22C8666AC"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\HistoryQueries.java",
+    "sha256": "C5DE3DAB670C6D3A1DF12678C1875306B61FE9B42B41C4DFA92522633F432780"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\InvalidProjectTransitionException.java",
+    "sha256": "F401EAD1DCE3DC3D1102ED2F380865B9F8AAD41C09937C07B144DA0EC40A6B4E"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\MoveBlock.java",
+    "sha256": "52AC62D72E843144F33F129004042AF0C2C61D4A37BFE6B9D5B673AF1FBB0A3F"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\MoveBlockUseCase.java",
+    "sha256": "CAAE7E80B06303689F7D813F2DF046D7676CC083ECEC03A8EBA42A7E98551037"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\MoveContext.java",
+    "sha256": "FD9C2ED7D1E5AFE123B2A11D156C7130A63F44520E5ED0738E33AB06C5657A0F"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\OutboxWork.java",
+    "sha256": "A99382DB62B5B2590C8F0F810A2BFC5C441F24CED9C7020D5E753F788C9B6667"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\PlanBlock.java",
+    "sha256": "40411E7BB7B5B99A1C076F370315C69BA2D0343BC9B176AA4D4C53A71A70A548"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\PlanBlockUseCase.java",
+    "sha256": "E6563077025123867242D33DF2CB7A184FBCC331873E63E48A863A41274B0264"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ProjectChange.java",
+    "sha256": "1895DA896172307BAE4526ED0D8D8FE3DF0C4A0762BAC423F6428D64DBD0E15E"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ProjectCommit.java",
+    "sha256": "35A381A77D6FF999A3367DFE6BF0943B379455E5ABDB413E4681350ADF45C530"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ProjectCompletedException.java",
+    "sha256": "6941F37CCEDD299380C6187AC6E13A43F6D20F249051C0DE63A0FD9B3EF64AE3"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ProjectConflictException.java",
+    "sha256": "FD366107F30ACC28FA750C8B997C68E95A412DE9752D64C6EAB99E0F2D8D2883"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ProjectCreated.java",
+    "sha256": "BBF8782805CF62EECE0688436B3E258DFD4DF70952B9D00BA078B2551E0977F4"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ProjectEditing.java",
+    "sha256": "0CC56247A2C43C2A927E6A4C39CA422E0E59CCDC8A5E5DCD23D5AFF1BB7F8DF2"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ProjectNotFoundException.java",
+    "sha256": "69E6D5609C147C4EC165673B73FD10988CB2DBC94BEAC8C2218A06C2AB13FDA0"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ProjectQueries.java",
+    "sha256": "6F29C8D42D1D7278BA1C695E378EF55E8A8FBE34281A7550D5FD853F293E4F2F"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ProjectStatusChange.java",
+    "sha256": "A8C166FD30A3624D91B69C63056A3A49F6D11E3867480C7734C3216150DBB921"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ProjectStatusChanged.java",
+    "sha256": "8681C9EB41C9E98317577F483E5CDDF807E47D897AF214705871AFEA32B8ACE6"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ProjectStatusEditing.java",
+    "sha256": "8D091CCF57ED5D16FA91E75F261C0ACC78B35C778B9E9C7AEBA9929E5CB9B57A"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ProjectUpdated.java",
+    "sha256": "C2FB9255A7B2C4F0F94116D1DA573819E4858F61B23080F47948412F5495812D"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\PublicationAudit.java",
+    "sha256": "E3E60F200F25654EC5C398FF660ACC3BAD3F12EC2379C3EF19A444FAFE27DF36"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\PublishOutbox.java",
+    "sha256": "B590D70CC982C0D299327DC6854469931B7AD374F7B78129B709ACE63AA7AA88"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\PublishOutboxUseCase.java",
+    "sha256": "7672E128F58BB32328781692D131D749178DDC89AD2909B4B169871AE46D80FE"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadAvailability.java",
+    "sha256": "BCD54E8124B153AE76C58B85C4496EC593B5AE2F93196269296024B66EC34674"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadAvailabilityUseCase.java",
+    "sha256": "DC09DDFEF079A94D116BAD57F259AB017266DA4AEF06D8AF9965499EEA83E7A9"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadBlockChanges.java",
+    "sha256": "80D921CE987D0C1C54AE8DEB471BDE7E27435C6AB923A6EEA83D5C8326F020CE"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadBlockChangesUseCase.java",
+    "sha256": "766C08D3FE8956CBAF7CFA1BEBFDC293307AD2F2806B5745A4DA905162A0BF71"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadBlocks.java",
+    "sha256": "294E8BC7D93BB02C569F663E178656A325D1F2EE3362CE301E0F7FB842ADECE0"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadBlocksUseCase.java",
+    "sha256": "F1A58FB93D84487A7F641B914288E892734F7D473B93995C45E12D387FAD7A5A"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadHistory.java",
+    "sha256": "4CFF8AE808FC5B96788C10829FC7BEAB8CD70B793F5DF525A3F5A530F0B55955"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadHistoryUseCase.java",
+    "sha256": "54579CE9B5392742FA23EE4BF75E011CA4B135A7A65BA5D9CC9AE2E437A0FBFD"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadProjects.java",
+    "sha256": "C65355FF5A6F0A7FB7DBCC004EF1888CDE2E708F81D67878A6F13942100A98EF"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadProjectsUseCase.java",
+    "sha256": "E245BA9ECF1E943774EB42B77333AF110EAB493B13A6841F90C2D3CEB05C3171"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadSubtasks.java",
+    "sha256": "F6EDA84DCCDECB8065AE1C652E5124740C4E382A3A9E4E4462CC41B41AE1FEC3"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadSubtasksUseCase.java",
+    "sha256": "3C55AD76453D154D835D3785C10036B411B797CB397C4724C78937B00B34ADE4"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadTaskHistory.java",
+    "sha256": "1DA41D9C06D74399E9B301B240294FD23118A24C465B146586B19930CA401F98"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadTaskHistoryUseCase.java",
+    "sha256": "5F3504C5A40C67484995E01ED55AE3E734463136027B107F93580A0EE343A1B7"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadTasks.java",
+    "sha256": "2297AA8C0E3B952B11D0ECA821D05AE5A618BE3BEC5BDE0D7D91E3064DDD7234"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadTaskStatus.java",
+    "sha256": "8CA0F3A5F9731000304452617798168DD603FC2170CDDFB43B8353FBC20AE14A"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadTaskStatusUseCase.java",
+    "sha256": "FC1E305E09BD13A36F5AFA229646B0FE1E579CD030010292CBF65ABF54E0570E"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadTasksUseCase.java",
+    "sha256": "3B225B4A93018057EEE299A59757C88581AF487E0EBE782DEBD9FAAEA9870592"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadToday.java",
+    "sha256": "D32D0BD5DB6CFA725DA7E52B630064E800F142D8059457B01C1289A716789D65"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadTodayUseCase.java",
+    "sha256": "E368009A766D387BD45936D697A004A8431C786145694EFC033BFFB79178BF6E"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadWorkSessionChanges.java",
+    "sha256": "E87396D9690FF43B5E0602B8E94FEBCAAA65CC6B558485445CB82990658F941B"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadWorkSessionChangesUseCase.java",
+    "sha256": "B844A9626EF032B00562A668BC96FD6F78698C4E2249A071E1D5026D572C4519"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadWorkSessionEnd.java",
+    "sha256": "B82F22C4A5E2F39A7FF5F7A29EDFD5C0E4CC01DC9C4B14253361D5BAB108E519"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadWorkSessionEndUseCase.java",
+    "sha256": "A61B548D89BB3E4D38C773B0F474D5FD1864BCC9DC88D196A25C4CB661E0C0C3"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadWorkSessions.java",
+    "sha256": "70B6EC53E8C5B9309DE9163689621A02F58A4C90221853B15012EC4454FCE3B1"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadWorkSessionState.java",
+    "sha256": "E43D3C02CE0134C57ED483760CE86AB722A183F0404EE6B0A9EB07C4CE3A130C"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadWorkSessionStateUseCase.java",
+    "sha256": "1140EDF0362FCD9B69BA76574601CF4087CAEB02EDC31C3CC61A564E81596E48"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ReadWorkSessionsUseCase.java",
+    "sha256": "EBCED63D53E89237E2F9DF5FC1DC1F64BAFC766A1C29672EA52099FEAB0239CE"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ResourceNotFoundException.java",
+    "sha256": "49CF5443E79BC59D708C9A7781DD52F00D47121FFE2674D7521DFCC5621567BB"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\SaveAvailability.java",
+    "sha256": "931A89F1A798B7C2384ADFDB8ECA4E7BD0BCA7B99CF4EC382115F4D5F5C0DBA4"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\SaveAvailabilityUseCase.java",
+    "sha256": "42D98EEE2076E79CA3D8AEE8C0AFF9239AB887A8E17A825CD150EDAF1C686614"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\StartWorkSession.java",
+    "sha256": "A18F8E7E087FD10EFBECA9FC2974C36A7E0B17190CCF492BE1ACB1E14A98F2CE"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\StartWorkSessionUseCase.java",
+    "sha256": "069C2D95F29FFC1E72B79AE5EB417D273C9342B26E54B72FEB07C7B9A305A4A6"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\StorageUnavailableException.java",
+    "sha256": "F9D1D01D119373C3373805940BA1751EC0B9566F454CE034BA3F84DAB0C3EC67"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\SubtaskCommit.java",
+    "sha256": "3974151B5388566503D66C2430A763133C49B963B66A9F68B74572530B513F31"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\SubtaskCreated.java",
+    "sha256": "9E9F6BE360C7F6DA0E96B36AD932A34E29EBF351C89951D0D69196D2F4F6472E"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\SubtaskQueries.java",
+    "sha256": "B9359F14703DBA264F2EA718F310059091C2BB65E3ED2ED47BFC5104DC8986D9"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\TaskCommit.java",
+    "sha256": "107B1B9C58D2AAF57F4842B1F96F85793AF2A4F69EEDC839F98DDE5654FD0813"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\TaskCompletedException.java",
+    "sha256": "B76B571C9F8217709C819FD0BB8AD81FA282703E6F91B3FFE39D1C0F1EF28A38"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\TaskConflictException.java",
+    "sha256": "EB2024DF218288763CE9130093EB0F8F9AD6ACCBFCD92DE4176C29807478B134"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\TaskCreated.java",
+    "sha256": "313E0BA7D746687F7C460748C72F1029D4448BCC3573EF10DC9C9383B78D5328"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\TaskCreation.java",
+    "sha256": "FA7F198EF559348732CA1D85DF1F014DB768C18543396B7279145DEAF12522CE"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\TaskCreationEvent.java",
+    "sha256": "9C71345DC306403DD406D5937512204F01904837FA4759031EC2DB897D56C8EA"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\TaskHistoryQueries.java",
+    "sha256": "A61059E6984950123F64AFADC6AFED5383B91861D413AC3E7BF94743B2C188F8"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\TaskQueries.java",
+    "sha256": "828D721F4AC2935B8A8DD9A6E6F7C78BCB74CEA1D665227FDDD201C067AD53D9"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\TaskStatusChange.java",
+    "sha256": "44C70D8C7EADABA11CF2ECDB77719E09374A17C5C1E932369D7D04AEA76C58D8"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\TaskStatusChanged.java",
+    "sha256": "993D3675C20870317935205C19EA0428A806BBA46AFC81BE061B1A3602727546"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\TaskStatusEditing.java",
+    "sha256": "5DF761C661EE4D91DDF453DC8D23097C915B86C40D0C16DF3CAEDB5449093BF8"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\TaskStatusQueries.java",
+    "sha256": "0D1904D9D29DD869AE3E68B3F42AE65D2B74EBEB7EAD75DAD4309BBFEB664702"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\TodayQueries.java",
+    "sha256": "3E0F9BCDF63C458CD69621255239B3F8A5D39A8B8218B8C517E678D9B34C2DA5"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\TopologyMismatchException.java",
+    "sha256": "2F33262310A80A39E81539E8B5E16FC0B0F3EE4F80985913D70401C3044B6072"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionAlreadyActiveException.java",
+    "sha256": "E3DE9973CC765062B26120F04F1AA2B355FF58EA91F90675322453EC8A16B2B0"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionChange.java",
+    "sha256": "C810DF922314B0F05D77B44641B9CD6291341FB0783F97C76E99685B6529D63B"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionChangeNotFoundException.java",
+    "sha256": "69B4164D92373453928333D16D7CAA743AC33DF121D48AF3FFC990FFBFC836E2"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionChanging.java",
+    "sha256": "026C79BA55AF9D9CEE039CB783F7EE580B602A7952045D015FB0E43910C095A3"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionClosed.java",
+    "sha256": "72C7959E0107ECBB5D04272A23D6B7AC47112926F98849A75155F5506BA1EB08"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionClosure.java",
+    "sha256": "1998485551BDAF2BF492243B589DAEAD598854AB3C21B3F0878B708381C46DAD"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionConfirmation.java",
+    "sha256": "1D68B67A2F1BD25BD7624389D1D33280F7F17E2736BB0D21007DA4F6B9F03BE5"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionContext.java",
+    "sha256": "FB9BAC4EBFA645A1F22CFDEBB7A5FB353DD514BBDF6BC0CD27E02F93D584E975"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionEnd.java",
+    "sha256": "47882C583FB5116233F57727C090292A89C0670831DB05E7A73FD669925E528D"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionEndQueries.java",
+    "sha256": "5042E61D049415B50FE2BB2A2ECF1772056E5F8F10B8C10332F5EA449EDD55D4"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionEndSnapshot.java",
+    "sha256": "B741E3522AB4F6C948C4E587C7E73FF08E6375E43C86B64E9EF0E938F34D2B3A"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionExtended.java",
+    "sha256": "94A6060F7A09DDE53AB87FA16AA184E93AC3E0C70009C319FFCD4BC93A961243"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionExtending.java",
+    "sha256": "1EAC7DD0AC03B0E55E5C0E9F539702C18350C08B6F3475914A7FEB830B536943"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionExtension.java",
+    "sha256": "67D7EB71D7F3B7A0643AD8297504B54A109345510D63B97D5217CAB42E226C02"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionExtensionTransition.java",
+    "sha256": "A8A17F9FA759BC5A6F79254FAC6EA1F8043AD1184C561B5B0CE26AD8B68C9D9D"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionIdempotencyConflictException.java",
+    "sha256": "B468F6CD428E565BD7E89BB8565576A74E05D0BB208712E93D2907BA989B9673"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionNotFoundException.java",
+    "sha256": "B2E26D93CDA0698D07569BC82452409ED299684DE2048BFF990343160B805776"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionQueries.java",
+    "sha256": "4B5A04D8F574329BC67B21BB8C3A9873375CDB59301DAC8C50908756296ACD7D"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionRevision.java",
+    "sha256": "EAFB985AFFF02CBB7C7299B36376A1C4029BFB16792ED38E7AFB5FB2BC79A761"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionSnapshot.java",
+    "sha256": "DB2BBC90739EFDAEEBCB134389F5751CD3801573B3C3300A77E0E3C2A4137146"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionStarted.java",
+    "sha256": "4A9F1011C73A8E91BA8D089F02ABC9BCD313660D543D395B2EED8B9912CA688A"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionStarting.java",
+    "sha256": "6B036A63D863E51BB1B2009AD8B0C6057D4B7931D696C19F55B9517B6B398C15"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionStateChanged.java",
+    "sha256": "C7A5BE33D7059E05A214693510893E5EA9424DAF19C822C532AA844CE6587D3E"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionStateQueries.java",
+    "sha256": "E1814DAF73215132DEA01E27F6204A5376D8DF38E1D694A609A6E7FB09D840D7"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionTimeOutOfRangeException.java",
+    "sha256": "E36357B0593A041544819E298B611BFAF52F648C89C7E712646078CCFE389791"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionTransition.java",
+    "sha256": "66B703C9D9788B3C5AADDE70BBBBACBE1E5A0CB4AF21C64EA09FB77A60BEB636"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionTransitionConfirmation.java",
+    "sha256": "C25FACA5091A40DA0D53F194DBAF49F661EB77A8FA53BAC7572E2DE42B2B52ED"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionTransitionQueries.java",
+    "sha256": "317C78FD32C00C18C9EDDA3832F24275F63B3BD9AB72052CF08EE9719EB666A3"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\WorkSessionTransitionReceipt.java",
+    "sha256": "E070678FAF37749EB49C526C19CC5277C2354ED42C7B9DCA78121A873503C639"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\application\\ZoneCatalog.java",
+    "sha256": "A2364254565019C8864DEDC5C6EB13A88932A3100D885A7B595BC00E47FF2A87"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\Availability.java",
+    "sha256": "C019B91DDC749F2B491B73B004F9434FC6CA5ABB2532818C0B7230C1000DFAB5"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\AvailabilityRevision.java",
+    "sha256": "B09E7F34AD2F23B4E2193DE26444663B0F118309756575CD07EFD71F86700147"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BlockBudget.java",
+    "sha256": "5C2912077234B173BE7699C0B11D4B896E3DC7A3B5FFB75CA38CC4118B5AF5BC"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BlockChangeConfirmation.java",
+    "sha256": "145A59A8E9E35B6670280F462197F506CC65A88A8FAD1A3CC0AF2BD162ADD76A"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BlockChangePage.java",
+    "sha256": "16979FCAC422EDA01A9407DD80368BD0147C7AB7A32C8EDCC34AC72B90419131"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BlockChangePosition.java",
+    "sha256": "DF31D26A0AF87A2D6A0BFC153EB830FBE9061E76BD5498EDA1609A79646D9921"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BlockChangeReceipt.java",
+    "sha256": "2ACCC9CE01782BA9698BF4EA8BB86022706F5FE2BB8A78ABB753B843D0494AE2"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BlockCreation.java",
+    "sha256": "90E61512C8B834D480A94A360379B4315121C8FF03DCFD1FB406915FA305F041"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BlockMoveRequest.java",
+    "sha256": "F6050FB9CF0EC61AA32D2596B88B995F2A5BDD0FAD231F96F99983BD9217985B"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BlockOffsetException.java",
+    "sha256": "4A201F1F69B0A06457924AA56C4D72AC308F5315BBDA1611F693E78C40D22DEC"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BlockPage.java",
+    "sha256": "757F8FBD373F48D15272BA1B2FB1B84B01F6F0F5F8D320547E44C09A196704F1"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BlockPlanningContext.java",
+    "sha256": "171813D2438604263F874CDEC90F38AAB02FB2BDEFCE5D0539095A04AF7687C8"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BlockPosition.java",
+    "sha256": "9CEB9F6F9F28B755867E59E7B7AC4002B8F06643BFB9D2B81E8B0172EF060285"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BlockPreview.java",
+    "sha256": "0345CC91FA8F610BFAF9746DDDBE98659B47E5B994FAE6F1495C3F124DED9358"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BlockRequest.java",
+    "sha256": "864EF82CC23A6FCB2A132DEFFE7282A84A1F04D222E014437A502F12AE097F14"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BlockState.java",
+    "sha256": "C24811561D7DA10211D62DDA6B40B269F130D486C47EA8616006E021A54038C1"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BlockStateException.java",
+    "sha256": "0E6CD6D82339C206542836D33DF758FD74E055FED4D3BE54BF0A2E4D988D50A9"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\BudgetDay.java",
+    "sha256": "481B3952C8ABA961AC534828496C89B983484876758EAADD370E5652C03BE16E"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\FieldError.java",
+    "sha256": "B0A0B246E38BC6D20D1FB737D0BFB477AFEA80BDE1CCA315FEFCCA75E41F83B3"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\OutboxMessage.java",
+    "sha256": "2E53C8431C1DE70C4641089085D44059931DCF9EC5AD38BFCF29B7E40FECAB91"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\PlannedBlock.java",
+    "sha256": "93F2D2EFAD8787D1BC7DCD7EA89681BF7FAC7D0BCD75BA17B90CD33C894D87BC"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\Project.java",
+    "sha256": "0F9C80E1110153D98B3DFFEBD5041F5F08A0F94B84EFE513CBDBB0EA1BD52140"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\ProjectPage.java",
+    "sha256": "E8B8E14DC61816591A681D88F5A3493EADE5572A3DDDB97135BEF13723AD248A"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\ProjectPosition.java",
+    "sha256": "EC56A61EA35049AD989A2D096D685735CE7F6C78B1EE17E12869B8516FA403BB"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\ProjectRevision.java",
+    "sha256": "0D862D1E0DF33B60146F6C9E4C780EE5E3DDA8E63B8E83ACC7202A08DA1D176C"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\ProjectSnapshot.java",
+    "sha256": "141985CEF2C2295A878391AEF77E759C3D9CD0CF25310068FFB980DA8A40868D"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\ProjectStates.java",
+    "sha256": "527EFDB5DECEE755758719A4AE4C731551126DAE8BFB77E05135A81D0E765863"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\ProjectSummary.java",
+    "sha256": "42FA5221E80AB2B281B553E303E7079E8E746D9E34507DFE49B9F0B202839C7F"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\PublicationAttempt.java",
+    "sha256": "E343E8604325F074F5E8B24FAB7257C0392EF81155F089EA641A7AB444200E11"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\ResolvedBlockTime.java",
+    "sha256": "D8438878564E2F4E74834752FCFE37FA59E915635BD221152E2D933AAED5144A"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\SessionStart.java",
+    "sha256": "5A372B9A6ECE96EC3CAA91D7E59FE22AE83D8FE43D7915C1C4A4E3221AFF41CD"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\Task.java",
+    "sha256": "F39AAA695B35D372AD6A75D0328EABE7BA318EB25A6A0D5CF6D1CFBC37B1CD66"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\TaskHistoryEntry.java",
+    "sha256": "F6251CDC38BB50A42C009A58A4EEE5BE186486BEB2AC108136F327A02F30F1FC"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\TaskHistoryPage.java",
+    "sha256": "3B77705A09E4F49B474C2682AE37685744AE77EC73EB9EC9EE6FD0B089D908C1"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\TaskHistoryPosition.java",
+    "sha256": "A50CA9CF23CB34C777934588EE4DEFCAD87F2B06C4811A2AB3E0F857F8E7AD94"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\TaskPage.java",
+    "sha256": "1C5381C3239523F609C661D51581F7EF4EE848A3540109916321BEF060F262C1"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\TaskPosition.java",
+    "sha256": "76D26ECCB5CBA2B4576E7C5FA6E4950669A8B68B93655C9D56287041EFCE44BE"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\TaskRevision.java",
+    "sha256": "72B763C1C81722BDA937E376179C9573DA244DCF23239D42F642D130B7727323"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\TaskSnapshot.java",
+    "sha256": "049EB0DCD40567BA1E2BBEF0F767D996E84B11825335DD918C0F8406AD3E7429"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\TodayItem.java",
+    "sha256": "242334269D66C473EABF409B06F1AFCC71B81D74C5F499A1E8116087297916A2"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\TodayWindow.java",
+    "sha256": "19597FD5F362B54BCE8BF9FD097A81DFE84F3BEE15C12216DFAD74F2B266292E"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\ValidationException.java",
+    "sha256": "4AA2ECCBA550356B1C5BEA18D52F646D39737178CC1ED060637F059F9F7679A6"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\WorkSessionCloseNotes.java",
+    "sha256": "C1C9B239CDCCEB7B55815D3DF40EDEA37CCCB3E7D3A2F94F351BAAB2834D9994"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\WorkSessionState.java",
+    "sha256": "C1D338BE657B3EE35AFB802DCDA44A7F245866910976D79DAE528B114F2EFDDD"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\domain\\WorkSessionTransitionException.java",
+    "sha256": "9708C528BECA5D6FFEEF2D43EC74822EC00755B2E87862484A03076D6AD2B653"
+  },
+  {
+    "path": "backend/src/main\\java\\com\\apptolast\\organization\\OrganizationApplication.java",
+    "sha256": "3BCDB2B1F4E8DE3ADB6532D7C2AD8445CCF833300631E695EA92B6D1530F7AF4"
+  },
+  {
+    "path": "backend/src/main\\resources\\application.properties",
+    "sha256": "CF9C0FF235FC62AC03FB8DE322AFA5BDBB82D7C41E2BAA5CE845B19F58FA280C"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V1__projects_and_outbox.sql",
+    "sha256": "81A5AB30C6765B6CD59020A3570533AE38871A3984BDCACC35E68FBD637533E4"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V10__availability_preferences.sql",
+    "sha256": "B4C4C49EF0C470675A9C030223366E1116C64E6F0ADCC236ACA2676849CD8B55"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V11__planned_blocks.sql",
+    "sha256": "D5E66E334813A0FB2BE844F9E1CDB92E79A844B2DDE44E54F43464138E25E986"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V12__block_changes.sql",
+    "sha256": "9AD1E9C2E37265CEC4AEBA3576B51F2D0CA72E80072B6F6E95554146D61AA73B"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V13__block_change_integrity.sql",
+    "sha256": "652E9253B79D7179E88AF8F1D0DE4F36548174D69905364A3C3B2656CA23E982"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V14__work_sessions.sql",
+    "sha256": "B3FB30E24B1C1F051B8785DD105426D91C18B702613564B8426B679A6811FEC1"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V15__work_session_uniqueness.sql",
+    "sha256": "3575BCC2E4BD7CA3FA87B397C30FFA60AB6FB2A52E56011F0A1E027D6EBC3D72"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V16__work_session_transitions.sql",
+    "sha256": "FCF5E21223898897B2FDE1748F91CEC4426C175FA9DAF8688BF4E9C6C8AD784E"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V17__work_session_closure.sql",
+    "sha256": "D3E539D5E1CA7C31AB89E7A085963CE8F338E447D2E8148BE79299B4B33036C5"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V18__work_session_end_time.sql",
+    "sha256": "4BDC855BF766BB2AB3ADA014772CA1B40DA0316B935BF55F3B336338E91A9C30"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V2__outbox_publication.sql",
+    "sha256": "6F5E1FFB29B1DEA38282584CFB4CCBE0361F71105F9E41B631661391458F217C"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V3__project_read_index.sql",
+    "sha256": "0C25514B084962CFC9C745634C61D64846CC771E490069E16FD8B81B1039FB19"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V4__project_version.sql",
+    "sha256": "CE359B8850F41827F9A987DBE218F5BD1CB8BF1F1D60409BCD7789938B0A9C94"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V5__project_states.sql",
+    "sha256": "90D5FE45B90C6443A4503EEDA8CE9F1058258124572EC95BD11C27AB10BF448E"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V6__jdbc_sessions.sql",
+    "sha256": "E4F796EA0C2F8BD1AC2C32A5393E7C93831393DB8B5849C947F96E57520AAC29"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V7__tasks.sql",
+    "sha256": "9129A4B41C22E076EBBAEB1A77B50995577A8FB64BDFC23FBF5F481C4C321A30"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V8__task_parent.sql",
+    "sha256": "08483D2FD520E4A72A609F9A52ACD58A5D1DE2B410D95D29F4E51E56616333AA"
+  },
+  {
+    "path": "backend/src/main\\resources\\db\\migration\\V9__task_status_history.sql",
+    "sha256": "B5DAEDC6D9138D26F3888D62DE6FE84F470CA0B2A0267EC7F6CFF9D299805CC8"
+  },
+  {
+    "path": "docker-compose.yml",
+    "sha256": "63F91A628E7174FE2DDEE9D0D9623B480CAB841EC1EABB8888936BFE4FEA8F54"
+  },
+  {
+    "path": "e2e/history.spec.mjs",
+    "sha256": "898A9E160E6CF46BE1E6D68EC2E14FF2DD80839E8F9A9D3401FFCE51EC69BED1"
+  },
+  {
+    "path": "frontend/package.json",
+    "sha256": "DD41A0BF019D5DE14FDAA97FF10806034175D9842EBF2D96955BCD0B6B79E1E1"
+  },
+  {
+    "path": "frontend/src\\api-client.ts",
+    "sha256": "19B8D5C0BACB65F5E219BA66035F80392924D80DDD521949D682DC5A995DA7AC"
+  },
+  {
+    "path": "frontend/src\\App.tsx",
+    "sha256": "B8CBB8190F25DAAC325EC09DDC40A611BC8A5564B0CFC73396F4FE7536A7BF18"
+  },
+  {
+    "path": "frontend/src\\availability-api.ts",
+    "sha256": "24E01D1EC98516B36CCF468C95AD4C4F50F2B2DAB4E6629AA1EEFB1B2ED3C6CD"
+  },
+  {
+    "path": "frontend/src\\availability.tsx",
+    "sha256": "042C68F09ABA85B895E0D39A91646E6DFFC141FF2C78E2E30CBFC9F4D7F62AFA"
+  },
+  {
+    "path": "frontend/src\\block-confirmation.tsx",
+    "sha256": "6A882F6A46FF3B718D30676BA39E0838C820806C0A8C14664E94A876DCC8F73E"
+  },
+  {
+    "path": "frontend/src\\block-details.tsx",
+    "sha256": "73E9D94D56036F08CDE58B8FE2F7CE1C102E7D002D49CB846CF0528DE0846C85"
+  },
+  {
+    "path": "frontend/src\\change-submit.tsx",
+    "sha256": "E12B6C1F5ABB4777976EF3792520D4365D53B8A4F5C8E3F06D1AE057A692FB02"
+  },
+  {
+    "path": "frontend/src\\edit-project-api.ts",
+    "sha256": "BDFFF194BA33CC79C40C5359DDCD6768FC2C16148D75A0A234BCB6F594377A29"
+  },
+  {
+    "path": "frontend/src\\history-api.ts",
+    "sha256": "768EFA248169C13F2FA07E1BA752A1990D060DF65601F4F500ADCB3FA173DAE0"
+  },
+  {
+    "path": "frontend/src\\history.scss",
+    "sha256": "B91E6A8BFDEB115B3550B871CA6404ACDF9C548C92B0ADB4B9CAC480E40EE705"
+  },
+  {
+    "path": "frontend/src\\history.tsx",
+    "sha256": "C4DC03625667D1639A5781BB2030E8EFA0EDF02BE3BDCFB4B60978E6D35C9BCD"
+  },
+  {
+    "path": "frontend/src\\main.tsx",
+    "sha256": "34C4F217EB45208F2C856A29BA80249D90051A85A328E6D39FED74CF8B1A8627"
+  },
+  {
+    "path": "frontend/src\\navigation.tsx",
+    "sha256": "9D801F6A3D8FC8CBC6B06DE884F9B14706D0D61A845E9B5DB017BF7666C0F2EA"
+  },
+  {
+    "path": "frontend/src\\project-editor.tsx",
+    "sha256": "1B7BE5A821F9D94A0CEDB2CBAB3B2DCC8301C768A921EF37D2C8BBED7ABE05A6"
+  },
+  {
+    "path": "frontend/src\\project-reader.tsx",
+    "sha256": "AB02CC409CB8DEADD816BC624C2F539268803E8C1F5217D75803FB841844D286"
+  },
+  {
+    "path": "frontend/src\\project-status-control.tsx",
+    "sha256": "F2BE40A3362709971106D38E5492CAAA1AED78EEF6F6153D293093FB09594BB1"
+  },
+  {
+    "path": "frontend/src\\project-status.ts",
+    "sha256": "3566378978C9124C74D9377ABB82FFFEE2808E64AF3B111B5C1263623E8B62AC"
+  },
+  {
+    "path": "frontend/src\\project-tasks.tsx",
+    "sha256": "A98561C9A8A56F259B6DABB42E219C30DFB936DFA39D730E59D6404D75C137F6"
+  },
+  {
+    "path": "frontend/src\\projects-api.ts",
+    "sha256": "B94FB5B2F52C5FF088FD726CF2F8D0B61AC0F3ECF6D8607EE26C3FCE4D60B2F2"
+  },
+  {
+    "path": "frontend/src\\read-projects-api.ts",
+    "sha256": "9674E0CE4E84D24F281FB3D13BC581AA8E7B97A4545D57ADE5AC830E3510B445"
+  },
+  {
+    "path": "frontend/src\\reschedule-api.ts",
+    "sha256": "CD71FDF6304A44528835C3CD5591DF6D1728C83FEB997F49AD7EAF8C4CB7CC09"
+  },
+  {
+    "path": "frontend/src\\reschedule-block.tsx",
+    "sha256": "F923BBEEAD7EFCE5FC2ED40DF994B8149B3D8B22B6A99C22752F762AB0242972"
+  },
+  {
+    "path": "frontend/src\\reschedule-history.tsx",
+    "sha256": "7C2E037F9573395D651C259A7E4BB8B83E1D0F63DC85D17FFA05EE8050C52C56"
+  },
+  {
+    "path": "frontend/src\\schedule-block-api.ts",
+    "sha256": "6CCA4B6A14620B2F30483CB2774292C784F7DCCB0EF2090EFAF16C426DA26D0C"
+  },
+  {
+    "path": "frontend/src\\session-api.ts",
+    "sha256": "C9ADDB2D3DB74AA308E6250084EB499122CA476BEACCB2B62A0A97720F0C283B"
+  },
+  {
+    "path": "frontend/src\\session-gate.tsx",
+    "sha256": "30146943E88AD03DD62B60F05ABC3976D9F988DE4C7B07EA91BF5D7CF5584607"
+  },
+  {
+    "path": "frontend/src\\styles.scss",
+    "sha256": "F6CDB22BE4DBFA2C2BE01D40C76C86A023262D6DAC66F01C8714966CCCA34122"
+  },
+  {
+    "path": "frontend/src\\task-blocks.tsx",
+    "sha256": "EC2D7AC254DD1D96410FC4618C7D5AEDCAD51B02CE049160113EF8206D5FD5A3"
+  },
+  {
+    "path": "frontend/src\\task-history.tsx",
+    "sha256": "90885F84E6B221E35A0E7AFB7707B19233E8DFD6DF88BC63302F89394E279BAD"
+  },
+  {
+    "path": "frontend/src\\task-parent.tsx",
+    "sha256": "D586AD1021403351CBE1C2CCC3C40C4D73695DA0DC29F1F46E345FBF67A5D63B"
+  },
+  {
+    "path": "frontend/src\\task-reader.tsx",
+    "sha256": "94A4EB4163D2076A894576E832BCA8C22AF3C0720CE3F548025EE6937FCB3387"
+  },
+  {
+    "path": "frontend/src\\task-state.tsx",
+    "sha256": "9EB8B493CA43772D7B12F0D040526E135CE8A572F8CB5E191D3B8BFA7C1EC7A3"
+  },
+  {
+    "path": "frontend/src\\task-status-api.ts",
+    "sha256": "4A388755E135974CCDF85B3DEB59D5060088F0365A59BE31DB6D376563899CEA"
+  },
+  {
+    "path": "frontend/src\\task-validation.ts",
+    "sha256": "656D59DAC2C0DC8829F57753221C06D1C1793DF4E0D2DBC9414EB1B471D3BA97"
+  },
+  {
+    "path": "frontend/src\\tasks-api.ts",
+    "sha256": "5E6BE9A3F902D3BB3C6C1F8C29A6C057548CF1A7DF2D1B2C338AAB051058CC32"
+  },
+  {
+    "path": "frontend/src\\test-setup.ts",
+    "sha256": "1C1F608698CEA6A2BDF222D68EF48FB2A8F6BB99297AFE3ED87151CB67739A99"
+  },
+  {
+    "path": "frontend/src\\today-api.ts",
+    "sha256": "96EECDADA067B78AEA8DA95FFE21B3E5DD663C7BD162736228B0DD40B0A93FBA"
+  },
+  {
+    "path": "frontend/src\\today-fixture.ts",
+    "sha256": "8388B2372934A59FDB1E1985B7AC88C74B5C75A6A77A9D41A3C822B5AC1C54EB"
+  },
+  {
+    "path": "frontend/src\\today.scss",
+    "sha256": "A3317B64D2B02990B728094B46138181174978B034FADDF5A06DA1067357DD62"
+  },
+  {
+    "path": "frontend/src\\today.tsx",
+    "sha256": "930495AEE7F67E1101FC966C6C42DB448788208B76FE228AC6EEA63FD99A8D1C"
+  },
+  {
+    "path": "frontend/src\\use-create-project.ts",
+    "sha256": "5EECFACADA0488227E52F55B8056B5AF95AD9FAF6C51FEE1E5869206DE024A91"
+  },
+  {
+    "path": "frontend/src\\use-edit-project.ts",
+    "sha256": "A5CA25FFA8BC1DCBFFFAF7F32C31FB15FA254DF8740DB9B821056B277BC016E2"
+  },
+  {
+    "path": "frontend/src\\use-project-status.ts",
+    "sha256": "A843D44BF719371ACEE7E6CCDE1BB90B0562BDB0EC31745F15273E8C65B1F36F"
+  },
+  {
+    "path": "frontend/src\\use-project-tasks.ts",
+    "sha256": "615EE659F49B03AA38D348709A632EDED08A0806F2D867361CA057AD014446A2"
+  },
+  {
+    "path": "frontend/src\\use-read-projects.ts",
+    "sha256": "3169323DC28556C1F20F66134F5B85D7D7BE86F3225ED925697F27B53780C1A4"
+  },
+  {
+    "path": "frontend/src\\use-session.ts",
+    "sha256": "7DC0D92F3E9CA199B5365D9C387F9C990B6486BF5096EBDCACCF293105950F94"
+  },
+  {
+    "path": "frontend/src\\use-work-session-decision.ts",
+    "sha256": "A17E547AE2CF14CE074B8BD4C51EF32592573837F5C56D213FCDC2CC2FF8060B"
+  },
+  {
+    "path": "frontend/src\\vite-env.d.ts",
+    "sha256": "65996936FBB042915F7B74A200FCDDE7E410F32A669B1AB9597CFAA4B0FADDB5"
+  },
+  {
+    "path": "frontend/src\\work-session-api.ts",
+    "sha256": "8B37B3C856FC208EB8A873A676D757E3C8945A60470C50A2739A7602540520C3"
+  },
+  {
+    "path": "frontend/src\\work-session-end-api.ts",
+    "sha256": "A7BD65AA29827DE31BE60286C528E55710ACA53F2A968C4B11F6454D267CFCE6"
+  },
+  {
+    "path": "frontend/src\\work-session-end.tsx",
+    "sha256": "667FA2EEBA44225BD2CB19A9E7DA02BFE664AB158F7212EF106CE1872CEDFBFA"
+  },
+  {
+    "path": "frontend/src\\work-session-reader.tsx",
+    "sha256": "FD83DD0B37EC1B3CDDED8857B4D8E512EDDD4A53C27A4817BEE4A4B0E8F54153"
+  },
+  {
+    "path": "frontend/src\\work-session-state-api.ts",
+    "sha256": "2F98191AB9C715600891026D0711E896CBD622930F4755C3010C0F5FD21C0A15"
+  },
+  {
+    "path": "frontend/src\\work-session-state.tsx",
+    "sha256": "3EBB7CDAC83986BC0A55FD2423B8BAC67A570F2E8035E0846E1E73E6DFCE2ACD"
+  },
+  {
+    "path": "frontend/src\\work-session.scss",
+    "sha256": "0E41A5408141BFE004548018AC35CF5C32E9B239955759FA18E304D7DB84FC80"
+  },
+  {
+    "path": "frontend/src\\work-session.tsx",
+    "sha256": "113D20EADD6313AEB590235EA86D1E13B79F17A518E7C5841C40BDD42AEE3E7D"
+  },
+  {
+    "path": "frontend/src\\workspace.tsx",
+    "sha256": "D1CAE44816F05EA9D29C788249DED63C261929A6C0D00D8E8ECB005A6F2AED61"
+  },
+  {
+    "path": "scripts/e2e.mjs",
+    "sha256": "ACEB45729E98903796DD8574295307FFCE96AE922DF3C80A8FD04203F1FF0161"
+  }
+]

@@ -374,3 +374,128 @@ test("history: pagination filters and reload survive API restart without fixture
     ),
   );
 });
+
+test("history: current errors withdraw private notes and retry only the requested read @s34 @s35 @s37", async ({
+  page,
+  request,
+  context,
+}) => {
+  sql(
+    "TRUNCATE work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+  );
+  const project = await create(request, "Contexto privado del historial");
+  const task = await saveTask(
+    request,
+    project.id,
+    "Notas privadas conservadas",
+  );
+  await configure(request);
+  const headers = await csrfHeaders(request);
+  const start = await request.post(
+    `/api/v1/projects/${project.id}/tasks/${task.id}/work-sessions`,
+    {
+      headers: { ...headers, "Idempotency-Key": randomUUID() },
+      data: { plannedMinutes: 25 },
+    },
+  );
+  expect(start.status(), await start.text()).toBe(201);
+  const session = await start.json();
+  const note =
+    "Nota privada de cierre: no debe persistir bajo una respuesta de error";
+  const close = await request.post(
+    `/api/v1/work-sessions/${session.id}/close`,
+    {
+      headers: {
+        ...headers,
+        "Idempotency-Key": randomUUID(),
+        "Work-Session-Revision": `work-session-${session.id}-1`,
+      },
+      data: { progressNote: note },
+    },
+  );
+  expect(close.status(), await close.text()).toBe(201);
+  const path = `/historial?projectId=${project.id}&category=sessions`;
+  await page.goto(path);
+  const list = page.getByRole("list", { name: "Hechos del historial" });
+  await expect(list.getByRole("listitem")).toHaveCount(2);
+  const closed = list.getByRole("listitem").filter({
+    has: page.getByRole("heading", { name: "Sesión cerrada", exact: true }),
+  });
+  await closed.locator("summary").click();
+  await expect(page.getByText(note, { exact: true })).toBeVisible();
+  const durableBefore = sql(
+    "SELECT (SELECT count(*) FROM work_sessions) || ':' || (SELECT count(*) FROM work_session_changes) || ':' || (SELECT count(*) FROM outbox_events)",
+  );
+  const reads = [];
+  page.on("request", (req) => {
+    if (new URL(req.url()).pathname === "/api/v1/history")
+      reads.push({ method: req.method(), query: new URL(req.url()).search });
+  });
+  await page.route(
+    "**/api/v1/history?**",
+    (route) =>
+      route.fulfill({
+        status: 503,
+        contentType: "application/problem+json",
+        body: JSON.stringify({
+          type: "about:blank",
+          title: "Unavailable",
+          status: 503,
+          code: "STORAGE_UNAVAILABLE",
+        }),
+      }),
+    { times: 1 },
+  );
+  await page.getByLabel("Categoría", { exact: true }).selectOption("planning");
+  await page
+    .getByRole("button", { name: "Aplicar filtros", exact: true })
+    .click();
+  await expect(page.getByRole("alert")).toHaveText(
+    "No hemos podido consultar el historial.",
+  );
+  await expect(list).toHaveCount(0);
+  await expect(page.getByText(note, { exact: true })).toHaveCount(0);
+  const failedUrl = page.url();
+  await page
+    .getByRole("button", { name: "Reintentar consulta", exact: true })
+    .click();
+  await expect(
+    page.getByText("No hay hechos con estos filtros.", { exact: true }),
+  ).toBeVisible();
+  expect(page.url()).toBe(failedUrl);
+  expect(reads).toHaveLength(2);
+  expect(reads[0]).toEqual(reads[1]);
+  expect(reads[0].method).toBe("GET");
+  await page.goto(`/historial?projectId=${randomUUID()}&category=sessions`);
+  await expect(page.getByRole("alert")).toHaveText(
+    "Este proyecto o tarea no está disponible para tu cuenta.",
+  );
+  await expect(list).toHaveCount(0);
+  await page
+    .getByRole("link", { name: "Quitar filtro de contexto", exact: true })
+    .click();
+  await expect(list.getByRole("listitem")).toHaveCount(2);
+  await context.clearCookies();
+  const revoked = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === "/api/v1/history" &&
+      response.status() === 401,
+  );
+  await page
+    .getByLabel("Categoría", { exact: true })
+    .selectOption("task-status");
+  await page
+    .getByRole("button", { name: "Aplicar filtros", exact: true })
+    .click();
+  await expect(list).toHaveCount(0);
+  await expect(page.getByText(note, { exact: true })).toHaveCount(0);
+  expect((await revoked).status()).toBe(401);
+  await expect(
+    page.getByRole("button", { name: "Iniciar sesión", exact: true }),
+  ).toBeVisible();
+  expect(
+    sql(
+      "SELECT (SELECT count(*) FROM work_sessions) || ':' || (SELECT count(*) FROM work_session_changes) || ':' || (SELECT count(*) FROM outbox_events)",
+    ),
+  ).toBe(durableBefore);
+});

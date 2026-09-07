@@ -2,7 +2,9 @@ package com.apptolast.organization.domain;
 
 import java.time.*;
 import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 public record WeeklyReviewWindow(
     Instant serverNow,
@@ -10,8 +12,20 @@ public record WeeklyReviewWindow(
     String zoneId,
     String zoneSource,
     String availabilityZoneId,
-    java.util.Map<DayOfWeek, Integer> budgets) {
+    Map<DayOfWeek, Integer> budgets) {
   public WeeklyReview emptyReview() {
+    return summarize(List.of());
+  }
+
+  public WeeklyReview summarize(List<Interval> planned) {
+    return summarize(planned, List.of());
+  }
+
+  public WeeklyReview summarize(List<Interval> planned, List<Interval> worked) {
+    return summarize(planned, worked, 0);
+  }
+
+  public WeeklyReview summarize(List<Interval> planned, List<Interval> worked, long unquantified) {
     requirePublicInstant(serverNow);
     var localToday = serverNow.atZone(ZoneId.of(zoneId)).toLocalDate();
     if (localToday.getYear() < 1 || localToday.getYear() > 9999)
@@ -29,8 +43,24 @@ public record WeeklyReviewWindow(
                       date,
                       date.atStartOfDay(ZoneId.of(zoneId)).toInstant(),
                       date.plusDays(1).atStartOfDay(ZoneId.of(zoneId)).toInstant(),
-                      0,
-                      0,
+                      sumMicroseconds(
+                          planned.stream()
+                              .mapToLong(
+                                  interval ->
+                                      interval.between(
+                                          date.atStartOfDay(ZoneId.of(zoneId)).toInstant(),
+                                          date.plusDays(1)
+                                              .atStartOfDay(ZoneId.of(zoneId))
+                                              .toInstant()))),
+                      sumMicroseconds(
+                          worked.stream()
+                              .mapToLong(
+                                  interval ->
+                                      interval.between(
+                                          date.atStartOfDay(ZoneId.of(zoneId)).toInstant(),
+                                          date.plusDays(1)
+                                              .atStartOfDay(ZoneId.of(zoneId))
+                                              .toInstant()))),
                       budgets == null ? null : budgets.get(date.getDayOfWeek()) * 60_000_000L);
                 })
             .toList();
@@ -46,17 +76,29 @@ public record WeeklyReviewWindow(
         days.getLast().endAt(),
         days,
         new WeeklyReview.Totals(
-            0,
-            0,
+            sumMicroseconds(days.stream().mapToLong(WeeklyReview.Day::plannedMicroseconds)),
+            sumMicroseconds(days.stream().mapToLong(WeeklyReview.Day::workedMicroseconds)),
             budgets == null
                 ? null
-                : days.stream().mapToLong(WeeklyReview.Day::capacityMicroseconds).sum()),
-        0);
+                : sumMicroseconds(days.stream().mapToLong(WeeklyReview.Day::capacityMicroseconds))),
+        unquantified);
   }
 
   private static void requirePublicInstant(Instant instant) {
     if (instant.isBefore(Instant.parse("0001-01-01T00:00:00Z"))
         || !instant.isBefore(Instant.parse("+10000-01-01T00:00:00Z")))
       throw new WeeklyReviewTimeOutOfRangeException();
+  }
+
+  static long sumMicroseconds(LongStream values) {
+    return values.reduce(0, Math::addExact);
+  }
+
+  public record Interval(Instant startAt, Instant endAt) {
+    long between(Instant start, Instant end) {
+      var from = startAt.isAfter(start) ? startAt : start;
+      var to = endAt.isBefore(end) ? endAt : end;
+      return from.isBefore(to) ? java.time.temporal.ChronoUnit.MICROS.between(from, to) : 0;
+    }
   }
 }

@@ -1,0 +1,98 @@
+{
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadWeeklyReview.java",
+      "sha256": "A9203B586B72FCBB9E695AF57349DC47FA9500C0F5976B11764480DCA37A041D"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadWeeklyReviewUseCase.java",
+      "sha256": "1E073739558F679915CB60652D131D02EF740848CA876A5C1833A2420C7D515F"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/WeeklyReviewQueries.java",
+      "sha256": "D267B442C9991F1FA0EAF1954F950E3BCF1AC4A247DB6CF4183871F2C715CE4B"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/WeeklyReview.java",
+      "sha256": "B2BE451F0BAF01CB0F26389F06D75BBFB5D3ECFC2F13EA7DE8A9E08797C3F2F3"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/WeeklyReviewWindow.java",
+      "sha256": "35D76A0F3937CD576AD1A849010D8EBD9882EF0BE9B6FED4175C29819D526CDB"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/WeeklyReviewTimeOutOfRangeException.java",
+      "sha256": "C09E0586FCFEF4A15FF8BC35FC0FE727A72F92B6F887484E537B9D1D54096A22"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresWeeklyReviewQueries.java",
+      "sha256": "9BA969F21B66E290536C6A02845E146E5F05BBB5148026962EF1534FE2F04A1F"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+      "sha256": "D60B548E76D170793764FCC8DAECFE7FB25884A0AF4DA3356283088FBC450C3B"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/application/ReadWeeklyReviewTest.java",
+      "sha256": "4EB3B5215C5B00716898564156BC0703C89CE2AAF7B16FA2C8AC48EA23E78707"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/domain/WeeklyReviewWindowTest.java",
+      "sha256": "F1CAE1C11E58D6A9E77C84D0089436623A8429D60D11CD2813A5233E616FDEBA"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/WeeklyReviewPersistenceTest.java",
+      "sha256": "18F50E7577557B35328E27469701572E0DD4BDEB0B8C296F36D36D4CBF999770"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/config/ApplicationWiringTest.java",
+      "sha256": "AAB79E07999E2DED096D83510FF2D8797A3BB2AB0DB30E3DBD29662B799E4499"
+    }
+  ],
+  "xml": [
+    {
+      "path": "progress/weekly_review_backend_final_xml/TEST-com.apptolast.organization.adapter.config.ApplicationWiringTest.xml",
+      "sha256": "37979B94B5EA098CEAA9BBC634D2ED6BEC2284ADAF007094AC67FA27AA02CA27",
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "progress/weekly_review_backend_final_xml/TEST-com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.xml",
+      "sha256": "83FABB0D0B4F9CB307A1032A7EABE0FEFDDEF42CDF29A2098272C4361366D31D",
+      "tests": 33,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "progress/weekly_review_backend_final_xml/TEST-com.apptolast.organization.adapter.WeeklyReviewApiTest.xml",
+      "sha256": "E0EC954F4D6C22C894C1DEB56809B7439D1F5B587A5E51B4927C2F6CB5A82562",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "progress/weekly_review_backend_final_xml/TEST-com.apptolast.organization.application.ReadWeeklyReviewTest.xml",
+      "sha256": "D64A3BD58FAD5875518F4017FF3FAEEBB28D75B89EA6C1DC19F5EC4E84706006",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "progress/weekly_review_backend_final_xml/TEST-com.apptolast.organization.domain.WeeklyReviewWindowTest.xml",
+      "sha256": "F3F22B410F863B63798B81BE4655F989EB88BEB2EE69F5E7CD3FFE1B6743259D",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "total": 91.0,
+  "exit": 0,
+  "execution": "f86eaa",
+  "scope": "Backend funcional19: domain/application/PG/wiring; HTTP17 de C sólo regresión integrada"
+}

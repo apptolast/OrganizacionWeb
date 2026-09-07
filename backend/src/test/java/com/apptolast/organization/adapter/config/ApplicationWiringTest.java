@@ -29,6 +29,19 @@ class ApplicationWiringTest {
                   .isInstanceOf(
                       com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries
                           .class);
+              org.mockito.Mockito.doAnswer(
+                      call -> {
+                        var extractor =
+                            (org.springframework.jdbc.core.ResultSetExtractor<?>)
+                                call.getArgument(1);
+                        return extractor.extractData(mock(java.sql.ResultSet.class));
+                      })
+                  .when(context.getBean(org.springframework.jdbc.core.JdbcTemplate.class))
+                  .query(
+                      org.mockito.ArgumentMatchers.anyString(),
+                      org.mockito.ArgumentMatchers
+                          .<org.springframework.jdbc.core.ResultSetExtractor<?>>any(),
+                      org.mockito.ArgumentMatchers.any(Object[].class));
               var result =
                   context
                       .getBean(ReadWeeklyReviewUseCase.class)

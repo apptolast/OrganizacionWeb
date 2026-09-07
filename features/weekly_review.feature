@@ -80,7 +80,7 @@ Feature: Revisar el plan vigente y el trabajo real de una semana propia
       | date=0001-01-01 y zona explícitaEtc/GMT-14 del catálogo            | 409 WEEKLY_REVIEW_TIME_OUT_OF_RANGE  |
       | serverNow no cabe en UTC0001–9999                                 | 409 WEEKLY_REVIEW_TIME_OUT_OF_RANGE  |
       | serverNow cabe en UTC pero su fecha local sale del rango público  | 409 WEEKLY_REVIEW_TIME_OUT_OF_RANGE  |
-      | el límiteUTC exclusivo de semana no es representable públicamente | 409 WEEKLY_REVIEW_TIME_OUT_OF_RANGE  |
+      | sin date, serverNow=9999-12-31T12:00:00Z y zonaUTC produce una semana cuyo domingo sale de9999 | 409 WEEKLY_REVIEW_TIME_OUT_OF_RANGE  |
 
   @s7
   Scenario Outline: Las fronteras civiles respetan DST y días saltados

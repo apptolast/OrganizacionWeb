@@ -12,6 +12,262 @@ import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 
 class PublishOutboxTest {
+  @Test
+  void pauseResume_s26_redeliversAfterLostConfirmation() throws Exception {
+    assertEventRetry(stateChangedMessage(), DeliveryOutcome.CONFIRM_TIMEOUT);
+  }
+
+  @Test
+  void pauseResume_s26_retriesUnavailableBrokerWithOriginalPayload() throws Exception {
+    assertEventRetry(stateChangedMessage(), DeliveryOutcome.BROKER_UNAVAILABLE);
+  }
+
+  @Test
+  void pauseResume_s26_blocksImpossibleResumeCalendar() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("action", "RESUME");
+    payload.put("fromStatus", "paused");
+    payload.put("toStatus", "running");
+    payload.put("runningSince", "2026-02-30T10:00:01.123457Z");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksResumeWithoutAnOpenInstant() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("action", "RESUME");
+    payload.put("fromStatus", "paused");
+    payload.put("toStatus", "running");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksNoncanonicalWorkedMicroseconds() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("workedMicroseconds", "01");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksNumericWorkedMicroseconds() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("workedMicroseconds", 1000001);
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksExtraPrivateField() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("requestKey", UUID.randomUUID().toString());
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksSessionIdentityReusedAsEvent() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("eventId", source.aggregateId().toString());
+    var changed =
+        new OutboxMessage(
+            source.aggregateId(),
+            source.aggregateId(),
+            source.ownerId(),
+            source.occurredAt(),
+            source.type(),
+            1,
+            source.json(),
+            payload,
+            0);
+    assertStartedBlocked(stateChangedWith(changed, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksYearZeroOccurrence() throws Exception {
+    var source = stateChangedMessage();
+    var when = Instant.parse("0000-12-31T23:59:59.999999Z");
+    var payload = new HashMap<>(source.payload());
+    payload.put("occurredAt", when.toString());
+    var changed =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            when,
+            source.type(),
+            1,
+            source.json(),
+            payload,
+            0);
+    assertStartedBlocked(stateChangedWith(changed, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksSubMicrosecondOccurrence() throws Exception {
+    var source = stateChangedMessage();
+    var when = source.occurredAt().plusNanos(1);
+    var payload = new HashMap<>(source.payload());
+    payload.put("occurredAt", when.toString());
+    var changed =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            when,
+            source.type(),
+            1,
+            source.json(),
+            payload,
+            0);
+    assertStartedBlocked(stateChangedWith(changed, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksResumeWithDifferentOpenInstant() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("action", "RESUME");
+    payload.put("fromStatus", "paused");
+    payload.put("toStatus", "running");
+    payload.put("runningSince", source.occurredAt().minusNanos(1000).toString());
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void pauseResume_s26_publishesResumeAtMaximumRevisionWithZeroWorkedTime() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("action", "RESUME");
+    payload.put("revision", "9223372036854775807");
+    payload.put("fromStatus", "paused");
+    payload.put("toStatus", "running");
+    payload.put("workedMicroseconds", "0");
+    payload.put("runningSince", source.occurredAt().toString());
+    assertStartedPublished(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksPauseWithAnOpenInterval() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("runningSince", source.occurredAt().toString());
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksPauseToRunning() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("toStatus", "running");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksPauseFromPaused() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("fromStatus", "paused");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksUnknownAction() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("action", "STOP");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksNegativeWorkedMicroseconds() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("workedMicroseconds", "-1");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksRevisionAboveBigint() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("revision", "9223372036854775808");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksNoncanonicalRevision() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("revision", "02");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void pauseResume_s26_blocksNumericRevision() throws Exception {
+    var source = stateChangedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("revision", 2);
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  static OutboxMessage stateChangedWith(OutboxMessage source, Map<String, Object> payload)
+      throws Exception {
+    return new OutboxMessage(
+        source.eventId(),
+        source.aggregateId(),
+        source.ownerId(),
+        source.occurredAt(),
+        source.type(),
+        source.schemaVersion(),
+        new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(payload),
+        payload,
+        source.attempts());
+  }
+
+  @Test
+  void pauseResume_s26_publishesTheOriginalPauseEvent() throws Exception {
+    assertStartedPublished(stateChangedMessage());
+  }
+
+  static OutboxMessage stateChangedMessage() throws Exception {
+    var event =
+        new WorkSessionStateChanged(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            "owner",
+            Instant.parse("2026-09-07T10:00:01.123457Z"),
+            1,
+            "WorkSessionStateChanged.v1",
+            "PAUSE",
+            "2",
+            "running",
+            "paused",
+            "1000001",
+            null);
+    var mapper =
+        new com.fasterxml.jackson.databind.ObjectMapper()
+            .findAndRegisterModules()
+            .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    var encoded = mapper.writeValueAsString(event);
+    Map<String, Object> payload =
+        mapper.readValue(
+            encoded, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+    return new OutboxMessage(
+        event.eventId(),
+        event.aggregateId(),
+        event.ownerId(),
+        event.occurredAt(),
+        event.type(),
+        event.schemaVersion(),
+        encoded,
+        payload,
+        0);
+  }
+
   static OutboxMessage startedMessage() throws Exception {
     var source = message(0);
     var payload = new HashMap<>(source.payload());
@@ -247,7 +503,10 @@ class PublishOutboxTest {
   }
 
   private void assertStartedRetry(DeliveryOutcome failure) throws Exception {
-    var event = startedMessage();
+    assertEventRetry(startedMessage(), failure);
+  }
+
+  private void assertEventRetry(OutboxMessage event, DeliveryOutcome failure) {
     var work = new Work(event);
     var sent = new ArrayList<OutboxMessage>();
     new PublishOutbox(

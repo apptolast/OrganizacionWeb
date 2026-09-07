@@ -17,6 +17,89 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 class RabbitBrokerPublisherTest {
+  @Test
+  void pauseResume_s26_routesResumeWithItsOriginalOpenInstant() throws Exception {
+    var when = Instant.parse("1969-12-31T23:59:59.123456Z");
+    var record =
+        new com.apptolast.organization.application.WorkSessionStateChanged(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            "owner",
+            when,
+            1,
+            "WorkSessionStateChanged.v1",
+            "RESUME",
+            "3",
+            "paused",
+            "running",
+            "1000001",
+            when);
+    assertStateChangeDelivered(record);
+  }
+
+  @Test
+  void pauseResume_s26_routesPauseToDurableQuorumQueue() throws Exception {
+    var record =
+        new com.apptolast.organization.application.WorkSessionStateChanged(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            "owner",
+            Instant.parse("2026-09-07T10:00:01.123457Z"),
+            1,
+            "WorkSessionStateChanged.v1",
+            "PAUSE",
+            "2",
+            "running",
+            "paused",
+            "1000001",
+            null);
+    assertStateChangeDelivered(record);
+  }
+
+  private void assertStateChangeDelivered(
+      com.apptolast.organization.application.WorkSessionStateChanged record) throws Exception {
+    var mapper =
+        new ObjectMapper()
+            .findAndRegisterModules()
+            .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    var encoded = mapper.writeValueAsString(record);
+    Map<String, Object> payload =
+        mapper.readValue(
+            encoded, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+    var event =
+        new OutboxMessage(
+            record.eventId(),
+            record.aggregateId(),
+            record.ownerId(),
+            record.occurredAt(),
+            record.type(),
+            1,
+            encoded,
+            payload,
+            0);
+    assertThat(event.validationCode()).isNull();
+    assertThat(publisher().publish(event)).isEqualTo(DeliveryOutcome.ACCEPTED);
+    try (var connection = factory().newConnection();
+        var channel = connection.createChannel()) {
+      channel.queueDeclare(
+          "organization.work-session-state-changed.v1",
+          true,
+          false,
+          false,
+          Map.of("x-queue-type", "quorum"));
+      var delivered = channel.basicGet("organization.work-session-state-changed.v1", true);
+      assertThat(delivered).isNotNull();
+      assertThat(delivered.getBody())
+          .isEqualTo(encoded.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      assertThat(json.readTree(delivered.getBody()).size()).isEqualTo(12);
+      assertThat(delivered.getEnvelope().getRoutingKey())
+          .isEqualTo("work-session.state-changed.v1");
+      assertThat(delivered.getProps().getMessageId()).isEqualTo(record.eventId().toString());
+      assertThat(delivered.getProps().getDeliveryMode()).isEqualTo(2);
+      assertThat(delivered.getProps().getContentType()).isEqualTo("application/json");
+    }
+  }
+
   @Container
   static final GenericContainer<?> rabbit =
       new GenericContainer<>("rabbitmq:4.3.5-management-alpine")

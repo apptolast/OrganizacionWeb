@@ -1,0 +1,9 @@
+# Revisión parcial: publicación de pausa y reanudación
+
+Root aprueba el paquete de cuatro Java congelado en def967 y su bitácora. No es el cierre de la funcionalidad 15. Lectura independiente de producción bdfb0d y tests fc4d6c: esquema cerrado de doce campos, validación de acción/estados/instantes, revisión decimal positiva BIGINT, acumulado textual canónico y ruta décima correcta. Las nueve rutas anteriores y el worker conservan sus garantías. La extracción del helper de reintento mantiene los oráculos anteriores.
+
+Rabbit prueba PAUSE y RESUME, quorum durable, contenido original, routing key, identidad y persistencia. El publicador prueba bloqueo de eventos inválidos y reintentos ante broker no disponible o confirmación perdida. El evento no contiene el inicio de sesión: no se exige al publicador recalcular intervalos ni se inventa un límite numérico distinto de su contrato. La suma corresponde al núcleo y PostgreSQL.
+
+El autor acredita 209 pruebas verdes mediante salida 36acf7 y XML98214b: 174 de PublishOutbox, 15 de RabbitBrokerPublisher, 9 de RabbitBrokerFailures y 11 de PublisherConfiguration, cero fallos, errores u omitidas. Root leyó independientemente el XML de PublishOutbox antes del siguiente foco. Los XML del conjunto no se preservaron antes de HTTP; la consulta posterior25746a no devolvió esas suites y no constituye una segunda validación independiente. No se repite una suite sólo por documentación: el gate integrado comprobará el conjunto. Spotless focal real y hashes están en la bitácora.
+
+Integración autorizada exclusivamente de OutboxMessage, RabbitBrokerPublisher, sus dos tests y estos documentos. Los snapshots de puertos HTTP son dependencias provisionales excluidas del commit. Faltan HTTP, integración PostgreSQL/UI, recorrido real y gates finales, incluida mutación, para cerrar 15.

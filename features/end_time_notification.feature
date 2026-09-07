@@ -541,6 +541,3 @@ Feature: Avisar del fin acordado y ampliar una sesión por decisión explícita
     And se conserva contexto, cantidades y hechos ante carga, error y recuperación
     And se documentan motores, tamaños y evidencia de la matriz 30 heredada sin certificar dispositivos físicos
     And no se añaden alarmas externas, historial18, estadísticas ni tiempo trabajado ficticio
-
-
-

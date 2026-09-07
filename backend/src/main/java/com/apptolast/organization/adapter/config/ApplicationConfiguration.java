@@ -9,6 +9,24 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  com.apptolast.organization.application.SaveCustomizationView saveCustomizationView(
+      com.apptolast.organization.application.CustomizationEditing store, Clock clock) {
+    return new com.apptolast.organization.application.SaveCustomizationView(store, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.application.CreateCustomField createCustomField(
+      com.apptolast.organization.application.CustomizationEditing store, Clock clock) {
+    return new com.apptolast.organization.application.CreateCustomField(store, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.application.UpdateCustomField updateCustomField(
+      com.apptolast.organization.application.CustomizationEditing store, Clock clock) {
+    return new com.apptolast.organization.application.UpdateCustomField(store, clock);
+  }
+
+  @Bean
   com.apptolast.organization.adapter.persistence.PostgresCustomizationStore customizationStore(
       org.springframework.jdbc.core.JdbcTemplate jdbc,
       org.springframework.transaction.PlatformTransactionManager transactions,

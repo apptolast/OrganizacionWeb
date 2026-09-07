@@ -1,0 +1,46 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/CustomizationEditing.java",
+    "sha256": "A893C3AD8985EF657C4F0551BAF60F16AFBC0F32640DC3C90C3C0CA35751D338"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/SaveCustomizationView.java",
+    "sha256": "96F6AE78CAE29D2144FF6E9D27E461DB6650E4E81D6DB9E4EE5B4600FBE7D558"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/CreateCustomField.java",
+    "sha256": "6166806A0F88C02B317CB2671F7CDC6F4992FC64CDAB46E38505F434E6871F27"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/UpdateCustomField.java",
+    "sha256": "B312913E5A149615602254100965FCE04AF73BC3485493D676614BC4F54FF171"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/CustomizationTime.java",
+    "sha256": "D73B4C1319B9397CDDB32592A9E1C5706DBF34774B037A94DA78A0AB3EF24C7E"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresCustomizationStore.java",
+    "sha256": "8906470B3D6FE39249FADFC590913DFCA50000657D0BB68FAEFFAE4146BF7A67"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+    "sha256": "001098CDD375AF5436438D2AD2776F3552105EBA7A75401C5955A90545355AF2"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/SaveCustomizationTest.java",
+    "sha256": "5F41ECC5C5D91EC74027BDD61B8D2F585C44258F85DD21091F8E8702847377D0"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/CustomFieldCommandsTest.java",
+    "sha256": "81376F7E71E8B1CC0986C7AE7F0B4727DC454BB69AF4B9B3687FD5A3E0AD14B9"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/CustomizationPersistenceTest.java",
+    "sha256": "37D16102593BDA166B99CABC75430C5F87150D6EA8054509D0DF90F7EF371BBC"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/config/CustomizationWiringTest.java",
+    "sha256": "7DA8C70756605D77B0399DCC7F2825F59E4C7DCCEFB2391393ECD6C687CA882E"
+  }
+]

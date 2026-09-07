@@ -37,6 +37,49 @@ class CustomizationWiringTest {
   @Autowired ApplicationContext context;
   @Autowired JdbcTemplate jdbc;
 
+  @org.junit.jupiter.api.BeforeEach
+  void clearOwnPreferences() {
+    jdbc.update("DELETE FROM customization_preferences");
+  }
+
+  @Test
+  void s2_s3_s7_realCommandBeansShareThePostgresConfiguration() {
+    var save =
+        context.getBean(com.apptolast.organization.application.SaveCustomizationViewUseCase.class);
+    var first =
+        save.save(
+            "wiring-command-owner",
+            CustomizationScope.TASK,
+            new com.apptolast.organization.domain.CustomizationRevision(null, 0),
+            java.util.List.of());
+    var create =
+        context.getBean(com.apptolast.organization.application.CreateCustomFieldUseCase.class);
+    var withField =
+        create.create(
+            "wiring-command-owner",
+            CustomizationScope.TASK,
+            new com.apptolast.organization.domain.CustomizationRevision(first.id(), 0),
+            "Dato",
+            com.apptolast.organization.domain.CustomFieldType.TEXT);
+    var update =
+        context.getBean(com.apptolast.organization.application.UpdateCustomFieldUseCase.class);
+    var result =
+        update.update(
+            "wiring-command-owner",
+            CustomizationScope.TASK,
+            withField.customFields().getFirst().id(),
+            new com.apptolast.organization.domain.CustomizationRevision(first.id(), 1),
+            "Renombrado",
+            false);
+    assertThat(
+            context
+                .getBean(ReadCustomizationUseCase.class)
+                .get("wiring-command-owner", CustomizationScope.TASK))
+        .contains(result);
+    assertThat(result.version()).isEqualTo(2);
+    assertThat(result.customFields().getFirst().active()).isFalse();
+  }
+
   @Test
   void s1_s2_realApplicationReadBeanUsesMigratedPostgresWithScopeIsolation() {
     var id = UUID.fromString("6734a57b-4f2f-4dcb-8d29-0d430413ee12");

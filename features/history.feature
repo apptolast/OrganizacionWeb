@@ -246,7 +246,7 @@ Feature: Consultar hechos propios sin convertir el historial en estado o progres
     Examples:
       | defectos                                   | resultado                              |
       | anónimo y cursor inválido                  | 401 del contrato de sesión             |
-      | seguridad403 y query inválida              | 403 del contrato de sesión             |
+      | autenticado sin token CSRF y query inválida | 400 query INVALID_VALUE                |
       | taskId sin projectId y cursor inválido     | 400 taskId INVALID_VALUE               |
       | from posterior a to y cursor inválido      | 400 to INVALID_VALUE                   |
 

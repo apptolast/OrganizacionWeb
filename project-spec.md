@@ -988,7 +988,7 @@ Cada fila de origen aparece una vez. El inicio y el cierre son hechos distintos;
 
 ### API y representación
 
-Única ruta nueva: GET /api/v1/history. Respuesta200 application/json exacta {items,nextCursor}; items de cero a20 entradas, nextCursor string opaco o null. Sin total, resumen agregado, ETag, Location ni consultas de estado por fila. Cache-Control:no-store y seguridad de sesión heredados. No POST de historial.
+Única ruta nueva: GET /api/v1/history. Respuesta200 application/json exacta {items,nextCursor}; items de cero a20 entradas, nextCursor string opaco o null. Sin total, resumen agregado, ETag, Location ni consultas de estado por fila. Cache-Control:no-store y seguridad de sesión heredados. H no exige token CSRF: un GET autenticado sin ese token conserva la validación normal de query, sin añadir políticas de seguridad nuevas. No POST de historial.
 
 Entrada exacta de ocho campos: id,type,occurredAt,projectId,projectName,taskId,taskTitle,details. IDs UUID canónicos; id es el de la fuente, identidad global del hecho es (type,id), porque UUID iguales entre tablas no deben mezclarse. projectName/taskTitle son strings no vacíos conforme a las validaciones vigentes de nombres/títulos y etiquetas **actuales**, obtenidas del contexto propio; nunca se presentan como nombres históricos ni intervienen en cursor/orden. Pueden cambiar entre páginas. No se devuelven owner, requestKey ni payload de outbox.
 

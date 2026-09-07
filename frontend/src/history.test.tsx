@@ -1067,3 +1067,100 @@ it("@s29 explains an inverted date range at Hasta and permits correction without
     expect.anything(),
   );
 });
+
+it("@s29 mutation18 discards a draft range error after leaving its URL and returning with Back", async () => {
+  const original = "/historial?from=2026-09-01&to=2026-09-07";
+  window.history.replaceState(null, "", original);
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockImplementation(() =>
+        Promise.resolve(Response.json({ items: [], nextCursor: null })),
+      ),
+  );
+  render(<App />);
+  await screen.findByText("No hay hechos con estos filtros.");
+  fireEvent.change(screen.getByLabelText("Desde (UTC)"), {
+    target: { value: "2026-09-08" },
+  });
+  await userEvent.click(
+    screen.getByRole("button", { name: "Aplicar filtros" }),
+  );
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "La fecha hasta debe ser igual o posterior",
+  );
+  await userEvent.click(screen.getByRole("link", { name: "Limpiar filtros" }));
+  await screen.findByText("Todavía no hay hechos en tu historial.");
+  window.history.back();
+  await waitFor(() =>
+    expect(window.location.pathname + window.location.search).toBe(original),
+  );
+  await screen.findByText("No hay hechos con estos filtros.");
+  expect(screen.getByLabelText("Desde (UTC)")).toHaveValue("2026-09-01");
+  expect(screen.getByLabelText("Hasta (UTC)")).toHaveValue("2026-09-07");
+  expect(screen.getByLabelText("Hasta (UTC)")).toHaveAttribute(
+    "aria-invalid",
+    "false",
+  );
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+});
+
+it("@s35 mutation18 retries a second unavailable read with the same filters and cursor", async () => {
+  let deliver!: (response: Response) => void;
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(new Response(null, { status: 503 }))
+    .mockResolvedValueOnce(new Response(null, { status: 503 }))
+    .mockReturnValueOnce(
+      new Promise<Response>((resolve) => {
+        deliver = resolve;
+      }),
+    );
+  vi.stubGlobal("fetch", fetcher);
+  render(<History route="/historial?category=sessions&cursor=opaque" />);
+  await screen.findByRole("alert");
+  await userEvent.click(
+    screen.getByRole("button", { name: "Reintentar consulta" }),
+  );
+  await screen.findByRole("alert");
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  await userEvent.click(
+    screen.getByRole("button", { name: "Reintentar consulta" }),
+  );
+  expect(screen.getByRole("status")).toHaveTextContent("Consultando historial");
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(fetcher).toHaveBeenCalledTimes(3);
+  expect(fetcher.mock.calls.map(([url]) => url)).toEqual(
+    Array(3).fill("/api/v1/history?category=sessions&cursor=opaque"),
+  );
+  await act(async () =>
+    deliver(Response.json({ items: [], nextCursor: null })),
+  );
+  expect(screen.getByText("No hay hechos con estos filtros.")).toBeVisible();
+});
+
+it("@s33 mutation18 explains absent optional notes in a valid historical closure", async () => {
+  const entry = {
+    ...privateClosure,
+    details: {
+      ...privateClosure.details,
+      closure: {
+        ...privateClosure.details.closure,
+        progressNote: "",
+        nextStep: "",
+      },
+    },
+  };
+  const fetcher = vi
+    .fn()
+    .mockResolvedValue(Response.json({ items: [entry], nextCursor: null }));
+  vi.stubGlobal("fetch", fetcher);
+  render(<History route="/historial" />);
+  await screen.findByRole("heading", { name: "Sesión cerrada" });
+  await userEvent.click(screen.getByText("Ver detalles del hecho"));
+  expect(screen.getByText("Sin avance anotado")).toBeVisible();
+  expect(screen.getByText("Sin siguiente paso anotado")).toBeVisible();
+  expect(screen.getByText("Tiempo trabajado: 60 s")).toBeVisible();
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});

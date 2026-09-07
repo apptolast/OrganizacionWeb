@@ -100,3 +100,24 @@ reports/
 /progress/history_ux_geometry_fixed_artifacts/
 /progress/history_ux_verified_artifacts/
 /progress/history_init_backend_xml/
+# Evidencia local de campañas y UX18; informes y manifiestos versionados.
+/progress/history_pit_final/
+/progress/history_pit_replay_final/
+/progress/history_reinforcement_xml/
+/progress/history_stryker_original.json
+/progress/history_stryker_replay_raw.json
+/progress/history_stryker_residuals.json
+/progress/history_stryker_classified_residuals.json
+/progress/history_stryker_residual_lines.jsonl
+/progress/history_pit_exit.txt
+/progress/analyze_history_mutation.mjs
+/progress/classify_history_mutation.mjs
+/progress/propose_history_replay.mjs
+/progress/map_history_replay.mjs
+/progress/history_ux_chromium_artifacts/
+/progress/history_ux_firefox_initial_artifacts/
+/progress/history_ux_firefox_final_artifacts/
+/progress/history_ux_webkit_initial_artifacts/
+/progress/history_ux_webkit_final_artifacts/
+/progress/history_ux_native_final_artifacts/
+/frontend/.stryker-tmp-history-replay/

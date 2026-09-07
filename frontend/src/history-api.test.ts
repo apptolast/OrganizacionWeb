@@ -1012,3 +1012,181 @@ it("@s1 preserves both historical intervals in a rescheduled reservation", async
     readHistory(new URLSearchParams({ category: "planning" })),
   ).resolves.toEqual(page);
 });
+
+it("@s26 mutation18 rejects an extra entry field with otherwise valid start details", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json({
+        items: [{ ...startEntry, extra: "unexpected" }],
+        nextCursor: null,
+      }),
+    ),
+  );
+  await expect(readHistory(new URLSearchParams())).rejects.toThrow(
+    "Historial inválido",
+  );
+});
+
+it("@s26 mutation18 rejects invalid task status details with coherent ID and occurrence", async () => {
+  const details = {
+    id: startEntry.id,
+    fromStatus: "paused",
+    toStatus: "completed",
+    occurredAt: startEntry.occurredAt,
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json({
+        items: [{ ...startEntry, type: "TASK_STATUS_CHANGED", details }],
+        nextCursor: null,
+      }),
+    ),
+  );
+  await expect(readHistory(new URLSearchParams())).rejects.toThrow(
+    "Historial inválido",
+  );
+});
+
+it("@s26 mutation18 rejects invalid original reservation details with coherent context and creation", async () => {
+  const details = { ...block, durationMinutes: 26 };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json({
+        items: [{ ...startEntry, type: "BLOCK_PLANNED", details }],
+        nextCursor: null,
+      }),
+    ),
+  );
+  await expect(readHistory(new URLSearchParams())).rejects.toThrow(
+    "Historial inválido",
+  );
+});
+
+it("@s26 mutation18 rejects invalid block change details without relying on outer identity mismatch", async () => {
+  const details = { ...cancelled, after: block };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json({
+        items: [
+          { ...startEntry, id: cancelled.id, type: "BLOCK_CHANGED", details },
+        ],
+        nextCursor: null,
+      }),
+    ),
+  );
+  await expect(readHistory(new URLSearchParams())).rejects.toThrow(
+    "Historial inválido",
+  );
+});
+
+it("@s26 mutation18 rejects invalid session arithmetic with coherent outer ID time and context", async () => {
+  const details = {
+    ...pause,
+    after: { ...pause.after, workedMicroseconds: "60000001" },
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json({
+        items: [
+          {
+            ...startEntry,
+            id: pause.id,
+            occurredAt: pause.occurredAt,
+            type: "SESSION_CHANGED",
+            details,
+          },
+        ],
+        nextCursor: null,
+      }),
+    ),
+  );
+  await expect(readHistory(new URLSearchParams())).rejects.toThrow(
+    "Historial inválido",
+  );
+});
+
+it("@s26 mutation18 rejects valid task status details labelled as block change", async () => {
+  const details = {
+    id: startEntry.id,
+    fromStatus: "pending",
+    toStatus: "completed",
+    occurredAt: startEntry.occurredAt,
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json({
+        items: [{ ...startEntry, type: "BLOCK_CHANGED", details }],
+        nextCursor: null,
+      }),
+    ),
+  );
+  await expect(readHistory(new URLSearchParams())).rejects.toThrow(
+    "Historial inválido",
+  );
+});
+
+it("@s26 mutation18 rejects valid planning details labelled as session start", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json({
+        items: [{ ...startEntry, type: "SESSION_STARTED", details: block }],
+        nextCursor: null,
+      }),
+    ),
+  );
+  await expect(readHistory(new URLSearchParams())).rejects.toThrow(
+    "Historial inválido",
+  );
+});
+
+it("@s26 mutation18 rejects valid block change details labelled as task status", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json({
+        items: [
+          {
+            ...startEntry,
+            id: cancelled.id,
+            type: "TASK_STATUS_CHANGED",
+            details: cancelled,
+          },
+        ],
+        nextCursor: null,
+      }),
+    ),
+  );
+  await expect(readHistory(new URLSearchParams())).rejects.toThrow(
+    "Historial inválido",
+  );
+});
+
+it("@s26 mutation18 rejects valid session change details labelled as task status", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json({
+        items: [
+          {
+            ...startEntry,
+            id: pause.id,
+            occurredAt: pause.occurredAt,
+            type: "TASK_STATUS_CHANGED",
+            details: pause,
+          },
+        ],
+        nextCursor: null,
+      }),
+    ),
+  );
+  await expect(readHistory(new URLSearchParams())).rejects.toThrow(
+    "Historial inválido",
+  );
+});

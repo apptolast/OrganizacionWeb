@@ -1,0 +1,500 @@
+{
+  "originalReportSha256": "21F58FA90232A5C85FB5A78AE889F75FC718FB2739D150684867655E6BC65FF5",
+  "files": {
+    "src/history-api.ts": {
+      "sha256": "768EFA248169C13F2FA07E1BA752A1990D060DF65601F4F500ADCB3FA173DAE0"
+    },
+    "src/history.tsx": {
+      "sha256": "539B0F7B2C07E6DA35FD1CFB6F85452FA6BD93BA3904E2160C591410226D8500"
+    }
+  },
+  "mutate": [
+    "src/history-api.ts:66:8-70:21",
+    "src/history-api.ts:86:11-87:40",
+    "src/history-api.ts:91:11-92:62",
+    "src/history-api.ts:96:11-97:68",
+    "src/history-api.ts:101:11-102:41",
+    "src/history.tsx:27:6-27:68",
+    "src/history.tsx:233:23-233:43",
+    "src/history.tsx:411:26-411:46",
+    "src/history.tsx:416:26-416:54"
+  ],
+  "targets": [
+    {
+      "originalId": "76",
+      "file": "src/history-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 22,
+          "line": 70
+        },
+        "start": {
+          "column": 9,
+          "line": 66
+        }
+      },
+      "replacement": "true",
+      "node": {
+        "kind": "BinaryExpression",
+        "start": {
+          "line": 66,
+          "column": 8
+        },
+        "end": {
+          "line": 70,
+          "column": 21
+        }
+      }
+    },
+    {
+      "originalId": "77",
+      "file": "src/history-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 22,
+          "line": 70
+        },
+        "start": {
+          "column": 9,
+          "line": 66
+        }
+      },
+      "replacement": "exact(item, \"id type occurredAt projectId projectName taskId taskTitle details\") || uuid(item.id)",
+      "node": {
+        "kind": "BinaryExpression",
+        "start": {
+          "line": 66,
+          "column": 8
+        },
+        "end": {
+          "line": 70,
+          "column": 21
+        }
+      }
+    },
+    {
+      "originalId": "125",
+      "file": "src/history-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 86
+        },
+        "start": {
+          "column": 12,
+          "line": 86
+        }
+      },
+      "replacement": "true",
+      "node": {
+        "kind": "BinaryExpression",
+        "start": {
+          "line": 86,
+          "column": 11
+        },
+        "end": {
+          "line": 86,
+          "column": 46
+        }
+      }
+    },
+    {
+      "originalId": "124",
+      "file": "src/history-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 87
+        },
+        "start": {
+          "column": 12,
+          "line": 86
+        }
+      },
+      "replacement": "item.type === \"TASK_STATUS_CHANGED\" || isHistoryEntry(item.details)",
+      "node": {
+        "kind": "BinaryExpression",
+        "start": {
+          "line": 86,
+          "column": 11
+        },
+        "end": {
+          "line": 87,
+          "column": 40
+        }
+      }
+    },
+    {
+      "originalId": "136",
+      "file": "src/history-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 63,
+          "line": 92
+        },
+        "start": {
+          "column": 12,
+          "line": 91
+        }
+      },
+      "replacement": "true",
+      "node": {
+        "kind": "BinaryExpression",
+        "start": {
+          "line": 91,
+          "column": 11
+        },
+        "end": {
+          "line": 92,
+          "column": 62
+        }
+      }
+    },
+    {
+      "originalId": "137",
+      "file": "src/history-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 63,
+          "line": 92
+        },
+        "start": {
+          "column": 12,
+          "line": 91
+        }
+      },
+      "replacement": "item.type === \"BLOCK_PLANNED\" || isBlock(item.details, item.projectId, item.taskId)",
+      "node": {
+        "kind": "BinaryExpression",
+        "start": {
+          "line": 91,
+          "column": 11
+        },
+        "end": {
+          "line": 92,
+          "column": 62
+        }
+      }
+    },
+    {
+      "originalId": "138",
+      "file": "src/history-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 91
+        },
+        "start": {
+          "column": 12,
+          "line": 91
+        }
+      },
+      "replacement": "true",
+      "node": {
+        "kind": "BinaryExpression",
+        "start": {
+          "line": 91,
+          "column": 11
+        },
+        "end": {
+          "line": 91,
+          "column": 40
+        }
+      }
+    },
+    {
+      "originalId": "150",
+      "file": "src/history-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 69,
+          "line": 97
+        },
+        "start": {
+          "column": 12,
+          "line": 96
+        }
+      },
+      "replacement": "item.type === \"BLOCK_CHANGED\" || isBlockChange(item.details, item.projectId, item.taskId)",
+      "node": {
+        "kind": "BinaryExpression",
+        "start": {
+          "line": 96,
+          "column": 11
+        },
+        "end": {
+          "line": 97,
+          "column": 68
+        }
+      }
+    },
+    {
+      "originalId": "151",
+      "file": "src/history-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 41,
+          "line": 96
+        },
+        "start": {
+          "column": 12,
+          "line": 96
+        }
+      },
+      "replacement": "true",
+      "node": {
+        "kind": "BinaryExpression",
+        "start": {
+          "line": 96,
+          "column": 11
+        },
+        "end": {
+          "line": 96,
+          "column": 40
+        }
+      }
+    },
+    {
+      "originalId": "166",
+      "file": "src/history-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 102
+        },
+        "start": {
+          "column": 12,
+          "line": 101
+        }
+      },
+      "replacement": "true",
+      "node": {
+        "kind": "BinaryExpression",
+        "start": {
+          "line": 101,
+          "column": 11
+        },
+        "end": {
+          "line": 102,
+          "column": 41
+        }
+      }
+    },
+    {
+      "originalId": "167",
+      "file": "src/history-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "LogicalOperator",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 102
+        },
+        "start": {
+          "column": 12,
+          "line": 101
+        }
+      },
+      "replacement": "item.type === \"SESSION_CHANGED\" || isSessionChange(item.details)",
+      "node": {
+        "kind": "BinaryExpression",
+        "start": {
+          "line": 101,
+          "column": 11
+        },
+        "end": {
+          "line": 102,
+          "column": 41
+        }
+      }
+    },
+    {
+      "originalId": "168",
+      "file": "src/history-api.ts",
+      "originalStatus": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 43,
+          "line": 101
+        },
+        "start": {
+          "column": 12,
+          "line": 101
+        }
+      },
+      "replacement": "true",
+      "node": {
+        "kind": "BinaryExpression",
+        "start": {
+          "line": 101,
+          "column": 11
+        },
+        "end": {
+          "line": 101,
+          "column": 42
+        }
+      }
+    },
+    {
+      "originalId": "302",
+      "file": "src/history.tsx",
+      "originalStatus": "NoCoverage",
+      "mutatorName": "CallExpression",
+      "location": {
+        "end": {
+          "column": 69,
+          "line": 27
+        },
+        "start": {
+          "column": 49,
+          "line": 27
+        }
+      },
+      "replacement": ";",
+      "node": {
+        "kind": "ExpressionStatement",
+        "start": {
+          "line": 27,
+          "column": 48
+        },
+        "end": {
+          "line": 27,
+          "column": 68
+        }
+      }
+    },
+    {
+      "originalId": "692",
+      "file": "src/history.tsx",
+      "originalStatus": "NoCoverage",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 411
+        },
+        "start": {
+          "column": 27,
+          "line": 411
+        }
+      },
+      "replacement": "\"\"",
+      "node": {
+        "kind": "StringLiteral",
+        "start": {
+          "line": 411,
+          "column": 26
+        },
+        "end": {
+          "line": 411,
+          "column": 46
+        }
+      }
+    },
+    {
+      "originalId": "696",
+      "file": "src/history.tsx",
+      "originalStatus": "NoCoverage",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 55,
+          "line": 416
+        },
+        "start": {
+          "column": 27,
+          "line": 416
+        }
+      },
+      "replacement": "\"\"",
+      "node": {
+        "kind": "StringLiteral",
+        "start": {
+          "line": 416,
+          "column": 26
+        },
+        "end": {
+          "line": 416,
+          "column": 54
+        }
+      }
+    },
+    {
+      "originalId": "298",
+      "file": "src/history.tsx",
+      "originalStatus": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 27
+        },
+        "start": {
+          "column": 7,
+          "line": 27
+        }
+      },
+      "replacement": "false",
+      "node": {
+        "kind": "BinaryExpression",
+        "start": {
+          "line": 27,
+          "column": 6
+        },
+        "end": {
+          "line": 27,
+          "column": 46
+        }
+      }
+    },
+    {
+      "originalId": "547",
+      "file": "src/history.tsx",
+      "originalStatus": "Survived",
+      "mutatorName": "ArrowFunction",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 233
+        },
+        "start": {
+          "column": 24,
+          "line": 233
+        }
+      },
+      "replacement": "() => undefined",
+      "node": {
+        "kind": "ArrowFunction",
+        "start": {
+          "line": 233,
+          "column": 23
+        },
+        "end": {
+          "line": 233,
+          "column": 43
+        }
+      }
+    }
+  ]
+}

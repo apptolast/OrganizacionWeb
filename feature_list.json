@@ -184,10 +184,12 @@
       "id": 17,
       "name": "end_time_notification",
       "title": "Aviso de fin",
-      "description": "Aviso de fin: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
-      "acceptance": [],
+      "description": "Aviso visible y ampliación deliberada del fin efectivo, con recuperación durable; contrato aprobado por autorización global en features/end_time_notification.feature.",
+      "acceptance": [
+        "Cumplir los escenarios @s1–@s44 de features/end_time_notification.feature con revisión, pruebas y mutación."
+      ],
       "sdd": true,
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "id": 18,

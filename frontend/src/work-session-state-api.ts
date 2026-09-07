@@ -55,7 +55,7 @@ export async function readWorkSessionState(
   return { ...value, token } as WorkSessionSnapshot;
 }
 
-function isState(value: unknown): value is WorkSessionState {
+export function isState(value: unknown): value is WorkSessionState {
   if (!(
     exact(
       value,
@@ -97,6 +97,14 @@ export type WorkSessionChange = {
 } & (
   | { action: "PAUSE" | "RESUME" }
   | {
+      action: "EXTEND";
+      extension: {
+        additionalMinutes: number;
+        previousEndAt: string;
+        effectiveEndAt: string;
+      };
+    }
+  | {
       action: "CLOSE";
       closure: {
         progressNote: string;
@@ -112,6 +120,7 @@ export type WorkSessionIntent = {
   key: string;
 } & (
   | { action: "PAUSE" | "RESUME" }
+  | { action: "EXTEND"; additionalMinutes: number }
   | { action: "CLOSE"; progressNote: string; nextStep: string }
 );
 export async function changeWorkSession(
@@ -131,7 +140,9 @@ export async function changeWorkSession(
               progressNote: intent.progressNote,
               nextStep: intent.nextStep,
             })
-          : "{}",
+          : intent.action === "EXTEND"
+            ? JSON.stringify({ additionalMinutes: intent.additionalMinutes })
+            : "{}",
       headers: {
         "Content-Type": "application/json",
         "Idempotency-Key": intent.key,
@@ -148,7 +159,7 @@ export async function changeWorkSession(
     value.action !== intent.action ||
     value.before.revision !== intent.state.revision ||
     !sameSession(value.before.session, intent.state.session) ||
-    !sameNotes(value, intent)
+    !sameDetails(value, intent)
   )
     throw new Error("Cambio de sesión inválido");
   return value;
@@ -165,21 +176,37 @@ function isChange(value: unknown): value is WorkSessionChange {
       typeof value.closure.workDate === "string" &&
       /^\d{4}-\d{2}-\d{2}$/.test(value.closure.workDate) &&
       microseconds(value.closure.workDate + "T00:00:00Z") !== null) ||
+      (exact(value, "id sessionId action occurredAt before after extension") &&
+        value.action === "EXTEND") ||
       (exact(value, "id sessionId action occurredAt before after") &&
-        value.action !== "CLOSE")) &&
+        (value.action === "PAUSE" || value.action === "RESUME"))) &&
     uuid(value.id) &&
     isState(value.before) &&
     isState(value.after) &&
-    (value.action === "PAUSE"
-      ? value.before.status === "running" && value.after.status === "paused"
-      : value.action === "CLOSE"
-        ? (value.before.status === "running" ||
-            value.before.status === "paused") &&
-          value.after.status === "closed"
-        : value.action === "RESUME" &&
-          value.before.status === "paused" &&
-          value.after.status === "running") &&
-    microseconds(value.occurredAt) === microseconds(value.after.changedAt) &&
+    (value.action === "EXTEND"
+      ? value.before.status !== "closed" &&
+        value.after.status === value.before.status &&
+        microseconds(value.occurredAt)! >=
+          microseconds(value.before.changedAt)! &&
+        validExtension(
+          value.extension,
+          value.occurredAt,
+          value.before.session.plannedEndAt,
+        ) &&
+        value.after.changedAt === value.before.changedAt &&
+        value.after.runningSince === value.before.runningSince &&
+        value.after.workedMicroseconds === value.before.workedMicroseconds
+      : value.action === "PAUSE"
+        ? value.before.status === "running" && value.after.status === "paused"
+        : value.action === "CLOSE"
+          ? (value.before.status === "running" ||
+              value.before.status === "paused") &&
+            value.after.status === "closed"
+          : value.action === "RESUME" &&
+            value.before.status === "paused" &&
+            value.after.status === "running") &&
+    (value.action === "EXTEND" ||
+      microseconds(value.occurredAt) === microseconds(value.after.changedAt)) &&
     microseconds(value.after.changedAt)! >=
       microseconds(value.before.changedAt)! &&
     sameId(value.sessionId, value.before.session.id) &&
@@ -191,6 +218,33 @@ function isChange(value: unknown): value is WorkSessionChange {
           ? microseconds(value.after.changedAt)! -
             microseconds(value.before.changedAt)!
           : 0n)
+  );
+}
+
+function validExtension(
+  value: unknown,
+  occurredAt: unknown,
+  originalEnd: string,
+) {
+  if (
+    !exact(value, "additionalMinutes previousEndAt effectiveEndAt") ||
+    typeof value.additionalMinutes !== "number" ||
+    !Number.isInteger(value.additionalMinutes) ||
+    value.additionalMinutes < 1 ||
+    value.additionalMinutes > 1440
+  )
+    return false;
+  const previous = microseconds(value.previousEndAt);
+  const occurred = microseconds(occurredAt);
+  const end = microseconds(value.effectiveEndAt);
+  return (
+    previous !== null &&
+    previous >= microseconds(originalEnd)! &&
+    occurred !== null &&
+    end !== null &&
+    end ===
+      (previous > occurred ? previous : occurred) +
+        BigInt(value.additionalMinutes) * 60000000n
   );
 }
 
@@ -240,7 +294,7 @@ export async function recoverWorkSessionChange(
     value.action !== intent.action ||
     value.before.revision !== intent.state.revision ||
     !sameSession(value.before.session, intent.state.session) ||
-    !sameNotes(value, intent)
+    !sameDetails(value, intent)
   )
     throw new Error("Cambio de sesión inválido");
   return value;
@@ -263,7 +317,12 @@ export async function readWorkSessionClosure(id: string, signal?: AbortSignal) {
   return value;
 }
 
-function sameNotes(value: WorkSessionChange, intent: WorkSessionIntent) {
+function sameDetails(value: WorkSessionChange, intent: WorkSessionIntent) {
+  if (intent.action === "EXTEND")
+    return (
+      value.action === "EXTEND" &&
+      value.extension.additionalMinutes === intent.additionalMinutes
+    );
   return (
     intent.action !== "CLOSE" ||
     (value.action === "CLOSE" &&

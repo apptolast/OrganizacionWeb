@@ -1,0 +1,106 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+    "sha256": "F99570A9B201C7F69F7BDE0652E7E76E7E436DC089481CA2D64F1C742BD3DB5C"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresWorkSessionStore.java",
+    "sha256": "932A8730EF873E68FDBED17BD2AB13AECFCCFE7F4086C1405E3514A815EBED83"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ExtendWorkSession.java",
+    "sha256": "0967253B22592C0B5792A23D9E5EF58274AB6612B44677E8AFB66DDB5F41D982"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ExtendWorkSessionUseCase.java",
+    "sha256": "FE074ABB57D3C2A4571E641451A97B234C66F5F1EFD54B221F088C70BFAEEE00"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ReadWorkSessionEnd.java",
+    "sha256": "B82F22C4A5E2F39A7FF5F7A29EDFD5C0E4CC01DC9C4B14253361D5BAB108E519"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ReadWorkSessionEndUseCase.java",
+    "sha256": "A61B548D89BB3E4D38C773B0F474D5FD1864BCC9DC88D196A25C4CB661E0C0C3"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/WorkSessionEnd.java",
+    "sha256": "47882C583FB5116233F57727C090292A89C0670831DB05E7A73FD669925E528D"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/WorkSessionEndQueries.java",
+    "sha256": "5042E61D049415B50FE2BB2A2ECF1772056E5F8F10B8C10332F5EA449EDD55D4"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/WorkSessionEndSnapshot.java",
+    "sha256": "B741E3522AB4F6C948C4E587C7E73FF08E6375E43C86B64E9EF0E938F34D2B3A"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/WorkSessionExtended.java",
+    "sha256": "94A6060F7A09DDE53AB87FA16AA184E93AC3E0C70009C319FFCD4BC93A961243"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/WorkSessionExtending.java",
+    "sha256": "1EAC7DD0AC03B0E55E5C0E9F539702C18350C08B6F3475914A7FEB830B536943"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/WorkSessionExtension.java",
+    "sha256": "67D7EB71D7F3B7A0643AD8297504B54A109345510D63B97D5217CAB42E226C02"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/WorkSessionExtensionTransition.java",
+    "sha256": "A8A17F9FA759BC5A6F79254FAC6EA1F8043AD1184C561B5B0CE26AD8B68C9D9D"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/WorkSessionTransitionReceipt.java",
+    "sha256": "E070678FAF37749EB49C526C19CC5277C2354ED42C7B9DCA78121A873503C639"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/domain/WorkSessionState.java",
+    "sha256": "C1D338BE657B3EE35AFB802DCDA44A7F245866910976D79DAE528B114F2EFDDD"
+  },
+  {
+    "path": "backend/src/main/resources/db/migration/V18__work_session_end_time.sql",
+    "sha256": "9CD15DA7771FBEFFBC879402498ED03428DD6F4B4629B4C4A5DC4494A24D6A49"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/config/ApplicationWiringTest.java",
+    "sha256": "CAE211A8EDC00E285B5365A9CA59D3F3F7CB3EFE74913334F41C47D740C52968"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/EndTimeIntegrationTest.java",
+    "sha256": "71E8BE6349FF44572109C88C8891295898F7CFF55236F82C845BFADF4416B6C6"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/WorkSessionClosureMigrationTest.java",
+    "sha256": "13B77C1088DF7D848ADE469E13D78BE5F768FC3D4826A5ACC911BA57388ABB65"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/WorkSessionEndMigrationTest.java",
+    "sha256": "2EB40BA03118104992C3557BBF1B5955568BA46D42438943E4D59A01714D0A84"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/WorkSessionExtensionReceiptTest.java",
+    "sha256": "E7286927664649D60BF811931A20289A0EB930464F083CAEC43C6EA6362C4100"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/WorkSessionTransitionStoreTest.java",
+    "sha256": "15926A01DB75730238D41E96330919246C2246DCC17CDFF35EDEB0081B316855"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/ChangeWorkSessionTest.java",
+    "sha256": "3367D330FAF6D56E4E3D27E03660B3816E29846F83FE767B9ED67E8DFF802E8E"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/CloseWorkSessionTest.java",
+    "sha256": "29DA476519CACE773622985C8A8A87C25F65939B09D6E5335E1541EB61F1D350"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/ExtendWorkSessionTest.java",
+    "sha256": "101F8B5C3ED0AC4FEC4299E1CE7DFD5120F257607D912B5BB5327776DEF0D06C"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/ReadWorkSessionEndTest.java",
+    "sha256": "4235FA7C0D3594149FDF630CF22F3ABCFBC1EB3F290A1C02AB6FDF85D8DC226B"
+  }
+]

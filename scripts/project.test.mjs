@@ -7,6 +7,119 @@ import { createHash } from "node:crypto";
 import * as commands from "./project.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
+test("end time Stryker preserves protection and measures both integrated surfaces", () => {
+  const config = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.end-time-notification.config.json"),
+      "utf8",
+    ),
+  );
+  const prior = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.close-work-session.config.json"),
+      "utf8",
+    ),
+  );
+  assert.deepEqual(config.mutate, [
+    "src/work-session-end-api.ts",
+    "src/work-session-end.tsx",
+    "src/use-work-session-decision.ts",
+    "src/work-session-state-api.ts",
+    "src/work-session-state.tsx",
+    "src/work-session-reader.tsx",
+    "src/work-session.tsx",
+  ]);
+  assert.deepEqual(config.thresholds, prior.thresholds);
+  assert.equal(config.thresholds.break, 80);
+  assert.equal(config.concurrency, 8);
+  assert.equal(config.coverageAnalysis, "perTest");
+  assert.deepEqual(config.ignorePatterns, prior.ignorePatterns);
+  assert.ok(config.ignorePatterns.includes(".stryker-tmp-availability-replay"));
+  assert.deepEqual(config.vitest, prior.vitest);
+  assert.equal(
+    config.jsonReporter.fileName,
+    "reports/mutation-end-time-notification/mutation.json",
+  );
+  assert.equal(
+    config.htmlReporter.fileName,
+    "reports/mutation-end-time-notification/mutation.html",
+  );
+  assert.equal(config.tempDirName, ".stryker-tmp-end-time-notification");
+});
+test("end time PIT preserves shared guards, all JUnit candidates and threshold", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  assert.match(
+    build,
+    /val endTimeNotificationOnly = scope == "end_time_notification"/,
+  );
+  assert.match(build, /endTimeNotificationOnly -> endTimeNotificationClasses/);
+  assert.match(
+    build,
+    /endTimeNotificationOnly -> setOf\("com\.apptolast\.organization\.\*"\)/,
+  );
+  const selected = build.match(
+    /val endTimeNotificationClasses = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(selected);
+  for (const name of [
+    "application.ExtendWorkSession",
+    "application.ReadWorkSessionEnd",
+    "application.WorkSessionEnd",
+    "application.WorkSessionEndSnapshot",
+    "application.WorkSessionExtension",
+    "application.WorkSessionExtensionTransition",
+    "application.WorkSessionExtended",
+    "application.WorkSessionTransitionReceipt",
+    "application.WorkSessionTransition",
+    "application.WorkSessionChanging",
+    "application.ChangeWorkSession",
+    "application.ReadWorkSessionState",
+    "application.ReadWorkSessionChanges",
+    "domain.WorkSessionState",
+    "domain.OutboxMessage",
+    "adapter.persistence.PostgresWorkSessionStore*",
+    "adapter.http.WorkSessionStateController*",
+    "adapter.broker.RabbitBrokerPublisher",
+    "adapter.config.ApplicationConfiguration",
+  ]) {
+    assert.ok(selected.includes(`"com.apptolast.organization.${name}"`), name);
+  }
+  assert.match(build, /else -> [^\n]+ \+ endTimeNotificationClasses/);
+  assert.match(
+    build,
+    /if \(endTimeNotificationOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-end-time-notification"\)\)/,
+  );
+  assert.match(build, /mutationThreshold\.set\(80\)/);
+  assert.match(build, /threads\.set\(4\)/);
+});
+test("end time frontend invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "end_time_notification-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.end-time-notification.config.json",
+      ],
+    ],
+  ]);
+});
+test("end time backend invokes only its fixed PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "end_time_notification-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=end_time_notification"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
 function historicalTodayFile(file) {
   const snapshot = JSON.parse(
     readFileSync(

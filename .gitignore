@@ -74,3 +74,19 @@ reports/
 /progress/close_publisher_year_one_xml/
 /frontend/.stryker-tmp-close-work-session-replay/
 /progress/close_work_boundary_final/
+
+# Evidencia17 preservada localmente; informes y manifiestos versionados.
+/progress/end_time_backend_final_xml/
+/progress/end_pub_checkpoint_xml/
+/progress/end_pub_final_xml/
+/progress/end_http_final_xml/
+/progress/end_integration_final_xml/
+/frontend/.stryker-tmp-end-time-notification/
+/progress/end_time_backend_global_xml/
+/progress/end_time_pit_final/
+/progress/end_time_publisher_replay_final/
+/progress/end_time_publisher_refinement.xml
+/progress/end_time_init_backend_xml/
+/progress/end_time_stryker_original.json
+/frontend/.stryker-tmp-end-time-notification-replay/
+/progress/end_time_stryker_replay_original.json

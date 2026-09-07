@@ -74,7 +74,10 @@ test("pause_resume_session: explicit start pause resume and reload preserve hist
   await page.reload();
   await expect(section.getByText("En curso", { exact: true })).toBeVisible();
   await expect(
-    section.locator(`time[datetime="${session.plannedEndAt}"]`),
+    section
+      .getByRole("paragraph")
+      .filter({ hasText: /^Fin previsto:/ })
+      .locator(`time[datetime="${session.plannedEndAt}"]`),
   ).toBeVisible();
   await expect(
     section.getByRole("button", { name: "Empezar a trabajar", exact: true }),

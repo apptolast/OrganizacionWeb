@@ -86,6 +86,42 @@ class ApplicationWiringTest {
   }
 
   @Test
+  void end_s13_readBeanUsesTheRealStore() {
+    freshContext()
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              assertThatThrownBy(
+                      () ->
+                          context
+                              .getBean(ReadWorkSessionEndUseCase.class)
+                              .read("owner", UUID.randomUUID()))
+                  .isInstanceOf(WorkSessionNotFoundException.class);
+            });
+  }
+
+  @Test
+  void end_s1_extensionBeanUsesTheRealStore() {
+    freshContext()
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              var id = UUID.randomUUID();
+              assertThatThrownBy(
+                      () ->
+                          context
+                              .getBean(ExtendWorkSessionUseCase.class)
+                              .extend(
+                                  "owner",
+                                  id,
+                                  UUID.randomUUID(),
+                                  new WorkSessionRevision(id, 1),
+                                  5))
+                  .isInstanceOf(WorkSessionNotFoundException.class);
+            });
+  }
+
+  @Test
   void pause_s25_receiptBeanUsesTheRealStore() {
     freshContext()
         .run(

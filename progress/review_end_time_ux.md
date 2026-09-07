@@ -1,0 +1,7 @@
+# Revisión de UX17
+
+APPROVED para el alcance medido, sin certificar dispositivos físicos ni toda percepción humana. Root revisó el test completo (b0b627/651d9d), las capturas Reader320 y tarea1440, y viewport del Reader con zoom nativo. El zoom usa chrome.tabs.setZoom/getZoom2 y su evidencia registra DPR1,5 a3 y viewport320CSS, no sólo reducción de ancho. Los controles se miden con enlaces, formularios y botones incluidos; se contrastan tamaño44, solapes y overflow.
+
+Consolidación independiente a154e9: siete combinaciones de motor/modo,515 medidas,35 análisis axe sin violaciones y feedback máximo5ms. Los manifiestos sólo difieren en el test UX ampliado durante sus ciclos; no se modificó producción. Los tres motores ejecutaron sus recorridos indicados. Textos de error por incertidumbre, espera, confirmación y formularios de ambas superficies están medidos. Los incidentes de autofocus y filtro de texto permanecen separados de defectos del producto.
+
+La matriz de treinta principios conserva límites: no estudio con personas, dispositivos físicos o lectores de pantalla reales; aviso vencido acreditado funcionalmente y error de cantidad cubierto en componente, sin geometría dedicada en este paquete. Esta combinación de evidencia no equivale a comprobar todas las permutaciones de estado, pantalla y dispositivo. No se detectó un defecto concreto nuevo que requiera alterar producción. Global E2E, CI y Stryker siguen gates independientes.

@@ -1,0 +1,18 @@
+[
+  {
+    "path": "scripts/project.mjs",
+    "sha256": "F57CFBEBBD13ACADD0A6F14A365F30CFC359C5457BE5E79DE1902E87A66D1AC5"
+  },
+  {
+    "path": "scripts/project.test.mjs",
+    "sha256": "40D35DD4920E94C1D125A4F3A164C0DD2A751AE717C9ED5BEB8A479D6C58FE7C"
+  },
+  {
+    "path": "backend/build.gradle.kts",
+    "sha256": "4B15575B93508E1E9BF4CF0805178D5DEEB1485C63AF392378D929FF476E6DE1"
+  },
+  {
+    "path": "frontend/stryker.end-time-notification.config.json",
+    "sha256": "54119B1D211B099633D67D72A376DE7172F740E83C9A9064FD4B3D35288F469F"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "sha256": "1E32D344868CA92147175D35874D4FBEA9FFBAC7DD814D1B5BE2F36BF8E7E6A9",
+    "path": "e2e/end-time-notification.spec.mjs"
+  },
+  {
+    "sha256": "FA6136568759397D0B96911F55EC9D0C805AF5C68ECA24C3CCB34B4A5690DBB7",
+    "path": "progress/end_e2e_01_red.log"
+  }
+]

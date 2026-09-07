@@ -1,0 +1,42 @@
+[
+  {
+    "sha256": "B3EE1EA07EB2838DC6F25BC9057125E93043FFE7FB6D5B3ABF81DF1EB28A24F9",
+    "path": "e2e/end-time-notification.spec.mjs"
+  },
+  {
+    "sha256": "2A748CAD548EF6CC371CFEED6DB9750DAD8E9E04905F4E7294C8CBD448B6F72A",
+    "path": "e2e/end-time-notification-ux.spec.mjs"
+  },
+  {
+    "sha256": "605654BDBEFD6A0F7D3CD9A146D3DBE6A2B83108CECD136DD5D1409744AF3D1C",
+    "path": "progress/tdd_end_time_e2e.md"
+  },
+  {
+    "sha256": "CB96BEB16D729B72B0E373AF5F0627EC0986316BAB2868C2E36B4A1F6A314ACE",
+    "path": "progress/tdd_end_time_ux.md"
+  },
+  {
+    "sha256": "767D84490B0ED0D017BC97FB3CA56FDB8A7B2B399F09D75E11E4881511ABA9D1",
+    "path": "progress/end_ux_results.json"
+  },
+  {
+    "sha256": "8526732533543F11C3D7F0CF1CF5691C93B3F36B5C5579AD8F47484CE93A9D7E",
+    "path": "progress/end_ux_final_initial.log"
+  },
+  {
+    "sha256": "877D586F8456AAFCCB6EA5CB8AA33A340C48709475E67BD73873D4BA9E711AA7",
+    "path": "progress/end_ux_text_initial.log"
+  },
+  {
+    "sha256": "9645F31A8DEA5171FF3B949430FAC737ABEFB16369EC653ACF23FF95082DD4AA",
+    "path": "progress/end_ux_native_initial.log"
+  },
+  {
+    "sha256": "B34859902CE2518CFBBB038926F5FD125F45ADE0D3361E43E4762AB541E90ED9",
+    "path": "progress/end_e2e_firefox.log"
+  },
+  {
+    "sha256": "D3F3F7BB2D53B74A75E212D53D416D8BB7538DB0C073E15A62811109721FDC7D",
+    "path": "progress/end_e2e_webkit.log"
+  }
+]

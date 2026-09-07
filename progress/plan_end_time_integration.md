@@ -1,0 +1,12 @@
+# Integración17: aviso y ampliación
+
+Contrato aprobado en706f539, estado in_progress enace3f9e y formato final42cda11. Se mantiene una funcionalidad en implementación. Cierre16 está fusionado en main fede342; su CI posterior34085908723 se comprueba en paralelo sin alterar aquel corte.
+
+1. A entrega un primer paquete Java compilable: decisión EXTEND, lectura E, tipos reales y compatibilidad de recibos históricos. Root revisa el diff y sus oráculos antes de integrarlo selectivamente en el árbol aislado de C. No se copian modelos provisionales ni se crean stubs para desbloquear compilación.
+2. C desarrolla publicador/HTTP en OrganizacionWeb-end-http. La validación del evento puede empezar con un OutboxMessage real; Rabbit y HTTP usarán los tipos compartidos compilables después de revisión. A continúa persistencia, marca temporal compartida, migración aditiva y carreras en COMMON.
+3. B entrega cliente exacto EXTEND/E y recuperación C/K para revisión, después panel y coordinación local en las dos superficies. Los recibos e intenciones siguen perteneciendo a sus componentes; el bloqueo y las generaciones compartidas impiden acciones hermanas simultáneas y respuestas antiguas. TDD individual y bitácora por paquete.
+4. Al congelar producción, revisión independiente cruzada: C sobre core/PG y A sobre cliente/UI. Root integra sólo paquetes aprobados y comprueba el recorrido HTTP con PostgreSQL real. Los mapas declaran reutilización y límites de la colisión postrollback, sin fabricar dos sesiones abiertas.
+5. Gates sobre un corte estable: init/build completos; navegador y UX con coordinación del único puerto18080; smoke con pérdida de respuesta, broker/reinicio y recibos durables; scopes de mutación según archivos realmente modificados. Un Gradle host durante PIT. Configuraciones y hashes se revisan antes de medir; no repetir campañas por cambios exclusivamente documentales.
+6. Dictamen final, estado done, publicación/CI/merge y comprobación de main. Historial18 requiere su propio contrato antes de implementación. Despliegue sigue condicionado al acceso y dominio ya preguntados; no es un resultado de los gates locales.
+
+Root controla Git y las validaciones integradas. A/B trabajan en COMMON; C en su árbol aislado. Ningún agente pisa otro ownership. Los primeros paquetes nominales son checkpoints, no cierre de17. Registros de prueba pertenecen a cada autor; root recupera únicamente los EXIT de sus propios procesos.

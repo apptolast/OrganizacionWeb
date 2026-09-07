@@ -29,6 +29,36 @@ const props = {
   projectStatus: "active" as const,
   onAccessFailure: vi.fn(),
 };
+function sessionReadResponse(url: string) {
+  const state = {
+    session: receipt,
+    status: "running",
+    revision: "1",
+    changedAt: receipt.startedAt,
+    workedMicroseconds: "0",
+    runningSince: receipt.startedAt,
+  };
+  const headers = { "Work-Session-Revision": `work-session-${receipt.id}-1` };
+  if (url === `/api/v1/work-sessions/${receipt.id}/state`)
+    return Promise.resolve(
+      Response.json(
+        { state, serverNow: receipt.startedAt, netMicroseconds: "0" },
+        { headers },
+      ),
+    );
+  if (url === `/api/v1/work-sessions/${receipt.id}/end-time`)
+    return Promise.resolve(
+      Response.json(
+        {
+          state,
+          serverNow: receipt.startedAt,
+          effectiveEndAt: receipt.plannedEndAt,
+        },
+        { headers },
+      ),
+    );
+  throw new Error(`Unexpected session read: ${url}`);
+}
 function deferred<T>() {
   let resolve!: (value: T) => void;
   const promise = new Promise<T>((done) => {
@@ -42,6 +72,215 @@ afterEach(() => {
   observeAccess();
   setCsrfToken();
 });
+it("@s28 feature17 exposes the agreed-end notice and deliberate extension from the task's active session", async () => {
+  const state = {
+    session: receipt,
+    status: "running",
+    revision: "1",
+    changedAt: receipt.startedAt,
+    workedMicroseconds: "0",
+    runningSince: receipt.startedAt,
+  };
+  const headers = { "Work-Session-Revision": `work-session-${receipt.id}-1` };
+  const fetcher = vi.fn((url: string) => {
+    if (url.endsWith("/active"))
+      return Promise.resolve(Response.json({ session: receipt }));
+    if (url.endsWith("/state"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state,
+            serverNow: receipt.plannedEndAt,
+            netMicroseconds: "1500000000",
+          },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/end-time"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state,
+            serverNow: receipt.plannedEndAt,
+            effectiveEndAt: receipt.plannedEndAt,
+          },
+          { headers },
+        ),
+      );
+    throw new Error(`Unexpected request ${url}`);
+  });
+  vi.stubGlobal("fetch", fetcher);
+  render(<WorkSession {...props} />);
+  expect(await screen.findByText("Ha llegado el fin acordado")).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Ampliar tiempo" }));
+  expect(screen.getByLabelText("Minutos adicionales")).toHaveValue(null);
+  expect(
+    screen.getByRole("button", { name: "Confirmar ampliación" }),
+  ).toBeVisible();
+  expect(screen.getByRole("button", { name: "Pausar" })).toBeVisible();
+  expect(fetcher.mock.calls.map(([url]) => url).sort()).toEqual(
+    [
+      `/api/v1/work-sessions/${receipt.id}/end-time`,
+      `/api/v1/work-sessions/${receipt.id}/state`,
+      "/api/v1/work-sessions/active",
+    ].sort(),
+  );
+});
+
+it("@s36 feature17 shares a pending pause with the task's extension control", async () => {
+  const fetcher = vi.fn((url: string, init?: RequestInit) => {
+    if (url.endsWith("/active"))
+      return Promise.resolve(Response.json({ session: receipt }));
+    if (init?.method === "POST") return new Promise<Response>(() => {});
+    return sessionReadResponse(url);
+  });
+  vi.stubGlobal("fetch", fetcher);
+  render(<WorkSession {...props} />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  fireEvent.change(screen.getByLabelText("Minutos adicionales"), {
+    target: { value: "5" },
+  });
+  fireEvent.click(await screen.findByRole("button", { name: "Pausar" }));
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar ampliación" }));
+  expect(
+    fetcher.mock.calls.filter(([url]) => url.endsWith("/extend")),
+  ).toHaveLength(0);
+  expect(
+    fetcher.mock.calls.filter(([url]) => url.endsWith("/pause")),
+  ).toHaveLength(1);
+  expect(
+    screen.getByRole("button", { name: "Confirmar ampliación" }),
+  ).toHaveAttribute("aria-disabled", "true");
+});
+
+it("@s41 feature17 aborts the parent's pending active lookup before a child's pause and late HTTP 401", async () => {
+  const oldActive = deferred<Response>();
+  let activeReads = 0;
+  const fetcher = vi.fn((url: string, init?: RequestInit) => {
+    if (url.endsWith("/active"))
+      return ++activeReads === 1
+        ? Promise.resolve(Response.json({ session: receipt }))
+        : oldActive.promise;
+    if (init?.method === "POST") return new Promise<Response>(() => {});
+    return sessionReadResponse(url);
+  });
+  vi.stubGlobal("fetch", fetcher);
+  const observer = vi.fn();
+  observeAccess(observer);
+  render(<WorkSession {...props} />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  fireEvent.change(screen.getByLabelText("Minutos adicionales"), {
+    target: { value: "5" },
+  });
+  fireEvent.click(
+    screen.getByRole("button", { name: "Actualizar sesión activa" }),
+  );
+  await waitFor(() => expect(activeReads).toBe(2));
+  fireEvent.click(await screen.findByRole("button", { name: "Pausar" }));
+  await act(async () => {
+    oldActive.resolve(new Response(null, { status: 401 }));
+  });
+  expect(observer).not.toHaveBeenCalled();
+  expect(props.onAccessFailure).not.toHaveBeenCalled();
+  expect(screen.getByLabelText("Minutos adicionales")).toHaveValue(5);
+  expect(screen.getByText("Procesando cambio de sesión")).toBeVisible();
+});
+
+it("@s40 @s41 feature17 invalidates a parent lookup started during a pause when its receipt is confirmed", async () => {
+  const post = deferred<Response>();
+  const oldActive = deferred<Response>();
+  const before = {
+    session: receipt,
+    status: "running",
+    revision: "1",
+    changedAt: receipt.startedAt,
+    workedMicroseconds: "0",
+    runningSince: receipt.startedAt as string | null,
+  };
+  const after = {
+    ...before,
+    status: "paused",
+    revision: "2",
+    runningSince: null,
+  };
+  let current = before;
+  let activeReads = 0;
+  const fetcher = vi.fn((url: string) => {
+    if (url.endsWith("/active"))
+      return ++activeReads === 2
+        ? oldActive.promise
+        : Promise.resolve(Response.json({ session: receipt }));
+    if (url.endsWith("/pause")) return post.promise;
+    const headers = {
+      "Work-Session-Revision": `work-session-${receipt.id}-${current.revision}`,
+    };
+    if (url.endsWith("/state"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state: current,
+            serverNow: receipt.startedAt,
+            netMicroseconds: "0",
+          },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/end-time"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state: current,
+            serverNow: receipt.startedAt,
+            effectiveEndAt: receipt.plannedEndAt,
+          },
+          { headers },
+        ),
+      );
+    throw new Error(`Unexpected request ${url}`);
+  });
+  vi.stubGlobal("fetch", fetcher);
+  const observer = vi.fn();
+  observeAccess(observer);
+  render(<WorkSession {...props} />);
+  fireEvent.click(await screen.findByRole("button", { name: "Pausar" }));
+  fireEvent.click(
+    screen.getByRole("button", { name: "Actualizar sesión activa" }),
+  );
+  await waitFor(() => expect(activeReads).toBe(2));
+  const id = "42345678-1234-1234-1234-123456789abc";
+  await act(async () => {
+    current = after;
+    post.resolve(
+      Response.json(
+        {
+          id,
+          sessionId: receipt.id,
+          action: "PAUSE",
+          occurredAt: receipt.startedAt,
+          before,
+          after,
+        },
+        {
+          status: 201,
+          headers: { Location: `/api/v1/work-session-changes/${id}` },
+        },
+      ),
+    );
+  });
+  expect(await screen.findByText("Pausa confirmada")).toBeVisible();
+  await act(async () => {
+    oldActive.resolve(new Response(null, { status: 401 }));
+  });
+  expect(observer).not.toHaveBeenCalled();
+  expect(props.onAccessFailure).not.toHaveBeenCalled();
+  expect(await screen.findByText("En pausa")).toBeVisible();
+  expect(activeReads).toBe(3);
+});
+
 it("@s32 withdraws earlier absence while a transmitted start is pending or uncertain", async () => {
   const pending = deferred<Response>();
   const fetcher = vi
@@ -136,6 +375,7 @@ it("@s32 Enter and a submit event during uncertainty cannot resend the intention
 it("@s33 recovers a retained start after the task becomes completed", async () => {
   const fetcher = vi
     .fn()
+    .mockImplementation((url) => sessionReadResponse(url))
     .mockResolvedValueOnce(Response.json({ session: null }))
     .mockResolvedValueOnce(new Response(null, { status: 503 }))
     .mockResolvedValueOnce(Response.json(receipt));
@@ -153,14 +393,18 @@ it("@s33 recovers a retained start after the task becomes completed", async () =
   fireEvent.click(screen.getByRole("button", { name: "Comprobar inicio" }));
   expect(await screen.findByText("Sesión iniciada")).toBeVisible();
   expect(fetcher.mock.calls[2][0]).toContain("/by-request/");
-  expect(fetcher).toHaveBeenCalledTimes(4);
+  expect(fetcher).toHaveBeenCalledTimes(5);
   expect(fetcher.mock.calls[3][0]).toBe(
     `/api/v1/work-sessions/${receipt.id}/state`,
   );
+  expect(
+    fetcher.mock.calls.filter(([url]) => url.endsWith("/end-time")),
+  ).toHaveLength(1);
 });
 it("@s36 rediscovers active work after remount without recovering an in-memory key", async () => {
   const fetcher = vi
     .fn()
+    .mockImplementation((url) => sessionReadResponse(url))
     .mockResolvedValueOnce(Response.json({ session: null }))
     .mockResolvedValueOnce(new Response(null, { status: 503 }))
     .mockResolvedValueOnce(Response.json({ session: receipt }));
@@ -184,10 +428,13 @@ it("@s36 rediscovers active work after remount without recovering an in-memory k
     screen.queryByRole("button", { name: "Empezar a trabajar" }),
   ).not.toBeInTheDocument();
   expect(fetcher.mock.calls[2][0]).toBe("/api/v1/work-sessions/active");
-  expect(fetcher).toHaveBeenCalledTimes(4);
+  expect(fetcher).toHaveBeenCalledTimes(5);
   expect(fetcher.mock.calls[3][0]).toBe(
     `/api/v1/work-sessions/${receipt.id}/state`,
   );
+  expect(
+    fetcher.mock.calls.filter(([url]) => url.endsWith("/end-time")),
+  ).toHaveLength(1);
 });
 it("@s30 keeps an incompatible success uncertain and checks the original intention", async () => {
   const fetcher = vi
@@ -313,6 +560,7 @@ it("@s40 supports keyboard submission without stealing focus from another contro
   const post = deferred<Response>();
   const fetcher = vi
     .fn()
+    .mockImplementation((url) => sessionReadResponse(url))
     .mockResolvedValueOnce(Response.json({ session: null }))
     .mockReturnValueOnce(post.promise);
   vi.stubGlobal("fetch", fetcher);
@@ -344,10 +592,13 @@ it("@s40 supports keyboard submission without stealing focus from another contro
   );
   expect(await screen.findByText("Sesión iniciada")).toBeVisible();
   expect(refreshButton).toHaveFocus();
-  expect(fetcher).toHaveBeenCalledTimes(3);
+  expect(fetcher).toHaveBeenCalledTimes(4);
   expect(fetcher.mock.calls[2][0]).toBe(
     `/api/v1/work-sessions/${receipt.id}/state`,
   );
+  expect(
+    fetcher.mock.calls.filter(([url]) => url.endsWith("/end-time")),
+  ).toHaveLength(1);
 });
 it("@s38 ignores recovered JSON after the task route changes", async () => {
   const json = deferred<unknown>();
@@ -427,6 +678,7 @@ it("@s33 keeps uncertainty after a failed repeated check without authorizing res
 it("@s32 retains the exact intention after an idempotency conflict", async () => {
   const fetcher = vi
     .fn()
+    .mockImplementation((url) => sessionReadResponse(url))
     .mockResolvedValueOnce(Response.json({ session: null }))
     .mockResolvedValueOnce(
       Response.json(
@@ -458,10 +710,13 @@ it("@s32 retains the exact intention after an idempotency conflict", async () =>
     `/api/v1/work-sessions/by-request/${requestKey}`,
   );
   expect(fetcher.mock.calls[2][1].method).toBeUndefined();
-  expect(fetcher).toHaveBeenCalledTimes(4);
+  expect(fetcher).toHaveBeenCalledTimes(5);
   expect(fetcher.mock.calls[3][0]).toBe(
     `/api/v1/work-sessions/${receipt.id}/state`,
   );
+  expect(
+    fetcher.mock.calls.filter(([url]) => url.endsWith("/end-time")),
+  ).toHaveLength(1);
 });
 it("@s42 rejects an incompatible active envelope without offering a new start", async () => {
   vi.stubGlobal(
@@ -484,6 +739,7 @@ it("@s36 ignores an older active lookup after a start confirmation", async () =>
   const lookup = deferred<Response>();
   const fetcher = vi
     .fn()
+    .mockImplementation((url) => sessionReadResponse(url))
     .mockResolvedValueOnce(Response.json({ session: null }))
     .mockReturnValueOnce(post.promise)
     .mockReturnValueOnce(lookup.promise);
@@ -515,10 +771,13 @@ it("@s36 ignores an older active lookup after a start confirmation", async () =>
     screen.queryByRole("button", { name: "Empezar a trabajar" }),
   ).not.toBeInTheDocument();
   expect(screen.getByText("Sesión iniciada")).toBeVisible();
-  expect(fetcher).toHaveBeenCalledTimes(4);
+  expect(fetcher).toHaveBeenCalledTimes(5);
   expect(fetcher.mock.calls[3][0]).toBe(
     `/api/v1/work-sessions/${receipt.id}/state`,
   );
+  expect(
+    fetcher.mock.calls.filter(([url]) => url.endsWith("/end-time")),
+  ).toHaveLength(1);
 });
 it("@s35 removes a task context rejected as RESOURCE_NOT_FOUND", async () => {
   vi.stubGlobal(
@@ -779,33 +1038,20 @@ it("@s39 removes visible work data on a current unauthorized lookup", async () =
       <WorkSession {...props} onAccessFailure={() => setLost(true)} />
     );
   }
+  let activeReads = 0;
   vi.stubGlobal(
     "fetch",
-    vi
-      .fn()
-      .mockResolvedValueOnce(Response.json({ session: receipt }))
-      .mockResolvedValueOnce(
-        Response.json(
-          {
-            state: {
-              session: receipt,
-              status: "running",
-              revision: "1",
-              changedAt: receipt.startedAt,
-              workedMicroseconds: "0",
-              runningSince: receipt.startedAt,
-            },
-            serverNow: receipt.startedAt,
-            netMicroseconds: "0",
-          },
-          {
-            headers: {
-              "Work-Session-Revision": `work-session-${receipt.id}-1`,
-            },
-          },
-        ),
-      )
-      .mockResolvedValueOnce(new Response(null, { status: 401 })),
+    vi.fn((url: string) => {
+      if (url === "/api/v1/work-sessions/active") {
+        activeReads += 1;
+        return Promise.resolve(
+          activeReads === 1
+            ? Response.json({ session: receipt })
+            : new Response(null, { status: 401 }),
+        );
+      }
+      return sessionReadResponse(url);
+    }),
   );
   render(<Gate />);
   await screen.findByText(/Fin previsto:/);
@@ -1127,6 +1373,7 @@ it("@s33 resends only after a missing receipt and preserves its original key and
 it("@s32 @s33 keeps an uncertain intention and confirms it only through its key", async () => {
   const fetcher = vi
     .fn()
+    .mockImplementation((url) => sessionReadResponse(url))
     .mockResolvedValueOnce(Response.json({ session: null }))
     .mockResolvedValueOnce(new Response(null, { status: 503 }))
     .mockResolvedValueOnce(Response.json(receipt));
@@ -1148,16 +1395,21 @@ it("@s32 @s33 keeps an uncertain intention and confirms it only through its key"
   expect(fetcher.mock.calls[2][0]).toBe(
     `/api/v1/work-sessions/by-request/${key}`,
   );
-  expect(fetcher).toHaveBeenCalledTimes(4);
+  expect(fetcher).toHaveBeenCalledTimes(5);
   expect(fetcher.mock.calls[3][0]).toBe(
     `/api/v1/work-sessions/${receipt.id}/state`,
   );
+  expect(
+    fetcher.mock.calls.filter(([url]) => url.endsWith("/end-time")),
+  ).toHaveLength(1);
 });
 it("@s37 confirms the original end and preserves the receipt if active refresh fails", async () => {
   let activeReads = 0;
   const fetcher = vi
     .fn()
     .mockImplementation((url: string, init: RequestInit) => {
+      if (url === `/api/v1/work-sessions/${receipt.id}/end-time`)
+        return sessionReadResponse(url);
       if (url === "/api/v1/work-sessions/active") {
         activeReads += 1;
         return Promise.resolve(

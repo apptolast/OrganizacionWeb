@@ -1,0 +1,106 @@
+[
+  {
+    "suite": "com.apptolast.organization.adapter.config.ApplicationWiringTest",
+    "tests": 21,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "EDEAA2838D3448EC974EFB6BAF5FAB529343AB3A2B6B6A7BF173EC338D12791F"
+  },
+  {
+    "suite": "com.apptolast.organization.adapter.config.ProjectStateConfigurationTest",
+    "tests": 7,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "699231885619E48B5859217A86AE96AEC0577BE96526D1ACFBDBA31919BF6E9C"
+  },
+  {
+    "suite": "com.apptolast.organization.adapter.EndTimeIntegrationTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "89D5D6419033E4CDB169942419E28F576729C8BD2D4981851389E2313E935CA4"
+  },
+  {
+    "suite": "com.apptolast.organization.adapter.persistence.WorkSessionClosureMigrationTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "792071FD1DD94356AF2CB5C76AFCCE838B21C710FADBD0B68128293A86A80FA8"
+  },
+  {
+    "suite": "com.apptolast.organization.adapter.persistence.WorkSessionEndMigrationTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "B00B846CE446FA70CD18C627E3F7CEED08167A873D2A45482B39E3AB19FE3075"
+  },
+  {
+    "suite": "com.apptolast.organization.adapter.persistence.WorkSessionExtensionReceiptTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "0EF51D801D993543CDCBF58CE2E2A63E1D1F75638B472E13215EA7D6F4E4EAF2"
+  },
+  {
+    "suite": "com.apptolast.organization.adapter.persistence.WorkSessionPersistenceTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "51DC69DEF1475DBD758F80022D592DB55DB22B203F37F71743950DD05657A504"
+  },
+  {
+    "suite": "com.apptolast.organization.adapter.persistence.WorkSessionTransitionMigrationTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "121FA2BED24CD3FFEEDA991F65B3A5805E6688D4E799EE4107F870B77CF423D2"
+  },
+  {
+    "suite": "com.apptolast.organization.adapter.persistence.WorkSessionTransitionStoreTest",
+    "tests": 94,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "B61BD34F3F45EDB2207954679901A325A0110F956441115E7C696B71DCC07701"
+  },
+  {
+    "suite": "com.apptolast.organization.application.ChangeWorkSessionTest",
+    "tests": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "D39A927B05FDF6A7D8088E2CCD4F98A097021D50B38EC6FF60A483323F137F28"
+  },
+  {
+    "suite": "com.apptolast.organization.application.CloseWorkSessionTest",
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "E7061F072A18A802BC28611768A72A70E366F8438AAE5E34AD1413002AAF68EE"
+  },
+  {
+    "suite": "com.apptolast.organization.application.ExtendWorkSessionTest",
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "9CDE092D9F34158235F63C1F70AF71F6B497A5C5F71B938A00E3684F5009580F"
+  },
+  {
+    "suite": "com.apptolast.organization.application.ReadWorkSessionEndTest",
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "01F29891B01961B6AF39A5E2C669E356DD98FAF9DEAA34BDCE8C45FFFE18892C"
+  }
+]

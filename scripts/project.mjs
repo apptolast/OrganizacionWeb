@@ -22,6 +22,8 @@ export function createProject(runner = run) {
       target !== "" &&
       (task !== "mutate" ||
         ![
+          "end_time_notification-backend",
+          "end_time_notification-frontend",
           "close_work_session-backend",
           "close_work_session-frontend",
           "pause_resume_session-backend",
@@ -60,6 +62,21 @@ export function createProject(runner = run) {
       mutate: "pitest",
     };
     if (!commands[task]) throw new Error(`Unknown task: ${task}`);
+    if (task === "mutate" && target === "end_time_notification-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.end-time-notification.config.json",
+      ]);
+      return;
+    }
+    if (task === "mutate" && target === "end_time_notification-backend") {
+      backend("pitest", ["-PmutationScope=end_time_notification"]);
+      return;
+    }
     if (task === "mutate" && target === "close_work_session-backend") {
       backend("pitest", ["-PmutationScope=close_work_session"]);
       return;

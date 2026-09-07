@@ -75,6 +75,8 @@ test("close_work_session: pending parent lookup cannot replace closure after nav
       .filter({ hasText: /^Consultando sesión activa$/ }),
   ).toBeVisible();
   await section
+    .getByRole("heading", { name: "Estado de la sesión", exact: true })
+    .locator("..")
     .getByRole("link", { name: "Cerrar sesión de trabajo", exact: true })
     .click();
   const stableUrl = `/proyectos/${project.id}/tareas/${task.id}/sesiones/${session.id}`;
@@ -150,6 +152,8 @@ test("close_work_session: lost confirmed response reloads closure by URL without
   const session = await startResponse.json();
   expect(session.id).toMatch(/^[0-9a-f-]{36}$/i);
   await section
+    .getByRole("heading", { name: "Estado de la sesión", exact: true })
+    .locator("..")
     .getByRole("link", { name: "Cerrar sesión de trabajo", exact: true })
     .click();
   const stableUrl = `/proyectos/${project.id}/tareas/${task.id}/sesiones/${session.id}`;
@@ -269,6 +273,8 @@ test("close_work_session: paused closes without counting rest and keeps a new ac
   const pause = await pauseResponse.json();
   await expect(section.getByText("En pausa", { exact: true })).toBeVisible();
   await section
+    .getByRole("heading", { name: "Estado de la sesión", exact: true })
+    .locator("..")
     .getByRole("link", { name: "Cerrar sesión de trabajo", exact: true })
     .click();
   await expect(page).toHaveURL(
@@ -404,6 +410,8 @@ test("close_work_session: running closes with exact durable time and reloads by 
       closeRequests.push(sent);
   });
   await section
+    .getByRole("heading", { name: "Estado de la sesión", exact: true })
+    .locator("..")
     .getByRole("link", { name: "Cerrar sesión de trabajo", exact: true })
     .click();
   await expect(page).toHaveURL(sessionUrl);

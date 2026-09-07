@@ -1,0 +1,10 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+    "sha256": "F99570A9B201C7F69F7BDE0652E7E76E7E436DC089481CA2D64F1C742BD3DB5C"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/config/ApplicationWiringTest.java",
+    "sha256": "CAE211A8EDC00E285B5365A9CA59D3F3F7CB3EFE74913334F41C47D740C52968"
+  }
+]

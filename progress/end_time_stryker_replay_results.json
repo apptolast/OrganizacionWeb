@@ -1,0 +1,122 @@
+{
+  "session": 47243,
+  "exitCode": 0,
+  "exitEvidence": "c06ceb",
+  "inputs": 130,
+  "changedInputs": 0,
+  "statuses": [
+    {
+      "Name": "Killed",
+      "Count": 39
+    },
+    {
+      "Name": "RuntimeError",
+      "Count": 1
+    },
+    {
+      "Name": "Survived",
+      "Count": 5
+    }
+  ],
+  "targets": [
+    {
+      "originalId": "14",
+      "file": "src/use-work-session-decision.ts",
+      "matches": 1,
+      "status": "Killed",
+      "replayId": "0"
+    },
+    {
+      "originalId": "52",
+      "file": "src/work-session-end-api.ts",
+      "matches": 1,
+      "status": "Killed",
+      "replayId": "2"
+    },
+    {
+      "originalId": "62",
+      "file": "src/work-session-end-api.ts",
+      "matches": 1,
+      "status": "Killed",
+      "replayId": "4"
+    },
+    {
+      "originalId": "155",
+      "file": "src/work-session-end.tsx",
+      "matches": 1,
+      "status": "Killed",
+      "replayId": "6"
+    },
+    {
+      "originalId": "217",
+      "file": "src/work-session-end.tsx",
+      "matches": 1,
+      "status": "Killed",
+      "replayId": "12"
+    },
+    {
+      "originalId": "226",
+      "file": "src/work-session-end.tsx",
+      "matches": 1,
+      "status": "Killed",
+      "replayId": "21"
+    },
+    {
+      "originalId": "228",
+      "file": "src/work-session-end.tsx",
+      "matches": 1,
+      "status": "RuntimeError",
+      "replayId": "23"
+    },
+    {
+      "originalId": "225",
+      "file": "src/work-session-end.tsx",
+      "matches": 1,
+      "status": "Killed",
+      "replayId": "20"
+    },
+    {
+      "originalId": "357",
+      "file": "src/work-session-end.tsx",
+      "matches": 1,
+      "status": "Killed",
+      "replayId": "26"
+    },
+    {
+      "originalId": "1138",
+      "file": "src/work-session-state-api.ts",
+      "matches": 1,
+      "status": "Killed",
+      "replayId": "30"
+    },
+    {
+      "originalId": "1142",
+      "file": "src/work-session-state-api.ts",
+      "matches": 1,
+      "status": "Killed",
+      "replayId": "34"
+    },
+    {
+      "originalId": "1147",
+      "file": "src/work-session-state-api.ts",
+      "matches": 1,
+      "status": "Killed",
+      "replayId": "36"
+    },
+    {
+      "originalId": "1227",
+      "file": "src/work-session-state-api.ts",
+      "matches": 1,
+      "status": "Killed",
+      "replayId": "38"
+    },
+    {
+      "originalId": "1228",
+      "file": "src/work-session-state-api.ts",
+      "matches": 1,
+      "status": "Killed",
+      "replayId": "39"
+    }
+  ],
+  "rawSha256": "D1280133E03618B5CFA8DAE1E7EDF38C98998510D97A7947947423B2CCD894B6"
+}

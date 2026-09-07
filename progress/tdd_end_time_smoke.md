@@ -1,0 +1,25 @@
+# Smoke de publicación y recuperación17
+
+Corte aislado end-http con backend finalc2882fd y wiring real. Propiedad exclusiva scripts/publisher-smoke.mjs y evidencia. No Gradle host, cambios Java/SQL/config ni frontend WIP. Se reutilizaron el lifecycle Compose dinámico, relay de una petición, sesión autenticada, consultas de outbox y management Rabbit existentes.
+
+Único recorrido añadido después de terminar los12 tramos históricos: inicio real14; E inicial; Rabbit detenido; POST EXTEND15 cuya respuesta sólo se descarta después de upstream201; K recupera EXTEND7; worker registra BROKER_UNAVAILABLE y conserva evento11 original; segunda ampliación1 con revisión actual; recuperación de Rabbit y publicación original; reinicio real Rabbit con mismo contenedor/mounts y cambio de StartedAt; mensaje persistente con payload exacto, cola12 quorum durable y routing work-session.extended.v1. Se retira sólo la fila publicada del primer evento, se reinicia API conservando PostgreSQL y C/K recuperan el primer recibo, mientras E conserva la segunda ampliación/revisión3. Consulta SQL contrasta fórmula exacta con timestamptz, fin original intacto, cero intervalos y cero trabajo añadido. Recuperación no añade cambios/eventos.
+
+Primera ejecución completa **13a8a8 EXIT0**, sin RED funcional inventado:13 líneas PASS (12 heredadas+1 nueva). Log `end_publisher_smoke.log`; formato/nodecheck185c0b. `end_smoke_before_hashes.json` y `end_smoke_after_hashes.json`: **249 archivos idénticos**,248 fuentes/recursos backend y script, verificación5af567. No cambio de producción durante build/ejecución. Script SHA01267F877BB001B8BD9695B23D4BB8CF8F5A7A6389F778E1EC25D3EA81B4AD6B; log SHAF5E2D18ECA30286435D593568A68C25AA4849FD4C9F8F573926590A5DEC41B8C. Diffcheck verde.
+
+Se preservaron todas las assertions14–16. Únicamente se retiraron sus tags numéricos antiguos de tres etiquetas PASS para evitar vincularlos a numeraciones contractuales equivocadas. Los logs/hashes históricos no se modificaron ni se reinterpretan como una ejecución nueva; esta ejecución los acredita sólo sobre su corte actual.
+
+Alcance @s24 y recuperación parcial@s23: la sesión ampliada queda running, revisión3. El caso literal de@s23 con cierre posterior se acredita hasta ahora en composición con EndTimeIntegrationTest (sin reinicio allí), no como un único recorrido de este smoke. Root informado de este límite antes de afirmar cierre global. No UI17 validada: frontend aislado sigue anterior y el único E2E17 permanece RED. No campañas ni suite global.
+
+Runner finalizó y ejecutó su cleanup limitado a su proyecto/volúmenes/scratch propios; EXIT0 incluye esa retirada. Puertos dinámicos, sin18080/8080 ni limpieza global. Paquete congelado para revisión root.
+
+## Recorrido final reforzado: sesión cerrada antes del reinicio
+
+Por contrato@s23 se añadió al mismo recorrido un CLOSE real con revisión3 después de la segunda ampliación, antes del reinicio de API. Se conservó la evidencia anterior sin sobrescribir: `end_publisher_smoke_open_checkpoint.log` mantiene F5E2D1…41B8C; script anterior en `end_smoke_open_script.mjs` y manifiestos `end_smoke_open_before_hashes.json`/`end_smoke_open_after_hashes.json`. El primer resultado13a8a8 sigue siendo parcial, no se reinterpreta.
+
+Nueva ejecución inicialmente **GREEN ac63df EXIT0**,13 PASS, log `end_publisher_smoke_closed.log`. El cierre confirma201/revisión4, before coincide con la segunda EXTEND y SessionStart sigue original. E antes/después del reinicio conserva ese estado closed y el segundo fin. C/K y POST replay con key/token/cantidad originales entregan el primer EXTEND sin nueva escritura ni outbox. Ahora hay3cambios (2EXTEND+1CLOSE),1intervalo cerrado y1eventoEXTEND restante tras retirar exclusivamente el primero publicado; CLOSE no se cuenta como ampliación. El neto corresponde al cierre y no se atribuye a los minutos añadidos.
+
+El límite del smoke anterior queda resuelto en este recorrido: ampliación posterior, cierre final, reinicioAPI, C/K/E y replay original se ejecutaron juntos. Se mantienen el relay que exige upstream201, outage/retry deRabbit, payload11/cola12 y reinicioRabbit con mounts conservados. Backend no cambió; no Gradle host ni frontend17 validado.
+
+Freeze final: manifiestos `end_smoke_closed_before_hashes.json` y `end_smoke_closed_after_hashes.json`,249 hashes idénticos;248 backend coinciden también con la primera ejecución. Script y log finales se entregan con sus SHA en la verificación de cierre. No reintento adicional ni cambio posterior del script. Cleanup del runner completado con EXIT0, limitado a su stack dinámico.
+
+Verificación final812a77: script SHA4A0A2E1F7AFA1DB37B644D30D11A8E6D5E01C7449BA4E9A50ADDBF7C9BFC0D36; log SHAF5E2D18ECA30286435D593568A68C25AA4849FD4C9F8F573926590A5DEC41B8C. El texto del log coincide byte por byte con el anterior porque las etiquetas PASS no imprimen los datos de cada ejecución; la ejecución reforzada se identifica por EXITac63df y el nuevo hash del script/manifiesto, no por un supuesto contenido distinto del log. El anterior permanece separado y con el mismo hash.

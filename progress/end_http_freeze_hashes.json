@@ -1,0 +1,18 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/http/WorkSessionStateController.java",
+    "sha256": "644334362BA156CF56E13F19E9A0D8ECA41F091A899BA29C4746F55DB7F727DE"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/EndTimeApiTest.java",
+    "sha256": "F59F531943ADA148D400B242887193536721865F422B3C13A45F9449FFCC64B7"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/WorkSessionStateApiTest.java",
+    "sha256": "18EE6FFCB76DC9216D5EFD411E340BAA9C1FEDE399A2FA20E13664BEFC18C3BB"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/CloseWorkSessionApiTest.java",
+    "sha256": "AB15DBE07C20074618EF6B7BA5162B7C3E4B3BE156791A45A0EDB9CC3CF84498"
+  }
+]

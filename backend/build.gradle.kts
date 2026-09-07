@@ -45,6 +45,7 @@ pitest {
     val rescheduleOnly = scope == "reschedule"
     val pauseResumeSessionOnly = scope == "pause_resume_session"
     val closeWorkSessionOnly = scope == "close_work_session"
+    val endTimeNotificationOnly = scope == "end_time_notification"
     val startWorkSessionOnly = scope == "start_work_session"
     val startWorkSessionReplayOnly = scope == "start_work_session_replay"
     val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
@@ -232,7 +233,29 @@ pitest {
         "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher",
         "com.apptolast.organization.adapter.config.ApplicationConfiguration"
     )
+    val endTimeNotificationClasses = setOf(
+        "com.apptolast.organization.application.ExtendWorkSession",
+        "com.apptolast.organization.application.ReadWorkSessionEnd",
+        "com.apptolast.organization.application.WorkSessionEnd",
+        "com.apptolast.organization.application.WorkSessionEndSnapshot",
+        "com.apptolast.organization.application.WorkSessionExtension",
+        "com.apptolast.organization.application.WorkSessionExtensionTransition",
+        "com.apptolast.organization.application.WorkSessionExtended",
+        "com.apptolast.organization.application.WorkSessionTransitionReceipt",
+        "com.apptolast.organization.application.WorkSessionTransition",
+        "com.apptolast.organization.application.WorkSessionChanging",
+        "com.apptolast.organization.application.ChangeWorkSession",
+        "com.apptolast.organization.application.ReadWorkSessionState",
+        "com.apptolast.organization.application.ReadWorkSessionChanges",
+        "com.apptolast.organization.domain.WorkSessionState",
+        "com.apptolast.organization.domain.OutboxMessage",
+        "com.apptolast.organization.adapter.persistence.PostgresWorkSessionStore*",
+        "com.apptolast.organization.adapter.http.WorkSessionStateController*",
+        "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher",
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration"
+    )
     targetClasses.set(when {
+        endTimeNotificationOnly -> endTimeNotificationClasses
         closeWorkSessionOnly -> closeWorkSessionClasses
         pauseResumeSessionOnly -> pauseResumeSessionClasses
         startWorkSessionReplayOnly -> setOf("com.apptolast.organization.application.WorkSessionStarted")
@@ -245,9 +268,10 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses
     })
     targetTests.set(when {
+        endTimeNotificationOnly -> setOf("com.apptolast.organization.*")
         closeWorkSessionOnly -> setOf("com.apptolast.organization.*")
         pauseResumeSessionOnly -> setOf("com.apptolast.organization.*")
         startWorkSessionReplayOnly -> setOf("com.apptolast.organization.*")
@@ -262,6 +286,7 @@ pitest {
         taskOnly -> taskTests
         else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests
     })
+    if (endTimeNotificationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-end-time-notification"))
     if (pauseResumeSessionOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-pause-resume-session"))
     if (closeWorkSessionOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-close-work-session"))
     if (rescheduleOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-reschedule"))

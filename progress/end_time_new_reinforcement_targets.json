@@ -1,0 +1,164 @@
+[
+  {
+    "id": "14",
+    "file": "src/use-work-session-decision.ts",
+    "mutator": "ArrowFunction",
+    "replacement": "() => undefined",
+    "statusOriginal": "Survived",
+    "locationOriginal1Based": {
+      "end": {
+        "column": 39,
+        "line": 23
+      },
+      "start": {
+        "column": 19,
+        "line": 23
+      }
+    },
+    "selectorColumns0Based": "src/use-work-session-decision.ts:23:18-23:38"
+  },
+  {
+    "id": "52",
+    "file": "src/work-session-end-api.ts",
+    "mutator": "ConditionalExpression",
+    "replacement": "false",
+    "statusOriginal": "Survived",
+    "locationOriginal1Based": {
+      "end": {
+        "column": 19,
+        "line": 32
+      },
+      "start": {
+        "column": 7,
+        "line": 32
+      }
+    },
+    "selectorColumns0Based": "src/work-session-end-api.ts:32:6-32:18"
+  },
+  {
+    "id": "62",
+    "file": "src/work-session-end-api.ts",
+    "mutator": "ConditionalExpression",
+    "replacement": "false",
+    "statusOriginal": "Survived",
+    "locationOriginal1Based": {
+      "end": {
+        "column": 19,
+        "line": 34
+      },
+      "start": {
+        "column": 7,
+        "line": 34
+      }
+    },
+    "selectorColumns0Based": "src/work-session-end-api.ts:34:6-34:18"
+  },
+  {
+    "id": "155",
+    "file": "src/work-session-end.tsx",
+    "mutator": "ConditionalExpression",
+    "replacement": "false",
+    "statusOriginal": "Survived",
+    "locationOriginal1Based": {
+      "end": {
+        "column": 74,
+        "line": 106
+      },
+      "start": {
+        "column": 41,
+        "line": 106
+      }
+    },
+    "selectorColumns0Based": "src/work-session-end.tsx:106:40-106:73"
+  },
+  {
+    "id": "217",
+    "file": "src/work-session-end.tsx",
+    "mutator": "ConditionalExpression",
+    "replacement": "true",
+    "statusOriginal": "Survived",
+    "locationOriginal1Based": {
+      "end": {
+        "column": 71,
+        "line": 157
+      },
+      "start": {
+        "column": 9,
+        "line": 156
+      }
+    },
+    "selectorColumns0Based": "src/work-session-end.tsx:156:8-157:70"
+  },
+  {
+    "id": "226",
+    "file": "src/work-session-end.tsx",
+    "mutator": "ConditionalExpression",
+    "replacement": "true",
+    "statusOriginal": "Survived",
+    "locationOriginal1Based": {
+      "end": {
+        "column": 70,
+        "line": 157
+      },
+      "start": {
+        "column": 21,
+        "line": 157
+      }
+    },
+    "selectorColumns0Based": "src/work-session-end.tsx:157:20-157:69"
+  },
+  {
+    "id": "228",
+    "file": "src/work-session-end.tsx",
+    "mutator": "OptionalChaining",
+    "replacement": "problem.code",
+    "statusOriginal": "Survived",
+    "locationOriginal1Based": {
+      "end": {
+        "column": 34,
+        "line": 157
+      },
+      "start": {
+        "column": 21,
+        "line": 157
+      }
+    },
+    "selectorColumns0Based": "src/work-session-end.tsx:157:20-157:33"
+  },
+  {
+    "id": "225",
+    "file": "src/work-session-end.tsx",
+    "mutator": "LogicalOperator",
+    "replacement": "check || problem?.code === \"WORK_SESSION_CHANGE_NOT_FOUND\"",
+    "statusOriginal": "Survived",
+    "locationOriginal1Based": {
+      "end": {
+        "column": 70,
+        "line": 157
+      },
+      "start": {
+        "column": 12,
+        "line": 157
+      }
+    },
+    "selectorColumns0Based": "src/work-session-end.tsx:157:11-157:69"
+  },
+  {
+    "id": "357",
+    "file": "src/work-session-end.tsx",
+    "mutator": "ConditionalExpression",
+    "replacement": "false",
+    "statusOriginal": "Survived",
+    "locationOriginal1Based": {
+      "end": {
+        "column": 36,
+        "line": 257
+      },
+      "start": {
+        "column": 16,
+        "line": 257
+      }
+    },
+    "selectorColumns0Based": "src/work-session-end.tsx:257:15-257:35"
+  }
+]

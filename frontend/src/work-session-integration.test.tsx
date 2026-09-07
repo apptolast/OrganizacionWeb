@@ -83,7 +83,10 @@ function fixture(
             headers: { Location: `/api/v1/work-sessions/${projectId}` },
           },
         );
-      if (url === `/api/v1/work-sessions/${projectId}/state`)
+      if (
+        url === `/api/v1/work-sessions/${projectId}/state` ||
+        url === `/api/v1/work-sessions/${projectId}/end-time`
+      )
         return Response.json(
           {
             state: {
@@ -103,7 +106,9 @@ function fixture(
               runningSince: time,
             },
             serverNow: time,
-            netMicroseconds: "0",
+            ...(url.endsWith("/end-time")
+              ? { effectiveEndAt: "2026-09-06T10:25:00Z" }
+              : { netMicroseconds: "0" }),
           },
           {
             headers: { "Work-Session-Revision": `work-session-${projectId}-1` },

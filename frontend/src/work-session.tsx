@@ -1,4 +1,6 @@
 import { WorkSessionStatePanel } from "./work-session-state";
+import { WorkSessionEndPanel } from "./work-session-end";
+import { useWorkSessionDecision } from "./use-work-session-decision";
 import { useEffect, useState, useRef, useLayoutEffect, useId } from "react";
 import {
   readActiveWorkSession,
@@ -198,9 +200,20 @@ function Session(props: Props) {
       {active && (
         <>
           <p>La pausa no desplaza el fin previsto de la sesión.</p>
-          <WorkSessionStatePanel
+          <ActiveSession
+            key={active.id}
             session={active}
             onAccessFailure={props.onAccessFailure}
+            onDecision={() => {
+              lookup.current?.abort();
+              setLoading(false);
+            }}
+            onConfirmed={() => {
+              lookup.current?.abort();
+              setLoading(true);
+              setLookupFailed(false);
+              setRefresh((value) => value + 1);
+            }}
           />
         </>
       )}
@@ -302,6 +315,46 @@ function Session(props: Props) {
         </>
       )}
     </section>
+  );
+}
+
+function ActiveSession({
+  session,
+  onAccessFailure,
+  onDecision,
+  onConfirmed,
+}: {
+  session: SessionStart;
+  onAccessFailure: (status: number) => void;
+  onDecision: () => void;
+  onConfirmed: () => void;
+}) {
+  const local = useWorkSessionDecision();
+  const decision = {
+    ...local,
+    acquire(action: Parameters<typeof local.acquire>[0]) {
+      if (!local.acquire(action)) return false;
+      onDecision();
+      return true;
+    },
+    settle() {
+      local.settle();
+      onConfirmed();
+    },
+  };
+  return (
+    <>
+      <WorkSessionStatePanel
+        session={session}
+        onAccessFailure={onAccessFailure}
+        decision={decision}
+      />
+      <WorkSessionEndPanel
+        session={session}
+        onAccessFailure={onAccessFailure}
+        decision={decision}
+      />
+    </>
   );
 }
 

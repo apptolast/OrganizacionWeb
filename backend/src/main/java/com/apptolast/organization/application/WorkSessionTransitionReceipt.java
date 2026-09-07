@@ -11,7 +11,19 @@ public record WorkSessionTransitionReceipt(
     Instant occurredAt,
     WorkSessionState before,
     WorkSessionState after,
-    WorkSessionClosure closure) {
+    WorkSessionClosure closure,
+    WorkSessionExtension extension) {
+  public WorkSessionTransitionReceipt(
+      UUID id,
+      UUID sessionId,
+      String action,
+      Instant occurredAt,
+      WorkSessionState before,
+      WorkSessionState after,
+      WorkSessionClosure closure) {
+    this(id, sessionId, action, occurredAt, before, after, closure, null);
+  }
+
   public WorkSessionTransitionReceipt(
       UUID id,
       UUID sessionId,
@@ -38,5 +50,11 @@ public record WorkSessionTransitionReceipt(
         && !new com.apptolast.organization.domain.WorkSessionCloseNotes(
                 closure.progressNote(), closure.nextStep())
             .equals(notes)) throw new WorkSessionIdempotencyConflictException();
+  }
+
+  public void requireExtensionIntent(UUID session, long expected, int additionalMinutes) {
+    requireIntent(session, "EXTEND", expected);
+    if (extension.additionalMinutes() != additionalMinutes)
+      throw new WorkSessionIdempotencyConflictException();
   }
 }

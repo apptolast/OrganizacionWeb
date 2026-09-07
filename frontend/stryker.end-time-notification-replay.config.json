@@ -1,0 +1,35 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "ignorePatterns": [".stryker-tmp-availability-replay"],
+  "mutate": [
+    "src/use-work-session-decision.ts:23:18-23:38",
+    "src/work-session-end-api.ts:32:6-32:18",
+    "src/work-session-end-api.ts:34:6-34:18",
+    "src/work-session-end.tsx:106:40-106:73",
+    "src/work-session-end.tsx:156:8-157:70",
+    "src/work-session-end.tsx:257:15-257:35",
+    "src/work-session-state-api.ts:187:8-188:50",
+    "src/work-session-state-api.ts:196:8-196:56",
+    "src/work-session-state-api.ts:230:4-231:47"
+  ],
+  "reporters": ["clear-text", "json", "html"],
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 80
+  },
+  "concurrency": 8,
+  "coverageAnalysis": "perTest",
+  "vitest": {
+    "configFile": "vite.config.ts"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation-end-time-notification-replay/mutation.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation-end-time-notification-replay/mutation.html"
+  },
+  "tempDirName": ".stryker-tmp-end-time-notification-replay"
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "path": "frontend/src/work-session-end.tsx",
+    "sha256": "E1BDC2E9EAA3BCC3E899368DB9623D84388E7697B4AFA5F5DC50F805361A6115"
+  },
+  {
+    "path": "frontend/src/work-session-end.test.tsx",
+    "sha256": "0BE495B843CCE67D08BA968A372EF95C5CC427EEC8609AB00EFE56DA64DD7DB1"
+  },
+  {
+    "path": "frontend/src/use-work-session-decision.ts",
+    "sha256": "A17E547AE2CF14CE074B8BD4C51EF32592573837F5C56D213FCDC2CC2FF8060B"
+  },
+  {
+    "path": "frontend/src/use-work-session-decision.test.tsx",
+    "sha256": "DC08F965BB101F67A565E626B9DDBF2CEF9C3716BA4A5D2F1EE6B18174CB1BB4"
+  },
+  {
+    "path": "frontend/src/work-session-end-api.test.ts",
+    "sha256": "2498D8174C1C35B0FD09291C2D6F7FB3C441118FC33FD3977FAF93BD68127F19"
+  },
+  {
+    "path": "frontend/src/work-session-state.tsx",
+    "sha256": "3EBB7CDAC83986BC0A55FD2423B8BAC67A570F2E8035E0846E1E73E6DFCE2ACD"
+  }
+]

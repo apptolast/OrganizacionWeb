@@ -58,20 +58,45 @@ public final class WorkSessionStateController {
   }
 
   private final ChangeWorkSessionUseCase change;
+  private final ExtendWorkSessionUseCase extensions;
+  private final ReadWorkSessionEndUseCase ends;
   private final ReadWorkSessionStateUseCase states;
   private final ReadWorkSessionChangesUseCase receipts;
   private final com.fasterxml.jackson.databind.ObjectMapper json;
 
   public WorkSessionStateController(
       ChangeWorkSessionUseCase change,
+      ExtendWorkSessionUseCase extensions,
+      ReadWorkSessionEndUseCase ends,
       ReadWorkSessionStateUseCase states,
       ReadWorkSessionChangesUseCase receipts,
       com.fasterxml.jackson.databind.ObjectMapper json) {
     this.change = change;
+    this.extensions = extensions;
+    this.ends = ends;
     this.states = states;
     this.receipts = receipts;
     this.json = json;
   }
+
+  @GetMapping("/api/v1/work-sessions/{id}/end-time")
+  public ResponseEntity<?> endTime(
+      Principal principal,
+      @PathVariable String id,
+      @RequestParam org.springframework.util.MultiValueMap<String, String> parameters) {
+    if (!parameters.isEmpty()) throw BlockController.invalid("query", "INVALID_VALUE");
+    var snapshot = ends.read(principal.getName(), BlockController.identifier(id, "id"));
+    var state = snapshot.state();
+    return ResponseEntity.ok()
+        .header(
+            "Work-Session-Revision",
+            "work-session-" + state.session().id() + "-" + state.revision())
+        .body(
+            new EndResponse(
+                StateResponse.from(state), snapshot.serverNow(), snapshot.effectiveEndAt()));
+  }
+
+  public record EndResponse(StateResponse state, Instant serverNow, Instant effectiveEndAt) {}
 
   @GetMapping("/api/v1/work-session-changes/{id}")
   public Object receipt(
@@ -125,7 +150,7 @@ public final class WorkSessionStateController {
   public record SnapshotResponse(StateResponse state, Instant serverNow, String netMicroseconds) {}
 
   @PostMapping(
-      value = "/api/v1/work-sessions/{id}/{action:pause|resume|close}",
+      value = "/api/v1/work-sessions/{id}/{action:pause|resume|close|extend}",
       consumes = "application/json")
   public ResponseEntity<?> change(
       Principal principal,
@@ -172,18 +197,22 @@ public final class WorkSessionStateController {
     var fields = new java.util.TreeSet<String>();
     body.fieldNames().forEachRemaining(fields::add);
     if (action.equals("close")) fields.removeAll(java.util.Set.of("progressNote", "nextStep"));
+    if (action.equals("extend")) fields.remove("additionalMinutes");
     if (!fields.isEmpty()) throw BlockController.invalid(fields.first(), "UNKNOWN_FIELD");
     var confirmed =
-        action.equals("close")
-            ? change.close(
-                principal.getName(),
-                sessionId,
-                requestKey,
-                expected,
-                new WorkSessionCloseNotes(note(body, "progressNote"), note(body, "nextStep")))
-            : action.equals("pause")
-                ? change.pause(principal.getName(), sessionId, requestKey, expected)
-                : change.resume(principal.getName(), sessionId, requestKey, expected);
+        action.equals("extend")
+            ? extensions.extend(
+                principal.getName(), sessionId, requestKey, expected, additionalMinutes(body))
+            : action.equals("close")
+                ? change.close(
+                    principal.getName(),
+                    sessionId,
+                    requestKey,
+                    expected,
+                    new WorkSessionCloseNotes(note(body, "progressNote"), note(body, "nextStep")))
+                : action.equals("pause")
+                    ? change.pause(principal.getName(), sessionId, requestKey, expected)
+                    : change.resume(principal.getName(), sessionId, requestKey, expected);
     return ResponseEntity.status(confirmed.replayed() ? 200 : 201)
         .location(URI.create("/api/v1/work-session-changes/" + confirmed.receipt().id()))
         .body(ReceiptResponse.from(confirmed.receipt()));
@@ -215,6 +244,15 @@ public final class WorkSessionStateController {
       StateResponse before,
       StateResponse after) {
     static Object from(WorkSessionTransitionReceipt receipt) {
+      if (receipt.action().equals("EXTEND"))
+        return new ExtensionReceiptResponse(
+            receipt.id(),
+            receipt.sessionId(),
+            receipt.action(),
+            receipt.occurredAt(),
+            StateResponse.from(receipt.before()),
+            StateResponse.from(receipt.after()),
+            receipt.extension());
       if (receipt.action().equals("CLOSE"))
         return new CloseReceiptResponse(
             receipt.id(),
@@ -243,10 +281,31 @@ public final class WorkSessionStateController {
       StateResponse after,
       WorkSessionClosure closure) {}
 
+  public record ExtensionReceiptResponse(
+      UUID id,
+      UUID sessionId,
+      String action,
+      Instant occurredAt,
+      StateResponse before,
+      StateResponse after,
+      WorkSessionExtension extension) {}
+
   private static String note(com.fasterxml.jackson.databind.JsonNode body, String field) {
     var value = body.get(field);
     if (value == null || value.isNull()) return null;
     if (!value.isTextual()) throw BlockController.invalid(field, "INVALID_VALUE");
     return value.textValue();
+  }
+
+  private static int additionalMinutes(com.fasterxml.jackson.databind.JsonNode body) {
+    var value = body.get("additionalMinutes");
+    if (value == null || value.isNull())
+      throw BlockController.invalid("additionalMinutes", "REQUIRED");
+    if (!value.isNumber()) throw BlockController.invalid("additionalMinutes", "INVALID_TYPE");
+    if (!value.isIntegralNumber() || !value.canConvertToInt())
+      throw BlockController.invalid("additionalMinutes", "OUT_OF_RANGE");
+    if (value.intValue() < 1 || value.intValue() > 1440)
+      throw BlockController.invalid("additionalMinutes", "OUT_OF_RANGE");
+    return value.intValue();
   }
 }

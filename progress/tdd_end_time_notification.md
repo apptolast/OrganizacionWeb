@@ -1,0 +1,79 @@
+# Mapa maestro de evidencia 17 — corte integrado para gates
+
+Contrato `features/end_time_notification.feature`, SHA256 `6BC581725DC0FE4C7B548191A842882CE5A62FD0348CF789D1BCCD843ABE4309`: **44 escenarios, 132 ejemplos**. Los ejemplos contractuales no son conteos de tests. Este mapa reúne evidencia compuesta y reutilización; acredita cierre técnico local, sin atribuir una ejecución independiente a cada variante de tabla ni CI/merge/despliegue completados.
+
+## Fuentes y cortes
+
+- **A**: `tdd_end_time_backend.md`, mapa final @s1–23; 175 tests en 13 suites, GREEN dc5c90, XML preservados. `review_end_time_backend.md` APPROVED, 26 hashes verificados 8bc66b. Regresión backend posterior de root: 2074 tests/89 suites, cero fallos; no equivale al init integrado final.
+- **B**: `../docs/tdd_end_time_frontend.md`, ciclos hasta 81. Cliente, panel, tarea y Reader aprobados en `review_end_time_frontend_client.md`, `review_end_time_frontend_panel.md`, `review_end_time_task_mount.md`, `review_end_time_reader_mount.md` y `review_end_time_frontend_integrated.md`. Ocho suites 248/248 GREEN df8548 antes del último delta F; después, Reader 47/47 GREEN a63304 con formato/lint verdes. No se suman ambas ejecuciones ni se atribuyen 248 al delta posterior. Freeze final: `end_time_frontend_reader_freeze.json`.
+- **H/P/I**: `tdd_end_time_http.md` (100, incluidos 73 heredados), `tdd_end_time_publisher.md` (226), `tdd_end_time_integration.md` (un recorrido HTTP+PG real); sus dictámenes separados están aprobados.
+- **N/D/R**: tres E2E reales en `tdd_end_time_e2e.md`, integrados por root bec6ea4: nominal N GREEN bb7728; vencimiento de un minuto D inicialmente GREEN a8fb59; recuperación R GREEN a71eee. Cada ejecución acredita un caso; no se presenta como una única ejecución conjunta del último delta F.
+- **S**: `tdd_end_time_smoke.md` y `review_end_time_smoke.md`, recorrido real API/PG/Rabbit, EXIT0 ac63df, 13 PASS y 249 hashes idénticos fb1437.
+- **M**: `mutation_end_time_backend.md` y `tdd_end_time_publisher_refinement.md`; PIT original y replay separado descritos al final.
+
+| @s | Evidencia localizada | Estado y límite real |
+| --- | --- | --- |
+| 1 | A Extend.s1 y PG.s1 nominales; H/I; N | Fórmula anticipada, revisión, precisión y recibo/evento independientes; recorrido navegador→API→PG alcanzado. |
+| 2 | Extend.s2_extendsAPausedExpiredSessionFromTheConfirmationClock; PG.end_s2_completedProjectAndTaskDoNotPreventExtension; H máximo paused | Fórmula tardía y contexto completed acreditados. Reutilización de max para ambos estados; no se inventa una ejecución por combinación. |
+| 3 | PG.end_s11_sameMicrosecondAllowsAnotherExtensionWithoutACumulativeDayLimit | GREEN 8b01fe: dos ampliaciones de 1440, acumulado 2880, sin trabajo nuevo. |
+| 4 | A cero/1441 antes del puerto; H tipo/fracción/overflow/límites; B error asociado y cantidad vacía | Validación por clases y ausencia de POST. Tipos rechazados por la misma guarda no se cuentan como tests nuevos. |
+| 5 | H query P/E, seguridad, token antes de JSON, campos/documentos extra; 73 heredados | Conexiones nuevas y reutilización explícita del transporte 15/16; sin repetir matriz HTTP. |
+| 6 | PG.s6_extendRequiresTheTokenSessionIdentityBeforeBusiness; I propiedad ajena | Token completo y orden owner→identidad→replay revisados; I no se presenta como instrumentación adicional del Clock. |
+| 7 | PG.s7_replaysAnExtensionAfterClosureAndAnotherStartWithoutClock; H/I; S | Replay histórico sin Clock; S añade otra ampliación, CLOSE y reinicio real antes de recuperar el original. |
+| 8 | PG.s8 cantidad distinta y end_s20 colisión cross-session; requireExtensionIntent | Acción/revisión/identidad reutilizan Change.s17_receiptIntentIncludesSessionIdentity y PG.s17_keyCannotChangeExpectedRevision/s17_keyCannotChangeActionBeforeCheckingCurrentRevision, reejecutados en A. |
+| 9 | Extend.s9 stale antes del Clock; guarda State.requireClose | Closed, máximo y stale antes de closed acreditados por Close.s13/s14 indicados en mapa A; no tres tests nuevos de EXTEND. |
+| 10 | Extend.s10 y PG.s10_pause/resume/closeCannotPrecedeTheLastExtension; resumeAdvancesTheLastDecisionWithItsAlreadyCapturedInstant | Cuatro decisiones y marca compartida probadas; no segunda captura de Clock. |
+| 11 | PG.end_s11_resumeAtTheExtensionMicrosecondPreservesTheExtendedEnd | GREEN b3b4eb: RESUME exactamente en la marca, sin sumar descanso ni alterar fin. |
+| 12 | Extend.s12 año 10000 y fin fuera de rango; guardas temporales compartidas | Año 0000 rechazado por now<changedAt para estado válido, con Close.s7/Change.s7 reejecutados; no literal 0000 nuevo de EXTEND. |
+| 13 | PG.s13_readsThePersistedEffectiveEndWithoutWriting; Upgrade.s22; I/N | E real, State6 y fallback de estados históricos sin escritura/backfill. |
+| 14 | ReadEnd.s14 reloj anterior/fuera de rango; I propiedad; PG.end_s11 lectura en marca | Privacidad, rechazo temporal e igualdad válidos mediante evidencia compuesta. |
+| 15 | PG.end_s13_snapshotExcludesAnExtensionCommittedBeforeClock | Read-only RR observado con writer terminado antes del Clock; lecturas coherentes, no inferencia del slice. |
+| 16 | PG.end_s16_readCompletionFailureIsNotAValidEndSnapshot; H E503 | Wrapper SQL compartido con s24_stateSqlFailureIsNotAbsence y s24_keySqlFailureIsNotAbsence reejecutados. No se atribuye un segundo caso SQL propio de E. |
+| 17 | Cinco PG.end_s17_*: supresión proyección/recibo/outbox, COMMIT y otra restricción | Rollback completo y diferenciación de ausencia de ganador; inicialmente GREEN documentado honestamente. |
+| 18 | PG.end_s18_sameKeyRaceConfirmsExactlyOneExtension | Ambas conexiones bloqueadas observadas; exactamente una confirmación y replay. |
+| 19 | Cuatro PG.end_s19_*: EXTEND/EXTEND, PAUSE, RESUME, CLOSE | Carreras reales con Lock observado y sin prefijar ganador; una revisión ganadora. |
+| 20 | PG.end_s20_crossSessionCollisionRollsBackBeforeFreshIntentLookup y sameIntentRecoveryUsesTheDurableWinnerAfterRollback; end_s17 sin ganador | UNIQUE y rollback reales, lectura en nuevo txid; snapshot/lookup controlados. Límite metodológico conservado debajo. |
+| 21 | PG.end_s21_otherOwnerAndPlanningLocksDoNotBlockExtension | Recursos de planificación y otra sesión permanecen bloqueados e intactos mientras se confirma la propia. |
+| 22 | WorkSessionEndMigrationTest y dos migraciones heredadas; JSONB P/R6/CLOSE7 | Upgrade 17→18 y CHECK end>=plan acreditados; siembra histórica explícita, sin ejecutar Store actual sobre esquema incompleto ni reescribir V14–V17. |
+| 23 | I C/K después de CLOSE y retirada exclusiva outbox17; S | S completa segunda ampliación, cierre, reinicio API y recuperación original durable; no se confunde nueva instancia Store con reinicio real. |
+| 24 | P Rabbit bytes/ruta/quorum; S | Broker detenido/reiniciado, respuesta perdida tras upstream201, publicación y recuperación reales. No depende sólo de borrar outbox. |
+| 25 | P once campos/fórmula/rango; dos oráculos adicionales y M replay | Tipo temporal y calendario imposible reforzados; firmas Outbox196/207 KILLED en replay. Resultado original permanece intacto. |
+| 26 | B cliente y API compartida aprobados; H; R | Transporte, intención y validación cerrada; R alcanza pérdida real de respuesta y K exacta sin segundo POST. |
+| 27 | B ciclo53 EXTEND paused/E en 1600, fracción .123457, GREEN a8ef74 | Época µs supera Number seguro de forma explícita; BigInt y decoder compartidos. No se usa nominal 2026 como ese oráculo. |
+| 28 | B montaje Task y Reader aprobados; N y D | Ambas superficies y aviso real. Identidad de activa de otra tarea propia conservada por montaje/revisión Task; no se atribuye variante navegador adicional. |
+| 29 | B formulario vacío/local/error y separación de CLOSE; N | Abrir no transmite decisión ni preacepta cantidad; navegador comprueba confirmación explícita. |
+| 30 | B monotonic deadline; D | D espera un minuto real y compara GET E inicial/posterior al fin en PG, sin cambiar reloj/SQL; aviso sin efectos de negocio. |
+| 31 | B fragments a 25-day deadline without an early request, GREEN d2f230 | Límite 32 bits y fragmentación acreditados en temporizador simulado; no es el E2E de recuperación. |
+| 32 | B remaining microsecond uses a positive millisecond, GREEN f58125 | Resto positivo mínimo y ausencia de bucle cero en prueba focal. No se atribuye a navegador un timer de 25 días ni un microsegundo medido. |
+| 33 | B visibility/coalescing f753be | Revalidación/coalescing focales; retirada actual de contexto completada en @s42. |
+| 34 | B E503/retry 00e1b2 y reloj atrasado 9d4705 | Espera/error y conservación de aviso ya confirmado. Ciclo45 corresponde a esta fila, no a @s32. |
+| 35 | B POST+E separado; recibo histórico ante E fallido e51e10; retirada aviso anterior 77dd53; D | Recibo no se sustituye por E; D confirma ampliación y E futuro retira aviso. No se afirma un segundo vencimiento real no ejecutado. |
+| 36 | B ambos órdenes PAUSE/EXTEND y CLOSE/EXTEND, ciclos40–42/62–69; R | Guardia síncrona, incertidumbre conserva bloqueo, rechazo definitivo libera. R confirma PAUSE posterior con revisión nueva. |
+| 37 | B POST503→K, K404 manual, CSRF manual; R | Intención retenida y recuperación sin reenvío automático acreditadas. R es recuperación, no @s31/32. Otras variantes usan decoder/recuperación compartidos; no se inventa un test del panel por cada error. |
+| 38 | B412 conserva cantidad y exige nueva intención; R2 pendiente-abortada; Reader68/69 | Rechazos definitivos liberan decisiones hermanas y permiten consulta manual; notas conservadas. Closed/fallo de consulta se complementan con @s34/@s39. |
+| 39 | B recarga closed; CLOSE propio con E pendiente; cierre externo Sclosed con F pendiente; recibo tras CLOSE412; R | Controles/timer retirados sin esperar E/F, recibo histórico conservado. Closed externo no confirma una intención propia incierta. R acredita recarga paused con fin durable, no cierre externo. |
+| 40 | B generaciones E↔S, R1 S diferida; Task GET A previo/durante; Reader64/67 | Snapshot vigente antes de decidir y abortos al adquirir/confirmar. Montajes aprobados; no se infiere sólo de AbortController. |
+| 41 | B HTTP401 antiguo E/POST/S/A, coordinador y Task; Reader heredado JSON/clasificación diferidos | Etapas diferenciadas: 401 antes de Response/observador; JSON tardío válido y clasificación no401 en pruebas compartidas. No se afirma 401 diferido después del observador síncrono. |
+| 42 | B GET/POST404,401 actual, E/S/F de contexto ajeno; ciclos71/74/76–79/81 | Retirada completa de fin, identidad, notas, recibo, espera y comandos; S/CLOSE tardíos no restauran datos. Último F: E visible→F ajena, RED c10ff6→47 GREEN a63304, revisión puntual aprobada. |
+| 43 | B feedback/doble submit/foco c83832/e35ad5/91bc8f; encabezado contextual ciclo80; D | Foco DOM y aviso real sin robar foco acreditados. UX aprobado: feedback máximo medido 5ms; no extrapolado a estados no medidos. |
+| 44 | `review_end_time_ux.md` APPROVED, integrado311cd33; consolidación a154e9 | Siete combinaciones motor/modo, 515 medidas, 35 axe sin violaciones; Firefox/WebKit 5/5 cada uno, Chromium con zoom nativo200%. Root inspeccionó capturas/fuentes. Límites detallados debajo. |
+
+## Límites de recuperación y mutación
+
+@s20 conserva una frontera explícita: A cerrada/B única abierta en colisión cross-session; para éxito de la misma intención se controlan snapshot y primera lookup, con FOR UPDATE, UNIQUE, rollback y otro txid reales. La carrera natural de la misma sesión se serializa antes de INSERT y su 201/200 de @s18 no acredita por sí sola el fallback excepcional. No se fabrica una segunda sesión abierta ni se exige otra matriz.
+
+PIT original: **616 KILLED/620, cuatro NO_COVERAGE, cero supervivientes/timeouts/errores; 99,35483870967742%**, EXIT0 b598f3, 348 inputs idénticos. Raw SHA `5006D78E0A06DED7B153EC1E6480E5CD4703704ED5ABBB978B8A8275487FC681`. Refuerzo posterior: 211 pruebas de publicador GREEN e837e3 y replay independiente **64/64 KILLED**, EXIT0 1e6077, 349 hashes idénticos ee30d9; SHA `71F17C95236A770BA3C2724352062844EF52AD448F6964390780018B0BB464CC`. Incluye explícitamente firmas Outbox196/207 y 62 mutantes adicionales. No se suman denominadores ni se reclasifican los cuatro originales. Store253/259 conserva el límite de éxito excepcional heredado sin equivalencia universal, conforme al dictamen aprobado.
+
+## Gates locales aprobados y CI pendiente
+
+- Init integrado **GREEN**: root85135 EXIT0 78e8c6, 2076 Java/89 XML, 1795 frontend/38 archivos y 40 Node. Build root93234 **GREEN**, EXIT0 d1f11e; log verificado668f6a. Cierre posterior con refuerzos: init49155 EXIT0 81dc46, 2076 Java/1802 frontend/40 Node y lint GREEN; log SHA487DCA08F158F62AE104161FFD2320B7DA4B4EA3FA7E6B8A0D231F1DA1C96A8E. Se conservan las cifras del corte anterior; no se suman ni se repitieron comandos en esta revisión.
+- Stryker17 original **APPROVED**: root90337 EXIT0 e73c7b, 1980 mutantes =1684 Killed/289 Survived/3 NoCoverage/4 RuntimeError; 85,222672% (1684/1976), estricto85,050505% (1684/1980). Raw SHA8E0BF31D8D2CC753700E8946E11516F929ED20A35C7D38D836EC9D8E8FE9EB4A; 129 inputs idénticos25fae9. Inventarios mutation_end_time_frontend_shared.md y mutation_end_time_frontend_new.md conservan todos los residuos, sin equivalencias generales ni errores contados como kills. Refuerzos revisados en review_end_time_new_refinement.md y tdd_end_time_state_api_refinement.md; replay único root47243 ya terminado, 45 mutantes/130 inputs. Su resultado posterior se acredita debajo, separado del original.
+- UX17 **APPROVED para el alcance medido**: 515 medidas/35 axe, feedback máximo5ms y revisión root. Zoom nativo verificado con tabs.setZoom/getZoom2, DPR1,5 a3 y viewport320CSS. No estudio con personas, dispositivos físicos ni lectores de pantalla reales. Aviso vencido funcional y error de cantidad en componente, sin geometría dedicada; no todas las permutaciones de estados/dispositivos.
+- E2E global **GREEN**: root96039 EXIT0 5df5b0, 121/121 en11,3min; log SHA448D71B2BBD177BD383DD11A3E31AF07208130CBF4A39D64922158A0208642FA. C revisa fixtures y log; no confundir ese cierre documental con tests aún sin ejecutar.
+- CI34099273259 sobre f9948dc: activa, pendiente de resultado. No reutilizar otra CI como cierre de este corte.
+
+Replay dirigido root47243 **APPROVED LOCAL con límites**, EXIT0 c06ceb;130 inputs idénticos1b7156, verificación independiente ab9431. Raw SHA D1280133E03618B5CFA8DAE1E7EDF38C98998510D97A7947947423B2CCD894B6. Resultado45=39 Killed/5 Survived/1 RuntimeError; score39/44=88,63636%, estricto39/45=86,66667%. Trece de catorce objetivos Killed;228 queda RuntimeError, no detectado. Los31 extras incluyen cinco supervivientes:358 igualdad del límite timer,15 decremento de generación,1139/1141 before closed y1231 typeof seguido de Number.isInteger. Los dos de before closed son hueco de oráculo explícito, no equivalencia ni defecto actual demostrado; las justificaciones locales restantes no reclasifican el raw. Error228 es fallo de serialización del runner al quitar optional chaining, no kill. Véase review_end_time_stryker_replay.md e inventario45. No otra campaña ni suma con el original1980.
+
+**Aprobación técnica LOCAL**: init, build, E2E global, smoke, UX y mutación con sus revisiones completados. Producción f9948dc intacta. Por autorización de root se marca17 done como cierre técnico local. CI34099273259, PR/merge y despliegue permanecen pendientes; no se inicia18.
+
+Las tres ejecuciones E2E y el smoke ya son evidencia real aprobada; los RED iniciales por montaje ausente y los incidentes de selector/fixture permanecen en sus bitácoras. Este maestro sustituye las marcas WIP históricas del mapa anterior sin borrar esos registros de autoría. El estado done corresponde únicamente al cierre técnico local autorizado; no autoriza implementación18 ni afirma publicación o despliegue.

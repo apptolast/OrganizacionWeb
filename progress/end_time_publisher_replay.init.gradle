@@ -1,0 +1,11 @@
+// Diagnostic replay only. The original feature17 report and global build stay unchanged.
+allprojects {
+    afterEvaluate { project ->
+        def pit = project.extensions.findByName('pitest')
+        if (pit != null) {
+            pit.targetClasses.set(['com.apptolast.organization.domain.OutboxMessage'] as Set)
+            pit.mutators.set(['EMPTY_RETURNS'] as Set)
+            pit.reportDir.set(project.layout.buildDirectory.dir('reports/pitest-end-time-publisher-replay'))
+        }
+    }
+}

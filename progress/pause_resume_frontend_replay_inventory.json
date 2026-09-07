@@ -1,0 +1,380 @@
+[
+  {
+    "file": "src/work-session-state.tsx",
+    "replayId": "5",
+    "originalIds": [
+      "401"
+    ],
+    "status": "Killed",
+    "mutator": "ConditionalExpression",
+    "replacement": "true",
+    "location": {
+      "end": {
+        "column": 71,
+        "line": 85
+      },
+      "start": {
+        "column": 9,
+        "line": 84
+      }
+    },
+    "sourceHash": "4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599"
+  },
+  {
+    "file": "src/work-session-state.tsx",
+    "replayId": "7",
+    "originalIds": [
+      "403"
+    ],
+    "status": "Killed",
+    "mutator": "LogicalOperator",
+    "replacement": "problem?.code === \"CSRF_INVALID\" && check && problem?.code === \"WORK_SESSION_CHANGE_NOT_FOUND\"",
+    "location": {
+      "end": {
+        "column": 71,
+        "line": 85
+      },
+      "start": {
+        "column": 9,
+        "line": 84
+      }
+    },
+    "sourceHash": "4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599"
+  },
+  {
+    "file": "src/work-session-state.tsx",
+    "replayId": "6",
+    "originalIds": [
+      "402"
+    ],
+    "status": "Killed",
+    "mutator": "ConditionalExpression",
+    "replacement": "false",
+    "location": {
+      "end": {
+        "column": 71,
+        "line": 85
+      },
+      "start": {
+        "column": 9,
+        "line": 84
+      }
+    },
+    "sourceHash": "4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599"
+  },
+  {
+    "file": "src/work-session-state.tsx",
+    "replayId": "8",
+    "originalIds": [
+      "404"
+    ],
+    "status": "Killed",
+    "mutator": "ConditionalExpression",
+    "replacement": "false",
+    "location": {
+      "end": {
+        "column": 41,
+        "line": 84
+      },
+      "start": {
+        "column": 9,
+        "line": 84
+      }
+    },
+    "sourceHash": "4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599"
+  },
+  {
+    "file": "src/work-session-state.tsx",
+    "replayId": "9",
+    "originalIds": [
+      "405"
+    ],
+    "status": "Killed",
+    "mutator": "EqualityOperator",
+    "replacement": "problem?.code !== \"CSRF_INVALID\"",
+    "location": {
+      "end": {
+        "column": 41,
+        "line": 84
+      },
+      "start": {
+        "column": 9,
+        "line": 84
+      }
+    },
+    "sourceHash": "4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599"
+  },
+  {
+    "file": "src/work-session-state.tsx",
+    "replayId": "10",
+    "originalIds": [
+      "406"
+    ],
+    "status": "Killed",
+    "mutator": "OptionalChaining",
+    "replacement": "problem.code",
+    "location": {
+      "end": {
+        "column": 22,
+        "line": 84
+      },
+      "start": {
+        "column": 9,
+        "line": 84
+      }
+    },
+    "sourceHash": "4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599"
+  },
+  {
+    "file": "src/work-session-state.tsx",
+    "replayId": "11",
+    "originalIds": [
+      "407"
+    ],
+    "status": "Killed",
+    "mutator": "StringLiteral",
+    "replacement": "\"\"",
+    "location": {
+      "end": {
+        "column": 41,
+        "line": 84
+      },
+      "start": {
+        "column": 27,
+        "line": 84
+      }
+    },
+    "sourceHash": "4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599"
+  },
+  {
+    "file": "src/work-session-state.tsx",
+    "replayId": "12",
+    "originalIds": [
+      "408"
+    ],
+    "status": "Killed",
+    "mutator": "ConditionalExpression",
+    "replacement": "false",
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 85
+      },
+      "start": {
+        "column": 12,
+        "line": 85
+      }
+    },
+    "sourceHash": "4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599"
+  },
+  {
+    "file": "src/work-session-state.tsx",
+    "replayId": "14",
+    "originalIds": [
+      "410"
+    ],
+    "status": "Killed",
+    "mutator": "ConditionalExpression",
+    "replacement": "true",
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 85
+      },
+      "start": {
+        "column": 21,
+        "line": 85
+      }
+    },
+    "sourceHash": "4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599"
+  },
+  {
+    "file": "src/work-session-state.tsx",
+    "replayId": "13",
+    "originalIds": [
+      "409"
+    ],
+    "status": "Killed",
+    "mutator": "LogicalOperator",
+    "replacement": "check || problem?.code === \"WORK_SESSION_CHANGE_NOT_FOUND\"",
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 85
+      },
+      "start": {
+        "column": 12,
+        "line": 85
+      }
+    },
+    "sourceHash": "4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599"
+  },
+  {
+    "file": "src/work-session-state.tsx",
+    "replayId": "15",
+    "originalIds": [
+      "411"
+    ],
+    "status": "Killed",
+    "mutator": "EqualityOperator",
+    "replacement": "problem?.code !== \"WORK_SESSION_CHANGE_NOT_FOUND\"",
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 85
+      },
+      "start": {
+        "column": 21,
+        "line": 85
+      }
+    },
+    "sourceHash": "4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599"
+  },
+  {
+    "file": "src/work-session-state.tsx",
+    "replayId": "17",
+    "originalIds": [
+      "413"
+    ],
+    "status": "Killed",
+    "mutator": "StringLiteral",
+    "replacement": "\"\"",
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 85
+      },
+      "start": {
+        "column": 39,
+        "line": 85
+      }
+    },
+    "sourceHash": "4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599"
+  },
+  {
+    "file": "src/work-session-state.tsx",
+    "replayId": "16",
+    "originalIds": [
+      "412"
+    ],
+    "status": "RuntimeError",
+    "mutator": "OptionalChaining",
+    "replacement": "problem.code",
+    "location": {
+      "end": {
+        "column": 34,
+        "line": 85
+      },
+      "start": {
+        "column": 21,
+        "line": 85
+      }
+    },
+    "sourceHash": "4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599"
+  },
+  {
+    "file": "src/work-session-state-api.ts",
+    "replayId": "4",
+    "originalIds": [
+      "270"
+    ],
+    "status": "Killed",
+    "mutator": "EqualityOperator",
+    "replacement": "value.action === intent.action",
+    "location": {
+      "end": {
+        "column": 35,
+        "line": 196
+      },
+      "start": {
+        "column": 5,
+        "line": 196
+      }
+    },
+    "sourceHash": "38743D9B82869708BD53C98850DF8C71FAEFB7CD0BE5348519679D8E32AB2FAA"
+  },
+  {
+    "file": "src/work-session-state-api.ts",
+    "replayId": "2",
+    "originalIds": [
+      "268"
+    ],
+    "status": "Killed",
+    "mutator": "BooleanLiteral",
+    "replacement": "isChange(value)",
+    "location": {
+      "end": {
+        "column": 21,
+        "line": 195
+      },
+      "start": {
+        "column": 5,
+        "line": 195
+      }
+    },
+    "sourceHash": "38743D9B82869708BD53C98850DF8C71FAEFB7CD0BE5348519679D8E32AB2FAA"
+  },
+  {
+    "file": "src/work-session-state-api.ts",
+    "replayId": "0",
+    "originalIds": [
+      "266"
+    ],
+    "status": "Killed",
+    "mutator": "ConditionalExpression",
+    "replacement": "false",
+    "location": {
+      "end": {
+        "column": 35,
+        "line": 196
+      },
+      "start": {
+        "column": 5,
+        "line": 195
+      }
+    },
+    "sourceHash": "38743D9B82869708BD53C98850DF8C71FAEFB7CD0BE5348519679D8E32AB2FAA"
+  },
+  {
+    "file": "src/work-session-state-api.ts",
+    "replayId": "1",
+    "originalIds": [
+      "267"
+    ],
+    "status": "Killed",
+    "mutator": "LogicalOperator",
+    "replacement": "!isChange(value) && value.action !== intent.action",
+    "location": {
+      "end": {
+        "column": 35,
+        "line": 196
+      },
+      "start": {
+        "column": 5,
+        "line": 195
+      }
+    },
+    "sourceHash": "38743D9B82869708BD53C98850DF8C71FAEFB7CD0BE5348519679D8E32AB2FAA"
+  },
+  {
+    "file": "src/work-session-state-api.ts",
+    "replayId": "3",
+    "originalIds": [
+      "269"
+    ],
+    "status": "Killed",
+    "mutator": "ConditionalExpression",
+    "replacement": "false",
+    "location": {
+      "end": {
+        "column": 35,
+        "line": 196
+      },
+      "start": {
+        "column": 5,
+        "line": 196
+      }
+    },
+    "sourceHash": "38743D9B82869708BD53C98850DF8C71FAEFB7CD0BE5348519679D8E32AB2FAA"
+  }
+]

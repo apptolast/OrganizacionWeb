@@ -6,6 +6,7 @@ RUN pnpm install --frozen-lockfile
 COPY frontend/ ./
 RUN pnpm build
 FROM nginx:1.30.4-alpine3.24
+RUN chmod 1777 /run /var/cache/nginx
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 8080

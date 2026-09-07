@@ -67,3 +67,17 @@ El pendiente@s39 del primer freeze F queda cerrado por el cuarto E2E de C; no es
 
 **Pendiente de resultado coordinado:** PIT16, Stryker16, global E2E iniciado por root 6843, consolidación de init/globales y CI. Este índice no los certifica ni cambia feature_list. Las revisiones parciales y focos anteriores no sustituyen esos gates. No se ejecutaron suites ni se modificaron fuentes/tests para redactarlo.
 
+
+### Resultado posterior de integración y refuerzos
+
+Root confirma E2E115/115 EXIT0 a958e5 y CI34082838516 SUCCESS sobre910f405 (a09918), con init/build/E2E/publicador. PIT original516/520 y Stryker1104/1275 superan80; denominador estricto frontend1277 y sus dos RuntimeError se conservan en los dictámenes. No se deduce cobertura contractual de esos porcentajes.
+
+8ecf0f8 añade tres oráculos Reader para@s5/@s38/@s40 (error diferenciado y descripción accesible,401 retirado, consulta activa pendiente sin duplicado),32Reader verdes; y un oráculo publisher@s29 con workDate0001,192publisher verdes. Producción intacta. Sus ciclos inicialmenteGREEN y la corrección de sincronización del fixture están en tdd_close_work_frontend.md y tdd_close_publisher_year_one.md. Los replays dirigidos e init/build finales siguen pendientes de resultado; no alteran las campañas originales ni los41 escenarios.
+
+## Cierre final autorizado
+
+Root confirma todos los gates y autoriza status16=done, conservando los41 escenarios de aceptación y sin afirmar113 tests ejecutados. [Dictamen final APPROVED](judge_close_work_session_final.md): init17230 EXIT0 b68a48, backend1985/83 sin fallos/errores/omitidas (XML51651c), frontend1721/35 y36 Node verdes; build38374 EXIT0 3d8828. Logs finales y hashes verificados16cb18: init723EA9B3F025F587D91632D14616B786A31CD612839791DF32E619B0D52E15E4, buildAB790B52324C82D429C88E5BC8A7F2E60B4EDEF167C3E9BE394B9CF0DC2A6838.
+
+PIT original516/520=99,23 %, Stryker original1104Killed/169Survived/2NoCoverage/2RuntimeError=86,59 % de herramienta; los originales permanecen intactos. Replay de frontera publicador7/7Killed EXIT0 e01e1a y322 hashes iguales; replay frontend final15/15Killed EXIT0 002701, doce firmas objetivo más tres extras y91 hashes iguales. Sus100 % dirigidos no sustituyen los scores originales ni reclasifican residuos. Global115 E2E, smoke, UX515 medidas/35 axe y CI34082838516 SUCCESS acreditados en el dictamen. Los pendientes anteriores de este índice corresponden a cortes históricos y quedan resueltos con esta evidencia.
+
+Sólo se actualiza feature_list.json para cerrar16; aceptación y demás features se verificaron idénticas108bda. No cambios de producto/tests ni implementación17/18 en este cierre; current/history pertenecen a root.

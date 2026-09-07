@@ -1,0 +1,55 @@
+{
+  "total": 1277,
+  "counts": {
+    "NoCoverage": 2,
+    "Killed": 1104,
+    "Survived": 169,
+    "RuntimeError": 2
+  },
+  "files": [
+    {
+      "file": "src/work-session-reader.tsx",
+      "counts": {
+        "NoCoverage": 1,
+        "Killed": 220,
+        "Survived": 60,
+        "RuntimeError": 1
+      },
+      "total": 282
+    },
+    {
+      "file": "src/work-session-state.tsx",
+      "counts": {
+        "NoCoverage": 1,
+        "Killed": 217,
+        "Survived": 28,
+        "RuntimeError": 1
+      },
+      "total": 247
+    },
+    {
+      "file": "src/App.tsx",
+      "counts": {
+        "Killed": 56,
+        "Survived": 5
+      },
+      "total": 61
+    },
+    {
+      "file": "src/use-session.ts",
+      "counts": {
+        "Killed": 224,
+        "Survived": 16
+      },
+      "total": 240
+    },
+    {
+      "file": "src/work-session-state-api.ts",
+      "counts": {
+        "Killed": 387,
+        "Survived": 60
+      },
+      "total": 447
+    }
+  ]
+}

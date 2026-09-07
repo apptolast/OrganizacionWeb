@@ -1,0 +1,272 @@
+[
+  {
+    "id": "7",
+    "originalId": "555",
+    "target": false,
+    "status": "Killed",
+    "mutator": "ConditionalExpression",
+    "replacement": "false",
+    "location": {
+      "end": {
+        "column": 62,
+        "line": 255
+      },
+      "start": {
+        "column": 29,
+        "line": 255
+      }
+    }
+  },
+  {
+    "id": "0",
+    "originalId": "543",
+    "target": true,
+    "status": "Killed",
+    "mutator": "StringLiteral",
+    "replacement": "``",
+    "location": {
+      "end": {
+        "column": 39,
+        "line": 232
+      },
+      "start": {
+        "column": 20,
+        "line": 232
+      }
+    }
+  },
+  {
+    "id": "1",
+    "originalId": "546",
+    "target": true,
+    "status": "Killed",
+    "mutator": "ConditionalExpression",
+    "replacement": "true",
+    "location": {
+      "end": {
+        "column": 66,
+        "line": 242
+      },
+      "start": {
+        "column": 29,
+        "line": 242
+      }
+    }
+  },
+  {
+    "id": "3",
+    "originalId": "548",
+    "target": true,
+    "status": "Killed",
+    "mutator": "LogicalOperator",
+    "replacement": "noteError || !validNote(progressNote)",
+    "location": {
+      "end": {
+        "column": 66,
+        "line": 242
+      },
+      "start": {
+        "column": 29,
+        "line": 242
+      }
+    }
+  },
+  {
+    "id": "5",
+    "originalId": "550",
+    "target": true,
+    "status": "Killed",
+    "mutator": "StringLiteral",
+    "replacement": "``",
+    "location": {
+      "end": {
+        "column": 64,
+        "line": 243
+      },
+      "start": {
+        "column": 45,
+        "line": 243
+      }
+    }
+  },
+  {
+    "id": "4",
+    "originalId": "549",
+    "target": true,
+    "status": "Killed",
+    "mutator": "BooleanLiteral",
+    "replacement": "validNote(progressNote)",
+    "location": {
+      "end": {
+        "column": 66,
+        "line": 242
+      },
+      "start": {
+        "column": 42,
+        "line": 242
+      }
+    }
+  },
+  {
+    "id": "2",
+    "originalId": "547",
+    "target": true,
+    "status": "Killed",
+    "mutator": "ConditionalExpression",
+    "replacement": "false",
+    "location": {
+      "end": {
+        "column": 66,
+        "line": 242
+      },
+      "start": {
+        "column": 29,
+        "line": 242
+      }
+    }
+  },
+  {
+    "id": "6",
+    "originalId": "554",
+    "target": true,
+    "status": "Killed",
+    "mutator": "ConditionalExpression",
+    "replacement": "true",
+    "location": {
+      "end": {
+        "column": 62,
+        "line": 255
+      },
+      "start": {
+        "column": 29,
+        "line": 255
+      }
+    }
+  },
+  {
+    "id": "9",
+    "originalId": "557",
+    "target": false,
+    "status": "Killed",
+    "mutator": "BooleanLiteral",
+    "replacement": "validNote(nextStep)",
+    "location": {
+      "end": {
+        "column": 62,
+        "line": 255
+      },
+      "start": {
+        "column": 42,
+        "line": 255
+      }
+    }
+  },
+  {
+    "id": "10",
+    "originalId": "558",
+    "target": true,
+    "status": "Killed",
+    "mutator": "StringLiteral",
+    "replacement": "``",
+    "location": {
+      "end": {
+        "column": 64,
+        "line": 256
+      },
+      "start": {
+        "column": 45,
+        "line": 256
+      }
+    }
+  },
+  {
+    "id": "8",
+    "originalId": "556",
+    "target": true,
+    "status": "Killed",
+    "mutator": "LogicalOperator",
+    "replacement": "noteError || !validNote(nextStep)",
+    "location": {
+      "end": {
+        "column": 62,
+        "line": 255
+      },
+      "start": {
+        "column": 29,
+        "line": 255
+      }
+    }
+  },
+  {
+    "id": "11",
+    "originalId": "611",
+    "target": true,
+    "status": "Killed",
+    "mutator": "ArrowFunction",
+    "replacement": "() => undefined",
+    "location": {
+      "end": {
+        "column": 36,
+        "line": 331
+      },
+      "start": {
+        "column": 12,
+        "line": 331
+      }
+    }
+  },
+  {
+    "id": "14",
+    "originalId": "630",
+    "target": true,
+    "status": "Killed",
+    "mutator": "BooleanLiteral",
+    "replacement": "false",
+    "location": {
+      "end": {
+        "column": 26,
+        "line": 358
+      },
+      "start": {
+        "column": 22,
+        "line": 358
+      }
+    }
+  },
+  {
+    "id": "12",
+    "originalId": "627",
+    "target": false,
+    "status": "Killed",
+    "mutator": "ConditionalExpression",
+    "replacement": "true",
+    "location": {
+      "end": {
+        "column": 22,
+        "line": 357
+      },
+      "start": {
+        "column": 15,
+        "line": 357
+      }
+    }
+  },
+  {
+    "id": "13",
+    "originalId": "628",
+    "target": true,
+    "status": "Killed",
+    "mutator": "ConditionalExpression",
+    "replacement": "false",
+    "location": {
+      "end": {
+        "column": 22,
+        "line": 357
+      },
+      "start": {
+        "column": 15,
+        "line": 357
+      }
+    }
+  }
+]

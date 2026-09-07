@@ -1,0 +1,79 @@
+[
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "173",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "indexes": "725",
+    "blocks": "115",
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:closeWork_s29_publishesFirstValidCalendarYear()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "232",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "indexes": "1187",
+    "blocks": "232",
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:workSession_s26_acceptsOneMinuteAtYearOneWithMicroseconds()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "233",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "indexes": "1193",
+    "blocks": "234",
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[method:workSession_s26_accepts1440MinutesEndingAtLastMicrosecondOfYear9999()]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "258",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "indexes": "1377",
+    "blocks": "281",
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:s26_acceptsBigintRevisionBoundaries(long)]/[test-template-invocation:#1]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "279",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "indexes": "1581",
+    "blocks": "328",
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:block_s36_s37_publishesHistoricalZoneWithoutCatalogResolution(int)]/[test-template-invocation:#1]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "280",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "indexes": "1587",
+    "blocks": "330",
+    "killingTest": "com.apptolast.organization.application.PublishOutboxTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.PublishOutboxTest]/[test-template:block_s36_s37_publishesHistoricalZoneWithoutCatalogResolution(int)]/[test-template-invocation:#3]"
+  },
+  {
+    "status": "KILLED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "321",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "indexes": "1868",
+    "blocks": "396",
+    "killingTest": "com.apptolast.organization.domain.TaskEventTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.TaskEventTest]/[method:s17_acceptsTaskEventWithItsOwnTitleLimit()]"
+  }
+]

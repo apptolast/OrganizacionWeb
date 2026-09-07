@@ -1,0 +1,34 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "ignorePatterns": [".stryker-tmp-availability-replay"],
+  "mutate": [
+    "src/work-session-reader.tsx:232:20-232:39",
+    "src/work-session-reader.tsx:242:29-242:66",
+    "src/work-session-reader.tsx:243:45-243:64",
+    "src/work-session-reader.tsx:255:29-255:62",
+    "src/work-session-reader.tsx:256:45-256:64",
+    "src/work-session-reader.tsx:331:12-331:36",
+    "src/work-session-reader.tsx:357:15-357:22",
+    "src/work-session-reader.tsx:358:22-358:26"
+  ],
+  "reporters": ["clear-text", "json", "html"],
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 80
+  },
+  "concurrency": 8,
+  "coverageAnalysis": "perTest",
+  "vitest": {
+    "configFile": "vite.config.ts"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation-close-work-session-replay/mutation.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation-close-work-session-replay/mutation.html"
+  },
+  "tempDirName": ".stryker-tmp-close-work-session-replay"
+}

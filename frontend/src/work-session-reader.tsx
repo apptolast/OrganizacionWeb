@@ -1,4 +1,13 @@
-import { useEffect, useState, useId, useRef, useLayoutEffect } from "react";
+import {
+  useEffect,
+  useState,
+  useId,
+  useRef,
+  useLayoutEffect,
+  useCallback,
+} from "react";
+import { WorkSessionEndPanel } from "./work-session-end";
+import { useWorkSessionDecision } from "./use-work-session-decision";
 import {
   readWorkSessionState,
   readWorkSessionClosure,
@@ -21,6 +30,11 @@ export function WorkSessionReader(props: ReaderProps) {
   );
 }
 function Reader({ id, projectId, taskId }: ReaderProps) {
+  const decision = useWorkSessionDecision();
+  const { generation, track } = decision;
+  const [snapshotGeneration, setSnapshotGeneration] = useState(generation);
+  const awaitingSnapshot = snapshotGeneration !== generation;
+  const blocked = Boolean(decision.owner && decision.owner !== "CLOSE");
   const [closure, setClosure] =
     useState<Awaited<ReturnType<typeof readWorkSessionClosure>>>();
   const [failure, setFailure] = useState<string>();
@@ -35,12 +49,15 @@ function Reader({ id, projectId, taskId }: ReaderProps) {
     }
   });
   const [snapshot, setSnapshot] = useState<WorkSessionSnapshot>();
+  const [session, setSession] =
+    useState<WorkSessionSnapshot["state"]["session"]>();
   const [progressNote, setProgressNote] = useState("");
   const [nextStep, setNextStep] = useState("");
   const fieldsId = useId();
   const [busy, setBusy] = useState(false);
   const [checking, setChecking] = useState(false);
   const command = useRef<AbortController | undefined>(undefined);
+  const lookup = useRef<AbortController | undefined>(undefined);
   useEffect(() => () => command.current?.abort(), []);
   const [noteError, setNoteError] = useState(false);
   const [uncertain, setUncertain] = useState(false);
@@ -48,7 +65,23 @@ function Reader({ id, projectId, taskId }: ReaderProps) {
   const [conflict, setConflict] = useState<string>();
   const [confirmedHere, setConfirmedHere] = useState(false);
   const retained = useRef<WorkSessionIntent | undefined>(undefined);
+  const inaccessible = useCallback(() => {
+    lookup.current?.abort();
+    command.current?.abort();
+    command.current = undefined;
+    setBusy(false);
+    setLoading(false);
+    setSnapshot(undefined);
+    setSession(undefined);
+    setClosure(undefined);
+    setProgressNote("");
+    setNextStep("");
+    retained.current = undefined;
+    setUncertain(false);
+    setFailure("Esta sesión no está disponible en esta tarea.");
+  }, []);
   async function close(check = false) {
+    if (!retained.current && awaitingSnapshot) return;
     if (
       (!snapshot && !retained.current) ||
       command.current ||
@@ -60,6 +93,7 @@ function Reader({ id, projectId, taskId }: ReaderProps) {
       return;
     }
     setNoteError(false);
+    if (!decision.acquire("CLOSE")) return;
     const controller = new AbortController();
     command.current = controller;
     setBusy(true);
@@ -80,6 +114,7 @@ function Reader({ id, projectId, taskId }: ReaderProps) {
       )(retained.current, controller.signal);
       if (controller.signal.aborted) return;
       if (result.action === "CLOSE") {
+        decision.settle();
         setClosure(result);
         setConfirmedHere(true);
         setSnapshot(undefined);
@@ -92,6 +127,7 @@ function Reader({ id, projectId, taskId }: ReaderProps) {
       if (controller.signal.aborted) return;
       const rejection = problem && rejectionMessage(problem.code);
       if (rejection) {
+        decision.release();
         retained.current = undefined;
         setSnapshot(undefined);
         setUncertain(false);
@@ -111,7 +147,10 @@ function Reader({ id, projectId, taskId }: ReaderProps) {
     }
   }
   useEffect(() => {
+    if (closure) return;
     const controller = new AbortController();
+    lookup.current = controller;
+    const untrack = track(controller);
     void readWorkSessionState(id, controller.signal)
       .then(async (snapshot) => {
         if (controller.signal.aborted) return;
@@ -119,33 +158,56 @@ function Reader({ id, projectId, taskId }: ReaderProps) {
           !sameId(snapshot.state.session.projectId, projectId) ||
           !sameId(snapshot.state.session.taskId, taskId)
         ) {
-          setFailure("Esta sesión no está disponible en esta tarea.");
+          inaccessible();
           return;
         }
         if (snapshot.state.status !== "closed") {
+          setSession(snapshot.state.session);
+          setSnapshotGeneration(generation);
           setSnapshot(snapshot);
           return;
         }
+        setSnapshot(snapshot);
+        setSession(snapshot.state.session);
         const result = await readWorkSessionClosure(id, controller.signal);
         if (controller.signal.aborted) return;
         if (
           !sameId(result.after.session.projectId, projectId) ||
           !sameId(result.after.session.taskId, taskId)
         ) {
-          setFailure("Esta sesión no está disponible en esta tarea.");
+          inaccessible();
           return;
         }
         setClosure(result);
       })
-      .catch(() => {
-        if (!controller.signal.aborted)
-          setFailure("No se ha podido consultar la sesión de trabajo.");
+      .catch(async (error) => {
+        if (controller.signal.aborted) return;
+        const problem = await readWorkSessionStateError(error);
+        if (controller.signal.aborted) return;
+        if (problem?.code === "WORK_SESSION_NOT_FOUND") {
+          inaccessible();
+          return;
+        }
+        setFailure("No se ha podido consultar la sesión de trabajo.");
       })
       .finally(() => {
+        untrack();
         if (!controller.signal.aborted) setLoading(false);
       });
-    return () => controller.abort();
-  }, [id, projectId, taskId, refresh]);
+    return () => {
+      untrack();
+      controller.abort();
+    };
+  }, [
+    id,
+    projectId,
+    taskId,
+    refresh,
+    generation,
+    closure,
+    track,
+    inaccessible,
+  ]);
   return (
     <main
       id="proyectos"
@@ -161,7 +223,9 @@ function Reader({ id, projectId, taskId }: ReaderProps) {
       <h1 ref={heading} tabIndex={-1}>
         Sesión de trabajo
       </h1>
-      {loading && <p role="status">Consultando sesión de trabajo</p>}
+      {!closure && (loading || (awaitingSnapshot && !failure)) && (
+        <p role="status">Consultando sesión de trabajo</p>
+      )}
       {busy && (
         <p role="status">
           {checking ? "Comprobando cierre" : "Cerrando sesión de trabajo"}
@@ -201,7 +265,16 @@ function Reader({ id, projectId, taskId }: ReaderProps) {
           )}
         </>
       )}
-      {snapshot && !uncertain && (
+      {session && (
+        <WorkSessionEndPanel
+          session={session}
+          headingLevel={2}
+          onAccessFailure={inaccessible}
+          decision={decision}
+          knownClosed={Boolean(closure) || snapshot?.state.status === "closed"}
+        />
+      )}
+      {snapshot && snapshot.state.status !== "closed" && !uncertain && (
         <form
           className="task-form"
           onSubmit={(event) => {
@@ -259,7 +332,10 @@ function Reader({ id, projectId, taskId }: ReaderProps) {
               onChange={(event) => setNextStep(event.target.value)}
             />
           </div>
-          <button type="submit" aria-disabled={busy}>
+          <button
+            type="submit"
+            aria-disabled={busy || blocked || awaitingSnapshot}
+          >
             Confirmar cierre
           </button>
         </form>

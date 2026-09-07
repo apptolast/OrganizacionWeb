@@ -1,0 +1,18 @@
+[
+  {
+    "path": "frontend/src/work-session-reader.tsx",
+    "sha256": "FD83DD0B37EC1B3CDDED8857B4D8E512EDDD4A53C27A4817BEE4A4B0E8F54153"
+  },
+  {
+    "path": "frontend/src/work-session-reader.test.tsx",
+    "sha256": "4893F2F542CE15462659D9A33AFCB2F6C1B0A1FF80EE6DFA1B13F48AF805DE14"
+  },
+  {
+    "path": "frontend/src/work-session-end.tsx",
+    "sha256": "667FA2EEBA44225BD2CB19A9E7DA02BFE664AB158F7212EF106CE1872CEDFBFA"
+  },
+  {
+    "path": "frontend/src/work-session-end.test.tsx",
+    "sha256": "DEF535E69DA0DBD1C8F4513468B4C404A2BE687475903469EB3C1F9690DE9D1B"
+  }
+]

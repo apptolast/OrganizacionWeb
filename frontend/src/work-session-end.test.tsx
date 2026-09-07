@@ -35,6 +35,48 @@ function response(value = snapshot) {
   });
 }
 
+it("@s42 withdraws an end snapshot with the known session id but a different task context", async () => {
+  const access = vi.fn();
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValueOnce(response())
+      .mockResolvedValueOnce(
+        response({
+          ...snapshot,
+          state: {
+            ...state,
+            session: {
+              ...session,
+              taskId: "62345678-1234-1234-1234-123456789abc",
+            },
+          },
+        }),
+      ),
+  );
+  render(<WorkSessionEndPanel session={session} onAccessFailure={access} />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  fireEvent.change(screen.getByLabelText("Minutos adicionales"), {
+    target: { value: "7" },
+  });
+  fireEvent.click(
+    screen.getByRole("button", { name: "Actualizar fin acordado" }),
+  );
+  await waitFor(() => expect(access).toHaveBeenCalledWith(404));
+  expect(
+    screen.queryByLabelText("Minutos adicionales"),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Ampliar tiempo" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("Ha llegado el fin acordado"),
+  ).not.toBeInTheDocument();
+});
+
 it("@s34 a later clock rollback does not withdraw an already confirmed notice for the same end", async () => {
   const fetcher = vi
     .fn()

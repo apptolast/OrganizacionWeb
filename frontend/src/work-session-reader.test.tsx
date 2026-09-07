@@ -55,6 +55,78 @@ const props = {
   projectId: session.projectId,
   taskId: session.taskId,
 };
+
+// Legacy closure oracles observe their S/F/C/K/A requests; E has its own routed fixture.
+// Feature17 composition cases below install the complete fetch dispatcher directly.
+function stubClosureRequests(
+  request: (url: string, init?: RequestInit) => unknown,
+) {
+  vi.stubGlobal("fetch", (url: string, init?: RequestInit) => {
+    const match = /^\/api\/v1\/work-sessions\/([^/]+)\/end-time$/.exec(url);
+    if (match) {
+      const current = { ...before, session: { ...session, id: match[1] } };
+      return Promise.resolve(
+        Response.json(
+          {
+            state: current,
+            serverNow: session.startedAt,
+            effectiveEndAt: session.plannedEndAt,
+          },
+          {
+            headers: { "Work-Session-Revision": `work-session-${match[1]}-1` },
+          },
+        ),
+      );
+    }
+    return request(url, init);
+  });
+}
+
+it("@s28 feature17 offers the end notice and a separate extension form on the known session route", async () => {
+  const headers = { "Work-Session-Revision": `work-session-${session.id}-1` };
+  const fetcher = vi.fn((url: string) => {
+    if (url.endsWith("/state"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state: before,
+            serverNow: session.plannedEndAt,
+            netMicroseconds: "1500000000",
+          },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/end-time"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state: before,
+            serverNow: session.plannedEndAt,
+            effectiveEndAt: session.plannedEndAt,
+          },
+          { headers },
+        ),
+      );
+    throw new Error(`Unexpected request ${url}`);
+  });
+  vi.stubGlobal("fetch", fetcher);
+  render(<WorkSessionReader {...props} />);
+  expect(await screen.findByText("Ha llegado el fin acordado")).toBeVisible();
+  expect(
+    screen.getByRole("heading", { name: "Fin de la sesión", level: 2 }),
+  ).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Ampliar tiempo" }));
+  const amount = screen.getByLabelText("Minutos adicionales");
+  expect(amount).toHaveValue(null);
+  expect(amount.closest("form")).not.toBe(
+    screen.getByRole("button", { name: "Confirmar cierre" }).closest("form"),
+  );
+  expect(fetcher.mock.calls.map(([url]) => url)).toEqual([
+    `/api/v1/work-sessions/${session.id}/state`,
+    `/api/v1/work-sessions/${session.id}/end-time`,
+  ]);
+});
+
 function closedResponse() {
   return Response.json(
     {
@@ -65,6 +137,1089 @@ function closedResponse() {
     { headers: { "Work-Session-Revision": `work-session-${session.id}-2` } },
   );
 }
+
+it("@s36 feature17 releases a definitively rejected closure so the user can choose extension after refresh", async () => {
+  const headers = { "Work-Session-Revision": `work-session-${session.id}-1` };
+  let extensions = 0;
+  vi.stubGlobal("fetch", (url: string) => {
+    if (url.endsWith("/state"))
+      return Promise.resolve(
+        Response.json(
+          { state: before, serverNow: session.startedAt, netMicroseconds: "0" },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/end-time"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state: before,
+            serverNow: session.startedAt,
+            effectiveEndAt: session.plannedEndAt,
+          },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/close"))
+      return Promise.resolve(
+        Response.json(
+          {
+            type: "urn:organization:problem:precondition_failed",
+            title: "Conflict",
+            status: 412,
+            code: "PRECONDITION_FAILED",
+          },
+          { status: 412 },
+        ),
+      );
+    if (url.endsWith("/extend")) {
+      extensions++;
+      return new Promise<Response>(() => {});
+    }
+    throw new Error(`Unexpected request ${url}`);
+  });
+  render(<WorkSessionReader {...props} />);
+  fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
+    target: { value: "Avance conservado" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Consultar estado actual" }),
+  );
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  fireEvent.change(screen.getByLabelText("Minutos adicionales"), {
+    target: { value: "5" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar ampliación" }));
+  expect(extensions).toBe(1);
+  expect(screen.getByLabelText("Avance anotado (opcional)")).toHaveValue(
+    "Avance conservado",
+  );
+});
+
+it("@s36 feature17 releases a definitively rejected extension so the user can choose closure", async () => {
+  const headers = { "Work-Session-Revision": `work-session-${session.id}-1` };
+  let closes = 0;
+  vi.stubGlobal("fetch", (url: string) => {
+    if (url.endsWith("/state"))
+      return Promise.resolve(
+        Response.json(
+          { state: before, serverNow: session.startedAt, netMicroseconds: "0" },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/end-time"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state: before,
+            serverNow: session.startedAt,
+            effectiveEndAt: session.plannedEndAt,
+          },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/extend"))
+      return Promise.resolve(
+        Response.json(
+          {
+            type: "urn:organization:problem:precondition_failed",
+            title: "Conflict",
+            status: 412,
+            code: "PRECONDITION_FAILED",
+          },
+          { status: 412 },
+        ),
+      );
+    if (url.endsWith("/close")) {
+      closes++;
+      return new Promise<Response>(() => {});
+    }
+    throw new Error(`Unexpected request ${url}`);
+  });
+  render(<WorkSessionReader {...props} />);
+  fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
+    target: { value: "Avance conservado" },
+  });
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  fireEvent.change(screen.getByLabelText("Minutos adicionales"), {
+    target: { value: "5" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar ampliación" }));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Consultar fin actual" }),
+  );
+  await waitFor(() =>
+    expect(
+      screen.queryByRole("button", { name: "Consultar fin actual" }),
+    ).not.toBeInTheDocument(),
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
+  expect(closes).toBe(1);
+  expect(screen.getByLabelText("Avance anotado (opcional)")).toHaveValue(
+    "Avance conservado",
+  );
+});
+
+it("@s41 feature17 invalidates the reader state before a sibling extension can receive an old HTTP401", async () => {
+  const extended = { ...before, revision: "2" };
+  const extension = {
+    id: "42345678-1234-1234-1234-123456789abc",
+    action: "EXTEND",
+    sessionId: session.id,
+    occurredAt: session.startedAt,
+    before,
+    after: extended,
+    extension: {
+      additionalMinutes: 5,
+      previousEndAt: session.plannedEndAt,
+      effectiveEndAt: "2026-09-07T10:30:00.123456Z",
+    },
+  };
+  let stateReads = 0;
+  let posts = 0;
+  let finishState!: (value: Response) => void;
+  const access = vi.fn();
+  observeAccess(access);
+  vi.stubGlobal("fetch", (url: string) => {
+    const state = posts ? extended : before;
+    const headers = {
+      "Work-Session-Revision": `work-session-${session.id}-${state.revision}`,
+    };
+    if (url.endsWith("/state")) {
+      if (++stateReads === 2)
+        return new Promise<Response>((resolve) => {
+          finishState = resolve;
+        });
+      return Promise.resolve(
+        Response.json(
+          { state, serverNow: session.startedAt, netMicroseconds: "0" },
+          { headers },
+        ),
+      );
+    }
+    if (url.endsWith("/end-time"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state,
+            serverNow: session.startedAt,
+            effectiveEndAt: posts
+              ? extension.extension.effectiveEndAt
+              : session.plannedEndAt,
+          },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/extend"))
+      return ++posts === 1
+        ? Promise.resolve(
+            Response.json(extension, {
+              status: 201,
+              headers: {
+                Location: `/api/v1/work-session-changes/${extension.id}`,
+              },
+            }),
+          )
+        : new Promise<Response>(() => {});
+    throw new Error(`Unexpected request ${url}`);
+  });
+  render(<WorkSessionReader {...props} />);
+  fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
+    target: { value: "Conservar borrador" },
+  });
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  fireEvent.change(screen.getByLabelText("Minutos adicionales"), {
+    target: { value: "5" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar ampliación" }));
+  expect(await screen.findByText("Ampliación confirmada")).toBeVisible();
+  await waitFor(() => expect(stateReads).toBe(2));
+  fireEvent.click(screen.getByRole("button", { name: "Ampliar tiempo" }));
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar ampliación" }));
+  await waitFor(() => expect(posts).toBe(2));
+  await act(async () => {
+    finishState(new Response(null, { status: 401 }));
+  });
+  expect(access).not.toHaveBeenCalled();
+  expect(screen.getByLabelText("Avance anotado (opcional)")).toHaveValue(
+    "Conservar borrador",
+  );
+  expect(screen.getByText("Ampliación confirmada")).toBeVisible();
+});
+
+it("@s39 feature17 retires end controls immediately after its close receipt while the end refresh is pending", async () => {
+  let endReads = 0;
+  const headers = { "Work-Session-Revision": `work-session-${session.id}-1` };
+  const fetcher = vi.fn((url: string) => {
+    if (url.endsWith("/state"))
+      return Promise.resolve(
+        Response.json(
+          { state: before, serverNow: session.startedAt, netMicroseconds: "0" },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/end-time"))
+      return ++endReads === 1
+        ? Promise.resolve(
+            Response.json(
+              {
+                state: before,
+                serverNow: session.startedAt,
+                effectiveEndAt: session.plannedEndAt,
+              },
+              { headers },
+            ),
+          )
+        : new Promise<Response>(() => {});
+    if (url.endsWith("/close"))
+      return Promise.resolve(
+        Response.json(receipt, {
+          status: 201,
+          headers: { Location: `/api/v1/work-session-changes/${receipt.id}` },
+        }),
+      );
+    if (url.endsWith("/active"))
+      return Promise.resolve(
+        Response.json({
+          session: { ...session, id: "62345678-1234-1234-1234-123456789abc" },
+        }),
+      );
+    throw new Error(`Unexpected request ${url}`);
+  });
+  vi.stubGlobal("fetch", fetcher);
+  render(<WorkSessionReader {...props} />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  fireEvent.change(screen.getByLabelText("Minutos adicionales"), {
+    target: { value: "5" },
+  });
+  fireEvent.change(screen.getByLabelText("Avance anotado (opcional)"), {
+    target: { value: closure.progressNote },
+  });
+  fireEvent.change(screen.getByLabelText("Siguiente paso (opcional)"), {
+    target: { value: closure.nextStep },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
+  expect(await screen.findByText("Sesión cerrada")).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Ampliar tiempo" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByLabelText("Minutos adicionales"),
+  ).not.toBeInTheDocument();
+  expect(await screen.findByText("Hay otra sesión abierta.")).toBeVisible();
+  expect(screen.getByText(closure.progressNote)).toBeVisible();
+  expect(endReads).toBe(2);
+  expect(
+    screen.queryByText("Consultando sesión de trabajo"),
+  ).not.toBeInTheDocument();
+  expect(screen.getByText("Comprobando el fin actual")).toHaveAttribute(
+    "role",
+    "status",
+  );
+});
+
+it("@s42 feature17 cannot restore a pending closure after the current end lookup withdraws access", async () => {
+  let finishClose!: (value: Response) => void;
+  let reads = 0;
+  const headers = { "Work-Session-Revision": `work-session-${session.id}-1` };
+  vi.stubGlobal("fetch", (url: string) => {
+    if (url.endsWith("/state"))
+      return Promise.resolve(
+        Response.json(
+          { state: before, serverNow: session.startedAt, netMicroseconds: "0" },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/end-time"))
+      return Promise.resolve(
+        ++reads === 1
+          ? Response.json(
+              {
+                state: before,
+                serverNow: session.startedAt,
+                effectiveEndAt: session.plannedEndAt,
+              },
+              { headers },
+            )
+          : Response.json(
+              {
+                type: "urn:organization:problem:work_session_not_found",
+                title: "Missing",
+                status: 404,
+                code: "WORK_SESSION_NOT_FOUND",
+              },
+              { status: 404 },
+            ),
+      );
+    if (url.endsWith("/close"))
+      return new Promise<Response>((resolve) => {
+        finishClose = resolve;
+      });
+    throw new Error(`Unexpected request ${url}`);
+  });
+  render(<WorkSessionReader {...props} />);
+  fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
+    target: { value: closure.progressNote },
+  });
+  fireEvent.change(screen.getByLabelText("Siguiente paso (opcional)"), {
+    target: { value: closure.nextStep },
+  });
+  await screen.findByRole("button", { name: "Ampliar tiempo" });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
+  fireEvent.click(
+    screen.getByRole("button", { name: "Actualizar fin acordado" }),
+  );
+  expect(
+    await screen.findByText("Esta sesión no está disponible en esta tarea."),
+  ).toBeVisible();
+  await act(async () => {
+    finishClose(
+      Response.json(receipt, {
+        status: 201,
+        headers: { Location: `/api/v1/work-session-changes/${receipt.id}` },
+      }),
+    );
+  });
+  expect(screen.queryByText("Sesión cerrada")).not.toBeInTheDocument();
+  expect(screen.queryByText(closure.progressNote)).not.toBeInTheDocument();
+});
+
+it("@s42 feature17 cannot restore a pending state after the current end lookup withdraws access", async () => {
+  const extended = { ...before, revision: "2" };
+  const extension = {
+    id: "42345678-1234-1234-1234-123456789abc",
+    action: "EXTEND",
+    sessionId: session.id,
+    occurredAt: session.startedAt,
+    before,
+    after: extended,
+    extension: {
+      additionalMinutes: 5,
+      previousEndAt: session.plannedEndAt,
+      effectiveEndAt: "2026-09-07T10:30:00.123456Z",
+    },
+  };
+  let changed = false;
+  let endReads = 0;
+  let finishState!: (value: Response) => void;
+  const headers = { "Work-Session-Revision": `work-session-${session.id}-1` };
+  vi.stubGlobal("fetch", (url: string) => {
+    if (url.endsWith("/state"))
+      return changed
+        ? new Promise<Response>((resolve) => {
+            finishState = resolve;
+          })
+        : Promise.resolve(
+            Response.json(
+              {
+                state: before,
+                serverNow: session.startedAt,
+                netMicroseconds: "0",
+              },
+              { headers },
+            ),
+          );
+    if (url.endsWith("/end-time")) {
+      endReads++;
+      return Promise.resolve(
+        changed
+          ? Response.json(
+              {
+                type: "urn:organization:problem:work_session_not_found",
+                title: "Missing",
+                status: 404,
+                code: "WORK_SESSION_NOT_FOUND",
+              },
+              { status: 404 },
+            )
+          : Response.json(
+              {
+                state: before,
+                serverNow: session.startedAt,
+                effectiveEndAt: session.plannedEndAt,
+              },
+              { headers },
+            ),
+      );
+    }
+    if (url.endsWith("/extend")) {
+      changed = true;
+      return Promise.resolve(
+        Response.json(extension, {
+          status: 201,
+          headers: { Location: `/api/v1/work-session-changes/${extension.id}` },
+        }),
+      );
+    }
+    throw new Error(`Unexpected request ${url}`);
+  });
+  render(<WorkSessionReader {...props} />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  fireEvent.change(screen.getByLabelText("Minutos adicionales"), {
+    target: { value: "5" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar ampliación" }));
+  expect(
+    await screen.findByText("Esta sesión no está disponible en esta tarea."),
+  ).toBeVisible();
+  expect(finishState).toBeTypeOf("function");
+  await act(async () => {
+    finishState(
+      Response.json(
+        { state: extended, serverNow: session.startedAt, netMicroseconds: "0" },
+        {
+          headers: { "Work-Session-Revision": `work-session-${session.id}-2` },
+        },
+      ),
+    );
+  });
+  expect(
+    screen.queryByLabelText("Avance anotado (opcional)"),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Ampliar tiempo" }),
+  ).not.toBeInTheDocument();
+  expect(endReads).toBe(2);
+});
+
+it("@s35 feature17 preserves its extension receipt when a later closure is definitively rejected", async () => {
+  const extended = { ...before, revision: "2" };
+  const extension = {
+    id: "42345678-1234-1234-1234-123456789abc",
+    action: "EXTEND",
+    sessionId: session.id,
+    occurredAt: session.startedAt,
+    before,
+    after: extended,
+    extension: {
+      additionalMinutes: 5,
+      previousEndAt: session.plannedEndAt,
+      effectiveEndAt: "2026-09-07T10:30:00.123456Z",
+    },
+  };
+  let changed = false;
+  vi.stubGlobal("fetch", (url: string) => {
+    const state = changed ? extended : before;
+    const headers = {
+      "Work-Session-Revision": `work-session-${session.id}-${state.revision}`,
+    };
+    if (url.endsWith("/state"))
+      return Promise.resolve(
+        Response.json(
+          { state, serverNow: session.startedAt, netMicroseconds: "0" },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/end-time"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state,
+            serverNow: session.startedAt,
+            effectiveEndAt: changed
+              ? extension.extension.effectiveEndAt
+              : session.plannedEndAt,
+          },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/extend")) {
+      changed = true;
+      return Promise.resolve(
+        Response.json(extension, {
+          status: 201,
+          headers: { Location: `/api/v1/work-session-changes/${extension.id}` },
+        }),
+      );
+    }
+    if (url.endsWith("/close"))
+      return Promise.resolve(
+        Response.json(
+          {
+            type: "urn:organization:problem:precondition_failed",
+            title: "Conflict",
+            status: 412,
+            code: "PRECONDITION_FAILED",
+          },
+          { status: 412 },
+        ),
+      );
+    throw new Error(`Unexpected request ${url}`);
+  });
+  render(<WorkSessionReader {...props} />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  fireEvent.change(screen.getByLabelText("Minutos adicionales"), {
+    target: { value: "5" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar ampliación" }));
+  expect(
+    await screen.findByRole("article", { name: "Ampliación guardada" }),
+  ).toBeVisible();
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Confirmar cierre" }),
+    ).toHaveAttribute("aria-disabled", "false"),
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
+  expect(
+    await screen.findByRole("button", { name: "Consultar estado actual" }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("article", { name: "Ampliación guardada" }),
+  ).toBeVisible();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Consultar estado actual" }),
+  );
+  expect(
+    await screen.findByRole("button", { name: "Confirmar cierre" }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("article", { name: "Ampliación guardada" }),
+  ).toBeVisible();
+});
+
+it("@s42 feature17 withdraws the reader draft and receipt when its fresh state belongs to another task", async () => {
+  const extended = { ...before, revision: "2" };
+  const extension = {
+    id: "42345678-1234-1234-1234-123456789abc",
+    action: "EXTEND",
+    sessionId: session.id,
+    occurredAt: session.startedAt,
+    before,
+    after: extended,
+    extension: {
+      additionalMinutes: 5,
+      previousEndAt: session.plannedEndAt,
+      effectiveEndAt: "2026-09-07T10:30:00.123456Z",
+    },
+  };
+  let changed = false;
+  const headers = { "Work-Session-Revision": `work-session-${session.id}-1` };
+  vi.stubGlobal("fetch", (url: string) => {
+    if (url.endsWith("/state"))
+      return Promise.resolve(
+        changed
+          ? Response.json(
+              {
+                state: {
+                  ...before,
+                  session: {
+                    ...session,
+                    taskId: "62345678-1234-1234-1234-123456789abc",
+                  },
+                },
+                serverNow: session.startedAt,
+                netMicroseconds: "0",
+              },
+              { headers },
+            )
+          : Response.json(
+              {
+                state: before,
+                serverNow: session.startedAt,
+                netMicroseconds: "0",
+              },
+              { headers },
+            ),
+      );
+    if (url.endsWith("/end-time"))
+      return changed
+        ? new Promise<Response>(() => {})
+        : Promise.resolve(
+            Response.json(
+              {
+                state: before,
+                serverNow: session.startedAt,
+                effectiveEndAt: session.plannedEndAt,
+              },
+              { headers },
+            ),
+          );
+    if (url.endsWith("/extend")) {
+      changed = true;
+      return Promise.resolve(
+        Response.json(extension, {
+          status: 201,
+          headers: { Location: `/api/v1/work-session-changes/${extension.id}` },
+        }),
+      );
+    }
+    throw new Error(`Unexpected request ${url}`);
+  });
+  render(<WorkSessionReader {...props} />);
+  fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
+    target: { value: "Nota privada" },
+  });
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  fireEvent.change(screen.getByLabelText("Minutos adicionales"), {
+    target: { value: "5" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar ampliación" }));
+  expect(
+    await screen.findByText("Esta sesión no está disponible en esta tarea."),
+  ).toBeVisible();
+  expect(
+    screen.queryByLabelText("Avance anotado (opcional)"),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("article", { name: "Ampliación guardada" }),
+  ).not.toBeInTheDocument();
+});
+
+it("@s42 feature17 withdraws the reader draft and receipt when its fresh state reports a missing session", async () => {
+  const extended = { ...before, revision: "2" };
+  const extension = {
+    id: "42345678-1234-1234-1234-123456789abc",
+    action: "EXTEND",
+    sessionId: session.id,
+    occurredAt: session.startedAt,
+    before,
+    after: extended,
+    extension: {
+      additionalMinutes: 5,
+      previousEndAt: session.plannedEndAt,
+      effectiveEndAt: "2026-09-07T10:30:00.123456Z",
+    },
+  };
+  let changed = false;
+  const headers = { "Work-Session-Revision": `work-session-${session.id}-1` };
+  vi.stubGlobal("fetch", (url: string) => {
+    if (url.endsWith("/state"))
+      return Promise.resolve(
+        changed
+          ? Response.json(
+              {
+                type: "urn:organization:problem:work_session_not_found",
+                title: "Missing",
+                status: 404,
+                code: "WORK_SESSION_NOT_FOUND",
+              },
+              { status: 404 },
+            )
+          : Response.json(
+              {
+                state: before,
+                serverNow: session.startedAt,
+                netMicroseconds: "0",
+              },
+              { headers },
+            ),
+      );
+    if (url.endsWith("/end-time"))
+      return changed
+        ? new Promise<Response>(() => {})
+        : Promise.resolve(
+            Response.json(
+              {
+                state: before,
+                serverNow: session.startedAt,
+                effectiveEndAt: session.plannedEndAt,
+              },
+              { headers },
+            ),
+          );
+    if (url.endsWith("/extend")) {
+      changed = true;
+      return Promise.resolve(
+        Response.json(extension, {
+          status: 201,
+          headers: { Location: `/api/v1/work-session-changes/${extension.id}` },
+        }),
+      );
+    }
+    throw new Error(`Unexpected request ${url}`);
+  });
+  render(<WorkSessionReader {...props} />);
+  fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
+    target: { value: "Nota privada" },
+  });
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  fireEvent.change(screen.getByLabelText("Minutos adicionales"), {
+    target: { value: "5" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar ampliación" }));
+  expect(
+    await screen.findByText("Esta sesión no está disponible en esta tarea."),
+  ).toBeVisible();
+  expect(
+    screen.queryByLabelText("Avance anotado (opcional)"),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("article", { name: "Ampliación guardada" }),
+  ).not.toBeInTheDocument();
+});
+
+it("@s39 feature17 withdraws open controls when refreshed state discovers external closure before its receipt arrives", async () => {
+  const extended = { ...before, revision: "2" };
+  const finalState = { ...closed, revision: "3" };
+  const extension = {
+    id: "42345678-1234-1234-1234-123456789abc",
+    action: "EXTEND",
+    sessionId: session.id,
+    occurredAt: session.startedAt,
+    before,
+    after: extended,
+    extension: {
+      additionalMinutes: 5,
+      previousEndAt: session.plannedEndAt,
+      effectiveEndAt: "2026-09-07T10:30:00.123456Z",
+    },
+  };
+  let changed = false;
+  let closureReads = 0;
+  vi.stubGlobal("fetch", (url: string) => {
+    const state = changed ? finalState : before;
+    const headers = {
+      "Work-Session-Revision": `work-session-${session.id}-${state.revision}`,
+    };
+    if (url.endsWith("/state"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state,
+            serverNow: state.changedAt,
+            netMicroseconds: state.workedMicroseconds,
+          },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/end-time"))
+      return changed
+        ? new Promise<Response>(() => {})
+        : Promise.resolve(
+            Response.json(
+              {
+                state,
+                serverNow: session.startedAt,
+                effectiveEndAt: session.plannedEndAt,
+              },
+              { headers },
+            ),
+          );
+    if (url.endsWith("/extend")) {
+      changed = true;
+      return Promise.resolve(
+        Response.json(extension, {
+          status: 201,
+          headers: { Location: `/api/v1/work-session-changes/${extension.id}` },
+        }),
+      );
+    }
+    if (url.endsWith("/closure")) {
+      closureReads++;
+      return new Promise<Response>(() => {});
+    }
+    throw new Error(`Unexpected request ${url}`);
+  });
+  render(<WorkSessionReader {...props} />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  fireEvent.change(screen.getByLabelText("Minutos adicionales"), {
+    target: { value: "5" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar ampliación" }));
+  await waitFor(() => expect(closureReads).toBe(1));
+  expect(
+    screen.queryByRole("button", { name: "Confirmar cierre" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Ampliar tiempo" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("article", { name: "Ampliación guardada" }),
+  ).toBeVisible();
+  expect(screen.getByText("Consultando sesión de trabajo")).toHaveAttribute(
+    "role",
+    "status",
+  );
+});
+
+it("@s39 feature17 reloads the durable agreed end of a closed session without offering another extension", async () => {
+  const finalReceipt = {
+    ...receipt,
+    before: { ...before, revision: "2" },
+    after: { ...closed, revision: "3" },
+  };
+  const headers = { "Work-Session-Revision": `work-session-${session.id}-3` };
+  const effectiveEndAt = "2026-09-07T10:30:00.123456Z";
+  const fetcher = vi.fn((url: string) => {
+    if (url.endsWith("/state"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state: finalReceipt.after,
+            serverNow: closed.changedAt,
+            netMicroseconds: closed.workedMicroseconds,
+          },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/closure"))
+      return Promise.resolve(Response.json(finalReceipt));
+    if (url.endsWith("/end-time"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state: finalReceipt.after,
+            serverNow: closed.changedAt,
+            effectiveEndAt,
+          },
+          { headers },
+        ),
+      );
+    throw new Error(`Unexpected request ${url}`);
+  });
+  vi.stubGlobal("fetch", fetcher);
+  render(<WorkSessionReader {...props} />);
+  expect(
+    await screen.findByText("Fin acordado actual:", { exact: false }),
+  ).toBeVisible();
+  expect(
+    screen
+      .getByText("Fin acordado actual:", { exact: false })
+      .querySelector("time"),
+  ).toHaveAttribute("datetime", effectiveEndAt);
+  expect(screen.getByText(closure.progressNote)).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Ampliar tiempo" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Confirmar cierre" }),
+  ).not.toBeInTheDocument();
+  expect(fetcher).toHaveBeenCalledTimes(3);
+});
+
+it("@s40 feature17 refreshes the reader state after extension and waits before closing with its new revision", async () => {
+  const extended = { ...before, revision: "2" };
+  let current = before;
+  let finishState!: (value: Response) => void;
+  let stateReads = 0;
+  const extension = {
+    id: "42345678-1234-1234-1234-123456789abc",
+    action: "EXTEND",
+    sessionId: session.id,
+    occurredAt: session.startedAt,
+    before,
+    after: extended,
+    extension: {
+      additionalMinutes: 5,
+      previousEndAt: session.plannedEndAt,
+      effectiveEndAt: "2026-09-07T10:30:00.123456Z",
+    },
+  };
+  const fetcher = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(
+    (url) => {
+      const headers = {
+        "Work-Session-Revision": `work-session-${session.id}-${current.revision}`,
+      };
+      if (url.endsWith("/state")) {
+        if (++stateReads === 2)
+          return new Promise<Response>((resolve) => {
+            finishState = resolve;
+          });
+        return Promise.resolve(
+          Response.json(
+            {
+              state: current,
+              serverNow: session.startedAt,
+              netMicroseconds: "0",
+            },
+            { headers },
+          ),
+        );
+      }
+      if (url.endsWith("/end-time"))
+        return Promise.resolve(
+          Response.json(
+            {
+              state: current,
+              serverNow: session.startedAt,
+              effectiveEndAt:
+                current.revision === "1"
+                  ? session.plannedEndAt
+                  : extension.extension.effectiveEndAt,
+            },
+            { headers },
+          ),
+        );
+      if (url.endsWith("/extend")) {
+        current = extended;
+        return Promise.resolve(
+          Response.json(extension, {
+            status: 201,
+            headers: {
+              Location: `/api/v1/work-session-changes/${extension.id}`,
+            },
+          }),
+        );
+      }
+      return new Promise<Response>(() => {});
+    },
+  );
+  vi.stubGlobal("fetch", fetcher);
+  render(<WorkSessionReader {...props} />);
+  fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
+    target: { value: "Borrador conservado" },
+  });
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  fireEvent.change(screen.getByLabelText("Minutos adicionales"), {
+    target: { value: "5" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar ampliación" }));
+  expect(await screen.findByText("Ampliación confirmada")).toBeVisible();
+  await waitFor(() => expect(stateReads).toBe(2));
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
+  expect(
+    fetcher.mock.calls.filter(([url]) => url.endsWith("/close")),
+  ).toHaveLength(0);
+  expect(
+    screen.getByRole("button", { name: "Confirmar cierre" }),
+  ).toHaveAttribute("aria-disabled", "true");
+  expect(screen.getByText("Consultando sesión de trabajo")).toHaveAttribute(
+    "role",
+    "status",
+  );
+  await act(async () => {
+    finishState(
+      Response.json(
+        { state: extended, serverNow: session.startedAt, netMicroseconds: "0" },
+        {
+          headers: { "Work-Session-Revision": `work-session-${session.id}-2` },
+        },
+      ),
+    );
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
+  const closeRequest = fetcher.mock.calls.find(([url]) =>
+    url.endsWith("/close"),
+  )?.[1];
+  expect(closeRequest?.headers).toEqual(
+    expect.objectContaining({
+      "Work-Session-Revision": `work-session-${session.id}-2`,
+    }),
+  );
+  expect(JSON.parse(String(closeRequest?.body))).toEqual({
+    progressNote: "Borrador conservado",
+    nextStep: "",
+  });
+});
+
+it("@s36 feature17 an uncertain extension keeps closure disabled and its draft intact", async () => {
+  const headers = { "Work-Session-Revision": `work-session-${session.id}-1` };
+  const fetcher = vi.fn((url: string, init?: RequestInit) => {
+    if (init?.method === "POST")
+      return Promise.resolve(new Response(null, { status: 503 }));
+    if (url.endsWith("/state"))
+      return Promise.resolve(
+        Response.json(
+          { state: before, serverNow: session.startedAt, netMicroseconds: "0" },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/end-time"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state: before,
+            serverNow: session.startedAt,
+            effectiveEndAt: session.plannedEndAt,
+          },
+          { headers },
+        ),
+      );
+    throw new Error(`Unexpected request ${url}`);
+  });
+  vi.stubGlobal("fetch", fetcher);
+  render(<WorkSessionReader {...props} />);
+  fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
+    target: { value: "Borrador conservado" },
+  });
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  fireEvent.change(screen.getByLabelText("Minutos adicionales"), {
+    target: { value: "5" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar ampliación" }));
+  expect(
+    await screen.findByText("No podemos confirmar la ampliación."),
+  ).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
+  expect(
+    fetcher.mock.calls.filter(([url]) => url.endsWith("/close")),
+  ).toHaveLength(0);
+  expect(
+    screen.getByRole("button", { name: "Confirmar cierre" }),
+  ).toHaveAttribute("aria-disabled", "true");
+  expect(screen.getByLabelText("Avance anotado (opcional)")).toHaveValue(
+    "Borrador conservado",
+  );
+});
+
+it("@s36 feature17 a pending close prevents an extension from the separate form", async () => {
+  const headers = { "Work-Session-Revision": `work-session-${session.id}-1` };
+  const fetcher = vi.fn((url: string, init?: RequestInit) => {
+    if (init?.method === "POST") return new Promise<Response>(() => {});
+    if (url.endsWith("/state"))
+      return Promise.resolve(
+        Response.json(
+          { state: before, serverNow: session.startedAt, netMicroseconds: "0" },
+          { headers },
+        ),
+      );
+    if (url.endsWith("/end-time"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state: before,
+            serverNow: session.startedAt,
+            effectiveEndAt: session.plannedEndAt,
+          },
+          { headers },
+        ),
+      );
+    throw new Error(`Unexpected request ${url}`);
+  });
+  vi.stubGlobal("fetch", fetcher);
+  render(<WorkSessionReader {...props} />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  fireEvent.change(screen.getByLabelText("Minutos adicionales"), {
+    target: { value: "5" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar ampliación" }));
+  expect(
+    fetcher.mock.calls.filter(([url]) => url.endsWith("/extend")),
+  ).toHaveLength(0);
+  expect(
+    fetcher.mock.calls.filter(([url]) => url.endsWith("/close")),
+  ).toHaveLength(1);
+  expect(
+    screen.getByRole("button", { name: "Confirmar ampliación" }),
+  ).toHaveAttribute("aria-disabled", "true");
+});
 afterEach(() => {
   cleanup();
   setCsrfToken(undefined);
@@ -78,7 +1233,7 @@ it("@s33 recovers the closure by known session URL without an active session or 
       return Promise.resolve(Response.json(receipt));
     throw new Error(`Unexpected request ${url}`);
   });
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(<WorkSessionReader {...props} />);
   expect(await screen.findByText("Sesión cerrada")).toBeVisible();
   expect(screen.getByText(closure.progressNote)).toBeVisible();
@@ -89,7 +1244,7 @@ it("@s33 recovers the closure by known session URL without an active session or 
 });
 it("@s33 rejects a session snapshot belonging to another task route", async () => {
   const fetcher = vi.fn().mockResolvedValue(closedResponse());
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(
     <WorkSessionReader
       {...props}
@@ -101,6 +1256,9 @@ it("@s33 rejects a session snapshot belonging to another task route", async () =
   );
   expect(screen.queryByText(closure.progressNote)).not.toBeInTheDocument();
   expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(
+    screen.queryByText("Consultando sesión de trabajo"),
+  ).not.toBeInTheDocument();
 });
 it("@s27 retries a failed closure lookup without claiming a missing closure", async () => {
   const fetcher = vi
@@ -109,7 +1267,7 @@ it("@s27 retries a failed closure lookup without claiming a missing closure", as
     .mockResolvedValueOnce(new Response(null, { status: 503 }))
     .mockResolvedValueOnce(closedResponse())
     .mockResolvedValueOnce(Response.json(receipt));
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(<WorkSessionReader {...props} />);
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "No se ha podido consultar la sesión de trabajo.",
@@ -126,8 +1284,7 @@ it("@s33 opens the stable session URL through App after reload", async () => {
     "",
     `/proyectos/${props.projectId}/tareas/${props.taskId}/sesiones/${props.id}`,
   );
-  vi.stubGlobal(
-    "fetch",
+  stubClosureRequests(
     vi
       .fn()
       .mockResolvedValueOnce(closedResponse())
@@ -160,7 +1317,7 @@ it("@s32 closes explicitly from the stable URL with both optional notes", async 
         headers: { Location: `/api/v1/work-session-changes/${receipt.id}` },
       }),
     );
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(<WorkSessionReader {...props} />);
   fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
     target: { value: closure.progressNote },
@@ -191,7 +1348,7 @@ it("@s40 announces a pending close and prevents duplicate submission while prese
       ),
     )
     .mockImplementation(() => new Promise(() => {}));
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(<WorkSessionReader {...props} />);
   const input = await screen.findByLabelText("Avance anotado (opcional)");
   const submit = screen.getByRole("button", { name: "Confirmar cierre" });
@@ -215,7 +1372,7 @@ it("@s5 preserves an overlong draft and rejects it before transmitting", async (
       },
     ),
   );
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(<WorkSessionReader {...props} />);
   const input = await screen.findByLabelText("Siguiente paso (opcional)");
   const text = "😀".repeat(2001);
@@ -252,7 +1409,7 @@ it("@s35 checks an uncertain close by its retained key without another POST", as
     )
     .mockResolvedValueOnce(new Response(null, { status: 503 }))
     .mockResolvedValueOnce(Response.json(receipt));
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(<WorkSessionReader {...props} />);
   fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
     target: { value: closure.progressNote },
@@ -307,7 +1464,7 @@ it("@s35 permits only deliberate identical resend after a recognized missing cha
         headers: { Location: `/api/v1/work-session-changes/${receipt.id}` },
       }),
     );
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(<WorkSessionReader {...props} />);
   fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
     target: { value: closure.progressNote },
@@ -377,7 +1534,7 @@ it("@s36 retains the draft after 412 and uses a new revision and key only after 
         headers: { Location: `/api/v1/work-session-changes/${receipt.id}` },
       }),
     );
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(<WorkSessionReader {...props} />);
   fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
     target: { value: closure.progressNote },
@@ -430,7 +1587,7 @@ it("@s37 renews CSRF separately and resends only the same retained closure manua
       ),
     )
     .mockImplementation(() => new Promise(() => {}));
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   setCsrfToken("before");
   render(<WorkSessionReader {...props} />);
   fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
@@ -465,7 +1622,7 @@ it("@s38 aborts a transmitted closure when its private reader unmounts", async (
       ),
     )
     .mockImplementation(() => new Promise(() => {}));
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   const view = render(<WorkSessionReader {...props} />);
   await screen.findByLabelText("Avance anotado (opcional)");
   fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
@@ -490,7 +1647,7 @@ it("@s38 replaces private drafts on route change and ignores a late command resp
     )
     .mockReturnValueOnce(pending)
     .mockImplementation(() => new Promise(() => {}));
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   const view = render(<WorkSessionReader {...props} />);
   fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
     target: { value: "Borrador privado" },
@@ -517,8 +1674,7 @@ it("@s38 replaces private drafts on route change and ignores a late command resp
   expect(fetcher).toHaveBeenCalledTimes(3);
 });
 it("@s40 retrying a failed read announces loading and gives disappearing initiator a focus destination", async () => {
-  vi.stubGlobal(
-    "fetch",
+  stubClosureRequests(
     vi
       .fn()
       .mockResolvedValueOnce(new Response(null, { status: 503 }))
@@ -552,7 +1708,7 @@ it("@s40 distinguishes a pending recovery read from transmitting a closure", asy
     )
     .mockResolvedValueOnce(new Response(null, { status: 503 }))
     .mockImplementation(() => new Promise(() => {}));
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(<WorkSessionReader {...props} />);
   await screen.findByLabelText("Avance anotado (opcional)");
   fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
@@ -565,8 +1721,7 @@ it("@s40 distinguishes a pending recovery read from transmitting a closure", asy
 });
 
 it("@s32 presents immutable closure date and explicit empty notes without implying task completion", async () => {
-  vi.stubGlobal(
-    "fetch",
+  stubClosureRequests(
     vi
       .fn()
       .mockResolvedValueOnce(closedResponse())
@@ -584,7 +1739,11 @@ it("@s32 presents immutable closure date and explicit empty notes without implyi
   expect(
     document.querySelector(`time[datetime="${receipt.occurredAt}"]`),
   ).toBeVisible();
-  expect(screen.getByText("UTC")).toBeVisible();
+  expect(
+    document
+      .querySelector(`time[datetime="${receipt.occurredAt}"]`)
+      ?.closest("p"),
+  ).toHaveTextContent("UTC");
   expect(
     screen.getByText("El cierre de la sesión no completa la tarea."),
   ).toBeVisible();
@@ -614,7 +1773,7 @@ it("@s34 preserves confirmed notes when the separate active lookup fails and ret
       return Promise.resolve(new Response(null, { status: 503 }));
     throw new Error(`Unexpected ${url}`);
   });
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(<WorkSessionReader {...props} />);
   fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
     target: { value: closure.progressNote },
@@ -649,8 +1808,7 @@ it("@s34 displays a different legitimate active session separately from the clos
     id: "62345678-1234-1234-1234-123456789abc",
     taskId: "72345678-1234-1234-1234-123456789abc",
   };
-  vi.stubGlobal(
-    "fetch",
+  stubClosureRequests(
     vi.fn().mockImplementation((url: string) => {
       if (url.endsWith("/state"))
         return Promise.resolve(
@@ -704,30 +1862,60 @@ it("@s33 rejects a closure whose immutable task context differs from the validat
     ...session,
     taskId: "72345678-1234-1234-1234-123456789abc",
   };
-  vi.stubGlobal(
-    "fetch",
-    vi
-      .fn()
-      .mockResolvedValueOnce(closedResponse())
-      .mockResolvedValueOnce(
-        Response.json({
-          ...receipt,
-          before: { ...before, session: otherSession },
-          after: { ...closed, session: otherSession },
-        }),
-      ),
-  );
+  let finishClosure!: (value: Response) => void;
+  vi.stubGlobal("fetch", (url: string) => {
+    if (url.endsWith("/state")) return Promise.resolve(closedResponse());
+    if (url.endsWith("/end-time"))
+      return Promise.resolve(
+        Response.json(
+          {
+            state: closed,
+            serverNow: closed.changedAt,
+            effectiveEndAt: session.plannedEndAt,
+          },
+          {
+            headers: {
+              "Work-Session-Revision": `work-session-${session.id}-2`,
+            },
+          },
+        ),
+      );
+    if (url.endsWith("/closure"))
+      return new Promise<Response>((resolve) => {
+        finishClosure = resolve;
+      });
+    throw new Error(`Unexpected request ${url}`);
+  });
   render(<WorkSessionReader {...props} />);
+  expect(
+    await screen.findByText("Fin previsto original:", { exact: false }),
+  ).toBeVisible();
+  await act(async () => {
+    finishClosure(
+      Response.json({
+        ...receipt,
+        before: { ...before, session: otherSession },
+        after: { ...closed, session: otherSession },
+      }),
+    );
+  });
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "Esta sesión no está disponible en esta tarea.",
   );
   expect(screen.queryByText(closure.progressNote)).not.toBeInTheDocument();
   expect(screen.queryByText("Sesión cerrada")).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("Fin previsto original:", { exact: false }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("heading", { name: "Fin de la sesión" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("Consultando sesión de trabajo"),
+  ).not.toBeInTheDocument();
 });
-
 it("@s32 the close form identifies its session times and explains that leaving does not revoke a sent close", async () => {
-  vi.stubGlobal(
-    "fetch",
+  stubClosureRequests(
     vi
       .fn()
       .mockResolvedValueOnce(
@@ -782,7 +1970,7 @@ it("@s36 a definitive state conflict consults the closure without resubmitting t
     )
     .mockResolvedValueOnce(closedResponse())
     .mockResolvedValueOnce(Response.json(receipt));
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(<WorkSessionReader {...props} />);
   fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
     target: { value: "Mi intención sin confirmar" },
@@ -804,8 +1992,7 @@ it("@s36 a definitive state conflict consults the closure without resubmitting t
 });
 
 it("@s14 a definitive revision limit reports the rejection without treating the close as uncertain", async () => {
-  vi.stubGlobal(
-    "fetch",
+  stubClosureRequests(
     vi
       .fn()
       .mockResolvedValueOnce(
@@ -856,7 +2043,7 @@ it("@s35 a failed key lookup preserves uncertainty and cannot enable resend", as
     .mockResolvedValueOnce(
       Response.json({ code: "UNKNOWN", status: 503 }, { status: 503 }),
     );
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(<WorkSessionReader {...props} />);
   await screen.findByLabelText("Avance anotado (opcional)");
   fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
@@ -887,7 +2074,7 @@ it("@s38 an old HTTP401 from a retired reader cannot revoke current access", asy
     .fn()
     .mockReturnValueOnce(pending)
     .mockImplementation(() => new Promise(() => {}));
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   const access = vi.fn();
   observeAccess(access);
   const view = render(<WorkSessionReader {...props} />);
@@ -907,8 +2094,7 @@ it("@s40 a deliberate blur before the close response does not move focus back to
   const pending = new Promise<Response>((resolve) => {
     finish = resolve;
   });
-  vi.stubGlobal(
-    "fetch",
+  stubClosureRequests(
     vi
       .fn()
       .mockResolvedValueOnce(
@@ -955,7 +2141,7 @@ it("@s32 explains the irreversible notes and unchanged task before confirmation"
       },
     ),
   );
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(<WorkSessionReader {...props} />);
   await screen.findByLabelText("Avance anotado (opcional)");
   expect(
@@ -976,8 +2162,7 @@ it("@s38 discards closure JSON decoded after navigating to another session", asy
   });
   const delayed = Response.json(receipt);
   vi.spyOn(delayed, "json").mockReturnValue(pending);
-  vi.stubGlobal(
-    "fetch",
+  stubClosureRequests(
     vi
       .fn()
       .mockResolvedValueOnce(closedResponse())
@@ -1007,8 +2192,7 @@ it("@s38 a late problem classification cannot restore the retired close draft", 
   const copy = new Response(null, { status: 503 });
   vi.spyOn(copy, "json").mockReturnValue(pending);
   vi.spyOn(failure, "clone").mockReturnValue(copy);
-  vi.stubGlobal(
-    "fetch",
+  stubClosureRequests(
     vi
       .fn()
       .mockResolvedValueOnce(
@@ -1047,8 +2231,7 @@ it("@s40 a disappearing focused confirm button transfers focus to the session he
   const pending = new Promise<Response>((resolve) => {
     finish = resolve;
   });
-  vi.stubGlobal(
-    "fetch",
+  stubClosureRequests(
     vi
       .fn()
       .mockResolvedValueOnce(
@@ -1126,7 +2309,7 @@ it("@s38 a late active HTTP401 after confirmed close cannot revoke the new reade
     }
     throw new Error(`Unexpected request ${url}`);
   });
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   const access = vi.fn();
   observeAccess(access);
   const view = render(<WorkSessionReader {...props} />);
@@ -1171,7 +2354,7 @@ it("@s5 associates a progress-only note error without marking the valid next ste
       { headers: { "Work-Session-Revision": `work-session-${session.id}-1` } },
     ),
   );
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(<WorkSessionReader {...props} />);
   const progress = await screen.findByLabelText("Avance anotado (opcional)");
   const next = screen.getByLabelText("Siguiente paso (opcional)");
@@ -1220,7 +2403,7 @@ it("@s40 retrying the active lookup announces pending and coalesces another clic
       );
     throw new Error(`Unexpected request ${url}`);
   });
-  vi.stubGlobal("fetch", fetcher);
+  stubClosureRequests(fetcher);
   render(<WorkSessionReader {...props} />);
   fireEvent.change(await screen.findByLabelText("Avance anotado (opcional)"), {
     target: { value: closure.progressNote },

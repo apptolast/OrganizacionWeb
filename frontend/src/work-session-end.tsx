@@ -20,7 +20,7 @@ import {
 } from "./work-session-end-api";
 import { SnapshotTime, rejectionMessage } from "./work-session-state";
 import { RouteLink } from "./navigation";
-import { integer } from "./schedule-block-api";
+import { integer, sameId } from "./schedule-block-api";
 import {
   useWorkSessionDecision,
   type SessionDecision,
@@ -30,6 +30,8 @@ type Props = {
   session: SessionStart;
   onAccessFailure: (status: number) => void;
   decision?: SessionDecision;
+  knownClosed?: boolean;
+  headingLevel?: 2 | 3;
 };
 export function WorkSessionEndPanel(props: Props) {
   return (
@@ -39,7 +41,14 @@ export function WorkSessionEndPanel(props: Props) {
     />
   );
 }
-function EndPanel({ session, onAccessFailure, decision: shared }: Props) {
+function EndPanel({
+  session,
+  onAccessFailure,
+  decision: shared,
+  knownClosed,
+  headingLevel = 3,
+}: Props) {
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   const local = useWorkSessionDecision();
   const decision = shared ?? local;
   const heading = useRef<HTMLHeadingElement>(null);
@@ -92,7 +101,8 @@ function EndPanel({ session, onAccessFailure, decision: shared }: Props) {
     [onAccessFailure],
   );
   async function send(check = false) {
-    if (blocked || (!retained.current && awaitingSnapshot)) return;
+    if (blocked || (!retained.current && (awaitingSnapshot || knownClosed)))
+      return;
     if (command.current || conflict || (uncertain && !check && !mayResend))
       return;
     if (!integer(Number(minutes), 1, 1440)) {
@@ -136,6 +146,7 @@ function EndPanel({ session, onAccessFailure, decision: shared }: Props) {
       }
       const rejection = problem && rejectionMessage(problem.code);
       if (rejection) {
+        decision.release();
         retained.current = undefined;
         setUncertain(false);
         setConflict(rejection);
@@ -167,6 +178,13 @@ function EndPanel({ session, onAccessFailure, decision: shared }: Props) {
     void readWorkSessionEnd(session.id, controller.signal)
       .then((value) => {
         if (controller.signal.aborted) return;
+        if (
+          !sameId(value.state.session.projectId, session.projectId) ||
+          !sameId(value.state.session.taskId, session.taskId)
+        ) {
+          withdraw(404);
+          return;
+        }
         receivedAt.current = performance.now();
         setSnapshotGeneration(generation);
         if (
@@ -201,7 +219,16 @@ function EndPanel({ session, onAccessFailure, decision: shared }: Props) {
       untrack();
       controller.abort();
     };
-  }, [session.id, refresh, onAccessFailure, generation, track, withdraw]);
+  }, [
+    session.id,
+    session.projectId,
+    session.taskId,
+    refresh,
+    onAccessFailure,
+    generation,
+    track,
+    withdraw,
+  ]);
   useEffect(() => {
     const visible = () => {
       if (document.visibilityState === "visible") refreshEnd();
@@ -210,7 +237,7 @@ function EndPanel({ session, onAccessFailure, decision: shared }: Props) {
     return () => document.removeEventListener("visibilitychange", visible);
   }, [refreshEnd]);
   useEffect(() => {
-    if (!snapshot || snapshot.state.status === "closed") return;
+    if (!snapshot || knownClosed || snapshot.state.status === "closed") return;
     const duration =
       microseconds(snapshot.effectiveEndAt)! -
       microseconds(snapshot.serverNow)!;
@@ -232,12 +259,12 @@ function EndPanel({ session, onAccessFailure, decision: shared }: Props) {
     }
     arm();
     return () => clearTimeout(timer);
-  }, [snapshot, refreshEnd]);
+  }, [snapshot, refreshEnd, knownClosed]);
   return (
     <section>
-      <h3 ref={heading} tabIndex={-1}>
+      <Heading ref={heading} tabIndex={-1}>
         Fin de la sesión
-      </h3>
+      </Heading>
       {(loading || (awaitingSnapshot && !lookupFailed)) && (
         <p role="status">Comprobando el fin actual</p>
       )}
@@ -329,7 +356,7 @@ function EndPanel({ session, onAccessFailure, decision: shared }: Props) {
               />
             </p>
           )}
-          {snapshot.state.status !== "closed" && (
+          {!knownClosed && snapshot.state.status !== "closed" && (
             <>
               {notifiedEnd === snapshot.effectiveEndAt && (
                 <p role="status">Ha llegado el fin acordado</p>

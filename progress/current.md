@@ -67,3 +67,11 @@ B entregó snapshot nominal de14fuentes/tests,158 focales verdes20f336,lint/tipo
 Los dos oráculos de publicador están revisados en1130e69. Replay root96267 terminó EXIT0 1e6077:64/64 KILLED,349 hashes sin cambios ee30d9, incluidas ambas firmas196/207 detectadas por sus nuevos tests. XML propio SHA71F17C95236A770BA3C2724352062844EF52AD448F6964390780018B0BB464CC; original620 intacto. Refuerzo y límites registrados en87828d9. No proceso Gradle/PIT root activo; full init integrado todavía pendiente.
 
 C acredita tres E2E individuales sobre snapshot nominal copiado: nominal bb7728, vencimiento real de1min a8fb59, recuperación ACK/K/PAUSE/recarga a71eee, todos EXIT0. Dos expectativas de selector/texto corregidas conservan sus intentos originales; no eran fallos de API. Continúa UX en aislado, fuentes nominales quietas. B entrega montaje conjunto248focalGREENca90f4 y A revisa deltas Reader/End; último ajuste loading y jerarquía de títulos se contrasta antes del freeze integrado. No se inicia Stryker sobre fuentes mutables. No feature18 ni despliegue todavía.
+
+## Validación integrada, 09:47
+
+Frontend final revisado e integrado en c803d4a; f8a1772 ajusta exclusivamente el dispatcher de un fixture histórico. Init85135 EXIT0 78e8c6:2076 pruebas Java/89 suites,1795 frontend/38 archivos y40Node, lint y formato verdes. Primera ejecución38720 conserva sus dos fallos de fixture y no se presenta como verde. Build93234 EXIT0 d1f11e. XML y hashes de init preservados en end_time_init_backend_results.json.
+
+UX17 aprobado e integrado311cd33:515 mediciones y35 análisis axe sin incidencias, tres motores, texto200% y zoom Chromium nativo200%; límites en review_end_time_ux.md. Los cinco enlaces históricos de cierre se acotaron a su panel en bd5f2c5, conservando todos sus oráculos; foco7/7 verde. C preservó por copia260 artefactos17 antes de las nuevas ejecuciones.
+
+Stryker root90337 sigue ACTIVO sobre129 entradas congeladas;1980 mutantes y dry-run860 pruebas seleccionadas verde. E2E global root7009 ACTIVO, log end_time_e2e_global.log, sobre COMMON integrado bd5f2c5 y puerto18080. No cambiar fuentes/tests/config frontend durante Stryker. Backend PIT original616/620 y replay dirigido64/64 ya concluidos; no sumar sus denominadores. CI17 pendiente,18 pendiente, sin despliegue. A actualiza dictamen y trazabilidad; root controla integración y procesos globales.

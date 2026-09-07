@@ -14,6 +14,8 @@ public final class PostgresWorkSessionStore
     implements WorkSessionStarting,
         WorkSessionQueries,
         WorkSessionChanging,
+        WorkSessionExtending,
+        WorkSessionEndQueries,
         WorkSessionStateQueries,
         WorkSessionTransitionQueries {
   private final JdbcTemplate jdbc;
@@ -21,6 +23,106 @@ public final class PostgresWorkSessionStore
   private final TransactionTemplate readOnly;
   private final TransactionTemplate stateSnapshot;
   private final ObjectMapper json;
+
+  private static WorkSessionEnd endState(java.sql.ResultSet row, int n)
+      throws java.sql.SQLException {
+    var state = STATE_MAPPER.mapRow(row, n);
+    var end = row.getTimestamp("effective_end_at");
+    var last = row.getTimestamp("last_decision_at");
+    return new WorkSessionEnd(
+        state,
+        end == null ? state.session().plannedEndAt() : end.toInstant(),
+        last == null ? state.changedAt() : last.toInstant());
+  }
+
+  public WorkSessionEndSnapshot readEnd(
+      String owner, UUID session, Function<WorkSessionEnd, WorkSessionEndSnapshot> snapshot) {
+    return storage(
+        () ->
+            stateSnapshot.execute(
+                status -> {
+                  var context =
+                      jdbc
+                          .query(
+                              "SELECT * FROM work_sessions WHERE owner_id=? AND id=?",
+                              PostgresWorkSessionStore::endState,
+                              owner,
+                              session)
+                          .stream()
+                          .findFirst()
+                          .orElseThrow(WorkSessionNotFoundException::new);
+                  return snapshot.apply(context);
+                }));
+  }
+
+  public WorkSessionTransitionConfirmation extend(
+      String owner,
+      UUID session,
+      UUID key,
+      WorkSessionRevision expected,
+      int additionalMinutes,
+      Function<WorkSessionEnd, WorkSessionExtensionTransition> operation) {
+    return storage(
+        () ->
+            transaction.execute(
+                status -> {
+                  var context =
+                      jdbc
+                          .query(
+                              "SELECT * FROM work_sessions WHERE owner_id=? AND id=? FOR UPDATE",
+                              PostgresWorkSessionStore::endState,
+                              owner,
+                              session)
+                          .stream()
+                          .findFirst()
+                          .orElseThrow(WorkSessionNotFoundException::new);
+                  if (!expected.sessionId().equals(session))
+                    throw new com.apptolast.organization.domain.WorkSessionTransitionException(
+                        "PRECONDITION_FAILED");
+                  var prior = transitionReplay(owner, key);
+                  if (prior.isPresent()) {
+                    var receipt = prior.orElseThrow();
+                    receipt.requireExtensionIntent(session, expected.value(), additionalMinutes);
+                    return new WorkSessionTransitionConfirmation(receipt, true);
+                  }
+                  var change = operation.apply(context);
+                  var receipt = change.receipt();
+                  requireOne(
+                      jdbc.update(
+                          "UPDATE work_sessions SET revision=?,effective_end_at=?,last_decision_at=? WHERE id=?",
+                          receipt.after().revision(),
+                          Timestamp.from(receipt.extension().effectiveEndAt()),
+                          Timestamp.from(receipt.occurredAt()),
+                          session));
+                  try {
+                    requireOne(
+                        jdbc.update(
+                            "INSERT INTO work_session_changes(id,owner_id,session_id,request_key,action,expected_revision,occurred_at,receipt) VALUES (?,?,?,?,?,?,?,?::jsonb)",
+                            receipt.id(),
+                            owner,
+                            session,
+                            key,
+                            "EXTEND",
+                            expected.value(),
+                            Timestamp.from(receipt.occurredAt()),
+                            receiptJson(receipt)));
+                    var event = change.event();
+                    requireOne(
+                        jdbc.update(
+                            "INSERT INTO outbox_events(event_id,aggregate_id,owner_id,event_type,schema_version,occurred_at,payload) VALUES (?,?,?,?,?,?,?::jsonb)",
+                            event.eventId(),
+                            session,
+                            owner,
+                            event.type(),
+                            event.schemaVersion(),
+                            Timestamp.from(event.occurredAt()),
+                            json.writeValueAsString(event)));
+                  } catch (JsonProcessingException error) {
+                    throw new IllegalStateException(error);
+                  }
+                  return new WorkSessionTransitionConfirmation(receipt, false);
+                }));
+  }
 
   public WorkSessionSnapshot read(
       String owner,
@@ -59,16 +161,17 @@ public final class PostgresWorkSessionStore
           try {
             return transaction.execute(
                 status -> {
-                  var before =
+                  var context =
                       jdbc
                           .query(
                               "SELECT * FROM work_sessions WHERE owner_id=? AND id=? FOR UPDATE",
-                              STATE_MAPPER,
+                              PostgresWorkSessionStore::endState,
                               owner,
                               session)
                           .stream()
                           .findFirst()
                           .orElseThrow(WorkSessionNotFoundException::new);
+                  var before = context.state();
                   if (!expected.sessionId().equals(session))
                     throw new com.apptolast.organization.domain.WorkSessionTransitionException(
                         "PRECONDITION_FAILED");
@@ -80,10 +183,11 @@ public final class PostgresWorkSessionStore
                   }
                   var change = operation.apply(before);
                   var receipt = change.receipt();
+                  context.requireTime(receipt.occurredAt());
                   var after = receipt.after();
                   requireOne(
                       jdbc.update(
-                          "UPDATE work_sessions SET status=?,revision=?,changed_at=?,worked_microseconds=?,running_since=? WHERE id=?",
+                          "UPDATE work_sessions SET status=?,revision=?,changed_at=?,worked_microseconds=?,running_since=?,last_decision_at=? WHERE id=?",
                           after.status(),
                           after.revision(),
                           Timestamp.from(after.changedAt()),
@@ -91,6 +195,7 @@ public final class PostgresWorkSessionStore
                           after.runningSince() == null
                               ? null
                               : Timestamp.from(after.runningSince()),
+                          Timestamp.from(receipt.occurredAt()),
                           session));
                   if (action.equals("PAUSE")
                       || (action.equals("CLOSE") && before.status().equals("running"))) {

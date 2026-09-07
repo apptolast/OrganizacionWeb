@@ -17,10 +17,10 @@ public final class ReadWorkSessionEnd implements ReadWorkSessionEndUseCase {
     return queries.readEnd(
         owner,
         session,
-        context ->
-            new WorkSessionEndSnapshot(
-                context.state(),
-                clock.instant().truncatedTo(ChronoUnit.MICROS),
-                context.effectiveEndAt()));
+        context -> {
+          var now = clock.instant().truncatedTo(ChronoUnit.MICROS);
+          context.requireTime(now);
+          return new WorkSessionEndSnapshot(context.state(), now, context.effectiveEndAt());
+        });
   }
 }

@@ -51,4 +51,10 @@ public record WorkSessionTransitionReceipt(
                 closure.progressNote(), closure.nextStep())
             .equals(notes)) throw new WorkSessionIdempotencyConflictException();
   }
+
+  public void requireExtensionIntent(UUID session, long expected, int additionalMinutes) {
+    requireIntent(session, "EXTEND", expected);
+    if (extension.additionalMinutes() != additionalMinutes)
+      throw new WorkSessionIdempotencyConflictException();
+  }
 }

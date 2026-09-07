@@ -35,4 +35,57 @@ class ReadWorkSessionEndTest {
     verify(clock).instant();
     verifyNoMoreInteractions(clock);
   }
+
+  @Test
+  void s14_rejectsAReadClockBeforeTheLastConfirmedDecision() {
+    var at = Instant.parse("2026-09-07T10:00:00Z");
+    var start =
+        new SessionStart(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            at,
+            25,
+            at.plusSeconds(1500),
+            "UTC");
+    var state = new WorkSessionState(start, "paused", 2, at, 0, null);
+    var context =
+        new WorkSessionEnd(state, start.plannedEndAt().plusSeconds(60), at.plusSeconds(10));
+    WorkSessionEndQueries queries = (owner, session, snapshot) -> snapshot.apply(context);
+    assertThatThrownBy(
+            () ->
+                new ReadWorkSessionEnd(
+                        queries, Clock.fixed(at.plusSeconds(10).minusNanos(1000), ZoneOffset.UTC))
+                    .read("owner", start.id()))
+        .isInstanceOfSatisfying(
+            WorkSessionTransitionException.class,
+            error -> assertThat(error.code()).isEqualTo("WORK_SESSION_TIME_OUT_OF_RANGE"));
+  }
+
+  @Test
+  void s14_rejectsAReadClockOutsideTheUtcRange() {
+    var at = Instant.parse("2026-09-07T10:00:00Z");
+    var start =
+        new SessionStart(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            at,
+            25,
+            at.plusSeconds(1500),
+            "UTC");
+    var state = new WorkSessionState(start, "running", 1, at, 0, at);
+    WorkSessionEndQueries queries =
+        (owner, session, snapshot) ->
+            snapshot.apply(new WorkSessionEnd(state, start.plannedEndAt(), at));
+    assertThatThrownBy(
+            () ->
+                new ReadWorkSessionEnd(
+                        queries,
+                        Clock.fixed(Instant.parse("+10000-01-01T00:00:00Z"), ZoneOffset.UTC))
+                    .read("owner", start.id()))
+        .isInstanceOfSatisfying(
+            WorkSessionTransitionException.class,
+            error -> assertThat(error.code()).isEqualTo("WORK_SESSION_TIME_OUT_OF_RANGE"));
+  }
 }

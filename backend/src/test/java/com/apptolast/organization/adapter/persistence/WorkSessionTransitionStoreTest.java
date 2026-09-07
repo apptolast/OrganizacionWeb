@@ -1868,4 +1868,326 @@ class WorkSessionTransitionStoreTest {
                 original.id()))
         .isEqualTo(1);
   }
+
+  @Test
+  void s1_extendCommitsEndRevisionReceiptAndIndependentEvent() throws Exception {
+    var at = Instant.parse("2026-09-07T10:00:00.123456Z");
+    var original =
+        new StartWorkSession(store, Clock.fixed(at, ZoneOffset.UTC), () -> Set.of("UTC"))
+            .start(owner, project, task, UUID.randomUUID(), 25)
+            .session();
+    var originalEvent =
+        jdbc.queryForMap("SELECT * FROM outbox_events WHERE aggregate_id=?", original.id());
+    var key = UUID.randomUUID();
+    var now = Instant.parse("2026-09-07T10:01:00.123457Z");
+    var result =
+        new ExtendWorkSession(store, Clock.fixed(now, ZoneOffset.UTC))
+            .extend(owner, original.id(), key, new WorkSessionRevision(original.id(), 1), 5);
+    assertThat(result.replayed()).isFalse();
+    assertThat(store.detail(owner, original.id())).contains(original);
+    var row = jdbc.queryForMap("SELECT * FROM work_sessions WHERE id=?", original.id());
+    assertThat(row)
+        .containsEntry("revision", 2L)
+        .containsEntry("status", "running")
+        .containsEntry("worked_microseconds", 0L);
+    assertThat(((java.sql.Timestamp) row.get("effective_end_at")).toInstant())
+        .isEqualTo(Instant.parse("2026-09-07T10:30:00.123456Z"));
+    assertThat(((java.sql.Timestamp) row.get("last_decision_at")).toInstant()).isEqualTo(now);
+    assertThat(row.get("changed_at")).isNull();
+    assertThat(row.get("running_since")).isNull();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_intervals WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isZero();
+    var stored =
+        jdbc.queryForMap("SELECT * FROM work_session_changes WHERE session_id=?", original.id());
+    assertThat(stored)
+        .containsEntry("id", result.receipt().id())
+        .containsEntry("request_key", key)
+        .containsEntry("expected_revision", 1L)
+        .containsEntry("action", "EXTEND");
+    var payload = json.readTree(stored.get("receipt").toString());
+    assertThat(payload.size()).isEqualTo(7);
+    assertThat(payload.get("action").asText()).isEqualTo("EXTEND");
+    assertThat(payload.get("closure")).isNull();
+    assertThat(payload.get("extension"))
+        .isEqualTo(
+            json.createObjectNode()
+                .put("additionalMinutes", 5)
+                .put("previousEndAt", "2026-09-07T10:25:00.123456Z")
+                .put("effectiveEndAt", "2026-09-07T10:30:00.123456Z"));
+    var event =
+        jdbc.queryForMap(
+            "SELECT * FROM outbox_events WHERE aggregate_id=? AND event_type='WorkSessionExtended.v1'",
+            original.id());
+    assertThat(event.get("event_id"))
+        .isNotEqualTo(result.receipt().id())
+        .isNotEqualTo(original.id());
+    assertThat(json.readTree(event.get("payload").toString()))
+        .isEqualTo(
+            json.createObjectNode()
+                .put("eventId", event.get("event_id").toString())
+                .put("aggregateId", original.id().toString())
+                .put("ownerId", owner)
+                .put("occurredAt", "2026-09-07T10:01:00.123457Z")
+                .put("schemaVersion", 1)
+                .put("type", "WorkSessionExtended.v1")
+                .put("revision", "2")
+                .put("additionalMinutes", 5)
+                .put("previousEndAt", "2026-09-07T10:25:00.123456Z")
+                .put("effectiveEndAt", "2026-09-07T10:30:00.123456Z")
+                .put("status", "running"));
+    assertThat(
+            jdbc.queryForMap(
+                "SELECT * FROM outbox_events WHERE event_id=?", originalEvent.get("event_id")))
+        .isEqualTo(originalEvent);
+  }
+
+  @Test
+  void s6_extendRequiresTheTokenSessionIdentityBeforeBusiness() {
+    var original =
+        new StartWorkSession(
+                store,
+                Clock.fixed(Instant.parse("2026-09-07T10:00:00Z"), ZoneOffset.UTC),
+                () -> Set.of("UTC"))
+            .start(owner, project, task, UUID.randomUUID(), 25)
+            .session();
+    var clock = org.mockito.Mockito.mock(Clock.class);
+    assertThatThrownBy(
+            () ->
+                new ExtendWorkSession(store, clock)
+                    .extend(
+                        owner,
+                        original.id(),
+                        UUID.randomUUID(),
+                        new WorkSessionRevision(UUID.randomUUID(), 1),
+                        1))
+        .isInstanceOfSatisfying(
+            com.apptolast.organization.domain.WorkSessionTransitionException.class,
+            error -> assertThat(error.code()).isEqualTo("PRECONDITION_FAILED"));
+    org.mockito.Mockito.verifyNoInteractions(clock);
+  }
+
+  @Test
+  void s7_replaysAnExtensionAfterClosureAndAnotherStartWithoutClock() {
+    var at = Instant.parse("2026-09-07T10:00:00Z");
+    var original =
+        new StartWorkSession(store, Clock.fixed(at, ZoneOffset.UTC), () -> Set.of("UTC"))
+            .start(owner, project, task, UUID.randomUUID(), 25)
+            .session();
+    var key = UUID.randomUUID();
+    var confirmed =
+        new ExtendWorkSession(store, Clock.fixed(at.plusSeconds(10), ZoneOffset.UTC))
+            .extend(owner, original.id(), key, new WorkSessionRevision(original.id(), 1), 5);
+    new ChangeWorkSession(store, Clock.fixed(at.plusSeconds(20), ZoneOffset.UTC))
+        .close(
+            owner,
+            original.id(),
+            UUID.randomUUID(),
+            new WorkSessionRevision(original.id(), 2),
+            new com.apptolast.organization.domain.WorkSessionCloseNotes("", ""));
+    var next =
+        new StartWorkSession(
+                store, Clock.fixed(at.plusSeconds(30), ZoneOffset.UTC), () -> Set.of("UTC"))
+            .start(owner, project, task, UUID.randomUUID(), 25)
+            .session();
+    var rows = jdbc.queryForList("SELECT * FROM work_sessions ORDER BY id");
+    var events = jdbc.queryForList("SELECT * FROM outbox_events ORDER BY event_id");
+    var clock = org.mockito.Mockito.mock(Clock.class);
+    var replay =
+        new ExtendWorkSession(store, clock)
+            .extend(owner, original.id(), key, new WorkSessionRevision(original.id(), 1), 5);
+    assertThat(replay.replayed()).isTrue();
+    assertThat(replay.receipt()).isEqualTo(confirmed.receipt());
+    assertThat(store.active(owner)).contains(next);
+    assertThat(jdbc.queryForList("SELECT * FROM work_sessions ORDER BY id")).isEqualTo(rows);
+    assertThat(jdbc.queryForList("SELECT * FROM outbox_events ORDER BY event_id"))
+        .isEqualTo(events);
+    org.mockito.Mockito.verifyNoInteractions(clock);
+  }
+
+  @Test
+  void s8_rejectsAnotherQuantityForTheSameExtensionKey() {
+    var at = Instant.parse("2026-09-07T10:00:00Z");
+    var original =
+        new StartWorkSession(store, Clock.fixed(at, ZoneOffset.UTC), () -> Set.of("UTC"))
+            .start(owner, project, task, UUID.randomUUID(), 25)
+            .session();
+    var key = UUID.randomUUID();
+    new ExtendWorkSession(store, Clock.fixed(at, ZoneOffset.UTC))
+        .extend(owner, original.id(), key, new WorkSessionRevision(original.id(), 1), 5);
+    var rows = jdbc.queryForList("SELECT * FROM work_sessions");
+    assertThatThrownBy(
+            () ->
+                new ExtendWorkSession(store, Clock.fixed(at, ZoneOffset.UTC))
+                    .extend(
+                        owner, original.id(), key, new WorkSessionRevision(original.id(), 1), 6))
+        .isInstanceOf(WorkSessionIdempotencyConflictException.class);
+    assertThat(jdbc.queryForList("SELECT * FROM work_sessions")).isEqualTo(rows);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_changes WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(1);
+  }
+
+  @Test
+  void s10_pauseCannotPrecedeTheLastExtension() {
+    var at = Instant.parse("2026-09-07T10:00:00Z");
+    var original =
+        new StartWorkSession(store, Clock.fixed(at, ZoneOffset.UTC), () -> Set.of("UTC"))
+            .start(owner, project, task, UUID.randomUUID(), 25)
+            .session();
+    new ExtendWorkSession(store, Clock.fixed(at.plusSeconds(10), ZoneOffset.UTC))
+        .extend(
+            owner, original.id(), UUID.randomUUID(), new WorkSessionRevision(original.id(), 1), 5);
+    var rows = jdbc.queryForList("SELECT * FROM work_sessions");
+    assertThatThrownBy(
+            () ->
+                new ChangeWorkSession(
+                        store, Clock.fixed(at.plusSeconds(10).minusNanos(1000), ZoneOffset.UTC))
+                    .pause(
+                        owner,
+                        original.id(),
+                        UUID.randomUUID(),
+                        new WorkSessionRevision(original.id(), 2)))
+        .isInstanceOfSatisfying(
+            com.apptolast.organization.domain.WorkSessionTransitionException.class,
+            error -> assertThat(error.code()).isEqualTo("WORK_SESSION_TIME_OUT_OF_RANGE"));
+    assertThat(jdbc.queryForList("SELECT * FROM work_sessions")).isEqualTo(rows);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_intervals WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_changes WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(1);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM outbox_events WHERE aggregate_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(2);
+  }
+
+  @Test
+  void s10_resumeCannotPrecedeTheLastExtension() {
+    var original = extendedPaused();
+    assertThatThrownBy(
+            () ->
+                new ChangeWorkSession(
+                        store,
+                        Clock.fixed(
+                            original.startedAt().plusSeconds(10).minusNanos(1000), ZoneOffset.UTC))
+                    .resume(
+                        owner,
+                        original.id(),
+                        UUID.randomUUID(),
+                        new WorkSessionRevision(original.id(), 3)))
+        .isInstanceOfSatisfying(
+            com.apptolast.organization.domain.WorkSessionTransitionException.class,
+            error -> assertThat(error.code()).isEqualTo("WORK_SESSION_TIME_OUT_OF_RANGE"));
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT revision FROM work_sessions WHERE id=?", Long.class, original.id()))
+        .isEqualTo(3);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_changes WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(2);
+  }
+
+  private com.apptolast.organization.domain.SessionStart extendedPaused() {
+    var at = Instant.parse("2026-09-07T10:00:00Z");
+    var original =
+        new StartWorkSession(store, Clock.fixed(at, ZoneOffset.UTC), () -> Set.of("UTC"))
+            .start(owner, project, task, UUID.randomUUID(), 25)
+            .session();
+    new ChangeWorkSession(store, Clock.fixed(at.plusSeconds(1), ZoneOffset.UTC))
+        .pause(owner, original.id(), UUID.randomUUID(), new WorkSessionRevision(original.id(), 1));
+    new ExtendWorkSession(store, Clock.fixed(at.plusSeconds(10), ZoneOffset.UTC))
+        .extend(
+            owner, original.id(), UUID.randomUUID(), new WorkSessionRevision(original.id(), 2), 5);
+    return original;
+  }
+
+  @Test
+  void s10_closeCannotPrecedeTheLastExtension() {
+    var original = extendedPaused();
+    assertThatThrownBy(
+            () ->
+                new ChangeWorkSession(
+                        store,
+                        Clock.fixed(
+                            original.startedAt().plusSeconds(10).minusNanos(1000), ZoneOffset.UTC))
+                    .close(
+                        owner,
+                        original.id(),
+                        UUID.randomUUID(),
+                        new WorkSessionRevision(original.id(), 3),
+                        new com.apptolast.organization.domain.WorkSessionCloseNotes("", "")))
+        .isInstanceOfSatisfying(
+            com.apptolast.organization.domain.WorkSessionTransitionException.class,
+            error -> assertThat(error.code()).isEqualTo("WORK_SESSION_TIME_OUT_OF_RANGE"));
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT revision FROM work_sessions WHERE id=?", Long.class, original.id()))
+        .isEqualTo(3);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM work_session_changes WHERE session_id=?",
+                Integer.class,
+                original.id()))
+        .isEqualTo(2);
+    assertThat(store.active(owner)).contains(original);
+  }
+
+  @Test
+  void s10_resumeAdvancesTheLastDecisionWithItsAlreadyCapturedInstant() {
+    var original = extendedPaused();
+    var now = original.startedAt().plusSeconds(12).plusNanos(1000);
+    var result =
+        new ChangeWorkSession(store, Clock.fixed(now, ZoneOffset.UTC))
+            .resume(
+                owner, original.id(), UUID.randomUUID(), new WorkSessionRevision(original.id(), 3));
+    assertThat(
+            jdbc.queryForObject(
+                    "SELECT last_decision_at FROM work_sessions WHERE id=?",
+                    java.sql.Timestamp.class,
+                    original.id())
+                .toInstant())
+        .isEqualTo(now);
+    assertThat(result.receipt().occurredAt()).isEqualTo(now);
+    assertThat(result.receipt().after().runningSince()).isEqualTo(now);
+    assertThat(result.receipt().after().workedMicroseconds()).isEqualTo(1000000);
+  }
+
+  @Test
+  void s13_readsThePersistedEffectiveEndWithoutWriting() {
+    var original = extendedPaused();
+    var rows = jdbc.queryForList("SELECT * FROM work_sessions");
+    var changes = jdbc.queryForList("SELECT * FROM work_session_changes ORDER BY id");
+    var snapshot =
+        new ReadWorkSessionEnd(
+                store, Clock.fixed(original.startedAt().plusSeconds(11), ZoneOffset.UTC))
+            .read(owner, original.id());
+    assertThat(snapshot.state().session()).isEqualTo(original);
+    assertThat(snapshot.state().status()).isEqualTo("paused");
+    assertThat(snapshot.state().revision()).isEqualTo(3);
+    assertThat(snapshot.effectiveEndAt()).isEqualTo(original.plannedEndAt().plusSeconds(300));
+    assertThat(snapshot.serverNow()).isEqualTo(original.startedAt().plusSeconds(11));
+    assertThat(jdbc.queryForList("SELECT * FROM work_sessions")).isEqualTo(rows);
+    assertThat(jdbc.queryForList("SELECT * FROM work_session_changes ORDER BY id"))
+        .isEqualTo(changes);
+  }
 }

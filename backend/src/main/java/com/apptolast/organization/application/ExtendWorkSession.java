@@ -16,6 +16,11 @@ public final class ExtendWorkSession implements ExtendWorkSessionUseCase {
 
   public WorkSessionTransitionConfirmation extend(
       String owner, UUID session, UUID key, WorkSessionRevision expected, int additionalMinutes) {
+    if (additionalMinutes < 1 || additionalMinutes > 1440)
+      throw new com.apptolast.organization.domain.ValidationException(
+          java.util.List.of(
+              new com.apptolast.organization.domain.FieldError(
+                  "additionalMinutes", "OUT_OF_RANGE", "Debe estar entre 1 y 1440 minutos.")));
     return store.extend(
         owner,
         session,
@@ -24,8 +29,12 @@ public final class ExtendWorkSession implements ExtendWorkSessionUseCase {
         additionalMinutes,
         context -> {
           var before = context.state();
+          before.requireClose(expected.value());
           var now = clock.instant().truncatedTo(ChronoUnit.MICROS);
-          var end = context.effectiveEndAt().plus(additionalMinutes, ChronoUnit.MINUTES);
+          context.requireTime(now);
+          var base = now.isAfter(context.effectiveEndAt()) ? now : context.effectiveEndAt();
+          var end = base.plus(additionalMinutes, ChronoUnit.MINUTES);
+          before.requireTime(end);
           var after =
               new WorkSessionState(
                   before.session(),

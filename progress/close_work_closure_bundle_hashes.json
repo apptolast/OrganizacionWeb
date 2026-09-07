@@ -1,0 +1,30 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ReadWorkSessionChangesUseCase.java",
+    "sha256": "B844A9626EF032B00562A668BC96FD6F78698C4E2249A071E1D5026D572C4519"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ReadWorkSessionChanges.java",
+    "sha256": "E87396D9690FF43B5E0602B8E94FEBCAAA65CC6B558485445CB82990658F941B"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/WorkSessionTransitionQueries.java",
+    "sha256": "317C78FD32C00C18C9EDDA3832F24275F63B3BD9AB72052CF08EE9719EB666A3"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresWorkSessionStore.java",
+    "sha256": "42448A0180F171E0C40FB2E606DFCE94579348DE9D6D01C221CCDDFF4933765C"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ChangeWorkSession.java",
+    "sha256": "593DB572A21847D1CD6B1FC4CA70C114C7FECCB49F4C27DBC8DE17283598FC3E"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/domain/WorkSessionState.java",
+    "sha256": "C1D338BE657B3EE35AFB802DCDA44A7F245866910976D79DAE528B114F2EFDDD"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/domain/WorkSessionCloseNotes.java",
+    "sha256": "C1C9B239CDCCEB7B55815D3DF40EDEA37CCCB3E7D3A2F94F351BAAB2834D9994"
+  }
+]

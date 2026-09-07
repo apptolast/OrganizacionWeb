@@ -1037,3 +1037,24 @@ it("@s7 un GET posterior al cierre abortado no vuelve a abrir sesión antigua", 
   await act(async () => second(Response.json(anonymous)));
   expect(screen.getByLabelText("Usuario")).toBeVisible();
 });
+
+it("@s33 conserva la URL del cierre tras autenticarse sin transmitir el cierre", async () => {
+  const route =
+    "/proyectos/22345678-1234-1234-1234-123456789abc/tareas/32345678-1234-1234-1234-123456789abc/sesiones/12345678-1234-1234-1234-123456789abc";
+  window.history.replaceState(null, "", route);
+  const fetcher = vi
+    .spyOn(globalThis, "fetch")
+    .mockResolvedValueOnce(Response.json(anonymous))
+    .mockResolvedValueOnce(new Response(null, { status: 204 }))
+    .mockResolvedValueOnce(Response.json(authenticated))
+    .mockImplementation(() => new Promise(() => {}));
+  render(<SessionGate />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Iniciar sesión" }),
+  );
+  await screen.findByRole("button", { name: "Cerrar sesión" });
+  expect(location.pathname).toBe(route);
+  expect(
+    fetcher.mock.calls.some(([url]) => String(url).endsWith("/close")),
+  ).toBe(false);
+});

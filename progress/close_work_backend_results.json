@@ -1,0 +1,58 @@
+[
+  {
+    "suite": "CloseWorkSessionTest",
+    "errors": 0,
+    "failures": 0,
+    "tests": 20,
+    "skipped": 0
+  },
+  {
+    "suite": "ChangeWorkSessionTest",
+    "errors": 0,
+    "failures": 0,
+    "tests": 16,
+    "skipped": 0
+  },
+  {
+    "suite": "ReadWorkSessionChangesTest",
+    "errors": 0,
+    "failures": 0,
+    "tests": 5,
+    "skipped": 0
+  },
+  {
+    "suite": "ReadWorkSessionStateTest",
+    "errors": 0,
+    "failures": 0,
+    "tests": 5,
+    "skipped": 0
+  },
+  {
+    "suite": "WorkSessionTransitionStoreTest",
+    "errors": 0,
+    "failures": 0,
+    "tests": 66,
+    "skipped": 0
+  },
+  {
+    "suite": "WorkSessionClosureMigrationTest",
+    "errors": 0,
+    "failures": 0,
+    "tests": 1,
+    "skipped": 0
+  },
+  {
+    "suite": "WorkSessionTransitionMigrationTest",
+    "errors": 0,
+    "failures": 0,
+    "tests": 1,
+    "skipped": 0
+  },
+  {
+    "suite": "WorkSessionPersistenceTest",
+    "errors": 0,
+    "failures": 0,
+    "tests": 1,
+    "skipped": 0
+  }
+]

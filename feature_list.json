@@ -173,10 +173,12 @@
       "id": 16,
       "name": "close_work_session",
       "title": "Cerrar sesión",
-      "description": "Cerrar sesión: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
-      "acceptance": [],
+      "description": "Cerrar una sesión propia con tiempo neto definitivo, notas opcionales y recuperación durable; contrato aprobado por autorización global en features/close_work_session.feature.",
+      "acceptance": [
+        "Cumplir los escenarios @s1–@s41 de features/close_work_session.feature con revisión, pruebas y mutación."
+      ],
       "sdd": true,
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": 17,

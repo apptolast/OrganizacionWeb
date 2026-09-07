@@ -8,7 +8,7 @@ import {
 } from "./work-session-api";
 export type WorkSessionState = {
   session: SessionStart;
-  status: "running" | "paused";
+  status: "running" | "paused" | "closed";
   revision: string;
   changedAt: string;
   workedMicroseconds: string;
@@ -61,7 +61,9 @@ function isState(value: unknown): value is WorkSessionState {
       value,
       "session status revision changedAt workedMicroseconds runningSince",
     ) &&
-    (value.status === "running" || value.status === "paused") &&
+    (value.status === "running" ||
+      value.status === "paused" ||
+      value.status === "closed") &&
     isSessionStart(value.session) &&
     typeof value.revision === "string" &&
     /^[1-9][0-9]*$/.test(value.revision) &&
@@ -89,17 +91,29 @@ function decimal(value: unknown): value is string {
 export type WorkSessionChange = {
   id: string;
   sessionId: string;
-  action: "PAUSE" | "RESUME";
   occurredAt: string;
   before: WorkSessionState;
   after: WorkSessionState;
-};
+} & (
+  | { action: "PAUSE" | "RESUME" }
+  | {
+      action: "CLOSE";
+      closure: {
+        progressNote: string;
+        nextStep: string;
+        workDate: string;
+        closeZoneId: string;
+      };
+    }
+);
 export type WorkSessionIntent = {
   state: WorkSessionState;
   token: string;
   key: string;
-  action: "PAUSE" | "RESUME";
-};
+} & (
+  | { action: "PAUSE" | "RESUME" }
+  | { action: "CLOSE"; progressNote: string; nextStep: string }
+);
 export async function changeWorkSession(
   intent: WorkSessionIntent,
   signal?: AbortSignal,
@@ -111,7 +125,13 @@ export async function changeWorkSession(
       credentials: "same-origin",
       cache: "no-store",
       signal,
-      body: "{}",
+      body:
+        intent.action === "CLOSE"
+          ? JSON.stringify({
+              progressNote: intent.progressNote,
+              nextStep: intent.nextStep,
+            })
+          : "{}",
       headers: {
         "Content-Type": "application/json",
         "Idempotency-Key": intent.key,
@@ -127,7 +147,8 @@ export async function changeWorkSession(
       `/api/v1/work-session-changes/${value.id}` ||
     value.action !== intent.action ||
     value.before.revision !== intent.state.revision ||
-    !sameSession(value.before.session, intent.state.session)
+    !sameSession(value.before.session, intent.state.session) ||
+    !sameNotes(value, intent)
   )
     throw new Error("Cambio de sesión inválido");
   return value;
@@ -135,15 +156,29 @@ export async function changeWorkSession(
 
 function isChange(value: unknown): value is WorkSessionChange {
   return (
-    exact(value, "id sessionId action occurredAt before after") &&
+    ((exact(value, "id sessionId action occurredAt before after closure") &&
+      value.action === "CLOSE" &&
+      exact(value.closure, "progressNote nextStep workDate closeZoneId") &&
+      validNote(value.closure.progressNote) &&
+      validNote(value.closure.nextStep) &&
+      typeof value.closure.closeZoneId === "string" &&
+      typeof value.closure.workDate === "string" &&
+      /^\d{4}-\d{2}-\d{2}$/.test(value.closure.workDate) &&
+      microseconds(value.closure.workDate + "T00:00:00Z") !== null) ||
+      (exact(value, "id sessionId action occurredAt before after") &&
+        value.action !== "CLOSE")) &&
     uuid(value.id) &&
     isState(value.before) &&
     isState(value.after) &&
     (value.action === "PAUSE"
       ? value.before.status === "running" && value.after.status === "paused"
-      : value.action === "RESUME" &&
-        value.before.status === "paused" &&
-        value.after.status === "running") &&
+      : value.action === "CLOSE"
+        ? (value.before.status === "running" ||
+            value.before.status === "paused") &&
+          value.after.status === "closed"
+        : value.action === "RESUME" &&
+          value.before.status === "paused" &&
+          value.after.status === "running") &&
     microseconds(value.occurredAt) === microseconds(value.after.changedAt) &&
     microseconds(value.after.changedAt)! >=
       microseconds(value.before.changedAt)! &&
@@ -152,10 +187,19 @@ function isChange(value: unknown): value is WorkSessionChange {
     BigInt(value.after.revision) === BigInt(value.before.revision) + 1n &&
     BigInt(value.after.workedMicroseconds) ===
       BigInt(value.before.workedMicroseconds) +
-        (value.action === "PAUSE"
+        (value.before.status === "running"
           ? microseconds(value.after.changedAt)! -
             microseconds(value.before.changedAt)!
           : 0n)
+  );
+}
+
+export function validNote(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    !/[\uD800-\uDFFF]/u.test(value) &&
+    !value.includes("\u0000") &&
+    [...value].length <= 2000
   );
 }
 
@@ -195,10 +239,37 @@ export async function recoverWorkSessionChange(
     !isChange(value) ||
     value.action !== intent.action ||
     value.before.revision !== intent.state.revision ||
-    !sameSession(value.before.session, intent.state.session)
+    !sameSession(value.before.session, intent.state.session) ||
+    !sameNotes(value, intent)
   )
     throw new Error("Cambio de sesión inválido");
   return value;
+}
+
+export async function readWorkSessionClosure(id: string, signal?: AbortSignal) {
+  const response = await apiRequest(`/api/v1/work-sessions/${id}/closure`, {
+    credentials: "same-origin",
+    cache: "no-store",
+    signal,
+  });
+  if (response.status !== 200) throw response;
+  const value: unknown = await response.json();
+  if (
+    !isChange(value) ||
+    value.action !== "CLOSE" ||
+    !sameId(value.sessionId, id)
+  )
+    throw new Error("Cambio de sesión inválido");
+  return value;
+}
+
+function sameNotes(value: WorkSessionChange, intent: WorkSessionIntent) {
+  return (
+    intent.action !== "CLOSE" ||
+    (value.action === "CLOSE" &&
+      value.closure.progressNote === intent.progressNote &&
+      value.closure.nextStep === intent.nextStep)
+  );
 }
 
 const stateErrors = {

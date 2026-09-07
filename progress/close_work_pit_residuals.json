@@ -1,0 +1,42 @@
+[
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.domain.OutboxMessage",
+    "method": "validationCode",
+    "line": "173",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "description": "changed conditional boundary",
+    "indexes": "725",
+    "blocks": "115"
+  },
+  {
+    "status": "NO_COVERAGE",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWorkSessionStore",
+    "method": "lambda$commit$0",
+    "line": "136",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "description": "replaced return value with null for com/apptolast/organization/adapter/persistence/PostgresWorkSessionStore::lambda$commit$0",
+    "indexes": "37",
+    "blocks": "3"
+  },
+  {
+    "status": "NO_COVERAGE",
+    "class": "com.apptolast.organization.adapter.persistence.PostgresWorkSessionStore",
+    "method": "lambda$commit$2",
+    "line": "142",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "description": "replaced return value with null for com/apptolast/organization/adapter/persistence/PostgresWorkSessionStore::lambda$commit$2",
+    "indexes": "32",
+    "blocks": "5"
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.adapter.http.WorkSessionStateController",
+    "method": "note",
+    "line": "248",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator",
+    "description": "replaced return value with \"\" for com/apptolast/organization/adapter/http/WorkSessionStateController::note",
+    "indexes": "17",
+    "blocks": "4"
+  }
+]

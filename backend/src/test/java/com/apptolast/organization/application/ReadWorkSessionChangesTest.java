@@ -45,4 +45,16 @@ class ReadWorkSessionChangesTest {
     verify(queries).changeDetail("owner", id);
     verifyNoMoreInteractions(queries);
   }
+
+  @Test
+  void s26_closureReturnsDurableReceiptByOwnedSession() {
+    var session = UUID.randomUUID();
+    var receipt = mock(WorkSessionTransitionReceipt.class);
+    var queries = mock(WorkSessionTransitionQueries.class);
+    when(queries.closure("owner", session)).thenReturn(Optional.of(receipt));
+    ReadWorkSessionChangesUseCase useCase = new ReadWorkSessionChanges(queries);
+    assertThat(useCase.closure("owner", session)).isSameAs(receipt);
+    verify(queries).closure("owner", session);
+    verifyNoMoreInteractions(queries);
+  }
 }

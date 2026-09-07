@@ -62,3 +62,15 @@ reports/
 /progress/pause_resume_frontend_mutation_raw.json
 /progress/pause_resume_mutation_preparation_hashes.json
 /progress/pause_resume_pit_process_sample.json
+
+# Evidencia XML local del primer checkpoint16; manifest e informe versionados.
+/progress/close_work_first_bundle_xml/
+/progress/close_work_backend_xml/
+/frontend/.stryker-tmp-close-work-session/
+
+# Evidencia de mutación16 preservada localmente; inventarios e informes versionados.
+/progress/close_work_pit_final/
+/progress/close_work_stryker_original.json
+/progress/close_publisher_year_one_xml/
+/frontend/.stryker-tmp-close-work-session-replay/
+/progress/close_work_boundary_final/

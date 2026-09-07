@@ -10,9 +10,16 @@ public record WorkSessionState(
     long workedMicroseconds,
     Instant runningSince) {
   public void requireTransition(long expected, boolean pause) {
+    requireChange(expected, status.equals(pause ? "running" : "paused"));
+  }
+
+  public void requireClose(long expected) {
+    requireChange(expected, status.equals("running") || status.equals("paused"));
+  }
+
+  private void requireChange(long expected, boolean compatible) {
     if (revision != expected) throw new WorkSessionTransitionException("PRECONDITION_FAILED");
-    if (!status.equals(pause ? "running" : "paused"))
-      throw new WorkSessionTransitionException("WORK_SESSION_STATE_CONFLICT");
+    if (!compatible) throw new WorkSessionTransitionException("WORK_SESSION_STATE_CONFLICT");
     if (revision == Long.MAX_VALUE)
       throw new WorkSessionTransitionException("WORK_SESSION_REVISION_EXHAUSTED");
   }

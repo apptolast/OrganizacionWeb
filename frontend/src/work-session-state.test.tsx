@@ -1150,3 +1150,61 @@ it("@s32 a failed by-key check remains uncertain without authorizing resend", as
     fetcher.mock.calls.filter(([, init]) => init.method === "POST"),
   ).toHaveLength(1);
 });
+
+it("@s32 enters the stable close URL without transmitting a command", async () => {
+  const fetcher = vi.fn().mockResolvedValue(response());
+  vi.stubGlobal("fetch", fetcher);
+  const previous = location.pathname;
+  render(<WorkSessionStatePanel session={session} onAccessFailure={vi.fn()} />);
+  const entry = await screen.findByRole("link", {
+    name: "Cerrar sesión de trabajo",
+  });
+  expect(entry).toHaveAttribute(
+    "href",
+    `/proyectos/${session.projectId}/tareas/${session.taskId}/sesiones/${session.id}`,
+  );
+  fireEvent.click(entry);
+  expect(location.pathname).toBe(
+    `/proyectos/${session.projectId}/tareas/${session.taskId}/sesiones/${session.id}`,
+  );
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  history.replaceState(null, "", previous);
+});
+
+it("@s24 a closed state cannot offer pause resume or another close", async () => {
+  const closed = {
+    ...state,
+    status: "closed",
+    revision: "2",
+    changedAt: snapshot.serverNow,
+    workedMicroseconds: "1000000",
+    runningSince: null,
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json(
+        { ...snapshot, state: closed },
+        {
+          headers: {
+            "Work-Session-Revision": `work-session-${session.id}-2`,
+          },
+        },
+      ),
+    ),
+  );
+  render(<WorkSessionStatePanel session={session} onAccessFailure={vi.fn()} />);
+  expect(await screen.findByText("Sesión cerrada")).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: /^(Pausar|Reanudar)$/ }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("link", { name: "Cerrar sesión de trabajo" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("link", { name: "Ver cierre de la sesión" }),
+  ).toHaveAttribute(
+    "href",
+    `/proyectos/${session.projectId}/tareas/${session.taskId}/sesiones/${session.id}`,
+  );
+});

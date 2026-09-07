@@ -74,7 +74,7 @@ public final class WorkSessionStateController {
   }
 
   @GetMapping("/api/v1/work-session-changes/{id}")
-  public ReceiptResponse receipt(
+  public Object receipt(
       Principal principal,
       @PathVariable String id,
       @RequestParam org.springframework.util.MultiValueMap<String, String> parameters) {
@@ -83,8 +83,18 @@ public final class WorkSessionStateController {
         receipts.detail(principal.getName(), BlockController.identifier(id, "id")));
   }
 
+  @GetMapping("/api/v1/work-sessions/{id}/closure")
+  public Object closure(
+      Principal principal,
+      @PathVariable String id,
+      @RequestParam org.springframework.util.MultiValueMap<String, String> parameters) {
+    if (!parameters.isEmpty()) throw BlockController.invalid("query", "INVALID_VALUE");
+    return ReceiptResponse.from(
+        receipts.closure(principal.getName(), BlockController.identifier(id, "id")));
+  }
+
   @GetMapping("/api/v1/work-session-changes/by-request/{key}")
-  public ReceiptResponse byRequest(
+  public Object byRequest(
       Principal principal,
       @PathVariable String key,
       @RequestParam org.springframework.util.MultiValueMap<String, String> parameters) {
@@ -115,7 +125,7 @@ public final class WorkSessionStateController {
   public record SnapshotResponse(StateResponse state, Instant serverNow, String netMicroseconds) {}
 
   @PostMapping(
-      value = "/api/v1/work-sessions/{id}/{action:pause|resume}",
+      value = "/api/v1/work-sessions/{id}/{action:pause|resume|close}",
       consumes = "application/json")
   public ResponseEntity<?> change(
       Principal principal,
@@ -161,11 +171,19 @@ public final class WorkSessionStateController {
     if (body == null || !body.isObject()) throw BlockController.invalid("body", "INVALID_TYPE");
     var fields = new java.util.TreeSet<String>();
     body.fieldNames().forEachRemaining(fields::add);
+    if (action.equals("close")) fields.removeAll(java.util.Set.of("progressNote", "nextStep"));
     if (!fields.isEmpty()) throw BlockController.invalid(fields.first(), "UNKNOWN_FIELD");
     var confirmed =
-        action.equals("pause")
-            ? change.pause(principal.getName(), sessionId, requestKey, expected)
-            : change.resume(principal.getName(), sessionId, requestKey, expected);
+        action.equals("close")
+            ? change.close(
+                principal.getName(),
+                sessionId,
+                requestKey,
+                expected,
+                new WorkSessionCloseNotes(note(body, "progressNote"), note(body, "nextStep")))
+            : action.equals("pause")
+                ? change.pause(principal.getName(), sessionId, requestKey, expected)
+                : change.resume(principal.getName(), sessionId, requestKey, expected);
     return ResponseEntity.status(confirmed.replayed() ? 200 : 201)
         .location(URI.create("/api/v1/work-session-changes/" + confirmed.receipt().id()))
         .body(ReceiptResponse.from(confirmed.receipt()));
@@ -196,7 +214,16 @@ public final class WorkSessionStateController {
       Instant occurredAt,
       StateResponse before,
       StateResponse after) {
-    static ReceiptResponse from(WorkSessionTransitionReceipt receipt) {
+    static Object from(WorkSessionTransitionReceipt receipt) {
+      if (receipt.action().equals("CLOSE"))
+        return new CloseReceiptResponse(
+            receipt.id(),
+            receipt.sessionId(),
+            receipt.action(),
+            receipt.occurredAt(),
+            StateResponse.from(receipt.before()),
+            StateResponse.from(receipt.after()),
+            receipt.closure());
       return new ReceiptResponse(
           receipt.id(),
           receipt.sessionId(),
@@ -205,5 +232,21 @@ public final class WorkSessionStateController {
           StateResponse.from(receipt.before()),
           StateResponse.from(receipt.after()));
     }
+  }
+
+  public record CloseReceiptResponse(
+      UUID id,
+      UUID sessionId,
+      String action,
+      Instant occurredAt,
+      StateResponse before,
+      StateResponse after,
+      WorkSessionClosure closure) {}
+
+  private static String note(com.fasterxml.jackson.databind.JsonNode body, String field) {
+    var value = body.get(field);
+    if (value == null || value.isNull()) return null;
+    if (!value.isTextual()) throw BlockController.invalid(field, "INVALID_VALUE");
+    return value.textValue();
   }
 }

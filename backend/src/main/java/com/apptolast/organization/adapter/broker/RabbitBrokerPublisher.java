@@ -51,40 +51,45 @@ public final class RabbitBrokerPublisher implements BrokerPublisher {
           case "BlockChanged.v1" -> "block-changed";
           case "WorkSessionStarted.v1" -> "work-session-started";
           case "WorkSessionStateChanged.v1" -> "work-session-state-changed";
+          case "WorkSessionClosed.v1" -> "work-session-closed";
           default -> throw new IllegalArgumentException("Unsupported event type");
         };
     String queue =
-        kind.equals("work-session-state-changed")
-            ? "organization.work-session-state-changed.v1"
-            : kind.equals("work-session-started")
-                ? "organization.work-session-started.v1"
-                : kind.equals("block-changed")
-                    ? "organization.block-changed.v1"
-                    : kind.equals("block-planned")
-                        ? "organization.block-planned.v1"
-                        : kind.equals("task-status-changed")
-                            ? "organization.task-status-changed.v1"
-                            : kind.equals("subtask-created")
-                                ? "organization.subtask-created.v1"
-                                : kind.equals("task-created")
-                                    ? "organization.task-created.v1"
-                                    : "organization.project-" + kind + ".v1";
+        kind.equals("work-session-closed")
+            ? "organization.work-session-closed.v1"
+            : kind.equals("work-session-state-changed")
+                ? "organization.work-session-state-changed.v1"
+                : kind.equals("work-session-started")
+                    ? "organization.work-session-started.v1"
+                    : kind.equals("block-changed")
+                        ? "organization.block-changed.v1"
+                        : kind.equals("block-planned")
+                            ? "organization.block-planned.v1"
+                            : kind.equals("task-status-changed")
+                                ? "organization.task-status-changed.v1"
+                                : kind.equals("subtask-created")
+                                    ? "organization.subtask-created.v1"
+                                    : kind.equals("task-created")
+                                        ? "organization.task-created.v1"
+                                        : "organization.project-" + kind + ".v1";
     String routing =
-        kind.equals("work-session-state-changed")
-            ? "work-session.state-changed.v1"
-            : kind.equals("work-session-started")
-                ? "work-session.started.v1"
-                : kind.equals("block-changed")
-                    ? "block.changed.v1"
-                    : kind.equals("block-planned")
-                        ? "block.planned.v1"
-                        : kind.equals("task-status-changed")
-                            ? "task.status-changed.v1"
-                            : kind.equals("subtask-created")
-                                ? "subtask.created.v1"
-                                : kind.equals("task-created")
-                                    ? "task.created.v1"
-                                    : "project." + kind + ".v1";
+        kind.equals("work-session-closed")
+            ? "work-session.closed.v1"
+            : kind.equals("work-session-state-changed")
+                ? "work-session.state-changed.v1"
+                : kind.equals("work-session-started")
+                    ? "work-session.started.v1"
+                    : kind.equals("block-changed")
+                        ? "block.changed.v1"
+                        : kind.equals("block-planned")
+                            ? "block.planned.v1"
+                            : kind.equals("task-status-changed")
+                                ? "task.status-changed.v1"
+                                : kind.equals("subtask-created")
+                                    ? "subtask.created.v1"
+                                    : kind.equals("task-created")
+                                        ? "task.created.v1"
+                                        : "project." + kind + ".v1";
     com.rabbitmq.client.Connection connection = null;
     try {
       connection = factory.newConnection();

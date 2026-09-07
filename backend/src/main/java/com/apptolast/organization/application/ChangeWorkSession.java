@@ -14,6 +14,63 @@ public final class ChangeWorkSession implements ChangeWorkSessionUseCase {
     this.clock = clock;
   }
 
+  public WorkSessionTransitionConfirmation close(
+      String owner,
+      UUID session,
+      UUID key,
+      WorkSessionRevision expected,
+      com.apptolast.organization.domain.WorkSessionCloseNotes notes) {
+    return store.commit(
+        owner,
+        session,
+        key,
+        "CLOSE",
+        expected,
+        notes,
+        before -> {
+          before.requireClose(expected.value());
+          var now = clock.instant().truncatedTo(ChronoUnit.MICROS);
+          before.requireTime(now);
+          var worked =
+              before.workedMicroseconds()
+                  + (before.status().equals("running")
+                      ? ChronoUnit.MICROS.between(before.runningSince(), now)
+                      : 0);
+          var after =
+              new WorkSessionState(
+                  before.session(), "closed", before.revision() + 1, now, worked, null);
+          java.time.ZoneId zone;
+          try {
+            zone = java.time.ZoneId.of(before.session().zoneId());
+          } catch (java.time.DateTimeException unknownZone) {
+            zone = java.time.ZoneId.of("UTC");
+          }
+          var day = now.atZone(zone).toLocalDate();
+          if (day.getYear() < 1 || day.getYear() > 9999)
+            throw new com.apptolast.organization.domain.WorkSessionTransitionException(
+                "WORK_SESSION_TIME_OUT_OF_RANGE");
+          var closure =
+              new WorkSessionClosure(notes.progressNote(), notes.nextStep(), day, zone.getId());
+          var receipt =
+              new WorkSessionTransitionReceipt(
+                  UUID.randomUUID(), session, "CLOSE", now, before, after, closure);
+          var event =
+              new WorkSessionClosed(
+                  UUID.randomUUID(),
+                  session,
+                  owner,
+                  now,
+                  1,
+                  "WorkSessionClosed.v1",
+                  Long.toString(after.revision()),
+                  before.status(),
+                  Long.toString(worked),
+                  day,
+                  zone.getId());
+          return new WorkSessionTransition(receipt, null, event);
+        });
+  }
+
   public WorkSessionTransitionConfirmation pause(
       String owner, UUID session, UUID key, WorkSessionRevision expected) {
     return transition(owner, session, key, expected, true);

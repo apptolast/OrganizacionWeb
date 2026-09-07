@@ -1,17 +1,27 @@
-# Sesión actual — contrato de cierre de sesiones
+# Sesión actual — cierre16 aprobado; preparación17
 
-Feature15 tiene dictamen local APPROVED y status done en judge_pause_resume_final.md. PR14 (codex/pause-resume-session) permanece draft para integración final. Fuente productiva validada por CI34075064014 SUCCESS6b8f360: init/build/108E2E/smoke. Dos tests posteriores9fc414e tienen82/82green y revisión; CI34076019493 activa, watch34749. No nuevas escrituras de producto15 pendientes. Root conserva commits finales de informes/replay aún por publicar juntos, sin cancelar CI sólo por documentación.
+## Estado
 
-PIT523/525K,2NC,0errores/timeouts;315hashesidénticos. Stryker741/861K,119S/1NC,0errores/timeouts;89hashesidénticos. Replay complementario seisfirmasK,17/18K y1RuntimeError explícito;90hashesidénticos. Todos los residuos fueron revisados sin reclasificar. UX515/35axe0 en tres motores y zoom200. Evidencia detallada, límites y hashes en los dictámenes; historial actualizado.
+Feature16 close_work_session está done y su dictamen final APPROVED: progress/judge_close_work_session_final.md. Contrato41 escenarios/113 ejemplos declarados, sin equipararlos al número de tests. Feature15 está fusionada en main b2ea1f211068e7d93c74d0a8d7e8717ec04323c3, CI34078825723 SUCCESS. Feature17 aviso/ampliación y18 historial siguen pendientes;19–30 autorizadas después del MVP. Hoy es objetivo, no garantía ni predicción de cuota. A revisa la estimación tras cerrar16.
 
-## Trabajo siguiente
+COMMON OrganizacionWeb-backend, rama codex/close-work-session. PR15 draft: root publica el corte final tras integrar602cf39 y documentos. Última CI34082838516 SUCCESS sobre910f405, init/build/E2E/publicador. La nueva publicación requiere su CI antes de ready/merge y comprobación posterior de main. User realiza squash desde GitHub; Claude parado, no volver a preguntar por origen. Root sólo revisión/documentación/Git; agentes escriben producción/tests.
 
-Preparar especificación y Gherkin de16 close_work_session bajo autorización global; no escribir código16 antes del contrato revisado. Implementación coordinada en una sola feature a la vez. Reutilizar arquitectura14/15, conservar recibos históricos y sus rutas. La propuesta de reducir arranques de Testcontainers es sólo lectura y no altera gates15; considerar su coste/beneficio para campañas posteriores.
+## Gates finales16
 
-Después17 aviso y18 historial, validación y despliegue del MVP. Hoy sigue siendo objetivo, sin garantía de terminar el proyecto completo o de cuota. Acceso SSH publickey rechazado y dominio pendientes de respuestas ya solicitadas; no repetir preguntas mientras avance trabajo independiente. No se ha desplegado el producto ni se habilita uso habitual antes del cierre16.
+Init17230 EXIT0 b68a48:1985 pruebas Java/83 suites sin fallos/errores/omitidos,1721 frontend/35 archivos,36Node y lint/formato. Log SHA723EA9B3F025F587D91632D14616B786A31CD612839791DF32E619B0D52E15E4. Build38374 EXIT0 3d8828, SHAAB790B52324C82D429C88E5BC8A7F2E60B4EDEF167C3E9BE394B9CF0DC2A6838. No gates locales activos.
 
-## Coordinación
+115E2E EXIT0 a958e5; smoke12PASS EXIT0b2d649 con ACK perdido/reinicio/Rabbit; UX515 medidas/35axe0 en3 motores, texto200 y zoom nativo200. Paquetes y límites en dictamen/índice41. Artefactos de UX revisados preservados en .e2e-work/close-work-ux-reviewed-20260907.18080 libre, stack8080 intacto. Sólo pruebas/docs posteriores a esos gates; no repetirlos sin cambios de producción o defecto concreto.
 
-COMMON OrganizacionWeb-backend es integración. Root controla Git/revisiones/documentación; no escribe producción ni tests. A/C/frontend quedan disponibles para16. pause-http conserva cinco snapshots locales, nunca fusionar su rama entera. start-work-final conserva evidencia14. El merge6b8f360 sólo reconcilió squash14 tras verificar baseline idéntico; no cambió contenido.
+PIT original516/520=99,23 %,2S/2NC,0errores/timeouts,321 hashes iguales, EXIT0ce3127. XMLSHA9CF3C8A44FB24E8EC1991BFDAE532D7E42B13A8D778D23CE663057E44787ED75. Stryker original1104K/169S/2NC/2RuntimeError,86,59 %global/78,29 %Reader,90hashesiguales,EXIT0aea3fb. JSONSHA F99173A0C635EFA7D5A2F9D3B9B9653B3A71C5C34B578BB6D35AC993C6EC43A0.
 
-Ponytail full/Caveman lite. No tocar .e2e-work/read-review-state.json, .e2e-work/read-review-stop, frontend/.stryker-tmp-availability-replay ni progress/proposal_schedule_block_time.md, ni borrar/mover ascendientes. No force-push, limpieza global ni intervención en stack8080. V14 muestra M sin diff de contenido: no reescribirla. Evidencia raw local preservada; sólo informes/manifiestos versionados.
+Refuerzos revisados8ecf0f8/602cf39 no cambian producción. ReplayPIT7/7K EXIT0e01e1a,322hashesiguales; Strykerattempt3 15/15K EXIT0 002701,12firmas+3extras,91hashesiguales. Attempt1 selección incorrecta yattempt2 con3S preservados. No reclasificar originales ni sumar scores. Todos los informes están en progress/.
+
+## Trabajo17
+
+C Fermat convierte propuesta_end_time_notification.md en sección normativa17, todavía sin código ni Gherkin. Root ratificó fin efectivo separado, plannedEndAt original inmutable, ampliación explícita1–1440minutos desde max(fin,now), revisión compartida, changedAt/runningSince/intervalos intactos, marca interna de última decisión para validar reloj sin relajar State6. Revisar normativa antes de Gherkin y revisión independiente. B terminó cierre16; A prepara revisión de estimación restante. No implementación17 hasta contrato previo revisado, autorización global vigente sin preguntar otra vez.
+
+## Despliegue y seguridad operativa
+
+SSH publickey rechazado y dominio pendientes de respuestas ya solicitadas; no repetir mientras exista trabajo independiente. Lectura local2c31d1 no encontró alias; ninguna nueva conexión ni lectura de claves privadas. No se ha desplegado el producto. Capacidad histórica45MiB no es RAM libre actual. Ver docs/deployment-readiness.md y progress/mvp_deployment_remaining.md.
+
+Ponytail full/Caveman lite. Sólo staging explícito. V14 aparece M sin diff de contenido: no reescribir ni stage. No force-push ni limpieza global. Prohibido leer/borrar/mover/reintentar .e2e-work/read-review-state.json, .e2e-work/read-review-stop, frontend/.stryker-tmp-availability-replay, progress/proposal_schedule_block_time.md o limpiar sus ascendientes. No tocar stack8080. Árboles aislados históricos contienen evidencia/snapshots: nunca fusionar sus ramas completas. Logs/raw/XML preservados localmente; informes/manifiestos versionados.

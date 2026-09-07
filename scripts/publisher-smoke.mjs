@@ -178,6 +178,7 @@ function outbox(id, type = "ProjectCreated.v1", taskId, revision) {
       "TaskStatusChanged.v1",
       "WorkSessionStarted.v1",
       "WorkSessionStateChanged.v1",
+      "WorkSessionClosed.v1",
     ].includes(type),
   );
   assert.match(id, /^[0-9a-f-]{36}$/i);
@@ -262,6 +263,13 @@ function assertMessage(row, received) {
       "plannedMinutes",
       "plannedEndAt",
       "zoneId",
+    ],
+    "WorkSessionClosed.v1": [
+      "revision",
+      "fromStatus",
+      "workedMicroseconds",
+      "workDate",
+      "closeZoneId",
     ],
     "WorkSessionStateChanged.v1": [
       "action",
@@ -1241,6 +1249,225 @@ try {
   assert.deepEqual(transitionCounts(), countsBeforeRecovery);
   console.log(
     "PASS pause_resume_session @s25/@s26: lost PAUSE ACK, later RESUME, two exact persistent events, real backend restart and immutable C/K recovery without outbox",
+  );
+  const closePath = `/api/v1/work-sessions/${recoveredStart.id}/close`;
+  const closeKey = randomUUID();
+  const closeNotes = {
+    progressNote: "  Avance real\n",
+    nextStep: "Continuar después 😀",
+  };
+  const closeToken = currentStateResponse.headers()["work-session-revision"];
+  docker(["stop", "rabbitmq"], undefined, 30000);
+  await postWithLostAck(
+    closePath,
+    {
+      ...(await csrfHeaders(application)),
+      Origin: origin,
+      "Idempotency-Key": closeKey,
+      "Work-Session-Revision": closeToken,
+    },
+    closeNotes,
+  );
+  const closeLookup = `/api/v1/work-session-changes/by-request/${closeKey}`;
+  const closeResponse = await application.get(closeLookup);
+  assert.equal(closeResponse.status(), 200);
+  const closeReceipt = await closeResponse.json();
+  assert.deepEqual(
+    Object.keys(closeReceipt).sort(),
+    [
+      "id",
+      "sessionId",
+      "action",
+      "occurredAt",
+      "before",
+      "after",
+      "closure",
+    ].sort(),
+  );
+  assert.equal(closeReceipt.sessionId, recoveredStart.id);
+  assert.equal(closeReceipt.action, "CLOSE");
+  assert.deepEqual(closeReceipt.before, resumeReceipt.after);
+  assert.deepEqual(closeReceipt.after.session, recoveredStart);
+  assert.equal(closeReceipt.after.status, "closed");
+  assert.equal(closeReceipt.after.revision, "4");
+  assert.equal(closeReceipt.after.runningSince, null);
+  assert.equal(closeReceipt.after.changedAt, closeReceipt.occurredAt);
+  assert.match(
+    closeReceipt.occurredAt,
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?Z$/,
+  );
+  assert.deepEqual(closeReceipt.closure, {
+    ...closeNotes,
+    workDate: closeReceipt.occurredAt.slice(0, 10),
+    closeZoneId: "UTC",
+  });
+  const closeType = "WorkSessionClosed.v1";
+  const closePending = await eventually(
+    "CLOSE committed while broker unavailable",
+    () => {
+      const row = outbox(recoveredStart.id, closeType);
+      return row?.status === "pending" && row.attempts >= 1 ? row : false;
+    },
+    30,
+  );
+  assert.equal(closePending.last_error_code, "BROKER_UNAVAILABLE");
+  assert.equal(closePending.published_at, null);
+  assert.deepEqual(closePending.payload, {
+    eventId: closePending.event_id,
+    aggregateId: recoveredStart.id,
+    ownerId: env.APP_AUTH_USERNAME,
+    occurredAt: closeReceipt.occurredAt,
+    schemaVersion: 1,
+    type: closeType,
+    revision: "4",
+    fromStatus: "running",
+    workedMicroseconds: closeReceipt.after.workedMicroseconds,
+    workDate: closeReceipt.closure.workDate,
+    closeZoneId: closeReceipt.closure.closeZoneId,
+  });
+  function closureCounts() {
+    return JSON.parse(
+      docker([
+        "exec",
+        "-T",
+        "postgres",
+        "psql",
+        "-U",
+        env.DB_USERNAME,
+        "-d",
+        "organization",
+        "-At",
+        "-c",
+        `SELECT json_build_object('sessions',(SELECT count(*) FROM work_sessions WHERE owner_id='${env.APP_AUTH_USERNAME}'),'open',(SELECT count(*) FROM work_sessions WHERE owner_id='${env.APP_AUTH_USERNAME}' AND status IN ('running','paused')),'changes',(SELECT count(*) FROM work_session_changes WHERE session_id='${recoveredStart.id}'),'intervals',(SELECT count(*) FROM work_session_intervals WHERE session_id='${recoveredStart.id}'),'events',(SELECT count(*) FROM outbox_events WHERE aggregate_id='${recoveredStart.id}' AND event_type='WorkSessionClosed.v1'),'net',(SELECT sum((extract(epoch FROM end_at-start_at)*1000000)::bigint)::text FROM work_session_intervals WHERE session_id='${recoveredStart.id}'))`,
+      ]),
+    );
+  }
+  const closeCounts = closureCounts();
+  assert.deepEqual(closeCounts, {
+    sessions: 1,
+    open: 0,
+    changes: 3,
+    intervals: 2,
+    events: 1,
+    net: closeReceipt.after.workedMicroseconds,
+  });
+  assert.deepEqual(
+    await (await application.get("/api/v1/work-sessions/active")).json(),
+    { session: null },
+  );
+  docker(["start", "rabbitmq"], undefined, 30000);
+  const closePublished = await eventually(
+    "CLOSE retries and publishes after broker recovery",
+    () => {
+      const row = outbox(recoveredStart.id, closeType);
+      return row?.status === "published" ? row : false;
+    },
+  );
+  assert.equal(closePublished.event_id, closePending.event_id);
+  assert.deepEqual(closePublished.payload, closePending.payload);
+  assert.ok(closePublished.attempts > closePending.attempts);
+  const closeQueue = "organization.work-session-closed.v1";
+  const closeMessages = await eventually(
+    "eleventh queue receives original CLOSE event",
+    () => {
+      const messages = management(`queues/organization/${closeQueue}/get`, {
+        count: 100,
+        ackmode: "ack_requeue_true",
+        encoding: "auto",
+        truncate: 1000000,
+      });
+      return messages.some(
+        (item) => item.properties.message_id === closePublished.event_id,
+      )
+        ? messages
+        : false;
+    },
+  );
+  assertMessage(closePublished, closeMessages);
+  const closeTopology = management(`queues/organization/${closeQueue}`);
+  assert.equal(closeTopology.durable, true);
+  assert.equal(closeTopology.type, "quorum");
+  assert.ok(
+    management(
+      `bindings/organization/e/organization.events/q/${closeQueue}`,
+    ).some((binding) => binding.routing_key === "work-session.closed.v1"),
+  );
+  assert.match(closePublished.event_id, /^[0-9a-f-]{36}$/i);
+  docker([
+    "exec",
+    "-T",
+    "postgres",
+    "psql",
+    "-U",
+    env.DB_USERNAME,
+    "-d",
+    "organization",
+    "-At",
+    "-c",
+    `DELETE FROM outbox_events WHERE event_id='${closePublished.event_id}' AND status='published'`,
+  ]);
+  const afterClosePublication = { ...closeCounts, events: 0 };
+  assert.deepEqual(closureCounts(), afterClosePublication);
+  const beforeCloseRestart = serviceSnapshot("backend");
+  const databaseBeforeCloseRestart = serviceSnapshot("postgres");
+  docker(["restart", "backend"], undefined, 30000);
+  await eventually(
+    "CLOSE receipt survives API restart without published outbox",
+    async () => {
+      const response = await application
+        .get(closeLookup, { timeout: 2000 })
+        .catch(() => null);
+      if (!response || response.status() !== 200) return false;
+      assert.deepEqual(await response.json(), closeReceipt);
+      return true;
+    },
+  );
+  assert.equal(serviceSnapshot("backend").id, beforeCloseRestart.id);
+  assert.notEqual(
+    serviceSnapshot("backend").startedAt,
+    beforeCloseRestart.startedAt,
+  );
+  assert.deepEqual(serviceSnapshot("postgres"), databaseBeforeCloseRestart);
+  for (const path of [
+    closeLookup,
+    `/api/v1/work-session-changes/${closeReceipt.id}`,
+    `/api/v1/work-sessions/${recoveredStart.id}/closure`,
+  ]) {
+    const response = await application.get(path);
+    assert.equal(response.status(), 200);
+    assert.equal(response.headers().location, undefined);
+    assert.deepEqual(await response.json(), closeReceipt);
+  }
+  const closeReplay = await application.post(closePath, {
+    headers: {
+      ...(await csrfHeaders(application)),
+      Origin: origin,
+      "Idempotency-Key": closeKey,
+      "Work-Session-Revision": closeToken,
+    },
+    data: closeNotes,
+  });
+  assert.equal(closeReplay.status(), 200);
+  assert.equal(
+    closeReplay.headers().location,
+    `/api/v1/work-session-changes/${closeReceipt.id}`,
+  );
+  assert.deepEqual(await closeReplay.json(), closeReceipt);
+  const terminal = await application.get(sessionStatePath);
+  assert.equal(terminal.status(), 200);
+  const terminalSnapshot = await terminal.json();
+  assert.deepEqual(terminalSnapshot.state, closeReceipt.after);
+  assert.equal(
+    terminalSnapshot.netMicroseconds,
+    closeReceipt.after.workedMicroseconds,
+  );
+  assert.deepEqual(
+    await (await application.get(workLookup)).json(),
+    recoveredStart,
+  );
+  assert.deepEqual(closureCounts(), afterClosePublication);
+  console.log(
+    "PASS close_work_session @s29/@s41: lost CLOSE ACK, broker outage/retry, exact private-note-free event on quorum11, API restart and C/K/F recovery plus identical replay without published outbox",
   );
 } catch (error) {
   console.error(

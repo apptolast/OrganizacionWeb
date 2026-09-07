@@ -1,0 +1,194 @@
+[
+  {
+    "file": "src/work-session-reader.tsx",
+    "id": "543",
+    "mutatorName": "StringLiteral",
+    "replacement": "``",
+    "location": {
+      "end": {
+        "column": 39,
+        "line": 232
+      },
+      "start": {
+        "column": 20,
+        "line": 232
+      }
+    }
+  },
+  {
+    "file": "src/work-session-reader.tsx",
+    "id": "546",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "true",
+    "location": {
+      "end": {
+        "column": 66,
+        "line": 242
+      },
+      "start": {
+        "column": 29,
+        "line": 242
+      }
+    }
+  },
+  {
+    "file": "src/work-session-reader.tsx",
+    "id": "550",
+    "mutatorName": "StringLiteral",
+    "replacement": "``",
+    "location": {
+      "end": {
+        "column": 64,
+        "line": 243
+      },
+      "start": {
+        "column": 45,
+        "line": 243
+      }
+    }
+  },
+  {
+    "file": "src/work-session-reader.tsx",
+    "id": "549",
+    "mutatorName": "BooleanLiteral",
+    "replacement": "validNote(progressNote)",
+    "location": {
+      "end": {
+        "column": 66,
+        "line": 242
+      },
+      "start": {
+        "column": 42,
+        "line": 242
+      }
+    }
+  },
+  {
+    "file": "src/work-session-reader.tsx",
+    "id": "547",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "false",
+    "location": {
+      "end": {
+        "column": 66,
+        "line": 242
+      },
+      "start": {
+        "column": 29,
+        "line": 242
+      }
+    }
+  },
+  {
+    "file": "src/work-session-reader.tsx",
+    "id": "548",
+    "mutatorName": "LogicalOperator",
+    "replacement": "noteError || !validNote(progressNote)",
+    "location": {
+      "end": {
+        "column": 66,
+        "line": 242
+      },
+      "start": {
+        "column": 29,
+        "line": 242
+      }
+    }
+  },
+  {
+    "file": "src/work-session-reader.tsx",
+    "id": "554",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "true",
+    "location": {
+      "end": {
+        "column": 62,
+        "line": 255
+      },
+      "start": {
+        "column": 29,
+        "line": 255
+      }
+    }
+  },
+  {
+    "file": "src/work-session-reader.tsx",
+    "id": "558",
+    "mutatorName": "StringLiteral",
+    "replacement": "``",
+    "location": {
+      "end": {
+        "column": 64,
+        "line": 256
+      },
+      "start": {
+        "column": 45,
+        "line": 256
+      }
+    }
+  },
+  {
+    "file": "src/work-session-reader.tsx",
+    "id": "556",
+    "mutatorName": "LogicalOperator",
+    "replacement": "noteError || !validNote(nextStep)",
+    "location": {
+      "end": {
+        "column": 62,
+        "line": 255
+      },
+      "start": {
+        "column": 29,
+        "line": 255
+      }
+    }
+  },
+  {
+    "file": "src/work-session-reader.tsx",
+    "id": "611",
+    "mutatorName": "ArrowFunction",
+    "replacement": "() => undefined",
+    "location": {
+      "end": {
+        "column": 36,
+        "line": 331
+      },
+      "start": {
+        "column": 12,
+        "line": 331
+      }
+    }
+  },
+  {
+    "file": "src/work-session-reader.tsx",
+    "id": "628",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "false",
+    "location": {
+      "end": {
+        "column": 22,
+        "line": 357
+      },
+      "start": {
+        "column": 15,
+        "line": 357
+      }
+    }
+  },
+  {
+    "file": "src/work-session-reader.tsx",
+    "id": "630",
+    "mutatorName": "BooleanLiteral",
+    "replacement": "false",
+    "location": {
+      "end": {
+        "column": 26,
+        "line": 358
+      },
+      "start": {
+        "column": 22,
+        "line": 358
+      }
+    }
+  }
+]

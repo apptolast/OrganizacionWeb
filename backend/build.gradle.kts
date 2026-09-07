@@ -44,6 +44,7 @@ pitest {
     val todayOnly = scope == "today"
     val rescheduleOnly = scope == "reschedule"
     val pauseResumeSessionOnly = scope == "pause_resume_session"
+    val closeWorkSessionOnly = scope == "close_work_session"
     val startWorkSessionOnly = scope == "start_work_session"
     val startWorkSessionReplayOnly = scope == "start_work_session_replay"
     val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
@@ -214,7 +215,25 @@ pitest {
         "com.apptolast.organization.application.ReadWorkSessionChanges*",
         "com.apptolast.organization.adapter.http.WorkSessionStateController*"
     )
+    val closeWorkSessionClasses = setOf(
+        "com.apptolast.organization.domain.WorkSessionCloseNotes",
+        "com.apptolast.organization.domain.WorkSessionState",
+        "com.apptolast.organization.domain.OutboxMessage",
+        "com.apptolast.organization.application.ChangeWorkSession",
+        "com.apptolast.organization.application.ReadWorkSessionState",
+        "com.apptolast.organization.application.ReadWorkSessionChanges",
+        "com.apptolast.organization.application.WorkSessionTransitionReceipt",
+        "com.apptolast.organization.application.WorkSessionTransition",
+        "com.apptolast.organization.application.WorkSessionChanging",
+        "com.apptolast.organization.application.WorkSessionClosed",
+        "com.apptolast.organization.application.WorkSessionClosure",
+        "com.apptolast.organization.adapter.persistence.PostgresWorkSessionStore*",
+        "com.apptolast.organization.adapter.http.WorkSessionStateController*",
+        "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher",
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration"
+    )
     targetClasses.set(when {
+        closeWorkSessionOnly -> closeWorkSessionClasses
         pauseResumeSessionOnly -> pauseResumeSessionClasses
         startWorkSessionReplayOnly -> setOf("com.apptolast.organization.application.WorkSessionStarted")
         startWorkSessionOnly -> startWorkSessionClasses
@@ -226,9 +245,10 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses
     })
     targetTests.set(when {
+        closeWorkSessionOnly -> setOf("com.apptolast.organization.*")
         pauseResumeSessionOnly -> setOf("com.apptolast.organization.*")
         startWorkSessionReplayOnly -> setOf("com.apptolast.organization.*")
         startWorkSessionOnly -> setOf("com.apptolast.organization.*")
@@ -243,6 +263,7 @@ pitest {
         else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests
     })
     if (pauseResumeSessionOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-pause-resume-session"))
+    if (closeWorkSessionOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-close-work-session"))
     if (rescheduleOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-reschedule"))
     if (startWorkSessionOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-start-work-session"))
     if (startWorkSessionReplayOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-start-work-session-replay"))

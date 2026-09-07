@@ -51,6 +51,7 @@ public final class PostgresWorkSessionStore
       UUID key,
       String action,
       WorkSessionRevision expected,
+      com.apptolast.organization.domain.WorkSessionCloseNotes notes,
       Function<com.apptolast.organization.domain.WorkSessionState, WorkSessionTransition>
           operation) {
     return storage(
@@ -74,7 +75,7 @@ public final class PostgresWorkSessionStore
                   var prior = transitionReplay(owner, key);
                   if (prior.isPresent()) {
                     var receipt = prior.orElseThrow();
-                    receipt.requireIntent(session, action, expected.value());
+                    receipt.requireIntent(session, action, expected.value(), notes);
                     return new WorkSessionTransitionConfirmation(receipt, true);
                   }
                   var change = operation.apply(before);
@@ -91,7 +92,8 @@ public final class PostgresWorkSessionStore
                               ? null
                               : Timestamp.from(after.runningSince()),
                           session));
-                  if (action.equals("PAUSE")) {
+                  if (action.equals("PAUSE")
+                      || (action.equals("CLOSE") && before.status().equals("running"))) {
                     requireOne(
                         jdbc.update(
                             "INSERT INTO work_session_intervals(session_id,revision,start_at,end_at) VALUES (?,?,?,?)",
@@ -110,19 +112,21 @@ public final class PostgresWorkSessionStore
                             action,
                             expected.value(),
                             Timestamp.from(receipt.occurredAt()),
-                            json.writeValueAsString(receipt))
+                            receiptJson(receipt))
                         != 1) throw new TransitionInsertCollision();
                     var event = change.event();
+                    var closed = change.closedEvent();
                     requireOne(
                         jdbc.update(
                             "INSERT INTO outbox_events(event_id,aggregate_id,owner_id,event_type,schema_version,occurred_at,payload) VALUES (?,?,?,?,?,?,?::jsonb)",
-                            event.eventId(),
+                            closed == null ? event.eventId() : closed.eventId(),
                             session,
                             owner,
-                            event.type(),
-                            event.schemaVersion(),
-                            Timestamp.from(event.occurredAt()),
-                            json.writeValueAsString(event)));
+                            closed == null ? event.type() : closed.type(),
+                            closed == null ? event.schemaVersion() : closed.schemaVersion(),
+                            Timestamp.from(
+                                closed == null ? event.occurredAt() : closed.occurredAt()),
+                            json.writeValueAsString(closed == null ? event : closed)));
                   } catch (JsonProcessingException error) {
                     throw new IllegalStateException(error);
                   }
@@ -134,7 +138,7 @@ public final class PostgresWorkSessionStore
                   var receipt =
                       transitionReplay(owner, key)
                           .orElseThrow(() -> new StorageUnavailableException(collision));
-                  receipt.requireIntent(session, action, expected.value());
+                  receipt.requireIntent(session, action, expected.value(), notes);
                   return new WorkSessionTransitionConfirmation(receipt, true);
                 });
           }
@@ -297,10 +301,37 @@ public final class PostgresWorkSessionStore
                     : null);
           };
 
+  private String receiptJson(WorkSessionTransitionReceipt receipt) throws JsonProcessingException {
+    var value = (com.fasterxml.jackson.databind.node.ObjectNode) json.valueToTree(receipt);
+    if (receipt.closure() == null) value.remove("closure");
+    return json.writeValueAsString(value);
+  }
+
   private java.util.Optional<WorkSessionTransitionReceipt> transitionReplay(
       String owner, UUID key) {
     return transitionReceipt(
         "SELECT receipt FROM work_session_changes WHERE owner_id=? AND request_key=?", owner, key);
+  }
+
+  public java.util.Optional<WorkSessionTransitionReceipt> closure(String owner, UUID session) {
+    return storage(
+        () ->
+            stateSnapshot.execute(
+                status -> {
+                  jdbc
+                      .query(
+                          "SELECT * FROM work_sessions WHERE owner_id=? AND id=?",
+                          STATE_MAPPER,
+                          owner,
+                          session)
+                      .stream()
+                      .findFirst()
+                      .orElseThrow(WorkSessionNotFoundException::new);
+                  return transitionReceipt(
+                      "SELECT receipt FROM work_session_changes WHERE owner_id=? AND session_id=? AND action='CLOSE'",
+                      owner,
+                      session);
+                }));
   }
 
   public java.util.Optional<WorkSessionTransitionReceipt> changeDetail(String owner, UUID id) {

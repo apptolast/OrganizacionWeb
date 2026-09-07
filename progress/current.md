@@ -1,6 +1,6 @@
 # Sesión actual — contrato de cierre de sesiones
 
-Feature15 tiene dictamen local APPROVED y status done en judge_pause_resume_final.md. PR14 (codex/pause-resume-session) permanece draft para integración final. CI34076019493 terminó SUCCESS sobre9fc414e con init/build/108E2E/smoke. La siguiente CI34076959702 sobre e091e7c detectó un fixture sensible al orden: GETstate consumía la respuesta destinada a active. Fix revisado en2e492a09a74eb3c64c0fcc1c8176101550141091, sólo test, con1668/1668 frontend verdes. CI34077907038 está en curso sobre ese commit; no cancelar por documentación. No nuevas escrituras de producto15 pendientes.
+Feature15 está aprobada y fusionada mediante PR14 en main b2ea1f211068e7d93c74d0a8d7e8717ec04323c3. CI34077907038 SUCCESS sobre2e492a0 resolvió el fixture sensible al orden con init/build/108E2E/smoke verdes. Watch99763 terminó EXIT0; log y detalle en ci_pause_resume.md. CI posterior de main34078825723 está en curso, sin nuevas escrituras15. La rama16 incorporó la historia del squash mediante0cf35fd tras verificar árboles idénticos; los cambios16 en curso se conservaron.
 
 PIT523/525K,2NC,0errores/timeouts;315hashesidénticos. Stryker741/861K,119S/1NC,0errores/timeouts;89hashesidénticos. Replay complementario seisfirmasK,17/18K y1RuntimeError explícito;90hashesidénticos. Todos los residuos fueron revisados sin reclasificar. UX515/35axe0 en tres motores y zoom200. Evidencia detallada, límites y hashes en los dictámenes; historial actualizado.
 

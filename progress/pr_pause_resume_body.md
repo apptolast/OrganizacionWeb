@@ -9,6 +9,7 @@ Validación:
 - PIT 523/525 (99,62%), dos sin cobertura y cero errores/timeouts. Stryker 741/861 (86,06%), 119 supervivientes y uno sin cobertura, sin errores/timeouts.
 - Seis firmas detectadas en replay separado. Un error adicional del runner queda registrado y no cuenta como detección.
 
-La CI posterior detectó un fixture sensible al orden de dos consultas. El último commit 2e492a0 asigna respuestas por ruta y comprueba el error concreto, sin cambiar producción. La suite frontend completa pasa localmente; CI 34077907038 valida la integración. Descontando conservadoramente las tres detecciones de mutación atribuidas al fixture anterior, 738/861 (85,71%) conserva el umbral del 80%.
+La CI posterior detectó un fixture sensible al orden de dos consultas. El último commit 2e492a0 asigna respuestas por ruta y comprueba el error concreto, sin cambiar producción. CI 34077907038 terminó SUCCESS sobre 2e492a0: init, compilación, 108 E2E y smoke real verdes. Descontando conservadoramente las tres detecciones de mutación atribuidas al fixture anterior, 738/861 (85,71%) conserva el umbral del 80%.
 
-PR en borrador hasta completar esa CI. Los límites de cobertura y dispositivos físicos permanecen explícitos. Cierre de sesión, aviso de fin, historial y despliegue siguen pendientes para el MVP.
+Los límites de cobertura y dispositivos físicos permanecen explícitos. Cierre de sesión, aviso de fin, historial y despliegue siguen pendientes para el MVP.
+

@@ -145,3 +145,39 @@ La extracción de todos los tipos antes de validar la lista permitía que [estim
 Regresión final: `41ce14` EXIT0, 43/43 sin fallos/errores/skips y formato focal real. Log `customization_http_definitions_final.log`; XML `backend/build/test-results/test/TEST-com.apptolast.organization.adapter.CustomizationApiTest.xml`.
 
 Incluye GET, PUT vista, POST definición y PUT definición con shared parser de cabecera/body, label puro y errores compartidos. Se preservan orden de validación, revisión exacta, campos cerrados y ausencia de datos ajenos en404. Los tests de alta/actualización utilizan mocks de puertos reales: PG, límites12/labelúnico bajo lock, concurrencia, rollback y durabilidad siguen en evidencia de A. No GET/PUT de valores implementado en este corte. Constructor requiere cuatro puertos, ningún bean añadido por C.
+
+## Seguridad y negociación de configuración (paquete abierto)
+
+Reparación E2E separada versionada por root `7e4ccaa`; no se ejecutó runner. Nuevos oráculos sólo en CustomizationApiTest, con focos separados por comportamiento:
+
+| Comportamiento en PUT vista / POST campo / PUT campo | Resultado inicial | Log |
+| --- | --- | --- |
+| anónimo con CSRF, query/body inválidos:401 y ninguna llamada | 3/3 GREEN224c5a EXIT0 | customization_http_security_anonymous_initial.log |
+| autenticado sin CSRF:403 antes de input | 3/3 GREEN85e944 EXIT0 | customization_http_security_csrf_initial.log |
+| origen ajeno aun con CSRF:403 UNTRUSTED_ORIGIN | 3/3 GREEN7c45b2 EXIT0 | customization_http_security_origin_initial.log |
+| Content-Type text/plain:415 previo a delegación | 3/3 GREEN3a961f EXIT0 | customization_http_security_content_initial.log |
+
+No producción modificada para estos doce ejemplos. GET sin CSRF y autenticación antes de query ya estaban cubiertos por el checkpoint43.
+
+### Hallazgo Accept anterior al comando
+
+Nuevo `s23_unacceptableViewResponseNeverExecutesTheWrite`: RED real15cd96 EXIT1. Con body válido y Accept application/xml, verifyNoInteractions detecta llamada SaveCustomizationViewUseCase antes del fallo de representación; XML comprobado3b384b. No es suficiente mapear el error de serialización a406 después del comando.
+
+Lectura local del bytecode Spring6.2.16 efectivo (2575ab): ProducesRequestCondition compara compatibilidad y parámetros, pero no excluye calidad0 por sí solo. Propuesta enviada a root: negociación mediante HeaderContentNegotiationStrategy/MediaType de Spring, selección por especificidad sin q y calidad efectiva, guarda local21 antes de delegación. Ningún parser manual ni cambio del manejador global. Implementación pendiente de revisión de esa composición; mantener original RED.
+
+### Corrección local Accept ratificada por root
+
+Guardia en los cuatro métodos de CustomizationController antes de query y puertos; los filtros de sesión/CSRF/origen permanecen anteriores. Usa HeaderContentNegotiationStrategy para parsear y ordenar Accept y MediaType de Spring para compatibilidad/especificidad. Q se elimina sólo al comparar especificidad; se conserva la calidad del rango elegido. En empates de especificidad se conserva estable el orden que Spring resolvió, incluido su orden de calidad. Sin parser manual ni cambios ApiErrors/filtros compartidos. HttpMediaTypeNotAcceptableException de la estrategia se traduce localmente a406 NOT_ACCEPTABLE; no se capturan excepciones de negocio en esa guarda.
+
+| Oráculo posterior | Resultado | Log |
+| --- | --- | --- |
+| PUT con Accept XML no invoca Save | GREEN b60b4c EXIT0 tras RED15cd96 | customization_http_accept_green.log |
+| q0 JSON frente wildcard; JSON positivo específico; wildcard positivo; q0 application/* frente */* | 4/4 inicialmente GREEN cbc196 EXIT0 | customization_http_accept_quality_initial.log |
+| GET/POST/PUTfield Accept XML antes de query | 3/3 inicialmente GREEN38534e EXIT0 | customization_http_accept_routes_initial.log |
+| Accept malformado:401 anónimo/406 autenticado | 2/2 inicialmente GREEN f8adfc EXIT0 | customization_http_accept_malformed_initial.log |
+| GET sin CSRF, Content-Type text/plain y origen ajeno:200 sin habilitar CORS | inicialmente GREEN2b03e7 EXIT0 | customization_http_get_negotiation_initial.log |
+| Tres nominales de escritura reforzados con origen confiable, Accept JSON y Content-Type JSON UTF-8 | 3/3 inicialmente GREENbd5501 EXIT0 | customization_http_trusted_json_initial.log |
+
+La ausencia de Access-Control-Allow-Origin no acredita lectura desde un navegador de otro origen. La guarda sólo aplica a rutas21 de este controlador; contratos1–20 no se modificaron. Bundle de lectura de valores b72e6ad incorporado por root durante la ventana sin Gradle; todavía no se usa en estos tests.
+
+Freeze seguridad/negociación: regresión del paquete 66/66 sin fallos/errores/skips, formato focal real, EXIT0 `507b84`. Log `customization_http_security_final.log`. Manifest `customization_http_security_freeze.json`; originales43 y REDAccept conservados. No PG, SQL, E2E ni campañas ejecutados. Pendiente revisión root e integración antes de cobertura real de valores.

@@ -4,12 +4,16 @@ import com.apptolast.organization.application.*;
 import com.apptolast.organization.domain.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
+import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.time.Instant;
 import java.util.*;
 import org.springframework.http.*;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.ServletWebRequest;
 
 @RestController
 public final class CustomizationController {
@@ -41,8 +45,10 @@ public final class CustomizationController {
       @PathVariable String fieldId,
       @RequestBody(required = false) String raw,
       @RequestHeader HttpHeaders headers,
-      @RequestParam MultiValueMap<String, String> parameters)
+      @RequestParam MultiValueMap<String, String> parameters,
+      HttpServletRequest request)
       throws JsonProcessingException {
+    acceptable(request);
     query(parameters);
     var parsed = scope(scope);
     if (!fieldId.matches(
@@ -64,8 +70,10 @@ public final class CustomizationController {
       @PathVariable String scope,
       @RequestBody(required = false) String raw,
       @RequestHeader HttpHeaders headers,
-      @RequestParam MultiValueMap<String, String> parameters)
+      @RequestParam MultiValueMap<String, String> parameters,
+      HttpServletRequest request)
       throws JsonProcessingException {
+    acceptable(request);
     query(parameters);
     var parsed = scope(scope);
     var expected = precondition(headers, parsed);
@@ -87,8 +95,10 @@ public final class CustomizationController {
       @PathVariable String scope,
       @RequestBody(required = false) String raw,
       @RequestHeader HttpHeaders headers,
-      @RequestParam MultiValueMap<String, String> parameters)
+      @RequestParam MultiValueMap<String, String> parameters,
+      HttpServletRequest request)
       throws JsonProcessingException {
+    acceptable(request);
     query(parameters);
     var parsed = scope(scope);
     var expected = precondition(headers, parsed);
@@ -155,6 +165,34 @@ public final class CustomizationController {
     if (!parameters.isEmpty()) throw invalid("query", "INVALID_VALUE");
   }
 
+  private static void acceptable(HttpServletRequest request) {
+    try {
+      var accepted =
+          new HeaderContentNegotiationStrategy().resolveMediaTypes(new ServletWebRequest(request));
+      var selected =
+          accepted.stream()
+              .filter(type -> type.isCompatibleWith(MediaType.APPLICATION_JSON))
+              .sorted(
+                  (left, right) ->
+                      MediaType.SPECIFICITY_COMPARATOR.compare(
+                          left.removeQualityValue(), right.removeQualityValue()))
+              .findFirst();
+      if (selected.isEmpty() || selected.get().getQualityValue() == 0)
+        throw new UnacceptableResponse();
+    } catch (HttpMediaTypeNotAcceptableException error) {
+      throw new UnacceptableResponse();
+    }
+  }
+
+  private static final class UnacceptableResponse extends RuntimeException {}
+
+  @ExceptionHandler(UnacceptableResponse.class)
+  ResponseEntity<?> unacceptable() {
+    return ResponseEntity.status(406)
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+        .body(ApiErrors.problem(406, "NOT_ACCEPTABLE", "Esta operación devuelve JSON."));
+  }
+
   private static ValidationException invalid(String field, String code) {
     return new ValidationException(
         List.of(new FieldError(field, code, "Revisa el valor de este campo.")));
@@ -217,7 +255,9 @@ public final class CustomizationController {
   public ResponseEntity<CustomizationResponse> get(
       Principal principal,
       @PathVariable String scope,
-      @RequestParam MultiValueMap<String, String> parameters) {
+      @RequestParam MultiValueMap<String, String> parameters,
+      HttpServletRequest request) {
+    acceptable(request);
     query(parameters);
     var parsed = scope(scope);
     return read.get(principal.getName(), parsed)

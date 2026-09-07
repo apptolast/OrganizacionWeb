@@ -27,6 +27,180 @@ import org.springframework.test.web.servlet.MockMvc;
 @Import(SecurityConfiguration.class)
 class CustomizationApiTest {
   @Test
+  void s23_getDoesNotRequireCsrfOrJsonRequestContentAndDoesNotEnableCors() throws Exception {
+    when(read.get("owner", CustomizationScope.PROJECT)).thenReturn(Optional.empty());
+    mvc.perform(
+            get("/api/v1/me/customization/PROJECT")
+                .with(user("owner"))
+                .header("Origin", "https://foreign.example")
+                .contentType("text/plain")
+                .accept("application/json"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith("application/json"))
+        .andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
+    verify(read).get("owner", CustomizationScope.PROJECT);
+    verifyNoInteractions(save, create, update);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({"false,401", "true,406"})
+  void s23_malformedAcceptIsLocalButAuthenticationStillComesFirst(
+      boolean authenticated, int expected) throws Exception {
+    var request = get("/api/v1/me/customization/PROJECT").header("Accept", "not a media type");
+    if (authenticated) request.with(user("owner"));
+    mvc.perform(request).andExpect(status().is(expected));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "GET,/api/v1/me/customization/PROJECT",
+    "POST,/api/v1/me/customization/PROJECT/fields",
+    "PUT,/api/v1/me/customization/TASK/fields/abcdefab-1111-1111-1111-111111111111"
+  })
+  void s23_unacceptableRepresentationPrecedesQueryOnOtherRoutes(String method, String path)
+      throws Exception {
+    mvc.perform(
+            request(org.springframework.http.HttpMethod.valueOf(method), path)
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .accept("application/xml")
+                .queryParam("forbidden", "true")
+                .contentType("application/json")
+                .content("{"))
+        .andExpect(status().isNotAcceptable())
+        .andExpect(jsonPath("$.code").value("NOT_ACCEPTABLE"))
+        .andExpect(header().doesNotExist("ETag"));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "'application/json;q=0, */*;q=1',406",
+    "'application/*;q=0, application/json;q=0.5',200",
+    "'*/*;q=0.5',200",
+    "'application/*;q=0, */*;q=1',406"
+  })
+  void s23_acceptQualityUsesSpecificityBeforeWildcardPreference(String accept, int expected)
+      throws Exception {
+    when(read.get("owner", CustomizationScope.PROJECT)).thenReturn(Optional.empty());
+    mvc.perform(get("/api/v1/me/customization/PROJECT").with(user("owner")).accept(accept))
+        .andExpect(status().is(expected));
+    if (expected == 200) verify(read).get("owner", CustomizationScope.PROJECT);
+    else verifyNoInteractions(read);
+    verifyNoInteractions(save, create, update);
+  }
+
+  @Test
+  void s23_unacceptableViewResponseNeverExecutesTheWrite() throws Exception {
+    when(save.save(anyString(), any(), any(), any()))
+        .thenReturn(
+            new com.apptolast.organization.domain.Customization(
+                java.util.UUID.fromString("abcdefab-1111-1111-1111-111111111111"),
+                "owner",
+                CustomizationScope.PROJECT,
+                java.util.List.of(),
+                java.util.List.of(),
+                0,
+                java.time.Instant.parse("2026-09-07T12:00:00Z")));
+    var response =
+        mvc.perform(
+                put("/api/v1/me/customization/PROJECT")
+                    .with(user("owner"))
+                    .with(csrf().asHeader())
+                    .header("If-Match", "\"customization:PROJECT:unconfigured\"")
+                    .contentType("application/json")
+                    .accept("application/xml")
+                    .content("{\"visibleFields\":[]}"))
+            .andReturn()
+            .getResponse();
+    verifyNoInteractions(read, save, create, update);
+    org.assertj.core.api.Assertions.assertThat(response.getStatus()).isEqualTo(406);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "PUT,/api/v1/me/customization/PROJECT",
+    "POST,/api/v1/me/customization/PROJECT/fields",
+    "PUT,/api/v1/me/customization/TASK/fields/abcdefab-1111-1111-1111-111111111111"
+  })
+  void s23_writesRejectNonJsonContentBeforeDelegation(String method, String path) throws Exception {
+    mvc.perform(
+            request(org.springframework.http.HttpMethod.valueOf(method), path)
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .contentType("text/plain")
+                .content("{}"))
+        .andExpect(status().isUnsupportedMediaType())
+        .andExpect(jsonPath("$.code").value("UNSUPPORTED_MEDIA_TYPE"));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "PUT,/api/v1/me/customization/PROJECT",
+    "POST,/api/v1/me/customization/PROJECT/fields",
+    "PUT,/api/v1/me/customization/TASK/fields/abcdefab-1111-1111-1111-111111111111"
+  })
+  void s23_foreignOriginRejectsWritesEvenWithValidCsrf(String method, String path)
+      throws Exception {
+    mvc.perform(
+            request(org.springframework.http.HttpMethod.valueOf(method), path)
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("Origin", "https://foreign.example")
+                .queryParam("forbidden", "true")
+                .contentType("application/json")
+                .content("{"))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("UNTRUSTED_ORIGIN"));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "PUT,/api/v1/me/customization/PROJECT",
+    "POST,/api/v1/me/customization/PROJECT/fields",
+    "PUT,/api/v1/me/customization/TASK/fields/abcdefab-1111-1111-1111-111111111111"
+  })
+  void s23_authenticatedWritesRequireCsrfBeforeInputValidation(String method, String path)
+      throws Exception {
+    mvc.perform(
+            request(org.springframework.http.HttpMethod.valueOf(method), path)
+                .with(user("owner"))
+                .queryParam("forbidden", "true")
+                .contentType("application/json")
+                .content("{"))
+        .andExpect(status().isForbidden())
+        .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+        .andExpect(
+            header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "PUT,/api/v1/me/customization/PROJECT",
+    "POST,/api/v1/me/customization/PROJECT/fields",
+    "PUT,/api/v1/me/customization/TASK/fields/abcdefab-1111-1111-1111-111111111111"
+  })
+  void s23_anonymousWritesNeverReachTheCustomizationPorts(String method, String path)
+      throws Exception {
+    mvc.perform(
+            request(org.springframework.http.HttpMethod.valueOf(method), path)
+                .with(csrf().asHeader())
+                .queryParam("forbidden", "true")
+                .contentType("application/json")
+                .content("{"))
+        .andExpect(status().isUnauthorized())
+        .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+        .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
+        .andExpect(
+            header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @Test
   void s25_firstInvalidVisibleFieldPrecedesLaterTypeFailure() throws Exception {
     mvc.perform(
             put("/api/v1/me/customization/PROJECT")
@@ -154,7 +328,9 @@ class CustomizationApiTest {
                 .with(user("another-owner"))
                 .with(csrf().asHeader())
                 .header("If-Match", "\"customization:TASK:" + configId + ":3\"")
-                .contentType("application/json")
+                .header("Origin", "https://organization.example")
+                .accept("application/json")
+                .contentType("application/json;charset=UTF-8")
                 .content("{\"label\":\"  Nueva nota  \",\"active\":false}"))
         .andExpect(status().isOk())
         .andExpect(header().string("ETag", "\"customization:TASK:" + configId + ":4\""))
@@ -270,7 +446,9 @@ class CustomizationApiTest {
                 .with(user("owner"))
                 .with(csrf().asHeader())
                 .header("If-Match", "\"customization:PROJECT:unconfigured\"")
-                .contentType("application/json")
+                .header("Origin", "https://organization.example")
+                .accept("application/json")
+                .contentType("application/json;charset=UTF-8")
                 .content("{\"label\":\"  Dato  \",\"type\":\"TEXT\"}"))
         .andExpect(status().isOk())
         .andExpect(header().string("ETag", "\"customization:PROJECT:" + configId + ":0\""))
@@ -662,7 +840,9 @@ class CustomizationApiTest {
                 .with(user("owner"))
                 .with(csrf().asHeader())
                 .header("If-Match", "\"customization:PROJECT:unconfigured\"")
-                .contentType("application/json")
+                .header("Origin", "https://organization.example")
+                .accept("application/json")
+                .contentType("application/json;charset=UTF-8")
                 .content("{\"visibleFields\":[\"createdAt\"]}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.configured").value(true))

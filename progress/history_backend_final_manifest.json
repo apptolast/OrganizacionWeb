@@ -1,0 +1,112 @@
+{
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/HistoryCursor.java",
+      "sha256": "F586554505FBFA598EF744CEECF7879A9967646E6923E3CD012B80979F9A54E3"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/HistoryEntry.java",
+      "sha256": "51D8EDD7D60635DC9F82BBE5F4EBA7F0AD841D7C6E2C82228D30E8FB2F04B6A7"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/HistoryFilters.java",
+      "sha256": "40B57D5B5238902241E31C9E0105871748CD2265463100016B2DE773AC4455DA"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/HistoryPage.java",
+      "sha256": "7DC7B48DC8AC3FFD7CC8735D1CBCDE4A296423B8FAFE0C4A47B2E8DAEEB867E0"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/HistoryPosition.java",
+      "sha256": "950C9B1BF3273D3B1DF7596F569D48F6B0108665B3D4F0F232F267A22C8666AC"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/HistoryQueries.java",
+      "sha256": "C5DE3DAB670C6D3A1DF12678C1875306B61FE9B42B41C4DFA92522633F432780"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadHistory.java",
+      "sha256": "4CFF8AE808FC5B96788C10829FC7BEAB8CD70B793F5DF525A3F5A530F0B55955"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadHistoryUseCase.java",
+      "sha256": "54579CE9B5392742FA23EE4BF75E011CA4B135A7A65BA5D9CC9AE2E437A0FBFD"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresHistoryQueries.java",
+      "sha256": "F4570E57847860513394D58CB007625D054F12EBD6FDA831F3AA1DDD18416CA3"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+      "sha256": "B378379822253A9229D710B1B5C85878DBB8F4949AE7C33ED841D9BB06362852"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/application/ReadHistoryTest.java",
+      "sha256": "98E5573FB6FCB91E33214A5168BF1DA759B7F6510FA747CB2B41E3C2F0226CA7"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/HistoryQueriesPersistenceTest.java",
+      "sha256": "C8FBCAB60A2959EF08C5C8F95DC4275EB6CEC59023D8B5D451460E8FB8DD4A50"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/HistoryReadTransactionTest.java",
+      "sha256": "275E9C335F97F73F5D2D5B06111CE2BCDA9FAF9D83F9F7FE3683D48461302874"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/config/ApplicationWiringTest.java",
+      "sha256": "67DAF031A0F3F6E7B5ABFAF97C9D88D2CF9E87C355AED5139D77C542E18D7506"
+    }
+  ],
+  "xml": [
+    {
+      "path": "progress/history_backend_final_xml/TEST-com.apptolast.organization.adapter.config.ApplicationWiringTest.xml",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "E34C0560C7E94A8F23D6C4E6E48C6F31C982916AC18CBC75E61231B23B01A802"
+    },
+    {
+      "path": "progress/history_backend_final_xml/TEST-com.apptolast.organization.adapter.config.ProjectStateConfigurationTest.xml",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "DE4FD3E4A93AA5FC34F4CDEB31C36CB829998EDCBE36F916CBABA6BF4FC61B02"
+    },
+    {
+      "path": "progress/history_backend_final_xml/TEST-com.apptolast.organization.adapter.HistoryApiTest.xml",
+      "tests": 75,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "B4CD8DB278AEED7DF91EC7BDB5CCAA4CA4F1FF3750AFA2C7E20171B5CAD03B67"
+    },
+    {
+      "path": "progress/history_backend_final_xml/TEST-com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.xml",
+      "tests": 52,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "1EEF2E403C385DA1E3CEEB7923614109AC4E9A2FCB2BBE53ECBFDBE76438D95A"
+    },
+    {
+      "path": "progress/history_backend_final_xml/TEST-com.apptolast.organization.adapter.persistence.HistoryReadTransactionTest.xml",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "BEB1AC7BE1C68948685F9A327E7C9778DA591D139AADB6650076B7DCCEBE1505"
+    },
+    {
+      "path": "progress/history_backend_final_xml/TEST-com.apptolast.organization.application.ReadHistoryTest.xml",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "AB6A6F1ADD907107885969D2CFAC6E8A818B25B08B427AE4B5252369C4338F63"
+    }
+  ],
+  "totalTests": 163.0,
+  "scope": "Freeze A backend18; HTTP integrado verificado por su suite. No gate global ni mutación."
+}

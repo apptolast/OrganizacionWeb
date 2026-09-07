@@ -217,8 +217,11 @@ class HistoryQueriesPersistenceTest {
   }
 
   private com.apptolast.organization.domain.PlannedBlock plannedBlock() {
+    return plannedBlock(Instant.parse("2026-09-07T10:00:00.123456Z"));
+  }
+
+  private com.apptolast.organization.domain.PlannedBlock plannedBlock(Instant created) {
     var id = UUID.randomUUID();
-    var created = Instant.parse("2026-09-07T10:00:00.123456Z");
     var start = Instant.parse("2026-10-01T11:00:00Z");
     var end = start.plusSeconds(3600);
     var offset = java.time.ZoneOffset.UTC;
@@ -655,5 +658,857 @@ class HistoryQueriesPersistenceTest {
                 .list("owner", new HistoryFilters(null, null, null, day, day), null))
         .extracting(HistoryEntry::id)
         .containsExactly(ids.get(2), ids.get(1));
+  }
+
+  @Test
+  void s23_parseableReceiptWithAnotherIdentityIsUnavailable() throws Exception {
+    var block = plannedBlock();
+    var at = block.createdAt().plusSeconds(60);
+    var receipt =
+        new com.apptolast.organization.domain.BlockChangeReceipt(
+            UUID.randomUUID(), block.id(), "CANCELLED", 2, at, block, null);
+    jdbc.update(
+        "UPDATE block_projections SET status='cancelled',version=2,updated_at=? WHERE block_id=?",
+        Timestamp.from(at),
+        block.id());
+    jdbc.update(
+        "INSERT INTO block_changes(id,project_id,task_id,block_id,request_key,kind,version,occurred_at,receipt) VALUES (?,?,?,?,?,'CANCELLED',2,?,?::jsonb)",
+        UUID.randomUUID(),
+        project,
+        task,
+        block.id(),
+        UUID.randomUUID(),
+        Timestamp.from(at),
+        json.writeValueAsString(receipt));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s23_receiptCannotExposeAnotherTasksBlockSnapshot() throws Exception {
+    var block = plannedBlock();
+    var at = block.createdAt().plusSeconds(60);
+    var foreign =
+        new com.apptolast.organization.domain.PlannedBlock(
+            block.id(),
+            project,
+            UUID.randomUUID(),
+            block.request(),
+            block.time(),
+            block.createdAt());
+    var receipt =
+        new com.apptolast.organization.domain.BlockChangeReceipt(
+            UUID.randomUUID(), block.id(), "CANCELLED", 2, at, foreign, null);
+    jdbc.update(
+        "UPDATE block_projections SET status='cancelled',version=2,updated_at=? WHERE block_id=?",
+        Timestamp.from(at),
+        block.id());
+    jdbc.update(
+        "INSERT INTO block_changes(id,project_id,task_id,block_id,request_key,kind,version,occurred_at,receipt) VALUES (?,?,?,?,?,'CANCELLED',2,?,?::jsonb)",
+        receipt.id(),
+        project,
+        task,
+        block.id(),
+        UUID.randomUUID(),
+        Timestamp.from(at),
+        json.writeValueAsString(receipt));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s11_firstSupportedUtcYearSurvivesPostgresAndDateFiltering() {
+    var id = UUID.randomUUID();
+    var at = Instant.parse("0001-01-01T00:00:00Z");
+    var start = new SessionStart(id, project, task, at, 25, at.plusSeconds(1500), "UTC");
+    jdbc.update(
+        "INSERT INTO work_sessions(id,owner_id,project_id,task_id,request_key,started_at,planned_minutes,planned_end_at,zone_id,status) VALUES (?,'owner',?,?,?,?::timestamptz,25,?::timestamptz,'UTC','running')",
+        id,
+        project,
+        task,
+        UUID.randomUUID(),
+        at.toString(),
+        start.plannedEndAt().toString());
+    var day = java.time.LocalDate.of(1, 1, 1);
+    assertThat(
+            new PostgresHistoryQueries(
+                    jdbc,
+                    new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                        jdbc.getDataSource()),
+                    json)
+                .list("owner", new HistoryFilters(null, null, null, day, day), null))
+        .containsExactly(
+            new HistoryEntry<>(
+                id, "SESSION_STARTED", at, project, "Entrega", task, "Publicar", start));
+  }
+
+  @Test
+  void s11_lastSupportedUtcDayNeedsNoYearTenThousandBound() {
+    var id = UUID.randomUUID();
+    var at = Instant.parse("9999-12-31T23:34:59.999999Z");
+    var start = new SessionStart(id, project, task, at, 25, at.plusSeconds(1500), "UTC");
+    jdbc.update(
+        "INSERT INTO work_sessions(id,owner_id,project_id,task_id,request_key,started_at,planned_minutes,planned_end_at,zone_id,status) VALUES (?,'owner',?,?,?,?::timestamptz,25,?::timestamptz,'UTC','running')",
+        id,
+        project,
+        task,
+        UUID.randomUUID(),
+        at.toString(),
+        start.plannedEndAt().toString());
+    assertThat(
+            new PostgresHistoryQueries(
+                    jdbc,
+                    new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                        jdbc.getDataSource()),
+                    json)
+                .list(
+                    "owner",
+                    new HistoryFilters(
+                        null, null, null, null, java.time.LocalDate.of(9999, 12, 31)),
+                    null))
+        .containsExactly(
+            new HistoryEntry<>(
+                id, "SESSION_STARTED", at, project, "Entrega", task, "Publicar", start));
+  }
+
+  @Test
+  void s19_cursorAtYearOneDoesNotRequireAnExistingBoundaryRow() {
+    var id = UUID.randomUUID();
+    var at = Instant.parse("0001-01-01T00:00:00Z");
+    jdbc.update(
+        "INSERT INTO work_sessions(id,owner_id,project_id,task_id,request_key,started_at,planned_minutes,planned_end_at,zone_id,status) VALUES (?,'owner',?,?,?,?::timestamptz,25,?::timestamptz,'UTC','running')",
+        id,
+        project,
+        task,
+        UUID.randomUUID(),
+        at.toString(),
+        at.plusSeconds(1500).toString());
+    var filters = new HistoryFilters(null, null, null, null, null);
+    var boundary = new HistoryPosition(at.plusSeconds(1), "SESSION_STARTED", UUID.randomUUID());
+    assertThat(
+            new PostgresHistoryQueries(
+                    jdbc,
+                    new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                        jdbc.getDataSource()),
+                    json)
+                .list("owner", filters, new HistoryCursor("owner", filters, boundary, boundary)))
+        .extracting(HistoryEntry::id)
+        .containsExactly(id);
+  }
+
+  @Test
+  void s3_allFiveFamiliesStayInsideTheirOwnersContext() throws Exception {
+    fiveFamilyHistory();
+    var queries =
+        new PostgresHistoryQueries(
+            jdbc,
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                jdbc.getDataSource()),
+            json);
+    var filters = new HistoryFilters(null, null, null, null, null);
+    assertThat(queries.list("owner", filters, null))
+        .extracting(HistoryEntry::type)
+        .containsExactly(
+            "SESSION_CHANGED",
+            "SESSION_STARTED",
+            "TASK_STATUS_CHANGED",
+            "BLOCK_CHANGED",
+            "BLOCK_PLANNED");
+    assertThat(queries.list("other-owner", filters, null)).isEmpty();
+  }
+
+  @Test
+  void s20_lateFactBehindAfterAppearsWithoutRepeatingDeliveredFacts() {
+    var cursor = firstHistoryCursor();
+    var late = plannedBlock(Instant.parse("2026-09-07T08:30:00Z"));
+    var queries =
+        new PostgresHistoryQueries(
+            jdbc,
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                jdbc.getDataSource()),
+            json);
+    var page = new ReadHistory(queries).list("owner", cursor.filters(), cursor);
+    assertThat(page.items())
+        .extracting(HistoryEntry::id)
+        .containsExactly(late.id(), new UUID(0, 1));
+    assertThat(page.next()).isNull();
+  }
+
+  private HistoryCursor firstHistoryCursor() {
+    var nine = Instant.parse("2026-09-07T09:00:00Z");
+    for (int version = 1; version <= 21; version++) {
+      var at =
+          version == 1
+              ? nine.minusSeconds(3600)
+              : version == 21 ? nine.plusSeconds(7200) : nine.plusSeconds((version - 2) * 360);
+      jdbc.update(
+          "INSERT INTO task_status_history(id,project_id,task_id,task_version,from_status,to_status,occurred_at) VALUES (?,?,?,?,?,?,?)",
+          new UUID(0, version),
+          project,
+          task,
+          version,
+          version % 2 == 1 ? "pending" : "completed",
+          version % 2 == 1 ? "completed" : "pending",
+          Timestamp.from(at));
+    }
+    jdbc.update(
+        "UPDATE tasks SET status='completed',version=21,completed_at=?,updated_at=? WHERE id=?",
+        Timestamp.from(nine.plusSeconds(7200)),
+        Timestamp.from(nine.plusSeconds(7200)),
+        task);
+    var queries =
+        new PostgresHistoryQueries(
+            jdbc,
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                jdbc.getDataSource()),
+            json);
+    var page =
+        new ReadHistory(queries)
+            .list("owner", new HistoryFilters(null, null, null, null, null), null);
+    assertThat(page.items()).hasSize(20);
+    assertThat(page.next().upper().occurredAt()).isEqualTo(nine.plusSeconds(7200));
+    assertThat(page.next().after().occurredAt()).isEqualTo(nine);
+    return page.next();
+  }
+
+  @Test
+  void s20_lateFactAboveUpperDoesNotEnterContinuation() {
+    var cursor = firstHistoryCursor();
+    plannedBlock(Instant.parse("2026-09-07T12:00:00Z"));
+    var queries =
+        new PostgresHistoryQueries(
+            jdbc,
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                jdbc.getDataSource()),
+            json);
+    var page = new ReadHistory(queries).list("owner", cursor.filters(), cursor);
+    assertThat(page.items()).extracting(HistoryEntry::id).containsExactly(new UUID(0, 1));
+    assertThat(page.next()).isNull();
+  }
+
+  @Test
+  void s20_lateFactBetweenUpperAndAfterDoesNotRepeatTheTraversedRange() {
+    var cursor = firstHistoryCursor();
+    plannedBlock(Instant.parse("2026-09-07T10:00:00Z"));
+    var queries =
+        new PostgresHistoryQueries(
+            jdbc,
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                jdbc.getDataSource()),
+            json);
+    var page = new ReadHistory(queries).list("owner", cursor.filters(), cursor);
+    assertThat(page.items()).extracting(HistoryEntry::id).containsExactly(new UUID(0, 1));
+    assertThat(page.next()).isNull();
+  }
+
+  @Test
+  void s21_refreshIncludesPreviouslyExcludedFactWithCurrentNames() {
+    var cursor = firstHistoryCursor();
+    var late = plannedBlock(Instant.parse("2026-09-07T10:00:00Z"));
+    var reader =
+        new ReadHistory(
+            new PostgresHistoryQueries(
+                jdbc,
+                new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                    jdbc.getDataSource()),
+                json));
+    assertThat(reader.list("owner", cursor.filters(), cursor).items())
+        .extracting(HistoryEntry::id)
+        .doesNotContain(late.id());
+    jdbc.update("UPDATE projects SET name='Actual' WHERE id=?", project);
+    jdbc.update("UPDATE tasks SET title='Título actual' WHERE id=?", task);
+    var fresh = reader.list("owner", cursor.filters(), null);
+    assertThat(fresh.items())
+        .filteredOn(e -> e.id().equals(late.id()))
+        .containsExactly(
+            new HistoryEntry<>(
+                late.id(),
+                "BLOCK_PLANNED",
+                late.createdAt(),
+                project,
+                "Actual",
+                task,
+                "Título actual",
+                late));
+    assertThat(fresh.items()).extracting(HistoryEntry::projectName).containsOnly("Actual");
+  }
+
+  private void fiveFamilyHistory() throws Exception {
+    var block = plannedBlock();
+    var at = block.createdAt();
+    var cancelled =
+        new com.apptolast.organization.domain.BlockChangeReceipt(
+            UUID.randomUUID(), block.id(), "CANCELLED", 2, at.plusSeconds(1), block, null);
+    jdbc.update(
+        "UPDATE block_projections SET status='cancelled',version=2,updated_at=? WHERE block_id=?",
+        Timestamp.from(cancelled.occurredAt()),
+        block.id());
+    jdbc.update(
+        "INSERT INTO block_changes(id,project_id,task_id,block_id,request_key,kind,version,occurred_at,receipt) VALUES (?,?,?,?,?,'CANCELLED',2,?,?::jsonb)",
+        cancelled.id(),
+        project,
+        task,
+        block.id(),
+        UUID.randomUUID(),
+        Timestamp.from(cancelled.occurredAt()),
+        json.writeValueAsString(cancelled));
+    jdbc.update(
+        "UPDATE tasks SET status='completed',version=1,completed_at=?,updated_at=? WHERE id=?",
+        Timestamp.from(at.plusSeconds(2)),
+        Timestamp.from(at.plusSeconds(2)),
+        task);
+    jdbc.update(
+        "INSERT INTO task_status_history(id,project_id,task_id,task_version,from_status,to_status,occurred_at) VALUES (?,?,?,1,'pending','completed',?)",
+        UUID.randomUUID(),
+        project,
+        task,
+        Timestamp.from(at.plusSeconds(2)));
+    var start =
+        new SessionStart(
+            UUID.randomUUID(), project, task, at.plusSeconds(3), 25, at.plusSeconds(1503), "UTC");
+    var before =
+        new com.apptolast.organization.domain.WorkSessionState(
+            start, "running", 1, start.startedAt(), 0, start.startedAt());
+    var after =
+        new com.apptolast.organization.domain.WorkSessionState(
+            start, "paused", 2, at.plusSeconds(4), 1000000, null);
+    var paused =
+        new WorkSessionTransitionReceipt(
+            UUID.randomUUID(), start.id(), "PAUSE", after.changedAt(), before, after);
+    jdbc.update(
+        "INSERT INTO work_sessions(id,owner_id,project_id,task_id,request_key,started_at,planned_minutes,planned_end_at,zone_id,status,revision,changed_at,worked_microseconds) VALUES (?,'owner',?,?,?,?,25,?,'UTC','paused',2,?,1000000)",
+        start.id(),
+        project,
+        task,
+        UUID.randomUUID(),
+        Timestamp.from(start.startedAt()),
+        Timestamp.from(start.plannedEndAt()),
+        Timestamp.from(after.changedAt()));
+    jdbc.update(
+        "INSERT INTO work_session_intervals(session_id,revision,start_at,end_at) VALUES (?,2,?,?)",
+        start.id(),
+        Timestamp.from(start.startedAt()),
+        Timestamp.from(after.changedAt()));
+    jdbc.update(
+        "INSERT INTO work_session_changes(id,owner_id,session_id,request_key,action,expected_revision,occurred_at,receipt) VALUES (?,'owner',?,?,'PAUSE',1,?,?::jsonb)",
+        paused.id(),
+        start.id(),
+        UUID.randomUUID(),
+        Timestamp.from(paused.occurredAt()),
+        json.writeValueAsString(paused));
+  }
+
+  @Test
+  void s23_sessionReceiptCannotExposeAnotherTasksBeforeSnapshot() throws Exception {
+    fiveFamilyHistory();
+    jdbc.update(
+        "UPDATE work_session_changes SET receipt=jsonb_set(receipt,'{before,session,taskId}',to_jsonb(?::text))",
+        UUID.randomUUID().toString());
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s23_sessionReceiptIdentityMustMatchItsDurableFact() throws Exception {
+    fiveFamilyHistory();
+    jdbc.update(
+        "UPDATE work_session_changes SET receipt=jsonb_set(receipt,'{id}',to_jsonb(?::text))",
+        UUID.randomUUID().toString());
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s23_receiptInstantMustMatchTheOrderedFact() throws Exception {
+    fiveFamilyHistory();
+    jdbc.update(
+        "UPDATE block_changes SET receipt=jsonb_set(receipt,'{occurredAt}',to_jsonb('2026-09-07T10:00:02.123456Z'::text))");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s23_sessionReceiptInstantMustMatchTheOrderedFact() throws Exception {
+    fiveFamilyHistory();
+    jdbc.update(
+        "UPDATE work_session_changes SET receipt=jsonb_set(receipt,'{occurredAt}',to_jsonb('2026-09-07T10:00:05.123456Z'::text))");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s23_sessionReceiptMustReferToTheSessionsInBothSnapshots() throws Exception {
+    fiveFamilyHistory();
+    jdbc.update(
+        "UPDATE work_session_changes SET receipt=jsonb_set(receipt,'{sessionId}',to_jsonb(?::text))",
+        UUID.randomUUID().toString());
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s23_blockReceiptMustReferToItsSnapshotBlock() throws Exception {
+    fiveFamilyHistory();
+    jdbc.update(
+        "UPDATE block_changes SET receipt=jsonb_set(receipt,'{blockId}',to_jsonb(?::text))",
+        UUID.randomUUID().toString());
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s23_parseablePauseCannotInventOrLoseWorkedTime() throws Exception {
+    fiveFamilyHistory();
+    jdbc.update(
+        "UPDATE work_session_changes SET receipt=jsonb_set(receipt,'{after,workedMicroseconds}','0'::jsonb)");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s1_readsARealResumeWithoutReplacingTheEarlierPause() throws Exception {
+    fiveFamilyHistory();
+    var id = jdbc.queryForObject("SELECT id FROM work_sessions", UUID.class);
+    var store =
+        new PostgresWorkSessionStore(
+            jdbc,
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                jdbc.getDataSource()),
+            json);
+    var at = Instant.parse("2026-09-07T10:00:05.123456Z");
+    var receipt =
+        new ChangeWorkSession(store, java.time.Clock.fixed(at, java.time.ZoneOffset.UTC))
+            .resume("owner", id, UUID.randomUUID(), new WorkSessionRevision(id, 2))
+            .receipt();
+    var rows =
+        new PostgresHistoryQueries(
+                jdbc,
+                new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                    jdbc.getDataSource()),
+                json)
+            .list("owner", new HistoryFilters("sessions", null, null, null, null), null);
+    assertThat(rows).hasSize(3);
+    assertThat(rows.getFirst().details()).isEqualTo(receipt);
+    assertThat(rows.getFirst().occurredAt()).isEqualTo(at);
+    assertThat(((WorkSessionTransitionReceipt) rows.get(1).details()).action()).isEqualTo("PAUSE");
+  }
+
+  @Test
+  void s23_resumeReceiptCannotCountThePauseAsWorkedTime() throws Exception {
+    fiveFamilyHistory();
+    var id = jdbc.queryForObject("SELECT id FROM work_sessions", UUID.class);
+    var store =
+        new PostgresWorkSessionStore(
+            jdbc,
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                jdbc.getDataSource()),
+            json);
+    new ChangeWorkSession(
+            store,
+            java.time.Clock.fixed(
+                Instant.parse("2026-09-07T10:00:05.123456Z"), java.time.ZoneOffset.UTC))
+        .resume("owner", id, UUID.randomUUID(), new WorkSessionRevision(id, 2));
+    jdbc.update(
+        "UPDATE work_session_changes SET receipt=jsonb_set(receipt,'{after,workedMicroseconds}','2000000'::jsonb) WHERE action='RESUME'");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s1_s24_closedReceiptAndStartRemainAfterOutboxRemoval() throws Exception {
+    fiveFamilyHistory();
+    var id = jdbc.queryForObject("SELECT id FROM work_sessions", UUID.class);
+    var store =
+        new PostgresWorkSessionStore(
+            jdbc,
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                jdbc.getDataSource()),
+            json);
+    var at = Instant.parse("2026-09-07T10:00:05.123456Z");
+    var receipt =
+        new ChangeWorkSession(store, java.time.Clock.fixed(at, java.time.ZoneOffset.UTC))
+            .close(
+                "owner",
+                id,
+                UUID.randomUUID(),
+                new WorkSessionRevision(id, 2),
+                new com.apptolast.organization.domain.WorkSessionCloseNotes(
+                    "Nota\ncon avance", "Seguir 🧭"))
+            .receipt();
+    assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events", Integer.class))
+        .isEqualTo(1);
+    jdbc.execute("TRUNCATE outbox_events");
+    var rows =
+        new PostgresHistoryQueries(
+                jdbc,
+                new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                    jdbc.getDataSource()),
+                json)
+            .list("owner", new HistoryFilters("sessions", null, null, null, null), null);
+    assertThat(rows).hasSize(3);
+    assertThat(rows.getFirst().details()).isEqualTo(receipt);
+    assertThat(receipt.closure().progressNote()).isEqualTo("Nota\ncon avance");
+    assertThat(receipt.after().workedMicroseconds()).isEqualTo(1000000);
+    assertThat(rows.getLast().details()).isEqualTo(receipt.before().session());
+  }
+
+  @Test
+  void s23_closeFromPausedCannotIncreaseTheFinalWorkedTime() throws Exception {
+    fiveFamilyHistory();
+    var id = jdbc.queryForObject("SELECT id FROM work_sessions", UUID.class);
+    var store =
+        new PostgresWorkSessionStore(
+            jdbc,
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                jdbc.getDataSource()),
+            json);
+    new ChangeWorkSession(
+            store,
+            java.time.Clock.fixed(
+                Instant.parse("2026-09-07T10:00:05.123456Z"), java.time.ZoneOffset.UTC))
+        .close(
+            "owner",
+            id,
+            UUID.randomUUID(),
+            new WorkSessionRevision(id, 2),
+            new com.apptolast.organization.domain.WorkSessionCloseNotes("Nota", "Seguir"));
+    jdbc.update(
+        "UPDATE work_session_changes SET receipt=jsonb_set(receipt,'{after,workedMicroseconds}','2000000'::jsonb) WHERE action='CLOSE'");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s23_jsonNullReceiptIsStorageUnavailable() throws Exception {
+    fiveFamilyHistory();
+    jdbc.update("UPDATE work_session_changes SET receipt='null'::jsonb");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s23_nullSnapshotSessionIdentityIsStorageUnavailable() throws Exception {
+    fiveFamilyHistory();
+    jdbc.update(
+        "UPDATE work_session_changes SET receipt=jsonb_set(receipt,'{before,session,id}','null'::jsonb)");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s23_coherentReceiptOfAnotherBlockCannotReplaceItsDurableSource() throws Exception {
+    fiveFamilyHistory();
+    var other = plannedBlock();
+    jdbc.update(
+        "UPDATE block_changes SET receipt=jsonb_set(jsonb_set(receipt,'{blockId}',to_jsonb(?::text)),'{before,id}',to_jsonb(?::text))",
+        other.id().toString(),
+        other.id().toString());
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s23_coherentSessionReceiptCannotReplaceTheDurableSessionIdentity() throws Exception {
+    fiveFamilyHistory();
+    var other = UUID.randomUUID().toString();
+    jdbc.update(
+        "UPDATE work_session_changes SET receipt=jsonb_set(jsonb_set(jsonb_set(receipt,'{sessionId}',to_jsonb(?::text)),'{before,session,id}',to_jsonb(?::text)),'{after,session,id}',to_jsonb(?::text))",
+        other,
+        other,
+        other);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s1_extensionIsItsOwnFactAndPreservesTheOriginalStart() throws Exception {
+    fiveFamilyHistory();
+    var id = jdbc.queryForObject("SELECT id FROM work_sessions", UUID.class);
+    var store =
+        new PostgresWorkSessionStore(
+            jdbc,
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                jdbc.getDataSource()),
+            json);
+    var receipt =
+        new ExtendWorkSession(
+                store,
+                java.time.Clock.fixed(
+                    Instant.parse("2026-09-07T10:00:05.123456Z"), java.time.ZoneOffset.UTC))
+            .extend("owner", id, UUID.randomUUID(), new WorkSessionRevision(id, 2), 5)
+            .receipt();
+    var rows =
+        new PostgresHistoryQueries(
+                jdbc,
+                new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                    jdbc.getDataSource()),
+                json)
+            .list("owner", new HistoryFilters("sessions", null, null, null, null), null);
+    assertThat(rows).hasSize(3);
+    assertThat(rows.getFirst().details()).isEqualTo(receipt);
+    assertThat(receipt.extension().additionalMinutes()).isEqualTo(5);
+    assertThat(rows.getLast().details()).isEqualTo(receipt.before().session());
+  }
+
+  @Test
+  void s23_extensionCannotChangeTheWorkStateTimestamp() throws Exception {
+    fiveFamilyHistory();
+    var id = jdbc.queryForObject("SELECT id FROM work_sessions", UUID.class);
+    var store =
+        new PostgresWorkSessionStore(
+            jdbc,
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                jdbc.getDataSource()),
+            json);
+    new ExtendWorkSession(
+            store,
+            java.time.Clock.fixed(
+                Instant.parse("2026-09-07T10:00:05.123456Z"), java.time.ZoneOffset.UTC))
+        .extend("owner", id, UUID.randomUUID(), new WorkSessionRevision(id, 2), 5);
+    jdbc.update(
+        "UPDATE work_session_changes SET receipt=jsonb_set(receipt,'{after,changedAt}',to_jsonb('2026-09-07T10:00:05.123456Z'::text)) WHERE action='EXTEND'");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s1_rescheduleRetainsOriginalPlanAndBothHistoricalDestinations() throws Exception {
+    var before = plannedBlock();
+    var offset = java.time.ZoneOffset.UTC;
+    var at = before.createdAt().plusSeconds(60);
+    var request =
+        new com.apptolast.organization.domain.BlockRequest(
+            before.request().objective(),
+            before.request().startLocal().plusHours(1),
+            before.request().endLocal().plusHours(1),
+            "UTC",
+            offset,
+            offset,
+            false);
+    var time =
+        new com.apptolast.organization.domain.ResolvedBlockTime(
+            before.time().startAt().plusSeconds(3600),
+            before.time().endAt().plusSeconds(3600),
+            offset,
+            offset,
+            60);
+    var after =
+        new com.apptolast.organization.domain.PlannedBlock(
+            before.id(), project, task, request, time, before.createdAt());
+    var receipt =
+        new com.apptolast.organization.domain.BlockChangeReceipt(
+            UUID.randomUUID(), before.id(), "RESCHEDULED", 2, at, before, after);
+    jdbc.update(
+        "UPDATE block_projections SET version=2,updated_at=?,start_local=?,end_local=?,zone_id='UTC',start_offset='Z',end_offset='Z',start_at=?,end_at=?,duration_minutes=60 WHERE block_id=?",
+        Timestamp.from(at),
+        request.startLocal(),
+        request.endLocal(),
+        Timestamp.from(time.startAt()),
+        Timestamp.from(time.endAt()),
+        before.id());
+    jdbc.update(
+        "INSERT INTO block_changes(id,project_id,task_id,block_id,request_key,kind,version,occurred_at,receipt) VALUES (?,?,?,?,?,'RESCHEDULED',2,?,?::jsonb)",
+        receipt.id(),
+        project,
+        task,
+        before.id(),
+        UUID.randomUUID(),
+        Timestamp.from(at),
+        json.writeValueAsString(receipt));
+    assertThat(
+            new PostgresHistoryQueries(
+                    jdbc,
+                    new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                        jdbc.getDataSource()),
+                    json)
+                .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .containsExactly(
+            new HistoryEntry<>(
+                receipt.id(), "BLOCK_CHANGED", at, project, "Entrega", task, "Publicar", receipt),
+            new HistoryEntry<>(
+                before.id(),
+                "BLOCK_PLANNED",
+                before.createdAt(),
+                project,
+                "Entrega",
+                task,
+                "Publicar",
+                before));
+  }
+
+  @Test
+  void s23_negativeBeforeWorkedTimeCannotHideBehindAConsistentSum() throws Exception {
+    fiveFamilyHistory();
+    jdbc.update(
+        "UPDATE work_session_changes SET receipt=jsonb_set(jsonb_set(receipt,'{before,workedMicroseconds}','-1'::jsonb),'{after,workedMicroseconds}','999999'::jsonb)");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s23_cancellationCannotCarryAMovedAfterSnapshot() throws Exception {
+    fiveFamilyHistory();
+    jdbc.update("UPDATE block_changes SET receipt=jsonb_set(receipt,'{after}',receipt->'before')");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s23_closeWithoutItsPersistedAttributionIsUnavailable() throws Exception {
+    fiveFamilyHistory();
+    var id = jdbc.queryForObject("SELECT id FROM work_sessions", UUID.class);
+    var store =
+        new PostgresWorkSessionStore(
+            jdbc,
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                jdbc.getDataSource()),
+            json);
+    new ChangeWorkSession(
+            store,
+            java.time.Clock.fixed(
+                Instant.parse("2026-09-07T10:00:05.123456Z"), java.time.ZoneOffset.UTC))
+        .close(
+            "owner",
+            id,
+            UUID.randomUUID(),
+            new WorkSessionRevision(id, 2),
+            new com.apptolast.organization.domain.WorkSessionCloseNotes("Nota", "Seguir"));
+    jdbc.update(
+        "UPDATE work_session_changes SET receipt=jsonb_set(receipt,'{closure,workDate}','null'::jsonb) WHERE action='CLOSE'");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", new HistoryFilters(null, null, null, null, null), null))
+        .isInstanceOf(StorageUnavailableException.class);
   }
 }

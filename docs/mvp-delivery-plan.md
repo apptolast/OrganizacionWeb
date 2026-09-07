@@ -1,33 +1,28 @@
-# Plan de entrega del MVP
+# Plan de entrega
 
-Actualizado el 7 de septiembre de 2026, a las 15:50. **Software del MVP1–18 fusionado y con CI posterior verde en main a5d1586.** Las imágenes están publicadas y su configuración montada funciona en una comprobación local con PostgreSQL y RabbitMQ. El despliegue mantiene una estimación orientativa de **4–8 horas de trabajo**, sujeta a la integración de capacidad y los controles de infraestructura. SSH/sudo y dominio ya están resueltos. No es una predicción de cuota ni garantía de ausencia de errores.
+Actualizado el 7 de septiembre de 2026, a las18:43. Las funcionalidades1–19 están validadas y fusionadas en mainc20105a. La apariencia persistente20 está en desarrollo;21–30 siguen pendientes. Este recuento de funcionalidades no mide un porcentaje de esfuerzo ni garantiza ausencia de errores.
 
 ## Estado comprobado
 
-El MVP incluye acceso privado, proyectos y tareas/subtareas, disponibilidad, planificación y replanificación, Hoy, sesiones con pausa/reanudación/cierre, aviso de fin, ampliación e historial. Conserva React, TypeScript, pnpm y SCSS; Java/Spring Boot con arquitectura hexagonal y EDA; PostgreSQL y RabbitMQ en un monorepo.
+El MVP incluye acceso privado, proyectos y tareas/subtareas, disponibilidad, planificación y replanificación, Hoy, sesiones con pausa/reanudación/cierre, aviso de fin, ampliación, historial y revisión semanal. Conserva React, TypeScript, pnpm y SCSS; Java/Spring Boot con arquitectura hexagonal y EDA; PostgreSQL y RabbitMQ en un monorepo.
 
-Las funcionalidades1–18 están fusionadas. PR17 incorporó Historial; PR19 corrigió un fixture de sesión. La CI posterior34120565608 terminó SUCCESS sobre a5d158621bc1eb1ab4f57cbb3161289525d6a851. El dictamen de Historial está en progress/judge_history_final.md.
+Revisión semanal19: CI34139336203 verde antes de la fusiónPR20; validación local2289Java,1968frontend,51Node,136E2E y13comprobaciones del publicador. PIT original178/190 y Stryker estricto615/764 superan80%; los replays se documentan aparte y no se suman a la campaña original. Los informes de revisión, mutación y UX están en progress. No se atribuye una certificación universal de UX por estas pruebas.
 
-Validación final local18:2.217 pruebas Java/93suites,1.899frontend/40suites y47Node; lint y build;129E2E completos y13comprobaciones del publicador. Los39escenarios y142ejemplos del contrato no son un recuento de pruebas. PIT original263/284 y Stryker original621/738 superan80; Stryker conserva tres RuntimeError fuera de su denominador oficial. Replays separados15/17 y32/33 detectan los seis y diecisiete objetivos respectivos. No se suman campañas ni se ocultan supervivientes.
+## Entrega en el servidor
 
-UX conserva495mediciones y27axe sin incidencias en evidencia compuesta; teclado Chromium/Firefox y zoom nativo Chromium. WebKit Windows acredita geometría por clic y texto200, no teclado de enlaces. No hay pruebas de dispositivos/lectores físicos ni estudios humanos que certifiquen universalmente las30leyes.
+SSH/sudo y DNS organizacion.apptolast.com están resueltos. Edge está aplicado y HTTPS funciona. La capacidad dispone de un perfil explícito que conserva los servicios existentes. Las imágenes se publican por digest; las credenciales se conservan protegidas, fuera de Git.
 
-## Trabajo pendiente
+El primer apply creó PostgreSQL y RabbitMQ, pero API/web no convergieron: Swarm descartó los montajes temporales abreviados. Una prueba real detectó además permisos insuficientes de los directorios de Nginx. El corte4d34b9c incluye la revisión semanal y la corrección mínima de la imagen. Infra491e2c2 usa montajes largos;15pruebas focales y lint pasaron. El check real terminó27ok/2changed/0failed. Falta aplicar este corte tras sus verificaciones remotas y ejecutar la aceptación autenticada.
 
-| Hito | Resultado verificable | Estimación |
-| --- | --- | --- |
-| Integración remota del MVP | CI previa, fusión y CI posterior verificadas | Terminada |
-| Despliegue condicionado | Imágenes inmutables, Swarm, HTTPS, persistencia, respaldo/restauración y reversión | 4–8 horas adicionales |
-| Acceso y dominio | SSH/sudo y DNS organizacion.apptolast.com comprobados | Resueltos |
+Los16servicios anteriores mantienen1/1 y las ocho rutas web conservan sus códigos previos. El ensayo local de restauración PostgreSQL pasó; no acredita por sí mismo copias externas, recuperación RabbitMQ ni escrow del servidor. Estas obligaciones operativas se mantienen visibles.
 
-Este rango sustituye las2–4horas anteriores por los hitos ya acreditados: refuerzos, replays, UX,129E2E y nuevo init final. No se descuenta automáticamente tiempo ni se divide entre agentes. No quedan cambios funcionales pendientes del contrato18.
+## Orden de trabajo
 
-## Dependencias del despliegue
+1. Completar el despliegue corregido y verificar HTTPS, login, proyectos, tareas, planificación, pausa/reanudación/cierre, historial y revisión semanal con datos sintéticos identificados.
+2. Comprobar publicación de eventos, persistencia y convergencia; documentar acceso, respaldo y reversión sin eliminar datos.
+3. Terminar apariencia20: persistencia y concurrencia, contrato HTTP, estado compartido y formulario, SCSS, integración, pruebas de navegador, UX y mutación.
+4. Continuar21–30 con contratos acotados: vistas/campos, exportación/importación, API de integración, webhooks, calendarios, GitHub, otros conectores y automatizaciones.
 
-Todavía no hay despliegue productivo acreditado. SSH/sudo funciona y el DNS apunta a159.195.156.57. El host tiene15981MiB de RAM; se observaron5788MiB disponibles y16servicios1/1. El presupuesto completo de infraestructura sólo deja45MiB, aunque observability no está desplegado: se revisa un perfil explícito de capacidad para la aplicación, conservando reservas y controles.
+## Estimaciones y límites
 
-Las imágenes inmutables del MVP están publicadas. La comprobación local con archivos configtree verificó sesión, escritura, publicación y conservación tras reiniciar API/PG/Rabbit. Falta integrar el nuevo stack en Swarm y verificar HTTPS, permisos de secretos y recuperación en producción. La ruta/healthz deNginx no acredita por sí sola API, PostgreSQL o broker. Véanse docs/deployment-readiness.md y progress/review_mvp_deployment_handoff.md.
-
-## Alcance posterior
-
-La funcionalidad19 está en desarrollo y20–30 siguen autorizadas después del MVP: revisión semanal, personalización, vistas/campos, importación/exportación, API de integración, webhooks, calendarios, GitHub, conectores y automatizaciones. Necesitan contratos propios. El inventario de proveedores debe acotarse antes de estimar el proyecto completo. No se incluyen silenciosamente en la entrega1–18 ni se promete completarlas con una recarga concreta.
+El rango anterior de4–8horas era una previsión de despliegue, no una cuenta atrás ni una promesa del proyecto completo. Ahora quedan la convergencia del corte corregido y su aceptación real; cualquier fallo observado se diagnostica antes de publicar un nuevo plazo. Los trabajos avanzados todavía requieren contratos y proveedores concretos, por lo que no hay una estimación total fiable ni una garantía de terminar con una recarga o cuota determinada.

@@ -1,6 +1,6 @@
 # Usar el MVP para trabajar con un horario
 
-El MVP de las funcionalidades 1–18, incluido Historial, está validado y fusionado. El estado de despliegue está en [el plan](mvp-delivery-plan.md). La revisión semanal se incorpora en la siguiente entrega; la personalización avanzada y los conectores de las funcionalidades 20–30 siguen pendientes.
+Las funcionalidades 1–19, incluidos Historial y Revisión semanal, están validadas y fusionadas. El estado de despliegue está en [el plan](mvp-delivery-plan.md). La apariencia persistente está en desarrollo; las funcionalidades 21–30 siguen pendientes.
 
 ## Preparar el trabajo
 
@@ -29,7 +29,7 @@ Cada página contiene hasta20hechos. **Más antiguos** sustituye la página actu
 
 Un error de consulta no significa que el historial esté vacío. El reintento sólo repite la lectura. Si caduca la sesión de acceso, vuelve a identificarte; la aplicación retira los datos privados de la pantalla.
 
-## Comparar la semana (siguiente entrega)
+## Comparar la semana
 
 Abre **Revisión semanal** para ver siete días de lunes a domingo. La fecha y la zona se aplican al pulsar **Mostrar semana**; cambiar un campo no inicia una consulta. Los enlaces de semana anterior, siguiente y actual permiten moverte sin perder la zona elegida. Atrás y recargar conservan la selección aplicada.
 

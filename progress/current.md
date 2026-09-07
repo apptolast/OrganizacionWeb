@@ -235,3 +235,9 @@ Servidor: validate-iac.sh reparado terminó EXIT0 tras confirmar y corregir úni
 ## Feature20 — apariencia, inicio de implementación
 
 Contrato aprobado f4697a6 bajo autorización global. Init inicial25384 EXIT0 14625f con frontend1.968/42, Java y arnés verdes; no cambios productivos desde mainc20105a. Se inicia TDD de20: backend y frontend en paralelo dentro del mismo contrato. A: dominio/persistencia/aplicación/configuración; B: cliente/vista/tokensSCSS/navegación. HTTP se coordina por root para no solapar Java. V14 protegida no se toca. Los37escenarios se acreditarán en informes de ciclos, no por su conteo documental112.
+
+## Primer despliegue y apariencia en curso, 7 de septiembre 18:32
+
+Feature19 fusionada en main c20105a; feature20 activa desde0202129. Checkpoint nominal de puertos dc374b0 revisado y entregado a HTTP aislado f7e7b22; no representa la persistencia ni reglas completas de20. A continúa dominio/aplicación/PG, B cliente/UI; C ha pausado HTTP en GREEN para corregir un defecto real de despliegue.
+
+Infra780aafa pasó CI34142641721 y ensayo Ansible real27/2/0. Edge aplicado; certificado HTTPS obtenido tras un único reinicio controlado, dominio responde503 porque la aplicación no está lista. Primer apply de OrganizationWeb creó sus datos y cuatro servicios: PG/Rabbit1/1, API/web reinician. Inspección real confirma Mounts=null en API/web: tmpfs abreviado no llegó al servicio Swarm, Tomcat falla al crear /tmp. Alias backend sí existe. C corrige el montaje en el catálogo mediante prueba de conversión Swarm, sin retirar read_only. Los16servicios previos mantienen1/1. No declarar despliegue funcional ni100%; imágenes actuales siguen siendo MVP18a5d1586. Credenciales exclusivamente protegidas, nunca en Git.

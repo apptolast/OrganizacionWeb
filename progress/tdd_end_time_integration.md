@@ -1,0 +1,11 @@
+# Integración HTTP y PostgreSQL de17
+
+Árbol aislado end-http, wiring real95a3881 sobre checkpoint Store0d48abb y HTTP5723f1c. Único archivo nuevo `EndTimeIntegrationTest.java`; no mocks de aplicación/Store ni cambios de producción. Reutiliza patrón SpringBoot/MockMvc/PostgreSQL17.9 de `CloseWorkSessionIntegrationTest` y su Clock de prueba compartido, sin nueva infraestructura.
+
+Un solo recorrido individual: inicio HTTP25min → E con fin original y State6 → EXTEND15min201 → E y columnas efectivas/marca SQL → cierre real → E cerrado conserva fin ampliado → se retira exclusivamente outbox WorkSessionExtended.v1 de la sesión → replay200 y recuperación C/K devuelven el recibo original. Verifica EXTEND7/extension3, µs exactos, before/after sólo revisión distinta, fin23:09 frente al plannedEnd22:54, evento11, Location sólo POST, cabecera revisión, no-store y ausencia de ETag. Cierre y fin acordado permanecen conceptos separados. Compara las cuatro tablas completas antes/después de replay/consultas, incluyendo401 anónimo y404 de otra identidad.
+
+Primera ejecución **f8deb6 EXIT1** y segundo intento **0907c9 EXIT1**: errores del comparador SQL del test, que intentó ordenar intervals y después outbox por una columna `id` inexistente. Evidencia5665cd/9d70ce. No fueron defectos del producto: ya se habían alcanzado ampliación, evento y cierre. Se corrigieron sólo las claves de orden a `(session_id,revision)` y `event_id`; no se alteró ningún oráculo ni dato de sesión. Primer resultado completo **ae60e1 EXIT0** sobre producción intacta, sin inventar un RED funcional.
+
+Spotless real y mismo foco tras formato: **4bffa6 EXIT0**,1/1, cero fallos/errores/saltos. XML preservado `progress/end_integration_final_xml`, conteo y diffcheck208064; hashes en `end_integration_freeze_hashes.json`. No cambios versionados de producción tras Spotless; el único Java entregable es el test nuevo.
+
+Alcance parcial @s1/@s7/@s13/@s23: wiring, HTTP, transacciones PostgreSQL nominales, persistencia del fin y recuperación independiente de la fila outbox. No acredita reinicio de proceso, broker real, carreras/rollback/upgrade finales de A ni ejecución de navegador. No se lanzaron campañas, E2E ni suite global. Freeze para revisión e integración selectiva de raíz.

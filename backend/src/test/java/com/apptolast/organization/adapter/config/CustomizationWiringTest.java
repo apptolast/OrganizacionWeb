@@ -37,6 +37,24 @@ class CustomizationWiringTest {
   @Autowired ApplicationContext context;
   @Autowired JdbcTemplate jdbc;
 
+  @Test
+  void s10_realValuesReadBeanChecksOwnedEntityAndReturnsAnAbsentSnapshot() {
+    var project = UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'wiring-values-owner','P','','active',now(),now())",
+        project);
+    var read =
+        context.getBean(com.apptolast.organization.application.ReadCustomFieldValuesUseCase.class);
+    var value = read.get("wiring-values-owner", CustomizationScope.PROJECT, project, project);
+    assertThat(value.entityId()).isEqualTo(project);
+    assertThat(value.schema())
+        .isEqualTo(new com.apptolast.organization.domain.CustomizationRevision(null, 0));
+    assertThat(value.revision())
+        .isEqualTo(new com.apptolast.organization.domain.CustomizationRevision(null, 0));
+    assertThat(value.values()).isEmpty();
+    assertThat(value.updatedAt()).isNull();
+  }
+
   @org.junit.jupiter.api.BeforeEach
   void clearOwnPreferences() {
     jdbc.update("DELETE FROM customization_preferences");

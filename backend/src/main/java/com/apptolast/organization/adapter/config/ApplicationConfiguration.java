@@ -9,6 +9,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  com.apptolast.organization.application.ReadCustomFieldValues readCustomFieldValues(
+      com.apptolast.organization.application.CustomFieldValuesQueries queries) {
+    return new com.apptolast.organization.application.ReadCustomFieldValues(queries);
+  }
+
+  @Bean
   com.apptolast.organization.application.SaveCustomizationView saveCustomizationView(
       com.apptolast.organization.application.CustomizationEditing store, Clock clock) {
     return new com.apptolast.organization.application.SaveCustomizationView(store, clock);

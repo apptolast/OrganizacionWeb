@@ -121,3 +121,11 @@ Root aprobó y versionó el cliente en `99f2971`: 53 pruebas nuevas y 475 regres
 Consulta duradera y aplicación aprobadas como checkpoint en `06bd830`: 21 pruebas PostgreSQL y 3 de aplicación, XML y cuatro hashes verificados (f1b654). Cinco fuentes, filtros y paginación por cursor ya disponibles; A continúa RR/read-only, integridad, errores, commits tardíos y wiring. Su nuevo oráculo de read-only está RED real (0a6047); las fuentes quedan liberadas después del commit.
 
 El adaptador HTTP nominal se revisó y versionó en el árbol aislado como `342ef0d`, rama `codex/history-http` publicada. Once pruebas y cuatro hashes comprobados (1a7426); sigue pendiente integrar en COMMON cuando exista el bean de aplicación. C continúa validación y cursor. E2E inicial RED por enlace Historial ausente, puerto 18080 libre. No hay procesos root activos ni campañas globales de la funcionalidad 18. Las entregas parciales no acreditan todavía su cierre.
+
+## API completa y montaje nominal integrados, 11:50
+
+HTTP/cursor aprobado en 5578514 e integrado como 4ef385c. Root verificó cinco hashes y dos XML (24c59e): 75 pruebas HTTP y 4 de seguridad, todas verdes. El contrato aclarado por be25c5c/5e2ad1e conserva 39 escenarios y 142 ejemplos; SHA actual de history.feature C9AB1D0486E98FB3F7B868EB5074DFD8C1EEE2EADC463B47C9032749F87B5D0D. No cambia la política de seguridad.
+
+Montaje UI nominal aprobado e integrado en 9fa0e58: 20 pruebas, cinco hashes contrastados (cfe985), lint/tipos y formato acreditados. C recibió PG, wiring, cliente y UI mediante commits 6d5906d, 71585ee, adbf189 y e3cf6d2 en su árbol aislado; puede ejecutar el primer E2E real. A conserva en COMMON las correcciones temporales e integridad todavía en WIP; no se atribuyen al snapshot aislado. B continúa enlaces, foco y UX. No campañas activas de root.
+
+El usuario ha reiterado que dispone de una última recarga y pide terminar hoy. Se mantiene prioridad al cierre probado del MVP con tres agentes; no se promete completar también 19–30 ni un despliegue sin acceso y dominio. La propuesta PIT de C está aprobada con 12 patrones y la configuración habitual; el dispatcher se implementará por TDD antes de usarlo. No se rebajan gates ni se repiten campañas heredadas sin una causa concreta.

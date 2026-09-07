@@ -118,10 +118,15 @@ it("@s30 reports a failed read without claiming an empty week or endless loading
 
 it("@s30 retries the same selection once while announcing its pending read", async () => {
   window.history.replaceState(null, "", "/revision-semanal?date=2026-09-09");
+  let release!: (response: Response) => void;
   const fetcher = vi
     .fn()
     .mockResolvedValueOnce(new Response(null, { status: 503 }))
-    .mockReturnValue(new Promise(() => {}));
+    .mockReturnValue(
+      new Promise<Response>((resolve) => {
+        release = resolve;
+      }),
+    );
   vi.stubGlobal("fetch", fetcher);
   render(<App />);
   const retry = await screen.findByRole("button", { name: "Reintentar" });
@@ -133,6 +138,10 @@ it("@s30 retries the same selection once while announcing its pending read", asy
   expect(fetcher.mock.calls[1][0]).toBe(
     "/api/v1/weekly-review?date=2026-09-09",
   );
+  await act(async () => release(Response.json(week)));
+  expect(
+    screen.getByRole("heading", { level: 1, name: "Revisión semanal" }),
+  ).toHaveFocus();
 });
 
 it("@s28 applies the draft date explicitly and withdraws the previous week's data", async () => {

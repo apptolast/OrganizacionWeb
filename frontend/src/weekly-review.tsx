@@ -276,8 +276,12 @@ export function WeeklyReview({ route }: { route: string }) {
           {failure.status !== 400 && (
             <button
               type="button"
-              onClick={() => {
-                if (!loading) setRefresh((value) => value + 1);
+              onClick={(event) => {
+                if (!loading) {
+                  if (event.currentTarget.contains(document.activeElement))
+                    initiator.current = event.currentTarget;
+                  setRefresh((value) => value + 1);
+                }
               }}
             >
               Reintentar

@@ -51,3 +51,10 @@ SHA256 del freeze:
 - RabbitBrokerPublisher.java: `3A47D01079E3CD28661FA550AC769F931C3DF8D3F1386786A248528329787F65`.
 - PublishOutboxTest.java: `07A0C191F4BE45821D81B6222DB3B6825C2E8C223D999A4127E79D7E40A6CFFA`.
 - RabbitBrokerPublisherTest.java: `E458E9DC74EBDC92388CC96FCFE82BD29881891AD7BB44EAD38E5F54CBEFDD50`.
+## Refuerzo único de calendario imposible
+
+Después de la campaña integrada, root asigna un solo oráculo @s27: WorkSessionStarted con plannedEndAt `2026-02-30T10:25:00.123456Z`. La forma UTC es válida y el resto del evento procede del fixture coherente; la fecha imposible alcanza el parseo de calendario. Se reutiliza assertStartedBlocked, que exige exactamente blocked/INVALID_EVENT y falla si se invoca el broker.
+
+Inicialmente GREEN231773; no cambio de producción. Spotless real focal IS CLEANe30c2f; check826894. Regresión PublishOutboxTest completa GREENc54dab: XMLcd9643 confirma153 pruebas, cero fallos/errores/omitidos. SHA256 nuevo del test:69A14120302754114B03AFCBA1362B76E4908EB8B1B020A1883EDECD3BA5DB62.
+
+Freeze comunicado directamente al autor backend para su PIT acotado; ninguna campaña lanzada por este autor, ningún cambio de configuración/current.md ni commits. No se atribuye detección de mutante antes de medir.

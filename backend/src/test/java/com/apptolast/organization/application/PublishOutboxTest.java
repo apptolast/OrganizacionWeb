@@ -33,6 +33,14 @@ class PublishOutboxTest {
     assertStartedBlocked(startedWith(source, payload));
   }
 
+  @Test
+  void workSession_s27_blocksImpossibleCalendarDateWithValidUtcShape() throws Exception {
+    var source = startedAt(Instant.parse("2026-02-28T10:00:00.123456Z"), 25);
+    var payload = new HashMap<>(source.payload());
+    payload.put("plannedEndAt", "2026-02-30T10:25:00.123456Z");
+    assertStartedBlocked(startedWith(source, payload));
+  }
+
   private void assertStartedBlocked(OutboxMessage event) {
     var work = new Work(event);
     new PublishOutbox(

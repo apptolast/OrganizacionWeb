@@ -105,19 +105,18 @@ class WorkSessionPersistenceTest {
     var payload = json.readTree(event.get("payload").toString());
     assertThat(payload)
         .isEqualTo(
-            json.valueToTree(
-                new com.apptolast.organization.application.WorkSessionStarted(
-                    (UUID) event.get("event_id"),
-                    session.id(),
-                    "owner",
-                    session.startedAt(),
-                    1,
-                    "WorkSessionStarted.v1",
-                    project,
-                    task,
-                    25,
-                    session.plannedEndAt(),
-                    "Europe/Madrid")));
+            json.createObjectNode()
+                .put("eventId", event.get("event_id").toString())
+                .put("aggregateId", session.id().toString())
+                .put("ownerId", "owner")
+                .put("occurredAt", "2026-09-06T10:00:00.123456Z")
+                .put("schemaVersion", 1)
+                .put("type", "WorkSessionStarted.v1")
+                .put("projectId", project.toString())
+                .put("taskId", task.toString())
+                .put("plannedMinutes", 25)
+                .put("plannedEndAt", "2026-09-06T10:25:00.123456Z")
+                .put("zoneId", "Europe/Madrid"));
     assertThat(jdbc.queryForList("SELECT * FROM projects")).isEqualTo(projectBefore);
     assertThat(jdbc.queryForList("SELECT * FROM tasks")).isEqualTo(taskBefore);
     assertThat(jdbc.queryForList("SELECT * FROM availability_preferences"))

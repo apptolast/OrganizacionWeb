@@ -45,3 +45,14 @@ Root aprobó y versionó primer bundle2e60131, liberado. Sin cambios de firmas. 
 Este corte todavía no incorpora transacción RR/read-only, traducción de errores/cierre, validación semántica de recibo seleccionado, commits tardíos ni wiring. Tampoco afirma que las variantes heredadas y los cinco owners estén acreditados por un único ejemplo.
 
 Formato real y regresión focal conjunta GREEN 01ce2f: 21 PG + 3 application, cero fallos/errores/omitidos. XML preservados en history_queries_checkpoint y cuatro archivos propios congelados en history_queries_checkpoint.json para revisión selectiva. Fuente/test frontend en WIP pertenecen a B y no forman parte del paquete.
+
+## 24–27. Transacción y conexión real de beans
+
+Root aprobó el checkpoint de consultas en06bd830, liberando las cuatro fuentes/tests.
+
+- @s22 HistoryReadTransactionTest.s22_pageRunsInsideReadOnlyRepeatableRead: RED 0a6047 observó readOnly off, GREEN 0f8bd9 observa on/repeatable read dentro de la consulta PostgreSQL. Constructor del adapter pasa a (JdbcTemplate, PlatformTransactionManager, ObjectMapper); puerto application intacto, consumidores PG ajustados mecánicamente.
+- @s23 cierre de transacción: RED d761a9, GREEN c0f448; manager delegado completa doCommit y lanza TransactionSystemException, capturada fuera de execute. No página vacía ante fallo.
+- @s23 SQL real: RED 270040, GREEN 4da4d0; tabla de este contenedor renombrada/restaurada en finally y DataAccessException traducida. No test global ni cambio de otra fuente.
+- @s1 ApplicationWiringTest.history_s1_readBeanUsesTheRealQueries: RED 1758e2 por bean ausente, GREEN 73e1f2 con ReadHistory y PostgresHistoryQueries reales. JdbcTemplate y manager simulados en este contexto: alcanza el adapter y su rechazo de contexto; no se atribuye PostgreSQL ni HTTP reales a este caso.
+
+Cierre de este checkpoint: formato y regresión GREEN4382ad; los cinco XML preservados en history_wiring_checkpoint suman **56** casos (21 PG consultas +3 PG transacción +3 application +22 wiring +7 configuración), todos sin fallos/errores/omitidos. El mensaje de entrega indicó57 por error de suma; los XML y conteos por suite siempre fueron56. Manifiesto de cinco archivos history_wiring_checkpoint.json, SHA D433DFF3ABDA3091643F763450AEA1BF04950DBCA9C90C6CE3A43302B0920BA5. Se conserva el límite de la prueba wiring: infraestructura simulada, adaptador real.

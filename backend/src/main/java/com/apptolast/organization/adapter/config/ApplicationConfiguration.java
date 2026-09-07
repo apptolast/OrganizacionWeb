@@ -9,6 +9,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  com.apptolast.organization.adapter.persistence.PostgresHistoryQueries historyQueries(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions,
+      com.fasterxml.jackson.databind.ObjectMapper json) {
+    return new com.apptolast.organization.adapter.persistence.PostgresHistoryQueries(
+        jdbc, transactions, json);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReadHistory readHistory(
+      com.apptolast.organization.application.HistoryQueries queries) {
+    return new com.apptolast.organization.application.ReadHistory(queries);
+  }
+
+  @Bean
   com.apptolast.organization.application.ReadWorkSessionEnd readWorkSessionEnd(
       com.apptolast.organization.application.WorkSessionEndQueries queries, Clock clock) {
     return new com.apptolast.organization.application.ReadWorkSessionEnd(queries, clock);

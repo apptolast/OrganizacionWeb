@@ -69,7 +69,11 @@ class HistoryQueriesPersistenceTest {
     var before = jdbc.queryForList("SELECT * FROM work_sessions");
 
     var rows =
-        new PostgresHistoryQueries(jdbc, json)
+        new PostgresHistoryQueries(
+                jdbc,
+                new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                    jdbc.getDataSource()),
+                json)
             .list("owner", new HistoryFilters(null, null, null, null, null), null);
 
     assertThat(rows)
@@ -92,7 +96,11 @@ class HistoryQueriesPersistenceTest {
         Timestamp.from(at),
         Timestamp.from(at.plusSeconds(1500)));
     assertThat(
-            new PostgresHistoryQueries(jdbc, json)
+            new PostgresHistoryQueries(
+                    jdbc,
+                    new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                        jdbc.getDataSource()),
+                    json)
                 .list("other-owner", new HistoryFilters(null, null, null, null, null), null))
         .isEmpty();
   }
@@ -115,7 +123,11 @@ class HistoryQueriesPersistenceTest {
     var expected =
         new com.apptolast.organization.domain.TaskHistoryEntry(id, 1, "pending", "completed", at);
     assertThat(
-            new PostgresHistoryQueries(jdbc, json)
+            new PostgresHistoryQueries(
+                    jdbc,
+                    new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                        jdbc.getDataSource()),
+                    json)
                 .list("owner", new HistoryFilters(null, null, null, null, null), null))
         .containsExactly(
             new HistoryEntry<>(
@@ -157,7 +169,11 @@ class HistoryQueriesPersistenceTest {
         Timestamp.from(change.occurredAt()),
         json.writeValueAsString(change));
     var rows =
-        new PostgresHistoryQueries(jdbc, json)
+        new PostgresHistoryQueries(
+                jdbc,
+                new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                    jdbc.getDataSource()),
+                json)
             .list("owner", new HistoryFilters(null, null, null, null, null), null);
     assertThat(rows).hasSize(2);
     assertThat(rows)
@@ -182,7 +198,11 @@ class HistoryQueriesPersistenceTest {
   void s1_plannedHistoryUsesCreationTimeAndTheOriginalDestination() {
     var block = plannedBlock();
     assertThat(
-            new PostgresHistoryQueries(jdbc, json)
+            new PostgresHistoryQueries(
+                    jdbc,
+                    new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                        jdbc.getDataSource()),
+                    json)
                 .list("owner", new HistoryFilters(null, null, null, null, null), null))
         .containsExactly(
             new HistoryEntry<>(
@@ -256,7 +276,11 @@ class HistoryQueriesPersistenceTest {
         Timestamp.from(at),
         json.writeValueAsString(receipt));
     var rows =
-        new PostgresHistoryQueries(jdbc, json)
+        new PostgresHistoryQueries(
+                jdbc,
+                new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                    jdbc.getDataSource()),
+                json)
             .list("owner", new HistoryFilters(null, null, null, null, null), null);
     assertThat(rows)
         .containsExactlyInAnyOrder(
@@ -295,7 +319,11 @@ class HistoryQueriesPersistenceTest {
         Timestamp.from(at.plusSeconds(22)),
         task);
     var rows =
-        new PostgresHistoryQueries(jdbc, json)
+        new PostgresHistoryQueries(
+                jdbc,
+                new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                    jdbc.getDataSource()),
+                json)
             .list("owner", new HistoryFilters(null, null, null, null, null), null);
     assertThat(rows).extracting(HistoryEntry::id).isEqualTo(expected.subList(0, 21));
   }
@@ -326,7 +354,11 @@ class HistoryQueriesPersistenceTest {
         Timestamp.from(at),
         Timestamp.from(at.plusSeconds(1500)));
     var rows =
-        new PostgresHistoryQueries(jdbc, json)
+        new PostgresHistoryQueries(
+                jdbc,
+                new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                    jdbc.getDataSource()),
+                json)
             .list("owner", new HistoryFilters(null, null, null, null, null), null);
     assertThat(rows)
         .extracting(HistoryEntry::type)
@@ -351,7 +383,11 @@ class HistoryQueriesPersistenceTest {
         Timestamp.from(at),
         Timestamp.from(at.plusSeconds(1500)));
     assertThat(
-            new PostgresHistoryQueries(jdbc, json)
+            new PostgresHistoryQueries(
+                    jdbc,
+                    new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                        jdbc.getDataSource()),
+                    json)
                 .list("owner", new HistoryFilters("sessions", null, null, null, null), null))
         .extracting(HistoryEntry::id)
         .containsExactly(id);
@@ -370,7 +406,11 @@ class HistoryQueriesPersistenceTest {
         Timestamp.from(at),
         Timestamp.from(at.plusSeconds(1500)));
     assertThat(
-            new PostgresHistoryQueries(jdbc, json)
+            new PostgresHistoryQueries(
+                    jdbc,
+                    new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                        jdbc.getDataSource()),
+                    json)
                 .list("owner", new HistoryFilters("planning", null, null, null, null), null))
         .extracting(HistoryEntry::id)
         .containsExactly(block.id());
@@ -393,7 +433,11 @@ class HistoryQueriesPersistenceTest {
         task,
         Timestamp.from(at));
     assertThat(
-            new PostgresHistoryQueries(jdbc, json)
+            new PostgresHistoryQueries(
+                    jdbc,
+                    new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                        jdbc.getDataSource()),
+                    json)
                 .list("owner", new HistoryFilters("task-status", null, null, null, null), null))
         .extracting(HistoryEntry::id)
         .containsExactly(id);
@@ -403,7 +447,11 @@ class HistoryQueriesPersistenceTest {
   void s9_unknownExplicitProjectIsNotAnEmptyHistory() {
     org.assertj.core.api.Assertions.assertThatThrownBy(
             () ->
-                new PostgresHistoryQueries(jdbc, json)
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
                     .list(
                         "owner",
                         new HistoryFilters(null, UUID.randomUUID(), null, null, null),
@@ -419,7 +467,11 @@ class HistoryQueriesPersistenceTest {
         other);
     org.assertj.core.api.Assertions.assertThatThrownBy(
             () ->
-                new PostgresHistoryQueries(jdbc, json)
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
                     .list("owner", new HistoryFilters(null, other, task, null, null), null))
         .isInstanceOf(ResourceNotFoundException.class);
   }
@@ -432,7 +484,11 @@ class HistoryQueriesPersistenceTest {
         "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'owner','Vacío','','idea',now(),now())",
         other);
     assertThat(
-            new PostgresHistoryQueries(jdbc, json)
+            new PostgresHistoryQueries(
+                    jdbc,
+                    new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                        jdbc.getDataSource()),
+                    json)
                 .list("owner", new HistoryFilters(null, other, null, null, null), null))
         .isEmpty();
   }
@@ -446,7 +502,11 @@ class HistoryQueriesPersistenceTest {
         other,
         project);
     assertThat(
-            new PostgresHistoryQueries(jdbc, json)
+            new PostgresHistoryQueries(
+                    jdbc,
+                    new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                        jdbc.getDataSource()),
+                    json)
                 .list("owner", new HistoryFilters(null, project, other, null, null), null))
         .isEmpty();
   }
@@ -458,7 +518,13 @@ class HistoryQueriesPersistenceTest {
     var position = new HistoryPosition(block.createdAt(), "BLOCK_PLANNED", block.id());
     var cursor = new HistoryCursor("other-owner", filters, position, position);
     org.assertj.core.api.Assertions.assertThatThrownBy(
-            () -> new PostgresHistoryQueries(jdbc, json).list("owner", filters, cursor))
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", filters, cursor))
         .isInstanceOfSatisfying(
             com.apptolast.organization.domain.ValidationException.class,
             e ->
@@ -478,7 +544,13 @@ class HistoryQueriesPersistenceTest {
             Instant.parse("2026-09-07T10:00:00Z"), "BLOCK_PLANNED", UUID.randomUUID());
     var cursor = new HistoryCursor("owner", filters, position, position);
     org.assertj.core.api.Assertions.assertThatThrownBy(
-            () -> new PostgresHistoryQueries(jdbc, json).list("other-owner", filters, cursor))
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("other-owner", filters, cursor))
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
@@ -491,7 +563,13 @@ class HistoryQueriesPersistenceTest {
         new HistoryCursor(
             "owner", new HistoryFilters(null, project, task, null, null), position, position);
     org.assertj.core.api.Assertions.assertThatThrownBy(
-            () -> new PostgresHistoryQueries(jdbc, json).list("owner", filters, cursor))
+            () ->
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
+                    .list("owner", filters, cursor))
         .isInstanceOf(com.apptolast.organization.domain.ValidationException.class);
   }
 
@@ -503,7 +581,11 @@ class HistoryQueriesPersistenceTest {
     var after = new HistoryPosition(block.createdAt(), "SESSION_STARTED", block.id());
     org.assertj.core.api.Assertions.assertThatThrownBy(
             () ->
-                new PostgresHistoryQueries(jdbc, json)
+                new PostgresHistoryQueries(
+                        jdbc,
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                            jdbc.getDataSource()),
+                        json)
                     .list("owner", filters, new HistoryCursor("owner", filters, upper, after)))
         .isInstanceOf(com.apptolast.organization.domain.ValidationException.class);
   }
@@ -528,7 +610,11 @@ class HistoryQueriesPersistenceTest {
     var filters = new HistoryFilters(null, null, null, null, null);
     var position = new HistoryPosition(at, "TASK_STATUS_CHANGED", high);
     var rows =
-        new PostgresHistoryQueries(jdbc, json)
+        new PostgresHistoryQueries(
+                jdbc,
+                new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                    jdbc.getDataSource()),
+                json)
             .list("owner", filters, new HistoryCursor("owner", filters, position, position));
     assertThat(rows).extracting(HistoryEntry::id).containsExactly(low, block.id());
   }
@@ -561,7 +647,11 @@ class HistoryQueriesPersistenceTest {
         task);
     var day = java.time.LocalDate.of(2026, 9, 7);
     assertThat(
-            new PostgresHistoryQueries(jdbc, json)
+            new PostgresHistoryQueries(
+                    jdbc,
+                    new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                        jdbc.getDataSource()),
+                    json)
                 .list("owner", new HistoryFilters(null, null, null, day, day), null))
         .extracting(HistoryEntry::id)
         .containsExactly(ids.get(2), ids.get(1));

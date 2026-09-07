@@ -91,3 +91,4 @@ reports/
 /frontend/.stryker-tmp-end-time-notification-replay/
 /progress/end_time_stryker_replay_original.json
 /progress/history_queries_checkpoint/
+/progress/history_wiring_checkpoint/

@@ -367,4 +367,22 @@ class ApplicationWiringTest {
                       error -> assertThat(((PortReached) error).port).isEqualTo(expectedPort));
             });
   }
+
+  @Test
+  void history_s1_readBeanUsesTheRealQueries() {
+    freshContext()
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              assertThatThrownBy(
+                      () ->
+                          context
+                              .getBean(ReadHistoryUseCase.class)
+                              .list(
+                                  "owner",
+                                  new HistoryFilters(null, PROJECT, TASK, null, null),
+                                  null))
+                  .isInstanceOf(ResourceNotFoundException.class);
+            });
+  }
 }

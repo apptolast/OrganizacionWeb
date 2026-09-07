@@ -10,13 +10,30 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public final class PostgresHistoryQueries implements HistoryQueries {
   private final JdbcTemplate jdbc;
   private final ObjectMapper json;
+  private final org.springframework.transaction.support.TransactionTemplate transaction;
 
-  public PostgresHistoryQueries(JdbcTemplate jdbc, ObjectMapper json) {
+  public PostgresHistoryQueries(
+      JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager manager,
+      ObjectMapper json) {
     this.jdbc = jdbc;
     this.json = json;
+    transaction = new org.springframework.transaction.support.TransactionTemplate(manager);
+    transaction.setReadOnly(true);
+    transaction.setIsolationLevel(
+        org.springframework.transaction.TransactionDefinition.ISOLATION_REPEATABLE_READ);
   }
 
   public List<HistoryEntry<?>> list(String owner, HistoryFilters filters, HistoryCursor cursor) {
+    try {
+      return transaction.execute(status -> read(owner, filters, cursor));
+    } catch (org.springframework.transaction.TransactionException
+        | org.springframework.dao.DataAccessException error) {
+      throw new StorageUnavailableException(error);
+    }
+  }
+
+  private List<HistoryEntry<?>> read(String owner, HistoryFilters filters, HistoryCursor cursor) {
     if (filters.projectId() != null
         && !Boolean.TRUE.equals(
             jdbc.queryForObject(

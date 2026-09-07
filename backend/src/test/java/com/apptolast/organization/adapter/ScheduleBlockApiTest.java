@@ -57,7 +57,7 @@ class ScheduleBlockApiTest {
     when(clock.instant()).thenReturn(Instant.parse("2030-01-01T00:00:00.123456789Z"));
     when(clock.getZone()).thenReturn(ZoneOffset.UTC);
     jdbc.execute(
-        "TRUNCATE"
+        "TRUNCATE project_custom_field_values,task_custom_field_values,"
             + " work_session_intervals,work_session_changes,work_sessions,block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
     project = UUID.randomUUID();
     task = UUID.randomUUID();

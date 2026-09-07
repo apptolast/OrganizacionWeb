@@ -1,0 +1,98 @@
+[
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/AuthenticationHttpTest.java",
+    "before": "CC0E5AEFFC3019574064D82DE212F45FA914751A4F6E506F9C537E7775C347B9"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/AvailabilityApiTest.java",
+    "before": "B3386692EDF0257E125B571DF708B8DA0D16D7E30907F55BBE3C41AA2918CD19"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/BlockChangesApiTest.java",
+    "before": "5ABF4F6A82C3DC81FB576F1822A3BDE3CA14DEBF764BDEB06D6E9422C4CD6A10"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/EditProjectsApiTest.java",
+    "before": "5A9E570102B01C0035611B7B8319A7D5001CA5A93D11F1944E5A6E0F66570FCD"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/ProjectApiTest.java",
+    "before": "E179947A39EE800675B28F898AAA521D83E580CD414BC8E6DF79C72723266031"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/ProjectStatesApiTest.java",
+    "before": "E9F1CF21C7FE28E9F400BB51B3AFC5DE097D671338EB20904E6318975D0136F4"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/ReadProjectsApiTest.java",
+    "before": "D42D5D03456EAAAB422D6E61C7D462104CCAF9BE5C2F4A271C46B531B011EF43"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/RescheduleApiTest.java",
+    "before": "4AC00E327DF980FB98034B22E15CDF15CE593180C4195FDA7EA2A43C231206E1"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/RescheduleErrorsApiTest.java",
+    "before": "1EE0839C6F1E648044FA0F535C0ECAA17F9880C4E82689274CA641CA2FA43BA3"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/ScheduleBlockApiTest.java",
+    "before": "3963AF147E19C8A4CD0D0220135E402FB6C01850C0DF3963F1D1A05783904D36"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/SubtaskApiTest.java",
+    "before": "C8056C3D45CA20A2844E97FF4F81A4D647D885BA2A3D999599AF53BC0EAB41CD"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/TaskApiTest.java",
+    "before": "2030794AC2690E8884FF51E41CFF127CD0D780CE920DC2C7157BB0914E596726"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/TaskHistoryApiTest.java",
+    "before": "09ACF6D0A7A7DC3A7A9AD7BF7D73EB40A97F80E225D150406E58BC506BEF7A27"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/TaskStatusApiTest.java",
+    "before": "AF8B62F6FB92BD39213295747A9B762D7BF71F9F9544C5D8460F6C6479B4E6CB"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/TodayApiTest.java",
+    "before": "3E815D1F664AE7847AFFC3EE1517F3AD223302FA4024B2D7068FB12BAE96502D"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/WorkSessionIntegrationTest.java",
+    "before": "203014831CAA3560DD29BA4D92CB31E07956494CA9B1A1C0F76FE618E6353243"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/BlockChangeQueriesPersistenceTest.java",
+    "before": "46CAC9BC8F58F166851BAB99C293B939B26D1A050FBBD164CC89568B433C942E"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/HistoryQueriesPersistenceTest.java",
+    "before": "B22F856B8F77E569D7F5E9A8C44032DF57883C879D677B8E87B8D0D68FB3CB94"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/HistoryReadTransactionTest.java",
+    "before": "275E9C335F97F73F5D2D5B06111CE2BCDA9FAF9D83F9F7FE3683D48461302874"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/OutboxRecoveryTest.java",
+    "before": "08D5A7FED207CA20DCBC884E5CBBD1FE228C5D75E23AB274B6349F49D14648D5"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/OutboxWorkTest.java",
+    "before": "795CA71F6F904726B7F4FA392784695F7C31EAFB64E569C197EDB9BFBFBC6C61"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/RescheduleCoordinationTest.java",
+    "before": "E7BB6DD8A159754667DF4A96B5DDC8EB1E90FE6FDB0BDC8613616E03F47DC11A"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ScheduleBlockPersistenceTest.java",
+    "before": "B2D7CADC62B01B4534CF178C721D63CFD4D6302983F97EF88D4A453F5F9573F2"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/WeeklyReviewPersistenceTest.java",
+    "before": "18F50E7577557B35328E27469701572E0DD4BDEB0B8C296F36D36D4CBF999770"
+  }
+]

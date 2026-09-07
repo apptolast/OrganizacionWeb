@@ -1,0 +1,66 @@
+[
+  {
+    "class": "com.apptolast.organization.adapter.AuthenticationHttpTest",
+    "xml": "TEST-com.apptolast.organization.adapter.AuthenticationHttpTest.xml",
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "tests": 22
+  },
+  {
+    "class": "com.apptolast.organization.adapter.config.CustomizationWiringTest",
+    "xml": "TEST-com.apptolast.organization.adapter.config.CustomizationWiringTest.xml",
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "tests": 2
+  },
+  {
+    "class": "com.apptolast.organization.adapter.CustomizationApiTest",
+    "xml": "TEST-com.apptolast.organization.adapter.CustomizationApiTest.xml",
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "tests": 30
+  },
+  {
+    "class": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest",
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.xml",
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "tests": 57
+  },
+  {
+    "class": "com.apptolast.organization.adapter.persistence.RescheduleCoordinationTest",
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.RescheduleCoordinationTest.xml",
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "tests": 6
+  },
+  {
+    "class": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest",
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.xml",
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "tests": 33
+  },
+  {
+    "class": "com.apptolast.organization.adapter.ProjectApiTest",
+    "xml": "TEST-com.apptolast.organization.adapter.ProjectApiTest.xml",
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "tests": 42
+  },
+  {
+    "class": "com.apptolast.organization.adapter.TaskApiTest",
+    "xml": "TEST-com.apptolast.organization.adapter.TaskApiTest.xml",
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "tests": 65
+  }
+]

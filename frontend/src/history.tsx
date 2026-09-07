@@ -117,7 +117,30 @@ export function History({ route }: { route: string }) {
     window.dispatchEvent(new PopStateEvent("popstate"));
   }
   return (
-    <main id="proyectos" tabIndex={-1} className="reader history">
+    <main
+      id="proyectos"
+      tabIndex={-1}
+      className="reader history"
+      onClickCapture={(event) => {
+        if (
+          event.button !== 0 ||
+          event.ctrlKey ||
+          event.metaKey ||
+          event.shiftKey ||
+          event.altKey
+        )
+          return;
+        const link =
+          event.target instanceof Element ? event.target.closest("a") : null;
+        const href = link?.getAttribute("href");
+        if (
+          link &&
+          (href === "/historial" || href?.startsWith("/historial?")) &&
+          link.contains(document.activeElement)
+        )
+          initiator.current = link;
+      }}
+    >
       <h1 ref={heading} tabIndex={-1}>
         Historial
       </h1>
@@ -401,24 +424,7 @@ export function History({ route }: { route: string }) {
         </ol>
       )}
       {failure !== 401 && (
-        <nav
-          aria-label="Paginación del historial"
-          onClickCapture={(event) => {
-            if (
-              event.button !== 0 ||
-              event.ctrlKey ||
-              event.metaKey ||
-              event.shiftKey ||
-              event.altKey
-            )
-              return;
-            if (
-              document.activeElement instanceof HTMLElement &&
-              event.currentTarget.contains(document.activeElement)
-            )
-              initiator.current = document.activeElement;
-          }}
-        >
+        <nav aria-label="Paginación del historial">
           {page?.nextCursor && (
             <RouteLink href={pageUrl(page.nextCursor)}>Más antiguos</RouteLink>
           )}

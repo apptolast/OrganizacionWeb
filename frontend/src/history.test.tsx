@@ -990,6 +990,9 @@ it("@s30 clears every applied filter and cursor through the global history URL",
   await userEvent.click(screen.getByRole("link", { name: "Limpiar filtros" }));
   await screen.findByText("Todavía no hay hechos en tu historial.");
   expect(window.location.pathname + window.location.search).toBe("/historial");
+  expect(
+    screen.getByRole("heading", { name: "Historial", level: 1 }),
+  ).toHaveFocus();
   expect(fetcher).toHaveBeenCalledTimes(2);
   expect(fetcher).toHaveBeenLastCalledWith(
     "/api/v1/history",

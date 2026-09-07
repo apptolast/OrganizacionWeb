@@ -304,3 +304,12 @@ Init21 sesión94704 EXIT0 ce0f1d: Java2387/102 sin fallos/errores/omitidos (recu
 Contrato Gherkin CA252E2A…36DF07 revisado por root:42 escenarios/42 When/174 ejemplos léxicos, no174 pruebas ejecutadas. Se añadieron primera configuración con defaults y cero campos activos; 404 conserva problem+json sin datos ajenos. No pasos después de Examples. Se aplica autorización global previa del usuario sin repetir aprobación. Init21 ya verde. Estado pasa a in_progress antes de código: A dominio/persistencia/aplicación; B cliente/UI; C HTTP aislado tras handoff de puertos.
 
 CI posterior de main7c1bf80,34156177485, terminó SUCCESS. Documentación operativa20 PR32 fusionada01e33a5 tras CI34156833452 SUCCESS. No hay cambios adicionales del servidor.
+
+
+## Feature21: lectura integrada y comandos en curso, 7 de septiembre 22:34
+
+PR24 borrador. Modelos/puerto de lectura9ef8a75 publicados; puertos de vista2797039 revisados por tres hashes. C aislado OrganizacionWeb-customization-http recibió72ff667 y4d0a565; GET nominal7/7 aprobado y committed61fd4b0.
+
+A entregó Store/V20/beanRead y dos tests reales con cinco hashes verificados:7b58da6. Root confirmó14 XML verdes del checkpoint y BUILD SUCCESSFUL del log; la sesión35877 se perdió al compactar A, por lo que no se inventa EXIT recuperado. GET de C integrado enCOMMON b1ed8e6. A confirma arranque combinado GREEN34a4d6 EXIT0 con CustomizationApiTest+CustomizationWiringTest y ciclo16, log customization_16_green.log. No cierre integral de21: validación de filas, comandos/valores/PG/escrituras/UI/mutación/E2E siguen en curso.
+
+C continúa PUT de vista en aislado con puertos reales y mocks de caso de uso, sin beanSave ficticio. Su RED inicial fue500 por el fallback heredado ante método sin ruta, no405; al añadir PUT nominal pasa200. No se modifica ese manejador transversal para simular RED. B mantiene cliente propio y tests nuevos; configuración40 casos verdes tras formato y lint, 400/refactor y valores todavía en curso. Ninguna UI21 terminada. No correr GradleCOMMON en paralelo a A. V14 protegida intacta y producción sigueed00ad4 (funciones1–20).

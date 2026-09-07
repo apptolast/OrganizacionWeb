@@ -1,10 +1,10 @@
-# Sesión actual — cierre16 aprobado; preparación17
+# Sesión actual — cierre16 fusionado y validado; implementación17
 
 ## Estado
 
 Feature16 close_work_session está done y su dictamen final APPROVED: progress/judge_close_work_session_final.md. Contrato41 escenarios/113 ejemplos declarados, sin equipararlos al número de tests. Feature15 está fusionada en main b2ea1f211068e7d93c74d0a8d7e8717ec04323c3, CI34078825723 SUCCESS. Feature17 aviso/ampliación está in_progress desdeace3f9e;18 historial pendiente;19–30 autorizadas después del MVP. Hoy es objetivo, no garantía ni predicción de cuota. Estimación revisada:8–15hsoftware y4–8hdespliegue condicionado, docs/mvp-delivery-plan.md.
 
-COMMON OrganizacionWeb-backend, rama codex/end-time-notification desde6c0a2bf. PR15 fusionada en main fede342d182fa9d348a7ede7fac6f9731a79f3fd tras CI34084817356 SUCCESS y watch77261 EXIT0. Árbol idéntico al corte16 aprobado6c0a2bf comprobado0aeffe; reconciliación de historia4cee04 preservó cambios17. CI posterior main34085908723 activo, watchroot58393. No publicar cambios17 en esa rama. Última CI34082838516 SUCCESS sobre910f405, init/build/E2E/publicador. La nueva publicación requiere su CI antes de ready/merge y comprobación posterior de main. User realiza squash desde GitHub; Claude parado, no volver a preguntar por origen. Root sólo revisión/documentación/Git; agentes escriben producción/tests.
+COMMON OrganizacionWeb-backend, rama codex/end-time-notification desde6c0a2bf. PR15 fusionada en main fede342d182fa9d348a7ede7fac6f9731a79f3fd tras CI34084817356 SUCCESS y watch77261 EXIT0. Árbol idéntico al corte16 aprobado6c0a2bf comprobado0aeffe; reconciliación de historia4cee04 preservó cambios17. CI posterior main34085908723 SUCCESS sobre fede342d182fa9d348a7ede7fac6f9731a79f3fd, verificado8decf6; watchroot58393 terminó EXIT0 1fb2a6. No publicar cambios17 en esa rama. Última CI34082838516 SUCCESS sobre910f405, init/build/E2E/publicador. La nueva publicación requiere su CI antes de ready/merge y comprobación posterior de main. User realiza squash desde GitHub; Claude parado, no volver a preguntar por origen. Root sólo revisión/documentación/Git; agentes escriben producción/tests.
 
 ## Gates finales16
 
@@ -25,3 +25,11 @@ Normativa17 revisada e integrada en63edc64, project-spec SHA2F44F439F7ED17E19CAE
 SSH publickey rechazado y dominio pendientes de respuestas ya solicitadas; no repetir mientras exista trabajo independiente. Lectura local2c31d1 no encontró alias; ninguna nueva conexión ni lectura de claves privadas. No se ha desplegado el producto. Capacidad histórica45MiB no es RAM libre actual. Ver docs/deployment-readiness.md y progress/mvp_deployment_remaining.md.
 
 Ponytail full/Caveman lite. Sólo staging explícito. V14 aparece M sin diff de contenido: no reescribir ni stage. No force-push ni limpieza global. Prohibido leer/borrar/mover/reintentar .e2e-work/read-review-state.json, .e2e-work/read-review-stop, frontend/.stryker-tmp-availability-replay, progress/proposal_schedule_block_time.md o limpiar sus ascendientes. No tocar stack8080. Árboles aislados históricos contienen evidencia/snapshots: nunca fusionar sus ramas completas. Logs/raw/XML preservados localmente; informes/manifiestos versionados.
+
+## Checkpoints revisados del 7 de septiembre, 07:30
+
+Primer núcleo nominal 909b0ca revisado e incorporado al árbol HTTP como6948904: 40 casos focales, sin atribuir todavía guardas completas ni persistencia17. A continúa core/PG/migración/wiring; ha comunicado primer caso PostgreSQL nominal verde d30c9e y continúa replay/marca/lectura RR antes del siguiente freeze.
+
+Cliente E/EXTEND revisado y commit22b569a: 20 casos nuevos y91 heredados, 111 verdes; formato/lint/tipos y hashes comprobados. B continúa hook de coordinación y panel en ambas superficies. Publicador/Rabbit revisado y commit aislado bbc07f1, integrado selectivamente como2089cbd: 226 casos verdes y cuatro hashes iguales. C continúa HTTP sobre puertos reales; puede añadir exclusivamente los dos mocks de puertos nuevos a slices históricos, sin cambiar sus oráculos.
+
+Main16 ya está validada; no hay watch ni gate global root activo. Feature17 sigue in_progress, sin PR ni despliegue, y18 pendiente. Los checkpoints no equivalen a validación integrada ni a funcionalidad terminada. El plan de integración continúa en progress/plan_end_time_integration.md. No se han consumido procesos de los agentes desde root.

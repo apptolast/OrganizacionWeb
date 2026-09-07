@@ -12,8 +12,8 @@ El MVP corresponde a1–18: acceso privado, proyectos y subtareas, disponibilida
 
 - 1–13 cerradas con sus dictámenes; Replanificar fusionado y CI verde, incluido control de concurrencia, presupuesto y recuperación. Las PR alternativas y checkpoints anteriores están resueltos; detalle histórico en Git y progress/history.md.
 - 14 inicio y15 pausa/reanudación cerradas y fusionadas. Main b2ea1f211068e7d93c74d0a8d7e8717ec04323c3 tiene CI34078825723 SUCCESS.
-- 16 cierre: dictamen final APPROVED y estado done. Init final1.985 pruebas Java,1.721 frontend y36 del arnés; build correcto.115 E2E y12 pasos smoke, recuperación tras reinicio y pérdida de respuesta. UX515 medidas/35axe sin violaciones, tres motores y zoom real, con límites físicos/humanos documentados. PIT original516/520=99,23 % y Stryker1104/1275=86,59 % con dos errores de herramienta explícitos; replays dirigidos7/7 y15/15 sin cambiar los resultados originales. Corte final6c0a2bf publicado en PR15; CI34084817356 en curso. La CI anterior34082838516 pasó sobre la misma producción antes de los refuerzos de tests/documentación.
-- 17 aviso y ampliación: normativa en preparación/revisión, sin implementación todavía.18 historial pendiente de contrato.
+- 16 cierre: dictamen final APPROVED y estado done. Init final1.985 pruebas Java,1.721 frontend y36 del arnés; build correcto.115 E2E y12 pasos smoke, recuperación tras reinicio y pérdida de respuesta. UX515 medidas/35axe sin violaciones, tres motores y zoom real, con límites físicos/humanos documentados. PIT original516/520=99,23 % y Stryker1104/1275=86,59 % con dos errores de herramienta explícitos; replays dirigidos7/7 y15/15 sin cambiar los resultados originales. Corte final6c0a2bf publicado en PR15; CI34084817356 SUCCESS, fusionado como fede342 y CI posterior main34085908723 SUCCESS. La CI anterior34082838516 pasó sobre la misma producción antes de los refuerzos de tests/documentación.
+- 17 aviso y ampliación: contrato aprobado de44 escenarios/132 ejemplos; implementación en curso con tres agentes. Núcleo nominal, cliente E/EXTEND y publicador Rabbit revisados e integrados. Persistencia completa, HTTP, interfaz y gates pendientes.18 historial pendiente de contrato.
 - No hay despliegue productivo acreditado.
 
 ## Plan y estimación pendiente
@@ -31,8 +31,8 @@ Son horas transcurridas de ejecución coordinada, incluyendo revisión y esperas
 
 ## Secuencia y dependencias
 
-1. Terminar CI de PR15, fusionar el cierre16 y comprobar main. La preparación contractual17 avanza sobre el corte16 aprobado, sin modificar la CI en curso.
-2. Revisar y destilar17; implementar con reparto backend/frontend y validación independiente. Conservar hora original, tiempo trabajado y recuperación.
+1. Completado: PR15 fusionada y CI posterior de main correcta.
+2. En curso: implementar17 sobre contrato aprobado, con reparto backend/frontend/HTTP y revisión independiente de paquetes. Conservar hora original, tiempo trabajado y recuperación.
 3. Acotar18, implementar historial de hechos y validar el recorrido conjunto. No incluir silenciosamente estadísticas semanales, edición retrospectiva ni exportación dentro de este contrato.
 4. Desplegar y comprobar en el servidor. El acceso SSH y el dominio ya están preguntados; el último intento rechazó publickey. No se ha hecho una nueva conexión ni se infieren credenciales.
 

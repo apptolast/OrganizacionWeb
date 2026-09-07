@@ -26,6 +26,272 @@ import org.springframework.test.web.servlet.MockMvc;
     })
 @Import(SecurityConfiguration.class)
 class CustomizationApiTest {
+  @Test
+  void s25_firstInvalidVisibleFieldPrecedesLaterTypeFailure() throws Exception {
+    mvc.perform(
+            put("/api/v1/me/customization/PROJECT")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("If-Match", "\"customization:PROJECT:unconfigured\"")
+                .contentType("application/json")
+                .content("{\"visibleFields\":[\"estimatedMinutes\",7]}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].field").value("visibleFields"))
+        .andExpect(jsonPath("$.errors[0].code").value("INVALID_VALUE"));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @Test
+  void s25_updateCannotChangeTheDefinitionType() throws Exception {
+    mvc.perform(
+            put("/api/v1/me/customization/TASK/fields/abcdefab-1111-1111-1111-111111111111")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("If-Match", "\"customization:TASK:unconfigured\"")
+                .contentType("application/json")
+                .content("{\"label\":\"Dato\",\"active\":true,\"type\":\"NUMBER\"}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].field").value("type"))
+        .andExpect(jsonPath("$.errors[0].code").value("UNKNOWN_FIELD"));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @MockitoBean com.apptolast.organization.application.CreateCustomFieldUseCase create;
+  @MockitoBean com.apptolast.organization.application.UpdateCustomFieldUseCase update;
+
+  @Test
+  void s17_updateNotFoundUsesThePrivateProblemWithoutCurrentTag() throws Exception {
+    when(update.update(
+            eq("owner"), eq(CustomizationScope.TASK), any(), any(), eq("Dato"), eq(true)))
+        .thenThrow(new com.apptolast.organization.application.ResourceNotFoundException());
+    mvc.perform(
+            put("/api/v1/me/customization/TASK/fields/abcdefab-1111-1111-1111-111111111111")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("If-Match", "\"customization:TASK:unconfigured\"")
+                .contentType("application/json")
+                .content("{\"label\":\"Dato\",\"active\":true}"))
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+        .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
+        .andExpect(jsonPath("$.customFields").doesNotExist())
+        .andExpect(jsonPath("$.label").doesNotExist())
+        .andExpect(header().doesNotExist("ETag"))
+        .andExpect(
+            header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")));
+    verifyNoInteractions(read, save, create);
+  }
+
+  @Test
+  void s25_updateDoesNotCoerceStringActive() throws Exception {
+    mvc.perform(
+            put("/api/v1/me/customization/TASK/fields/abcdefab-1111-1111-1111-111111111111")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("If-Match", "\"customization:TASK:unconfigured\"")
+                .contentType("application/json")
+                .content("{\"label\":\"Dato\",\"active\":\"false\"}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].field").value("active"))
+        .andExpect(jsonPath("$.errors[0].code").value("INVALID_TYPE"));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @Test
+  void s25_updateRequiresActive() throws Exception {
+    mvc.perform(
+            put("/api/v1/me/customization/TASK/fields/abcdefab-1111-1111-1111-111111111111")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("If-Match", "\"customization:TASK:unconfigured\"")
+                .contentType("application/json")
+                .content("{\"label\":\"Dato\"}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].field").value("active"))
+        .andExpect(jsonPath("$.errors[0].code").value("REQUIRED"));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @Test
+  void s23_updateRejectsAbbreviatedUuidBeforeRequiredHeader() throws Exception {
+    mvc.perform(
+            put("/api/v1/me/customization/TASK/fields/1-1-1-1-1")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .contentType("application/json")
+                .content("{"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].field").value("fieldId"))
+        .andExpect(jsonPath("$.errors[0].code").value("INVALID_FORMAT"));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @Test
+  void s7_updateDeactivatesTheExactDefinitionWithCanonicalLabel() throws Exception {
+    var fieldId = java.util.UUID.fromString("abcdefab-1111-1111-1111-111111111111");
+    var configId = java.util.UUID.fromString("fedcbafe-2222-2222-2222-222222222222");
+    var expected = new com.apptolast.organization.domain.CustomizationRevision(configId, 3);
+    var saved =
+        new com.apptolast.organization.domain.Customization(
+            configId,
+            "another-owner",
+            CustomizationScope.TASK,
+            java.util.List.of(),
+            java.util.List.of(
+                new com.apptolast.organization.domain.CustomFieldDefinition(
+                    fieldId,
+                    "Nueva nota",
+                    com.apptolast.organization.domain.CustomFieldType.TEXT,
+                    false)),
+            4,
+            java.time.Instant.parse("2026-09-07T12:00:00Z"));
+    when(update.update(
+            "another-owner", CustomizationScope.TASK, fieldId, expected, "Nueva nota", false))
+        .thenReturn(saved);
+    mvc.perform(
+            put("/api/v1/me/customization/TASK/fields/"
+                    + fieldId.toString().toUpperCase(java.util.Locale.ROOT))
+                .with(user("another-owner"))
+                .with(csrf().asHeader())
+                .header("If-Match", "\"customization:TASK:" + configId + ":3\"")
+                .contentType("application/json")
+                .content("{\"label\":\"  Nueva nota  \",\"active\":false}"))
+        .andExpect(status().isOk())
+        .andExpect(header().string("ETag", "\"customization:TASK:" + configId + ":4\""))
+        .andExpect(jsonPath("$.customFields[0].id").value(fieldId.toString()))
+        .andExpect(jsonPath("$.customFields[0].label").value("Nueva nota"))
+        .andExpect(jsonPath("$.customFields[0].type").value("TEXT"))
+        .andExpect(jsonPath("$.customFields[0].active").value(false));
+    verify(update)
+        .update("another-owner", CustomizationScope.TASK, fieldId, expected, "Nueva nota", false);
+    verifyNoInteractions(read, save, create);
+  }
+
+  @Test
+  void s4_labelDomainValidationPrecedesMissingType() throws Exception {
+    mvc.perform(
+            post("/api/v1/me/customization/PROJECT/fields")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("If-Match", "\"customization:PROJECT:unconfigured\"")
+                .contentType("application/json")
+                .content("{\"label\":\"\\u2003\"}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].field").value("label"))
+        .andExpect(jsonPath("$.errors[0].code").value("INVALID_VALUE"));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @Test
+  void s25_createRejectsUnknownType() throws Exception {
+    mvc.perform(
+            post("/api/v1/me/customization/PROJECT/fields")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("If-Match", "\"customization:PROJECT:unconfigured\"")
+                .contentType("application/json")
+                .content("{\"label\":\"Dato\",\"type\":\"text\"}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].field").value("type"))
+        .andExpect(jsonPath("$.errors[0].code").value("INVALID_VALUE"));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @Test
+  void s25_createRequiresTypeAfterValidLabel() throws Exception {
+    mvc.perform(
+            post("/api/v1/me/customization/PROJECT/fields")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("If-Match", "\"customization:PROJECT:unconfigured\"")
+                .contentType("application/json")
+                .content("{\"label\":\"Dato\"}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].field").value("type"))
+        .andExpect(jsonPath("$.errors[0].code").value("REQUIRED"));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @Test
+  void s25_createRejectsNumericLabelBeforeType() throws Exception {
+    mvc.perform(
+            post("/api/v1/me/customization/PROJECT/fields")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("If-Match", "\"customization:PROJECT:unconfigured\"")
+                .contentType("application/json")
+                .content("{\"label\":7}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].field").value("label"))
+        .andExpect(jsonPath("$.errors[0].code").value("INVALID_TYPE"));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @Test
+  void s25_createRequiresLabelBeforeType() throws Exception {
+    mvc.perform(
+            post("/api/v1/me/customization/PROJECT/fields")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("If-Match", "\"customization:PROJECT:unconfigured\"")
+                .contentType("application/json")
+                .content("{}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].field").value("label"))
+        .andExpect(jsonPath("$.errors[0].code").value("REQUIRED"));
+    verifyNoInteractions(read, save, create, update);
+  }
+
+  @Test
+  void s3_createTextDefinitionConfirmsTheNewServerIdentityAndCanonicalLabel() throws Exception {
+    var fieldId = java.util.UUID.fromString("abcdefab-1111-1111-1111-111111111111");
+    var configId = java.util.UUID.fromString("fedcbafe-2222-2222-2222-222222222222");
+    var expected = new com.apptolast.organization.domain.CustomizationRevision(null, 0);
+    var saved =
+        new com.apptolast.organization.domain.Customization(
+            configId,
+            "owner",
+            CustomizationScope.PROJECT,
+            java.util.List.of("createdAt"),
+            java.util.List.of(
+                new com.apptolast.organization.domain.CustomFieldDefinition(
+                    fieldId, "Dato", com.apptolast.organization.domain.CustomFieldType.TEXT, true)),
+            0,
+            java.time.Instant.parse("2026-09-07T12:00:00Z"));
+    when(create.create(
+            "owner",
+            CustomizationScope.PROJECT,
+            expected,
+            "Dato",
+            com.apptolast.organization.domain.CustomFieldType.TEXT))
+        .thenReturn(saved);
+    mvc.perform(
+            post("/api/v1/me/customization/PROJECT/fields")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("If-Match", "\"customization:PROJECT:unconfigured\"")
+                .contentType("application/json")
+                .content("{\"label\":\"  Dato  \",\"type\":\"TEXT\"}"))
+        .andExpect(status().isOk())
+        .andExpect(header().string("ETag", "\"customization:PROJECT:" + configId + ":0\""))
+        .andExpect(header().doesNotExist("Location"))
+        .andExpect(
+            content()
+                .json(
+                    "{\"configured\":true,\"visibleFields\":[\"createdAt\"],\"customFields\":[{\"id\":\""
+                        + fieldId
+                        + "\",\"label\":\"Dato\",\"type\":\"TEXT\",\"active\":true}],\"updatedAt\":\"2026-09-07T12:00:00Z\"}",
+                    true));
+    verify(create)
+        .create(
+            "owner",
+            CustomizationScope.PROJECT,
+            expected,
+            "Dato",
+            com.apptolast.organization.domain.CustomFieldType.TEXT);
+    verifyNoInteractions(read, save, update);
+  }
+
   @Autowired MockMvc mvc;
   @MockitoBean ReadCustomizationUseCase read;
   @MockitoBean com.apptolast.organization.application.SaveCustomizationViewUseCase save;

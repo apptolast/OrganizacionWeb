@@ -108,3 +108,40 @@ Los ciclos incorporan lectura real de If-Match, familia/ámbito y gramática can
 Bundle `eb7d2b4` aporta CustomizationView/CustomFieldLabel; `9db2289` aporta puertos Create/Update, todos de A e intactos. El PUT usa CustomizationView para reglas de scope/lista/duplicados, no réplica local. La incorporación de eb7d2b4 coincidió con recuperación del resultado 566ead; el siguiente foco d90892 y todas regresiones posteriores recompilaron ese corte real. No se atribuye identidad completa de inputs al run anterior.
 
 Refactor en GREEN: GET y PUT comparten serialización de configuración y análisis de scope. Formato limitado a los dos Java propios con init temporal externo; regresión final del checkpoint en customization_http_view_checkpoint.log. Este paquete contiene GET+PUT vista, 30 casos MVC. No implementa aún POST/PUT de definiciones ni GET/PUT valores; sin PG/beansSave, carreras, no-op persistente ni durabilidad acreditados por estos mocks. El primer manifiesto GET conserva sus hashes históricos.
+
+## Definiciones — siguiente paquete (abierto)
+
+GET+PUT vista versionado por root en `692c386`; los manifiestos previos conservan su corte. Se reutilizan puertos reales Create/Update de `9db2289`, sin beans ni persistencia supuestos. Se extraen análisis de cabecera/cuerpo y respuestas de errores a helpers locales porque POST y PUT los comparten.
+
+| Caso individual | RED | GREEN focal | Logs prefijo customization_http_ |
+| --- | --- | --- | --- |
+| @s3 alta TEXT/UUID servidor/label canónica | d3adda EXIT1 | c8c0f4 EXIT0 | create_red/green.log |
+| @s25 label requerida antes de type | b50af2 EXIT1 | d13eb9 EXIT0 | label_required_red/green.log |
+| @s25 label numérica antes de type | 3663f9 EXIT1 | 8dd5d5 EXIT0 | label_type_red/green.log |
+| @s25 type requerido después de label válido | 8680f4 EXIT1 | a449a4 EXIT0 | field_type_required_red/green.log |
+| @s25 type desconocido | 6152de EXIT1 | bf93f4 EXIT0 | field_type_enum_red/green.log |
+| @s4 label sólo Unicode White_Space antes de type ausente | inicialmente GREEN | 011637 EXIT0 | label_domain_initial.log |
+
+Los focos posteriores a 692c386 ejecutan sólo el test nuevo; regresión de paquete al cerrar. El oráculo del alta verifica delegación exacta owner/scope/revisión/label normalizada/type y respuesta completa sin Location, no acredita generación de UUID ni transacción PG dentro del mock.
+
+| Caso individual de actualización | RED | GREEN focal | Logs prefijo customization_http_ |
+| --- | --- | --- | --- |
+| @s7 desactivar definición UUID con letras mayúsculas de ruta | b78ccb EXIT1 | 2dc6ef EXIT0 | update_red/green.log |
+| @s23 UUID abreviado antes de cabecera requerida | eab197 EXIT1 | bbfee2 EXIT0 | update_uuid_red/green.log |
+| @s25 active requerido | 4f9287 EXIT1 | cb72f7 EXIT0 | active_required_red/green.log |
+| @s25 active string sin coerción | 09c44b EXIT1 | 8bd5ce EXIT0 | active_type_red/green.log |
+| @s17 ResourceNotFoundException privada | inicialmente GREEN | 84c6c2 EXIT0 | update_notfound_initial.log |
+
+El 404 usa ApiErrors existente y no publica etiqueta/definiciones/tag; propiedad real y precedencia respecto a conflicto pertenecen a A. El constructor ahora requiere Create y Update reales, además de Read/Save; sólo mocks de interfaces auténticas en MVC, ningún bean productivo provisional.
+
+Regresión intermedia de definiciones: 41/41, formato real y EXIT0 `214cbb`. Después se añadió `s25_updateCannotChangeTheDefinitionType`, inicialmente GREEN `15cc3e`, sin producción: rechaza type UNKNOWN_FIELD antes de delegar.
+
+### Corrección acotada de precedencia del PUT ya versionado
+
+La extracción de todos los tipos antes de validar la lista permitía que [estimatedMinutes,7] en PROJECT informase el segundo elemento antes del enum inválido del primero. Root ratificó que @s25 exige orden por índice y el error de enum mantiene campo visibleFields. Nuevo test `s25_firstInvalidVisibleFieldPrecedesLaterTypeFailure`: RED `5ecd4d` EXIT1, GREEN `2e26d8` EXIT0. Logs `customization_http_view_index_order_red.log` y `customization_http_view_index_order_green.log`. Reutiliza CustomizationView sobre cada prefijo; hay como máximo cuatro elementos válidos en TASK antes de rechazar otro, sin duplicar reglas ni cambiar dominio. Es un delta posterior a 692c386; los resultados originales quedan intactos.
+
+## Freeze de definiciones
+
+Regresión final: `41ce14` EXIT0, 43/43 sin fallos/errores/skips y formato focal real. Log `customization_http_definitions_final.log`; XML `backend/build/test-results/test/TEST-com.apptolast.organization.adapter.CustomizationApiTest.xml`.
+
+Incluye GET, PUT vista, POST definición y PUT definición con shared parser de cabecera/body, label puro y errores compartidos. Se preservan orden de validación, revisión exacta, campos cerrados y ausencia de datos ajenos en404. Los tests de alta/actualización utilizan mocks de puertos reales: PG, límites12/labelúnico bajo lock, concurrencia, rollback y durabilidad siguen en evidencia de A. No GET/PUT de valores implementado en este corte. Constructor requiere cuatro puertos, ningún bean añadido por C.

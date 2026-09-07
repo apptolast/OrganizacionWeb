@@ -6,7 +6,7 @@ Actualizado el 7 de septiembre de 2026. Objetivo: terminar hoy. Estimación vige
 
 El MVP comprende las funcionalidades 1–18: acceso privado, proyectos y tareas, disponibilidad, planificación y replanificación, Hoy, sesiones con pausa, reanudación y cierre, aviso de fin, ampliación e historial. Conserva React, TypeScript, pnpm y SCSS; Java y Spring Boot con arquitectura hexagonal y EDA; PostgreSQL y RabbitMQ en un monorepo.
 
-Las funcionalidades 1–17 están cerradas técnicamente y fusionadas. La PR 16 incorporó la funcionalidad 17 en `56b91bee09d332eda27a016eea34d20f639992ab`. Su CI previa, `34100084803`, terminó correctamente y se verificó que el árbol del squash era idéntico. La CI posterior de main, `34101887939`, sigue en curso: init, build y E2E están verdes; publisher sigue ejecutándose.
+Las funcionalidades 1–17 están cerradas técnicamente y fusionadas. La PR 16 incorporó la funcionalidad 17 en `56b91bee09d332eda27a016eea34d20f639992ab`. Su CI previa, `34100084803`, terminó correctamente y se verificó que el árbol del squash era idéntico. La CI posterior de main, `34101887939`, también terminó correctamente sobre ese mismo commit (verificación f8c94b; watch12926 EXIT0, 93b922).
 
 La validación local de la funcionalidad 17 incluye 2.076 pruebas Java, 1.802 frontend, 40 del arnés, build, 121 E2E y 13 comprobaciones del publisher. La revisión UX documenta 515 mediciones, 35 análisis axe sin incidencias y pruebas en tres motores, con límites explícitos. PIT obtuvo 616/620; Stryker, 1.684/1.976 (85,22 %), con cuatro errores fuera de ese denominador. Los replays dirigidos se registran por separado. Véase `progress/judge_end_time_notification_final.md`.
 
@@ -35,3 +35,4 @@ Existen Dockerfiles, Compose y un overlay de RabbitMQ. Falta publicar imágenes,
 La entrega requiere recorridos reales contra API y base de datos, conservación tras reinicio, privacidad, recuperación sin duplicados y distinción entre planificación y trabajo real. El despliegue exige además comprobar HTTPS, acceso y recuperación en el servidor. Las pruebas no garantizan ausencia absoluta de errores ni certificación universal de las treinta leyes de UX.
 
 Las funcionalidades 19–30 siguen autorizadas para después del MVP: revisión semanal, personalización, vistas y campos, importación y exportación, API de integración, webhooks, calendarios, GitHub, conectores y automatizaciones. Necesitan sus propios contratos. El inventario de proveedores debe acotarse antes de estimar el proyecto completo.
+

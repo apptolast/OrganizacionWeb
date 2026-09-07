@@ -109,3 +109,7 @@ El paquete nominal `2e60131` está revisado. A continúa persistencia y paginaci
 C completó init del árbol aislado `OrganizacionWeb-history-http`: EXIT0, herramienta 891b81, con 2.076 pruebas Java, 1.802 frontend y 40 del arnés. Se conserva el primer EXIT1 por dependencias ausentes. Root incorporó el paquete nominal como `99ddbb0` (d190bb); C continúa HTTP/cursor y el primer E2E. El puerto 18080 queda reservado para ese recorrido cuando C lo arranque; 8080 no se toca.
 
 CI posterior de main 34101887939 sigue activa sobre 56b91bee09d332eda27a016eea34d20f639992ab: init, build y E2E verdes; publisher en ejecución (b29cdd). Root mantiene watch12926. No se atribuye éxito final antes de su resultado. El plan de entrega se consolida en una sola estimación vigente; siguen pendientes el cierre del historial, la validación integrada y el despliegue condicionado.
+
+## CI posterior de main verificada
+
+Watch root12926 terminó EXIT0 (93b922). GitHub confirma `34101887939` completed/success sobre `56b91bee09d332eda27a016eea34d20f639992ab` (f8c94b). La funcionalidad 17 queda acreditada localmente, fusionada y con CI posterior verde. No quedan procesos root activos; el historial sigue en desarrollo por A/B/C.

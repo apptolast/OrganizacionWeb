@@ -113,3 +113,11 @@ CI posterior de main 34101887939 sigue activa sobre 56b91bee09d332eda27a016eea34
 ## CI posterior de main verificada
 
 Watch root12926 terminó EXIT0 (93b922). GitHub confirma `34101887939` completed/success sobre `56b91bee09d332eda27a016eea34d20f639992ab` (f8c94b). La funcionalidad 17 queda acreditada localmente, fusionada y con CI posterior verde. No quedan procesos root activos; el historial sigue en desarrollo por A/B/C.
+
+## Checkpoints de historial revisados, 11:22
+
+Root aprobó y versionó el cliente en `99f2971`: 53 pruebas nuevas y 475 regresiones, total 528 verdes; formato y tipos verificados por B. Cinco hashes contrastados (55289b). La página y los controles siguen en TDD por B, con privacidad post-await y UX aún pendientes.
+
+Consulta duradera y aplicación aprobadas como checkpoint en `06bd830`: 21 pruebas PostgreSQL y 3 de aplicación, XML y cuatro hashes verificados (f1b654). Cinco fuentes, filtros y paginación por cursor ya disponibles; A continúa RR/read-only, integridad, errores, commits tardíos y wiring. Su nuevo oráculo de read-only está RED real (0a6047); las fuentes quedan liberadas después del commit.
+
+El adaptador HTTP nominal se revisó y versionó en el árbol aislado como `342ef0d`, rama `codex/history-http` publicada. Once pruebas y cuatro hashes comprobados (1a7426); sigue pendiente integrar en COMMON cuando exista el bean de aplicación. C continúa validación y cursor. E2E inicial RED por enlace Historial ausente, puerto 18080 libre. No hay procesos root activos ni campañas globales de la funcionalidad 18. Las entregas parciales no acreditan todavía su cierre.

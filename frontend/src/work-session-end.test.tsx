@@ -883,6 +883,56 @@ it("@s37 retains an uncertain extension and checks its key without another POST"
   ).toHaveLength(1);
 });
 
+it("@s37 keeps an unknown failed receipt lookup uncertain without offering resend or posting on Enter", async () => {
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(response())
+    .mockResolvedValueOnce(new Response(null, { status: 503 }))
+    .mockResolvedValueOnce(
+      Response.json(
+        {
+          type: "urn:organization:problem:unknown",
+          status: 503,
+          code: "UNKNOWN",
+          title: "Unavailable",
+        },
+        { status: 503 },
+      ),
+    );
+  vi.stubGlobal("fetch", fetcher);
+  render(<WorkSessionEndPanel session={session} onAccessFailure={vi.fn()} />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Ampliar tiempo" }),
+  );
+  const amount = screen.getByLabelText("Minutos adicionales");
+  fireEvent.change(amount, { target: { value: "5" } });
+  fireEvent.click(screen.getByRole("button", { name: "Confirmar ampliación" }));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Comprobar ampliación" }),
+  );
+  await waitFor(() =>
+    expect(
+      screen.queryByText("Comprobando ampliación"),
+    ).not.toBeInTheDocument(),
+  );
+  expect(
+    screen.queryByRole("button", { name: "Reenviar ampliación" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Comprobar ampliación" }),
+  ).toBeVisible();
+  const { default: userEvent } = await import("@testing-library/user-event");
+  const user = userEvent.setup();
+  await user.click(amount);
+  await user.keyboard("{Enter}");
+  fireEvent.submit(amount.closest("form")!);
+  expect(amount).toHaveValue(5);
+  expect(
+    fetcher.mock.calls.filter(([, options]) => options.method === "POST"),
+  ).toHaveLength(1);
+  expect(fetcher).toHaveBeenCalledTimes(3);
+});
+
 it("@s34 presents a failed initial end query as an error and retries with loading", async () => {
   let finish!: (value: Response) => void;
   const pending = new Promise<Response>((resolve) => {
@@ -985,6 +1035,7 @@ it("@s30 the monotonic deadline queries the server before announcing a due end",
 
 it("@s31 fragments a 25-day deadline without an early request", async () => {
   vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+  const scheduled = vi.spyOn(globalThis, "setTimeout");
   let monotonic = 0;
   vi.spyOn(performance, "now").mockImplementation(() => monotonic);
   const fetcher = vi.fn().mockResolvedValueOnce(
@@ -999,6 +1050,7 @@ it("@s31 fragments a 25-day deadline without an early request", async () => {
   await act(async () => {
     render(<WorkSessionEndPanel session={session} onAccessFailure={vi.fn()} />);
   });
+  expect(scheduled.mock.calls.at(-1)?.[1]).toBe(2147483647);
   monotonic = 2147483647;
   await act(async () => {
     await vi.advanceTimersByTimeAsync(2147483647);

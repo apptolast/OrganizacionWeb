@@ -387,6 +387,64 @@ it("@s27 accepts an exact paused extension and end whose epoch microseconds exce
   });
 });
 
+it("@s27 rejects an invalid server clock even when the valid session epoch is negative", async () => {
+  const historical = {
+    ...session,
+    startedAt: "1600-01-01T10:00:00.123456Z",
+    plannedEndAt: "1600-01-01T10:25:00.123456Z",
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json(
+        {
+          state: {
+            ...state,
+            session: historical,
+            changedAt: historical.startedAt,
+            runningSince: historical.startedAt,
+          },
+          serverNow: "invalid",
+          effectiveEndAt: historical.plannedEndAt,
+        },
+        { headers: { "Work-Session-Revision": token } },
+      ),
+    ),
+  );
+  await expect(readWorkSessionEnd(session.id)).rejects.toThrow(
+    "Fin de sesión inválido",
+  );
+});
+
+it("@s27 rejects an invalid effective end even when the valid planned epoch is negative", async () => {
+  const historical = {
+    ...session,
+    startedAt: "1600-01-01T10:00:00.123456Z",
+    plannedEndAt: "1600-01-01T10:25:00.123456Z",
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json(
+        {
+          state: {
+            ...state,
+            session: historical,
+            changedAt: historical.startedAt,
+            runningSince: historical.startedAt,
+          },
+          serverNow: historical.startedAt,
+          effectiveEndAt: "invalid",
+        },
+        { headers: { "Work-Session-Revision": token } },
+      ),
+    ),
+  );
+  await expect(readWorkSessionEnd(session.id)).rejects.toThrow(
+    "Fin de sesión inválido",
+  );
+});
+
 it("@s27 recovers a late paused EXTEND without changing its interval or requiring Location", async () => {
   const before = { ...state, status: "paused" as const, runningSince: null };
   const receipt = {

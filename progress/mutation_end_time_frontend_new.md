@@ -139,3 +139,29 @@ Los patrones de privacidad tardía, foco, reintentos repetidos y clasificación 
 
 No se proponen cambios de producción antes de un defecto reproducido. No se exige100%, no se excluyen ramas difíciles, no se suman scores original/replay. La selección final de un refuerzo debe conservar el oráculo público, registrar inicialmenteGREEN honestamente y mantener un eventual replay separado, autorizado y comparado por firma exacta.
 
+
+## Refuerzos autorizados posteriores, sólo tests
+
+Sin cambios de producción ni ejecución de replay. Cada paso se añadió antes de su focal; todos pasaron inicialmente y no se declara ningún RED de producto:
+
+| Paso | Oráculo | Primera ejecución |
+| --- | --- | --- |
+|1|POST503→K503 problema desconocido, sin Reenviar; Enter y evento submit no duplicanPOST; conserva5min e intención|GREENa64fb7|
+|2|Dos confirmaciones hermanas sucesivas exigen dos nuevas lecturas; segunda S diferida bloquea PAUSE hasta revisión3|GREEN1381f6|
+|3|Caso25días existente añade retardo setTimeout exacto2147483647; conserva anteriores asserts|GREENea582a|
+|4|Sesión1600 válida, sólo serverNow inválido|GREEN9fe1ae|
+|5|Sesión1600 válida, sólo effectiveEndAt inválido|GREENb15bc8|
+
+Foco conjunto90d674:59/59 (End33,API23,hook3). Formato077836 y ESLinte3e6d4 EXIT0; diffchecka37122. Se conserva el resultado original y no se atribuye muerte a ninguna firma antes del replay.
+
+Freeze tests: EndAPI7F7115BEA5881DE9DCF17D35BDAB43ADD60B27E8D7C27D50ACA4A483E3548B9C; EndPanel39690C261D481F439C63A48EFDF2873BCF288AB2362BFDF5EA132BA0BE52D762; hook49BC5F5EAFC41CE3C6D17ADE7F0C6B2B4192F428F485A683CB7206FF0E6E6E26.
+
+`end_time_new_reinforcement_targets.json` contiene las nueve firmas originales14/52/62/155/217/225/226/228/357 con mutador/reemplazo, rangos1-based originales y selectores de columnas0-based. Los rangos se solapan: un único replay conjunto puede generar extras; debe informar todos y casar las nueve firmas, sin usar sólo el conteo ni los IDs nuevos. Root coordina revisión y configuración junto al refuerzo compartido de A. Privacidad tardía y otros timers permanecen límites documentados, sin ampliar este paquete.
+
+### Corrección de formato tras init reforzado
+
+Root53535/c001af detectó sólo Prettier en EndAPItest. La lectura491c1e confirma que todavía tenía el hash7F7115…548B9C entregado tras077836; no se atribuye a una edición de otro autor.077836 fue `prettier --write` exitoso, no una comprobación posterior completa. El siguiente pase con Prettier3.9.6 compacta las dos cadenas `vi.fn().mockResolvedValue(...)` previamente partidas: la primera salida no había quedado estable ante el check posterior. No se cambia configuración ni versión para resolverlo.
+
+Corrección única bee948; comando real `pnpm --dir frontend lint` EXIT0 9f0448 (ESLint completo y Prettier check .). AST sintáctico serializado sin posiciones/trivia antes1e695c y después14867d idéntico SHAa4bac95c4fd0ae14b8a1f84906a0fe97f5d18a7c4f6b0f2d2b4a704520bb8f32. No cambia lógica, valores ni oráculos; no se añaden tests ni producción.
+
+Freeze corregido EndAPItest SHA10DDBF5871F9B263B50F75C1AC7BC5C7EE7442A95119035E433E7C603D969664; reemplaza sólo el hash anterior para el futuro replay. EndPanel/hook tests y firmas de producción permanecen intactos. Conteos de tests y resultado original de mutación no se alteran por este formato.

@@ -1,0 +1,433 @@
+{
+  "originalReport": "progress/end_time_stryker_original.json",
+  "originalSha256": "8E0BF31D8D2CC753700E8946E11516F929ED20A35C7D38D836EC9D8E8FE9EB4A",
+  "baseAllowedSources": [
+    "src/work-session-end-api.ts",
+    "src/work-session-end.tsx",
+    "src/use-work-session-decision.ts",
+    "src/work-session-state-api.ts",
+    "src/work-session-state.tsx",
+    "src/work-session-reader.tsx",
+    "src/work-session.tsx"
+  ],
+  "targets": [
+    {
+      "id": "14",
+      "file": "src/use-work-session-decision.ts",
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined",
+      "statusOriginal": "Survived",
+      "locationOriginal1Based": {
+        "end": {
+          "column": 39,
+          "line": 23
+        },
+        "start": {
+          "column": 19,
+          "line": 23
+        }
+      },
+      "selectorColumns0Based": "src/use-work-session-decision.ts:23:18-23:38",
+      "interpretedRange0Based": {
+        "start": {
+          "line": 22,
+          "column": 18
+        },
+        "end": {
+          "line": 22,
+          "column": 38
+        }
+      },
+      "selectedRange": "src/use-work-session-decision.ts:23:18-23:38"
+    },
+    {
+      "id": "52",
+      "file": "src/work-session-end-api.ts",
+      "mutator": "ConditionalExpression",
+      "replacement": "false",
+      "statusOriginal": "Survived",
+      "locationOriginal1Based": {
+        "end": {
+          "column": 19,
+          "line": 32
+        },
+        "start": {
+          "column": 7,
+          "line": 32
+        }
+      },
+      "selectorColumns0Based": "src/work-session-end-api.ts:32:6-32:18",
+      "interpretedRange0Based": {
+        "start": {
+          "line": 31,
+          "column": 6
+        },
+        "end": {
+          "line": 31,
+          "column": 18
+        }
+      },
+      "selectedRange": "src/work-session-end-api.ts:32:6-32:18"
+    },
+    {
+      "id": "62",
+      "file": "src/work-session-end-api.ts",
+      "mutator": "ConditionalExpression",
+      "replacement": "false",
+      "statusOriginal": "Survived",
+      "locationOriginal1Based": {
+        "end": {
+          "column": 19,
+          "line": 34
+        },
+        "start": {
+          "column": 7,
+          "line": 34
+        }
+      },
+      "selectorColumns0Based": "src/work-session-end-api.ts:34:6-34:18",
+      "interpretedRange0Based": {
+        "start": {
+          "line": 33,
+          "column": 6
+        },
+        "end": {
+          "line": 33,
+          "column": 18
+        }
+      },
+      "selectedRange": "src/work-session-end-api.ts:34:6-34:18"
+    },
+    {
+      "id": "155",
+      "file": "src/work-session-end.tsx",
+      "mutator": "ConditionalExpression",
+      "replacement": "false",
+      "statusOriginal": "Survived",
+      "locationOriginal1Based": {
+        "end": {
+          "column": 74,
+          "line": 106
+        },
+        "start": {
+          "column": 41,
+          "line": 106
+        }
+      },
+      "selectorColumns0Based": "src/work-session-end.tsx:106:40-106:73",
+      "interpretedRange0Based": {
+        "start": {
+          "line": 105,
+          "column": 40
+        },
+        "end": {
+          "line": 105,
+          "column": 73
+        }
+      },
+      "selectedRange": "src/work-session-end.tsx:106:40-106:73"
+    },
+    {
+      "id": "217",
+      "file": "src/work-session-end.tsx",
+      "mutator": "ConditionalExpression",
+      "replacement": "true",
+      "statusOriginal": "Survived",
+      "locationOriginal1Based": {
+        "end": {
+          "column": 71,
+          "line": 157
+        },
+        "start": {
+          "column": 9,
+          "line": 156
+        }
+      },
+      "selectorColumns0Based": "src/work-session-end.tsx:156:8-157:70",
+      "interpretedRange0Based": {
+        "start": {
+          "line": 155,
+          "column": 8
+        },
+        "end": {
+          "line": 156,
+          "column": 70
+        }
+      },
+      "selectedRange": "src/work-session-end.tsx:156:8-157:70"
+    },
+    {
+      "id": "226",
+      "file": "src/work-session-end.tsx",
+      "mutator": "ConditionalExpression",
+      "replacement": "true",
+      "statusOriginal": "Survived",
+      "locationOriginal1Based": {
+        "end": {
+          "column": 70,
+          "line": 157
+        },
+        "start": {
+          "column": 21,
+          "line": 157
+        }
+      },
+      "selectorColumns0Based": "src/work-session-end.tsx:157:20-157:69",
+      "interpretedRange0Based": {
+        "start": {
+          "line": 156,
+          "column": 20
+        },
+        "end": {
+          "line": 156,
+          "column": 69
+        }
+      },
+      "selectedRange": "src/work-session-end.tsx:156:8-157:70"
+    },
+    {
+      "id": "228",
+      "file": "src/work-session-end.tsx",
+      "mutator": "OptionalChaining",
+      "replacement": "problem.code",
+      "statusOriginal": "Survived",
+      "locationOriginal1Based": {
+        "end": {
+          "column": 34,
+          "line": 157
+        },
+        "start": {
+          "column": 21,
+          "line": 157
+        }
+      },
+      "selectorColumns0Based": "src/work-session-end.tsx:157:20-157:33",
+      "interpretedRange0Based": {
+        "start": {
+          "line": 156,
+          "column": 20
+        },
+        "end": {
+          "line": 156,
+          "column": 33
+        }
+      },
+      "selectedRange": "src/work-session-end.tsx:156:8-157:70"
+    },
+    {
+      "id": "225",
+      "file": "src/work-session-end.tsx",
+      "mutator": "LogicalOperator",
+      "replacement": "check || problem?.code === \"WORK_SESSION_CHANGE_NOT_FOUND\"",
+      "statusOriginal": "Survived",
+      "locationOriginal1Based": {
+        "end": {
+          "column": 70,
+          "line": 157
+        },
+        "start": {
+          "column": 12,
+          "line": 157
+        }
+      },
+      "selectorColumns0Based": "src/work-session-end.tsx:157:11-157:69",
+      "interpretedRange0Based": {
+        "start": {
+          "line": 156,
+          "column": 11
+        },
+        "end": {
+          "line": 156,
+          "column": 69
+        }
+      },
+      "selectedRange": "src/work-session-end.tsx:156:8-157:70"
+    },
+    {
+      "id": "357",
+      "file": "src/work-session-end.tsx",
+      "mutator": "ConditionalExpression",
+      "replacement": "false",
+      "statusOriginal": "Survived",
+      "locationOriginal1Based": {
+        "end": {
+          "column": 36,
+          "line": 257
+        },
+        "start": {
+          "column": 16,
+          "line": 257
+        }
+      },
+      "selectorColumns0Based": "src/work-session-end.tsx:257:15-257:35",
+      "interpretedRange0Based": {
+        "start": {
+          "line": 256,
+          "column": 15
+        },
+        "end": {
+          "line": 256,
+          "column": 35
+        }
+      },
+      "selectedRange": "src/work-session-end.tsx:257:15-257:35"
+    },
+    {
+      "id": "1138",
+      "file": "src/work-session-state-api.ts",
+      "mutator": "LogicalOperator",
+      "replacement": "value.before.status !== \"closed\" || value.after.status === value.before.status",
+      "statusOriginal": "Survived",
+      "locationOriginal1Based": {
+        "end": {
+          "column": 51,
+          "line": 188
+        },
+        "start": {
+          "column": 9,
+          "line": 187
+        }
+      },
+      "selectorColumns0Based": "src/work-session-state-api.ts:187:8-188:50",
+      "interpretedRange0Based": {
+        "start": {
+          "line": 186,
+          "column": 8
+        },
+        "end": {
+          "line": 187,
+          "column": 50
+        }
+      },
+      "selectedRange": "src/work-session-state-api.ts:187:8-188:50"
+    },
+    {
+      "id": "1142",
+      "file": "src/work-session-state-api.ts",
+      "mutator": "ConditionalExpression",
+      "replacement": "true",
+      "statusOriginal": "Survived",
+      "locationOriginal1Based": {
+        "end": {
+          "column": 51,
+          "line": 188
+        },
+        "start": {
+          "column": 9,
+          "line": 188
+        }
+      },
+      "selectorColumns0Based": "src/work-session-state-api.ts:188:8-188:50",
+      "interpretedRange0Based": {
+        "start": {
+          "line": 187,
+          "column": 8
+        },
+        "end": {
+          "line": 187,
+          "column": 50
+        }
+      },
+      "selectedRange": "src/work-session-state-api.ts:187:8-188:50"
+    },
+    {
+      "id": "1147",
+      "file": "src/work-session-state-api.ts",
+      "mutator": "ConditionalExpression",
+      "replacement": "true",
+      "statusOriginal": "Survived",
+      "locationOriginal1Based": {
+        "end": {
+          "column": 57,
+          "line": 196
+        },
+        "start": {
+          "column": 9,
+          "line": 196
+        }
+      },
+      "selectorColumns0Based": "src/work-session-state-api.ts:196:8-196:56",
+      "interpretedRange0Based": {
+        "start": {
+          "line": 195,
+          "column": 8
+        },
+        "end": {
+          "line": 195,
+          "column": 56
+        }
+      },
+      "selectedRange": "src/work-session-state-api.ts:196:8-196:56"
+    },
+    {
+      "id": "1227",
+      "file": "src/work-session-state-api.ts",
+      "mutator": "ConditionalExpression",
+      "replacement": "false",
+      "statusOriginal": "Survived",
+      "locationOriginal1Based": {
+        "end": {
+          "column": 48,
+          "line": 231
+        },
+        "start": {
+          "column": 5,
+          "line": 230
+        }
+      },
+      "selectorColumns0Based": "src/work-session-state-api.ts:230:4-231:47",
+      "interpretedRange0Based": {
+        "start": {
+          "line": 229,
+          "column": 4
+        },
+        "end": {
+          "line": 230,
+          "column": 47
+        }
+      },
+      "selectedRange": "src/work-session-state-api.ts:230:4-231:47"
+    },
+    {
+      "id": "1228",
+      "file": "src/work-session-state-api.ts",
+      "mutator": "LogicalOperator",
+      "replacement": "!exact(value, \"additionalMinutes previousEndAt effectiveEndAt\") && typeof value.additionalMinutes !== \"number\"",
+      "statusOriginal": "Survived",
+      "locationOriginal1Based": {
+        "end": {
+          "column": 48,
+          "line": 231
+        },
+        "start": {
+          "column": 5,
+          "line": 230
+        }
+      },
+      "selectorColumns0Based": "src/work-session-state-api.ts:230:4-231:47",
+      "interpretedRange0Based": {
+        "start": {
+          "line": 229,
+          "column": 4
+        },
+        "end": {
+          "line": 230,
+          "column": 47
+        }
+      },
+      "selectedRange": "src/work-session-state-api.ts:230:4-231:47"
+    }
+  ],
+  "selectedRanges": [
+    "src/use-work-session-decision.ts:23:18-23:38",
+    "src/work-session-end-api.ts:32:6-32:18",
+    "src/work-session-end-api.ts:34:6-34:18",
+    "src/work-session-end.tsx:106:40-106:73",
+    "src/work-session-end.tsx:156:8-157:70",
+    "src/work-session-end.tsx:257:15-257:35",
+    "src/work-session-state-api.ts:187:8-188:50",
+    "src/work-session-state-api.ts:196:8-196:56",
+    "src/work-session-state-api.ts:230:4-231:47"
+  ],
+  "validation": "14 exact original signatures and installed ProjectReader conversion checked; no mutation executed"
+}

@@ -896,3 +896,61 @@ it("@s32 rejects an internally valid opposite action recovered for the retained 
     recoverWorkSessionChange({ state, token, key, action: "PAUSE" }),
   ).rejects.toThrow("Cambio de sesión inválido");
 });
+
+it("@s26 feature17 rejects an EXTEND that closes an otherwise unchanged paused state", async () => {
+  const before = { ...state, status: "paused", runningSince: null };
+  const result = {
+    ...receipt,
+    action: "EXTEND",
+    before,
+    after: { ...before, status: "closed", revision: "2" },
+    extension: {
+      additionalMinutes: 1,
+      previousEndAt: session.plannedEndAt,
+      effectiveEndAt: "2026-09-07T10:26:00.123456Z",
+    },
+  };
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(result)));
+  await expect(readWorkSessionChange(result.id)).rejects.toThrow(
+    "Cambio de sesión inválido",
+  );
+});
+
+it("@s26 feature17 rejects an EXTEND that only advances a paused changedAt", async () => {
+  const before = { ...state, status: "paused", runningSince: null };
+  const result = {
+    ...receipt,
+    action: "EXTEND",
+    before,
+    after: { ...before, revision: "2", changedAt: snapshot.serverNow },
+    extension: {
+      additionalMinutes: 1,
+      previousEndAt: session.plannedEndAt,
+      effectiveEndAt: "2026-09-07T10:26:00.123456Z",
+    },
+  };
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(result)));
+  await expect(readWorkSessionChange(result.id)).rejects.toThrow(
+    "Cambio de sesión inválido",
+  );
+});
+
+it("@s26 feature17 rejects an extra field only inside extension", async () => {
+  const before = { ...state, status: "paused", runningSince: null };
+  const result = {
+    ...receipt,
+    action: "EXTEND",
+    before,
+    after: { ...before, revision: "2" },
+    extension: {
+      additionalMinutes: 1,
+      previousEndAt: session.plannedEndAt,
+      effectiveEndAt: "2026-09-07T10:26:00.123456Z",
+      extra: true,
+    },
+  };
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(result)));
+  await expect(readWorkSessionChange(result.id)).rejects.toThrow(
+    "Cambio de sesión inválido",
+  );
+});

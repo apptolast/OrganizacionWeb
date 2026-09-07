@@ -184,6 +184,18 @@ test("weekly review: native selection and seven days remain usable across widths
       width: innerWidth,
       height: innerHeight,
       scroll: document.documentElement.scrollWidth,
+      headingFocus: (() => {
+        const heading = document.querySelector("main h1");
+        const label = document.querySelector('label[for="weekly-date"]');
+        const style = getComputedStyle(heading);
+        return {
+          focused: document.activeElement === heading,
+          bottom: heading.getBoundingClientRect().bottom,
+          outlineWidth: parseFloat(style.outlineWidth),
+          outlineOffset: parseFloat(style.outlineOffset),
+          labelTop: label.getBoundingClientRect().top,
+        };
+      })(),
       controls: [
         ...document.querySelectorAll(
           'nav[aria-label="Principal"] a,main a,main button,main input,main select',
@@ -212,6 +224,13 @@ test("weekly review: native selection and seven days remain usable across widths
         fullPage: true,
       });
     expect(measurement.scroll, `overflow ${width}`).toBeLessThanOrEqual(width);
+    expect(measurement.headingFocus.focused).toBe(true);
+    expect(
+      measurement.headingFocus.bottom +
+        measurement.headingFocus.outlineWidth +
+        measurement.headingFocus.outlineOffset,
+      `heading focus outline above date label ${width}`,
+    ).toBeLessThanOrEqual(measurement.headingFocus.labelTop);
     for (const box of measurement.controls) {
       expect(box.x, `${width}:${box.name}:left`).toBeGreaterThanOrEqual(0);
       expect(

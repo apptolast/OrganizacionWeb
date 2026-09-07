@@ -122,11 +122,12 @@ it("@s30 retries the same selection once while announcing its pending read", asy
   const fetcher = vi
     .fn()
     .mockResolvedValueOnce(new Response(null, { status: 503 }))
-    .mockReturnValue(
+    .mockReturnValueOnce(
       new Promise<Response>((resolve) => {
         release = resolve;
       }),
-    );
+    )
+    .mockResolvedValueOnce(Response.json(week));
   vi.stubGlobal("fetch", fetcher);
   render(<App />);
   const retry = await screen.findByRole("button", { name: "Reintentar" });
@@ -138,7 +139,15 @@ it("@s30 retries the same selection once while announcing its pending read", asy
   expect(fetcher.mock.calls[1][0]).toBe(
     "/api/v1/weekly-review?date=2026-09-09",
   );
-  await act(async () => release(Response.json(week)));
+  await act(async () => release(new Response(null, { status: 503 })));
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Reintentar" }),
+  );
+  await screen.findByRole("list", { name: "Días de la semana" });
+  expect(fetcher).toHaveBeenCalledTimes(3);
+  expect(fetcher.mock.calls[2][0]).toBe(
+    "/api/v1/weekly-review?date=2026-09-09",
+  );
   expect(
     screen.getByRole("heading", { level: 1, name: "Revisión semanal" }),
   ).toHaveFocus();
@@ -581,32 +590,44 @@ it("@s33 restores heading focus when applying filters removes the still-focused 
   );
 });
 
-it("@s33 leaves focus on a deliberately chosen control when the new selection finishes", async () => {
-  window.history.replaceState(null, "", "/revision-semanal");
-  let deliver!: (response: Response) => void;
-  vi.stubGlobal(
-    "fetch",
-    vi
-      .fn()
-      .mockResolvedValueOnce(Response.json(week))
-      .mockReturnValueOnce(
-        new Promise<Response>((resolve) => {
-          deliver = resolve;
-        }),
-      ),
-  );
-  render(<App />);
-  await screen.findByRole("list", { name: "Días de la semana" });
-  fireEvent.change(screen.getByLabelText("Fecha de la semana"), {
-    target: { value: "2026-09-09" },
-  });
-  await userEvent.click(screen.getByRole("button", { name: "Mostrar semana" }));
-  const chosen = screen.getByLabelText("Fecha de la semana");
-  chosen.focus();
-  await act(async () => deliver(Response.json(week)));
-  expect(chosen).toHaveFocus();
-  expect(screen.getByRole("list", { name: "Días de la semana" })).toBeVisible();
-});
+it.each([false, true])(
+  "@s33 respects deliberate focus after selection, moved to body: %s",
+  async (moveToBody) => {
+    window.history.replaceState(null, "", "/revision-semanal");
+    let deliver!: (response: Response) => void;
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(Response.json(week))
+        .mockReturnValueOnce(
+          new Promise<Response>((resolve) => {
+            deliver = resolve;
+          }),
+        ),
+    );
+    render(<App />);
+    await screen.findByRole("list", { name: "Días de la semana" });
+    fireEvent.change(screen.getByLabelText("Fecha de la semana"), {
+      target: { value: "2026-09-09" },
+    });
+    await userEvent.click(
+      screen.getByRole("button", { name: "Mostrar semana" }),
+    );
+    const chosen = screen.getByLabelText("Fecha de la semana");
+    chosen.focus();
+    expect(chosen).toHaveFocus();
+    if (moveToBody) {
+      chosen.blur();
+      expect(document.body).toHaveFocus();
+    }
+    await act(async () => deliver(Response.json(week)));
+    expect(moveToBody ? document.body : chosen).toHaveFocus();
+    expect(
+      screen.getByRole("list", { name: "Días de la semana" }),
+    ).toBeVisible();
+  },
+);
 
 it("@s33 restores focus after the current-week link is replaced by its new snapshot", async () => {
   window.history.replaceState(null, "", "/revision-semanal?date=2026-09-09");
@@ -779,6 +800,31 @@ it("@s28 does not revive an earlier snapshot when Back starts another pending re
   expect(screen.getByRole("status")).toHaveTextContent(
     "Consultando revisión semanal",
   );
+});
+
+it("@s32 aborts the pending catalog before a late HTTP401 can revoke access after removal", async () => {
+  window.history.replaceState(null, "", "/revision-semanal");
+  let deliver!: (response: Response) => void;
+  const fetcher = vi.fn().mockImplementation((url) => {
+    if (url === "/api/v1/weekly-review")
+      return Promise.resolve(Response.json(week));
+    return new Promise<Response>((resolve) => {
+      deliver = resolve;
+    });
+  });
+  const observer = vi.fn();
+  observeAccess(observer);
+  vi.stubGlobal("fetch", fetcher);
+  const view = render(<App />);
+  await screen.findByRole("list", { name: "Días de la semana" });
+  fireEvent.focus(screen.getByLabelText("Zona horaria"));
+  await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(2));
+  view.unmount();
+  await act(async () => deliver(new Response(null, { status: 401 })));
+  expect(observer).not.toHaveBeenCalled();
+  expect(
+    screen.queryByRole("list", { name: "Días de la semana" }),
+  ).not.toBeInTheDocument();
 });
 
 it("@s32 aborts the pending private read when the session view is removed", async () => {

@@ -1,0 +1,33 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "ignorePatterns": [".stryker-tmp-availability-replay"],
+  "mutate": [
+    "src/weekly-review.tsx:37:12-37:51",
+    "src/weekly-review.tsx:39:2-45:9",
+    "src/weekly-review.tsx:51:6-53:46",
+    "src/weekly-review.tsx:283:29-283:49",
+    "src/weekly-review-api.ts:93:6-93:64",
+    "src/weekly-review-api.ts:138:5-142:5",
+    "src/weekly-review-api.ts:147:30-147:69"
+  ],
+  "reporters": ["clear-text", "json", "html"],
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 80
+  },
+  "concurrency": 8,
+  "coverageAnalysis": "perTest",
+  "vitest": {
+    "configFile": "vite.config.ts"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation-weekly-review-replay/mutation.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation-weekly-review-replay/mutation.html"
+  },
+  "tempDirName": ".stryker-tmp-weekly-review-refined"
+}

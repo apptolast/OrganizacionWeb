@@ -196,6 +196,10 @@ it("@s25 rejects known capacity totals when one day is unknown", async () => {
     vi.fn().mockResolvedValue(
       Response.json({
         ...week,
+        days: week.days.map((day, index) => ({
+          ...day,
+          capacityMicroseconds: index === 0 ? null : "0",
+        })),
         totals: { ...week.totals, capacityMicroseconds: "0" },
       }),
     ),
@@ -215,6 +219,16 @@ it("@s25 rejects known capacity whose total differs from seven daily budgets", a
   await expect(readWeeklyReview(new URLSearchParams())).rejects.toThrow(
     "Revisión semanal inválida",
   );
+});
+
+it("@s25 accepts a positive capacity total equal to the seven daily budgets", async () => {
+  const value = {
+    ...week,
+    days: week.days.map((day) => ({ ...day, capacityMicroseconds: "1" })),
+    totals: { ...week.totals, capacityMicroseconds: "7" },
+  };
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(value)));
+  await expect(readWeeklyReview(new URLSearchParams())).resolves.toEqual(value);
 });
 
 it("@s26 preserves exact long amounts above Number safe integer and known zero budgets", async () => {
@@ -247,12 +261,20 @@ it("@s25 rejects an instant with submicrosecond precision", async () => {
 });
 
 it("@s25 rejects a week whose first civil date is not Monday", async () => {
-  vi.stubGlobal(
-    "fetch",
-    vi
-      .fn()
-      .mockResolvedValue(Response.json({ ...week, weekStart: "2026-09-08" })),
-  );
+  const value = {
+    ...week,
+    weekStart: "2026-09-08",
+    weekEnd: "2026-09-14",
+    startAt: "2026-09-08T00:00:00Z",
+    endAt: "2026-09-15T00:00:00Z",
+    days: week.days.map((day, index) => ({
+      ...day,
+      date: `2026-09-${String(index + 8).padStart(2, "0")}`,
+      startAt: `2026-09-${String(index + 8).padStart(2, "0")}T00:00:00Z`,
+      endAt: `2026-09-${String(index + 9).padStart(2, "0")}T00:00:00Z`,
+    })),
+  };
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(value)));
   await expect(readWeeklyReview(new URLSearchParams())).rejects.toThrow(
     "Revisión semanal inválida",
   );

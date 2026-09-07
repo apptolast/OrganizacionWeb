@@ -3,6 +3,10 @@ $ink: #23392f;
 $muted: #58655c;
 $line: #e0e5dc;
 .weekly-review {
+  > h1 {
+    margin-bottom: 16px;
+  }
+
   select {
     width: 100%;
     min-height: 44px;

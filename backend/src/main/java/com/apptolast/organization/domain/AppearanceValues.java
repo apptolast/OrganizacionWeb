@@ -5,39 +5,47 @@ import java.util.Set;
 
 public record AppearanceValues(String theme, String accentLight, String accentDark) {
   public AppearanceValues {
-    if (!Set.of("LIGHT", "DARK", "SYSTEM").contains(theme))
+    theme = theme(theme);
+    accentLight = accentLight(accentLight);
+    accentDark = accentDark(accentDark);
+  }
+
+  public static String theme(String value) {
+    if (!Set.of("LIGHT", "DARK", "SYSTEM").contains(value))
       throw new ValidationException(
           List.of(new FieldError("theme", "INVALID_VALUE", "Selecciona un tema válido.")));
-    if (!accentLight.matches("#[0-9a-fA-F]{6}"))
+    return value;
+  }
+
+  public static String accentLight(String value) {
+    return color(
+        value,
+        "accentLight",
+        List.of("#F8F9F5", "#FFFFFF", "#FDFEFB", "#EEF1E9", "#DFE8D9", "#D0DFC9"));
+  }
+
+  public static String accentDark(String value) {
+    return color(
+        value,
+        "accentDark",
+        List.of("#111827", "#1F2937", "#182232", "#0B1220", "#28394A", "#33485C"));
+  }
+
+  private static String color(String value, String field, List<String> surfaces) {
+    if (!value.matches("#[0-9a-fA-F]{6}"))
       throw new ValidationException(
           List.of(
-              new FieldError(
-                  "accentLight", "INVALID_VALUE", "Introduce un color hexadecimal completo.")));
-    for (var surface : List.of("#F8F9F5", "#FFFFFF", "#FDFEFB", "#EEF1E9", "#DFE8D9", "#D0DFC9")) {
-      if (contrast(accentLight, surface) < 4.5)
+              new FieldError(field, "INVALID_VALUE", "Introduce un color hexadecimal completo.")));
+    for (var surface : surfaces) {
+      if (contrast(value, surface) < 4.5)
         throw new ValidationException(
             List.of(
                 new FieldError(
-                    "accentLight",
+                    field,
                     "INSUFFICIENT_CONTRAST",
                     "Selecciona un color con suficiente contraste.")));
     }
-    if (!accentDark.matches("#[0-9a-fA-F]{6}"))
-      throw new ValidationException(
-          List.of(
-              new FieldError(
-                  "accentDark", "INVALID_VALUE", "Introduce un color hexadecimal completo.")));
-    for (var surface : List.of("#111827", "#1F2937", "#182232", "#0B1220", "#28394A", "#33485C")) {
-      if (contrast(accentDark, surface) < 4.5)
-        throw new ValidationException(
-            List.of(
-                new FieldError(
-                    "accentDark",
-                    "INSUFFICIENT_CONTRAST",
-                    "Selecciona un color con suficiente contraste.")));
-    }
-    accentLight = accentLight.toUpperCase(java.util.Locale.ROOT);
-    accentDark = accentDark.toUpperCase(java.util.Locale.ROOT);
+    return value.toUpperCase(java.util.Locale.ROOT);
   }
 
   private static double contrast(String first, String second) {

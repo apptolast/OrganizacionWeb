@@ -17,3 +17,5 @@ Evidencia:
 Las mejoras restantes de cobertura, pruebas físicas y optimización de contenedores conservan sus límites documentados. No se exige100% para el umbral80 acordado, ni se omite un defecto observado para cumplir una fecha. La única corrección funcional de esta fase fue anunciar correctamente la consulta reintentada; está validada antes del corte productivo medido.
 
 Se autoriza marcar15 done y preparar contrato16 bajo autorización global vigente. Mantener PR14 en borrador hasta completar la integración del corte final; no confundir cierre funcional local con merge o despliegue. La CI del commit posterior y de main se registrarán por separado. Si revelan un fallo, se resolverá antes de publicar el MVP.
+
+Actualización posterior al dictamen: CI34076019493 SUCCESS sobre9fc414e completo (root6d29cf):1668 pruebas frontend,108E2E, init/build/smoke verdes. Los dos oráculos posteriores quedan así validados también por la suite completa remota. El cierre funcional se mantiene; la publicación final documental se controla desde ci_pause_resume.md.

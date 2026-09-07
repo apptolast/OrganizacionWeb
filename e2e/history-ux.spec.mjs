@@ -31,7 +31,7 @@ test("history: filters details and read recovery preserve geometry and keyboard 
     });
   await mkdir(folder, { recursive: true });
   sql(
-    "TRUNCATE work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
   );
   const project = await create(
     request,
@@ -286,7 +286,7 @@ test("history: keyboard pagination and a superseded read preserve the current pa
 }, testInfo) => {
   test.setTimeout(120000);
   sql(
-    "TRUNCATE work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
   );
   const project = await create(
     request,
@@ -446,7 +446,7 @@ async function largeReading(page, request, folder, options) {
   test.setTimeout(180000);
   await mkdir(folder, { recursive: true });
   sql(
-    "TRUNCATE work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
   );
   const project = await create(
     request,

@@ -213,3 +213,24 @@ sin cobertura conservan su clasificación y el denominador original.
 Puerta de mutación backend superada. CI `34167438318` sobre `1cd88e7` también
 terminó SUCCESS con 144 E2E y publicador. Frontend, integración final y
 aceptación productiva siguen pendientes; no se declara terminada la feature.
+
+## Revisión final de interfaz y trazabilidad
+
+Frontend funcional y foco164 aprobados mediante revisión independiente de
+estado, formularios, fixtures y navegador. Root contrastó los catorce hashes
+finales (d57287) y los 221 hashes de fuentes/evidencia UX (3c82d8), además de
+inspeccionar zoom nativo y recuperación de foco Firefox. CSS revisado y
+transferido en 433aced; modalidades finales integradas en b22440b.
+
+Se acepta el alcance técnico documentado por ux_customization.md: Chromium
+cinco recorridos focales, Firefox cuatro; WebKit original tres de cuatro y
+ensayo separado de recuperación con sólo el enlace abierto por clic en
+Windows. No se declara navegación Tab de ese enlace, dispositivos físicos,
+lector de pantalla humano ni comprensión universal. El límite observado no
+se transforma en un éxito del recorrido original ni en un defecto confirmado
+de la aplicación.
+
+La revisión independiente review_customization_acceptance_final.md no señala
+huecos adicionales en los 42 escenarios. No sustituye las puertas pendientes:
+Stryker frontend, corrección del arnés de rangos históricos, init/CI integrada,
+rollback y aceptación productiva. Feature21 conserva in_progress.

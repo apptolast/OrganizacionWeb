@@ -89,3 +89,9 @@ PR16 draft https://github.com/apptolast/OrganizacionWeb/pull/16 publicada. CI340
 Dictamen APPROVED con límites y estado17 done. Todos los gates locales completados: init49155 EXIT0 (2076Java/1802frontend/40Node/lint), build93234 EXIT0,121E2E96039 EXIT0 y revisión C aprobada, smoke13 y UX515/35axe aprobados. Replay47243 EXIT0:39K/5S/1RuntimeError sobre45,13de14objetivosK y228error;130hashes idénticos y revisión independiente aprobada. Original1980 y sus estados intactos, sin sumar scores. No más procesos locales activos.
 
 PR16 todavía draft; CI34099273259 sobre f9948dc activa al registrar. Root publicará este cierre documental para una CI final y no fusionará hasta comprobar resultado. El estado done es técnico local, no afirmación de CI/merge/despliegue. Se autoriza preparar contrato18 en rama separada, sin cambiar producción17 ni la PR durante sus gates. Estimación revisada en docs/mvp-delivery-plan.md:5–9hsoftware y4–8hdespliegue condicionado; objetivo hoy sin garantía. SSH/dominio siguen pendientes, no repetir preguntas durante trabajo independiente.
+
+## Preparación18 en rama separada, 10:24
+
+COMMON cambió a codex/work-history desde fc36b735719f747e57fe6dc1e6a45dc680171045. PR16 conserva codex/end-time-notification congelada; CI final34100084803 activa sobre fc36b73. No proceso local root activo.17 done técnico local; no merge/CI verde todavía.18 pending, sólo propuesta previa a contrato/Gherkin: C redacta proposal_history.md; A diseña consulta/índices/cursores reutilizables; B diseña vista y estados UX. No producción/tests18 hasta revisión y contrato.
+
+Decisión preliminar de root: hechos durables de sesiones, finalizaciones/reaperturas y replanificación; no outbox ni escrituras de consulta. Keyset no se presenta como snapshot transaccional entre requests: commits tardíos con instante antiguo requieren garantía explícita, sin nueva tabla global o transacción persistente sólo para simular congelación. No19–30 dentro de18.

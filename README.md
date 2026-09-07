@@ -16,6 +16,10 @@ Los bloques horarios están implementados en el detalle de una tarea pendiente: 
 
 **Hoy** reúne las reservas del día con su proyecto, tarea, objetivo y horario. Muestra presupuesto, tiempo planificado, exceso y cierre previsto; utiliza la zona configurada o explica el fallback UTC con capacidad desconocida. `GET /api/v1/today` lee una instantánea privada y consistente, sin generar eventos ni modificar las reservas. La entrega está implementada y su validación local cerrada: [el dictamen aprobado](progress/judge_today.md) conserva las pruebas, mediciones de mutación y límites de la revisión UX. No acredita trabajo realizado ni completa tareas automáticamente.
 
+Replanificar está cerrado: permite mover y cancelar reservas, revisar presupuesto y recuperar una respuesta perdida sin duplicar el cambio. El [dictamen de replanificación](progress/judge_reschedule_final.md) conserva la evidencia de concurrencia y recuperación.
+
+El inicio de sesiones de trabajo también está cerrado y fusionado: registra inicio real, duración prevista y fin previsto, conserva un recibo durable y permite recuperar la sesión propia después de recargar. Una reserva planificada sigue siendo distinta del trabajo realizado. El [dictamen de inicio](progress/judge_start_work_final.md) y la [CI posterior a la fusión](progress/ci_start_work_final.md) documentan su validación. Pausa/reanudación está en desarrollo; cierre, aviso e historial de sesiones siguen pendientes. El ciclo completo todavía no está listo para uso habitual.
+
 El límite inicial es de tres proyectos activos por propietario. `APP_MAX_ACTIVE_PROJECTS` permite elegir de 1 a 10 en `.env`; todas las réplicas deben usar el mismo valor. Al alcanzar el límite, el propietario decide qué pausar. Reducirlo no pausa proyectos automáticamente y dos activaciones simultáneas no pueden ocupar la misma última plaza.
 
 ## Ejecutar localmente

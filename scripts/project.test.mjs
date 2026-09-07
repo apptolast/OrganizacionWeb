@@ -14,6 +14,36 @@ function capture() {
   return { calls, project };
 }
 
+test("pause resume frontend invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "pause_resume_session-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.pause-resume-session.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("pause resume backend invokes only its fixed PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "pause_resume_session-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=pause_resume_session"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
 test("start work PIT selects the complete feature and shared publication with all JUnit candidates", () => {
   const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
   assert.match(

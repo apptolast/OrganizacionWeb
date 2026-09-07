@@ -22,6 +22,8 @@ export function createProject(runner = run) {
       target !== "" &&
       (task !== "mutate" ||
         ![
+          "custom_views_fields-backend",
+          "custom_views_fields-frontend",
           "appearance-backend",
           "appearance-frontend",
           "weekly_review-backend",
@@ -67,6 +69,17 @@ export function createProject(runner = run) {
       ]);
       return;
     }
+    if (task === "mutate" && target === "custom_views_fields-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.custom-views-fields.config.json",
+      ]);
+      return;
+    }
     if (task === "install") {
       runner("pnpm", ["install", "--frozen-lockfile"]);
       runner("pnpm", ["--dir", "frontend", "install", "--frozen-lockfile"]);
@@ -79,6 +92,10 @@ export function createProject(runner = run) {
       mutate: "pitest",
     };
     if (!commands[task]) throw new Error(`Unknown task: ${task}`);
+    if (task === "mutate" && target === "custom_views_fields-backend") {
+      backend("pitest", ["-PmutationScope=custom_views_fields"]);
+      return;
+    }
     if (task === "mutate" && target === "appearance-backend") {
       backend("pitest", ["-PmutationScope=appearance"]);
       return;

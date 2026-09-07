@@ -7,6 +7,148 @@ import { createHash } from "node:crypto";
 import * as commands from "./project.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
+test("customization default PIT exposes the real feature wiring test", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  const tests = build.match(
+    /val customizationAdapterTests = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(
+    tests?.includes(
+      '"com.apptolast.organization.adapter.config.CustomizationWiringTest"',
+    ),
+  );
+});
+test("customization targets fail closed outside mutation", () => {
+  const { calls, project } = capture();
+  for (const target of [
+    "custom_views_fields-backend",
+    "custom_views_fields-frontend",
+  ])
+    assert.throws(() => project("test", target), /Invalid target/);
+  assert.throws(
+    () => project("mutate", "custom_views_fields-unknown"),
+    /Invalid target/,
+  );
+  assert.deepEqual(calls, []);
+});
+test("customization Stryker includes new modules without weakening inherited gates", () => {
+  const config = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.custom-views-fields.config.json"),
+      "utf8",
+    ),
+  );
+  const prior = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.appearance.config.json"),
+      "utf8",
+    ),
+  );
+  for (const file of [
+    "src/customization-api.ts",
+    "src/custom-fields-api.ts",
+    "src/customization-state.ts",
+    "src/customization.tsx",
+    "src/custom-fields.tsx",
+  ])
+    assert.ok(config.mutate.includes(file), file);
+  assert.ok(config.mutate.every((file) => !file.startsWith("!")));
+  assert.deepEqual(config.thresholds, prior.thresholds);
+  assert.equal(config.thresholds.break, 80);
+  assert.equal(config.concurrency, 8);
+  assert.equal(config.coverageAnalysis, "perTest");
+  assert.deepEqual(config.vitest, prior.vitest);
+  assert.deepEqual(config.ignorePatterns, prior.ignorePatterns);
+  assert.deepEqual(config.plugins, prior.plugins);
+  assert.equal(config.tempDirName, ".stryker-tmp-custom-views-fields");
+  assert.equal(
+    config.jsonReporter.fileName,
+    "reports/mutation-custom-views-fields/mutation.json",
+  );
+  assert.equal(
+    config.htmlReporter.fileName,
+    "reports/mutation-custom-views-fields/mutation.html",
+  );
+});
+test("customization frontend invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "custom_views_fields-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.custom-views-fields.config.json",
+      ],
+    ],
+  ]);
+});
+test("customization PIT includes complete families and exposes their adapter tests by default", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  const selected = build.match(
+    /val customizationClasses = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(selected);
+  for (const name of [
+    "domain.Customization*",
+    "domain.CustomField*",
+    "application.ReadCustomization*",
+    "application.SaveCustomization*",
+    "application.CreateCustomField*",
+    "application.UpdateCustomField*",
+    "application.ReadCustomFieldValues*",
+    "application.SaveCustomFieldValues*",
+    "application.Customization*",
+    "application.CustomFieldValues*",
+    "adapter.persistence.PostgresCustomizationStore*",
+    "adapter.http.CustomizationController*",
+    "adapter.config.ApplicationConfiguration",
+  ])
+    assert.ok(selected.includes(`"com.apptolast.organization.${name}"`), name);
+  assert.match(build, /val customizationOnly = scope == "custom_views_fields"/);
+  assert.match(build, /customizationOnly -> customizationClasses/);
+  assert.match(
+    build,
+    /customizationOnly -> setOf\("com\.apptolast\.organization\.\*"\)/,
+  );
+  assert.match(build, /else -> [^\n]+ \+ customizationClasses/);
+  const tests = build.match(
+    /val customizationAdapterTests = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(tests);
+  for (const name of [
+    "adapter.CustomizationApiTest",
+    "adapter.persistence.Customization*Test",
+    "adapter.persistence.CustomField*Test",
+    "adapter.config.ApplicationWiringTest",
+  ])
+    assert.ok(tests.includes(`"com.apptolast.organization.${name}"`), name);
+  assert.match(
+    build,
+    /else -> core \+ authenticationTests[^\n]+ \+ customizationAdapterTests/,
+  );
+  assert.match(
+    build,
+    /if \(customizationOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-custom-views-fields"\)\)/,
+  );
+  assert.match(build, /mutationThreshold\.set\(80\)/);
+  assert.match(build, /threads\.set\(4\)/);
+});
+test("customization backend invokes only its fixed PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "custom_views_fields-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=custom_views_fields"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
 test("end time Stryker preserves protection and measures both integrated surfaces", () => {
   const config = JSON.parse(
     readFileSync(

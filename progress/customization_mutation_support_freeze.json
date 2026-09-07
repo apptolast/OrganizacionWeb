@@ -1,0 +1,29 @@
+{
+  "scope": "mutation support only; frontend integration ranges pending",
+  "exit": 0,
+  "output": "036824",
+  "tests": 61,
+  "campaignsExecuted": false,
+  "files": [
+    {
+      "path": "scripts/project.mjs",
+      "sha256": "9CBE0C5587735497D25E3439B6EBF336364E588DCB452EA19BC812F2E7E60E3C"
+    },
+    {
+      "path": "scripts/project.test.mjs",
+      "sha256": "3847B20EA3F7E17089110412677209DA02B506451B8722F708A4CAF7BA90B08E"
+    },
+    {
+      "path": "backend/build.gradle.kts",
+      "sha256": "9120899BCBC450977F244BF343FCF7D1F4A05A6CAF56EDA6F2DDF175A504132D"
+    },
+    {
+      "path": "frontend/stryker.custom-views-fields.config.json",
+      "sha256": "84724688722E056727177AEB3F8B35ED49258A8A3A8E2ADB3E34AE7FF0AD5963"
+    },
+    {
+      "path": "progress/customization_mutation_support.md",
+      "sha256": "31E272087D5B4AADCB93B629FAB36EE7E8E9CD411A0BBE340F0C881AA510EF9B"
+    }
+  ]
+}

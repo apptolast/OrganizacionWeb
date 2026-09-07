@@ -428,7 +428,7 @@ it("@s36 rediscovers active work after remount without recovering an in-memory k
     screen.queryByRole("button", { name: "Empezar a trabajar" }),
   ).not.toBeInTheDocument();
   expect(fetcher.mock.calls[2][0]).toBe("/api/v1/work-sessions/active");
-  expect(fetcher).toHaveBeenCalledTimes(5);
+  await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(5));
   expect(fetcher.mock.calls[3][0]).toBe(
     `/api/v1/work-sessions/${receipt.id}/state`,
   );

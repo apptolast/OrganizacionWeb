@@ -5,3 +5,7 @@ Lectura COMMON ca1768/5ec267/6f0866: el caso78 del global7009 falló después de
 Error-context copiado sin modificar a progress/pause_e2e_historical_end_error.md, SHA B4EB53A4C051D9597E35A1860245B4422DF42332C8B0DCFFA9FDF968733363BF (e10352). Corrección autorizada exclusivamente en el test aislado: getByRole(paragraph).filter(hasText:/^Fin previsto:/) antes del time exacto. Conserva toBeVisible, comparación de sesión/tiempo trabajado y SQL de estado/revisión/cambios/intervalos. Búsqueda del mismo archivo encuentra sólo este selector datetime/plannedEndAt; no se amplían cambios.
 
 Formato e10352 GREEN. Foco pendiente de liberación18080; no runner, Java, fuentes frontend ni campaña ejecutados durante el global/Stryker.
+
+## Verificación integrada posterior
+
+Corrección74588c3 acreditada en global96039: EXIT0 real5df5b0 comunicado por root,121/121 en11,3min. Log end_time_e2e_verified.log línea282: caso78 GREEN (3,7s). SHA del log448D71B2BBD177BD383DD11A3E31AF07208130CBF4A39D64922158A0208642FA, verificado2582af. Test A2A3E08010E24F18AB87205D70A6795AB83891892A159C3E1C0BB1A6E18627C7 coincide con entrega (7733c1). El pendiente anterior queda resuelto por el global, sin foco redundante ni producción nueva en la corrección. Se conserva el primer119/121 EXIT1.

@@ -43,3 +43,13 @@ Se revisará el rango tras17, al aprobar el contrato18 y al conseguir la primera
 ## Criterio de entrega
 
 Los recorridos del MVP deben funcionar contra API y base de datos reales, conservar datos al reiniciar, proteger privacidad, recuperar errores y evitar duplicados. Planificación y trabajo real permanecen separados. Deben pasar contrato, revisión, tests y mutación, además de criterios responsive/accesibilidad con evidencia y límites explícitos. La entrega completa requiere HTTPS, acceso y respaldo/restauración comprobados en el servidor. Esto no equivale a ausencia absoluta de errores ni a certificación universal de las30 leyes UX por herramientas automáticas.
+
+## Reestimación tras el cierre técnico local17, 7 de septiembre, 10:20
+
+Esta actualización sustituye el rango de8–15 horas de software pendiente indicado al cerrar16: quedan **5–9 horas efectivas** para18 y la validación integrada final, con confianza media-baja. Despliegue conserva **4–8 horas adicionales condicionadas** a acceso, hostname y capacidad utilizables; esperas externas sin cota. Hoy sigue siendo objetivo, no garantía.
+
+17 está done técnicamente en local: init2076Java/1802frontend/40Node, build,121E2E, smoke13, UX515/35axe y campañas/revisiones aprobadas con límites. PR16 y CI final todavía pendientes; no se presenta como fusionada ni desplegada. Los cambios posteriores a producción son refuerzos de tests, fixtures y documentación.
+
+Desglose restante: contrato e implementación18,2,5–4,5h; integración/CI del MVP,1–2h; margen de correcciones,1,5–2,5h. Total5–9h, sin dividirlo de nuevo entre agentes. Se preparará18 en una rama separada mientras CI valida17, evitando modificar la PR que está ejecutándose. No se añaden revisión semanal, personalización avanzada ni conectores19–30 al MVP por inferencia.
+
+Base de revisión:17 requirió más trabajo de integración que la única muestra previa16, especialmente coordinación entre decisiones y recuperación. Sus gates medidos incluyen PIT38m55, Stryker25m42, globalE2E corregido11,3min y replay2m12; se solaparon y no deben sumarse como ruta crítica. Este rango es juicio de planificación, no extrapolación estadística ni predicción de cuota. Se volverá a revisar al fijar el contrato18.

@@ -83,3 +83,9 @@ Stryker root90337 terminó EXIT0 e73c7b en25m42.129 entradas sin cambios25fae9. 
 Primer global7009 EXIT1 12850a:119/121 pasan,13,1min. Dos selectores históricos de plannedEndAt resolvían tanto Fin previsto como Fin previsto original; no fallo de transición ni cambio de instante. Log preservado SHA FD78830A00F40744347F9D9422D1F5B0AE60BB3ED3EA39BAA1EA0FEB1B1F2DF3. Correcciones74588c3 y7bf7a1a acotan párrafos manteniendo oráculos; una tercera acotación preventiva en inicio no se atribuye como RED propio. Segundo global root96039 ACTIVO, end_time_e2e_verified.log, puerto18080.
 
 PR16 draft https://github.com/apptolast/OrganizacionWeb/pull/16 publicada. CI34097100842 del corte anterior cancelada por el nuevo push que corrige esos fixtures; no se atribuye aprobación. CI34098404615 ACTIVA sobre90560635d211df056a35682bf1ac4afabe66d09f. No ready/merge mientras queden gates y refuerzo/revisión.17 sigue in_progress,18 pendiente, sin despliegue.
+
+## Cierre técnico local17, 10:20
+
+Dictamen APPROVED con límites y estado17 done. Todos los gates locales completados: init49155 EXIT0 (2076Java/1802frontend/40Node/lint), build93234 EXIT0,121E2E96039 EXIT0 y revisión C aprobada, smoke13 y UX515/35axe aprobados. Replay47243 EXIT0:39K/5S/1RuntimeError sobre45,13de14objetivosK y228error;130hashes idénticos y revisión independiente aprobada. Original1980 y sus estados intactos, sin sumar scores. No más procesos locales activos.
+
+PR16 todavía draft; CI34099273259 sobre f9948dc activa al registrar. Root publicará este cierre documental para una CI final y no fusionará hasta comprobar resultado. El estado done es técnico local, no afirmación de CI/merge/despliegue. Se autoriza preparar contrato18 en rama separada, sin cambiar producción17 ni la PR durante sus gates. Estimación revisada en docs/mvp-delivery-plan.md:5–9hsoftware y4–8hdespliegue condicionado; objetivo hoy sin garantía. SSH/dominio siguen pendientes, no repetir preguntas durante trabajo independiente.

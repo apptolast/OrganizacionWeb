@@ -9,6 +9,7 @@ build/
 
 # Mutación / tests
 .stryker-tmp/
+/frontend/.stryker-tmp-pause-resume-session/
 .coverage
 htmlcov/
 coverage/
@@ -52,3 +53,8 @@ playwright-report/
 .gradle/
 reports/
 .e2e-work/
+
+# Evidencia XML local de validación15; informes y manifiestos sí versionados.
+/progress/pause_resume_backend_checkpoint_xml/
+/progress/pause_resume_backend_final_xml/
+/progress/pause_resume_global_init_xml/

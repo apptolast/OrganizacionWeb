@@ -1,6 +1,6 @@
 # Revisión independiente del panel de fin17 — freeze selectivo
 
-**CHANGES_REQUESTED**, limitado a tres flujos diferenciables del corte. Revisión de lectura, sin ejecutar pruebas ni modificar producto/tests. Se verificaron los seis hashes de `end_time_frontend_panel_freeze.json` (`d625de`), incluidos `work-session-state.tsx` 2CE8D5…27F51 y panel 2E9E42…9DD41. La evidencia del autor es88/88 GREEN1dc4ee:29 panel,2 hook,21 API17 y36 StatePanel; lint/types/formato según su bitácora. No se presenta esa ejecución como propia.
+**Dictamen vigente: APPROVED parcial para el freeze corregido ecab5e.** Los tres hallazgos se cerraron en la re-review inferior; montaje padre/Reader y gates siguen fuera de alcance. Se conserva a continuación el dictamen histórico **CHANGES_REQUESTED**, limitado a tres flujos diferenciables del corte. Revisión de lectura, sin ejecutar pruebas ni modificar producto/tests. Se verificaron los seis hashes de `end_time_frontend_panel_freeze.json` (`d625de`), incluidos `work-session-state.tsx` 2CE8D5…27F51 y panel 2E9E42…9DD41. La evidencia del autor es88/88 GREEN1dc4ee:29 panel,2 hook,21 API17 y36 StatePanel; lint/types/formato según su bitácora. No se presenta esa ejecución como propia.
 
 ## Hallazgos accionables
 
@@ -35,3 +35,13 @@ El coordinador tiene adquisición síncrona mediante ref, invalida lecturas regi
 No se revisó como terminado el montaje en WorkSession/Reader, GETactive padre, cierre compartido, ambas superficies reales ni la nueva sesión tras un cierre. B reconoce esos pendientes y no son un hallazgo nuevo. Tampoco se acredita navegador, controles44px, geometría, anuncios reales con lector de pantalla ni campañas17 desde estos88 tests. API@s27 y sus campos exactos se leen dentro del freeze; la época grande y precisión son evidencia del caso del autor, no una ejecución independiente.
 
 Los tres hallazgos se comunicaron a root y B antes de cualquier cambio o campaña frontend. El dictamen podrá actualizarse con el delta y oráculos acotados; no se solicita ampliar la matriz heredada14–16.
+
+## Re-review del freeze corregido — APPROVED parcial
+
+Seis hashes de `end_time_frontend_panel_freeze_corrected.json` verificados idénticos (`bef5f1`). Lectura de cambios y oráculos `328f96`/`d67742`; sin suites nuevas ni cambios de fuentes. La evidencia del autor es113/113 GREENbcaea5 (31 panel,2 hook,36 StatePanel,44 WorkSession), con formato/lint/types verdes. API17 conserva su evidencia21 anterior; no se suman dos veces.
+
+- **R1 cerrado:** StatePanel registra la generación de su snapshot y comprueba awaitingSnapshot antes de construir una intención nueva; conserva la recuperación retenida. El botón y el anuncio reflejan esa espera. El caso existente difiere GETstate, intenta Pausar y verifica cero POST, luego resuelve revisión2 y comprueba el único envío con esa revisión. REDf4d2ae → GREEN14670b.
+- **R2 cerrado:** el aborto coordinado libera lookupBusy/loading síncronamente, sin depender de que fetch finalice. El listener se retira antes de abortar en el cleanup de sustitución y también al finalizar: una limpieza anterior no libera el estado de la lectura que la sustituye. El caso E pendiente → POST412 → consulta manual observa la tercera E y conserva cantidad. RED7be305 → GREENc78f73; incidente previo de código de problema inválido correctamente separado en bitácora.
+- **R3 cerrado:** POST reconoce WORK_SESSION_NOT_FOUND antes del rechazo genérico y reutiliza withdraw, que retira snapshot, hecho confirmado, cantidad/formulario e intención, y comunica404. Sigue detrás de las dos guardas de aborto alrededor de la clasificación. El caso verifica callback y retirada de datos, sin confundirlo con GET. RED0f0c5b → GREENbcaea5.
+
+No queda un bloqueante distinto en estos deltas. Esta aprobación no certifica el montaje Reader/CLOSE, que está en TDD separado: el RED4c4fc1 de retirada inmediata de controles/timer tras cierre no se oculta ni se atribuye a este freeze. **Panel liberado para esa siguiente modificación coordinada**; cualquier nuevo delta conserva su propia evidencia y revisión. No se exige repetir estos113 casos sólo por finalizar la revisión documental.

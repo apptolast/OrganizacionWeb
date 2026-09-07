@@ -2,6 +2,10 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { SessionStart } from "./work-session-api";
 import { RouteLink } from "./navigation";
 import {
+  useWorkSessionDecision,
+  type SessionDecision,
+} from "./use-work-session-decision";
+import {
   readWorkSessionStateError,
   recoverWorkSessionChange,
   type WorkSessionIntent,
@@ -14,11 +18,21 @@ import {
 type StatePanelProps = {
   session: SessionStart;
   onAccessFailure: (status: number) => void;
+  decision?: SessionDecision;
 };
 export function WorkSessionStatePanel(props: StatePanelProps) {
   return <StatePanel key={props.session.id} {...props} />;
 }
-function StatePanel({ session, onAccessFailure }: StatePanelProps) {
+function StatePanel({
+  session,
+  onAccessFailure,
+  decision: shared,
+}: StatePanelProps) {
+  const local = useWorkSessionDecision();
+  const decision = shared ?? local;
+  const { track, generation } = decision;
+  const [snapshotGeneration, setSnapshotGeneration] = useState(generation);
+  const awaitingSnapshot = snapshotGeneration !== generation;
   const heading = useRef<HTMLHeadingElement>(null);
   const interacted = useRef(false);
   useLayoutEffect(() => {
@@ -39,7 +53,15 @@ function StatePanel({ session, onAccessFailure }: StatePanelProps) {
   const [conflict, setConflict] = useState<string>();
   const [mayResend, setMayResend] = useState(false);
   async function send(check = false) {
+    if (!retained.current && awaitingSnapshot) return;
     if (busy || (!snapshot && !retained.current)) return;
+    if (
+      !decision.acquire(
+        retained.current?.action ??
+          (snapshot!.state.status === "running" ? "PAUSE" : "RESUME"),
+      )
+    )
+      return;
     retained.current ??= {
       state: snapshot!.state,
       token: snapshot!.token,
@@ -59,6 +81,7 @@ function StatePanel({ session, onAccessFailure }: StatePanelProps) {
         : changeWorkSession(retained.current, controller.signal));
       if (controller.signal.aborted) return;
       setConfirmed(result);
+      decision.settle();
       setUncertain(false);
       retained.current = undefined;
       setSnapshot(undefined);
@@ -75,6 +98,7 @@ function StatePanel({ session, onAccessFailure }: StatePanelProps) {
       if (controller.signal.aborted) return;
       const rejection = problem && rejectionMessage(problem.code);
       if (rejection) {
+        decision.release();
         retained.current = undefined;
         setConflict(rejection);
         setUncertain(false);
@@ -92,10 +116,12 @@ function StatePanel({ session, onAccessFailure }: StatePanelProps) {
   }
   useEffect(() => {
     const controller = new AbortController();
+    const untrack = track(controller);
     lookup.current = controller;
     void readWorkSessionState(session.id, controller.signal)
       .then((result) => {
         if (!controller.signal.aborted) {
+          setSnapshotGeneration(generation);
           setSnapshot(result);
           setLookupFailed(false);
         }
@@ -109,16 +135,20 @@ function StatePanel({ session, onAccessFailure }: StatePanelProps) {
         setLookupFailed(true);
       })
       .finally(() => {
+        untrack();
         if (!controller.signal.aborted) setLoading(false);
       });
-    return () => controller.abort();
-  }, [session.id, refresh, onAccessFailure]);
+    return () => {
+      untrack();
+      controller.abort();
+    };
+  }, [session.id, refresh, onAccessFailure, generation, track]);
   return (
     <div>
       <h3 ref={heading} tabIndex={-1}>
         Estado de la sesión
       </h3>
-      {loading && snapshot && (
+      {(loading || (awaitingSnapshot && !lookupFailed)) && snapshot && (
         <p role="status">Consultando estado de la sesión</p>
       )}
       <button
@@ -220,7 +250,7 @@ function StatePanel({ session, onAccessFailure }: StatePanelProps) {
           {snapshot.state.status !== "closed" && (
             <button
               type="button"
-              aria-disabled={busy}
+              aria-disabled={busy || awaitingSnapshot}
               onClick={() => void send()}
             >
               {snapshot.state.status === "running" ? "Pausar" : "Reanudar"}

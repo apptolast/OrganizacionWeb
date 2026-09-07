@@ -339,6 +339,54 @@ it("@s26 refuses a recovered receipt for another amount of the same intention", 
   ).rejects.toThrow("Cambio de sesión inválido");
 });
 
+it("@s27 accepts an exact paused extension and end whose epoch microseconds exceed Number precision", async () => {
+  const historical = {
+    ...session,
+    startedAt: "1600-01-01T10:00:00.123456Z",
+    plannedEndAt: "1600-01-01T10:25:00.123456Z",
+  };
+  const before = {
+    ...state,
+    session: historical,
+    status: "paused" as const,
+    changedAt: historical.startedAt,
+    runningSince: null,
+  };
+  const receipt = {
+    ...extensionReceipt(),
+    before,
+    after: { ...before, revision: "2" },
+    occurredAt: "1600-01-01T11:30:00.123457Z",
+    extension: {
+      additionalMinutes: 1440,
+      previousEndAt: historical.plannedEndAt,
+      effectiveEndAt: "1600-01-02T11:30:00.123457Z",
+    },
+  };
+  const end = {
+    state: receipt.after,
+    serverNow: receipt.occurredAt,
+    effectiveEndAt: receipt.extension.effectiveEndAt,
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValueOnce(Response.json(receipt))
+      .mockResolvedValueOnce(
+        Response.json(end, {
+          headers: { "Work-Session-Revision": `work-session-${session.id}-2` },
+        }),
+      ),
+  );
+  const { readWorkSessionChange } = await import("./work-session-state-api");
+  await expect(readWorkSessionChange(receipt.id)).resolves.toEqual(receipt);
+  await expect(readWorkSessionEnd(session.id)).resolves.toEqual({
+    ...end,
+    token: `work-session-${session.id}-2`,
+  });
+});
+
 it("@s27 recovers a late paused EXTEND without changing its interval or requiring Location", async () => {
   const before = { ...state, status: "paused" as const, runningSince: null };
   const receipt = {

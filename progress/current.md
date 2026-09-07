@@ -137,3 +137,13 @@ Soporte PIT aprobado en C6b513f6 e integrado en COMMON222725e durante ventana si
 GitHub muestra PR17 para codex/work-history y PR18 para codex/history-http, creadas fuera de las operaciones root de esta sesión. No se vuelve a preguntar su origen: el usuario ya explicó que opera desde GitHub. Se convirtieron ambas en borrador (707007). PR17 concentra la integración; PR18 conserva el checkpoint HTTP ya incorporado. Se añadieron títulos y descripciones con validaciones y límites. Main sigue success34101887939 (4a174c). Rama común publicada hasta222725e, con A/B todavía en WIP.
 
 C acredita dos E2E reales verdes 2e7881: vacío con texto visible y diez hechos de las cinco fuentes, detalle literal, SQL y enlace a sesión. El snapshot sigue siendo nominal; la paginación y el reinicio están en curso. B informa154 pruebas focales verdes, pero reabre únicamente History/test para corregir el rango de fechas invertido; no se presenta ese freeze provisional como final. A cierra la forma de recibos corruptos antes de su regresión final. Tres agentes activos, sin nuevas funcionalidades ni despliegue.
+
+## Fuentes finales integradas y gates en marcha
+
+Frontend final aprobado0fa1729 (14hashes ee14b2); rango invertido corregido,30 History verdes. Soporte Stryker769d3ea aprobado con ternarios App completos,47Node y snapshot histórico14. Backend final06f9233 aprobado:14hashes y seisXML verificados81af72,163 pruebas focales verdes; incluye rechazo503 del JSON literal null tras RED6206b1/GREENe97112. Rama común publicada hasta06f9233.
+
+Cuatro E2E de historial revisados e integrados en190eff8/f273a08, ejecutados en focos2/2+1/1+1/1 con sus límites. Paginación21hechos, reinicioAPI manteniendoPG, retiradaoutbox,503transporte y401/404 reales; el EXIT del foco de paginación no se recuperó, aunque log registra1/1 y cleanup. No se convierte ese dato en un EXIT inventado.
+
+C recibió todas las fuentes finales en b639336 y f03ce2f. El primer UX fue RED5d013a a320 por controles menores44px; geometría/captura preservadas. La copiaPG posterior al lifecycle ocurrió durante la captura after de C:322hashes iguales y1PG distinto explicado por esa copia; no se afirma identidad total. C corrige CSS medido en su árbol, sin tocar TS/TSX. Los cuatro E2E funcionales permanecen independientes del archivo UX.
+
+Root inició init global en COMMON, proceso32293 y log history_init_final.log sobre06f9233, sin campañas PIT/Stryker todavía. A/B quedan para esas campañas tras init/build; C ejecuta UX en su árbol. La funcionalidad18 y el despliegue siguen abiertos, con acceso/hostname pendientes ya solicitados.

@@ -1,0 +1,18 @@
+[
+  {
+    "path": "frontend/src/customization-api.ts",
+    "sha256": "CF121AF437C95B1D758F9437F7540DAAD5A14BF2E4C201C43E4D88BBC9C0530C"
+  },
+  {
+    "path": "frontend/src/customization-api.test.ts",
+    "sha256": "D62915C50AE6CB65E658D4960940EAFC5A43C491B37AEF6D3C3F18A4114CE1BC"
+  },
+  {
+    "path": "frontend/src/custom-fields-api.ts",
+    "sha256": "5D0EA08122722B22BB445E7FDF1DF506F93F8390337E394785CFB0E367F5AAD1"
+  },
+  {
+    "path": "frontend/src/custom-fields-api.test.ts",
+    "sha256": "1FBC4AA7AA590CB38FE7EA36C6B937ECBB3E1E00909508A292516ABFF6237557"
+  }
+]

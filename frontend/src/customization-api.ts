@@ -1,3 +1,4 @@
+import { microseconds } from "./work-session-api";
 import { exact, instant } from "./schedule-block-api";
 
 import { apiRequest } from "./api-client";
@@ -45,46 +46,14 @@ async function decodeCustomization(
   if (signal?.aborted)
     throw new DOMException("Consulta retirada", "AbortError");
   if (response.status === 400) {
-    const problem: unknown = await response
-      .clone()
-      .json()
-      .catch(() => null);
-    if (signal?.aborted)
-      throw new DOMException("Consulta retirada", "AbortError");
-    if (
-      exact(problem, "type title status code errors") &&
-      problem.type === "urn:organization:problem:validation_error" &&
-      problem.status === 400 &&
-      problem.code === "VALIDATION_ERROR" &&
-      typeof problem.title === "string" &&
-      problem.title.trim() &&
-      Array.isArray(problem.errors) &&
-      problem.errors.length > 0 &&
-      problem.errors.every(
-        (error) =>
-          exact(error, "field code message") &&
-          typeof error.field === "string" &&
-          /^(label|type|active|customFields|visibleFields(?:\[[0-9]+\])?)$/.test(
-            error.field,
-          ) &&
-          [
-            "REQUIRED",
-            "UNKNOWN_FIELD",
-            "INVALID_TYPE",
-            "INVALID_VALUE",
-            "INVALID_FORMAT",
-          ].includes(error.code as string) &&
-          typeof error.message === "string" &&
-          error.message.trim(),
-      )
-    ) {
-      throw new CustomizationValidationError(
-        problem.errors.map((error) => ({
-          field: error.field,
-          message: error.message,
-        })),
-      );
-    }
+    await throwCustomizationValidation(
+      response,
+      (field) =>
+        /^(label|type|active|customFields|visibleFields(?:\[[0-9]+\])?)$/.test(
+          field,
+        ),
+      signal,
+    );
   }
   if (response.status !== 200) throw response;
 
@@ -152,30 +121,13 @@ async function decodeCustomization(
   if (
     !body.customFields.every(
       (field) =>
-        exact(field, "id label type active") &&
-        ["TEXT", "NUMBER", "DATE", "BOOLEAN"].includes(field.type as string),
+        exact(field, "id label type active") && isCustomFieldType(field.type),
     )
   )
     throw new Error("Respuesta incompatible");
   if (
     !body.customFields.every(
-      (field) =>
-        typeof field.label === "string" &&
-        field.label.length > 0 &&
-        [...field.label].length <= 60 &&
-        !/^\p{White_Space}|\p{White_Space}$/u.test(field.label) &&
-        !field.label.includes(String.fromCharCode(0)) &&
-        !/[\ud800-\udfff]/u.test(field.label),
-    )
-  )
-    throw new Error("Respuesta incompatible");
-  if (
-    !body.customFields.every(
-      (field) =>
-        typeof field.id === "string" &&
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
-          field.id,
-        ),
+      (field) => isCustomFieldLabel(field.label) && isCustomFieldId(field.id),
     )
   )
     throw new Error("Respuesta incompatible");
@@ -209,6 +161,10 @@ export async function saveCustomizationView(
 ): Promise<CustomizationSnapshot> {
   const sent = [...visibleFields];
   const retained = previous.customFields.map((field) => ({ ...field }));
+  const transition = {
+    ...previous,
+    changed: JSON.stringify(sent) !== JSON.stringify(previous.visibleFields),
+  };
   const response = await apiRequest(`/api/v1/me/customization/${scope}`, {
     method: "PUT",
     credentials: "same-origin",
@@ -223,6 +179,7 @@ export async function saveCustomizationView(
     throw new Error("Respuesta incompatible");
   if (!sameFields(result.customFields, retained))
     throw new Error("Respuesta incompatible");
+  verifyPrivateRevision(transition, result);
   return result;
 }
 
@@ -239,6 +196,7 @@ export async function createCustomField(
   const retained = previous.customFields.map((field) => ({ ...field }));
   const retainedView = [...previous.visibleFields];
   const existing = retained.map((field) => field.id);
+  const transition = { ...previous, changed: true };
   const response = await apiRequest(
     `/api/v1/me/customization/${scope}/fields`,
     {
@@ -271,6 +229,7 @@ export async function createCustomField(
     throw new Error("Respuesta incompatible");
   if (JSON.stringify(result.visibleFields) !== JSON.stringify(retainedView))
     throw new Error("Respuesta incompatible");
+  verifyPrivateRevision(transition, result);
   return result;
 }
 
@@ -281,6 +240,8 @@ export async function updateCustomField(
   input: { label: string; active: boolean },
   signal?: AbortSignal,
 ): Promise<CustomizationSnapshot> {
+  if (!previous.customFields.some((field) => field.id === fieldId))
+    throw new Error("Campo no disponible");
   const sent = {
     label: input.label.replace(/^\p{White_Space}+|\p{White_Space}+$/gu, ""),
     active: input.active,
@@ -289,6 +250,10 @@ export async function updateCustomField(
   const expected = previous.customFields.map((field) =>
     field.id === fieldId ? { ...field, ...sent } : { ...field },
   );
+  const transition = {
+    ...previous,
+    changed: !sameFields(expected, previous.customFields),
+  };
   const response = await apiRequest(
     `/api/v1/me/customization/${scope}/fields/${fieldId}`,
     {
@@ -308,6 +273,7 @@ export async function updateCustomField(
     throw new Error("Respuesta incompatible");
   if (JSON.stringify(result.visibleFields) !== JSON.stringify(retainedView))
     throw new Error("Respuesta incompatible");
+  verifyPrivateRevision(transition, result);
   return result;
 }
 
@@ -324,4 +290,95 @@ function sameFields(actual: CustomField[], expected: CustomField[]) {
       );
     })
   );
+}
+
+export function verifyPrivateRevision(
+  previous: Pick<CustomizationSnapshot, "configured" | "etag" | "updatedAt"> & {
+    changed: boolean;
+  },
+  result: Pick<CustomizationSnapshot, "configured" | "etag" | "updatedAt">,
+) {
+  if (!previous.configured && !result.etag.endsWith(':0"'))
+    throw new Error("Respuesta incompatible");
+  if (
+    previous.configured &&
+    !previous.changed &&
+    (result.etag !== previous.etag || result.updatedAt !== previous.updatedAt)
+  )
+    throw new Error("Respuesta incompatible");
+  if (previous.configured && previous.changed) {
+    if (microseconds(result.updatedAt)! < microseconds(previous.updatedAt)!)
+      throw new Error("Respuesta incompatible");
+    const separator = previous.etag.lastIndexOf(":");
+    const next = BigInt(previous.etag.slice(separator + 1, -1)) + 1n;
+    if (result.etag !== `${previous.etag.slice(0, separator + 1)}${next}"`)
+      throw new Error("Respuesta incompatible");
+  }
+}
+
+export function isCustomFieldLabel(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.length > 0 &&
+    [...value].length <= 60 &&
+    !/^\p{White_Space}|\p{White_Space}$/u.test(value) &&
+    !value.includes(String.fromCharCode(0)) &&
+    !/[\ud800-\udfff]/u.test(value)
+  );
+}
+export function isCustomFieldId(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(value)
+  );
+}
+export function isCustomFieldType(value: unknown): value is CustomFieldType {
+  return ["TEXT", "NUMBER", "DATE", "BOOLEAN"].includes(value as string);
+}
+
+export async function throwCustomizationValidation(
+  response: Response,
+  acceptField: (field: string) => boolean,
+  signal?: AbortSignal,
+) {
+  if (response.status === 400) {
+    const problem: unknown = await response
+      .clone()
+      .json()
+      .catch(() => null);
+    if (signal?.aborted)
+      throw new DOMException("Consulta retirada", "AbortError");
+    if (
+      exact(problem, "type title status code errors") &&
+      problem.type === "urn:organization:problem:validation_error" &&
+      problem.status === 400 &&
+      problem.code === "VALIDATION_ERROR" &&
+      typeof problem.title === "string" &&
+      problem.title.trim() &&
+      Array.isArray(problem.errors) &&
+      problem.errors.length > 0 &&
+      problem.errors.every(
+        (error) =>
+          exact(error, "field code message") &&
+          typeof error.field === "string" &&
+          acceptField(error.field) &&
+          [
+            "REQUIRED",
+            "UNKNOWN_FIELD",
+            "INVALID_TYPE",
+            "INVALID_VALUE",
+            "INVALID_FORMAT",
+          ].includes(error.code as string) &&
+          typeof error.message === "string" &&
+          error.message.trim(),
+      )
+    ) {
+      throw new CustomizationValidationError(
+        problem.errors.map((error) => ({
+          field: error.field,
+          message: error.message,
+        })),
+      );
+    }
+  }
 }

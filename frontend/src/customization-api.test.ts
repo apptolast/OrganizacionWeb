@@ -1267,3 +1267,193 @@ it("@s34 rejects the complete mixed problem when one field is unknown", async ()
     createCustomField("PROJECT", previous, { label: "Dato", type: "TEXT" }),
   ).rejects.toBe(response);
 });
+
+it("@s28 rejects changed presentation confirmed with the previous revision", async () => {
+  const previous = {
+    configured: true,
+    visibleFields: ["createdAt"],
+    customFields: [],
+    updatedAt: "2026-09-07T10:00:00Z",
+    etag: '"customization:PROJECT:12345678-1234-1234-1234-123456789abc:4"',
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json(
+        {
+          configured: true,
+          visibleFields: [],
+          customFields: [],
+          updatedAt: "2026-09-07T10:01:00Z",
+        },
+        { headers: { ETag: previous.etag } },
+      ),
+    ),
+  );
+  await expect(
+    saveCustomizationView("PROJECT", previous, []),
+  ).rejects.toThrow();
+});
+
+it("@s28 rejects first creation confirmed above version zero", async () => {
+  const previous = {
+    configured: false,
+    visibleFields: ["createdAt"],
+    customFields: [],
+    updatedAt: null,
+    etag: '"customization:PROJECT:unconfigured"',
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json(
+        {
+          configured: true,
+          visibleFields: ["createdAt"],
+          customFields: [
+            {
+              id: "22345678-1234-1234-1234-123456789abc",
+              label: "Dato",
+              type: "TEXT",
+              active: true,
+            },
+          ],
+          updatedAt: "2026-09-07T10:00:00Z",
+        },
+        {
+          headers: {
+            ETag: '"customization:PROJECT:12345678-1234-1234-1234-123456789abc:1"',
+          },
+        },
+      ),
+    ),
+  );
+  await expect(
+    createCustomField("PROJECT", previous, { label: "Dato", type: "TEXT" }),
+  ).rejects.toThrow();
+});
+
+it("@s28 rejects a no-op confirmation with a changed revision", async () => {
+  const body = {
+    configured: true,
+    visibleFields: ["createdAt"],
+    customFields: [],
+    updatedAt: "2026-09-07T10:00:00Z",
+  };
+  const previous = {
+    ...body,
+    etag: '"customization:PROJECT:12345678-1234-1234-1234-123456789abc:4"',
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json(body, {
+        headers: {
+          ETag: '"customization:PROJECT:12345678-1234-1234-1234-123456789abc:5"',
+        },
+      }),
+    ),
+  );
+  await expect(
+    saveCustomizationView("PROJECT", previous, ["createdAt"]),
+  ).rejects.toThrow();
+});
+
+it("@s28 rejects a no-op confirmation that changes the timestamp", async () => {
+  const previous = {
+    configured: true,
+    visibleFields: [],
+    customFields: [],
+    updatedAt: "2026-09-07T10:00:00Z",
+    etag: '"customization:PROJECT:12345678-1234-1234-1234-123456789abc:4"',
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json(
+        {
+          configured: true,
+          visibleFields: [],
+          customFields: [],
+          updatedAt: "2026-09-07T10:01:00Z",
+        },
+        { headers: { ETag: previous.etag } },
+      ),
+    ),
+  );
+  await expect(
+    saveCustomizationView("PROJECT", previous, []),
+  ).rejects.toThrow();
+});
+
+it("@s28 rejects a changed confirmation that moves time backwards by one microsecond", async () => {
+  const previous = {
+    configured: true,
+    visibleFields: ["createdAt"],
+    customFields: [],
+    updatedAt: "2026-09-07T10:00:00.123456Z",
+    etag: '"customization:PROJECT:12345678-1234-1234-1234-123456789abc:4"',
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json(
+        {
+          configured: true,
+          visibleFields: [],
+          customFields: [],
+          updatedAt: "2026-09-07T10:00:00.123455Z",
+        },
+        {
+          headers: {
+            ETag: '"customization:PROJECT:12345678-1234-1234-1234-123456789abc:5"',
+          },
+        },
+      ),
+    ),
+  );
+  await expect(
+    saveCustomizationView("PROJECT", previous, []),
+  ).rejects.toThrow();
+});
+
+it("@s28 refuses updating an identity absent from the captured configuration", async () => {
+  const body = {
+    configured: true,
+    visibleFields: [],
+    customFields: [],
+    updatedAt: "2026-09-07T10:00:00Z",
+  };
+  const etag = '"customization:PROJECT:12345678-1234-1234-1234-123456789abc:4"';
+  const fetcher = vi
+    .fn()
+    .mockResolvedValue(Response.json(body, { headers: { ETag: etag } }));
+  vi.stubGlobal("fetch", fetcher);
+  await expect(
+    updateCustomField(
+      "PROJECT",
+      { ...body, etag },
+      "22345678-1234-1234-1234-123456789abc",
+      { label: "Dato", active: false },
+    ),
+  ).rejects.toThrow();
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it("@s8 accepts an unchanged view at the maximum revision without rewriting time", async () => {
+  const body = {
+    configured: true,
+    visibleFields: ["createdAt"],
+    customFields: [],
+    updatedAt: "2026-09-07T10:00:00.123456Z",
+  };
+  const etag =
+    '"customization:PROJECT:12345678-1234-1234-1234-123456789abc:9223372036854775807"';
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(Response.json(body, { headers: { ETag: etag } })),
+  );
+  await expect(
+    saveCustomizationView("PROJECT", { ...body, etag }, ["createdAt"]),
+  ).resolves.toEqual({ ...body, etag });
+});

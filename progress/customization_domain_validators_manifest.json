@@ -1,0 +1,10 @@
+[
+  {
+    "sha256": "A915FA8DF5FAC8E0D6D36C96CA81BDD9A4C3E94FF9E54D79126323F96F0A0040",
+    "path": "backend/src/main/java/com/apptolast/organization/domain/CustomizationView.java"
+  },
+  {
+    "sha256": "FF9A9D9ABC0807871855FEEB729372436B99BC6F56F46C9B1E962785BF110655",
+    "path": "backend/src/main/java/com/apptolast/organization/domain/CustomFieldLabel.java"
+  }
+]

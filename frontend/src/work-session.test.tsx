@@ -1154,16 +1154,55 @@ it("@s32 @s33 keeps an uncertain intention and confirms it only through its key"
   );
 });
 it("@s37 confirms the original end and preserves the receipt if active refresh fails", async () => {
+  let activeReads = 0;
   const fetcher = vi
     .fn()
-    .mockResolvedValueOnce(Response.json({ session: null }))
-    .mockResolvedValueOnce(
-      Response.json(receipt, {
-        status: 201,
-        headers: { Location: `/api/v1/work-sessions/${receipt.id}` },
-      }),
-    )
-    .mockResolvedValueOnce(new Response(null, { status: 503 }));
+    .mockImplementation((url: string, init: RequestInit) => {
+      if (url === "/api/v1/work-sessions/active") {
+        activeReads += 1;
+        return Promise.resolve(
+          activeReads === 1
+            ? Response.json({ session: null })
+            : new Response(null, { status: 503 }),
+        );
+      }
+      if (url === `/api/v1/work-sessions/${receipt.id}/state`) {
+        return Promise.resolve(
+          Response.json(
+            {
+              state: {
+                session: receipt,
+                status: "running",
+                revision: "1",
+                changedAt: receipt.startedAt,
+                workedMicroseconds: "0",
+                runningSince: receipt.startedAt,
+              },
+              serverNow: receipt.startedAt,
+              netMicroseconds: "0",
+            },
+            {
+              headers: {
+                "Work-Session-Revision": `work-session-${receipt.id}-1`,
+              },
+            },
+          ),
+        );
+      }
+      if (
+        url ===
+          `/api/v1/projects/${props.projectId}/tasks/${props.taskId}/work-sessions` &&
+        init.method === "POST"
+      ) {
+        return Promise.resolve(
+          Response.json(receipt, {
+            status: 201,
+            headers: { Location: `/api/v1/work-sessions/${receipt.id}` },
+          }),
+        );
+      }
+      throw new Error(`Unexpected request: ${init.method ?? "GET"} ${url}`);
+    });
   vi.stubGlobal("fetch", fetcher);
   render(<WorkSession {...props} />);
   fireEvent.change(
@@ -1181,7 +1220,15 @@ it("@s37 confirms the original end and preserves the receipt if active refresh f
   fireEvent.click(
     screen.getByRole("button", { name: "Actualizar sesión activa" }),
   );
-  await screen.findByRole("alert");
+  await screen.findByText("No se ha podido consultar la sesión activa.");
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "No se ha podido consultar la sesión activa.",
+  );
+  expect(await screen.findByText("En curso")).toBeVisible();
+  expect(activeReads).toBe(2);
+  expect(
+    fetcher.mock.calls.filter(([, init]) => init.method === "POST"),
+  ).toHaveLength(1);
   expect(screen.getByText("Sesión iniciada")).toBeVisible();
   expect(
     screen.queryByRole("button", { name: "Empezar a trabajar" }),

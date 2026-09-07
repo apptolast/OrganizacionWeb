@@ -182,3 +182,15 @@ Dos oráculos adicionales, introducidos y ejecutados uno a uno; no se modificó 
 Después: Prettier focal c661be EXIT0; ambos archivos completos82/82 GREEN34f600; ESLint focal f6c143 EXIT0; diffcheck c23294 EXIT0. Diff limitado a57 líneas añadidas en los dos tests. No campaña global ni backend Gradle.
 
 Freeze de pruebas: work-session-state.test.tsx SHA25692ABFCB589938D32CAD198AF605BC7B42E9A39BB75BC489C8D87046A36086FC5; work-session-state-api.test.ts SHA256F7B72E82E722114EA02237B344CD82EE5BB0F9C3CB831AA96B766361EBF191C7. Fuentes intactas: panel4FCD95AC8BCCDE4AAB91137A0F4970378F81DAE078FC0318F4BBB017D26A1599; API38743D9B82869708BD53C98850DF8C71FAEFB7CD0BE5348519679D8E32AB2FAA. Los IDs candidatos401/409/410 y266/267/269 no se declaran Killed hasta medición independiente.
+
+## Corrección de fixture CI15, sin cambio de producto
+
+CI34076959702 conservado en progress/ci_pause_resume_final_failed.log:1667/1668, falla el caso14 @s37 «confirms the original end and preserves the receipt if active refresh fails» por dos role=alert. Causa: sus tres respuestas secuenciales eran active=null, POST201 y503; desde15, GET state consume el503 y el posterior GET active recibe undefined del mock agotado. Quedan dos errores de consultas distintas. La aserción global podía pasar prematuramente mirando el error de state o fallar al observar ambos; no es fallo de los anuncios del producto.
+
+Reproducción: el foco sin cambios pasó fd591c, confirmando sensibilidad al orden. Instrumentación temporal exclusiva del test esperó ambos textos de error antes de la aserción original: RED04acda reproduce las dos alertas exactas de CI. Se retiró esa instrumentación al corregir la fixture; no se presentó la pasada inicial como un RED.
+
+Arreglo sólo en ese caso de work-session.test.tsx: respuestas por URL, GET state15 válido con token/snapshot exactos, primera consulta active=null y refresco active503, POST201 independiente. Una URL no prevista falla explícitamente. Conserva fin original, confirmación histórica y ausencia de nuevo inicio; exige texto preciso de alerta de active, estado En curso válido, dos consultas active y un único POST. No first(), ocultación de alertas ni relajación del producto.
+
+Se revisaron las otras ocho consultas get/find/queryByRole(alert) del archivo (1362f8/c3f03a). Las restantes aserciones de alerta corresponden a ausencia/inicio rechazado antes de montar state, o contextos retirados; no se encontró otra aserción hermana dependiente del GET añadido. No se extendió el parche a43 fixtures.
+
+Verificación: formato focal5073f0,43/43 GREENab95e7; frontend completo1668/1668 en33 archivos GREEN8c78b0 (sesión9407,20,80s), ESLint focal c6c67f EXIT0. No backend/Gradle ni mutación ni código16. Este cambio de fixture no altera fuentes productivas ni el resultado original de mutación.

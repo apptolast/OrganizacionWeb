@@ -1,0 +1,69 @@
+{
+  "base": "4d34b9c",
+  "inputs": [
+    {
+      "path": ".gitignore",
+      "sha256": "768B9DA255AADAB3DFFA2A6F466D03C11EE9AB14AFBBD957BC50B30393CC682A"
+    },
+    {
+      "path": "deploy/nginx.conf",
+      "sha256": "91A1E07B75F7531D1201DD570EAC2AB1E8F87F6106A9A9139001424933512065"
+    },
+    {
+      "path": "scripts/web-dns-smoke.mjs",
+      "sha256": "5188EDD3F3C7AD58B3D67F8410E48E7A4E080028B34B002B23987EB45902402B"
+    },
+    {
+      "path": "progress/tdd_web_dns_recovery.md",
+      "sha256": "81E0E0DBA49D6EEA8482693971D1B7D1D67BB0634E35AD159FE9E944FCE7D0D1"
+    },
+    {
+      "path": "progress/web_dns_red.log",
+      "sha256": "EDD260E442C168957DB56CF3445CC683099BAB9B373DF4704D8C48AD484765D3"
+    },
+    {
+      "path": "progress/web_dns_green.log",
+      "sha256": "2C9C253302317A5EFA6B629629A6C564AC445B2BC7228E3933089D0FD6F38B64"
+    },
+    {
+      "path": "progress/web_dns_swarm_mount_green.log",
+      "sha256": "E6098B132C33A5B2AD42E61689903DE0500A6DB61D62C3FD337D7261182E35A7"
+    },
+    {
+      "path": ".build/web-dns/owdns-742a5d76-340f-4214-b356-9f467bae1ceb/build.log",
+      "sha256": "010A7427F10307FC1FF0D8395E0858FAC5B4FC6A9955808E92DB91EB20E417A5"
+    },
+    {
+      "path": ".build/web-dns/owdns-742a5d76-340f-4214-b356-9f467bae1ceb/result.json",
+      "sha256": "1E9C6FED40B04CB4CDD7379574A29993BEEEEC122752D76FC3E0718461EF6EB0"
+    },
+    {
+      "path": ".build/web-dns/owdns-742a5d76-340f-4214-b356-9f467bae1ceb/web.log",
+      "sha256": "AC0CF6FBB35A261B774342EE4B83E69542673F75F9354A69915CB88BD1BEADEB"
+    },
+    {
+      "path": ".build/web-dns/owdns-9ed1b45a-a9bb-40eb-8ca9-08b95e4dbec5/build.log",
+      "sha256": "1AB78E63105E61D5777DB4C37092E748AC482B80563AE670CD1C271704E1A2DC"
+    },
+    {
+      "path": ".build/web-dns/owdns-9ed1b45a-a9bb-40eb-8ca9-08b95e4dbec5/result.json",
+      "sha256": "282727C9CBBAA1EA843C42F1EFC8CB8D23F0CA4C492A621572332DA3646E2D66"
+    },
+    {
+      "path": ".build/web-dns/owdns-9ed1b45a-a9bb-40eb-8ca9-08b95e4dbec5/web.log",
+      "sha256": "0B71B13B3C3603F6DB50D16F1293A5DE7CB346F11AE042CDD5A08107DE4EB60E"
+    },
+    {
+      "path": ".build/web-dns/owdns-b35e1316-ed5c-48c6-a871-7fa2d31a89b1/build.log",
+      "sha256": "5D2B10F02278F49DD5F92434A37B6175A88BEAF779CF0C543F76B6B557353B62"
+    },
+    {
+      "path": ".build/web-dns/owdns-b35e1316-ed5c-48c6-a871-7fa2d31a89b1/result.json",
+      "sha256": "4D37A549847CAA00A4A2B92597C68F63C4D05C12ABE4AE5EF7A065809427C1B3"
+    },
+    {
+      "path": ".build/web-dns/owdns-b35e1316-ed5c-48c6-a871-7fa2d31a89b1/web.log",
+      "sha256": "5CC01D2C9B2B3256CE58296FCF6475A088268F575484EA10694025F509230CA6"
+    }
+  ]
+}

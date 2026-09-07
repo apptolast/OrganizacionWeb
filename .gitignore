@@ -141,3 +141,4 @@ reports/
 /frontend/.stryker-tmp-weekly-review-refined/
 /progress/weekly_review_stryker_replay.json
 /frontend/.stryker-tmp-appearance/
+/.build/web-dns/

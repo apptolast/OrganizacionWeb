@@ -178,7 +178,7 @@
         "Cumplir los escenarios @s1–@s41 de features/close_work_session.feature con revisión, pruebas y mutación."
       ],
       "sdd": true,
-      "status": "spec_ready"
+      "status": "in_progress"
     },
     {
       "id": 17,

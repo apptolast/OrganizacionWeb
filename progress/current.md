@@ -6,7 +6,9 @@ PIT523/525K,2NC,0errores/timeouts;315hashesidénticos. Stryker741/861K,119S/1NC,
 
 ## Trabajo siguiente
 
-La propuesta16 close_work_session ya fue revisada y aprobada en review_close_work_proposal.md. Jason promueve el texto normativo y destila Gherkin; Confucius prepara el mapa de integración UI y revisará el contrato. No escribir código16 antes del contrato revisado y de resolver integración15. Fermat comprobó la influencia del fixture defectuoso sobre Stryker: descontando sus tres detecciones,738/861=85,71%, aún sobre80; raw y score original intactos. Implementación coordinada en una sola feature a la vez. La propuesta de reducir arranques de Testcontainers sigue sin implementar.
+Contrato16 aprobado y versionado5cbe0b6:41 escenarios/113 casos declarados, SHA3E45F26004E2656E97443451E2D0368CBC9DE734D859725BD07896E206A44285; revisión independiente en review_close_work_contract.md. Root habilita TDD16: el arreglo15 ya está revisado con1668 pruebas locales verdes y su CI remota pasó init/build. La CI continúa sobre el corte congelado2e492a0; no se modifica esa rama al implementar16. PR14 sólo se fusionará tras su resultado completo. Esto mantiene una sola feature en implementación y permite solapar validación remota con desarrollo independiente.
+
+Jason toma core/PG/migración/wiring en COMMON; Confucius frontend en COMMON; Fermat HTTP/publicador en el nuevo árbol aislado OrganizacionWeb-close-http para no compilar cambios de Jason en vuelo. Firmas propuestas en gherkin_close_work_session.md; usar sólo tipos reales al congelarse, sin stubs. Root conserva revisión/Git y no escribe producción/tests. La cota conservadora de mutación15 descuenta tres detecciones del fixture:738/861=85,71%, raw intacto. La propuesta de reducir arranques de Testcontainers sigue sin implementar.
 
 Después17 aviso y18 historial, validación y despliegue del MVP. Hoy sigue siendo objetivo, sin garantía de terminar el proyecto completo o de cuota. Acceso SSH publickey rechazado y dominio pendientes de respuestas ya solicitadas; no repetir preguntas mientras avance trabajo independiente. No se ha desplegado el producto ni se habilita uso habitual antes del cierre16.
 

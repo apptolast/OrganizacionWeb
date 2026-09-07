@@ -1,3 +1,5 @@
+import { CustomizationControls } from "./customization";
+import type { CustomizationSession } from "./customization-state";
 import { useProjectTasks } from "./use-project-tasks";
 import { taskMessages } from "./task-validation";
 import type { ProjectSnapshot } from "./read-projects-api";
@@ -8,11 +10,13 @@ export function ProjectTasks({
   projectStatus,
   onProjectConfirmed,
   parentTaskId,
+  customization,
 }: {
   projectId: string;
   projectStatus: string;
   onProjectConfirmed: (snapshot: ProjectSnapshot) => void;
   parentTaskId?: string;
+  customization?: CustomizationSession;
 }) {
   const {
     title,
@@ -63,6 +67,9 @@ export function ProjectTasks({
       <h2 id="tasks-heading" tabIndex={-1} ref={heading}>
         {parentTaskId ? "Subtareas" : "Tareas"}
       </h2>
+      {customization && page && !failure && (
+        <CustomizationControls scope="TASK" session={customization} />
+      )}
       <p className="tasks-intro">Pasos pequeños, con un resultado claro.</p>
       {parentTaskId && (
         <p>
@@ -99,15 +106,51 @@ export function ProjectTasks({
                   {task.title}
                 </RouteLink>
               </h3>
-              <p>{task.completionCriterion}</p>
               <span className="idea-badge">
                 {task.status === "pending" ? "Pendiente" : "Completada"}
               </span>
-              <p>
-                {task.estimatedMinutes === null
-                  ? "Sin estimación"
-                  : `Estimación: ${task.estimatedMinutes} min`}
-              </p>
+              {(
+                customization?.configs.TASK?.visibleFields ?? [
+                  "completionCriterion",
+                  "estimatedMinutes",
+                ]
+              ).map((field) => (
+                <p key={field}>
+                  {field === "completionCriterion" ? (
+                    task.completionCriterion
+                  ) : field === "estimatedMinutes" ? (
+                    task.estimatedMinutes === null ? (
+                      "Sin estimación"
+                    ) : (
+                      `Estimación: ${task.estimatedMinutes} min`
+                    )
+                  ) : (
+                    <>
+                      {field === "createdAt" ? "Creado" : "Actualizado"}{" "}
+                      <time
+                        dateTime={
+                          field === "createdAt"
+                            ? task.createdAt
+                            : task.updatedAt
+                        }
+                      >
+                        {new Intl.DateTimeFormat("es", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                          timeZone: "UTC",
+                        }).format(
+                          new Date(
+                            field === "createdAt"
+                              ? task.createdAt
+                              : task.updatedAt,
+                          ),
+                        )}{" "}
+                        UTC
+                      </time>
+                    </>
+                  )}
+                </p>
+              ))}
             </li>
           ))}
         </ul>

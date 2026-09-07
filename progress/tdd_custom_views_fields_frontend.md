@@ -146,3 +146,108 @@ contratos heredados y no altera cuerpos de esos helpers.
   reutilizado; corregido fixture para Response nueva por llamada, REDcontrolado
   8faa92 exclusivamente cuenta2vs1. GREENlog90_green,2/2. No error productivo
   atribuido a consumir dos veces una Response simulada.
+
+- 91 guardar selección explícita: RED log91_red (1 fallo/2 verdes), GREEN5bc256,3/3.
+- 92 restaurar PROJECT sólo borrador:269fd3 →91c24c,4/4.
+- 93 controles/defaults TASK específicos:0c4f31 →e3f67e,5/5.
+- 94 cancelar y reabrir guardado:661a7a → log94_green. Sin escrituras por restaurar/cancelar.
+- 95 orden DOM y envío mediante Subir: f73dc5 → b56dac,7/7.
+- 96 consulta fallida, base provisional y recarga manual:7111f7 →8713c6,8/8. RED incluía rechazo no gestionado, eliminado en GREEN.
+- 97 incertidumbre compartida tras salir/volver:95d326 →caec82,9/9. Sólo GET manual válido desbloquea.
+- 98 guardado pendiente y doble pulsación:0696f0 →7ab9d9,10/10; controles congelados durante envío.
+- 99 recuperación pendiente no restaura borrador antiguo:3cdc39 →d0b48c,11/11.
+- 100 sesión desmontada antes de HTTP401 tardío:de1237 →ea1638,12/12; aborto antes del observador de acceso.
+
+- 101 rechazo 400 corregible conserva borrador: ce8fc3 → 52a264, 13/13.
+- 102 creación tipada: 3461fd; primer intento de GREEN tuvo duplicación de identificador durante extracción del comando compartido (7d5a73), sin tests ejecutados. Corregido, 91a079 GREEN 14/14.
+- 103 etiqueta vacía con error accesible local: 41f027 → 54da48, 15/15.
+- 104 renombrar/desactivar sin cambiar tipo: fb296d → a2f191, 16/16.
+- 105 lectura de valores BOOLEAN false: a7470d (módulo ausente) → 4a05bb, 1/1.
+- 106 guardado booleano explícito: a5ab5b → ebaa93, 2/2.
+- 107 NUMBER cero y entero negativo: 9b0bc1 → 9cfedf, 3/3.
+- 108 intención fraccionaria larga antes de conversión: cc0d89 → e2db79, 4/4. RED incluía confirmación simulada incompatible tras envío indebido; GREEN no envía petición.
+- 109 rango NUMBER antes de petición: f6f5f3 → log109_green, 5/5. Gramática decimal entera, finito y rango comprobados antes de construir JSON; no parser JSON global ni dependencia nueva.
+
+- 110 texto multilínea conserva espacios: 8852ef → a85683, 6/6 valores.
+- 111 fecha civil con control nativo y sin conversión de zona: 3d1442 → f0f0b6, 7/7 valores.
+- 112 escritura de configuración abortada antes de 401 tardío: 60cd44 → ce3f65, 17/17 configuración UI. GET y PUT tienen evidencia distinta; POST comparte el ejecutor pero aún no se atribuye una simulación separada.
+- 113 borrador de vista por ámbito sobrevive a navegación interna: 356ece → 51d088, 18/18 configuración UI.
+
+Pendientes antes del freeze UI: valores (borradores, incertidumbre, privacidad, validación y errores indexados), gestión completa de definiciones, invalidación entre lectores/escrituras, montaje en proyectos/tareas y foco/SCSS. Este WIP no es una aprobación ni evidencia de recorrido completo.
+
+- 114 guardado de valores incierto sobrevive a navegación: 16e433 → d68c2d, 8/8 valores.
+- 115 corrección de oráculo según @s33: fallo inicial usa Reintentar, no Recargar guardado. RED 295c46 → e85433, 18/18 configuración UI. La prueba de borrador entre rutas no se atribuye ya a @s33.
+- 116 fallo inicial de valores no publica vacío confirmado: aac156 → a1dea6, 9/9 valores.
+- 117 error values[1].value enlazado al orden enviado, conserva todos los borradores: 365b84 → b04d87, 10/10 valores. Etiqueta y descripción accesible separadas.
+- 118 borrador de valores por recurso durante navegación: f8c65f → 8b67ef, 11/11 valores.
+- 119 Vaciar sólo un campo y conservar false en el conjunto enviado: 661649 → 0626b3, 12/12 valores.
+- 120 Cancelar restaura snapshot sin escritura: 0a3331 → 962041, 13/13 valores.
+- 121 cambio de proyecto aborta GET anterior antes del observador 401: 2ba17b → f26aeb, 14/14 valores.
+- 122 volver tras retirar una consulta inicial pendiente permite consultar de nuevo: 95752d → 7f89ec, 15/15 valores.
+
+No bloqueo de infraestructura. Montaje y resto de guardas siguen pendientes; no se ha ejecutado ninguna campaña o regresión global.
+
+- 123 PUT de valores abortado al retirar sesión: f0d303 → c39af2, 16/16 valores.
+- 124 espera y exclusión de doble envío/edición: 6faea9 → e6423a, 17/17 valores.
+- 125 primer montaje App/Proyectos con metadatos vacíos y sin N+1: 464faf → d48f0c, 1/1 integración.
+- 126 orden de fechas PROJECT en UTC: 8cf6df → 72e478, 2/2 integración.
+- 127 TASK compartido en proyecto conserva borrador de creación: d43c89 → feddc9, 3/3 integración.
+- 128 fechas TASK con orden y UTC: f715f0 → 7789f8, 4/4 integración.
+- 129 campos personales en detalle de proyecto: 1f8f7d → 567923, 5/5 integración. Fixture anterior añade exclusivamente GET propio de valores vacío confirmado para el nuevo montaje, conservando unexpected=[].
+- 130 detalle tarea y subtareas: c8daf3 → e3c2b2, 6/6 integración. Sólo GET de valores del detalle; criterio de negocio permanece aunque se oculta en la lista.
+- 131 lectura anterior de configuración no restaura confirmación: 1f91ca → 70727c, 19/19 configuración UI.
+- 132 lectura anterior de valores no restaura confirmación: 3977c0 → 30926c, 18/18 valores.
+- 133 incertidumbre después de retirar otra lectura no provoca GET al volver: 1f4e53 → 919fea, 19/19 valores.
+- 134 recuperación manual pendiente anuncia espera y no duplica GET: 195f7a → b1e260, 20/20 valores.
+- 135 404 vigente de escritura retira campos y avisa al contenedor, manteniendo lectura antigua descartada: b3e385 → e6a7a2, 21/21 valores.
+
+- 136 retirada del contenedor de proyecto ante 404: RED controlado a8017c → GREEN 335d2d, 7/7 integración. El primer RED dd31e6 también detectó una precondición incompleta del fixture: ahora espera la carga de Personalizar vista antes de contar consultas, conservando los oráculos.
+- 137 retirada del contenedor de tarea ante 404: b42b54 → 47d2eb, 8/8 integración.
+- 138 recuperación manual con 404 retira el recurso y comunica al contenedor: 9ce4a4 → 4ff73c, 22/22 valores; elimina el rechazo sin consumidor demostrado en RED.
+- 139 cambio local de esquema invalida valores limpios al volver: fee2bf → 8706ec, 20/20 configuración UI.
+- 140 variante con borrador conserva valores y exige recuperación manual: 61f133 → 4dc6c9, 43/43 configuración y valores.
+- 141 consumidor limpio todavía montado consulta la nueva generación: 6695a1 → e7f157 (EXIT e73a7c), 22/22 configuración UI.
+- 142 error 400 general de values anuncia explicación y conserva borrador: 5a6527 → b5d332, 23/23 valores.
+- 143 edición iniciada durante PUT del esquema también se conserva: 8410ab → f59b04, 23/23 configuración UI. La confirmación consulta el borrador vigente, no el capturado antes del await.
+
+Corte parcial para revisión: clientes, retirada de recursos, integración y coherencia del esquema. Permanecen pendientes validaciones locales y acabado de formularios, mensajes/foco y SCSS. No representa cierre de la interfaz ni validación física; no se han ejecutado gates globales.
+
+Verificación del corte parcial: 142/142 en cinco suites, tipos y formato verdes. Lint detectó escritura del ref de callback durante render y una variable de fixture sin uso; refactor mínimo a efecto y retirada de la variable, sin desactivar reglas. Lint final 085b35 EXIT0; suites y tipos repetidos tras el delta (logs customization_ui_partial_*_final.log). Manifiesto: customization_frontend_ui_partial_freeze.json, 14 archivos. No validación global ni física atribuida.
+
+- 144 TEXT de más de 1000 puntos de código: RED 982b10 (envío indebido terminaba en incertidumbre) y GREEN 742961, 24/24 valores. Mensaje local asociado al campo, borrador intacto, ninguna escritura.
+- 145 recuperación manual de configuración con esquema diferente: RED b601e9, GREEN fbd4c4, 24/24 configuración UI. Una variante del fixture de esquema simula PUT412 y GET manual válido; ahora GET y escritura comparten acceptConfig, comparan ETag y conservan las protecciones dirty/uncertain. Formato/lint 63253c EXIT0. El manifiesto parcial anterior se conserva como snapshot histórico para el E2E aislado; no describe estos deltas posteriores.
+
+- 146 TEXT con NUL: RED 99051c y GREEN c63e81, 25/25 valores, reutilizando el oráculo de validación local.
+- 147 primera configuración después de URL directa con valores cacheados de otro esquema: RED af23ee y GREEN cbcc78, 25/25 configuración. Compara la revisión de esquema de valores aceptados; no invalida lecturas nominales sin snapshot ni revisiones iguales. Lint/formato b935f3.
+- 148 TEXT con surrogate aislado: RED 0bea94 y GREEN 5faeb8, 26/26 valores. Regex Unicode no rechaza pares válidos.
+- 149 límite superior civil del control DATE: RED cb2ceb y GREEN fb77f3, 26/26 valores. min/max nativos impiden enviar año 10000; se conserva el oráculo previo de fecha bisiesta y payload exacto.
+- 150 recuperación de configuración conserva borrador hasta GET válido: RED 90c1fc y GREEN 707ffa, 25/25 configuración. Consumidor del hook observa el borrador durante espera; el borrado se realiza al aceptar recuperación válida.
+- 151 etiqueta duplicada incluyendo campo inactivo: RED funcional 6cff6f y GREEN 81006a, 26/26 configuración. Dos intentos previos conservaron error sintáctico del test, no se cuentan como evidencia funcional.
+- 152 límite de doce campos incluyendo inactivos mantiene edición: RED funcional 722547 y GREEN 5d7253 (log completo), 27/27 configuración. Primer intento sintáctico preservado sin atribución funcional.
+
+- 153 cancelar edición de definición restaura formulario nuevo sin petición: RED 157577 y GREEN 3f5e8e, 27/27 configuración; se conserva el envío previo de renombre/desactivación.
+- 154 ACK de valores anterior a esquema ya observado: RED a685a6 y GREEN 623451, 28/28 configuración. Aceptar esquema distinto retira escritura pendiente y conserva incertidumbre/borrador para recuperación manual.
+- 155 GET inicial retenido con schema anterior al config observado: RED 37f366 y GREEN 542d50, 29/29 configuración. Guardia común de llegada de valores, usada en lectura y escritura; compara revisiones del mismo agregado, acepta revisiones más nuevas y no inicia consultas automáticas. Formato/lint 143b2d EXIT0.
+
+- 156 foco tras desaparecer Guardar vista: RED 3ad67d y GREEN 48d233, 29/29 configuración. Región lógica enfocable; sólo captura iniciador realmente enfocado y no sustituye foco ajeno.
+- 157 editar/cancelar valores limpia confirmación y errores anteriores: RED 515784 y GREEN 6a38fe, 26/26 valores.
+- 158 abrir nuevo borrador de vista limpia confirmación anterior: RED 1af74c y GREEN 0c6c9f, 29/29 configuración.
+- 159 recuperación de valores devuelve foco al encabezado si desaparece el iniciador: RED ada5ba y GREEN 37be01, 26/26 valores.
+- 160 editar nueva definición limpia confirmación anterior: RED 5008c6 y GREEN 9bb13b, 29/29 configuración.
+- 161 anuncio común de escritura dice Guardando personalización (también se usa para campos): RED f6f93e y GREEN 0735e6, 29/29 configuración; conserva oráculos de espera/exclusión.
+- 162 refuerzo de foco voluntario: el primer intento falló porque blur() de un botón deshabilitado no mueve el foco en este entorno. Fixture corregido: el usuario mueve foco a otro control habilitado y después a body; inicialmente GREEN cbffda, sin cambio productivo. Conserva todas las aserciones previas de guardado y espera.
+- Ayuda de desactivación añadida por instrucción explícita root como copy reversible, sin nuevo ciclo costoso. Un intento anterior de prueba de esa ayuda coincidió con el fixture162 todavía fallido y no se cuenta como evidencia funcional; fue retirado antes de revalidar162. Texto explica ocultar, conservar valores y reactivar.
+
+Cierre funcional JS para revisión: formato/lint 25640d EXIT0; pruebas focales y tipos en customization_frontend_final_tests.log / customization_frontend_final_types.log. CSS21 y E2E/UX físicos son propiedad de C y permanecen como gate independiente; no se atribuye cierre de feature ni gates globales a este corte.
+
+Regresión global autorizada después del freeze: EXIT1 41fc1a, 2084/2209 pasan y 125 fallan en nueve suites heredadas (log customization_frontend_global.log). Las cinco suites21 conservan151/151. Diagnóstico inicial comunicado a root antes de editar: fixtures secuenciales reciben GET21 perezosos que antes no existían; no se atribuye automáticamente cada fallo a fixture sin revisar. Build frontend 9e1628 EXIT0; lint global en customization_frontend_global_lint.log. No campaña de mutación iniciada.
+
+Scope Stryker21: cinco módulos completos y once nodos AST completos de cuatro archivos de integración, inventario customization_frontend_mutation_nodes.json. Líneas 1-based, columnas 0-based, final exclusivo; configuración mantiene8/perTest/todas suites/80/ignores y salidas independientes. Default conserva lo previo y añade comportamiento nuevo; project-tasks/task-reader ya estaban completos en default. Pendiente revisión root antes de campaña.
+
+Corrección física de foco164: C observó en Chromium blur automático del botón deshabilitado aún conectado, sin focusin voluntario (diagnóstico14c758). Oráculo DOM reforzado con focusOut del iniciador disabled: RED66c5eb. Dos intentos intermedios no aplicaron el reemplazo de código y continuaron RED; no se cuentan como GREEN. Corrección final común a ambos consumidores usa matches(':disabled'), incluyendo fieldset, sin eliminar listener de foco voluntario. GREEN081fab,55/55; C repite navegador sobre hashes actuales. Manifiesto actualizado separado: customization_frontend_focus_final_freeze.json.
+
+Fixtures heredados: helper local test-fixtures/customization.ts intercepta sólo GET21 canónicos y delega todo otro tráfico al mock de negocio. Nueve suites459/459 GREENe158ef, sin suprimir oráculos. Un único ajuste de precondición @s15 espera Personalizar vista antes del assert global de ausencia de status. Regresión reparada2209/2209,49suites, EXIT0acf19a;122inputs antes/después idénticos d00cdf. Build437fbfEXIT0. Lint detectó dos imports vi sin uso tras sustituir los spies; retirados sin cambios de comportamiento.
+
+Precisión de revisión A: helper exige coincidencia completa también frente a LF final (el ancla $ permite LF en JavaScript). Cambio posterior al pase2209 sólo en helper; comprobación ejecutada sobre función transpilada acredita GET válidos, LF y POST delegados, log customization_legacy_exact_routes.log. No se reatribuye el hash del helper posterior al pase anterior. Manifiesto final de diez archivos customization_legacy_freeze_final.json; no repetición global automática por esta precisión y retirada de imports.
+
+Lint final e976a9 EXIT0: la revisión posterior sólo encontró formato de stryker.config.json tras sustituir rangosApp por archivo completo, conforme instrucción root (mismo universo ejecutable). Prettier aplicado sin tocar opciones; resultado final en customization_frontend_lint_closed.log. Config focal21 conserva cinco módulos y once nodos completos; defaultApp completo evita deriva de coordenadas. No campaña iniciada por B.

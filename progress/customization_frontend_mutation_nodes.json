@@ -1,0 +1,82 @@
+{
+  "coordinates": "one-based lines; zero-based columns; end exclusive; full TypeScript AST nodes",
+  "nodes": [
+    {
+      "file": "src/App.tsx",
+      "range": "17:24-17:49",
+      "kind": "CallExpression",
+      "sourceSha256": "5518bb7aa1663742c30297d92ce984f83021f118b2d3f784940c7a3cb4e7587c",
+      "text": "useCustomizationSession()"
+    },
+    {
+      "file": "src/App.tsx",
+      "range": "64:8-69:10",
+      "kind": "JsxSelfClosingElement",
+      "sourceSha256": "5518bb7aa1663742c30297d92ce984f83021f118b2d3f784940c7a3cb4e7587c",
+      "text": "<TaskReader\n          key={route}\n          projectId={taskRoute[1]}\n          id={taskRoute[2]}\n          customization={customization}\n        />"
+    },
+    {
+      "file": "src/App.tsx",
+      "range": "73:8-77:10",
+      "kind": "JsxSelfClosingElement",
+      "sourceSha256": "5518bb7aa1663742c30297d92ce984f83021f118b2d3f784940c7a3cb4e7587c",
+      "text": "<ProjectReader\n          key={route}\n          route={route}\n          customization={customization}\n        />"
+    },
+    {
+      "file": "src/project-reader.tsx",
+      "range": "156:10-158:12",
+      "kind": "JsxExpression",
+      "sourceSha256": "5e53712172eec0406a062d25ed343f56aba5a562854a9c3a451983827f2c4506",
+      "text": "{customization && (\n            <CustomizationControls scope=\"PROJECT\" session={customization} />\n          )}"
+    },
+    {
+      "file": "src/project-reader.tsx",
+      "range": "198:22-213:25",
+      "kind": "JsxExpression",
+      "sourceSha256": "5e53712172eec0406a062d25ed343f56aba5a562854a9c3a451983827f2c4506",
+      "text": "{(\n                        customization?.configs.PROJECT?.visibleFields ?? [\n                          \"createdAt\",\n                        ]\n                      ).map((field) => (\n                        <span key={field}>\n                          {field === \"createdAt\" ? \"Creado\" : \"Actualizado\"}{\" \"}\n                          <ProjectTime\n                            value={\n                              field === \"createdAt\"\n                                ? item.createdAt\n                                : item.updatedAt\n                            }\n                          />\n                        </span>\n                      ))}"
+    },
+    {
+      "file": "src/project-reader.tsx",
+      "range": "239:6-245:8",
+      "kind": "JsxExpression",
+      "sourceSha256": "5e53712172eec0406a062d25ed343f56aba5a562854a9c3a451983827f2c4506",
+      "text": "{project && customization && (\n        <CustomFieldsPanel\n          projectId={project.id}\n          session={customization}\n          onAccessFailure={revokeProject}\n        />\n      )}"
+    },
+    {
+      "file": "src/project-reader.tsx",
+      "range": "247:8-253:10",
+      "kind": "JsxSelfClosingElement",
+      "sourceSha256": "5e53712172eec0406a062d25ed343f56aba5a562854a9c3a451983827f2c4506",
+      "text": "<ProjectTasks\n          key={project.id}\n          projectId={project.id}\n          projectStatus={project.status}\n          onProjectConfirmed={confirmProject}\n          customization={customization}\n        />"
+    },
+    {
+      "file": "src/project-tasks.tsx",
+      "range": "70:6-72:8",
+      "kind": "JsxExpression",
+      "sourceSha256": "fe9d3c46f59609b8a677fa3505d43c02deac3d105494c43fcc51aec5ae78d161",
+      "text": "{customization && page && !failure && (\n        <CustomizationControls scope=\"TASK\" session={customization} />\n      )}"
+    },
+    {
+      "file": "src/project-tasks.tsx",
+      "range": "112:14-153:17",
+      "kind": "JsxExpression",
+      "sourceSha256": "fe9d3c46f59609b8a677fa3505d43c02deac3d105494c43fcc51aec5ae78d161",
+      "text": "{(\n                customization?.configs.TASK?.visibleFields ?? [\n                  \"completionCriterion\",\n                  \"estimatedMinutes\",\n                ]\n              ).map((field) => (\n                <p key={field}>\n                  {field === \"completionCriterion\" ? (\n                    task.completionCriterion\n                  ) : field === \"estimatedMinutes\" ? (\n                    task.estimatedMinutes === null ? (\n                      \"Sin estimación\"\n                    ) : (\n                      `Estimación: ${task.estimatedMinutes} min`\n                    )\n                  ) : (\n                    <>\n                      {field === \"createdAt\" ? \"Creado\" : \"Actualizado\"}{\" \"}\n                      <time\n                        dateTime={\n                          field === \"createdAt\"\n                            ? task.createdAt\n                            : task.updatedAt\n                        }\n                      >\n                        {new Intl.DateTimeFormat(\"es\", {\n                          dateStyle: \"medium\",\n                          timeStyle: \"short\",\n                          timeZone: \"UTC\",\n                        }).format(\n                          new Date(\n                            field === \"createdAt\"\n                              ? task.createdAt\n                              : task.updatedAt,\n                          ),\n                        )}{\" \"}\n                        UTC\n                      </time>\n                    </>\n                  )}\n                </p>\n              ))}"
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "range": "134:10-141:12",
+      "kind": "JsxExpression",
+      "sourceSha256": "4b28ec5d74241d9bcce62c3aede69374cd0cfb74347ac5cb9c767a305091d236",
+      "text": "{customization && (\n            <CustomFieldsPanel\n              projectId={task.projectId}\n              taskId={task.id}\n              session={customization}\n              onAccessFailure={setFailure}\n            />\n          )}"
+    },
+    {
+      "file": "src/task-reader.tsx",
+      "range": "181:12-187:14",
+      "kind": "JsxSelfClosingElement",
+      "sourceSha256": "4b28ec5d74241d9bcce62c3aede69374cd0cfb74347ac5cb9c767a305091d236",
+      "text": "<ProjectTasks\n              projectId={task.projectId}\n              projectStatus={snapshot.project.status}\n              parentTaskId={task.id}\n              onProjectConfirmed={setSnapshot}\n              customization={customization}\n            />"
+    }
+  ]
+}

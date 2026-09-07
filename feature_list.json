@@ -167,7 +167,7 @@
       "description": "Pausar y reanudar: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
       "acceptance": [],
       "sdd": true,
-      "status": "pending"
+      "status": "spec_ready"
     },
     {
       "id": 16,

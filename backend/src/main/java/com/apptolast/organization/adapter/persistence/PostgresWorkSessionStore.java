@@ -63,8 +63,9 @@ public final class PostgresWorkSessionStore
       int additionalMinutes,
       Function<WorkSessionEnd, WorkSessionExtensionTransition> operation) {
     return storage(
-        () ->
-            transaction.execute(
+        () -> {
+          try {
+            return transaction.execute(
                 status -> {
                   var context =
                       jdbc
@@ -95,9 +96,8 @@ public final class PostgresWorkSessionStore
                           Timestamp.from(receipt.occurredAt()),
                           session));
                   try {
-                    requireOne(
-                        jdbc.update(
-                            "INSERT INTO work_session_changes(id,owner_id,session_id,request_key,action,expected_revision,occurred_at,receipt) VALUES (?,?,?,?,?,?,?,?::jsonb)",
+                    if (jdbc.update(
+                            "INSERT INTO work_session_changes(id,owner_id,session_id,request_key,action,expected_revision,occurred_at,receipt) VALUES (?,?,?,?,?,?,?,?::jsonb) ON CONFLICT (owner_id,request_key) DO NOTHING",
                             receipt.id(),
                             owner,
                             session,
@@ -105,7 +105,8 @@ public final class PostgresWorkSessionStore
                             "EXTEND",
                             expected.value(),
                             Timestamp.from(receipt.occurredAt()),
-                            receiptJson(receipt)));
+                            receiptJson(receipt))
+                        != 1) throw new TransitionInsertCollision();
                     var event = change.event();
                     requireOne(
                         jdbc.update(
@@ -121,7 +122,18 @@ public final class PostgresWorkSessionStore
                     throw new IllegalStateException(error);
                   }
                   return new WorkSessionTransitionConfirmation(receipt, false);
-                }));
+                });
+          } catch (TransitionInsertCollision collision) {
+            return readOnly.execute(
+                status -> {
+                  var receipt =
+                      transitionReplay(owner, key)
+                          .orElseThrow(() -> new StorageUnavailableException(collision));
+                  receipt.requireExtensionIntent(session, expected.value(), additionalMinutes);
+                  return new WorkSessionTransitionConfirmation(receipt, true);
+                });
+          }
+        });
   }
 
   public WorkSessionSnapshot read(

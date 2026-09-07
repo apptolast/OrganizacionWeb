@@ -53,14 +53,65 @@ class WorkSessionClosureMigrationTest {
               .start(owner, project, task, key, 25)
               .session());
     }
+    // Historical V16 fixture: State6 and receipt6, before V18 projection columns existed.
+    var session = sessions.get(1);
+    var beforePause = new WorkSessionState(session, "running", 1, at, 0, at);
+    var afterPause = new WorkSessionState(session, "paused", 2, at.plusSeconds(1), 1000000, null);
     var paused =
-        new ChangeWorkSession(store, Clock.fixed(at.plusSeconds(1), ZoneOffset.UTC))
-            .pause(
-                "paused-owner",
-                sessions.get(1).id(),
-                UUID.randomUUID(),
-                new WorkSessionRevision(sessions.get(1).id(), 1))
-            .receipt();
+        new WorkSessionTransitionReceipt(
+            UUID.randomUUID(), session.id(), "PAUSE", at.plusSeconds(1), beforePause, afterPause);
+    jdbc.update(
+        "UPDATE work_sessions SET status='paused',revision=2,changed_at=?,worked_microseconds=1000000 WHERE id=?",
+        java.sql.Timestamp.from(paused.occurredAt()),
+        session.id());
+    jdbc.update(
+        "INSERT INTO work_session_intervals VALUES (?,2,?,?)",
+        session.id(),
+        java.sql.Timestamp.from(at),
+        java.sql.Timestamp.from(paused.occurredAt()));
+    jdbc.update(
+        "INSERT INTO work_session_changes VALUES (?,?,?,?,'PAUSE',1,?,?::jsonb)",
+        paused.id(),
+        "paused-owner",
+        session.id(),
+        UUID.randomUUID(),
+        java.sql.Timestamp.from(paused.occurredAt()),
+        json.valueToTree(
+                Map.of(
+                    "id",
+                    paused.id(),
+                    "sessionId",
+                    session.id(),
+                    "action",
+                    "PAUSE",
+                    "occurredAt",
+                    paused.occurredAt(),
+                    "before",
+                    beforePause,
+                    "after",
+                    afterPause))
+            .toString());
+    var eventId = UUID.randomUUID();
+    var event =
+        json.createObjectNode()
+            .put("eventId", eventId.toString())
+            .put("aggregateId", session.id().toString())
+            .put("ownerId", "paused-owner")
+            .put("occurredAt", paused.occurredAt().toString())
+            .put("schemaVersion", 1)
+            .put("type", "WorkSessionStateChanged.v1")
+            .put("action", "PAUSE")
+            .put("revision", "2")
+            .put("fromStatus", "running")
+            .put("toStatus", "paused")
+            .put("workedMicroseconds", "1000000")
+            .putNull("runningSince");
+    jdbc.update(
+        "INSERT INTO outbox_events(event_id,aggregate_id,owner_id,event_type,schema_version,occurred_at,payload) VALUES (?,?,'paused-owner','WorkSessionStateChanged.v1',1,?,?::jsonb)",
+        eventId,
+        session.id(),
+        java.sql.Timestamp.from(paused.occurredAt()),
+        event.toString());
     var rows = jdbc.queryForList("SELECT * FROM work_sessions ORDER BY id");
     var intervals =
         jdbc.queryForList("SELECT * FROM work_session_intervals ORDER BY session_id,revision");
@@ -74,7 +125,11 @@ class WorkSessionClosureMigrationTest {
     assertThat(store.changeDetail("paused-owner", paused.id())).contains(paused);
     assertThat(store.closure("running-owner", sessions.get(0).id())).isEmpty();
     assertThat(store.closure("paused-owner", sessions.get(1).id())).isEmpty();
-    assertThat(jdbc.queryForList("SELECT * FROM work_sessions ORDER BY id")).isEqualTo(rows);
+    var migratedRows = jdbc.queryForList("SELECT * FROM work_sessions ORDER BY id");
+    assertThat(migratedRows).hasSize(rows.size());
+    for (int index = 0; index < rows.size(); index++) {
+      assertThat(migratedRows.get(index)).containsAllEntriesOf(rows.get(index));
+    }
     assertThat(
             jdbc.queryForList("SELECT * FROM work_session_intervals ORDER BY session_id,revision"))
         .isEqualTo(intervals);

@@ -123,3 +123,15 @@ reports/
 /frontend/.stryker-tmp-history-replay/
 /progress/history_pit_replay_exit.txt
 /progress/history_closure_backend_xml/
+# Evidencia local original de revisión semanal; informes y manifiestos versionados.
+/progress/weekly_review_backend_final_xml/
+/progress/weekly_review_first_xml/
+/progress/weekly_review_nominal_xml/
+/progress/weekly_review_integrated_62c676e_xml/
+/progress/weekly_review_ux_initial_artifacts/
+/progress/weekly_review_pit_final/
+/progress/weekly_review_pit_replay_final/
+/progress/weekly_review_pit_exit.txt
+/progress/weekly_review_pit_replay_exit.txt
+/progress/weekly_review_reinforcement_tests.xml
+/frontend/.stryker-tmp-weekly-review/

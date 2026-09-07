@@ -1,0 +1,128 @@
+[
+  {
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 31,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "21"
+    ],
+    "originalStatus": "SURVIVED",
+    "target": true,
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_yearOneClockAndSelectedWeekRemainPubliclyValid()]"
+  },
+  {
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 31,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "25"
+    ],
+    "originalStatus": "SURVIVED",
+    "target": true,
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_lastCompleteWeekAndClockInYear9999RemainPubliclyValid()]"
+  },
+  {
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 35,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "56"
+    ],
+    "originalStatus": "KILLED",
+    "target": false,
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_yearOneClockAndSelectedWeekRemainPubliclyValid()]"
+  },
+  {
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 35,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "62"
+    ],
+    "originalStatus": "SURVIVED",
+    "target": true,
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_lastCompleteWeekAndClockInYear9999RemainPubliclyValid()]"
+  },
+  {
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 29,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "indexes": [
+      "5"
+    ],
+    "originalStatus": "SURVIVED",
+    "target": true,
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_utcClockOutsideRangeCannotBeHiddenByARepresentableLocalDate()]"
+  },
+  {
+    "class": "com.apptolast.organization.domain.WeeklyReviewWindow",
+    "method": "summarize",
+    "descriptor": "(Ljava/util/List;Ljava/util/List;J)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 67,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator",
+    "indexes": [
+      "96"
+    ],
+    "originalStatus": "KILLED",
+    "target": false,
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_utcBoundaryBeforeYearOneIsATemporalConflict()]"
+  },
+  {
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 24,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "10"
+    ],
+    "originalStatus": "KILLED",
+    "target": false,
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_utcBoundaryBeforeYearOneIsATemporalConflict()]"
+  },
+  {
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 25,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "16"
+    ],
+    "originalStatus": "SURVIVED",
+    "target": true,
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_lastCompleteWeekAndClockInYear9999RemainPubliclyValid()]"
+  },
+  {
+    "class": "com.apptolast.organization.application.ReadWeeklyReview",
+    "method": "get",
+    "descriptor": "(Ljava/lang/String;Ljava/time/LocalDate;Ljava/lang/String;)Lcom/apptolast/organization/domain/WeeklyReview;",
+    "line": 26,
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": [
+      "27"
+    ],
+    "originalStatus": "SURVIVED",
+    "target": true,
+    "status": "KILLED",
+    "killingTest": "com.apptolast.organization.application.ReadWeeklyReviewTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.ReadWeeklyReviewTest]/[method:s6_lastCompleteWeekAndClockInYear9999RemainPubliclyValid()]"
+  }
+]

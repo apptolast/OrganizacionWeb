@@ -1,0 +1,18 @@
+[
+  {
+    "path": "scripts/project.mjs",
+    "sha256": "2D586E0762BFF892846039F0650D83441E38BEDA966ECAFBEFDB07EE88268636"
+  },
+  {
+    "path": "scripts/project.test.mjs",
+    "sha256": "DF16416277E9ED3F94C42B9B4CBB1699D6AC8927BF832EA545EE1AF4EFB69850"
+  },
+  {
+    "path": "backend/build.gradle.kts",
+    "sha256": "07B3B6EA50B76372F7BABA68B4484104E73FE973BBC00DDE19DD0E5C22E70336"
+  },
+  {
+    "path": "frontend/stryker.close-work-session.config.json",
+    "sha256": "10074986AFD9135E8AAF9114A97576FE81B9EE0D7007399207A54361D342FC77"
+  }
+]

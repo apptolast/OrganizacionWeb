@@ -14,6 +14,116 @@ function capture() {
   return { calls, project };
 }
 
+test("close work Stryker includes shared navigation and protects previous reports", () => {
+  const config = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.close-work-session.config.json"),
+      "utf8",
+    ),
+  );
+  const prior = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.pause-resume-session.config.json"),
+      "utf8",
+    ),
+  );
+  assert.deepEqual(config.mutate, [
+    "src/work-session-state-api.ts",
+    "src/work-session-state.tsx",
+    "src/work-session-reader.tsx",
+    "src/App.tsx",
+    "src/use-session.ts",
+  ]);
+  assert.deepEqual(config.thresholds, prior.thresholds);
+  assert.equal(config.thresholds.break, 80);
+  assert.equal(config.concurrency, 8);
+  assert.equal(config.coverageAnalysis, "perTest");
+  assert.deepEqual(config.ignorePatterns, prior.ignorePatterns);
+  assert.ok(config.ignorePatterns.includes(".stryker-tmp-availability-replay"));
+  assert.deepEqual(config.vitest, prior.vitest);
+  assert.equal(
+    config.jsonReporter.fileName,
+    "reports/mutation-close-work-session/mutation.json",
+  );
+  assert.equal(
+    config.htmlReporter.fileName,
+    "reports/mutation-close-work-session/mutation.html",
+  );
+  assert.equal(config.tempDirName, ".stryker-tmp-close-work-session");
+});
+
+test("close work PIT scope includes changed core and shared adapters with all JUnit candidates", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  assert.match(
+    build,
+    /val closeWorkSessionOnly = scope == "close_work_session"/,
+  );
+  assert.match(build, /closeWorkSessionOnly -> closeWorkSessionClasses/);
+  assert.match(
+    build,
+    /closeWorkSessionOnly -> setOf\("com\.apptolast\.organization\.\*"\)/,
+  );
+  const selected = build.match(
+    /val closeWorkSessionClasses = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(selected);
+  for (const name of [
+    "domain.WorkSessionCloseNotes",
+    "domain.WorkSessionState",
+    "domain.OutboxMessage",
+    "application.ChangeWorkSession",
+    "application.ReadWorkSessionState",
+    "application.ReadWorkSessionChanges",
+    "application.WorkSessionTransitionReceipt",
+    "application.WorkSessionTransition",
+    "application.WorkSessionChanging",
+    "application.WorkSessionClosed",
+    "application.WorkSessionClosure",
+    "adapter.persistence.PostgresWorkSessionStore*",
+    "adapter.http.WorkSessionStateController*",
+    "adapter.broker.RabbitBrokerPublisher",
+    "adapter.config.ApplicationConfiguration",
+  ]) {
+    assert.ok(selected.includes(`"com.apptolast.organization.${name}"`), name);
+  }
+  assert.match(
+    build,
+    /if \(closeWorkSessionOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-close-work-session"\)\)/,
+  );
+  assert.match(build, /mutationThreshold\.set\(80\)/);
+  assert.match(build, /threads\.set\(4\)/);
+});
+
+test("close work frontend invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "close_work_session-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.close-work-session.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("close work backend invokes only its fixed PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "close_work_session-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=close_work_session"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
 test("pause resume frontend invokes only its fixed Stryker configuration", () => {
   const { calls, project } = capture();
   project("mutate", "pause_resume_session-frontend");

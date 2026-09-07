@@ -1,0 +1,7 @@
+# Revisión del primer paquete Java17
+
+APPROVED como checkpoint nominal compilable para compartir tipos con HTTP/publicador; no aprobación de la funcionalidad completa. Root leyó decisión, lectura, puertos, evento y tres pruebas nuevas en abaed5/352f66 y comprobó16 hashes idénticos al manifiesto. Focal del autor40/40 GREEN649354, cero fallos/errores/omitidos en el inventario; no se atribuye una suite global nueva.
+
+La decisión conserva State6 salvo revisión y usa un contexto de fin/última decisión suministrado por el puerto. El lector captura el reloj dentro del callback, después de las lecturas. Los casos nominales comprueban identidad, microsegundo exacto, captura única y evento11. La representación interna del recibo conserva constructores históricos; el JSONB de P/R/C omite extension nula. La regresión PostgreSQL existente encontró ese campo extra y el cambio mínimo lo resolvió, sin modificar su aserción.
+
+Pendientes explícitos: reglas de cantidad, fórmula tardía, precedencias/estado/revisión/límites/reloj, marca temporal compartida, implementación PostgreSQL17/migración/wiring, recuperación y concurrencia. El código nominal no se presenta como apto para habilitar EXTEND completo hasta esos pasos. No se introducen stubs en el árbol de C; éste recibe sólo el commit revisado. Interfaces y records responden a los dos casos de uso y al evento requeridos por el contrato hexagonal.

@@ -11,7 +11,19 @@ public record WorkSessionTransitionReceipt(
     Instant occurredAt,
     WorkSessionState before,
     WorkSessionState after,
-    WorkSessionClosure closure) {
+    WorkSessionClosure closure,
+    WorkSessionExtension extension) {
+  public WorkSessionTransitionReceipt(
+      UUID id,
+      UUID sessionId,
+      String action,
+      Instant occurredAt,
+      WorkSessionState before,
+      WorkSessionState after,
+      WorkSessionClosure closure) {
+    this(id, sessionId, action, occurredAt, before, after, closure, null);
+  }
+
   public WorkSessionTransitionReceipt(
       UUID id,
       UUID sessionId,

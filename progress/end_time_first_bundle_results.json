@@ -1,0 +1,44 @@
+[
+  {
+    "name": "com.apptolast.organization.adapter.persistence.WorkSessionExtensionReceiptTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "com.apptolast.organization.adapter.persistence.WorkSessionTransitionStoreTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "com.apptolast.organization.application.ChangeWorkSessionTest",
+    "tests": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "com.apptolast.organization.application.CloseWorkSessionTest",
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "com.apptolast.organization.application.ExtendWorkSessionTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "com.apptolast.organization.application.ReadWorkSessionEndTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+]

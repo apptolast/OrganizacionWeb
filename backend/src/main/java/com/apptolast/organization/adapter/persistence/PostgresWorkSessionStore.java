@@ -304,6 +304,7 @@ public final class PostgresWorkSessionStore
   private String receiptJson(WorkSessionTransitionReceipt receipt) throws JsonProcessingException {
     var value = (com.fasterxml.jackson.databind.node.ObjectNode) json.valueToTree(receipt);
     if (receipt.closure() == null) value.remove("closure");
+    if (receipt.extension() == null) value.remove("extension");
     return json.writeValueAsString(value);
   }
 

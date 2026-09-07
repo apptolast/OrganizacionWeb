@@ -1,4 +1,10 @@
 .work-session {
+  &.reader a {
+    display: inline-flex;
+    align-items: center;
+    min-width: 44px;
+    min-height: 44px;
+  }
   .closure-note {
     white-space: pre-wrap;
     overflow-wrap: anywhere;

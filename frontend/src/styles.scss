@@ -2,6 +2,34 @@ $forest: #244c3c;
 $ink: #23392f;
 $muted: #58655c;
 $line: #e0e5dc;
+.weekly-review {
+  select {
+    width: 100%;
+    min-height: 44px;
+    max-width: 100%;
+    font: inherit;
+    color: $ink;
+    background: #fdfefb;
+    border: 1px solid #b7c1b1;
+    border-radius: 8px;
+    padding: 13px 14px;
+    &:focus {
+      border-color: #3f6950;
+    }
+    &[aria-invalid="true"] {
+      border-color: #a23d36;
+    }
+  }
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    min-width: 44px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    scroll-margin-block: 16px;
+  }
+}
 :root {
   font-family: "Segoe UI", system-ui, sans-serif;
   color: $ink;

@@ -1,0 +1,18 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/domain/OutboxMessage.java",
+    "sha256": "2E53C8431C1DE70C4641089085D44059931DCF9EC5AD38BFCF29B7E40FECAB91"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/broker/RabbitBrokerPublisher.java",
+    "sha256": "7AD1EC76204D79ACEE2CA4A2C43B80101FB7DB06F0D31870EA392C4D7AA5F58A"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/PublishOutboxTest.java",
+    "sha256": "77CFAA5150D944CC780BAC4ED746DC2EBF8B8C99EDFD565C21AF71AF25432A22"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/broker/RabbitBrokerPublisherTest.java",
+    "sha256": "ADB66004253C61944C65FA53751075546A04D97E11851FAE8C3A3DCF2F09DD15"
+  }
+]

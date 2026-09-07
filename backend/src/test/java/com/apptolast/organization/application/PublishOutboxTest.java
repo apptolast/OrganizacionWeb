@@ -13,6 +13,209 @@ import org.junit.jupiter.api.Test;
 
 class PublishOutboxTest {
   @Test
+  void endTime_s24_retriesOriginalExtensionAfterLostConfirmation() throws Exception {
+    assertEventRetry(extendedMessage(), DeliveryOutcome.CONFIRM_TIMEOUT);
+  }
+
+  @Test
+  void endTime_s24_retriesOriginalExtensionWhenBrokerUnavailable() throws Exception {
+    assertEventRetry(extendedMessage(), DeliveryOutcome.BROKER_UNAVAILABLE);
+  }
+
+  @Test
+  void endTime_s24_publishesOneMinuteAtFirstValidYear() throws Exception {
+    var source = extendedMessage();
+    var when = Instant.parse("0001-01-01T00:00:00Z");
+    var payload = new HashMap<>(source.payload());
+    payload.put("occurredAt", when.toString());
+    payload.put("previousEndAt", when.toString());
+    payload.put("effectiveEndAt", "0001-01-01T00:01:00Z");
+    payload.put("additionalMinutes", 1);
+    var changed =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            when,
+            source.type(),
+            1,
+            source.json(),
+            payload,
+            0);
+    assertStartedPublished(stateChangedWith(changed, payload));
+  }
+
+  @Test
+  void endTime_s24_publishesPausedLate1440AtLastMicrosecond() throws Exception {
+    var source = extendedMessage();
+    var when = Instant.parse("9999-12-30T23:59:59.999999Z");
+    var payload = new HashMap<>(source.payload());
+    payload.put("occurredAt", when.toString());
+    payload.put("previousEndAt", "9999-12-29T23:59:59.999999Z");
+    payload.put("effectiveEndAt", "9999-12-31T23:59:59.999999Z");
+    payload.put("additionalMinutes", 1440);
+    payload.put("status", "paused");
+    payload.put("revision", "9223372036854775807");
+    var changed =
+        new OutboxMessage(
+            source.eventId(),
+            source.aggregateId(),
+            source.ownerId(),
+            when,
+            source.type(),
+            1,
+            source.json(),
+            payload,
+            0);
+    assertStartedPublished(stateChangedWith(changed, payload));
+  }
+
+  @Test
+  void endTime_s25_blocksEventIdentityReusedAsSession() throws Exception {
+    var source = extendedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("eventId", source.aggregateId().toString());
+    var changed =
+        new OutboxMessage(
+            source.aggregateId(),
+            source.aggregateId(),
+            source.ownerId(),
+            source.occurredAt(),
+            source.type(),
+            1,
+            source.json(),
+            payload,
+            0);
+    assertStartedBlocked(stateChangedWith(changed, payload));
+  }
+
+  @Test
+  void endTime_s25_blocksPreviousEndInYearZero() throws Exception {
+    var source = extendedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("previousEndAt", "0000-12-31T23:59:59.999999Z");
+    payload.put("effectiveEndAt", "2026-09-07T10:15:00.123456Z");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void endTime_s25_blocksSubmicrosecondPreviousEnd() throws Exception {
+    var source = extendedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("previousEndAt", "2026-09-07T09:59:00.123456789Z");
+    payload.put("effectiveEndAt", "2026-09-07T10:15:00.123456Z");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void endTime_s25_blocksRevisionBeyondBigint() throws Exception {
+    var source = extendedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("revision", "9223372036854775808");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void endTime_s25_blocksNoncanonicalRevision() throws Exception {
+    var source = extendedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("revision", "02");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void endTime_s25_blocks1441MinutesWithCoherentEnd() throws Exception {
+    var source = extendedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("additionalMinutes", 1441);
+    payload.put("effectiveEndAt", "2026-09-08T10:06:00.123456Z");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void endTime_s25_blocksZeroMinutesWithCoherentEnd() throws Exception {
+    var source = extendedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("additionalMinutes", 0);
+    payload.put("effectiveEndAt", payload.get("previousEndAt"));
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void endTime_s25_blocksPrivateField() throws Exception {
+    var source = extendedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("progressNote", "private");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void endTime_s25_blocksOneMicrosecondFormulaMismatch() throws Exception {
+    var source = extendedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("effectiveEndAt", "2026-09-07T10:20:00.123457Z");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void endTime_s25_blocksFractionalMinutes() throws Exception {
+    var source = extendedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("additionalMinutes", 1.5);
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void endTime_s25_blocksClosedStatus() throws Exception {
+    var source = extendedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("status", "closed");
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void endTime_s25_blocksNumericRevision() throws Exception {
+    var source = extendedMessage();
+    var payload = new HashMap<>(source.payload());
+    payload.put("revision", 2);
+    assertStartedBlocked(stateChangedWith(source, payload));
+  }
+
+  @Test
+  void endTime_s24_publishesOriginalExtension() throws Exception {
+    assertStartedPublished(extendedMessage());
+  }
+
+  static OutboxMessage extendedMessage() throws Exception {
+    var event = UUID.randomUUID();
+    var session = UUID.randomUUID();
+    var when = Instant.parse("2026-09-07T10:00:00.123456Z");
+    var payload =
+        Map.<String, Object>ofEntries(
+            Map.entry("eventId", event.toString()),
+            Map.entry("aggregateId", session.toString()),
+            Map.entry("ownerId", "owner"),
+            Map.entry("occurredAt", when.toString()),
+            Map.entry("schemaVersion", 1),
+            Map.entry("type", "WorkSessionExtended.v1"),
+            Map.entry("revision", "2"),
+            Map.entry("additionalMinutes", 15),
+            Map.entry("previousEndAt", "2026-09-07T10:05:00.123456Z"),
+            Map.entry("effectiveEndAt", "2026-09-07T10:20:00.123456Z"),
+            Map.entry("status", "running"));
+    return new OutboxMessage(
+        event,
+        session,
+        "owner",
+        when,
+        "WorkSessionExtended.v1",
+        1,
+        new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(payload),
+        payload,
+        0);
+  }
+
+  @Test
   void closeWork_s29_publishesFirstValidCalendarYear() throws Exception {
     var source = closedAt(Instant.parse("0001-01-01T00:00:00Z"));
     var payload = new HashMap<>(source.payload());

@@ -24,3 +24,16 @@ Archivos nuevos AppearanceValues/AppearanceValuesTest; ninguno de los11archivos 
 8. @s10 formato oscuro tras claro válido: RED87d007→GREENf29230.
 9. @s11 contraste oscuro pese a LIGHT: RED1745d0→GREENd5a5c5.
 10. @s2 defaults minúsculos canónicos y válidos contra los fondos reales: RED0d53a3→GREENdb62e2 (6/6dominio). Logs appearance_05..10_red/green.log. Fórmula y seis fondos de cada tema implementados sólo en dominio, aún sin conectarlos al caso de uso congelado. No se atribuye validación HTTP/PG todavía.
+
+## Casos de uso tras liberación dc374b0
+
+Corrección de evidencia de formato: el hook focal de fc1b25 terminó sin reformatear las líneas del bundle; no se usa como garantía. Formato real spotlessJavaApply8d791d y, tras ciclos posteriores, spotlessJavaApply+test27e6da completados. No cambió producción ajena20.
+11. @s10 dominio integrado antes de almacenamiento: REDbf88ca→GREENe462a9.
+12. @s3/@s35 no-op versiónMAX sin interacción Clock: RED0bf101→GREEN423cb3.
+13. @s4 stale no se disfraza de no-op: RED96d5b1→GREEN01a1ef.
+14. @s6 tag configurado contra ausencia propia: RED60be40→GREEN218057.
+15. @s2 cambio conserva ID, incrementa y no retrocede timestamp: RED8ee5a7→GREEN311f57.
+16. @s35 cambio real versiónMAX→503 sin wrap: REDf0a3f4→GREEN3181e0.
+17. @s35 relojUTC fuera de1..9999 (dos extremos): RED6e0420→GREEN083ca4.
+18. @s35 falloClock→503: RED64bbc9→GREENf09d8a.
+Logs appearance_11..18_red/green.log. Regresión core y formato real27e6da en appearance_core_green.log. No evidencia PG aún. Segundo corte de fuentes dominio/app mantiene firmas públicas; preparado para que C use validación real, mientras A inicia PG en nuevos archivos.

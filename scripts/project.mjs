@@ -22,6 +22,8 @@ export function createProject(runner = run) {
       target !== "" &&
       (task !== "mutate" ||
         ![
+          "weekly_review-backend",
+          "weekly_review-frontend",
           "history-backend",
           "history-frontend",
           "end_time_notification-backend",
@@ -64,6 +66,21 @@ export function createProject(runner = run) {
       mutate: "pitest",
     };
     if (!commands[task]) throw new Error(`Unknown task: ${task}`);
+    if (task === "mutate" && target === "weekly_review-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.weekly-review.config.json",
+      ]);
+      return;
+    }
+    if (task === "mutate" && target === "weekly_review-backend") {
+      backend("pitest", ["-PmutationScope=weekly_review"]);
+      return;
+    }
     if (task === "mutate" && target === "end_time_notification-frontend") {
       runner("pnpm", [
         "--dir",

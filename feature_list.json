@@ -215,10 +215,10 @@
       "id": 20,
       "name": "appearance",
       "title": "Apariencia",
-      "description": "Apariencia: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "description": "Preferencias accesibles persistentes, concurrencia y recuperación implementadas, revisadas y desplegadas; evidencia en progress/judge_appearance.md.",
       "acceptance": ["Cumplir @s1–@s37 de features/appearance.feature con revisión, pruebas y mutación antes del cierre."],
       "sdd": true,
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 21,

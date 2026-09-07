@@ -267,3 +267,28 @@ Checkpoint b430741 publicado en codex/appearance: cliente, Provider por sesión,
 Stryker original comenzó en sesión 79876: siete fuentes, 747 mutantes y ocho workers. No hay resultado anticipado. C termina modalidades, zoom y motores; conserva tres avisos originales de axe en colores forzados y separa su limitación de análisis CSS de la revisión de pintura real. No se modifica el producto durante mutación. Root detectó dependencia de orden entre dos E2E de apariencia; B verifica y corrige únicamente su preparación de estado, coordinado con C.
 
 CI posterior a main DNS 34149187634 terminó SUCCESS. La versión viva sigue siendo el MVP 1–19; apariencia todavía no está desplegada ni marcada done. Las funciones 21–30 permanecen pendientes.
+
+## Cierre de Apariencia en CI y preparación de entrega, 7 de septiembre 21:13
+
+Producto integrado ed00ad4; refuerzos y correcciones de fixtures en 1f36315, publicado en PR23. Stryker original EXIT0 f0a339: 637K/102S/8NC de747 (85,27%), cero timeout/error,119 hashes intactos. Root verificó raw SHA56D3A57C…D60122 y ocho artefactos. Se clasificaron110 residuos, preservando limitaciones; diez ejemplos API y cinco refuerzos UI/auth sólo modifican pruebas. Global final2.058/44 EXIT091f538 y lint066161f; único cambio posterior al global fue formato del testAPI, sin semántica. Replay dirigido autorizado31 firmas/21rangos,79mutantes; sesión78488 activa, cobertura811 pruebas verde. Salida separada, no suma de puntuaciones.
+
+UX cerrada en Chromium/Firefox/WebKit con límites por matriz; root contrastó271hashes. Zoom nativo Chromium2/DPR1.5→3/320CSS y capturas CDP verificados. CI inicial34152171279 falló141/143: captura fullPage Linux incompatible y fixture History sin nueva consulta Appearance. C retiró sólo la captura redundante, conservó CDP/oráculos y ajustó History a dos GET exactos; ambos focales verdes. CI corregida34154520811 en curso sobre1f36315; guardián verde. No repetir global local automáticamente ni publicar checkpoints que cancelen esa ejecución.
+
+Candidato Docker desde checkout limpio OrganizacionWeb-release20 ed00ad4: API índice fae45cecc45c8a3feed715524dd0cbfba6ecfac9eabd1ef50be740f84332ceb6; web3b939af19b1d66b05c8adef5649b9e5ecd3d8778aea0a3905c86e0c206be4d23. Builds y pushes EXIT0; OCIrevision exacta, amd64 y cuatro bases resueltas iguales a4d946. Sólo tests/soporte/evidencia posteriores; producto idéntico. No desplegado20 todavía.
+
+Infraestructura: rama codex/organizationweb-appearance, commit8aec1582776d42945498f6b78dec904d94302224, PR31 borrador. Baseline bootstrap/validate/lint y15focales/lintfinal verdes; root revisó tres campos y tres hashes iguales, ocho ejes operativos documentados fueraGit. CI34154628641 en curso. Checkout remoto limpio cambiado desde770b736 al candidato8aec158 mediante fetch explícito, sin force/reset; todavía no check ni apply. Ambas PR siguen pendientes de sus gates.
+
+Backup nuevo bajo lock oficial: /var/backups/organizationweb/organization-20260907T184034Z-ac3b2c3152e647b8aaeb94cc611ed7a7.dump,49.534bytes,0600,SHA6f1a141d7ed70667ac1f3271ab0ad939aacfcff774ecdc7fb945c9a0884a639e. Transferencia verificada, restore real enPGvacío sinred EXIT0:18migraciones,1proyecto/1tarea/1sesión/9eventos, sin tabla20; entorno retirado y buffer borrado. C ensayó API20→API4d946→API20 sobrePGV19, preferencia y todaFlyway idénticas, EXIT096dba9; recursos locales retirados. Evidencia externa deployment-preparation. No garantiza copias externas ni escrituras posteriores.
+
+La versión productiva permanece4d946 (MVP1–19). Feature20 in_progress,21–30pending; V14 heredada protegida sigue sin tocar. Finalizar replay/CI, hacer check/apply porwrapper y aceptación20 antes de continuar21.
+
+
+## Apariencia desplegada y aceptada, 7 de septiembre 21:41
+
+Feature20 done. CI de aplicación 34154520811 SUCCESS sobre 1f36315; infraestructura 34154628641 SUCCESS. PR23 fusionada en 7c1bf80 y PR31 en f89a014. Producto OCI ed00ad4: API fae45cec…ceb6 y web 3b939af1…4d23. Stryker dirigido final 72K/7S de79 (91,14%), 30 de31 objetivos detectados y120 hashes intactos; original separado 637/747 (85,27%). Dictamen final de código aprobado.
+
+Wrapper oficial sobre infraestructura 8aec158: check EXIT0 27ok/2changed/0failed; apply EXIT0 38ok/5changed/0failed, operación c61292fc8fe07176de35ea96171db825a44b2fff8c4b1b74620afcf973d4c581 liberada. API/web UpdateStatus completed, cuatro servicios saludables y20 réplicas1/1. PG c85f0de047ff y Rabbit10270883bd46 conservados; ocho rutas anteriores mantienen sus respuestas.
+
+Aceptación HTTPS: GET de defaults sin configuración, PUT200 SYSTEM conservando ambos colores, lectura y nueva sesión recuperan DTO/ETag exactos. Navegador publicado en390/768/1280 sin desbordamiento ni errores; capturas revisadas. Proyecto, sesión cerrada de14062085µs, historial y revisión semanal conservados. Cierre HTTP204 y posterior GET anónimo. Un wait de URL del primer cierre UI excedió el timeout de la herramienta; no se cuenta como prueba de logout y se repitió explícitamente por HTTP con éxito. Evidencia externa deployment-preparation/organizationweb-appearance-acceptance.json y logs check/apply.
+
+20 terminada; comienza especificación de21 Vistas/campos.22–30 siguen pendientes. La copia restaurada y el ensayo de retorno a la API anterior mantienen sus límites documentados. V14 heredada protegida intacta.

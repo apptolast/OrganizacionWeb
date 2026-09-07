@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+const root=resolve(import.meta.dirname,'..');
+const read=p=>JSON.parse(readFileSync(resolve(root,p),'utf8').replace(/^\uFEFF/,''));
+const flatten=r=>Object.entries(r.files).flatMap(([file,f])=>f.mutants.map(m=>({file,...m})));
+const signature=m=>JSON.stringify([m.file,m.location.start.line,m.location.start.column,m.location.end.line,m.location.end.column,m.mutatorName,m.replacement]);
+const original=flatten(read('progress/appearance_stryker_original/mutation.json'));
+const replay=flatten(read('progress/appearance_stryker_replay_original/mutation.json'));
+const targets=read('progress/appearance_stryker_replay_targets.json').targets;
+const rows=replay.map(m=>{const originals=original.filter(o=>signature(o)===signature(m));assert.equal(originals.length,1);const target=targets.find(t=>signature(t)===signature(m));return{file:m.file,replayId:m.id,originalId:originals[0].id,originalStatus:originals[0].status,status:m.status,target:!!target,location:m.location,mutatorName:m.mutatorName,replacement:m.replacement,killedBy:m.killedBy??[]};});
+assert.equal(rows.filter(r=>r.target).length,31);
+for(const t of targets)assert.equal(replay.filter(r=>signature(r)===signature(t)).length,1);
+const counts=items=>items.reduce((r,m)=>(r[m.status]=(r[m.status]??0)+1,r),{});
+const result={total:rows.length,states:counts(rows),targets:counts(rows.filter(r=>r.target)),extras:counts(rows.filter(r=>!r.target)),rows};
+writeFileSync(resolve(root,'progress/appearance_stryker_replay_inventory.json'),JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify({...result,rows:rows.filter(r=>r.status!=='Killed')},null,2));

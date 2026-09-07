@@ -1,0 +1,48 @@
+{
+  "files": [
+    {
+      "sha256": "F2CE7FA83B55CCCEEFA0FDCC186FB0FA23E82613C0DE56DFC623B49F63F9637F",
+      "path": "frontend/stryker.appearance-replay.config.json"
+    },
+    {
+      "sha256": "B221E373E8E0107D6C3BDAC5F5D3B7547D495827CBD791673DE8B1BFC2B26358",
+      "path": "progress/appearance_stryker_replay_targets.json"
+    },
+    {
+      "sha256": "41A34C21915D0FF67936072058DD04B3A9AC546D3C704997C65443400BA1E930",
+      "path": "progress/appearance_stryker_replay_before.json"
+    },
+    {
+      "sha256": "5D89D82169F70269FDA9368B5F29BC9FD4B87EF2E743E2438D41EDD365B76E3E",
+      "path": "progress/appearance_stryker_replay_after.json"
+    },
+    {
+      "sha256": "577DDCE8A8C1DA921D65E73069B6101DD4097011AA6C34B6E33F2DDFFCDF0683",
+      "path": "progress/appearance_stryker_replay_inventory.json"
+    },
+    {
+      "sha256": "9C77E7E678891651D8C6803DA4B89F932A4D1402A3773425A1B94604054DC4C4",
+      "path": "progress/review_appearance_stryker_replay.md"
+    },
+    {
+      "sha256": "B5308179632195B5E6A06051775F2605B390B8ACADEE0F75F1607B52D6921559",
+      "path": "progress/plan_appearance_stryker_replay.md"
+    },
+    {
+      "sha256": "95F5B9FB23F9B7F7982C673DC8DE49C31866C4D3C7E926A152761175E8C42BAB",
+      "path": "progress/prepare_appearance_stryker_replay.mjs"
+    },
+    {
+      "sha256": "27F338B387927D6F46E8F02E66C8316E0EBA4B865DCC754D144EB3180E128F49",
+      "path": "progress/analyze_appearance_stryker_replay.mjs"
+    }
+  ],
+  "rawSha256": "61EAB93975D8795DD2C479C7A0B21850FAA8EC2EB16C13339DA423A546029A91",
+  "exit": 0,
+  "survived": 7,
+  "targetSurvived": 1,
+  "unchangedInputs": 120,
+  "total": 79,
+  "targetKilled": 30,
+  "killed": 72
+}

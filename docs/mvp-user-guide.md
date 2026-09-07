@@ -1,6 +1,6 @@
 # Usar el MVP para trabajar con un horario
 
-Esta guía describe las funciones implementadas del corte MVP. Historial sigue en validación final; el estado de entrega y las dependencias del servidor están en [el plan](mvp-delivery-plan.md). La personalización avanzada y los conectores de las funcionalidades19–30 pertenecen a entregas posteriores.
+El MVP de las funcionalidades 1–18, incluido Historial, está validado y fusionado. El estado de despliegue está en [el plan](mvp-delivery-plan.md). La revisión semanal se incorpora en la siguiente entrega; la personalización avanzada y los conectores de las funcionalidades 20–30 siguen pendientes.
 
 ## Preparar el trabajo
 
@@ -28,6 +28,16 @@ Puedes entrar desde la navegación principal o desde el detalle de un proyecto o
 Cada página contiene hasta20hechos. **Más antiguos** sustituye la página actual; **Volver a recientes**, Atrás y recargar conservan una navegación basada en la URL. Los nombres de proyecto y tarea son los actuales; los detalles guardados del hecho permanecen históricos. Si varios hechos coinciden en el instante, su orden visual no demuestra una relación causal.
 
 Un error de consulta no significa que el historial esté vacío. El reintento sólo repite la lectura. Si caduca la sesión de acceso, vuelve a identificarte; la aplicación retira los datos privados de la pantalla.
+
+## Comparar la semana (siguiente entrega)
+
+Abre **Revisión semanal** para ver siete días de lunes a domingo. La fecha y la zona se aplican al pulsar **Mostrar semana**; cambiar un campo no inicia una consulta. Los enlaces de semana anterior, siguiente y actual permiten moverte sin perder la zona elegida. Atrás y recargar conservan la selección aplicada.
+
+**Plan vigente** muestra las reservas actuales, **Trabajo registrado** suma los intervalos efectivos y **Presupuesto actual** refleja tu disponibilidad configurada. Una reserva de una hora y treinta minutos de trabajo aparecen como cifras distintas. El trabajo no equivale a tareas terminadas.
+
+Las semanas pasadas también reflejan cambios actuales de reservas o disponibilidad. Un presupuesto de cero indica descanso planificado, no demuestra que hayas descansado ni genera una deuda. Si la disponibilidad no puede usarse para la zona seleccionada, el presupuesto aparece como desconocido.
+
+La hora de consulta indica hasta cuándo se ha contado una sesión en curso. Pulsa **Actualizar** para leer de nuevo. Durante la espera o un error, los datos anteriores están identificados; **Reintentar** repite la consulta sin modificar tus tareas, reservas o sesiones.
 
 ## Datos y servidor
 

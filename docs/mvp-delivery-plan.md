@@ -14,13 +14,13 @@ El corte de entrega corresponde a las funcionalidades 1–18 del roadmap. Las fu
 - Replanificar: init integrado con1617 pruebas backend,1498 frontend y22 scripts verdes;98 E2E y9 comprobaciones del publicador aprobadas. Mutación backend98,9446 % (750/758), cero errores/timeouts; frontend86,70 % global con dos errores de herramienta registrados. Recuperación tras reinicio, concurrencia, privacidad, presupuesto y UX cuentan con dictámenes finales; los residuales y límites físicos se conservan explícitos.
 - PR6 fusionada por el usuario en `9623990`; evidencia de cierre publicada en main `d997421`, con CI `34060054467` SUCCESS. Dictamen final en `progress/judge_reschedule_final.md`.
 - Funcionalidad 14 cerrada y fusionada mediante PR13 en main353c9d4, con CI34070995379 SUCCESS. Inicio durable y recuperación real; 104 E2E, mutación backend97,9827% y frontend89,6104%, con residuales explícitos. Replay adicional terminado:11/11 KILLED, separado de las campañas originales.
-- Funcionalidad15 fusionada en main b2ea1f2 mediante PR14:1890 pruebas Java,1668 frontend, smoke real y515 medidas responsive/35axe0. PIT523/525 y Stryker741/861 superan el umbral, con residuos documentados. CI34077907038 SUCCESS sobre2e492a0 pasó init/build/108E2E/smoke tras corregir el fixture sensible al orden. Descontando conservadoramente las tres detecciones de mutación atribuidas al fixture anterior,738/861=85,71% mantiene el umbral. CI posterior de main34078825723 en curso.
+- Funcionalidad15 fusionada en main b2ea1f2 mediante PR14:1890 pruebas Java,1668 frontend, smoke real y515 medidas responsive/35axe0. PIT523/525 y Stryker741/861 superan el umbral, con residuos documentados. CI34077907038 SUCCESS sobre2e492a0 pasó init/build/108E2E/smoke tras corregir el fixture sensible al orden. Descontando conservadoramente las tres detecciones de mutación atribuidas al fixture anterior,738/861=85,71% mantiene el umbral. CI posterior de main34078825723 SUCCESS con init/build/108E2E/smoke.
 - Funcionalidad16 tiene contrato revisado y está en TDD con tres agentes. El primer checkpoint nominal compilable no es la funcionalidad completa.17–18 siguen pendientes.
 - Ningún despliegue productivo acreditado todavía.
 
 ## Trabajo restante y estimación
 
-Camino crítico vigente: cierre de validación de15 pausa/reanudación →16 cierre con duración neta y atribución histórica →17 aviso de fin y decisión explícita →18 historial de hechos → validación integrada y despliegue real. Backend y frontend de cada funcionalidad se reparten entre agentes; cada una conserva contrato previo, TDD y validación. La tabla siguiente conserva las partidas de la hipótesis anterior, **no constituye una nueva medición** después de14. No hay evidencia suficiente para prometer el MVP hoy ni para actualizar el total con una cifra menor.
+Camino crítico vigente:16 cierre con duración neta y atribución histórica →17 aviso de fin y decisión explícita →18 historial de hechos → validación integrada y despliegue real. Backend y frontend de cada funcionalidad se reparten entre agentes; cada una conserva contrato previo, TDD y validación. La tabla siguiente conserva las partidas de la hipótesis anterior, **no constituye una nueva medición** después de14. No hay evidencia suficiente para prometer el MVP hoy ni para actualizar el total con una cifra menor.
 
 | Hito | Resultado verificable | Horas efectivas estimadas |
 | --- | --- | ---: |
@@ -40,7 +40,7 @@ Para el conjunto del roadmap, la orientación anterior de 1–3 semanas es de ba
 ## Secuencia de entrega y puntos de revisión
 
 1. Inicio de sesiones (14) completado: contrato trazado, revisión, gates propios y CI posterior al merge verdes. Conservar esa regresión al integrar pausa/reanudación.
-2. Cerrar la validación de pausa/reanudación (15) en PR14 y después implementar cierre (16), con su contrato previo y validación. Comprobar duración real, recuperación y posibilidad de terminar una sesión antes de habilitar el ciclo para uso habitual.
+2. Pausa/reanudación (15) cerrada y fusionada en PR14. Implementar cierre (16), cuyo contrato ya está aprobado. Comprobar duración real, recuperación y posibilidad de terminar una sesión antes de habilitar el ciclo para uso habitual.
 3. Añadir aviso de fin (17), conservando el fin previsto y la decisión explícita del usuario sobre continuar o terminar.
 4. Incorporar historial (18): consultar lo realizado con fechas y tiempo real, separado de los bloques planificados.
 5. Validar el recorrido integrado y desplegar: acceso privado, persistencia tras reinicio, responsive, HTTPS, respaldo y restauración verificados en el servidor.

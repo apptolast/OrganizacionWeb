@@ -62,3 +62,6 @@ reports/
 /progress/pause_resume_frontend_mutation_raw.json
 /progress/pause_resume_mutation_preparation_hashes.json
 /progress/pause_resume_pit_process_sample.json
+
+# Evidencia XML local del primer checkpoint16; manifest e informe versionados.
+/progress/close_work_first_bundle_xml/

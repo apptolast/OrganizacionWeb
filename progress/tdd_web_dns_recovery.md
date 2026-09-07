@@ -38,3 +38,27 @@ Se prueba Docker bridge con su DNS embebido y backend HTTP de eco, usando la ima
 Root aprobó el cambio Nginx y pidió ajustar el oráculo al montaje tmpfs actual de Swarm. Se sustituyeron las dos opciones `--tmpfs ...mode=1777` por `--mount type=tmpfs,destination=...,tmpfs-size=16777216`, sin sobreescribir el modo. Se añadió únicamente `/.build/web-dns/` a `.gitignore`. Un fallo de cleanup ahora también establece `report.status = "FAIL"`, además de EXIT1.
 
 Reejecución única pertinente: `node scripts/web-dns-smoke.mjs`, EXIT0 `536da8`; log `progress/web_dns_swarm_mount_green.log`, raw `.build/web-dns/owdns-b35e1316-ed5c-48c6-a871-7fa2d31a89b1/`. Los tres oráculos completos vuelven a pasar con el montaje tmpfs solicitado. Los resultados anteriores se conservan y no se reinterpretan como esta ejecución. Nginx permanece con el mismo hash aprobado. No se simula un fallo de cleanup; su guardia se revisa en el diff.
+
+## Corrección de portabilidad del fixture en CI
+
+CI34146908898/job101820803980 falló en el paso DNS (`458e75`):
+Docker rechazó `--ip` porque la red usa una subred asignada automáticamente.
+Los dos primeros oráculos ya habían pasado remotamente. Log original:
+`progress/web_dns_ci_failure.log`. No fue un fallo de Nginx.
+
+Se conservan dos ensayos exploratorios: dos backend simultáneos pasaron
+`7b77eb`, pero root exigió evitar alias coincidentes; reconectar el segundo
+sólo después de retirar el primero permitió reciclar la IP y el oráculo
+rechazó correctamente ese caso (`3cedda`). Ninguno es el resultado final.
+
+Corrección final mínima: retirar únicamente `--ip` y su argumento del
+contenedor reserva original. Docker asigna su dirección dinámicamente;
+el backend original ya está retirado antes de publicar el segundo alias.
+Se conserva el assert de IP distinta, respuesta marcada, URI y ausencia
+de reinicio. No se añade subnet ni se presupone una dirección específica.
+
+GREEN final EXIT0 `5709db`: `node scripts/web-dns-smoke.mjs`, log
+`progress/web_dns_ci_dynamic_reservation_green.log`, raw en
+`.build/web-dns/owdns-ecee6fc7-0d15-4e91-9bce-fb6d77919e91/`.
+Tres oráculos completos verdes. La recuperación real de CI queda pendiente
+del próximo run; este resultado es local. Nginx y backend20 no cambian.

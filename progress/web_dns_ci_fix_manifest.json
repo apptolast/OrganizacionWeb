@@ -1,0 +1,22 @@
+[
+  {
+    "path": "scripts/web-dns-smoke.mjs",
+    "sha256": "26A54C3AC576643BE0E9D68BD4649AE4C6B9B15DC4440A9BA0239CC097AE7970"
+  },
+  {
+    "path": "progress/tdd_web_dns_recovery.md",
+    "sha256": "12FB3B4E999EFBE56B1A38F925934B649B0CA2F4F39CE8C860A260FB8B73AF66"
+  },
+  {
+    "path": "progress/web_dns_ci_failure.log",
+    "sha256": "A6D8FC238D6A51BDB7797DB2BCE9B3FD2CD092A3B62DD7C8C5DF32444D5EC81F"
+  },
+  {
+    "path": "progress/web_dns_ci_dynamic_reservation_green.log",
+    "sha256": "1F9CC469393026BD85DB06205846001C4854B7BF3CCBAE0C20A80E48F31D0552"
+  },
+  {
+    "path": ".build/web-dns/owdns-ecee6fc7-0d15-4e91-9bce-fb6d77919e91/result.json",
+    "sha256": "9394078C7827276DEC74CE8C7412A39EB810F21BBC4E479DE00A65EC54C395B8"
+  }
+]

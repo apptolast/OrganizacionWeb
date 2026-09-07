@@ -188,8 +188,6 @@ try {
   run(`${prefix}-reserve`, [
     "--network",
     prefix,
-    "--ip",
-    firstIp,
     "--read-only",
     "--cap-drop",
     "ALL",

@@ -47,3 +47,11 @@ PIT17 está ACTIVO: root24839, log progress/end_time_pit_final.log, dispatcher e
 C ejecuta smoke17 en aislado (su sesión74883, root no puede consumirla), sólo runner/puertos dinámicos propios/Docker build, sin Gradle host ni backend fuente. Primer E2E17 en su árbol está REDc6568d por ausencia del panel; stack6720 retirado,18080 libre, sin más casos hasta GREEN. Root incorporó integración HTTP+PG como612f84e; último push conocido985268 alcanza612f84e.
 
 B entregó panel/hook/API test y StatePanel como freeze selectivo de seis archivos,88 verdes atribuidos al autor. A revisión CHANGES_REQUESTED: snapshot State viejo mientras lectura nueva pendiente; lookupBusy atrapado al abortar E antes de un rechazo; POST404 conserva datos privados. B corrige mediante TDD individual y mantiene montaje Reader pendiente. Se preserva el manifiesto inicial en end_time_frontend_panel_rejected_hashes.json; no se ha integrado ese paquete rechazado. A queda disponible para revisar las correcciones. El maestro44 conserva pendientes frontend/smoke/E2E/UX/gates.17 sigue in_progress y18 sin implementar.
+
+## Integración revisada, 08:48
+
+Panel corregido aprobado por A después de los tres hallazgos: seis hashes verificados por root81b50f y checkpoint50f0a34.113 casos focales atribuidos al autor; montaje Reader y cierre compartido siguen en TDD, incluido RED4c4fc1 para retirar controles tras cierre confirmado. El panel fue liberado después del commit para esa modificación. No se declara frontend completo.
+
+Smoke17 final ac63df EXIT0,13 PASS, revisado por root932596/fb1437:249 hashes actuales y before/after iguales. Ahora acredita en un recorrido originalEXTEND, segundaEXTEND, CLOSE, reinicioAPI, recuperación originalC/K y replay sin escrituras, además de Rabbit reiniciado y evento original persistente/quorum12. Commit aislado133572c incorporado como5998c54. Primera ejecución abierta y su evidencia se conservan separadas. No hay smoke activo ni E2E activo; C prepara plan de evidencia17 mientras espera montaje íntegro.
+
+PIT root24839 continúa activo, backend congelado. A queda disponible para revisar el montaje final; B posee los deltas frontend.17 continúa in_progress,18 pendiente; no despliegue ni nueva PR parcial.

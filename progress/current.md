@@ -231,3 +231,7 @@ La infraestructura f15c651 está publicada en PR29 de DockerSwarmInfrastrcture, 
 Application CI34139336203 terminó success sobre d065af3 y el guardián34139334307 también pasó. Todos los cambios posteriores son evidencia y estado; los gates funcionales y de mutación están aprobados en judge_weekly_review.md. Feature19 pasa a done; integración de PR20 en main y actualización de imágenes siguen como operaciones de entrega. Se puede comenzar el contrato20 bajo la autorización global vigente.
 
 Servidor: validate-iac.sh reparado terminó EXIT0 tras confirmar y corregir únicamente el permiso del fixture público Traefik. El paginador de Git quedó esperando entrada al final; se cerró sólo su proceso identificado y Git/validador terminaron0. Lint remoto terminó0:72commits escaneados y ningún hallazgo. Edge --check está en curso con el wrapper oficial como admin1001; no se ha aplicado ningún servicio.
+
+## Feature20 — apariencia, inicio de implementación
+
+Contrato aprobado f4697a6 bajo autorización global. Init inicial25384 EXIT0 14625f con frontend1.968/42, Java y arnés verdes; no cambios productivos desde mainc20105a. Se inicia TDD de20: backend y frontend en paralelo dentro del mismo contrato. A: dominio/persistencia/aplicación/configuración; B: cliente/vista/tokensSCSS/navegación. HTTP se coordina por root para no solapar Java. V14 protegida no se toca. Los37escenarios se acreditarán en informes de ciclos, no por su conteo documental112.

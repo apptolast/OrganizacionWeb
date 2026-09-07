@@ -216,9 +216,9 @@
       "name": "appearance",
       "title": "Apariencia",
       "description": "Apariencia: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
-      "acceptance": [],
+      "acceptance": ["Cumplir @s1–@s37 de features/appearance.feature con revisión, pruebas y mutación antes del cierre."],
       "sdd": true,
-      "status": "spec_ready"
+      "status": "in_progress"
     },
     {
       "id": 21,

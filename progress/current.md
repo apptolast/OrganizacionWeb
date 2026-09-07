@@ -1,5 +1,7 @@
 # Sesión actual — cierre de inicio y contrato de pausa/reanudación
 
+Actualización: 14 ya está done. Replay adicional terminado con 11/11 KILLED, EXIT 0, sin errores/timeouts y 289 hashes intactos, verificado por root cfa8a8/c41e81. Backend liberado; no se requiere otra campaña. PR13 publica el cierre y los refuerzos desde codex/start-work-session-final; su CI aún debe comprobarse antes de fusionar. La propuesta normativa15 está en revisión con tres precisiones, y el flujo UX en pause_resume_ux_proposal.md; sin producción15 todavía. Las referencias a la campaña en curso de abajo describen el corte anterior.
+
 El dictamen final de feature 14 está APPROVED en judge_start_work_final.md. El autor registra done y pasa al contrato de feature 15. No se implementan todavía pausa, cierre, aviso o historial sin sus contratos respectivos. No se habilita uso habitual antes de disponer del cierre de sesiones.
 
 PR12 está fusionada en main ae861102ff0507e15617ccb1ff830d6e5babcc50. CI de PR y main SUCCESS: 104 E2E, build y publicador real. Pruebas locales: init con 1751 Java, 1571 frontend y 29 scripts; regresión posterior con 1585 frontend. Dos refuerzos de oráculos posteriores pasan PG, publicación 153/153, formato y scripts 30/30. No modifican producción.

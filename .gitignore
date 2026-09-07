@@ -65,3 +65,4 @@ reports/
 
 # Evidencia XML local del primer checkpoint16; manifest e informe versionados.
 /progress/close_work_first_bundle_xml/
+/progress/close_work_backend_xml/

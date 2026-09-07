@@ -1,0 +1,11 @@
+# Revisión de implementación16 antes de integración real
+
+APPROVED para integrar y ejecutar gates; no aprobación final de la feature. Root revisó las fuentes y deltas de core/persistencia, migración y lector/UI, y contrastó los manifests de19 archivos backend y10 frontend en d78cb9. Paquetes integrados2580d2f y1f5d5b7; HTTP, cliente y publicador tienen revisiones propias anteriores.
+
+La intención conserva notas en los dos caminos de replay. El índice V17 impide dos cierres por sesión sin reescribir migraciones. Las carreras usan locks reales de PostgreSQL y los fallos comprueban rollback; los intercalados de inicio mantienen abierta la transacción exterior hasta commit o rollback. La recuperación consulta propiedad y recibo en un snapshot read-only/RR. Se revisó el nominal HTTP+PostgreSQL175a06 y su hash494bff, integrado1027e5d: usa wiring real y reloj controlado, sin mocks de aplicación/persistencia.
+
+La interfaz establece la URL antes del envío, separa estado/recibo/activa, conserva intención incierta y borrador tras412, y descarta resultados retirados después de cada espera. Los helpers temporales existentes se exportan sin duplicar lógica. La revisión detectó restauración de foco demasiado amplia; el test de blur deliberado falló y se corrigió antes del freeze. Las notas preservan saltos y espacios mediante SCSS y nunca interpretan HTML. La configuración de mutación incluye exactamente los cinco TS/TSX modificados; el cambio SCSS se comprobará visualmente.
+
+Evidencia focal declarada por autores:115 pruebas backend en ocho suites y306 frontend en ocho archivos; no sumar esos recuentos como pruebas nuevas independientes ni como cumplimiento de113 ejemplos. Los mapas declaran reutilización de guardas y rutas compartidas. No hay necesidad observada de añadir beans, dependencias, tablas de notas o servicios de temporización.
+
+Pendientes antes de aprobación final: init/build integrados, E2E real running/paused/ACK perdido, recorrido compuesto de GET antiguo del padre, smoke con broker y reinicio, matriz UX y campañas de mutación con análisis de residuos. Los tests de cliente no acreditan persistencia; los mocks de Rabbit no acreditan reinicio; los tests de foco en JSDOM no acreditan geometría o motores. No se declara terminada la feature16.

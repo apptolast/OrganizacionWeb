@@ -192,3 +192,19 @@ it("@s28 integrates explicit work start in the existing task reader", async () =
   expect(screen.getByText("Sin estimación")).toBeVisible();
   expect(unexpected).toEqual([]);
 });
+
+it("history18 @s28 discovers history from the existing task detail", async () => {
+  const unexpected = fixture();
+  render(<TaskReader projectId={projectId} id={taskId} />);
+  expect(
+    await screen.findByRole("heading", { name: "Leer el capítulo", level: 1 }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("link", { name: "Ver historial de esta tarea" }),
+  ).toHaveAttribute(
+    "href",
+    `/historial?projectId=${projectId}&taskId=${taskId}`,
+  );
+  await screen.findByLabelText("Duración prevista (minutos)");
+  expect(unexpected).toEqual([]);
+});

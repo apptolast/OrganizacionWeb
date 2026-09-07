@@ -1,4 +1,11 @@
-import { render, screen, within, act, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  within,
+  act,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
 import { App } from "./App";
@@ -99,6 +106,9 @@ it("@s35 retries only the same GET and announces the pending retry", async () =>
   expect(
     await screen.findByText("No hay hechos con estos filtros."),
   ).toBeVisible();
+  expect(
+    screen.getByRole("heading", { name: "Historial", level: 1 }),
+  ).toHaveFocus();
 });
 
 it("@s36 aborts a discarded read before its late HTTP401 reaches the session observer", async () => {
@@ -172,6 +182,15 @@ it("@s32 presents a session fact with current context and its existing session r
     session.startedAt,
   );
   expect(within(list).getByText("UTC")).toBeVisible();
+  expect(
+    within(list).getByRole("link", { name: "Ver historial de este proyecto" }),
+  ).toHaveAttribute("href", `/historial?projectId=${session.projectId}`);
+  expect(
+    within(list).getByRole("link", { name: "Ver historial de esta tarea" }),
+  ).toHaveAttribute(
+    "href",
+    `/historial?projectId=${session.projectId}&taskId=${session.taskId}`,
+  );
 });
 
 const block = {
@@ -273,6 +292,9 @@ it("@s33 distinguishes the five families and links a decision to its session rat
     within(list).getAllByRole("link", { name: "Ver sesión de trabajo" }),
   ).toHaveLength(2);
   expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(
+    screen.getByText(/Empatar en el instante no indica un orden causal/),
+  ).toBeVisible();
 });
 
 it("@s34 retires previous results while a different URL query is pending", async () => {
@@ -331,6 +353,9 @@ it("@s29 applies a filter draft explicitly and removes the previous cursor from 
     expect.anything(),
   );
   expect(fetcher).toHaveBeenCalledTimes(2);
+  expect(
+    screen.getByRole("heading", { name: "Historial", level: 1 }),
+  ).toHaveFocus();
 });
 it("@s34 distinguishes no matching facts and offers to clear the applied filters", async () => {
   window.history.replaceState(
@@ -379,6 +404,9 @@ it("@s31 replaces one page through its URL and returns to recent facts with the 
     .mockResolvedValueOnce(
       Response.json({ items: [started], nextCursor: null }),
     );
+  fetcher.mockResolvedValueOnce(
+    Response.json({ items: [old], nextCursor: null }),
+  );
   vi.stubGlobal("fetch", fetcher);
   render(<App />);
   await screen.findByRole("link", { name: "Tarea actual" });
@@ -396,6 +424,9 @@ it("@s31 replaces one page through its URL and returns to recent facts with the 
   ).toHaveLength(1);
   expect(window.location.search).toBe("?category=sessions&cursor=next-page");
   expect(
+    screen.getByRole("heading", { name: "Historial", level: 1 }),
+  ).toHaveFocus();
+  expect(
     screen.queryByRole("link", { name: "Más antiguos" }),
   ).not.toBeInTheDocument();
   await userEvent.click(
@@ -406,6 +437,21 @@ it("@s31 replaces one page through its URL and returns to recent facts with the 
   ).toBeVisible();
   expect(window.location.search).toBe("?category=sessions");
   expect(fetcher).toHaveBeenCalledTimes(3);
+  window.history.back();
+  await waitFor(() =>
+    expect(window.location.search).toBe("?category=sessions&cursor=next-page"),
+  );
+  expect(
+    await screen.findByRole("link", { name: "Tarea anterior" }),
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("link", { name: "Tarea actual" }),
+  ).not.toBeInTheDocument();
+  expect(fetcher).toHaveBeenCalledTimes(4);
+  expect(fetcher).toHaveBeenLastCalledWith(
+    "/api/v1/history?category=sessions&cursor=next-page",
+    expect.anything(),
+  );
 });
 
 it("@s37 withdraws filter controls on a current authentication failure", async () => {
@@ -695,4 +741,326 @@ it("@s33 keeps a reopened task visible and describes the historical transition",
     within(disclosure).getByText("Estado registrado: Pendiente"),
   ).toBeVisible();
   expect(within(disclosure).queryByRole("button")).not.toBeInTheDocument();
+});
+
+it("@s29 keeps context discoverable even on an empty filtered page without fetching a name", async () => {
+  const projectId = "22345678-1234-1234-1234-123456789abc";
+  const taskId = "32345678-1234-1234-1234-123456789abc";
+  const fetcher = vi
+    .fn()
+    .mockResolvedValue(Response.json({ items: [], nextCursor: null }));
+  vi.stubGlobal("fetch", fetcher);
+  render(
+    <History
+      route={`/historial?projectId=${projectId}&taskId=${taskId}&category=sessions`}
+    />,
+  );
+  await screen.findByText("No hay hechos con estos filtros.");
+  expect(screen.getByRole("link", { name: "Este proyecto" })).toHaveAttribute(
+    "href",
+    `/proyectos/${projectId}`,
+  );
+  expect(screen.getByRole("link", { name: "Esta tarea" })).toHaveAttribute(
+    "href",
+    `/proyectos/${projectId}/tareas/${taskId}`,
+  );
+  expect(
+    screen.getByRole("link", { name: "Quitar filtro de contexto" }),
+  ).toHaveAttribute("href", "/historial?category=sessions");
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});
+
+it("@s38 does not reclaim focus after the user leaves the pending retry for another control", async () => {
+  let deliver!: (response: Response) => void;
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValueOnce(new Response(null, { status: 503 }))
+      .mockReturnValueOnce(
+        new Promise<Response>((resolve) => {
+          deliver = resolve;
+        }),
+      ),
+  );
+  render(<History route="/historial" />);
+  await screen.findByRole("alert");
+  await userEvent.click(
+    screen.getByRole("button", { name: "Reintentar consulta" }),
+  );
+  const category = screen.getByLabelText("Categoría");
+  category.focus();
+  category.blur();
+  await act(async () =>
+    deliver(Response.json({ items: [], nextCursor: null })),
+  );
+  expect(
+    screen.getByText("Todavía no hay hechos en tu historial."),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("heading", { name: "Historial", level: 1 }),
+  ).not.toHaveFocus();
+  expect(document.body).toHaveFocus();
+});
+
+it("@s36 ignores an old HTTP401 after a different history page is already visible", async () => {
+  let deliver!: (response: Response) => void;
+  const observer = vi.fn();
+  observeAccess(observer);
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockReturnValueOnce(
+        new Promise<Response>((resolve) => {
+          deliver = resolve;
+        }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({ items: [started], nextCursor: null }),
+      ),
+  );
+  const view = render(<History route="/historial?cursor=old" />);
+  view.rerender(<History route="/historial?category=sessions" />);
+  await screen.findByRole("link", { name: "Tarea actual" });
+  await act(async () => deliver(new Response(null, { status: 401 })));
+  expect(screen.getByRole("link", { name: "Tarea actual" })).toBeVisible();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(observer).not.toHaveBeenCalled();
+});
+
+it("@s36 ignores old JSON completing after the current page", async () => {
+  let deliver!: (value: unknown) => void;
+  const response = Response.json({});
+  const json = vi.spyOn(response, "json").mockReturnValue(
+    new Promise((resolve) => {
+      deliver = resolve;
+    }),
+  );
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValueOnce(response)
+      .mockResolvedValueOnce(
+        Response.json({ items: [started], nextCursor: null }),
+      ),
+  );
+  const view = render(<History route="/historial?cursor=old" />);
+  await act(async () => {});
+  expect(json).toHaveBeenCalledTimes(1);
+  view.rerender(<History route="/historial?category=sessions" />);
+  await screen.findByRole("link", { name: "Tarea actual" });
+  await act(async () => deliver({ items: [], nextCursor: null }));
+  expect(screen.getByRole("link", { name: "Tarea actual" })).toBeVisible();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("No hay hechos con estos filtros."),
+  ).not.toBeInTheDocument();
+});
+
+it("@s36 ignores an unknown old storage problem instead of replacing the current page with an error", async () => {
+  let deliver!: (response: Response) => void;
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockReturnValueOnce(
+        new Promise<Response>((resolve) => {
+          deliver = resolve;
+        }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({ items: [started], nextCursor: null }),
+      ),
+  );
+  const view = render(<History route="/historial?cursor=old" />);
+  view.rerender(<History route="/historial?category=sessions" />);
+  await screen.findByRole("link", { name: "Tarea actual" });
+  await act(async () =>
+    deliver(
+      Response.json(
+        { type: "unknown", status: 503, detail: "old" },
+        { status: 503 },
+      ),
+    ),
+  );
+  expect(screen.getByRole("link", { name: "Tarea actual" })).toBeVisible();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Reintentar consulta" }),
+  ).not.toBeInTheDocument();
+});
+
+const privateClosure = {
+  ...started,
+  id: pause.id,
+  type: "SESSION_CHANGED",
+  occurredAt: pause.occurredAt,
+  details: {
+    ...pause,
+    action: "CLOSE",
+    after: { ...pause.after, status: "closed" },
+    closure: {
+      progressNote: "Nota privada del cierre",
+      nextStep: "Paso privado",
+      workDate: "2026-09-07",
+      closeZoneId: "UTC",
+    },
+  },
+};
+it("@s37 removes a previously visible closure and its notes when the current read loses authentication", async () => {
+  const observer = vi.fn();
+  observeAccess(observer);
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({ items: [privateClosure], nextCursor: null }),
+      )
+      .mockResolvedValueOnce(new Response(null, { status: 401 })),
+  );
+  const view = render(<History route="/historial" />);
+  await screen.findByRole("heading", { name: "Sesión cerrada" });
+  await userEvent.click(screen.getByText("Ver detalles del hecho"));
+  expect(screen.getByText("Nota privada del cierre")).toBeVisible();
+  view.rerender(<History route="/historial?category=sessions" />);
+  await screen.findByRole("alert");
+  expect(
+    screen.queryByRole("list", { name: "Hechos del historial" }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText("Nota privada del cierre")).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("link", { name: "Tarea actual" }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByRole("form")).not.toBeInTheDocument();
+  expect(observer).toHaveBeenCalledExactlyOnceWith(401);
+});
+
+it("@s37 withdraws old private notes and context links when the new contextual page is unavailable", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({ items: [privateClosure], nextCursor: null }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({ code: "RESOURCE_NOT_FOUND" }, { status: 404 }),
+      ),
+  );
+  const view = render(
+    <History route={`/historial?projectId=${session.projectId}`} />,
+  );
+  await screen.findByRole("heading", { name: "Sesión cerrada" });
+  await userEvent.click(screen.getByText("Ver detalles del hecho"));
+  expect(screen.getByText("Nota privada del cierre")).toBeVisible();
+  expect(screen.getByRole("link", { name: "Este proyecto" })).toBeVisible();
+  view.rerender(
+    <History route={`/historial?projectId=${session.projectId}&cursor=next`} />,
+  );
+  await screen.findByRole("alert");
+  expect(screen.queryByText("Nota privada del cierre")).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("list", { name: "Hechos del historial" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("link", { name: "Este proyecto" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("link", { name: "Quitar filtro de contexto" }),
+  ).toHaveAttribute("href", "/historial");
+});
+
+it("@s30 clears every applied filter and cursor through the global history URL", async () => {
+  window.history.replaceState(
+    null,
+    "",
+    `/historial?category=sessions&projectId=${session.projectId}&taskId=${session.taskId}&from=2026-09-01&to=2026-09-07&cursor=old`,
+  );
+  const fetcher = vi
+    .fn()
+    .mockImplementation(() =>
+      Promise.resolve(Response.json({ items: [], nextCursor: null })),
+    );
+  vi.stubGlobal("fetch", fetcher);
+  render(<App />);
+  await screen.findByText("No hay hechos con estos filtros.");
+  await userEvent.click(screen.getByRole("link", { name: "Limpiar filtros" }));
+  await screen.findByText("Todavía no hay hechos en tu historial.");
+  expect(window.location.pathname + window.location.search).toBe("/historial");
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  expect(fetcher).toHaveBeenLastCalledWith(
+    "/api/v1/history",
+    expect.objectContaining({ cache: "no-store" }),
+  );
+});
+
+it("@s31 opens an old page directly from its URL without previous in-memory pagination", async () => {
+  window.history.replaceState(
+    null,
+    "",
+    "/historial?category=sessions&from=2026-09-01&cursor=opaque-old",
+  );
+  const fetcher = vi
+    .fn()
+    .mockResolvedValue(Response.json({ items: [started], nextCursor: null }));
+  vi.stubGlobal("fetch", fetcher);
+  render(<App />);
+  expect(
+    await screen.findByRole("link", { name: "Tarea actual" }),
+  ).toBeVisible();
+  expect(screen.getByLabelText("Categoría")).toHaveValue("sessions");
+  expect(screen.getByLabelText("Desde (UTC)")).toHaveValue("2026-09-01");
+  expect(
+    screen.getByRole("link", { name: "Volver a recientes" }),
+  ).toHaveAttribute("href", "/historial?category=sessions&from=2026-09-01");
+  expect(
+    screen.queryByRole("link", { name: "Más antiguos" }),
+  ).not.toBeInTheDocument();
+  expect(fetcher).toHaveBeenCalledExactlyOnceWith(
+    "/api/v1/history?category=sessions&from=2026-09-01&cursor=opaque-old",
+    expect.anything(),
+  );
+});
+
+it("@s29 explains an inverted date range at Hasta and permits correction without sending the invalid query", async () => {
+  window.history.replaceState(null, "", "/historial?cursor=old");
+  const fetcher = vi
+    .fn()
+    .mockImplementation(() =>
+      Promise.resolve(Response.json({ items: [], nextCursor: null })),
+    );
+  vi.stubGlobal("fetch", fetcher);
+  render(<App />);
+  await screen.findByText("No hay hechos en esta página.");
+  fireEvent.change(screen.getByLabelText("Desde (UTC)"), {
+    target: { value: "2026-09-07" },
+  });
+  const until = screen.getByLabelText("Hasta (UTC)");
+  fireEvent.change(until, { target: { value: "2026-09-01" } });
+  await userEvent.click(
+    screen.getByRole("button", { name: "Aplicar filtros" }),
+  );
+  const error = screen.getByRole("alert");
+  expect(error).toHaveTextContent(
+    "La fecha hasta debe ser igual o posterior a la fecha desde.",
+  );
+  expect(until).toHaveAttribute("aria-invalid", "true");
+  expect(until).toHaveAttribute("aria-describedby", error.id);
+  expect(until).toHaveAccessibleDescription(error.textContent!);
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(window.location.search).toBe("?cursor=old");
+  fireEvent.change(until, { target: { value: "2026-09-08" } });
+  await userEvent.click(
+    screen.getByRole("button", { name: "Aplicar filtros" }),
+  );
+  await screen.findByText("No hay hechos con estos filtros.");
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  expect(fetcher).toHaveBeenLastCalledWith(
+    "/api/v1/history?from=2026-09-07&to=2026-09-08",
+    expect.anything(),
+  );
 });

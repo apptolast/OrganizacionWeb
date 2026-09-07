@@ -1,4 +1,10 @@
-import { useEffect, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
 import {
   readHistory,
   type HistoryPage,
@@ -17,10 +23,32 @@ export function History({ route }: { route: string }) {
     failure: number | null;
   }>();
 
+  const [rangeError, setRangeError] = useState<{ route: string } | null>(null);
+  if (rangeError && rangeError.route !== route) setRangeError(null);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const initiator = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const moved = (event: FocusEvent) => {
+      if (event.target !== initiator.current) initiator.current = null;
+    };
+    document.addEventListener("focusin", moved);
+    return () => document.removeEventListener("focusin", moved);
+  }, []);
   const [refresh, setRefresh] = useState(0);
   const current = result?.route === route && result.refresh === refresh;
   const page = current ? result.page : null;
   const failure = current ? result.failure : null;
+  useLayoutEffect(() => {
+    if (!current) return;
+    const control = initiator.current;
+    initiator.current = null;
+    if (
+      control &&
+      !control.isConnected &&
+      document.activeElement === document.body
+    )
+      heading.current?.focus();
+  }, [current]);
   useEffect(() => {
     const controller = new AbortController();
     void readHistory(
@@ -59,7 +87,20 @@ export function History({ route }: { route: string }) {
   }
   function apply(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (
+      document.activeElement instanceof HTMLElement &&
+      event.currentTarget.contains(document.activeElement)
+    )
+      initiator.current = document.activeElement;
     const data = new FormData(event.currentTarget);
+    const from = String(data.get("from") ?? "");
+    const to = String(data.get("to") ?? "");
+    if (from && to && from > to) {
+      initiator.current = null;
+      setRangeError({ route });
+      return;
+    }
+    setRangeError(null);
     const query = new URLSearchParams(filters);
     query.delete("cursor");
     for (const field of ["category", "from", "to"]) {
@@ -77,7 +118,9 @@ export function History({ route }: { route: string }) {
   }
   return (
     <main id="proyectos" tabIndex={-1} className="reader history">
-      <h1>Historial</h1>
+      <h1 ref={heading} tabIndex={-1}>
+        Historial
+      </h1>
       {failure !== 401 && (
         <form key={route} onSubmit={apply} aria-label="Filtros del historial">
           <label htmlFor="history-category">Categoría</label>
@@ -105,6 +148,10 @@ export function History({ route }: { route: string }) {
             <label htmlFor="history-to">Hasta (UTC)</label>
             <input
               id="history-to"
+              aria-invalid={rangeError?.route === route}
+              aria-describedby={
+                rangeError?.route === route ? "history-range-error" : undefined
+              }
               name="to"
               type="date"
               min="0001-01-01"
@@ -112,6 +159,11 @@ export function History({ route }: { route: string }) {
               defaultValue={filters.get("to") ?? ""}
             />
           </fieldset>
+          {rangeError?.route === route && (
+            <p id="history-range-error" role="alert">
+              La fecha hasta debe ser igual o posterior a la fecha desde.
+            </p>
+          )}
           <button type="submit">Aplicar filtros</button>
           <RouteLink href="/historial">Limpiar filtros</RouteLink>
         </form>
@@ -126,12 +178,35 @@ export function History({ route }: { route: string }) {
               : "No hemos podido consultar el historial."}
         </p>
       )}
+      {page && filters.has("projectId") && (
+        <p>
+          Contexto:{" "}
+          <RouteLink href={`/proyectos/${filters.get("projectId")}`}>
+            Este proyecto
+          </RouteLink>
+          {filters.has("taskId") && (
+            <>
+              {" "}
+              ·{" "}
+              <RouteLink
+                href={`/proyectos/${filters.get("projectId")}/tareas/${filters.get("taskId")}`}
+              >
+                Esta tarea
+              </RouteLink>
+            </>
+          )}
+          {" · "}
+          <RouteLink href={contextFreeUrl}>Quitar filtro de contexto</RouteLink>
+        </p>
+      )}
       {failure === 404 && (
         <RouteLink href={contextFreeUrl}>Quitar filtro de contexto</RouteLink>
       )}
       {failure !== null && failure !== 401 && failure !== 404 && (
         <button
-          onClick={() => {
+          onClick={(event) => {
+            if (document.activeElement === event.currentTarget)
+              initiator.current = event.currentTarget;
             setRefresh((value) => value + 1);
           }}
         >
@@ -139,11 +214,28 @@ export function History({ route }: { route: string }) {
         </button>
       )}
       {page && page.items.length > 0 && (
+        <p>
+          Empatar en el instante no indica un orden causal. Cada revisión
+          corresponde únicamente a su sesión o reserva.
+        </p>
+      )}
+      {page && page.items.length > 0 && (
         <ol aria-label="Hechos del historial">
           {page.items.map((item) => (
             <li key={`${item.type}:${item.id}`}>
               <h2>{actionLabel(item)}</h2>
               <SnapshotTime instant={item.occurredAt} zone="UTC" />
+              <p>
+                <RouteLink href={`/historial?projectId=${item.projectId}`}>
+                  Ver historial de este proyecto
+                </RouteLink>
+                {" · "}
+                <RouteLink
+                  href={`/historial?projectId=${item.projectId}&taskId=${item.taskId}`}
+                >
+                  Ver historial de esta tarea
+                </RouteLink>
+              </p>
               <p>
                 Proyecto actual:{" "}
                 <RouteLink href={`/proyectos/${item.projectId}`}>
@@ -309,7 +401,24 @@ export function History({ route }: { route: string }) {
         </ol>
       )}
       {failure !== 401 && (
-        <nav aria-label="Paginación del historial">
+        <nav
+          aria-label="Paginación del historial"
+          onClickCapture={(event) => {
+            if (
+              event.button !== 0 ||
+              event.ctrlKey ||
+              event.metaKey ||
+              event.shiftKey ||
+              event.altKey
+            )
+              return;
+            if (
+              document.activeElement instanceof HTMLElement &&
+              event.currentTarget.contains(document.activeElement)
+            )
+              initiator.current = document.activeElement;
+          }}
+        >
           {page?.nextCursor && (
             <RouteLink href={pageUrl(page.nextCursor)}>Más antiguos</RouteLink>
           )}

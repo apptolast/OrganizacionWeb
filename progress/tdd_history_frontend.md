@@ -140,3 +140,53 @@ UI20 ajustó la consulta del oráculo UI7 a headings de nivel2: los nuevos detal
 Incluye: acceso mediante Workspace, URL/página única, filtros explícitos nativos, paginación y recientes, estados de espera/vacío/error, recuperación GET, aborto antes de401 tardío, retirada de datos al cambiar consulta, cinco familias y sus detalles históricos con enlaces de sesión correctos. Reservas, inicio previsto, pausa acumulada, cierre final y ampliación están diferenciados; texto de notas y atribución se conservan. No catálogos nuevos ni consultas por fila.
 
 **Pendientes explícitos de este checkpoint**, que no es freeze final de18: enlaces desde detalles de proyecto/tarea y enlaces para filtrar contexto desde filas; etiqueta genérica de contexto vacío; regla de fechas from>to en formulario; foco/teclado al sustituir controles, descarte de JSON diferido tras cambiar consulta y regresiones de composición; explicación visible de empates/revisión local; SCSS responsive y evidencia completa30UX. La lectura de los details heredados y el cursor se reutilizan; no repetir matrices internas. El primer E2E vacío puede ejecutarse sobre este corte, sin presentarlo como cierre global.
+
+## UI 22–23 — enlaces desde detalles existentes
+
+UI22: el nuevo oráculo público del proyecto completado falló por ausencia del enlace (7f2fd9, history_ui_22_red.log). Se añadió únicamente el enlace dentro del detalle autorizado. ReadProjects completo: 36/36 GREEN a78cad, history_ui_22_green.log.
+
+UI23: el detalle de tarea falló por ausencia de «Ver historial de esta tarea» (94a87f, history_ui_23_red.log). Se añadió el enlace con ambos identificadores conocidos, sin cambiar el enrutamiento del fixture ni sus oráculos de peticiones inesperadas. El primer intento de escritura falló por el parámetro PowerShell NoNewline; ese intento no cambió producción y su ejecución siguió roja (history_ui_23_green.log). Escritura corregida y suite completa 3/3 GREEN 1f6650, history_ui_23_green_final.log.
+
+El checkpoint nominal fue aprobado e integrado por root en 9fa0e58; sus cinco archivos están liberados. Continúo sólo los pendientes contractuales.
+
+## UI 24–27 — contexto y foco del reintento
+
+UI24: contexto vacío sin nombre inventado ni consulta adicional, RED bd4ab0 → 21/21 GREEN cf7c90. UI25 refuerza el nominal existente con los dos enlaces contextuales de fila: RED 520dbc → 21/21 GREEN 55575f. Los enlaces filtran el contexto conocido, sin crear catálogos ni rutas nuevas.
+
+UI26 refuerza el reintento existente con foco en encabezado al desaparecer su botón: RED ddb963 → 21/21 GREEN aa9c16. UI27 añade movimiento deliberado a categoría y posterior blur mientras espera: RED fff919 acreditó apropiación indebida del foco al terminar; el listener local invalida esa intención y 22/22 GREEN c8cacc. No bandera permanente de interacción. Logs history_ui_24–27_red/green.log conservados.
+
+## UI 28–35 — navegación y retirada
+
+UI28 y UI29 refuerzan respectivamente aplicar filtros y paginación existentes con foco en el encabezado: RED bc45dd/6f1945 → GREEN 184639/847bc3, 22/22. UI30 añade al caso de cinco familias la advertencia contractual de empate no causal: RED 300267 → GREEN b1b2ce, 22/22.
+
+UI31 HTTP401 antiguo tras nueva página: inicialmente GREEN 438bc9. UI32 JSON200 diferido tras nueva página: inicialmente GREEN ec8eb7. UI33 problema503 desconocido antiguo: inicialmente GREEN 2aa904; esta UI clasifica por HTTP sin await del cuerpo del problema, por lo que no se inventa una etapa asíncrona de clasificación inexistente. Las tres guardas usan consultas reales del cliente y no alteraron producción.
+
+UI34 y UI35 acreditan retirada de notas de CLOSE previamente visibles y enlaces contextuales ante401/404 vigentes. Inicialmente GREEN e3ed80/f68690. Se mantienen los oráculos iniciales de ausencia de acceso y limpieza de contexto. Logs individuales history_ui_28–35 preservados; 27 casos UI acumulados, no equivalencia con los142 ejemplos del contrato.
+
+## UI 36–38 — URL completa
+
+UI36 limpiar todos los filtros/contexto/cursor con GETglobal: inicialmente GREEN 10e5a8. UI37 refuerza navegación existente con Back real de history y recuperación de una sola página anterior: inicialmente GREEN 7c36d8. UI38 arranque nuevo directamente en URL antigua con cursor opaco y filtros: inicialmente GREEN; no necesita cadena en memoria. Esto acredita montaje desde URL en jsdom, no una recarga física de navegador. El E2E complementará ese límite. No cambios productivos en estos tres ciclos.
+
+## Freeze funcional final — 7 de septiembre de 2026, 12:04 Europe/Madrid
+
+UI38 inicialmente GREEN cc98d0. Tras formato focal, History 29 casos y regresión de ReadProjects, composición WorkSession y TaskBlocks: 154/154 en cuatro suites, EXIT0 512ba0 (history_ui_final_tests.log). Prettier check, ESLint focal y TypeScript sin emisión: EXIT0 ff1589; logs history_ui_final_format_check.log, history_ui_final_lint.log y history_ui_final_types.log. El check final de formato pasó después de una escritura, sin repetir el incidente del checkpoint anterior.
+
+Manifest history_frontend_freeze.json congela14 archivos: nueve de montaje/evidencia UI y cinco de cliente/validadores ya aprobados. Delta desde checkpoint nominal: seis archivos, enlaces de los dos detalles, contexto de página/fila, aviso no causal, foco local y oráculos. No cambios a la lógica del cliente ni sus validadores. App, Workspace y SCSS permanecen iguales al checkpoint aprobado.
+
+### Mapa frontend y límites
+
+- @s25–27: 53 oráculos de cliente ya aprobados (528 con herencia), precisión BigInt, detalles cerrados, contextos, filtros, orden y rechazo íntegro. UI reutiliza SnapshotTime/seconds intactos; su oráculo heredado muestra 0,000001 s. CLOSE UI conserva notas, fecha atribuida y fallback UTC; la prueba de época1000/1600 y neto superior a Number pertenece al cliente, no se atribuye a una captura de navegador.
+- @s28–32: navegación Principal y enlaces de detalle proyecto completado/tarea; contexto vacío genérico sin consulta de nombres; aplicar/limpiar; una página por URL, antiguos/recientes, Back y montaje nuevo con URL antigua; enlaces de fila a rutas existentes y filtros de contexto. Recarga física pendiente de E2E.
+- @s33: cinco familias, detalles nativos sin GET por fila, notas plaintext y whitespace, intervalos originales/reservados, cierre/neto propio, extensión/fin, transición/reapertura y revisiones locales. Advertencia de empate sin causalidad; sin estadísticas ni escrituras.
+- @s34–35: pendiente anunciado síncronamente, vacíos separados,503 conservando URL y GET de reintento. La prueba jsdom no acredita latencia física de400ms.
+- @s36–37: HTTP401 antes del observador, JSON diferido y503 obsoletos;401/404 vigentes retiran notas y contexto previamente visibles. La clasificación de error no espera JSON; no se inventa cobertura de un await inexistente.
+- @s38: foco al desaparecer iniciador en aplicar/paginación/reintento; intento cancelado al mover deliberadamente foco, incluso si luego queda en body. Semántica y foco comprobados en DOM, no lector físico.
+- @s39: etiquetas, jerarquía nativa y notas con pre-wrap presentes; matriz31anchos,44px, tres motores, axe, texto y zoom siguen pendientes de UX real. SCSS sólo conserva notas y no se presenta como prueba de geometría. Ningún nuevo CSS especulativo durante esta entrega.
+
+Backend, HTTP, cursor, snapshot, persistencia y publicación corresponden a los otros autores y a su evidencia; no se convierten142ejemplos contractuales en142tests frontend. E2E nominal corre sobre el snapshot previo aprobado de C, no se atribuye automáticamente a este delta. Sin Git ni campañas globales por B.
+
+## UI39 — rango invertido y refreeze
+
+Root señaló el rango invertido pendiente, no un fallo del contrato HTTP. Único recorrido añadido: fechas invertidas → error accesible enlazado a Hasta sin GET ni cambio de cursor → corregir fecha y aplicar GET válido. RED 58da38 (history_ui_39_red.log); mínimo local, 30/30 History GREEN d47b5d (history_ui_39_green.log). El error se retira al aplicar válido y no se arrastra a otra URL. No nueva matriz de fechas heredadas ni cambios al decoder.
+
+Formato/check, ESLint y tipos focales terminados tras el ajuste; logs history_ui_39_format_check.log, history_ui_39_lint.log y history_ui_39_types.log. El pase previo154/154 sigue preservado para los otros tres archivos de pruebas sin cambios; sólo History pasó de29 a30, no se etiqueta155 como una ejecución conjunta nueva. Manifest anterior FD49C9…5B7D preservado en history_frontend_before_range_freeze.json; nuevo history_frontend_freeze.json cambia únicamente History y su test. Resto doce hashes idénticos. Freeze final de producto; CSS sólo si UX real demuestra necesidad y root coordina.

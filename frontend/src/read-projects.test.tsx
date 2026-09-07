@@ -429,3 +429,20 @@ it("@s16 anuncia espera inmediata sin presentar un vacío ficticio", () => {
     screen.queryByText("Todavía no tienes proyectos"),
   ).not.toBeInTheDocument();
 });
+
+it("history18 @s28 discovers a completed project's history directly from its detail", async () => {
+  window.history.replaceState(null, "", `/proyectos/${summary.id}`);
+  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    Response.json({
+      ...summary,
+      status: "completed",
+      ownerId: "owner",
+      description: "Proyecto terminado",
+    }),
+  );
+  render(<App />);
+  await screen.findByRole("heading", { level: 1, name: summary.name });
+  expect(
+    screen.getByRole("link", { name: "Ver historial de este proyecto" }),
+  ).toHaveAttribute("href", `/historial?projectId=${summary.id}`);
+});

@@ -108,6 +108,12 @@ export function ProjectReader({ route }: { route: string }) {
             onAccessFailure={revokeProject}
             onReload={retry}
           />
+          <RouteLink
+            className="secondary-link"
+            href={`/historial?projectId=${project.id}`}
+          >
+            Ver historial de este proyecto
+          </RouteLink>
           <h2>La idea, en tus palabras</h2>
           <p className="project-description">
             {project.description || "Sin descripción."}

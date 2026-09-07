@@ -109,6 +109,12 @@ export function TaskReader({
             {task.title}
           </h1>
           <p>{task.completionCriterion}</p>
+          <RouteLink
+            className="secondary-link"
+            href={`/historial?projectId=${task.projectId}&taskId=${task.id}`}
+          >
+            Ver historial de esta tarea
+          </RouteLink>
           <TaskState
             projectId={task.projectId}
             id={task.id}

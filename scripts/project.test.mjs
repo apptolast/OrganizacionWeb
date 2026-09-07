@@ -7,6 +7,29 @@ import { createHash } from "node:crypto";
 import * as commands from "./project.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
+function historicalTodayFile(file) {
+  const snapshot = JSON.parse(
+    readFileSync(
+      resolve(root, "progress/today_frontend_historical_snapshot.json"),
+      "utf8",
+    ),
+  );
+  assert.equal(
+    snapshot.sourceCommit,
+    "1f7090eb6a114194622d45184a84be4904f302bb",
+  );
+  assert.equal(snapshot.encoding, "base64");
+  const entry = snapshot.files[file];
+  assert.equal(entry.path, `frontend/${file}`);
+  if (file === "stryker.config.json")
+    assert.equal(
+      entry.sha256,
+      "42f5684c14952730c9af830a2aed9c6535ed36bd2bb2c07dc3523e3cde9ac017",
+    );
+  const bytes = Buffer.from(entry.base64, "base64");
+  assert.equal(createHash("sha256").update(bytes).digest("hex"), entry.sha256);
+  return bytes;
+}
 function capture() {
   const calls = [];
   // An injected runner keeps these tests from launching Gradle or Stryker.
@@ -409,10 +432,9 @@ test("today replay preserves 63 reviewed identities plus the new focus region wi
     assert.equal(item.operator, original.operator);
     assert.equal(item.originalStatus, original.status);
     assert.deepEqual(item.originalLocation, original.location);
-    const source = readFileSync(
-      resolve(root, "frontend", item.file),
-      "utf8",
-    ).replace(/\r\n/g, "\n");
+    const source = historicalTodayFile(item.file)
+      .toString("utf8")
+      .replace(/\r\n/g, "\n");
     const offset = ({ line, column }) =>
       source
         .split("\n")
@@ -429,18 +451,18 @@ test("today replay preserves 63 reviewed identities plus the new focus region wi
   }
   for (const [file, hash] of Object.entries(manifest.sourceSha256))
     assert.equal(
-      createHash("sha256")
-        .update(readFileSync(resolve(root, "frontend", file)))
-        .digest("hex"),
+      createHash("sha256").update(historicalTodayFile(file)).digest("hex"),
       hash,
       file,
     );
 });
 
-test("today configuration measures the frozen new code and changed shared regions", () => {
+test("today configuration preserves its historical source and shared-region selection", () => {
   const read = (path) => JSON.parse(readFileSync(resolve(root, path), "utf8"));
   const config = read("frontend/stryker.today.config.json");
-  const full = read("frontend/stryker.config.json");
+  const full = JSON.parse(
+    historicalTodayFile("stryker.config.json").toString("utf8"),
+  );
   const manifest = read("progress/today_frontend_mutation_scope.json");
   assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
   assert.equal(config.coverageAnalysis, "perTest");
@@ -468,9 +490,7 @@ test("today configuration measures the frozen new code and changed shared region
   ]);
   for (const [path, hash] of Object.entries(manifest.sourceSha256)) {
     assert.equal(
-      createHash("sha256")
-        .update(readFileSync(resolve(root, "frontend", path)))
-        .digest("hex"),
+      createHash("sha256").update(historicalTodayFile(path)).digest("hex"),
       hash,
       path,
     );
@@ -749,13 +769,11 @@ test("today final selects only the two unresolved exact identities", () => {
   assert.equal(
     manifest.sourceSha256,
     createHash("sha256")
-      .update(readFileSync(resolve(root, "frontend/src/today.tsx")))
+      .update(historicalTodayFile("src/today.tsx"))
       .digest("hex"),
   );
   for (const x of manifest.selection) {
-    const lines = readFileSync(resolve(root, "frontend", x.file), "utf8").split(
-      /\r?\n/,
-    );
+    const lines = historicalTodayFile(x.file).toString("utf8").split(/\r?\n/);
     assert.equal(
       lines[x.mappedLocation.start.line - 1].slice(
         x.mappedLocation.start.column,

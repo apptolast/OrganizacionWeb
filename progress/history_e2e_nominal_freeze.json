@@ -1,0 +1,22 @@
+[
+  {
+    "path": "e2e/history.spec.mjs",
+    "sha256": "B4857C4AF136E353EFFC39E4EDBF7591512DF054E78453D58DC0432F5D1149BF"
+  },
+  {
+    "path": "progress/tdd_history_e2e.md",
+    "sha256": "209FDD76F3F0B4D6232A9144E2CABA293D7B6B36C53D7E9EFC579952ED9266B5"
+  },
+  {
+    "path": "progress/history_e2e_pagination_before.json",
+    "sha256": "1E927D87D25B821B9CFA8DDA526E705F15EEFD9D539B6055714AF9DA2A2BAF96"
+  },
+  {
+    "path": "progress/history_e2e_pagination_after.json",
+    "sha256": "1E927D87D25B821B9CFA8DDA526E705F15EEFD9D539B6055714AF9DA2A2BAF96"
+  },
+  {
+    "path": "progress/history_e2e_pagination_evidence.json",
+    "sha256": "693357DAD5909E00CBE7D15AD9949F2F78FEDDFFCE5F3D7A9CD1C62EAD0565DC"
+  }
+]

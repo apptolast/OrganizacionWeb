@@ -313,3 +313,44 @@ PR24 borrador. Modelos/puerto de lectura9ef8a75 publicados; puertos de vista2797
 A entregó Store/V20/beanRead y dos tests reales con cinco hashes verificados:7b58da6. Root confirmó14 XML verdes del checkpoint y BUILD SUCCESSFUL del log; la sesión35877 se perdió al compactar A, por lo que no se inventa EXIT recuperado. GET de C integrado enCOMMON b1ed8e6. A confirma arranque combinado GREEN34a4d6 EXIT0 con CustomizationApiTest+CustomizationWiringTest y ciclo16, log customization_16_green.log. No cierre integral de21: validación de filas, comandos/valores/PG/escrituras/UI/mutación/E2E siguen en curso.
 
 C continúa PUT de vista en aislado con puertos reales y mocks de caso de uso, sin beanSave ficticio. Su RED inicial fue500 por el fallback heredado ante método sin ruta, no405; al añadir PUT nominal pasa200. No se modifica ese manejador transversal para simular RED. B mantiene cliente propio y tests nuevos; configuración40 casos verdes tras formato y lint, 400/refactor y valores todavía en curso. Ninguna UI21 terminada. No correr GradleCOMMON en paralelo a A. V14 protegida intacta y producción sigueed00ad4 (funciones1–20).
+
+## Feature 21: revisión de comandos y clientes, 7 de septiembre 22:50
+
+Helpers de dominio revisados en 36ee10d y puertos Create/Update en bdacad6,
+transferidos al agente HTTP. Cliente de configuración y 43 pruebas focales
+comprometidos en 709021f tras comprobar los dos hashes. Se ha pedido reforzar
+la coherencia entre revisión anterior y confirmación, además de validar el
+contenido; el autor continúa mediante TDD junto al cliente de valores.
+
+GET y PUT de vista HTTP terminados como corte aislado 692c386: 30 XML verdes
+comprobados por root, tres hashes iguales al manifiesto y EXIT 0 del autor
+6140ab. Espera el bean real de escritura para integrarse; no se ha presentado
+un mock como persistencia. El agente HTTP sigue con definiciones. Backend
+completa comandos y escrituras PostgreSQL. La revisión incremental está en
+progress/judge_custom_views_fields.md. PR 24 permanece en borrador, publicada
+hasta 328b505; CI 34160728290 estaba en curso al consultar. Producción sigue
+en ed00ad4, funciones 1–20. No hay despliegue nuevo ni cierre de la feature 21.
+
+## Feature 21: integración y reparación de CI, 7 de septiembre
+
+Escrituras de configuración reales integradas en 4e3a8a8, GET/PUT de vista
+en 6e128b3 y definiciones HTTP en 55e9c46. El fixture de wiring que dependía
+del orden se reprodujo y corrigió antes de integrar. Clientes de configuración
+y valores en 65d4043: 88 pruebas focales verdes, formato/ESLint/tsc y cuatro
+hashes revisados. Estado y formularios UI siguen en desarrollo.
+
+CI 34160728290 sobre 328b505 terminó FAILURE (1122/2398 Java): las nuevas FK
+de V20 exigían incluir sus tablas en las limpiezas antiguas. Se reprodujo
+SQLSTATE 0A000 y se repararon los 24 fixtures JDBC en 641ef4f. Root verificó
+sus 24 hashes y los XML de 1121 pruebas verdes, sin cambios de oráculos.
+HTTP 21 final 43 y wiring 2 también verdes. E2E reparado en 3efa87c: 42 SQL
+en 32 pruebas más limpieza de datos propios de personalización; verificación
+estática y hashes correctos, runtime/CI correctiva pendientes. Se conserva
+el log de CI fallida fuera de Git, con hash en el informe de revisión.
+
+Puertos y modelos de lectura de valores en c47400b, transferidos a C como
+b72e6ad; aún no bean o adaptador completo de valores. C cierra negociación
+Accept previa a los comandos tras reproducir una escritura que llegaba al
+puerto con Accept incompatible. A continúa valores y validación durable;
+B continúa estado/UI. Sólo A usa Gradle COMMON. PR 24 permanece en borrador,
+producción sigue ed00ad4 y funciones 22–30 pendientes.

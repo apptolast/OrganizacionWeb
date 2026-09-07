@@ -22,6 +22,33 @@ Estado: **IN_PROGRESS**, sin aprobación de cierre de la feature 21.
   El helper existente `instant` ya limita fechas válidas y microsegundos.
   Se conserva la evidencia focal de formato, ESLint y TypeScript del autor;
   no equivale a una ejecución global del frontend.
+- GET y PUT de vista HTTP: corte aislado `692c386`, con 30 pruebas MVC,
+  cero fallos, errores u omisiones comprobados en el XML. Tres hashes
+  coinciden con `customization_http_view_freeze.json`; formato y regresión
+  del autor terminados con EXIT 0 (`6140ab`). Reutiliza el validador de
+  dominio, comprueba cabeceras antes del JSON y no publica datos privados
+  al informar de un conflicto. Su integración en la aplicación espera el
+  bean de escritura real. Los mocks de casos de uso no prueban PostgreSQL.
+  Posteriormente integrado en `6e128b3`, tras los beans reales del corte
+  de escritura `4e3a8a8`.
+- Escrituras de configuración: `4e3a8a8`, once hashes corregidos comprobados
+  contra `customization_writing_checkpoint_corrected_manifest.json`.
+  Las 46 pruebas del checkpoint original tienen cero fallos, errores y
+  omisiones; el fixture corregido tiene dos pruebas verdes adicionales
+  verificadas en su XML. No se suman como 48 pruebas distintas.
+  Revisados los tres comandos, serialización por cuenta y ámbito antes del
+  reloj, carrera inicial con un ganador y un conflicto, no-op físico
+  mediante `xmin`/`ctid`, tiempo monótono y ausencia de eventos de negocio.
+  La traducción de errores de escritura a 503 y validación integral de filas
+  guardadas siguen pendientes; no es aprobación final del adaptador.
+- Definiciones HTTP integradas en `55e9c46`: 43 pruebas MVC verdes,
+  tres hashes verificados, creación y edición con puertos reales y
+  validación por índice corregida. No acredita todavía negociación completa.
+- Clientes de configuración y valores integrados en `65d4043`: cuatro
+  hashes verificados, 50 pruebas de configuración y 38 de valores verdes.
+  Revisados esquema compuesto, orden de definiciones, tipos, límites,
+  aborto y confirmación coherente. Formato, ESLint y TypeScript verdes
+  en `9e69bc`; ejecución focal de 88 pruebas en `aece31`.
 
 ## Hallazgos que deben resolverse antes del cierre
 
@@ -33,10 +60,39 @@ Estado: **IN_PROGRESS**, sin aprobación de cierre de la feature 21.
    una edición cuyo campo no existía en la instantánea enviada. Corrección
    delegada al autor mediante TDD, sin bloquear su trabajo independiente de
    valores.
+   Resuelto en `65d4043`: guardia común de versión y fecha, esquema fijo
+   en valores y existencia previa del campo editado. Se revisaron código
+   y oráculos de confirmación contradictoria, no-op y microsegundos.
 2. En la lectura provisional de `UpdateCustomField`, el reloj podía hacer
    retroceder `updatedAt`. El autor confirmó que su ciclo 29 ya reproduce
    ese caso en rojo (`d869dc`). La implementación no estaba congelada ni
    se había aprobado como completa.
+   El corte de escritura posterior ya aplica el máximo entre la fecha
+   anterior y el reloj; caso verde `6a17d1` y código comprobado por root.
+3. La prueba de arranque `CustomizationWiringTest` comparte PostgreSQL entre
+   dos métodos, pero uno contaba todas las filas esperando una. El otro
+   método también crea configuración, por lo que el resultado dependía del
+   orden de ejecución. Se ha pedido aislar el recuento o la preparación
+   antes de integrar el corte de escritura.
+   Resuelto antes de integrar: reproducción real con orden inverso
+   `a88843` en rojo, limpieza de preferencias en PostgreSQL exclusivo y
+   `6433a1` en verde. Se retiraron las anotaciones temporales de orden;
+   ejecución final `e02de9` verde, XML de wiring revisado por root.
+4. CI `34160728290` sobre `328b505` falló: 1122 de 2398 pruebas Java.
+   V20 añadió dos FK y las limpiezas antiguas no incluían las tablas nuevas.
+   Reproducción local `e21b09`, SQLSTATE `0A000`. Reparación Java `641ef4f`:
+   24 hashes y 24 clases/XML revisados, 1121 pruebas verdes; sólo se añaden
+   las dos tablas a los TRUNCATE. HTTP actual 43 y wiring 2 también verdes.
+   Reparación E2E `3efa87c`: 42 sentencias en 32 pruebas y limpieza propia
+   del fixture autenticado; 36 hashes revisados, sintaxis/formato y AST
+   comprobados por el autor. Su ejecución E2E y CI correctiva están pendientes.
+   Log original externo: `organizationweb-customization-ci-34160728290.log`,
+   SHA256 `606F9D02AD4B161474170A3A7AD889A1A2009F2CE468629CE121AC47C4FA739E`.
+5. El oráculo HTTP de Accept descubrió que un PUT podía llegar al caso de uso
+   antes de fallar la negociación de respuesta (`15cd96`). Se ha ratificado
+   una guardia local a las rutas 21, basada en negociación y especificidad
+   de Spring, con rechazo antes de cualquier comando. Corrección y sus
+   pruebas de calidad, comodines y ausencia de efectos todavía pendientes.
 
 ## Puertas pendientes
 

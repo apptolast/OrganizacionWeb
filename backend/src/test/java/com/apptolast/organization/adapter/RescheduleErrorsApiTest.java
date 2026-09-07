@@ -56,7 +56,7 @@ class RescheduleErrorsApiTest {
     org.mockito.Mockito.when(clock.instant()).thenReturn(Instant.parse("2030-01-07T09:00:00Z"));
     jdbc.execute(
         "TRUNCATE"
-            + " work_sessions,block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
+            + " work_session_intervals,work_session_changes,work_sessions,block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
     project = UUID.randomUUID();
     task = UUID.randomUUID();
     block = UUID.randomUUID();

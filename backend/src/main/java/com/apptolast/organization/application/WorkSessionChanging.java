@@ -5,6 +5,11 @@ import java.util.UUID;
 import java.util.function.Function;
 
 public interface WorkSessionChanging {
-  WorkSessionTransitionConfirmation commit(String owner, UUID session, UUID key, String action,
-      WorkSessionRevision expected, Function<WorkSessionState, WorkSessionTransition> operation);
+  WorkSessionTransitionConfirmation commit(
+      String owner,
+      UUID session,
+      UUID key,
+      String action,
+      WorkSessionRevision expected,
+      Function<WorkSessionState, WorkSessionTransition> operation);
 }

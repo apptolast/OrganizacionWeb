@@ -58,7 +58,7 @@ class WorkSessionIntegrationTest {
   @BeforeEach
   void seed() {
     jdbc.execute(
-        "TRUNCATE work_sessions,block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
+        "TRUNCATE work_session_intervals,work_session_changes,work_sessions,block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
     jdbc.update(
         "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,'owner','P','','active',now(),now())",
         project);

@@ -43,6 +43,7 @@ pitest {
     val scheduleBlockOnly = scope == "schedule_block"
     val todayOnly = scope == "today"
     val rescheduleOnly = scope == "reschedule"
+    val pauseResumeSessionOnly = scope == "pause_resume_session"
     val startWorkSessionOnly = scope == "start_work_session"
     val startWorkSessionReplayOnly = scope == "start_work_session_replay"
     val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
@@ -206,7 +207,15 @@ pitest {
         "com.apptolast.organization.adapter.config.ApplicationConfiguration",
         "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher"
     )
+    val pauseResumeSessionClasses = startWorkSessionClasses + setOf(
+        "com.apptolast.organization.domain.WorkSession*",
+        "com.apptolast.organization.application.ChangeWorkSession*",
+        "com.apptolast.organization.application.ReadWorkSessionState*",
+        "com.apptolast.organization.application.ReadWorkSessionChanges*",
+        "com.apptolast.organization.adapter.http.WorkSessionStateController*"
+    )
     targetClasses.set(when {
+        pauseResumeSessionOnly -> pauseResumeSessionClasses
         startWorkSessionReplayOnly -> setOf("com.apptolast.organization.application.WorkSessionStarted")
         startWorkSessionOnly -> startWorkSessionClasses
         rescheduleOnly -> rescheduleClasses
@@ -217,9 +226,10 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses
     })
     targetTests.set(when {
+        pauseResumeSessionOnly -> setOf("com.apptolast.organization.*")
         startWorkSessionReplayOnly -> setOf("com.apptolast.organization.*")
         startWorkSessionOnly -> setOf("com.apptolast.organization.*")
         rescheduleOnly -> rescheduleTests
@@ -232,6 +242,7 @@ pitest {
         taskOnly -> taskTests
         else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests
     })
+    if (pauseResumeSessionOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-pause-resume-session"))
     if (rescheduleOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-reschedule"))
     if (startWorkSessionOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-start-work-session"))
     if (startWorkSessionReplayOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-start-work-session-replay"))

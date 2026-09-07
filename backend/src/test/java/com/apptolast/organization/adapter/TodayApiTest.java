@@ -53,7 +53,7 @@ class TodayApiTest {
     when(clock.getZone()).thenReturn(ZoneOffset.UTC);
     jdbc.execute(
         "TRUNCATE"
-            + " work_sessions,block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
+            + " work_session_intervals,work_session_changes,work_sessions,block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
     jdbc.update(
         "INSERT INTO"
             + " availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at)"

@@ -46,7 +46,8 @@ class WorkSessionStoreTest {
 
   @BeforeEach
   void context() {
-    jdbc.execute("TRUNCATE work_sessions,projects,outbox_events,availability_preferences CASCADE");
+    jdbc.execute(
+        "TRUNCATE work_session_intervals,work_session_changes,work_sessions,projects,outbox_events,availability_preferences CASCADE");
     project = UUID.randomUUID();
     task = UUID.randomUUID();
     key = UUID.randomUUID();

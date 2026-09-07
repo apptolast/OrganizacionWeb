@@ -49,7 +49,7 @@ class RescheduleCoordinationTest {
   void reset() {
     jdbc.execute(
         "TRUNCATE"
-            + " work_sessions,block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
+            + " work_session_intervals,work_session_changes,work_sessions,block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
     store =
         new PostgresBlockStore(
             jdbc, transaction, new PostgresAvailabilityStore(jdbc, transaction), json);

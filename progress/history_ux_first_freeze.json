@@ -1,0 +1,18 @@
+[
+  {
+    "path": "frontend/src/history.scss",
+    "sha256": "74A1B6D3EBA3AB664FF9E0513AD938F3D7DBA484FEB04DEFE79EA16E0ABE002A"
+  },
+  {
+    "path": "frontend/src/styles.scss",
+    "sha256": "5A290233564D874FD0A349FADCD48B3952C20CFBA2552A45EB9E147D24F21B30"
+  },
+  {
+    "path": "e2e/history-ux.spec.mjs",
+    "sha256": "D745CA2A51A5C74A0EC37247C3048F8AAC663F45D8C3077D7335496BF26B2F50"
+  },
+  {
+    "path": "progress/tdd_history_ux.md",
+    "sha256": "81E4BD1568D10298EE5689F1EEE0CE1A0D42EA19530DFABF159F3414843F6CF5"
+  }
+]

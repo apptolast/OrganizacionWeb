@@ -96,3 +96,6 @@ reports/
 /progress/history_http_final_xml/
 /progress/history_backend_final_xml/
 /frontend/.stryker-tmp-history/
+/progress/history_ux_initial_artifacts/
+/progress/history_ux_geometry_fixed_artifacts/
+/progress/history_ux_verified_artifacts/

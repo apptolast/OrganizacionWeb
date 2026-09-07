@@ -1,0 +1,122 @@
+[
+  {
+    "state": "details",
+    "width": 320,
+    "height": 900,
+    "scroll": 320,
+    "controls": [
+      {
+        "name": "◉ Hoy",
+        "x": 12,
+        "y": -275,
+        "width": 41.359375,
+        "height": 44
+      },
+      {
+        "name": "▦ Proyectos ",
+        "x": 61.359375,
+        "y": -275,
+        "width": 70.96875,
+        "height": 44
+      },
+      {
+        "name": "◷ Disponibilidad",
+        "x": 140.328125,
+        "y": -275,
+        "width": 95.4375,
+        "height": 44
+      },
+      {
+        "name": "Historial",
+        "x": 243.765625,
+        "y": -275,
+        "width": 64.234375,
+        "height": 44
+      },
+      {
+        "name": "Categoría",
+        "x": 15,
+        "y": -5.53125,
+        "width": 290,
+        "height": 44
+      },
+      {
+        "name": "Desde (UTC)",
+        "x": 31,
+        "y": 102.0625,
+        "width": 258,
+        "height": 44
+      },
+      {
+        "name": "Hasta (UTC)",
+        "x": 31,
+        "y": 183.0625,
+        "width": 258,
+        "height": 44
+      },
+      {
+        "name": "Aplicar filtros",
+        "x": 15,
+        "y": 247.0625,
+        "width": 290,
+        "height": 45
+      },
+      {
+        "name": "Limpiar filtros",
+        "x": 15,
+        "y": 300.0625,
+        "width": 290,
+        "height": 44
+      },
+      {
+        "name": "Este proyecto",
+        "x": 87.125,
+        "y": 360.0625,
+        "width": 95.703125,
+        "height": 44
+      },
+      {
+        "name": "Quitar filtro de contexto",
+        "x": 15,
+        "y": 404.0625,
+        "width": 169.921875,
+        "height": 44
+      },
+      {
+        "name": "Ver historial de este proyecto",
+        "x": 55,
+        "y": 656.875,
+        "width": 205.734375,
+        "height": 44
+      },
+      {
+        "name": "Ver historial de esta tarea",
+        "x": 55,
+        "y": 700.875,
+        "width": 178.5,
+        "height": 44
+      },
+      {
+        "name": "Revisar hechos y contexto sin perder decisiones 🧭",
+        "x": 55,
+        "y": 781.875,
+        "width": 250,
+        "height": 44
+      },
+      {
+        "name": "Una tarea con título largo y Unicode para conservar una lectura comprensible en el historial",
+        "x": 55,
+        "y": 862.875,
+        "width": 250,
+        "height": 63
+      },
+      {
+        "name": "Ver detalles del hecho",
+        "x": 55,
+        "y": 941.875,
+        "width": 250,
+        "height": 44
+      }
+    ]
+  }
+]

@@ -19,6 +19,17 @@ class ProjectStateConfigurationTest {
     var runner =
         new ApplicationContextRunner()
             .withUserConfiguration(ApplicationConfiguration.class)
+            .withBean(
+                org.springframework.jdbc.core.JdbcTemplate.class,
+                () -> org.mockito.Mockito.mock(org.springframework.jdbc.core.JdbcTemplate.class))
+            .withBean(
+                org.springframework.transaction.PlatformTransactionManager.class,
+                () ->
+                    org.mockito.Mockito.mock(
+                        org.springframework.transaction.PlatformTransactionManager.class))
+            .withBean(
+                com.fasterxml.jackson.databind.ObjectMapper.class,
+                com.fasterxml.jackson.databind.ObjectMapper::new)
             .withBean(BlockMoving.class, () -> org.mockito.Mockito.mock(BlockMoving.class))
             .withBean(
                 BlockChangeQueries.class, () -> org.mockito.Mockito.mock(BlockChangeQueries.class))

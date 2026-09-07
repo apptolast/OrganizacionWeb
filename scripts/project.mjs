@@ -22,6 +22,8 @@ export function createProject(runner = run) {
       target !== "" &&
       (task !== "mutate" ||
         ![
+          "start_work_session-frontend",
+          "start_work_session-backend",
           "reschedule-frontend",
           "reschedule-backend",
           "today-backend",
@@ -53,6 +55,21 @@ export function createProject(runner = run) {
       mutate: "pitest",
     };
     if (!commands[task]) throw new Error(`Unknown task: ${task}`);
+    if (task === "mutate" && target === "start_work_session-backend") {
+      backend("pitest", ["-PmutationScope=start_work_session"]);
+      return;
+    }
+    if (task === "mutate" && target === "start_work_session-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.start-work-session.config.json",
+      ]);
+      return;
+    }
     if (task === "mutate" && target === "reschedule-backend") {
       backend("pitest", ["-PmutationScope=reschedule"]);
       return;

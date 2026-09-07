@@ -43,6 +43,7 @@ pitest {
     val scheduleBlockOnly = scope == "schedule_block"
     val todayOnly = scope == "today"
     val rescheduleOnly = scope == "reschedule"
+    val startWorkSessionOnly = scope == "start_work_session"
     val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
     val authenticationClasses = setOf(
         "com.apptolast.organization.adapter.http.SessionController",
@@ -192,7 +193,20 @@ pitest {
     )
     // Keep all JUnit candidates: PIT chooses tests using measured coverage.
     val rescheduleTests = setOf("com.apptolast.organization.*")
+    val startWorkSessionClasses = setOf(
+        "com.apptolast.organization.domain.SessionStart",
+        "com.apptolast.organization.domain.OutboxMessage",
+        "com.apptolast.organization.application.StartWorkSession*",
+        "com.apptolast.organization.application.ReadWorkSessions*",
+        "com.apptolast.organization.application.WorkSession*",
+        "com.apptolast.organization.application.PublishOutbox",
+        "com.apptolast.organization.adapter.persistence.PostgresWorkSessionStore*",
+        "com.apptolast.organization.adapter.http.WorkSessionController*",
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+        "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher"
+    )
     targetClasses.set(when {
+        startWorkSessionOnly -> startWorkSessionClasses
         rescheduleOnly -> rescheduleClasses
         todayOnly -> todayClasses
         scheduleBlockOnly -> scheduleBlockClasses
@@ -201,9 +215,10 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses
     })
     targetTests.set(when {
+        startWorkSessionOnly -> setOf("com.apptolast.organization.*")
         rescheduleOnly -> rescheduleTests
         todayOnly -> todayTests
         scheduleBlockOnly -> scheduleBlockTests
@@ -215,6 +230,7 @@ pitest {
         else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests
     })
     if (rescheduleOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-reschedule"))
+    if (startWorkSessionOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-start-work-session"))
     if (todayOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-today"))
     if (availabilityOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-availability"))
     if (scheduleBlockOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-schedule-block"))

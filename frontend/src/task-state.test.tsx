@@ -48,6 +48,8 @@ function contextFetch(
     .spyOn(globalThis, "fetch")
     .mockImplementation(async (input, options) => {
       const url = String(input);
+      if (url === "/api/v1/work-sessions/active")
+        return Response.json({ session: null });
       const result = override(url, options);
       if (result) return result;
       if (url === `/api/v1/projects/${project.id}`)

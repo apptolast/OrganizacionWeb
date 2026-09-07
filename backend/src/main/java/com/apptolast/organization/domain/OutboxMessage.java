@@ -26,11 +26,13 @@ public record OutboxMessage(
             && !"SubtaskCreated.v1".equals(type)
             && !"TaskStatusChanged.v1".equals(type)
             && !"BlockPlanned.v1".equals(type)
-            && !"BlockChanged.v1".equals(type))
+            && !"BlockChanged.v1".equals(type)
+            && !"WorkSessionStarted.v1".equals(type))
         || schemaVersion != 1) return "UNSUPPORTED_EVENT";
     boolean taskStatusChanged = "TaskStatusChanged.v1".equals(type);
     boolean blockPlanned = "BlockPlanned.v1".equals(type);
     boolean blockChanged = "BlockChanged.v1".equals(type);
+    boolean workSessionStarted = "WorkSessionStarted.v1".equals(type);
     boolean statusChanged = "ProjectStatusChanged.v1".equals(type);
     boolean subtaskCreated = "SubtaskCreated.v1".equals(type);
     boolean taskCreated = "TaskCreated.v1".equals(type) || subtaskCreated;
@@ -102,6 +104,20 @@ public record OutboxMessage(
               "revision",
               "before",
               "after");
+    if (workSessionStarted)
+      expected =
+          java.util.Set.of(
+              "eventId",
+              "aggregateId",
+              "ownerId",
+              "occurredAt",
+              "schemaVersion",
+              "type",
+              "projectId",
+              "taskId",
+              "plannedMinutes",
+              "plannedEndAt",
+              "zoneId");
     if (!expected.equals(payload.keySet())
         || !eventId.toString().equals(payload.get("eventId"))
         || !aggregateId.toString().equals(payload.get("aggregateId"))
@@ -113,6 +129,33 @@ public record OutboxMessage(
       if (!occurredAt.equals(Instant.parse(timestamp))) return "INVALID_EVENT";
     } catch (java.time.format.DateTimeParseException error) {
       return "INVALID_EVENT";
+    }
+    if (workSessionStarted) {
+      if (eventId.equals(aggregateId)) return "INVALID_EVENT";
+      for (var field : java.util.List.of("projectId", "taskId")) {
+        if (!(payload.get(field) instanceof String id)
+            || !id.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))
+          return "INVALID_EVENT";
+      }
+      if (!(payload.get("plannedMinutes") instanceof Integer minutes)
+          || !(payload.get("zoneId") instanceof String zone)
+          || zone.isBlank()
+          || minutes < 1
+          || minutes > 1440
+          || !(payload.get("plannedEndAt") instanceof String end)
+          || !workSessionTimestamp(timestamp)
+          || !workSessionTimestamp(end)
+          || occurredAt.getNano() % 1000 != 0
+          || occurredAt.isBefore(Instant.parse("0001-01-01T00:00:00Z"))) return "INVALID_EVENT";
+      try {
+        var plannedEnd = Instant.parse(end);
+        return plannedEnd.isBefore(Instant.parse("+10000-01-01T00:00:00Z"))
+                && occurredAt.plusSeconds(minutes * 60L).equals(plannedEnd)
+            ? null
+            : "INVALID_EVENT";
+      } catch (java.time.DateTimeException error) {
+        return "INVALID_EVENT";
+      }
     }
     if (blockChanged) {
       for (var field : java.util.List.of("changeId", "blockId", "taskId")) {
@@ -212,5 +255,10 @@ public record OutboxMessage(
     } catch (java.time.DateTimeException | IllegalArgumentException error) {
       return false;
     }
+  }
+
+  private static boolean workSessionTimestamp(String value) {
+    return value.matches(
+        "[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?Z");
   }
 }

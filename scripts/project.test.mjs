@@ -14,6 +14,132 @@ function capture() {
   return { calls, project };
 }
 
+test("start work PIT selects the complete feature and shared publication with all JUnit candidates", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  assert.match(
+    build,
+    /val startWorkSessionOnly = scope == "start_work_session"/,
+  );
+  assert.match(build, /startWorkSessionOnly -> startWorkSessionClasses/);
+  assert.match(
+    build,
+    /startWorkSessionOnly -> setOf\("com\.apptolast\.organization\.\*"\)/,
+  );
+  assert.match(
+    build,
+    /if \(startWorkSessionOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-start-work-session"\)\)/,
+  );
+  const selection =
+    /val startWorkSessionClasses = setOf\(([\s\S]*?)\n    \)/.exec(build)?.[1];
+  assert.ok(selection);
+  assert.deepEqual(
+    [...selection.matchAll(/"([^"]+)"/g)].map((match) => match[1]),
+    [
+      "com.apptolast.organization.domain.SessionStart",
+      "com.apptolast.organization.domain.OutboxMessage",
+      "com.apptolast.organization.application.StartWorkSession*",
+      "com.apptolast.organization.application.ReadWorkSessions*",
+      "com.apptolast.organization.application.WorkSession*",
+      "com.apptolast.organization.application.PublishOutbox",
+      "com.apptolast.organization.adapter.persistence.PostgresWorkSessionStore*",
+      "com.apptolast.organization.adapter.http.WorkSessionController*",
+      "com.apptolast.organization.adapter.config.ApplicationConfiguration",
+      "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher",
+    ],
+  );
+  assert.match(build, /threads\.set\(4\)/);
+  assert.match(build, /mutationThreshold\.set\(80\)/);
+});
+
+test("start work backend rejects a non-mutation task before execution", () => {
+  const { calls, project } = capture();
+  assert.throws(
+    () => project("test", "start_work_session-backend"),
+    /Invalid target/,
+  );
+  assert.deepEqual(calls, []);
+});
+
+test("start work frontend rejects injected configuration before execution", () => {
+  const { calls, project } = capture();
+  assert.throws(
+    () => project("mutate", "start_work_session-frontend --config other.json"),
+    /Invalid target/,
+  );
+  assert.deepEqual(calls, []);
+});
+
+test("default frontend scope retains the complete new work session sources", () => {
+  const config = JSON.parse(
+    readFileSync(resolve(root, "frontend/stryker.config.json"), "utf8"),
+  );
+  assert.ok(config.mutate.includes("src/work-session-api.ts"));
+  assert.ok(config.mutate.includes("src/work-session.tsx"));
+  assert.ok(config.mutate.includes("src/task-reader.tsx"));
+});
+
+test("start work frontend scope includes the session flow and its task reader integration", () => {
+  const config = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.start-work-session.config.json"),
+      "utf8",
+    ),
+  );
+  assert.deepEqual(config.mutate, [
+    "src/work-session-api.ts",
+    "src/work-session.tsx",
+    "src/task-reader.tsx:124:0-135:12",
+  ]);
+  assert.equal(config.thresholds.break, 80);
+  assert.equal(config.coverageAnalysis, "perTest");
+  assert.equal(config.concurrency, 8);
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  assert.equal(
+    config.jsonReporter.fileName,
+    "reports/mutation-start-work-session/mutation.json",
+  );
+  assert.equal(
+    config.htmlReporter.fileName,
+    "reports/mutation-start-work-session/mutation.html",
+  );
+  const lines = readFileSync(
+    resolve(root, "frontend/src/task-reader.tsx"),
+    "utf8",
+  ).split(/\r?\n/);
+  assert.equal(lines[123].trim(), "<WorkSession");
+  assert.equal(lines[134].trim(), "/>");
+});
+
+test("start work backend invokes only its fixed PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "start_work_session-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=start_work_session"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
+test("start work frontend invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "start_work_session-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.start-work-session.config.json",
+      ],
+    ],
+  ]);
+});
+
 test("today backend scope runs only its fixed PIT target", () => {
   const { calls, project } = capture();
   project("mutate", "today-backend");

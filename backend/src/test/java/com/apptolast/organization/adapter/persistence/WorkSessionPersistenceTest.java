@@ -71,7 +71,8 @@ class WorkSessionPersistenceTest {
     var result =
         new StartWorkSession(
                 new PostgresWorkSessionStore(jdbc, new DataSourceTransactionManager(source), json),
-                clock)
+                clock,
+                () -> java.util.Set.of("UTC", "Europe/Madrid"))
             .start("owner", project, task, key, 25);
     var session = result.session();
     assertThat(result.replayed()).isFalse();

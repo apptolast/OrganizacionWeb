@@ -6,6 +6,7 @@ import { ProjectTasks } from "./project-tasks";
 import { TaskParent } from "./task-parent";
 import { TaskState } from "./task-state";
 import { TaskBlocks } from "./task-blocks";
+import { WorkSession } from "./work-session";
 import type { TaskStatusSnapshot } from "./task-status-api";
 import { ProjectStatusControl } from "./project-status-control";
 export function TaskReader({
@@ -120,6 +121,18 @@ export function TaskReader({
               : `Estimación: ${task.estimatedMinutes} min`}
           </p>
           <TaskParent projectId={task.projectId} id={task.id} />
+          <WorkSession
+            projectId={task.projectId}
+            taskId={task.id}
+            taskTitle={task.title}
+            taskStatus={taskState?.status}
+            projectStatus={
+              !projectLoading && !projectFailure
+                ? snapshot?.project.status
+                : undefined
+            }
+            onAccessFailure={setFailure}
+          />
           <TaskBlocks
             onAccessFailure={setFailure}
             projectId={task.projectId}

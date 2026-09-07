@@ -1,0 +1,17 @@
+# Revisión independiente del lote frontend14
+
+Dictamen: **APPROVED para iniciar gates de integración y mutación**. No es cierre de feature14, aprobación de despliegue ni validación responsive completa. Autor resume_frontend; revisor root, sin escribir producción ni tests del lote. Freeze: diez archivos y hashes en start_work_frontend_freeze.json, comprobados en d16bca.
+
+Se revisaron el cliente, componente, integración TaskReader, tests y cambios de fixtures en 50f3f9,64c01b,7500b7,ee0371,d16bca y dd5015. El cliente conserva respuestas de error para clasificación, valida DTO cerrado, identidad contextual, duración y relación temporal exacta en microsegundos. La interfaz separa ausencia confirmada de espera/error y mantiene intención/key ante incertidumbre, sin POST automático. La recuperación por key exige compatibilidad del recibo. La confirmación conserva el fin original y las consultas posteriores no eliminan el recibo por un error.
+
+Hallazgo previo de revisión resuelto: una respuesta active=null anterior al POST podía restaurar ausencia después de confirmar. El autor añadió RED61230d y corrigió mediante aborto de lookup al confirmar; GREEN022727. El test actual conserva confirmación y ausencia de un segundo iniciador después de entregar deliberadamente la respuesta antigua. Se revisaron también retiro de contexto, JSON y clasificación tardíos, aborto antes de observador401, logout con respuesta pendiente, foco al desaparecer controles y conservación de foco en otro control conectado.
+
+Evidencia del autor sobre el freeze:73/73 pruebas focales (32 API,39 UI,2 integración),4a7565;250/250 regresión pertinente heredada,ff75d9; ESLint4a12d6,TypeScript692cff y formato977c1d. Los tres cambios de fixtures heredados sólo responden explícitamente al GET active nuevo; no relajan aserciones. Root verifica correspondencia de hashes y revisa oráculos; no atribuye una segunda corrida independiente de esos tests. Los refuerzos inicialmente verdes y errores de fixture quedan identificados honestamente en la bitácora.
+
+Ponytail: controles nativos y SCSS existente, sin dependencias ni abstracciones nuevas para el formulario. El puerto y el parser compartido conservan las reglas explícitas. Caveman lite no elimina mensajes necesarios de incertidumbre, cierre y accesibilidad.
+
+Límites pendientes obligatorios: recorrido HTTP/PG real14, mutación del código nuevo y puerta global, mediciones de geometría/contraste/áreas táctiles/feedback, zoom nativo y motores. ux_start_work_session.md incluye las treinta filas y distingue evidencia semántica de mediciones pendientes. JSDOM no acredita responsive ni evaluación humana. La integración TaskReader no debe publicarse para uso habitual antes del ciclo de cierre16. El lote puede versionarse en rama de desarrollo y medirse con Stryker mientras los otros autores completan backend y HTTP.
+
+## Configuración de mutación frontend revisada
+
+Root revisó bc9b16: el destino frontend sólo ejecuta la configuración fija; se mutan API y componente completos más la composición TaskReader124–135, cuyos extremos verifica el test de despacho. El default incluye también API/UI14. Se mantienen umbral80, análisis por test, concurrencia8 y exclusión del directorio protegido. Veintiocho tests de despacho verdes en d03b00. Aprobada la campaña frontend sobre producto congelado46913a7; el selector Gradle backend todavía no existe y **no debe ejecutarse** su destino hasta completarlo y revisarlo. No se versiona ni se publica el despacho incompleto como arnés final.

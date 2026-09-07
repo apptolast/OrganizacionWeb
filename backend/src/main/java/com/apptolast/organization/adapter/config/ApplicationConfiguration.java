@@ -9,6 +9,29 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  com.apptolast.organization.adapter.persistence.PostgresWorkSessionStore workSessionStore(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions,
+      com.fasterxml.jackson.databind.ObjectMapper json) {
+    return new com.apptolast.organization.adapter.persistence.PostgresWorkSessionStore(
+        jdbc, transactions, json);
+  }
+
+  @Bean
+  com.apptolast.organization.application.StartWorkSession startWorkSession(
+      com.apptolast.organization.application.WorkSessionStarting store,
+      Clock clock,
+      com.apptolast.organization.application.ZoneCatalog catalog) {
+    return new com.apptolast.organization.application.StartWorkSession(store, clock, catalog);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReadWorkSessions readWorkSessions(
+      com.apptolast.organization.application.WorkSessionQueries queries) {
+    return new com.apptolast.organization.application.ReadWorkSessions(queries);
+  }
+
+  @Bean
   com.apptolast.organization.application.ReadBlockChangesUseCase readBlockChanges(
       com.apptolast.organization.application.BlockChangeQueries queries) {
     return new com.apptolast.organization.application.ReadBlockChanges(queries);

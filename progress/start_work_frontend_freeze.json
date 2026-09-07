@@ -1,0 +1,42 @@
+[
+  {
+    "path": "frontend/src/work-session-api.ts",
+    "sha256": "B50C97B6309B68389257D4A02BE132789F3A1B91E082696736166786BC1D87A9"
+  },
+  {
+    "path": "frontend/src/work-session-api.test.ts",
+    "sha256": "81692FFA8B131505BA787BA10ECEEE76AAE238B4D704D4D1F6524362606E58C7"
+  },
+  {
+    "path": "frontend/src/work-session.tsx",
+    "sha256": "433D5A00A5A2C233DAB2B69C0FFC71B709F7B1A7E85CE71EFEAC8FBF3F29AB2F"
+  },
+  {
+    "path": "frontend/src/work-session.test.tsx",
+    "sha256": "E0F9E0DB8F0310F73FEFF2B5DD37966EB4BF75642A04A8BAAE66B43D05CC1AD9"
+  },
+  {
+    "path": "frontend/src/work-session.scss",
+    "sha256": "C8EB424E3481EA12D6B4A21CB74249884AA5A5CED57CEFE5EEA9EE926D01BA5E"
+  },
+  {
+    "path": "frontend/src/work-session-integration.test.tsx",
+    "sha256": "F376929F39DC5172B42E996C7B2E4F75458397E8A28CDDBCF65D36D5DC804BCD"
+  },
+  {
+    "path": "frontend/src/task-reader.tsx",
+    "sha256": "0CC6ED956F083FE7262F512DA2830F11FB46596191DDD4E6C2DA5945E187402A"
+  },
+  {
+    "path": "frontend/src/task-state.test.tsx",
+    "sha256": "F4766DF0C8D143B01772B2C0AB8044F720613796F55A33E3EB60CF4DD6564FFA"
+  },
+  {
+    "path": "frontend/src/task-blocks.test.tsx",
+    "sha256": "CD31F0FBE7019650713CE6B672A63571726FE29BFA8A13E19886CA7B9460D330"
+  },
+  {
+    "path": "frontend/src/split-task.test.tsx",
+    "sha256": "38B176F9E90FEF509A0B77A9A22C89D0742E90C2FC84BCEC9426E385571A2CBA"
+  }
+]

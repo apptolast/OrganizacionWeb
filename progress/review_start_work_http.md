@@ -1,0 +1,11 @@
+# Revisión del adaptador HTTP de inicio de trabajo
+
+Dictamen **APPROVED para integración**, pendiente de wiring real y gates finales14. Autor resume_review; revisor root. Lecturas de fuente y tests:7dcc4f,f3562b,4bf23e y f1c75c. Root verificó en c739ab los hashes del freeze y el XML:49 pruebas, cero fallos, errores y omitidos. Regresión del autor a47c27; Spotless focal aplicado y segunda pasada IS CLEAN3afdd8/7bf5ed.
+
+El controlador adapta POST y los tres GET a los puertos, toma propietario del principal y mantiene la validación query/UUID/key/JSON/tipo/rango antes de llamar al caso de uso. JSON duplicado o concatenado usa el lector estricto existente; campos desconocidos se ordenan léxicamente. La duración no admite coerción de cadenas, decimales ni enteros grandes que desborden. POST distingue201/200 y conserva Location del recibo; GET devuelve representación o ausencia activa explícita, sin Location de una operación nueva.
+
+Los handlers de errores propios están limitados al controlador; no cambian los títulos de otras rutas. Los tests comprueban problemas cerrados, no-store, precedencia de seguridad/origen/CSRF/negociación y ausencia de invocación de puertos ante entrada rechazada. Las respuestas de error no incluyen detalles internos de la excepción. La suite WebMvcTest utiliza filtros reales y mocks de los puertos: acredita adaptación y seguridad HTTP, **no persistencia ni commit PostgreSQL**.
+
+Paquete autorizado: WorkSessionController.java (SHA25620C0CA344C54C8367451B2AA472627F22BAA2639C8270973E7BAA3CF10196EF1), WorkSessionApiTest.java (SHA256384B2E5242D245A71AFA519CD36B8E110C531CFF560B37C1FD452DAB6AD4C141), bitácora y este dictamen. Las cinco copias locales de interfaces/excepciones son dependencias de compilación ajenas y quedan excluidas del commit y de cualquier integración. No se fusiona toda la rama aislada.
+
+Siguiente gate: conectar los puertos reales y constructor de tres argumentos en ApplicationConfiguration, comprobar HTTP con PostgreSQL y pasar regresión de contextos Spring heredados. Reutilizar mecanismos existentes, sin mocks en esos contextos ni fallback ficticio. Después, mutación, E2E y revisión final14. No desplegar este corte como ciclo de trabajo completo.

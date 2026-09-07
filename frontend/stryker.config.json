@@ -22,6 +22,8 @@
     "src/use-project-tasks.ts",
     "src/project-tasks.tsx",
     "src/task-reader.tsx",
+    "src/work-session-api.ts",
+    "src/work-session.tsx",
     "src/task-parent.tsx",
     "src/task-state.tsx",
     "src/task-history.tsx",

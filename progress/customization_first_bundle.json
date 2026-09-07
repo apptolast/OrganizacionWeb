@@ -1,0 +1,34 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/domain/CustomizationScope.java",
+    "sha256": "E39461D96E680C50C7877BD0319CBAE60B6220AFECAD3F9916847FC63BB585AF"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/domain/Customization.java",
+    "sha256": "2D3E8A4C3460A9352DEBA21C2ACC0FE1E059D727AC4C9D9F43E607CDEAEAC24A"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/domain/CustomFieldType.java",
+    "sha256": "5620457FA6DC7EBCB8127166842AF0DB87195CE6ACA3601EAA0E6C564A2DD3D0"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/domain/CustomFieldDefinition.java",
+    "sha256": "2E0FB324089AF4D3ACC25B4DB95392AE0D24E1384B9FEA4B913BB1073DE464BA"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/CustomizationQueries.java",
+    "sha256": "542AD2070DED133D1800F76B2BBB7B3287F7547CA61C1F05F66DFC98A5B98E8D"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ReadCustomizationUseCase.java",
+    "sha256": "834311DC26A7E964A49ED1F349655A7DCE5BA2C196B4233EBE8CA509D7839D70"
+  },
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/application/ReadCustomization.java",
+    "sha256": "87023B2A96FD184820E52DBF870664DF8E38B02E303FC8921A796796564DB818"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/ReadCustomizationTest.java",
+    "sha256": "12FCDE720F4994E30428C06B9910AD8D0ADD11E1AACEBC4CF08581879F1FCFF8"
+  }
+]

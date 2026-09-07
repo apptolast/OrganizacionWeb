@@ -23,6 +23,7 @@ export function createProject(runner = run) {
       (task !== "mutate" ||
         ![
           "history-backend",
+          "history-frontend",
           "end_time_notification-backend",
           "end_time_notification-frontend",
           "close_work_session-backend",
@@ -71,6 +72,17 @@ export function createProject(runner = run) {
         "stryker",
         "run",
         "stryker.end-time-notification.config.json",
+      ]);
+      return;
+    }
+    if (task === "mutate" && target === "history-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.history.config.json",
       ]);
       return;
     }

@@ -378,10 +378,29 @@ test("start work frontend scope includes the session flow and its task reader in
     config.htmlReporter.fileName,
     "reports/mutation-start-work-session/mutation.html",
   );
-  const lines = readFileSync(
-    resolve(root, "frontend/src/task-reader.tsx"),
-    "utf8",
-  ).split(/\r?\n/);
+  const snapshot = JSON.parse(
+    readFileSync(
+      resolve(root, "progress/start_work_frontend_historical_snapshot.json"),
+      "utf8",
+    ),
+  );
+  assert.equal(
+    snapshot.sourceCommit,
+    "46913a71c1a582357fa8d50053766a50a5793299",
+  );
+  assert.equal(snapshot.encoding, "base64");
+  const entry = snapshot.files["src/task-reader.tsx"];
+  assert.equal(entry.path, "frontend/src/task-reader.tsx");
+  const bytes = Buffer.from(entry.base64, "base64");
+  assert.equal(
+    entry.sha256,
+    "0CC6ED956F083FE7262F512DA2830F11FB46596191DDD4E6C2DA5945E187402A",
+  );
+  assert.equal(
+    createHash("sha256").update(bytes).digest("hex").toUpperCase(),
+    entry.sha256,
+  );
+  const lines = bytes.toString("utf8").split(/\r?\n/);
   assert.equal(lines[123].trim(), "<WorkSession");
   assert.equal(lines[134].trim(), "/>");
 });
@@ -1030,4 +1049,81 @@ test("default PIT exposes history adapter tests for the newly selected classes",
     build,
     /else -> core \+ authenticationTests[^\n]+ \+ historyAdapterTests/,
   );
+});
+
+test("history frontend invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "history-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.history.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("history frontend rejects use outside mutation before any runner call", () => {
+  const { calls, project } = capture();
+  assert.throws(
+    () => project("test", "history-frontend"),
+    /Invalid target: history-frontend/,
+  );
+  assert.deepEqual(calls, []);
+});
+
+test("history Stryker covers new modules and complete integration nodes with inherited gates", () => {
+  const config = JSON.parse(
+    readFileSync(resolve(root, "frontend/stryker.history.config.json"), "utf8"),
+  );
+  assert.deepEqual(config.mutate, [
+    "src/history-api.ts",
+    "src/history.tsx",
+    "src/App.tsx:14:8-14:57",
+    "src/App.tsx:25:12-31:22",
+    "src/App.tsx:38:10-62:7",
+    "src/workspace.tsx:55:10-60:22",
+    "src/project-reader.tsx:111:10-116:22",
+    "src/task-reader.tsx:112:10-117:22",
+  ]);
+  assert.equal(config.testRunner, "vitest");
+  assert.deepEqual(config.vitest, { configFile: "vite.config.ts" });
+  assert.equal(config.coverageAnalysis, "perTest");
+  assert.equal(config.concurrency, 8);
+  assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  assert.equal(
+    config.jsonReporter.fileName,
+    "reports/mutation-history/mutation.json",
+  );
+  assert.equal(
+    config.htmlReporter.fileName,
+    "reports/mutation-history/mutation.html",
+  );
+  assert.equal(config.tempDirName, ".stryker-tmp-history");
+  assert.equal(config.mutator, undefined);
+});
+
+test("default Stryker retains history modules and full new integration nodes", () => {
+  const config = JSON.parse(
+    readFileSync(resolve(root, "frontend/stryker.config.json"), "utf8"),
+  );
+  for (const entry of [
+    "src/history-api.ts",
+    "src/history.tsx",
+    "src/App.tsx:25:12-31:22",
+    "src/App.tsx:38:10-62:7",
+    "src/workspace.tsx:55:10-60:22",
+    "src/project-reader.tsx:111:10-116:22",
+  ])
+    assert.ok(config.mutate.includes(entry), entry);
+  assert.ok(config.mutate.includes("src/task-reader.tsx"));
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  assert.equal(config.thresholds.break, 80);
 });

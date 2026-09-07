@@ -1,0 +1,28 @@
+{
+  "originalXmlSha256": "293593AC0AFB54D77BDDC2B624AC92503C904764E970BF598998BB466E2EDA5E",
+  "tests": 29,
+  "exitCode": 0,
+  "result": "d25688",
+  "files": [
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/domain/AppearanceValuesTest.java",
+      "sha256": "22BBFF0F87AC659E747342F34A721E7BEF57DC8F8C9E0BAEB0A04F2BE00EBED2"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/AppearancePersistenceTest.java",
+      "sha256": "634794FFDF399E1E6C1C2EA9431877D11F5E8AFC4C232160A9F7AD226DCEF52E"
+    },
+    {
+      "path": "progress/tdd_appearance_refinement.md",
+      "sha256": "682B838509AE1D892A9B4C04882A7322F4557AD9DEAE8BF333FDE54F8AA8DEB5"
+    },
+    {
+      "path": "progress/appearance_refinement_targets.json",
+      "sha256": "AC81906834FBF9EC7949ED5D6C28DC46ACAFBD91F1A89825DBE8A8251EDF8E00"
+    },
+    {
+      "path": "progress/appearance_pit_replay.init.gradle",
+      "sha256": "DF950C8530120CA2C5A1678010C9DAE0D3B70DBF1465CFEDE00E97A348AF80FC"
+    }
+  ]
+}

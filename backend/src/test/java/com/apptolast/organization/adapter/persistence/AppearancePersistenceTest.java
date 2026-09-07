@@ -18,6 +18,34 @@ class AppearancePersistenceTest {
   static JdbcTemplate jdbc;
   static DataSourceTransactionManager manager;
 
+  @Test
+  void s35_lastPublicMicrosecondCanBeCommittedAndReadByANewStore() {
+    var last = java.time.Instant.parse("9999-12-31T23:59:59.999999Z");
+    var save =
+        new com.apptolast.organization.application.SaveAppearance(
+            new PostgresAppearanceStore(jdbc, new TransactionTemplate(manager)),
+            java.time.Clock.fixed(last, java.time.ZoneOffset.UTC));
+    var saved =
+        save.execute(
+            "last-year-owner",
+            new com.apptolast.organization.domain.AppearanceRevision(null, 0),
+            "SYSTEM",
+            "#244C3C",
+            "#B7E4C7");
+    assertThat(saved.updatedAt()).isEqualTo(last);
+    assertThat(
+            new PostgresAppearanceStore(jdbc, new TransactionTemplate(manager))
+                .find("last-year-owner"))
+        .contains(saved);
+    assertThat(
+            jdbc.queryForObject(
+                    "SELECT updated_at FROM appearance_preferences WHERE owner_id=?",
+                    java.time.OffsetDateTime.class,
+                    "last-year-owner")
+                .toInstant())
+        .isEqualTo(last);
+  }
+
   @BeforeAll
   static void database() {
     var source =

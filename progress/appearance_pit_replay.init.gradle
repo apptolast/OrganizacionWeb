@@ -1,0 +1,20 @@
+// Diagnostic replay only; preserve the original appearance campaign and its gates.
+allprojects {
+    afterEvaluate { project ->
+        def pit = project.extensions.findByName('pitest')
+        if (pit != null) {
+            pit.targetClasses.set([
+                'com.apptolast.organization.domain.AppearanceValues',
+                'com.apptolast.organization.application.SaveAppearance',
+                'com.apptolast.organization.adapter.persistence.PostgresAppearanceStore'
+            ] as Set)
+            pit.mutators.set(['CONDITIONALS_BOUNDARY', 'MATH'] as Set)
+            pit.excludedMethods.set([
+                'equals', 'hashCode', 'toString', '<init>', 'theme', 'accentLight',
+                'accentDark', 'luminance', 'find', 'select', 'save', 'lambda$save$0',
+                'execute', 'lambda$execute$0'
+            ] as Set)
+            pit.reportDir.set(project.layout.buildDirectory.dir('reports/pitest-appearance-replay'))
+        }
+    }
+}

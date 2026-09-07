@@ -6,6 +6,20 @@ import org.junit.jupiter.api.Test;
 
 class AppearanceValuesTest {
   @Test
+  void s11_acceptsAValidAccentWhoseContrastNeedsTheLuminanceOffset() {
+    // Independent WCAG vector: minimum contrast on the six light surfaces is 5.1689120807.
+    var values = new AppearanceValues("DARK", "#0033FF", "#B7E4C7");
+    assertThat(values.accentLight()).isEqualTo("#0033FF");
+  }
+
+  @Test
+  void s11_acceptsAValidAccentWithANonzeroLowLinearChannel() {
+    // Independent WCAG vector: minimum contrast on the six light surfaces is 7.8564656109.
+    var values = new AppearanceValues("LIGHT", "#0002D0", "#B7E4C7");
+    assertThat(values.accentLight()).isEqualTo("#0002D0");
+  }
+
+  @Test
   void s10_rejectsThemeBeforeBothInvalidAccents() {
     assertThatThrownBy(() -> new AppearanceValues("light", "#fff", "rgb(1,2,3)"))
         .isInstanceOfSatisfying(

@@ -1,0 +1,68 @@
+{
+  "originalExit": 0,
+  "replayExit": 0,
+  "originalCount": 159,
+  "replayCount": 15,
+  "files": [
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/domain/AppearanceValuesTest.java",
+      "sha256": "22BBFF0F87AC659E747342F34A721E7BEF57DC8F8C9E0BAEB0A04F2BE00EBED2"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/AppearancePersistenceTest.java",
+      "sha256": "634794FFDF399E1E6C1C2EA9431877D11F5E8AFC4C232160A9F7AD226DCEF52E"
+    },
+    {
+      "path": "progress/mutation_appearance_backend.md",
+      "sha256": "2C6DCA135F8C6072EDF43D436E44AB01C18969EF0100000A91A6561E262F3F3F"
+    },
+    {
+      "path": "progress/appearance_backend_gate_results.json",
+      "sha256": "3BCC6ADB77720CE78B64A7FA458B636F6EC5E9FD27717866BF542B7EEE2ED0BD"
+    },
+    {
+      "path": "progress/appearance_pit_before_hashes.json",
+      "sha256": "FA1B248F89FF97F1E8E2428E0194DBB7D669DC5DDD0D2603CA440BC9BCC548AA"
+    },
+    {
+      "path": "progress/appearance_pit_after_hashes.json",
+      "sha256": "FA1B248F89FF97F1E8E2428E0194DBB7D669DC5DDD0D2603CA440BC9BCC548AA"
+    },
+    {
+      "path": "progress/appearance_pit_residuals.json",
+      "sha256": "F80A6A8405AD8BDE90C3588E29725FAB4112A9FA27D3A529FB9F4D86F3BF22EA"
+    },
+    {
+      "path": "progress/tdd_appearance_refinement.md",
+      "sha256": "682B838509AE1D892A9B4C04882A7322F4557AD9DEAE8BF333FDE54F8AA8DEB5"
+    },
+    {
+      "path": "progress/appearance_refinement_targets.json",
+      "sha256": "AC81906834FBF9EC7949ED5D6C28DC46ACAFBD91F1A89825DBE8A8251EDF8E00"
+    },
+    {
+      "path": "progress/appearance_refinement_freeze.json",
+      "sha256": "EF90004E789BC02B93BFA6A1C9372FE05FFA80B4B5EB9FCADC601568C5FAA7A3"
+    },
+    {
+      "path": "progress/appearance_pit_replay.init.gradle",
+      "sha256": "DF950C8530120CA2C5A1678010C9DAE0D3B70DBF1465CFEDE00E97A348AF80FC"
+    },
+    {
+      "path": "progress/appearance_pit_replay_before_hashes.json",
+      "sha256": "9E1C4AE501F1C35A62603EC614A394A3EF9F5F8EF597E6DE319B888CCF60CA06"
+    },
+    {
+      "path": "progress/appearance_pit_replay_after_hashes.json",
+      "sha256": "9E1C4AE501F1C35A62603EC614A394A3EF9F5F8EF597E6DE319B888CCF60CA06"
+    },
+    {
+      "path": "progress/appearance_pit_replay_inventory.json",
+      "sha256": "E52BFDF6776E32E60E031E465866FEC60228C06E2DA1EAFF89F54FA5D213A176"
+    },
+    {
+      "path": "progress/mutation_appearance_backend_replay.md",
+      "sha256": "D033F61A5DB2F4AF1F9F66F31F11F8D0A5C8DE6CA2AD6F6AA0D0E4F27ED5C7CE"
+    }
+  ]
+}

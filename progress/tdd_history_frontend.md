@@ -92,3 +92,51 @@ Fuentes nuevas: `frontend/src/history-api.ts` y su test. Cambios compartidos: so
 Cobertura de este corte: transporte GET privado/signal, Response no200; envoltorio y entradas cerrados, cinco familias y variantes discriminadas reutilizadas, correspondencia de identidad/contexto/instante, UTC0001–9999 y microsegundos exactos, etiquetas actuales no vacías, veinte entradas, cursor opaco textual, orden por tiempo/rango/UUID y unicidad(type,id), coincidencia de filtros, captura de consulta previa al await. Los positivos cubren empates, frontera20, filtros inclusivos, CLOSE de época1600/neto grande, RESUME, EXTEND y RESCHEDULED. Las matrices internas de validadores de detalles se reutilizan; no se duplican aquí.
 
 Pendiente: página Historial, navegación y enlaces de detalles, formulario y URL, estados/carga/errores, post-await/privacidad del montaje, foco/teclado/responsive y evidencia real UX/E2E. El cliente no añade validación de sintaxis del cursor ni sustituye la precedencia HTTP del servidor. La prueba E2E inicial de C sigue RED por enlace ausente; no indica fallo de este decoder.
+
+## Página e integración — ciclos individuales
+
+| Ciclo UI | Oráculo | RED | GREEN | Cambio |
+| --- | --- | --- | --- | --- |
+| 1 | @s28 navegación existente, URL y vacío confirmado | d48d1b, enlace ausente | log UI01green_final | History, enlace Workspace y ruta App |
+
+Primer intento del ciclo UI1 todavía rojo 89a795: sustitución textual no actualizó section de Workspace, por lo que faltaba aria-current. Corregido dentro del mismo ciclo; no se atribuye ese intento a GREEN.
+| 2 | @s34 espera sin ausencia | cdd5ff | 05a035, 2/2 | status de carga |
+| 3 | @s34 fallo503 sin ausencia/carga indefinida | 242c72, incluye rechazo no capturado | e9aa0c, 3/3 | catch y error visible |
+| 4 | @s35 reintento GET con misma URL | 315d06 | log UI04green, 4/4 | refresh manual y espera anunciada |
+| 5 | @s36 HTTP401 tardío tras desmontar | 824132 | 43ded2, 5/5 | AbortController y guardas tras await |
+| 6 | @s32 inicio con enlaces de contexto/sesión | b347bf | 9d131b, 6/6 | lista semántica y SnapshotTime existente |
+| 7 | @s33 lista mixta de cinco familias | 9a8b5b | log UI07green, 7/7 | etiquetas discriminadas y sessionId del recibo |
+| 8 | @s34 URL nueva no muestra datos anteriores como vigentes | 586b4a | c337cd, 8/8 | resultado asociado a ruta y refresh |
+| 9 | @s29 borrador explícito de categoría/fechas, reinicia cursor | 0f2060 | log UI09green_final, 9/9 | formulario nativo y URL existente |
+
+Incidentes de edición dentro del ciclo: UI8 aebed7 no compilaba porque la sustitución de líneas conservó los estados anteriores; UI9 98c8b6 dejó el handler sin insertar. Se corrigieron las sustituciones antes de GREEN, sin relajar pruebas. Esos intentos no se cuentan como pases.
+| 10 | @s34 vacío filtrado y limpiar filtros | 75f543 | 718aa3, 10/10 | mensaje propio y enlace nativo |
+| 11 | @s29/@s31 refuerzo del caso existente con cursor vacío | 918712 | 0811e3, 10/10 | no afirmar ausencia global desde continuación |
+| 12 | @s31 página reemplazada y volver a recientes | 2a7002 | log UI12green, 11/11 | enlaces URL con filtros conservados |
+
+UI10 actualiza el texto esperado del caso UI4: su consulta ya tenía category=sessions, por lo que ahora corresponde vacío filtrado. Conserva los oráculos de reintento, URL, número de peticiones y anuncio de espera. UI11 fortalece un caso existente, no agrega otro test.
+| 13 | @s37 HTTP401 vigente | f59234 | 3d5964, 12/12 | retirar controles y orientar autenticación |
+| 14 | @s37 contexto404 y quitar sólo contexto/cursor | a05a85 | 9a1733, 13/13 | salida conservando categoría/fechas |
+| 15 | @s33 cierre con notas/tiempo propio/atribución | 7fdf14 | log UI15green, 14/14 | details nativo, texto y SCSS mínimo pre-wrap |
+
+El test UI15 verifica DOM, texto sin HTML y fallback; no acredita aún la geometría física del texto. La regla SCSS conserva espacios/saltos y permite envolver líneas; su reflow se medirá con UX real.
+| 16 | @s33 EXTEND con fines y revisión local | 2b5e93 | 9bfc5c, 15/15 | datos propios sin trabajo inventado |
+| 17 | @s33 inicio con tiempo previsto original | 154a78 | e2dc36, 16/16 | detalles históricos de inicio |
+| 18 | @s33 pausa con acumulado, no total final | d51699 | log UI18green, 17/17 | etiqueta y seconds heredado |
+
+Root comunicó aclaración de seguridad18 commit5e2ad1e: @s18 prueba GET autenticado sin CSRF/query inválida como400query, no un403 imposible. No cambia UI ni se modifica el contrato desde este paquete.
+| 19 | @s33 reserva original con intervalo | 30947b | da279b, 18/18 | hechos de reserva, no trabajo |
+| 20 | @s33 replanificación con before/after | 600b44 | 99a0c2, 19/19 | ReservationDetails y revisión local |
+| 21 | @s33 reapertura visible | 6426c8 | log UI21green, 20/20 | transición histórica de tarea |
+
+UI20 ajustó la consulta del oráculo UI7 a headings de nivel2: los nuevos detalles añaden headings de nivel3. Se conservan las cinco etiquetas, orden, destinos y una petición; no se selecciona un primer elemento arbitrario. Primer intento 7b57d3 reflejó ese desajuste de ámbito antes del verde final.
+
+## Checkpoint nominal de montaje para revisión y primer E2E
+
+**Cinco archivos congelados**: `history.tsx`, `history.test.tsx`, `history.scss`, `App.tsx`, `workspace.tsx`, bajo frontend/src. Dependencia: cliente aprobado99f2971. Manifiesto en `progress/history_ui_checkpoint.json`.
+
+20/20 pruebas UI verdes después del formato, log `progress/history_ui_checkpoint_tests.log`, 39452c. ESLint y TypeScript EXIT0 d88e6f. Prettier requirió una segunda pasada del test (acbdc4): el check después de la primera escritura detectó aún formato pendiente, como ya ocurrió con cadenas de mocks en17. El check final de los cinco archivos está verde. No se declara estable la primera pasada ni se atribuye el aviso al producto.
+
+Incluye: acceso mediante Workspace, URL/página única, filtros explícitos nativos, paginación y recientes, estados de espera/vacío/error, recuperación GET, aborto antes de401 tardío, retirada de datos al cambiar consulta, cinco familias y sus detalles históricos con enlaces de sesión correctos. Reservas, inicio previsto, pausa acumulada, cierre final y ampliación están diferenciados; texto de notas y atribución se conservan. No catálogos nuevos ni consultas por fila.
+
+**Pendientes explícitos de este checkpoint**, que no es freeze final de18: enlaces desde detalles de proyecto/tarea y enlaces para filtrar contexto desde filas; etiqueta genérica de contexto vacío; regla de fechas from>to en formulario; foco/teclado al sustituir controles, descarte de JSON diferido tras cambiar consulta y regresiones de composición; explicación visible de empates/revisión local; SCSS responsive y evidencia completa30UX. La lectura de los details heredados y el cursor se reutilizan; no repetir matrices internas. El primer E2E vacío puede ejecutarse sobre este corte, sin presentarlo como cierre global.

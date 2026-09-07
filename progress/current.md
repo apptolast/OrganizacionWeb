@@ -101,3 +101,11 @@ Decisión preliminar de root: hechos durables de sesiones, finalizaciones/reaper
 Normativa6384934 y contrato5546278 aprobados por root/B. SHA Gherkin768AA48A5A0495BDC5AA292395F1DC42DADD0BD7702987F50D2FAD4664B72C13:39escenarios/142ejemplos, sin equipararlos a tests.18 pasa in_progress bajo autorización global del usuario, sin nueva pregunta. A posee dominio/caso de uso/PG/wiring; B cliente/página/rutas/SCSS; C HTTP/cursor/E2E/integración en worktree aislado después del contrato. Primeros paquetes nominales revisables antes de campañas globales.
 
 17PR16 fusionada56b91bee09d332eda27a016eea34d20f639992ab el2026-09-07T08:40:55Z, CI34100084803 SUCCESS sobre fc36b73 y watch59029 EXIT0 aa1672. Árbol17fc36b73 y squashmain iguales a899cffbf004c085ad65999c99739e2e69c442e3 (8c06e4). Reconciliación46dc342 preserva árbol de rama18 efe7f6449990d6634d51c932d534b72ee50e823e idéntico antes/después0f93f4. CI posterior main34101887939 ACTIVA, rootwatch12926, log end_time_main_ci_watch.log. No proceso local de test/mutación activo.
+
+## Historial en desarrollo, 10:58
+
+El paquete nominal `2e60131` está revisado. A continúa persistencia y paginación en COMMON; B implementa el cliente y la página, reutilizando validadores mediante exportaciones mínimas. Sus ciclos focales verdes no acreditan todavía el historial completo.
+
+C completó init del árbol aislado `OrganizacionWeb-history-http`: EXIT0, herramienta 891b81, con 2.076 pruebas Java, 1.802 frontend y 40 del arnés. Se conserva el primer EXIT1 por dependencias ausentes. Root incorporó el paquete nominal como `99ddbb0` (d190bb); C continúa HTTP/cursor y el primer E2E. El puerto 18080 queda reservado para ese recorrido cuando C lo arranque; 8080 no se toca.
+
+CI posterior de main 34101887939 sigue activa sobre 56b91bee09d332eda27a016eea34d20f639992ab: init, build y E2E verdes; publisher en ejecución (b29cdd). Root mantiene watch12926. No se atribuye éxito final antes de su resultado. El plan de entrega se consolida en una sola estimación vigente; siguen pendientes el cierre del historial, la validación integrada y el despliegue condicionado.

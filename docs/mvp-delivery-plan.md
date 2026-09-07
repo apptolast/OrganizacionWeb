@@ -1,67 +1,45 @@
 # Plan de entrega del MVP
 
-Estado actualizado el 7 de septiembre de 2026 tras aprobar el inicio de sesiones. Las30–60 horas son la hipótesis de planificación anterior, de baja confianza: no se reducen por proporción de funcionalidades ni por número de agentes. La solicitud de terminar hoy es el objetivo de trabajo, no una fecha garantizada. Las horas representan tiempo transcurrido de ejecución efectiva coordinada, incluidas pruebas, CI, mutación y revisión; excluyen pausas por cuota, acceso o información pendiente. No predicen la cuota de la cuenta.
+Actualizado el7 de septiembre de2026 tras cerrar técnicamente las sesiones (feature16). Previsión revisada: **8–15 horas efectivas para las funciones restantes y su validación integrada**, más **4–8 horas para desplegar y comprobar el servidor**, cuando haya acceso, dominio y entorno utilizables. Confianza media-baja en software y baja en despliegue. Terminar hoy sigue siendo el objetivo; no hay garantía de fecha ni predicción de cuota. Las esperas externas no tienen una cota conocida.
 
-## Qué se entregará primero
+## Alcance de entrega
 
-Un MVP que permita iniciar sesión, organizar proyectos y subtareas, configurar disponibilidad, planificar y replanificar bloques, consultar Hoy, trabajar con temporizador y pausas, cerrar sesiones y consultar lo realizado con sus fechas y duración real. Frontend React con pnpm y SCSS, backend Java/Spring Boot hexagonal con eventos, PostgreSQL y RabbitMQ, dentro del mismo monorepo y desplegado en el servidor del usuario.
+El MVP corresponde a1–18: acceso privado, proyectos y subtareas, disponibilidad, planificación y replanificación, Hoy, sesiones con pausa/reanudación/cierre, aviso de fin y consulta de lo realizado. React/TypeScript/pnpm/SCSS, Java/Spring Boot hexagonal/EDA, PostgreSQL/RabbitMQ en monorepo, desplegado en el servidor del usuario.
 
-El corte de entrega corresponde a las funcionalidades 1–18 del roadmap. Las funcionalidades 19–30 siguen autorizadas: revisión semanal, personalización, vistas y campos, importación/exportación, API de integración, webhooks, calendarios, GitHub, conectores y automatizaciones. Su entrega posterior no cancela ni reduce el proyecto aprobado.
+19–30 siguen autorizadas para después: revisión semanal, personalización, vistas/campos, importación/exportación, API de integración, webhooks, calendarios, GitHub, otros conectores y automatizaciones. Su inventario por proveedor todavía debe acotarse antes de estimar el proyecto completo.
 
 ## Estado comprobado
 
-- Funcionalidades 1–13 cerradas conforme a sus dictámenes y límites registrados. Esto no equivale a despliegue productivo.
-- Replanificar: init integrado con1617 pruebas backend,1498 frontend y22 scripts verdes;98 E2E y9 comprobaciones del publicador aprobadas. Mutación backend98,9446 % (750/758), cero errores/timeouts; frontend86,70 % global con dos errores de herramienta registrados. Recuperación tras reinicio, concurrencia, privacidad, presupuesto y UX cuentan con dictámenes finales; los residuales y límites físicos se conservan explícitos.
-- PR6 fusionada por el usuario en `9623990`; evidencia de cierre publicada en main `d997421`, con CI `34060054467` SUCCESS. Dictamen final en `progress/judge_reschedule_final.md`.
-- Funcionalidad 14 cerrada y fusionada mediante PR13 en main353c9d4, con CI34070995379 SUCCESS. Inicio durable y recuperación real; 104 E2E, mutación backend97,9827% y frontend89,6104%, con residuales explícitos. Replay adicional terminado:11/11 KILLED, separado de las campañas originales.
-- Funcionalidad15 fusionada en main b2ea1f2 mediante PR14:1890 pruebas Java,1668 frontend, smoke real y515 medidas responsive/35axe0. PIT523/525 y Stryker741/861 superan el umbral, con residuos documentados. CI34077907038 SUCCESS sobre2e492a0 pasó init/build/108E2E/smoke tras corregir el fixture sensible al orden. Descontando conservadoramente las tres detecciones de mutación atribuidas al fixture anterior,738/861=85,71% mantiene el umbral. CI posterior de main34078825723 SUCCESS con init/build/108E2E/smoke.
-- Funcionalidad16 tiene contrato revisado y está en TDD con tres agentes. El primer checkpoint nominal compilable no es la funcionalidad completa.17–18 siguen pendientes.
-- Ningún despliegue productivo acreditado todavía.
+- 1–13 cerradas con sus dictámenes; Replanificar fusionado y CI verde, incluido control de concurrencia, presupuesto y recuperación. Las PR alternativas y checkpoints anteriores están resueltos; detalle histórico en Git y progress/history.md.
+- 14 inicio y15 pausa/reanudación cerradas y fusionadas. Main b2ea1f211068e7d93c74d0a8d7e8717ec04323c3 tiene CI34078825723 SUCCESS.
+- 16 cierre: dictamen final APPROVED y estado done. Init final1.985 pruebas Java,1.721 frontend y36 del arnés; build correcto.115 E2E y12 pasos smoke, recuperación tras reinicio y pérdida de respuesta. UX515 medidas/35axe sin violaciones, tres motores y zoom real, con límites físicos/humanos documentados. PIT original516/520=99,23 % y Stryker1104/1275=86,59 % con dos errores de herramienta explícitos; replays dirigidos7/7 y15/15 sin cambiar los resultados originales. Corte final6c0a2bf publicado en PR15; CI34084817356 en curso. La CI anterior34082838516 pasó sobre la misma producción antes de los refuerzos de tests/documentación.
+- 17 aviso y ampliación: normativa en preparación/revisión, sin implementación todavía.18 historial pendiente de contrato.
+- No hay despliegue productivo acreditado.
 
-## Trabajo restante y estimación
+## Plan y estimación pendiente
 
-Camino crítico vigente:16 cierre con duración neta y atribución histórica →17 aviso de fin y decisión explícita →18 historial de hechos → validación integrada y despliegue real. Backend y frontend de cada funcionalidad se reparten entre agentes; cada una conserva contrato previo, TDD y validación. La tabla siguiente conserva las partidas de la hipótesis anterior, **no constituye una nueva medición** después de14. No hay evidencia suficiente para prometer el MVP hoy ni para actualizar el total con una cifra menor.
-
-| Hito | Resultado verificable | Horas efectivas estimadas |
+| Hito | Resultado verificable | Horas efectivas |
 | --- | --- | ---: |
-| Replanificar (13), completado | Dictamen final, integración funcional y mutación superadas | 0 |
-| Sesiones de trabajo (14–17) | Iniciar, pausar/reanudar, cerrar y avisar al terminar; tiempo real persistido y recuperación tras recarga | 12–24 |
-| Historial de trabajo (18) | Consultar tareas y sesiones realizadas, fechas y tiempos reales sin confundirlos con planificación | 4–8 |
-| Validación y despliegue del MVP | CI, recorridos completos, responsive/accesibilidad, configuración del servidor, comprobación tras reinicio y recuperación | 4–8 |
-| Margen de integración y correcciones | Incidencias descubiertas al unir los flujos o desplegar | 8–16 |
-| Total de las partidas pendientes | Intervalo aritmético | 28–56 |
+|17 Aviso de fin y ampliación deliberada | Aviso comprobado, fin efectivo persistido y decisión explícita sin reescribir el inicio ni sumar trabajo ficticio; contrato, TDD y gates |3–5|
+|18 Historial | Hechos propios con fechas, tiempo real y acceso al detalle; filtros/orden y paginación acotados por contrato; gates |2,5–4,5|
+|Validación integrada del software | Recorrido completo, revisión y CI del corte conjunto; sin repetir campañas aprobadas por cambios sólo documentales |1–2|
+|Margen de correcciones | Hallazgos de contrato, integración, oráculos o herramientas |1,5–3|
+|Software restante | Rango redondeado de8–14,5 |**8–15**|
+|Despliegue condicionado | Imágenes/configuración de infraestructura, HTTPS/acceso, salud, persistencia, reinicio, respaldo/restauración y reversión comprobados |**4–8 adicionales**|
 
-La previsión pendiente se redondea prudentemente a **30–60 horas efectivas**, frente a las36–72 estimadas antes del cierre13. La confianza sigue siendo limitada hasta contrastar acceso/configuración del servidor y completar el primer ciclo de sesiones. El extremo inferior exige reutilización fluida de la infraestructura existente y ausencia de incidencias importantes. Si esos supuestos fallan, se publica una nueva estimación con su causa; no se recortan pruebas para mantener la cifra.
+Son horas transcurridas de ejecución coordinada, incluyendo revisión y esperas técnicas; no horas-persona ni un total que deba dividirse entre agentes. La nueva estimación sustituye la hipótesis anterior30–60. Su base observable es el ciclo16: contrato05:02:31, implementación integrada05:54:01 y cierre local06:54:12, aproximadamente112 minutos. Es una sola muestra y no incluye toda la preparación previa ni acredita un ritmo futuro garantizado. Los márgenes por novedad de17 y contrato abierto18 son juicio de planificación, no coeficientes estadísticos. El desglose y las duraciones reales de gates están en [la revisión de estimación](../progress/review_mvp_estimate_after_close.md).
 
-Dependencia de despliegue ya identificada en docs/implementation-proposal.md: la lectura histórica del contrato de infraestructura dejaba 45 MiB dentro de su presupuesto de stacks. No representa RAM libre medida ni el estado actual del servidor. Hay que comprobar capacidad real y actualizar ese contrato antes de incorporar API, base de datos y broker. Si hace falta ampliar recursos o cambiar infraestructura, la partida de despliegue deberá reestimarse con ese trabajo concreto.
+## Secuencia y dependencias
 
-Para el conjunto del roadmap, la orientación anterior de 1–3 semanas es de baja confianza, no un compromiso: «otros conectores» y «personalizable al extremo» requieren un inventario acotado por proveedor y comportamiento antes de poder estimar el total con rigor. Cada integración depende también de permisos y contratos externos. No se puede asegurar que el proyecto completo ni el MVP terminen antes de un reinicio de cuota dentro de cuatro días.
+1. Terminar CI de PR15, fusionar el cierre16 y comprobar main. La preparación contractual17 avanza sobre el corte16 aprobado, sin modificar la CI en curso.
+2. Revisar y destilar17; implementar con reparto backend/frontend y validación independiente. Conservar hora original, tiempo trabajado y recuperación.
+3. Acotar18, implementar historial de hechos y validar el recorrido conjunto. No incluir silenciosamente estadísticas semanales, edición retrospectiva ni exportación dentro de este contrato.
+4. Desplegar y comprobar en el servidor. El acceso SSH y el dominio ya están preguntados; el último intento rechazó publickey. No se ha hecho una nueva conexión ni se infieren credenciales.
 
-## Secuencia de entrega y puntos de revisión
+La capacidad documentada45MiB era margen de un presupuesto histórico de límites, no RAM libre medida. Hay que comprobar capacidad, catálogo Swarm, volúmenes, secrets y respaldo reales. Compose y CI de aplicación no equivalen a imágenes publicadas ni a un servicio productivo. Ampliación de recursos, adopción DNS o respaldo inexistente requerirían estimación adicional al observarlos. Detalles en [pendientes de despliegue](../progress/mvp_deployment_remaining.md).
 
-1. Inicio de sesiones (14) completado: contrato trazado, revisión, gates propios y CI posterior al merge verdes. Conservar esa regresión al integrar pausa/reanudación.
-2. Pausa/reanudación (15) cerrada y fusionada en PR14. Implementar cierre (16), cuyo contrato ya está aprobado. Comprobar duración real, recuperación y posibilidad de terminar una sesión antes de habilitar el ciclo para uso habitual.
-3. Añadir aviso de fin (17), conservando el fin previsto y la decisión explícita del usuario sobre continuar o terminar.
-4. Incorporar historial (18): consultar lo realizado con fechas y tiempo real, separado de los bloques planificados.
-5. Validar el recorrido integrado y desplegar: acceso privado, persistencia tras reinicio, responsive, HTTPS, respaldo y restauración verificados en el servidor.
+Se revisará el rango tras17, al aprobar el contrato18 y al conseguir la primera comprobación autenticada del servidor. No se promete finalizar antes del reinicio de cuota ni se presenta un porcentaje de proyecto terminado.
 
-En paralelo con el desarrollo puede prepararse la configuración documental del despliegue; la puesta en servicio depende del ciclo funcional y de comprobar acceso, capacidad y dominio. Se mantiene una feature en implementación cada vez, aunque backend y frontend de esa feature se repartan entre agentes.
+## Criterio de entrega
 
-La revisión de estimación en `progress/review_mvp_estimate.md` confirma que 30–60 horas es una **hipótesis de planificación de baja confianza**, no una previsión validada por medición. No se convierte automáticamente en días ni se divide por el número de agentes. Se recalculará tras cerrar 14 con sus gates, tras completar el ciclo 14–16 y tras comprobar el servidor. Los recuentos de funcionalidades o pruebas no equivalen a un porcentaje de esfuerzo terminado.
-
-## Resolución de las PR
-
-- PR1, PR2 y PR4: fusionadas por el usuario desde GitHub. Incluían checkpoints parciales de Replanificar.
-- PR3: cerrada como referencia alternativa incompleta; rama y commit `d0e83bb` conservados.
-- PR5: frontend completado y fusionado por el usuario en `53ed311`.
-- Correcciones posteriores de formato y fixtures E2E integradas en `ae364e5`; CI completo verde sobre ese commit.
-- Consulta remota posterior `27bee7`: cero PR abiertas y main `fc31969`. La integración local `1332eb7` conserva backend revisado y frontend de main; incorpora únicamente los paquetes E2E aprobados, sin fusionar snapshots Java provisionales.
-- PR6 integrada mediante squash por el usuario en `9623990`. El cierre documental se publicó en `d997421`; CI34060054467 SUCCESS. La última consulta posterior confirmó cero PR abiertas. Feature14 continúa en una rama nueva desde ese main validado.
-
-El usuario confirmó que él realiza squash and merge desde GitHub y que Claude está detenido. Las cancelaciones de CI anteriores coincidían con nuevas fusiones; ya no hay una duda de coordinación pendiente. Los agentes internos mantienen propiedad por archivo y revisión independiente. Replanificar queda cerrada por sus pruebas y dictámenes, no por el mero hecho de fusionar una rama. El despliegue del MVP sigue pendiente del ciclo de trabajo real y la preparación del servidor.
-
-## Qué significa funcional para esta entrega
-
-Todos los recorridos incluidos en el MVP deben funcionar contra el backend y la base de datos reales: persistencia tras reinicio, acceso privado, recuperación de errores, planificación separada del tiempo trabajado y ausencia de duplicados al reintentar. Deben pasar los contratos aprobados, revisión, pruebas y umbral de mutación, además de los criterios responsive y de accesibilidad documentados. El despliegue debe comprobarse en el servidor con configuración de secretos, HTTPS y procedimiento de respaldo/restauración verificado.
-
-Esto define criterios comprobables; no promete ausencia absoluta de errores ni declara cumplimiento humano de las 30 leyes UX sólo por pasar herramientas automáticas. Las limitaciones reales se registran en el acta de entrega.
+Los recorridos del MVP deben funcionar contra API y base de datos reales, conservar datos al reiniciar, proteger privacidad, recuperar errores y evitar duplicados. Planificación y trabajo real permanecen separados. Deben pasar contrato, revisión, tests y mutación, además de criterios responsive/accesibilidad con evidencia y límites explícitos. La entrega completa requiere HTTPS, acceso y respaldo/restauración comprobados en el servidor. Esto no equivale a ausencia absoluta de errores ni a certificación universal de las30 leyes UX por herramientas automáticas.

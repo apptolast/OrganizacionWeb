@@ -17,3 +17,5 @@ PIT30914 terminó EXIT0 ce3127 y Stryker23099 EXIT0 aea3fb. Sus dictámenes regi
 Después de los refuerzos 8ecf0f8 y602cf39, init17230 terminó EXIT0 b68a48:1.985 pruebas backend en83 suites sin fallos/errores/omitidos (XML51651c),1.721 frontend en35 archivos y36 comprobaciones Node. Incluye lint y formato. Log close_work_init_final.log SHA723EA9B3F025F587D91632D14616B786A31CD612839791DF32E619B0D52E15E4.
 
 Build38374 terminó EXIT0 3d8828: backend y frontend correctos. Log close_work_build_final.log SHAAB790B52324C82D429C88E5BC8A7F2E60B4EDEF167C3E9BE394B9CF0DC2A6838. Ambos replays acabaron: PIT7/7K EXIT0e01e1a, Stryker15/15K EXIT0 002701, con manifests idénticos y resultados originales preservados. No hay gates locales activos.
+
+Corte final6c0a2bf47c682ca9aad781d09a3aa18d946842c1 publicado cf9eaf. Application CI34084817356 activo, rootwatch77261; no nueva publicación en esa rama durante la validación. COMMON pasó a codex/end-time-notification desde ese corte aprobado para preparar17, conservando cambios pendientes de su contrato fuera de PR15. No es confirmación de merge ni resultado de CI todavía.

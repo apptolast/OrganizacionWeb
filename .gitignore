@@ -139,3 +139,4 @@ reports/
 /progress/weekly_review_stryker_original.json
 /progress/weekly_review_ux_before_outline/
 /frontend/.stryker-tmp-weekly-review-refined/
+/progress/weekly_review_stryker_replay.json

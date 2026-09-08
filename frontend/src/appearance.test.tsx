@@ -1451,7 +1451,9 @@ it.each([
     await waitFor(() =>
       expect(screen.getByRole("radio", { name: label })).toBeChecked(),
     );
-    expect(document.documentElement.style.colorScheme).toBe(effective);
+    await waitFor(() =>
+      expect(document.documentElement.style.colorScheme).toBe(effective),
+    );
     await act(async () => {
       media.matches = true;
       media.dispatchEvent(new Event("change"));

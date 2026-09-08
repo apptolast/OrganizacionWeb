@@ -1,6 +1,6 @@
 # Usar el MVP para trabajar con un horario
 
-Las funcionalidades 1–22, incluidos Historial, Revisión semanal, Apariencia, campos personales y Exportación, están disponibles en [OrganizationWeb](https://organizacion.apptolast.com). El estado de despliegue está en [el plan](mvp-delivery-plan.md). Las funcionalidades 23–30 todavía no están publicadas.
+Las funcionalidades 1–23, incluidos Historial, Revisión semanal, Apariencia, campos personales, Exportación e Importación, están disponibles en [OrganizationWeb](https://organizacion.apptolast.com). El estado de despliegue está en [el plan](mvp-delivery-plan.md). Las funcionalidades 24–30 todavía no están publicadas.
 
 ## Preparar el trabajo
 
@@ -69,7 +69,7 @@ El JSON privado reúne catorce colecciones de tu cuenta, incluidos historial y c
 
 ## Importar una copia propia
 
-Estas instrucciones estarán disponibles al desplegar la funcionalidad 23; no indican que ya esté publicada.
+Importación está publicada y permite validar una copia antes de confirmarla.
 
 Abre **Importación** y selecciona un archivo JSON v1 obtenido con **Exportación** de tu misma cuenta. El archivo puede contener información privada: conserva la copia original protegida y sin editar. Se admiten hasta **32 MiB y 100000 registros**. Una copia de otra cuenta o un archivo incompatible no se puede importar.
 

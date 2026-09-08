@@ -1,0 +1,79 @@
+{
+  "commit": "bb0064c",
+  "exitCode": 0,
+  "total": 330,
+  "killed": 316,
+  "strictScore": 95.75757575757575,
+  "inputCount": 512,
+  "changedInputs": [],
+  "files": [
+    {
+      "path": "progress/import_persistence_pit_original/inputs_after.json",
+      "sha256": "BCC3DD509B6ED0E426A34042577DC0BE289B993169D532766CC3C50D3B217922"
+    },
+    {
+      "path": "progress/import_persistence_pit_original/inputs_before.json",
+      "sha256": "44F92C1EF986A0556EE01A4BD8837D0E7636E879ADC077D176BF12723B573BBF"
+    },
+    {
+      "path": "progress/import_persistence_pit_original/inventory.json",
+      "sha256": "668AFE74B507BDAEE9411A622C53F8DA3BC3A3B863FFCEC24B8402A484F0D613"
+    },
+    {
+      "path": "progress/import_persistence_pit_original/report/com.apptolast.organization.adapter.persistence/ImportCustomizationValidator.java.html",
+      "sha256": "5BD5405F766CC5085E879228B66D2590B15C389065B1614C6B924C639EE11800"
+    },
+    {
+      "path": "progress/import_persistence_pit_original/report/com.apptolast.organization.adapter.persistence/ImportRecordValidator.java.html",
+      "sha256": "845448270289667EFA5EFC436A63001F3391F033B103415E7738B87B10DBAA88"
+    },
+    {
+      "path": "progress/import_persistence_pit_original/report/com.apptolast.organization.adapter.persistence/index.html",
+      "sha256": "ACF4352DEFFC8360F654C6BE19FA05D30DD85CC3F255A78F5A106EA6D6C8B231"
+    },
+    {
+      "path": "progress/import_persistence_pit_original/report/com.apptolast.organization.adapter.persistence/PostgresImportDataStore.java.html",
+      "sha256": "A66EBB4AF33B8FDE8242D64B5A764265647EA7B69BECB6ED35F1D19EF9C3EE7B"
+    },
+    {
+      "path": "progress/import_persistence_pit_original/report/com.apptolast.organization.application/ImportCounts.java.html",
+      "sha256": "3180EF7BBA4D1575B64CC8BA7A6F9577DEAFD4155C116496DAE44B9599A73D8E"
+    },
+    {
+      "path": "progress/import_persistence_pit_original/report/com.apptolast.organization.application/index.html",
+      "sha256": "721846A30766E8924D7AC1A0452E5C03C4A30CA678CF2B8773C2CD5CC8706829"
+    },
+    {
+      "path": "progress/import_persistence_pit_original/report/index.html",
+      "sha256": "B5995CA4062F35443E26C2699E68171A637117D5EDEEA0B3E3CBA4FD5C3F9FA8"
+    },
+    {
+      "path": "progress/import_persistence_pit_original/report/mutations.xml",
+      "sha256": "BBD5C8D0F0F13E2478ECC23199B796D297B53BEBA7AA13910742095AE8C9D8D0"
+    },
+    {
+      "path": "progress/import_persistence_pit_original/report/style.css",
+      "sha256": "78EA37FB78E124ACD62B472B0DBDB1F80176D8B4C3353411668797FBF3DB7976"
+    },
+    {
+      "path": "progress/import_persistence_pit_original/residues.json",
+      "sha256": "B09AE3DD59DB8A35AD2D8664B37A662FA7D263788EF77A75FE1A2D6AC92834CE"
+    },
+    {
+      "path": "progress/import_persistence_pit_original/results.json",
+      "sha256": "B902848C9720DBC51253D382B7C60D35D6E39CBD2211BB3A5EB9156761249841"
+    },
+    {
+      "path": "progress/import_persistence_pit_original/run.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+    },
+    {
+      "path": "progress/import_persistence_pit_original/run.log",
+      "sha256": "EDF8A50D571C33F0123CA5F68F61D286DB142CE35624335E1638148B32BE7604"
+    },
+    {
+      "path": "progress/mutation_import_persistence.md",
+      "sha256": "397909BA06076B030937411077417248AA04D382F5053E29C6E991EA191F75B2"
+    }
+  ]
+}

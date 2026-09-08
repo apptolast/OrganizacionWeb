@@ -1,6 +1,6 @@
 # API de importación de datos v1
 
-Describe el contrato implementado del candidato 4c74e183; su publicación depende del despliegue de la funcionalidad 23. Complementa la sección 23 de project-spec.md y la exportación JSON v1 de la sección 22.
+Describe el contrato implementado y desplegado del producto 4c74e183. La funcionalidad 23 está publicada; evidencia y límites en progress/judge_import_data.md. Complementa la sección 23 de project-spec.md y la exportación JSON v1 de la sección 22.
 
 ## Transporte y acceso
 

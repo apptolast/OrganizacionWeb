@@ -237,9 +237,14 @@ for (const [width, zoom] of [
           .analyze()
       ).violations,
     ).toEqual([]);
+    const tabBudget = await page
+      .locator(
+        'a[href],button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex="0"]',
+      )
+      .count();
     for (
       let step = 0;
-      step < 10 &&
+      step < tabBudget &&
       !(await name.evaluate((element) => element === document.activeElement));
       step++
     ) {

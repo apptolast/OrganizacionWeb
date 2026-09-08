@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.apptolast.organization.adapter.ApiCredentialHttpPersistenceTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-09-08T15:10:16.024Z" hostname="PABLOHGDEV87" time="14.02">
+  <properties/>
+  <testcase name="s21_defaultFrameworkLogoutCannotBypassBearerAuthentication()" classname="com.apptolast.organization.adapter.ApiCredentialHttpPersistenceTest" time="0.265"/>
+  <testcase name="s21_bearerLogoutIsDeniedWithoutChangingCookieSessionAndCookieLogoutStillWorks()" classname="com.apptolast.organization.adapter.ApiCredentialHttpPersistenceTest" time="0.678"/>
+  <testcase name="s17_s20_realTokenStorageFailureIsNotSessionFailureOrCookieFallback()" classname="com.apptolast.organization.adapter.ApiCredentialHttpPersistenceTest" time="0.39"/>
+  <testcase name="[1] state=invalid" classname="com.apptolast.organization.adapter.ApiCredentialHttpPersistenceTest" time="0.295"/>
+  <testcase name="[2] state=revoked" classname="com.apptolast.organization.adapter.ApiCredentialHttpPersistenceTest" time="0.336"/>
+  <testcase name="[3] state=disabled" classname="com.apptolast.organization.adapter.ApiCredentialHttpPersistenceTest" time="0.138"/>
+  <testcase name="[4] state=orphan" classname="com.apptolast.organization.adapter.ApiCredentialHttpPersistenceTest" time="0.196"/>
+  <testcase name="s19_s26_s32_realBearerWritesWithoutCsrfThenOpenApiAndRevocationDoNotConsume()" classname="com.apptolast.organization.adapter.ApiCredentialHttpPersistenceTest" time="0.515"/>
+  <testcase name="s1_s19_s20_realSessionCreatesCredentialThenBearerAdmitsWithoutSessionAccess()" classname="com.apptolast.organization.adapter.ApiCredentialHttpPersistenceTest" time="0.318"/>
+  <system-out><![CDATA[17:10:16.286 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.apptolast.organization.OrganizationApplication for test class com.apptolast.organization.adapter.ApiCredentialHttpPersistenceTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.11)
+
+2026-09-08T17:10:16.662+02:00  INFO 19332 --- [organization-api] [    Test worker] org.testcontainers.images.PullPolicy     : Image pull policy will be performed by: DefaultPullPolicy()
+2026-09-08T17:10:16.666+02:00  INFO 19332 --- [organization-api] [    Test worker] o.t.utility.ImageNameSubstitutor         : Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+2026-09-08T17:10:16.671+02:00  INFO 19332 --- [organization-api] [    Test worker] org.testcontainers.DockerClientFactory   : Testcontainers version: 1.21.4
+2026-09-08T17:10:16.828+02:00  INFO 19332 --- [organization-api] [    Test worker] o.t.d.DockerClientProviderStrategy       : Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+2026-09-08T17:10:17.052+02:00  INFO 19332 --- [organization-api] [    Test worker] o.t.d.DockerClientProviderStrategy       : Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+2026-09-08T17:10:17.053+02:00  INFO 19332 --- [organization-api] [    Test worker] org.testcontainers.DockerClientFactory   : Docker host IP address is localhost
+2026-09-08T17:10:17.068+02:00  INFO 19332 --- [organization-api] [    Test worker] org.testcontainers.DockerClientFactory   : Connected to docker: 
+  Server Version: 29.7.2
+  API Version: 1.55
+  Operating System: Docker Desktop
+  Total Memory: 31781 MB
+  Labels: 
+    com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+2026-09-08T17:10:18.182+02:00  INFO 19332 --- [organization-api] [    Test worker] tc.testcontainers/ryuk:0.12.0            : Creating container for image: testcontainers/ryuk:0.12.0
+2026-09-08T17:10:18.397+02:00  INFO 19332 --- [organization-api] [    Test worker] tc.testcontainers/ryuk:0.12.0            : Container testcontainers/ryuk:0.12.0 is starting: 46901a5d082f184535af275c404cbfae8781456b3bb5b23489deb59dc3d8f04c
+2026-09-08T17:10:18.684+02:00  INFO 19332 --- [organization-api] [    Test worker] tc.testcontainers/ryuk:0.12.0            : Container testcontainers/ryuk:0.12.0 started in PT0.5017325S
+2026-09-08T17:10:18.688+02:00  INFO 19332 --- [organization-api] [    Test worker] o.t.utility.RyukResourceReaper           : Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+2026-09-08T17:10:18.689+02:00  INFO 19332 --- [organization-api] [    Test worker] org.testcontainers.DockerClientFactory   : Checking the system...
+2026-09-08T17:10:18.689+02:00  INFO 19332 --- [organization-api] [    Test worker] org.testcontainers.DockerClientFactory   : ✔︎ Docker server version should be at least 1.6.0
+2026-09-08T17:10:18.689+02:00  INFO 19332 --- [organization-api] [    Test worker] tc.postgres:17.9-alpine                  : Creating container for image: postgres:17.9-alpine
+2026-09-08T17:10:18.749+02:00  INFO 19332 --- [organization-api] [    Test worker] tc.postgres:17.9-alpine                  : Container postgres:17.9-alpine is starting: 9cea1baa1f140554d7c73d25e1fa8ee800771669fef1576660cc39c4df1395fb
+2026-09-08T17:10:19.812+02:00  INFO 19332 --- [organization-api] [    Test worker] tc.postgres:17.9-alpine                  : Container postgres:17.9-alpine started in PT1.1218347S
+2026-09-08T17:10:19.812+02:00  INFO 19332 --- [organization-api] [    Test worker] tc.postgres:17.9-alpine                  : Container is started (JDBC URL: jdbc:postgresql://localhost:19484/test?loggerLevel=OFF)
+2026-09-08T17:10:19.819+02:00  INFO 19332 --- [organization-api] [    Test worker] c.a.o.a.ApiCredentialHttpPersistenceTest : Starting ApiCredentialHttpPersistenceTest using Java 25.0.1 with PID 19332 (started by vhurt in C:\Users\vhurt\Documents\Codex\2026-09-05\a-ver-necesito-o-me-gustar\work\OrganizacionWeb-integration-http\backend)
+2026-09-08T17:10:19.820+02:00  INFO 19332 --- [organization-api] [    Test worker] c.a.o.a.ApiCredentialHttpPersistenceTest : No active profile set, falling back to 1 default profile: "default"
+2026-09-08T17:10:21.964+02:00  INFO 19332 --- [organization-api] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-09-08T17:10:22.200+02:00  INFO 19332 --- [organization-api] [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@61246109
+2026-09-08T17:10:22.203+02:00  INFO 19332 --- [organization-api] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-09-08T17:10:22.248+02:00  INFO 19332 --- [organization-api] [    Test worker] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:19484/test?loggerLevel=OFF (PostgreSQL 17.9)
+2026-09-08T17:10:22.364+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "public"."flyway_schema_history" does not exist yet
+2026-09-08T17:10:22.370+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbValidate     : Successfully validated 22 migrations (execution time 00:00.060s)
+2026-09-08T17:10:22.410+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "public"."flyway_schema_history" ...
+2026-09-08T17:10:22.503+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Current version of schema "public": << Empty Schema >>
+2026-09-08T17:10:22.522+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "1 - projects and outbox"
+2026-09-08T17:10:22.599+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "2 - outbox publication"
+2026-09-08T17:10:22.651+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "3 - project read index"
+2026-09-08T17:10:22.740+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "4 - project version"
+2026-09-08T17:10:22.799+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "5 - project states"
+2026-09-08T17:10:22.838+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "6 - jdbc sessions"
+2026-09-08T17:10:22.898+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "7 - tasks"
+2026-09-08T17:10:22.933+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "8 - task parent"
+2026-09-08T17:10:22.986+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "9 - task status history"
+2026-09-08T17:10:23.059+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "10 - availability preferences"
+2026-09-08T17:10:23.119+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "11 - planned blocks"
+2026-09-08T17:10:23.177+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "12 - block changes"
+2026-09-08T17:10:23.224+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "13 - block change integrity"
+2026-09-08T17:10:23.367+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "14 - work sessions"
+2026-09-08T17:10:23.414+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "15 - work session uniqueness"
+2026-09-08T17:10:23.477+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "16 - work session transitions"
+2026-09-08T17:10:23.539+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "17 - work session closure"
+2026-09-08T17:10:23.585+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "18 - work session end time"
+2026-09-08T17:10:23.636+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "19 - appearance preferences"
+2026-09-08T17:10:23.694+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "20 - customization"
+2026-09-08T17:10:23.759+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "21 - import receipts"
+2026-09-08T17:10:23.816+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "22 - api credentials"
+2026-09-08T17:10:23.888+02:00  INFO 19332 --- [organization-api] [    Test worker] o.f.core.internal.command.DbMigrate      : Successfully applied 22 migrations to schema "public", now at version v22 (execution time 00:00.586s)
+2026-09-08T17:10:24.523+02:00  INFO 19332 --- [organization-api] [    Test worker] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name users
+2026-09-08T17:10:26.766+02:00  INFO 19332 --- [organization-api] [    Test worker] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-08T17:10:26.767+02:00  INFO 19332 --- [organization-api] [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-08T17:10:26.769+02:00  INFO 19332 --- [organization-api] [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 2 ms
+2026-09-08T17:10:26.813+02:00  INFO 19332 --- [organization-api] [    Test worker] c.a.o.a.ApiCredentialHttpPersistenceTest : Started ApiCredentialHttpPersistenceTest in 10.394 seconds (process running for 12.259)
+]]></system-out>
+  <system-err><![CDATA[Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (C:\Users\vhurt\.gradle\caches\modules-2\files-2.1\net.bytebuddy\byte-buddy-agent\1.17.8\f09415827a71be7ed621c7bd02550678f28bc81c\byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+</testsuite>

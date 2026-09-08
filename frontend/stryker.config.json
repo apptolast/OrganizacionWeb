@@ -4,6 +4,9 @@
   "plugins": ["@stryker-mutator/vitest-runner"],
   "ignorePatterns": [".stryker-tmp-availability-replay"],
   "mutate": [
+    "src/integration-api-client.ts",
+    "src/integration-api-intent.ts",
+    "src/integration-api.tsx",
     "src/projects-api.ts",
     "src/use-create-project.ts",
     "src/read-projects-api.ts",

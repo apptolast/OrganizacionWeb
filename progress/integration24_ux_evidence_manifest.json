@@ -1,0 +1,367 @@
+[
+  {
+    "path": "progress/ux_integration_api.md",
+    "sha256": "A6A18FD7E456617411C7B361F4F36A72E448685E94F1896A5A80E0DD6CE9C61A",
+    "bytes": 8531
+  },
+  {
+    "path": "e2e/integration-api-browser.spec.mjs",
+    "sha256": "96A4F18D3F694AB458F67C3C55C6A7B5B245E724D42248F599E5BC3DDF352BF2",
+    "bytes": 24030
+  },
+  {
+    "path": "e2e/integration-api-browser.config.mjs",
+    "sha256": "475B63029CF461565F809728D7AA8FE542F8D42A03D3234AADE29DF75FCC22F5",
+    "bytes": 299
+  },
+  {
+    "path": "progress/integration24_browser_production.log",
+    "sha256": "41D782936A39A2F7581149A7E9291CBBA66965FF1B869123B0986E2901E2FB22",
+    "bytes": 1671
+  },
+  {
+    "path": "progress/integration24_browser_modalities.log",
+    "sha256": "7F8CA894A8FDB21B18B4CA34E2367FD2A749DD8415B6A468492B2B23B4715940",
+    "bytes": 1003
+  },
+  {
+    "path": "progress/integration24_browser_native_zoom.log",
+    "sha256": "572C6C010EA0494AEE961AE6FFCE9DFA4F2A07772B6FB3D6D166F46113A82DC9",
+    "bytes": 356
+  },
+  {
+    "path": "progress/integration24_browser_feedback.log",
+    "sha256": "A7EB59A75FA68610BFBA25A46A272E9B7ADFDD18443B14B221D352CD10AB1669",
+    "bytes": 1091
+  },
+  {
+    "path": "progress/integration24_browser_wide.log",
+    "sha256": "6A0F7FC8434E1A0095D3B2899365FEEE45FBDC220E0CF3ECD0EEAC7F7166EE04",
+    "bytes": 971
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/.last-run.json",
+    "sha256": "91D1C43004802CD49950D78EB11C8FA7D05DA8FFFFE219A8B13B2F561BC00903",
+    "bytes": 45
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-chromium/dark-prepared-1280.png",
+    "sha256": "EBF30E175BF51D223102622999F445EBB41CC68EE1B939630CDFECBAD0C5FDAC",
+    "bytes": 99187
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-chromium/dark-prepared-320.png",
+    "sha256": "E5BB3FC46B6D00CE642C067183A4172B2575F40E806DC2E9B7A834C00341BB1D",
+    "bytes": 72504
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-chromium/dark-prepared-768.png",
+    "sha256": "E6F12D383567A72F95F240C1C8F6AE2EB8165C5967C5871B22703B575865C802",
+    "bytes": 92430
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-chromium/geometry.json",
+    "sha256": "4568AB11CDCBD14526B1796F66D79EC1AA851A8CEDA706AD1E11B00A394FBBB4",
+    "bytes": 12609
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-chromium/light-prepared-1280.png",
+    "sha256": "21BC7D900DF73E18F7DB91102EE6126C243212814E30C7EB289534974D97C7A8",
+    "bytes": 98624
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-chromium/light-prepared-320.png",
+    "sha256": "D2DB9B75E2E0112D3618DAE8DFE8657EE2017F684B5079EB056D54FD260B4657",
+    "bytes": 71594
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-chromium/light-prepared-768.png",
+    "sha256": "EC2FBB3FD4A689BFC29A12C912313BE488D965F27DB92DB5EC546401353ABD06",
+    "bytes": 91785
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-firefox/dark-prepared-1280.png",
+    "sha256": "C734B3521973507F5EF7AEF678564C9FF0FD84DC2B7997ED9C60309DADB68B26",
+    "bytes": 99590
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-firefox/dark-prepared-320.png",
+    "sha256": "D38A9D2B5E7909F38D8222926D741EB1BF94ADE32B04677335AB4CFBBD53F791",
+    "bytes": 65519
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-firefox/dark-prepared-768.png",
+    "sha256": "9BC5A35631EA905F3BDE1DC90DDE6F769B3F87ED15EC68DE29F234C9DC43106E",
+    "bytes": 86454
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-firefox/geometry.json",
+    "sha256": "84907CE0EF670A913638868BEAAE757B5117B84D180314FDCF615FD4E8E778D0",
+    "bytes": 14143
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-firefox/light-prepared-1280.png",
+    "sha256": "94F22F20047347DE03819DE444926FE57C32904A0BCAD3DF3AE250CF149C1265",
+    "bytes": 99417
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-firefox/light-prepared-320.png",
+    "sha256": "3853DCD3B2C03C992590E4BD8BE86D0EB64BC322F65DB1F49E363298562E56EB",
+    "bytes": 65334
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-firefox/light-prepared-768.png",
+    "sha256": "8BFF8C9FD3805DF8BDFC9065C830B0DB71B2186E3F424ACA87666AE3944C2745",
+    "bytes": 86262
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-webkit/dark-prepared-1280.png",
+    "sha256": "351B21748034977BEC1E7C592FB2B63ED27A5E02AD1DC293CD0D29EC6D8550C6",
+    "bytes": 88314
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-webkit/dark-prepared-320.png",
+    "sha256": "3897E7BD12DF63E8F2BF1916C83841C2CDCC043AB83B28A80858378C88A60A49",
+    "bytes": 64482
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-webkit/dark-prepared-768.png",
+    "sha256": "3CAF674A3134B0729A9733327EC841D2078E662AD4955633FAB6E9F465685629",
+    "bytes": 81547
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-webkit/geometry.json",
+    "sha256": "6852555A67F11440F655315A1330F09B469B9D64BCC9DBD79791EBA1CFB6200D",
+    "bytes": 12609
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-webkit/light-prepared-1280.png",
+    "sha256": "9DF242D625E3F6F301B7019D606BF0C9FC2A3A1ADB5A2021A8DFDF80D458292F",
+    "bytes": 87863
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-webkit/light-prepared-320.png",
+    "sha256": "DC1675F8BB28AC1C7E810B5BB383F917A2569976328BCF1B364B0A314CD041F1",
+    "bytes": 63732
+  },
+  {
+    "path": ".e2e-work/integration-browser-production/integration-api-browser-in-24746-ive-readability-s33-s37-s41-webkit/light-prepared-768.png",
+    "sha256": "3FF1322811C89854D7F08CB9B79861632D1FE24E221F1A5586978D56240C6723",
+    "bytes": 81062
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/.last-run.json",
+    "sha256": "91D1C43004802CD49950D78EB11C8FA7D05DA8FFFFE219A8B13B2F561BC00903",
+    "bytes": 45
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-chromium/dark-text200-1280.png",
+    "sha256": "C6DAAF29D790D79D6D89F66318E187F83F306D43C4E0CA4846CBCB0D8E624B4D",
+    "bytes": 250405
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-chromium/dark-text200-320.png",
+    "sha256": "3F1C05C4A730390BE249643CC1A27E0109AAE0C424BA7C7F254D505F1A8AE016",
+    "bytes": 246930
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-chromium/forced-colors.png",
+    "sha256": "E6190CE1AC3724953CB336C76398638114EEEC8D15954FA675DA06E00671069E",
+    "bytes": 191945
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-chromium/light-text200-1280.png",
+    "sha256": "B807295E0C2E936D864C209ED1A70B2BE8F57638F37FD3817EA36C22D6076DF7",
+    "bytes": 253495
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-chromium/light-text200-320.png",
+    "sha256": "45F1F1B9966BBDE5DF65473B2619206DA03F96533BCDCAA1DDEDE49562845204",
+    "bytes": 247514
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-chromium/modalities.json",
+    "sha256": "F149BDB5896F349CB4AD2217F5963138FC52D322B966A8C2AA986C8B10DC5A54",
+    "bytes": 7231
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-firefox/dark-text200-1280.png",
+    "sha256": "3B5A34D6CC0047F756EDEADB26ED24A216A7800D9CC46D4B26F5C1CA652EF3D8",
+    "bytes": 215384
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-firefox/dark-text200-320.png",
+    "sha256": "462852A81E793DD2D2B379DEED731D7325A53186325024276CD0F31023863AAA",
+    "bytes": 191270
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-firefox/forced-colors.png",
+    "sha256": "BB4D6DFF3D7881404195CB65B4732470D6B07818D3C65E4BF35150CE5E91C476",
+    "bytes": 189436
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-firefox/light-text200-1280.png",
+    "sha256": "AEA80B735B30DDAF3321D95A7A98E79C80BB3B152E2157A4858062453F96D93A",
+    "bytes": 215690
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-firefox/light-text200-320.png",
+    "sha256": "D7B2511FFEFE43E8F35E6FECEE3D6387FD07B34F22E4E9B33A9C6B33CF9FCFFE",
+    "bytes": 191627
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-firefox/modalities.json",
+    "sha256": "07709D4345DC23339440EDAEF75D4C11211E3AB95CC7566B076BCA486296C846",
+    "bytes": 7949
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-webkit/dark-text200-1280.png",
+    "sha256": "0BF6C4837BDE36167415814A42D83CFB0D185E4A442ADB52443EBE398AD31175",
+    "bytes": 193412
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-webkit/dark-text200-320.png",
+    "sha256": "B196FE8E9BC89E34911BC86BE16B605E67D890F4B85B6F6447F5055C46BDBC3B",
+    "bytes": 187562
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-webkit/forced-colors.png",
+    "sha256": "425D97F5E3E1818D5415686D757BD58A39289B9D629C8DC892ED354C044DF1A8",
+    "bytes": 189474
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-webkit/light-text200-1280.png",
+    "sha256": "CE00C9393F256BC2DF2A87F5EB9FCE2E5F43772984CB026C89FB0C1EEAAFCE5C",
+    "bytes": 191235
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-webkit/light-text200-320.png",
+    "sha256": "042B5F1F5E21770CD57B99CAFCEF03C50F2525914956631A9A70E89F96CDB7E1",
+    "bytes": 182146
+  },
+  {
+    "path": ".e2e-work/integration-browser-modalities/integration-api-browser-in-add62-nd-existing-media-modes-s41-webkit/modalities.json",
+    "sha256": "B9ACCF3E755B9F06C270393D2F01889662843E35686DC16B244E514C59D6C03B",
+    "bytes": 7231
+  },
+  {
+    "path": ".e2e-work/integration-browser-native-zoom/.last-run.json",
+    "sha256": "91D1C43004802CD49950D78EB11C8FA7D05DA8FFFFE219A8B13B2F561BC00903",
+    "bytes": 45
+  },
+  {
+    "path": ".e2e-work/integration-browser-native-zoom/integration-api-browser-in-ef1a3-ative-Chromium-zoom-200-s41-chromium/zoom.json",
+    "sha256": "7C0F7FD943DC0A078D6C25D6DE0D506BDA35D0B615F888BE95A8CCD822156B23",
+    "bytes": 160
+  },
+  {
+    "path": ".e2e-work/integration-browser-native-zoom/integration-api-browser-in-ef1a3-ative-Chromium-zoom-200-s41-chromium/zoom200-compositor.png",
+    "sha256": "5454511780A97E77059CECD5C0815D2C837F3EF26AB1180565B0C42C7628E6C3",
+    "bytes": 67772
+  },
+  {
+    "path": ".e2e-work/integration-browser-native-zoom/integration-api-browser-in-ef1a3-ative-Chromium-zoom-200-s41-chromium/zoom200.png",
+    "sha256": "E2B37286B91E0FAB88FC4B2776DB4DB74AF20AEE5F13C171CA4BBA7304D219AB",
+    "bytes": 2400
+  },
+  {
+    "path": ".e2e-work/integration-browser-feedback/.last-run.json",
+    "sha256": "91D1C43004802CD49950D78EB11C8FA7D05DA8FFFFE219A8B13B2F561BC00903",
+    "bytes": 45
+  },
+  {
+    "path": ".e2e-work/integration-browser-feedback/integration-api-browser-in-f9b24-hout-announcing-success-s41-chromium/feedback.json",
+    "sha256": "22845F60EBC961352B40F941B4D33408EA13A7594BFFD481ECDED5E3D012E7A3",
+    "bytes": 82
+  },
+  {
+    "path": ".e2e-work/integration-browser-feedback/integration-api-browser-in-f9b24-hout-announcing-success-s41-firefox/feedback.json",
+    "sha256": "A08319D46A533866A94290DAD6CFB4D9608A82BCC6962E7774BE473C12F52E08",
+    "bytes": 66
+  },
+  {
+    "path": ".e2e-work/integration-browser-feedback/integration-api-browser-in-f9b24-hout-announcing-success-s41-webkit/feedback.json",
+    "sha256": "CAD54CC695437927D362DE22F0F5AB3F9180AFC0EEFF22BF2FFC33D00DCB69A4",
+    "bytes": 66
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/.last-run.json",
+    "sha256": "91D1C43004802CD49950D78EB11C8FA7D05DA8FFFFE219A8B13B2F561BC00903",
+    "bytes": 45
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/integration-api-browser-in-acafd-ayouts-at-1920-and-2560-s41-chromium/dark-1920.png",
+    "sha256": "59435DE5BCD7506D7E65E9F3827D0F9CD121BD1008F7B92CCF347987B0D80267",
+    "bytes": 94071
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/integration-api-browser-in-acafd-ayouts-at-1920-and-2560-s41-chromium/dark-2560.png",
+    "sha256": "AAC6634295A2501DCFA3042CD97A20B0968378EEF5A0D7DAD3087A79665AE6B2",
+    "bytes": 100905
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/integration-api-browser-in-acafd-ayouts-at-1920-and-2560-s41-chromium/light-1920.png",
+    "sha256": "09C4EF4C4D3F8979F3694635629E90C888274765270AC886D5F3728BA9A9DDD7",
+    "bytes": 93934
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/integration-api-browser-in-acafd-ayouts-at-1920-and-2560-s41-chromium/light-2560.png",
+    "sha256": "5F6D060AC3D593F05A6D0D4D72EC56CB8BC1AE114A8A6C31087B7BBD9FC12EDB",
+    "bytes": 100342
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/integration-api-browser-in-acafd-ayouts-at-1920-and-2560-s41-chromium/wide.json",
+    "sha256": "872F844904B74A61F67FD5BDE7925ACAAF7E535A9F5930AD878DA87401797C42",
+    "bytes": 4456
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/integration-api-browser-in-acafd-ayouts-at-1920-and-2560-s41-firefox/dark-1920.png",
+    "sha256": "7A5DCD11DFAF22CF82A4A20C3D56A0DE4745F642C9FEEC13490E7939451C7363",
+    "bytes": 90676
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/integration-api-browser-in-acafd-ayouts-at-1920-and-2560-s41-firefox/dark-2560.png",
+    "sha256": "A0CC7FC8FB67E3D62627BA058AF2B86562B848BE0DB74362A2AC051BB960D0E4",
+    "bytes": 99290
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/integration-api-browser-in-acafd-ayouts-at-1920-and-2560-s41-firefox/light-1920.png",
+    "sha256": "D65067B27411AEC3FAB7D8E11FF1215DD9CB9718F529CB7816B942FF24E50E98",
+    "bytes": 90587
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/integration-api-browser-in-acafd-ayouts-at-1920-and-2560-s41-firefox/light-2560.png",
+    "sha256": "0703BC853F11CED89DAD5B0D7428EA0FD99C450E3CC0658BAC12CD93A43ACB1C",
+    "bytes": 99212
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/integration-api-browser-in-acafd-ayouts-at-1920-and-2560-s41-firefox/wide.json",
+    "sha256": "56E955B03E4B5F482B9CBDBDE7E1A6ADC250F94DDA3D3F025ED354BD99F92123",
+    "bytes": 5084
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/integration-api-browser-in-acafd-ayouts-at-1920-and-2560-s41-webkit/dark-1920.png",
+    "sha256": "C7F301509120BE7CADB5DE4376CA44D40F0F31C9700DF9926EE784454913AEA6",
+    "bytes": 81267
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/integration-api-browser-in-acafd-ayouts-at-1920-and-2560-s41-webkit/dark-2560.png",
+    "sha256": "45982F077293599583EF7931D5D2446A988DDA37E02C7C03E355A1527009A9F9",
+    "bytes": 85957
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/integration-api-browser-in-acafd-ayouts-at-1920-and-2560-s41-webkit/light-1920.png",
+    "sha256": "2A3585D429EEBD32B34AEC4CD43718680007E29A1D31133D28C4C9BC81434C52",
+    "bytes": 81156
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/integration-api-browser-in-acafd-ayouts-at-1920-and-2560-s41-webkit/light-2560.png",
+    "sha256": "7A38F0E7D24FB20EC98E2D944D7F927401118EDAD9CCA7DAF7C0E5EB10BBA58A",
+    "bytes": 86171
+  },
+  {
+    "path": ".e2e-work/integration-browser-wide/integration-api-browser-in-acafd-ayouts-at-1920-and-2560-s41-webkit/wide.json",
+    "sha256": "849C96CAEE671730B5F5CE4DC4915C326403E6D11FCDA6F933832AEF621F56BC",
+    "bytes": 4472
+  }
+]

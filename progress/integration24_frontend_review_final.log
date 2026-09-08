@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb-integration-api/frontend
+
+
+ Test Files  3 passed (3)
+      Tests  66 passed (66)
+   Start at  16:46:07
+   Duration  15.82s (transform 897ms, setup 1.07s, import 1.09s, tests 13.08s, environment 3.68s)
+

@@ -612,3 +612,117 @@ A cierra integridad histórica y escala sobre persistencia. Sus nuevos ciclos de
 
 
 Cierre: APPROVED y desplegada. Véase progress/judge_import_data.md e import_live_acceptance.json. API24 es la siguiente implementación; su propuesta y escenarios se prepararon de forma aislada durante la validación de23.
+
+## API24: transición y primeros cortes (histórico)
+
+# Estado actual
+
+## Importación 23 cerrada y publicada — 8 de septiembre de 2026
+
+Funciones 1–23 desplegadas y aceptadas en https://organizacion.apptolast.com. Producto 4c74e183; aplicación PR27 fusionada en 3f4c3ef e infraestructura PR38 en 183293b. Fuente aplicada 7712fc8, EXIT 0: 38 correctas, cuatro cambios, cero fallos y cero omisiones. Operación liberada.
+
+Root aprueba los 42 escenarios con init/build y CI verdes y campañas completas sobre el umbral: lector 135/161, HTTP 56/56, frontend 651/801 y persistencia 316/330 KILLED (95,7576 %). Los timeouts y errores siguen en sus denominadores. La campaña alternativa se retiró incompleta tras verificar la original; sus resultados no se combinan.
+
+Aceptación live sólo mediante preview de una copia propia en memoria, sin confirmar importación ni crear recibos: 17 tablas conservadas, 20 servicios 1/1, 18 contenedores intactos, ocho rutas anteriores iguales. Chromium a 320/768/1280 sin overflow ni incidencias axe, teclado, cancelación, logout 204 y rechazo anónimo 401. Evidencia y límites en judge_import_data.md, import_live_acceptance.json y paquetes originales import.
+
+## Siguiente trabajo
+
+API para integraciones24: propuesta revisada y 42 escenarios preparados en OrganizacionWeb-integration-api. Todavía no se implementa ni se marca done. El baseline de ese checkout detectó una espera heredada de appearance.test.tsx; su reparación de sincronización está revisada, con validación global y CI posteriores todavía pendientes, sin cambios de producto. 25–30 siguen pendientes de contrato/implementación. Autorización global vigente, sin nuevas puertas humanas rutinarias.
+
+COMMON/V14 y artefactos ajenos permanecen protegidos. El histórico de esta entrega está preservado en history.md. Este cierre cambia documentación/estado/evidencia e incorpora la sincronización revisada del test heredado de apariencia (16d60f8, foco 50/50); no cambia producto ni repite despliegue por esos archivos. La validación global posterior del arreglo y la CI de cierre se registran por separado.
+
+## API 24: contrato aprobado e implementación iniciada
+
+Root aprueba A155A48E4AF40CA7A0BBFD2979FD14A89BBE0EDDCD3A587C8E3861EF087C4B95: 42 escenarios, revisión independiente y autorización global vigente. Transición pending → spec_ready → in_progress, después del cierre real de 23. Backend, frontend y frontera HTTP trabajan con propietarios separados; root coordina y revisa.
+
+Baseline corregido sobre 2bb20674, init oficial EXIT 0: 70 pruebas Node y 2424 frontend ejecutadas. Java UP-TO-DATE reutiliza 3215 pruebas de 135 suites ejecutadas en el baseline anterior. Root verificó cinco artefactos y 843 entradas antes/después idénticas. Metadatos externos integration24-corrective-results.json SHA a7ab08f98b16ae17b574a2f28bcf217da815e2a9dbe61fb834284bac52b110f2. El intento fallido original se conserva; no se atribuye una segunda ejecución Java. Este apartado sustituye el pendiente de baseline anterior. PR28 espera CI; infra PR39 fusionada, sin nuevo despliegue por documentación.
+
+
+
+## Checkpoint conservado antes de validación integrada de API24
+
+# Estado actual — API para integraciones24
+
+Las funcionalidades1–23 están desplegadas y aceptadas en https://organizacion.apptolast.com. Importación23 conserva producto4c74e183 y aplicación/infraestructura ya fusionadas. El cierre documental PR28 se fusionó en4c7d558 tras CI34231982918 SUCCESS (26m38,161E2E y2omisiones documentadas). InfraPR39 se fusionó en9dbc08e. No hubo otro despliegue por documentación o corrección del test heredado.
+
+Feature24 está in_progress con42escenarios A155A48E aprobados por root bajo autorización global; propuesta y revisión independientes versionadas. Se precisó en de9b062 que microsegundos admite0–6decimales UTC y que el primer revokedAt válido puede preceder createdAt si retrocede el reloj. No hay nuevas puertas humanas rutinarias. 25–30 no están implementadas; la consulta opcional al usuario sobre proveedores de calendario/tareas sigue pendiente y no bloquea24.
+
+## Trabajo paralelo y revisión
+
+A desarrolla aplicación/dominio/PG/V22 en este checkout. B desarrolla cliente/intención/interfaz en archivos separados aquí. C desarrolla HTTP/seguridad/OpenAPI en work/OrganizacionWeb-integration-http; integra commits de A aprobados. Root coordina/revisa/integra/despliega, sin escribir producto ni tests. Ponytail full/Caveman lite vigentes.
+
+Cortes revisados en review_integration_api_checkpoints.md: emisión nominal f485486 y creación durable c58bad5 (18fuentes+51evidencias,29tests). Incluyen replay/cupo/locks/rollback/wiring; A precisa dos oráculos de carrera/caducidad y continúa lectura/revocación/autenticación/cuotas. Cliente segundo corte32tests (26cliente+4intención+2UI nominal) aprobado tras corregir fechas con RED019/020; vista y su integración siguen en desarrollo. HTTP estructural16tests y corte creación/resolver24tests revisados: fronteraJSON4096, errores reales/no-store, resolver de sesión estándar todavía sin cadenaBearer integrada. No atribuir cierre funcional a esos cortes.
+
+Baseline oficial corregido2bb20674 EXIT0: Node70 y frontend2424 ejecutados; Java UP-TO-DATE reutiliza3215pruebas/135suites ejecutadas originalmente. Root verificó5artefactos y843entradas idénticas. C inició checkout separado con install/init0 nuevos, logs originales preservados; no se atribuye su conteoJava desde XML reemplazado por focales. Git45e1edd une main4c7d558 con árbolidéntico al padre24: sólo ancestry, sin sobrescribir fuentes de agentes.
+
+## Próximas puertas
+
+Completar las tres fronteras, revisar/integrar, fijar corte, ejecutar regresión integrada, E2E/UX y mutación sobre todo lo tocado. Verificar rollback aditivo y export/import sin credenciales antes de construir/publicar imágenes24 y hacer aceptación HTTPS. No hay despliegue24 todavía. Plan operativo externo integration24-release-checklist.md. Evitar globales durante ciclosRED ajenos y repeticiones de gates válidos por docs.
+
+COMMON/V14 protegido: no leer/hash/copiar/restaurar/modificar;8080protegido/18080reservado. No borrar artefactos ajenos, forzarGit ni parar procesos no identificados. Los originales23/PIT y campaña alternativa abortada siguen separados. Credenciales privadas permanecen fueraGit/logs/chat; escrituraQA de24 usa infraestructura efímera. El PC no se mantiene activo mediante automatizaciones ni otra sesión.
+
+
+## Avance posterior — 16:30 Madrid
+
+Gestión backend 17e9b3b revisada: 41 pruebas y 54 artefactos verificados. HTTP eb3cb38 integrado como ee4f275; rama publicada hasta 36912bf. Autenticación y cuota nominal cefd1c9 revisadas: 67 pruebas, 75 artefactos verificados y puertos liberados para C. El fallo de listado 503 quedó corregido. A completa concurrencia, atomicidad, invariantes y dos fixtures de wiring heredados.
+
+B incorporó la ruta privada y navegación, recuperación por id, revocación incierta por credencial y tolerancia a almacenamiento inaccesible. Sigue cerrando UI/foco/SCSS y navegador; aún no hay freeze final. C integra los puertos reales y termina seguridad/OpenAPI; el mapa independiente de respuestas está en el artefacto externo integration24-openapi-source-map.md. A posee build.gradle.kts, B configuración Stryker y C scripts del arnés para las campañas de integración. No se ha lanzado una campaña ni suite global sobre ciclos activos.
+
+
+## Avance posterior — 17:03 Madrid
+
+Backend final propio 8d7d8b2 revisado: 122 pruebas/9 XML y 87 hashes verificados. Frontend 82a45c2 fijado, evidencia original en ZIP; revisados recuperación, privacidad, foco y guardas. Dispatcher integrado d153fbe. A revisa HTTP/Bearer parcial de C; C completa wiring real y OpenAPI; B cierra scope Stryker, rangos históricos y evidencia responsive. Campañas, regresión integrada, E2E real, rollback de imágenes y despliegue24 todavía pendientes.
+
+
+
+## Estado archivado 2026-09-08T15:51:01.289Z
+
+# Estado actual — API para integraciones (24)
+
+Las features 1–23 están desplegadas y aceptadas en https://organizacion.apptolast.com. Producto 23: 4c74e183; cierres de aplicación e infraestructura fusionados. No hay despliegue 24 todavía. Las features 25–30 siguen pendientes, sin porcentaje de avance ficticio ni compromiso de terminar todas hoy.
+
+Feature 24 está in_progress bajo los 42 escenarios aprobados (A155A48E), con autorización global para implementar, revisar, publicar y desplegar sin nuevas puertas humanas rutinarias. React/SCSS, arquitectura hexagonal, PostgreSQL y controles de seguridad se conservan. Ponytail full y Caveman lite vigentes.
+
+## Cortes revisados
+
+- Backend final propio 8d7d8b2: 122 tests en nueve XML; root verificó 87 entradas. Incluye creación y replay, cuotas atómicas, concurrencia observada, revocación, owner habilitado, COMMIT incierto, Unicode y compatibilidad V21/V22/export/import.
+- HTTP 5b10287 y wiring 1466f07: 138 tests en seis XML y nueve casos reales con Clock fijo. Corrección de LogoutFilter aplicada exclusivamente a Bearer. Verificados originales y separación de sesión. OpenAPI completo aún pendiente.
+- Frontend 82a45c2 y gate 9a15cb5: 2.492 tests en 65 suites, Node 72, lint y build verdes. Tres expectativas heredadas de posición del menú actualizadas; originales fallidos conservados. Scope Stryker completo y siete nodos AST verificados.
+- Compatibilidad de negocio 20c3ac3: dos tests integrados inicialmente verdes para PUT/ETag/outbox y errores 412/428/404 que consumen cuota sin cambiar hechos. Once entradas verificadas. PIT usa ocho workers sólo para los dos scopes de integración, con los demás controles intactos.
+
+## Trabajo activo y próximas puertas
+
+B ejecuta Stryker oficial del frontend sobre fuentes fijas: 997 mutantes, ocho runners. Prepara E2E real aislado en puerto 18084; el navegador simulado acredita teclado, recuperación, temas, geometría 320–2560, texto 200 %, movimiento reducido, colores forzados y zoom nativo sólo Chromium. No confundir esas pruebas con backend real.
+
+A prepara checkout DETACHED 20c3ac3 en OrganizacionWeb-integration-pit, install/init oficial y después una campaña integration_api-backend. C cierra OpenAPI y su revisión; root validará el esquema oficial offline. Root coordina revisión/Git/ops; no escribe producto ni tests.
+
+Faltan regresión integrada final, E2E real, mutaciones con killed/total >=80 %, imágenes, ensayo API24→23→24, infraestructura y aceptación HTTPS. El helper operacional V22 está preparado, no ejecutado: compara 20 tablas más esquema y audita logs privadamente. No almacena tokens ni logs brutos en evidencia. Plan externo integration24-release-checklist.md.
+
+## Límites operativos
+
+COMMON/V14 protegido: no lectura ni hash manual, copia, modificación o restauración; excluir V14 de nuevas enumeraciones de contenido. Puertos 8080, 18080 y 18081 protegidos/reservados. No parar procesos ni alterar stacks ajenos; no forzar Git ni borrar artefactos de otros trabajos. Credenciales SSH/sudo permanecen fuera de Git/logs/chat. QA de escritura usa infraestructura efímera; aceptación live 24 prevista sin escrituras de negocio. La pregunta opcional sobre proveedores de calendario/tareas sigue pendiente y no bloquea 24.
+
+
+## Estado archivado 2026-09-08T16:49:38.284Z
+
+# Estado actual — API para integraciones (24)
+
+Las features 1–23 están desplegadas en https://organizacion.apptolast.com. Feature 24 permanece in_progress con los 42 escenarios aprobados. Las features 25–30 están pendientes; no se promete un 100 % sin validación. Autorización global de implementación, revisión, publicación y despliegue vigente. Ponytail full/Caveman lite; root coordina revisión/Git/ops, agentes escriben producto y tests.
+
+## Validación confirmada
+
+Backend final 8d7d8b2: 122 tests focales y 87 entradas verificadas. HTTP/wiring 5b10287/1466f07: 138 tests y nueve casos PG con Clock fijo. Compatibilidad de negocio 20c3ac3: dos casos de ETag/outbox y errores que consumen cuota. OpenAPI final 32d3390: 18 operaciones, 181 referencias resueltas, 28 schemas, metavalidación oficial offline verde. E2E real 1/1 y 16 ejecuciones UX simuladas conservadas en ZIPs originales 6c77b6b; alcance y límites en ux_integration_api.md.
+
+Init final aislado 360c7636: Node72, frontend2492/65 suites, Java3446/149 XML sin fallos, errores ni omisiones; 1039 entradas before/after idénticas. Incluye las dos correcciones de expectativas Basic heredadas fe6f87f. OAS final queda fuera de ese checkout; tiene validación focal independiente. CI final aún pendiente.
+
+Stryker original terminó por debajo del umbral: 780/997 Killed, 208 Survived, 8 NoCoverage, 1 RuntimeError, 0 Timeout; estricto 78,2347 %. Original íntegro preservado. Se revisaron 15 casos adicionales de permisos, Unicode, clipboard e incertidumbre, inicialmente GREEN; foco83/83. No cambian producto ni config, no se atribuyen nuevas muertes todavía.
+
+## Trabajo activo
+
+A ejecuta una campaña oficial PIT núcleo (8 workers). C escalona PIT HTTP tras el baseline y comprobación de recursos. B prepara una única campaña correctiva Stryker con el mismo universo/config, tras doble revisión favorable. Root ensaya API24→23→24 aislado con helper V22 revisado, sin tocar producción. Imágenes candidatas fe6f87f publicadas y descargadas por digest, linux/amd64 y revisión verificadas; 580 entradas de construcción idénticas antes/después, V14 excluido antes de lectura.
+
+Faltan resultados de mutación >=80 % estricto, CI final, ensayo de rollback, revisión de infraestructura, backup y aceptación HTTPS. Ninguna imagen24 se ha desplegado todavía. Plan externo integration24-release-checklist.md. La pregunta opcional sobre proveedores calendario/tareas no bloquea24.
+
+## Límites operativos
+
+COMMON/V14 protegido: no lectura/hash manual, copia, modificación o restauración. Excluir V14 de nuevas enumeraciones de contenido. Puertos8080/18080/18081 reservados. No forzar Git, parar procesos ajenos ni borrar artefactos históricos. Credenciales privadas fuera de Git/logs/chat. QA de escritura sólo efímero; aceptación live24 prevista sin escrituras de negocio. Evidencia UX es comprobación automatizada/heurística, no estudio con usuarios ni garantía universal.

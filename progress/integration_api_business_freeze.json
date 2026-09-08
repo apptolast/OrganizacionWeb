@@ -1,0 +1,58 @@
+{
+  "scope": "test-only business compatibility plus approved PIT worker count; no campaign",
+  "totals": {
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "exit": 0,
+  "files": [
+    {
+      "path": "backend/build.gradle.kts",
+      "sha256": "171222651abc43eabdcede38ed83a6f1fa2b1ceb8d5ecfbc5548c130560ce33a"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/ApiCredentialBusinessCompatibilityTest.java",
+      "sha256": "a079510508c7eacb47c42906a89e644bc33ba8fc21d626e5bf701322e5cb5c8d"
+    },
+    {
+      "path": "progress/tdd_integration_api_backend.md",
+      "sha256": "c8b991709bb95fe1c53f1bc3df84fe9502c69ee53f9bde457575ecec0d76a8c0"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-40-initial.log",
+      "sha256": "01133c369b2eded55d6d058f5674d450f33f6172fcd1a936326f9851f9b1a2ec"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-40-initial.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-41-initial.log",
+      "sha256": "1366938fa091c0f90da53551c47caa0fcb6a1ec21900db7a067ba6e05ce72946"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-41-initial.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-business-final.log",
+      "sha256": "99695e4bb391fd64c20d2ecb122d6319c51d275f58def210da312d71287eee20"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-business-final.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-business-final.xml",
+      "sha256": "71e359844753cdcd0dc06b142cd4c50882a74b2fbc7762e81b30c31ae3c27b78"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-final-bitacora-original.md",
+      "sha256": "0673f85d533f3c82f68f10deea98a189d80113ea0fb094302857b5d4d813859d"
+    }
+  ]
+}

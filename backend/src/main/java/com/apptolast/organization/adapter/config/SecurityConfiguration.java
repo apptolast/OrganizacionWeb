@@ -27,6 +27,34 @@ public class SecurityConfiguration {
   }
 
   @Bean
+  @org.springframework.core.annotation.Order(1)
+  SecurityFilterChain bearerSecurity(
+      HttpSecurity http,
+      @Value("${app.public-origin}") String publicOrigin,
+      com.fasterxml.jackson.databind.ObjectMapper json,
+      org.springframework.beans.factory.ObjectProvider<
+              com.apptolast.organization.application.AuthenticateApiCredentialUseCase>
+          authenticate,
+      org.springframework.beans.factory.ObjectProvider<
+              com.apptolast.organization.application.ConsumeApiQuotaUseCase>
+          quota)
+      throws Exception {
+    return http.securityMatcher(request -> request.getHeader("Authorization") != null)
+        .logout(logout -> logout.disable())
+        .csrf(csrf -> csrf.disable())
+        .requestCache(cache -> cache.disable())
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .addFilterBefore(
+            new com.apptolast.organization.adapter.http.ApiCredentialBearerFilter(
+                authenticate, quota, json, publicOrigin),
+            org.springframework.security.web.authentication.AnonymousAuthenticationFilter.class)
+        .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+        .build();
+  }
+
+  @Bean
+  @org.springframework.core.annotation.Order(2)
   SecurityFilterChain security(
       HttpSecurity http,
       com.fasterxml.jackson.databind.ObjectMapper json,
@@ -78,6 +106,12 @@ public class SecurityConfiguration {
                         new com.apptolast.organization.adapter.http.SessionAccessDeniedHandler(
                             json)))
         .build();
+  }
+
+  @Bean
+  org.springframework.session.web.http.HttpSessionIdResolver sessionIdResolver(
+      org.springframework.session.web.http.DefaultCookieSerializer serializer) {
+    return new com.apptolast.organization.adapter.http.ApiCredentialSessionIdResolver(serializer);
   }
 
   @Bean

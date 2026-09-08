@@ -105,7 +105,7 @@ test("import PIT keeps complete disjoint classes and dedicated tests while exten
     /"com\.apptolast\.organization\.adapter\.config\.Import\*Test"/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(4\)/);
+  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
 });
 test("import backend targets invoke only their fixed PIT scopes", () => {
   for (const part of ["reader", "http", "persistence"]) {
@@ -119,6 +119,39 @@ test("import backend targets invoke only their fixed PIT scopes", () => {
       ],
     ]);
   }
+});
+test("integration backend targets invoke only their fixed PIT scopes", () => {
+  for (const [target, scope] of [
+    ["integration_api-backend", "integration_api"],
+    ["integration_api-http-backend", "integration_api_http"],
+  ]) {
+    const { calls, project } = capture();
+    project("mutate", target);
+    assert.deepEqual(calls, [
+      [
+        process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+        ["pitest", "--no-daemon", `-PmutationScope=${scope}`],
+        { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+      ],
+    ]);
+  }
+});
+test("integration frontend invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "integration_api-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.integration-api.config.json",
+      ],
+    ],
+  ]);
 });
 test("import frontend invokes only its fixed Stryker configuration", () => {
   const { calls, project } = capture();
@@ -291,7 +324,7 @@ test("export persistence PIT preserves complete classes and extends the default"
     /if \(exportPersistenceOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-export-data-persistence"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(4\)/);
+  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
 });
 
 test("export persistence backend invokes only its fixed PIT scope", () => {
@@ -435,7 +468,7 @@ test("customization PIT includes complete families and exposes their adapter tes
     /if \(customizationOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-custom-views-fields"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(4\)/);
+  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
 });
 test("customization backend invokes only its fixed PIT scope", () => {
   const { calls, project } = capture();
@@ -531,7 +564,7 @@ test("end time PIT preserves shared guards, all JUnit candidates and threshold",
     /if \(endTimeNotificationOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-end-time-notification"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(4\)/);
+  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
 });
 test("end time frontend invokes only its fixed Stryker configuration", () => {
   const { calls, project } = capture();
@@ -668,7 +701,7 @@ test("close work PIT scope includes changed core and shared adapters with all JU
     /if \(closeWorkSessionOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-close-work-session"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(4\)/);
+  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
 });
 
 test("close work frontend invokes only its fixed Stryker configuration", () => {
@@ -764,7 +797,7 @@ test("start work PIT selects the complete feature and shared publication with al
       "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher",
     ],
   );
-  assert.match(build, /threads\.set\(4\)/);
+  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
   assert.match(build, /mutationThreshold\.set\(80\)/);
 });
 
@@ -1470,7 +1503,7 @@ test("history PIT includes complete new modules and wiring with all JUnit candid
     /if \(historyOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-history"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(4\)/);
+  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
 });
 
 test("default PIT exposes history adapter tests for the newly selected classes", () => {
@@ -1633,7 +1666,7 @@ test("weekly review PIT includes complete new modules and wiring with all JUnit 
     /if \(weeklyReviewOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-weekly-review"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(4\)/);
+  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
 });
 
 test("default PIT exposes weekly review adapter tests for the newly selected classes", () => {
@@ -1718,7 +1751,7 @@ test("appearance PIT includes all new modules and makes their tests available by
     /if \(appearanceOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-appearance"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(4\)/);
+  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
 });
 
 test("appearance frontend invokes only its fixed Stryker configuration", () => {
@@ -1750,12 +1783,12 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     "src/appearance-api.ts",
     "src/appearance-state.tsx",
     "src/appearance.tsx",
-    "src/App.tsx:31:8-31:44",
-    "src/App.tsx:45:14-57:30",
-    "src/App.tsx:72:10-113:7",
-    "src/workspace.tsx:76:10-81:22",
+    "src/App.tsx:32:8-32:44",
+    "src/App.tsx:49:16-61:32",
+    "src/App.tsx:78:10-119:7",
+    "src/workspace.tsx:77:10-82:22",
     "src/session-gate.tsx:32:2-52:6",
-    "src/use-session.ts:194:0-214:1",
+    "src/use-session.ts:208:0-229:1",
   ]);
   assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
   assert.equal(config.concurrency, 8);

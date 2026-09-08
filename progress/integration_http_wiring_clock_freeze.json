@@ -1,0 +1,45 @@
+{
+  "context": "29f802551913b20e3ff5fa7eaa8249d9b159a589",
+  "tests": 9,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "exit": 0,
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/config/SecurityConfiguration.java",
+      "sha256": "1635343A5D0EDAE9C0FECEA023EE380308BBCAC490D3262EFA994FA1D4411071",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-wiring-clock-original\\backend\\src\\main\\java\\com\\apptolast\\organization\\adapter\\config\\SecurityConfiguration.java"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/ApiCredentialBearerTest.java",
+      "sha256": "5F96B82B234DF27654A7FC44240B4497359B671337B3490C3E654DD4A1061543",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-wiring-clock-original\\backend\\src\\test\\java\\com\\apptolast\\organization\\adapter\\ApiCredentialBearerTest.java"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/ApiCredentialHttpPersistenceTest.java",
+      "sha256": "328950C545C1CA0DCD569C39541E200D5CCE99704590055CB75AF6A1445271B4",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-wiring-clock-original\\backend\\src\\test\\java\\com\\apptolast\\organization\\adapter\\ApiCredentialHttpPersistenceTest.java"
+    },
+    {
+      "path": "progress/tdd_integration_api_http_wiring.md",
+      "sha256": "2AB413347A0EA82E142B9AE022EEE17BFADBA8BE3A53A6F89FD5EA835B990C10",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-wiring-clock-original\\progress\\tdd_integration_api_http_wiring.md"
+    },
+    {
+      "path": "progress/integration_http_wiring_clock_final.log",
+      "sha256": "3BDFE18504FC815A845A051F8B5A36B7ECB76F27B379A5DEE133D72BA7FE6990",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-wiring-clock-original\\progress\\integration_http_wiring_clock_final.log"
+    },
+    {
+      "path": "progress/integration_http_wiring_clock_final.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-wiring-clock-original\\progress\\integration_http_wiring_clock_final.exit"
+    },
+    {
+      "path": "progress/integration_http_wiring_clock_original.xml",
+      "sha256": "1F3DB1E3A35EE23044C63CD50162812AEFF3F1FEB4FA336032ABD90C7DC1CC31",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-wiring-clock-original\\progress\\integration_http_wiring_clock_original.xml"
+    }
+  ]
+}

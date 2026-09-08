@@ -1,0 +1,289 @@
+{
+  "scope": "credential creation only; remaining feature not approved",
+  "totals": {
+    "tests": 29,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresApiCredentialStore.java",
+      "sha256": "a915aad7cb2edf86f502c03e3d1fd8dd9d5fcc4feaba812014a66dcf43bdf6e2"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialCommit.java",
+      "sha256": "519a663eeba94662179f93761e80c77a4622764857d92169da5b5a92bbb87d4a"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialConflictException.java",
+      "sha256": "19f232befa74d6a2fe827e7404191e70d091d5a3c5e64ff9c7cd35c1caa916eb"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialCreation.java",
+      "sha256": "8251e59a15323531382b40bfda60b4f02f1ef110d5e9ea07114affd94681e9f9"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialIssuance.java",
+      "sha256": "3d80d5baeb4faf1248a56fc10a207e8e0b9f8944f6a28f6505e21475625e0240"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialLimitException.java",
+      "sha256": "d9f692068f7570bad806ee53bd27acde31142c2ceaabd886e02a9dd5406e23ab"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/CreateApiCredential.java",
+      "sha256": "144be9c9821864e2c9702ca393984a4a4bdd0749e0abffa1b283b6d1f3071f85"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/CreateApiCredentialUseCase.java",
+      "sha256": "1c8006bc622494d9f7a8ffc2f91dc32896f1a7019e364a56bccb2122601f7de1"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/ApiCredential.java",
+      "sha256": "79984954096da8511193b09ea032bff1ae52dc270f4535fc41f8fe4150f55d4d"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/ApiCredentialIntent.java",
+      "sha256": "b00d52f2f594c4a34ae72c15c4a0450fa81bbd1ffa84de072822ae63feba324e"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/ApiCredentialInvalidException.java",
+      "sha256": "fb36af703d44e4db3327461d2a2c44aa67ff114c09ea20014fb488dd6c5ad331"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ApiCredentialPersistenceTest.java",
+      "sha256": "97babaa3a3a17d1f8590b13b97c47d0f4e2326af42f8d836c0333eb16967c5e1"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ApiCredentialWiringTest.java",
+      "sha256": "0aa5f11108286a91f8786da0d911b5a96d84e720d066971b57b0000239ebfaf3"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/application/CreateApiCredentialTest.java",
+      "sha256": "f9e7f13a014e254ee5e181e14b95e3609ff35920ea4c8eca206dca76b6c516c4"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+      "sha256": "a5a5b9214ef04f85e352454dbff1ca058e0de36044508d44345225a49f9486bf"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V22__api_credentials.sql",
+      "sha256": "85fab95c9d4b85d95b89904cd2a9dd65ae5c33848a257f241dcec090dc670f7f"
+    },
+    {
+      "path": "progress/tdd_integration_api_backend.md",
+      "sha256": "a9034c52480f02293f185203b56d6225a8717902336a6bea3d0fb82b05df9b71"
+    },
+    {
+      "path": "progress/integration_api_backend_handoff.md",
+      "sha256": "5358c52bb3cf6f520cd51a094e0b9dbc7dd91a53315fe79b50fc30255f636131"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "integration24-02-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-02-green.log",
+      "sha256": "9f53ceb26a0e861d951a433ad5e516d3094ddd95597012a87e29db9ef9928ca4"
+    },
+    {
+      "path": "integration24-02-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-02-red.log",
+      "sha256": "94304e619b1bbac8c91a8edcae412329253778343fb07e64bb12e60f53ffc655"
+    },
+    {
+      "path": "integration24-03-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-03-green.log",
+      "sha256": "af7063ff34d263351be0f857cebfc50de84139c02c3225360cb77a2bcd6ff206"
+    },
+    {
+      "path": "integration24-03-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-03-red.log",
+      "sha256": "0b635189d62e7e542c1a5dfb907f9612e5f914746f7a648a5a95dc84e32c2a8c"
+    },
+    {
+      "path": "integration24-04-green-corrected-fixture.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-04-green-corrected-fixture.log",
+      "sha256": "ea6e51bb8607cf7edb6c294b60fe69697799ea3b21cc70b0eeff91cdf4cb193e"
+    },
+    {
+      "path": "integration24-04-green.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-04-green.log",
+      "sha256": "53a9b42268424c2b9a0ddc946c9a2343bc88b1300252cedca0f84353f6905ef3"
+    },
+    {
+      "path": "integration24-04-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-04-red.log",
+      "sha256": "4c2b950dadf45929f8e430d05ad9bf74d678a53c8cc712f8a53de6a8b62b309d"
+    },
+    {
+      "path": "integration24-05-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-05-green.log",
+      "sha256": "839a6ea92d68a73e6d7799e9280269ea4da45c3f5251b65db203f9bde2c72450"
+    },
+    {
+      "path": "integration24-05-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-05-red.log",
+      "sha256": "8ee99b479f9e00ae607c4ef7ba2cd7bc1e4c1f7ac4cd2c0c17d5c8cf5ebbdd45"
+    },
+    {
+      "path": "integration24-06-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-06-green.log",
+      "sha256": "aa50fce5455c795732e83bf16a5e250b1a1eec1f4bb38f800672eed0cd8fd5b8"
+    },
+    {
+      "path": "integration24-06-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-06-red.log",
+      "sha256": "5c249026a785f3694087c8d3464a255b8ce9b400a8f9bbc766ad9b6bda122983"
+    },
+    {
+      "path": "integration24-07-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-07-green.log",
+      "sha256": "8ab8c7b699f09cb6417f48700fe6c1e39c0e47a255a02a1d4842e847ff32a7b3"
+    },
+    {
+      "path": "integration24-07-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-07-red.log",
+      "sha256": "c3f02b40eb651353ea0aa50a5ff4b18fe830474730529e1ec9ab56bdf985d655"
+    },
+    {
+      "path": "integration24-08-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-08-green.log",
+      "sha256": "8ab8c7b699f09cb6417f48700fe6c1e39c0e47a255a02a1d4842e847ff32a7b3"
+    },
+    {
+      "path": "integration24-08-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-08-red.log",
+      "sha256": "823ebe7bee3ae42673f5727338bb84c79cf8414be495cb755d895b6519468932"
+    },
+    {
+      "path": "integration24-09-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-09-green.log",
+      "sha256": "e3523033c5804125d6cbc4d8ded2db42aafc8c9de8c3791ec7d28c2fa1c413a0"
+    },
+    {
+      "path": "integration24-09-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-09-red.log",
+      "sha256": "f13c84009d99876a704d6e4fe57bcd25899faec1a9eac7897852bf7c96cba8d7"
+    },
+    {
+      "path": "integration24-10-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-10-green.log",
+      "sha256": "14e46b498d05be06089a6dee05c86ddd20d00dbd274ead4f9b9493170de09b84"
+    },
+    {
+      "path": "integration24-10-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-10-red.log",
+      "sha256": "736c185d4a42d5e98523c77524f4f0fcde7e659417137359b14bf41fd6677f1a"
+    },
+    {
+      "path": "integration24-11-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-11-green.log",
+      "sha256": "ec1a3730a674806ad076e58778cb996540b2d01694596dc1d1bf45ff8d422795"
+    },
+    {
+      "path": "integration24-11-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-11-red.log",
+      "sha256": "aab9746d35416c513297d9bb978e18730c847e974dfaa991107f2469fa90aa64"
+    },
+    {
+      "path": "integration24-12-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-12-green.log",
+      "sha256": "2061a070dc5455f651ea0235d21ebf5311b65a314ccaa4b8d826515ab644f9a2"
+    },
+    {
+      "path": "integration24-12-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-12-red.log",
+      "sha256": "755a68d0567102cf000ecb21a1e41b1bb162861063a40436c6cbdc53b0ab6959"
+    },
+    {
+      "path": "integration24-creation-checkpoint-xml/TEST-com.apptolast.organization.adapter.persistence.ApiCredentialPersistenceTest.xml",
+      "sha256": "ca50888406afeea64508418ae71a0dd0a5f632c9958ee50f4178974547e8abec"
+    },
+    {
+      "path": "integration24-creation-checkpoint-xml/TEST-com.apptolast.organization.adapter.persistence.ApiCredentialWiringTest.xml",
+      "sha256": "b6f857dc3240a69680e5c7cd5c164d010201ad0e001c43a75ff19f7386ea7b0a"
+    },
+    {
+      "path": "integration24-creation-checkpoint-xml/TEST-com.apptolast.organization.application.CreateApiCredentialTest.xml",
+      "sha256": "1614075dc5770ee1edaf909086bf2b95a37fc51a201e7f2ee18ce2ffa105b39a"
+    },
+    {
+      "path": "integration24-creation-checkpoint.log",
+      "sha256": "474347be373a18f13c1e1b6d02da23be5483d20fb00ccc71f28f42ab8aa6592c"
+    },
+    {
+      "path": "integration24-creation-checkpoint.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    }
+  ]
+}

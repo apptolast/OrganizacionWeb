@@ -14,6 +14,7 @@ import { WeeklyReview } from "./weekly-review";
 import { Appearance } from "./appearance";
 import { ExportData } from "./export-data";
 import { ImportData } from "./import-data";
+import { IntegrationApi } from "./integration-api";
 import { useAppearance } from "./appearance-state";
 export function App({
   sessionControls,
@@ -31,6 +32,7 @@ export function App({
   const appearance = route === "/apariencia";
   const exportData = route === "/exportacion";
   const importData = route === "/importacion";
+  const integrationApi = route === "/integraciones/api";
   const taskRoute = /^\/proyectos\/([^/]+)\/tareas\/([^/?]+)$/.exec(route);
   const sessionRoute =
     /^\/proyectos\/([^/]+)\/tareas\/([^/]+)\/sesiones\/([^/?]+)$/.exec(route);
@@ -38,26 +40,30 @@ export function App({
     <Workspace
       sessionControls={sessionControls}
       section={
-        importData
-          ? "Importación"
-          : exportData
-            ? "Exportación"
-            : appearance
-              ? "Apariencia"
-              : route === "/"
-                ? "Hoy"
-                : weeklyReview
-                  ? "Revisión semanal"
-                  : history
-                    ? "Historial"
-                    : availability
-                      ? "Disponibilidad"
-                      : route.startsWith("/proyectos")
-                        ? "Proyectos"
-                        : null
+        integrationApi
+          ? "API para integraciones"
+          : importData
+            ? "Importación"
+            : exportData
+              ? "Exportación"
+              : appearance
+                ? "Apariencia"
+                : route === "/"
+                  ? "Hoy"
+                  : weeklyReview
+                    ? "Revisión semanal"
+                    : history
+                      ? "Historial"
+                      : availability
+                        ? "Disponibilidad"
+                        : route.startsWith("/proyectos")
+                          ? "Proyectos"
+                          : null
       }
     >
-      {importData && username ? (
+      {integrationApi && username ? (
+        <IntegrationApi owner={username} />
+      ) : importData && username ? (
         <ImportData
           owner={username}
           onImported={async (receipt) => {

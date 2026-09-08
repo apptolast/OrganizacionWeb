@@ -1,0 +1,14 @@
+
+> organizationweb-frontend@0.1.0 build C:\Users\vhurt\Documents\Codex\2026-09-05\a-ver-necesito-o-me-gustar\work\OrganizacionWeb-integration-api\frontend
+> tsc --noEmit && vite build
+
+vite v8.2.2 building client environment for production...
+transforming...
+✓ 85 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.59 kB │ gzip:   0.36 kB
+dist/assets/index-tYPvLSox.css   35.26 kB │ gzip:   7.00 kB
+dist/assets/index-Df6birhB.js   434.46 kB │ gzip: 119.08 kB
+
+✓ built in 332ms

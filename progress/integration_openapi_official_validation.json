@@ -1,0 +1,50 @@
+{
+  "finalDocumentSha256": "f5934eb88a62331d385f5f0e869a9d031482f3445051a9ce88ca921f8b6ee929",
+  "sourceSchemas": [
+    {
+      "url": "https://spec.openapis.org/oas/3.1/schema-base/2025-11-23",
+      "name": "schema-base-2025-11-23.json",
+      "id": "https://spec.openapis.org/oas/3.1/schema-base/2025-11-23",
+      "sha256": "ab0bde84a429f43f280624f645a19d05c90b626e63862d7278074a465a20ff54"
+    },
+    {
+      "url": "https://spec.openapis.org/oas/3.1/schema/2025-11-23",
+      "name": "schema-2025-11-23.json",
+      "id": "https://spec.openapis.org/oas/3.1/schema/2025-11-23",
+      "sha256": "1b8ccc6e34234b17536f2dd0eb3597142a32bd108438cd42471a5fca4c1a07ef"
+    },
+    {
+      "url": "https://spec.openapis.org/oas/3.1/meta/2024-11-10",
+      "name": "meta-2024-11-10.json",
+      "id": "https://spec.openapis.org/oas/3.1/meta/2024-11-10",
+      "sha256": "80706a9a404affedbf84ac4dc1328c9ce0d2a00804cdfc4d95c0ddd0053121dd"
+    },
+    {
+      "url": "https://spec.openapis.org/oas/3.1/dialect/2024-11-10",
+      "name": "dialect-2024-11-10.json",
+      "id": "https://spec.openapis.org/oas/3.1/dialect/2024-11-10",
+      "sha256": "647f32dfff64949d5020a28ecd1af4ffeffb1e9c695f861a52255a8004e07460"
+    }
+  ],
+  "runs": [
+    {
+      "documentSha256": "b494a776cd057cb513b4e3cde99314b74043417d8d1ffdfcb04977db0f032de3",
+      "validator": "jsonschema Draft202012Validator, official OpenAPI 3.1 schema-base 2025-11-23, offline registry",
+      "errors": [],
+      "passed": true
+    },
+    {
+      "documentSha256": "f5934eb88a62331d385f5f0e869a9d031482f3445051a9ce88ca921f8b6ee929",
+      "validator": "official OpenAPI 3.1 schema-base 2025-11-23 offline",
+      "errors": [],
+      "passed": true
+    }
+  ],
+  "semanticReview": {
+    "operations": 18,
+    "localReferences": 181,
+    "unresolved": 0,
+    "review": "Existing controllers and domain DTOs compared against 28 documented schemas, nullable fields, decimal-string counters, ETag/If-Match, error responses and seven history details variants. Normalized name/title limits corrected after review.",
+    "limits": "Schema validation does not replace runtime API acceptance. Vendor normalized-length keyword is descriptive; standard JSON Schema does not trim strings."
+  }
+}

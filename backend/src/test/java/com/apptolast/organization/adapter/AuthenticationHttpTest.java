@@ -168,8 +168,9 @@ class AuthenticationHttpTest {
             .build();
     var response = client.send(request, HttpResponse.BodyHandlers.ofString());
     assertThat(response.statusCode()).isEqualTo(401);
-    assertThat(response.headers().firstValue("WWW-Authenticate")).isEmpty();
-    assertThat(json.readTree(response.body()).get("code").asText()).isEqualTo("UNAUTHENTICATED");
+    assertThat(response.headers().firstValue("WWW-Authenticate")).contains("Bearer");
+    assertThat(json.readTree(response.body()).get("code").asText())
+        .isEqualTo("API_UNAUTHENTICATED");
   }
 
   String login() throws Exception {

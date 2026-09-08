@@ -1,0 +1,2554 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OrganizationWeb Integration API",
+    "version": "1.0.0",
+    "description": "API limitada de integración mediante credenciales personales revocables. Scopes independientes: projects:read, projects:write, tasks:read, tasks:write, agenda:read e history:read. Cuotas fijas por minuto UTC: 60 solicitudes por credencial y 120 por propietario, admitidas atómicamente. Las rutas y métodos no incluidos (también HEAD y OPTIONS) devuelven API_SCOPE_DENIED. Sin cookies ni CSRF en Bearer; no hay fallback a sesión. GET /api/v1/integration-openapi.json requiere sesión o Bearer válido, sin cuota ni scope adicional. Los contratos existentes de negocio conservan sus precondiciones y errores."
+  },
+  "paths": {
+    "/api/v1/projects": {
+      "get": {
+        "x-required-scope": "projects:read",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Cursor opaco de la página anterior; no repetir este parámetro.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Representación actual del recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          }
+        },
+        "description": "Requiere únicamente projects:read. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota. Sólo los parámetros de consulta documentados, sin repeticiones."
+      },
+      "post": {
+        "x-required-scope": "projects:write",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Representación actual del recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "description": "Ruta del recurso creado.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "415": {
+            "description": "415 UNSUPPORTED_MEDIA_TYPE: esta escritura acepta application/json.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCreate"
+              }
+            }
+          },
+          "required": true,
+          "description": "JSON con campos cerrados. Authorization selecciona Bearer; no requiere CSRF. Origin, si está presente, debe coincidir con el público."
+        },
+        "description": "Requiere únicamente projects:write. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota. Creación no idempotente: no reintentar automáticamente tras pérdida de respuesta."
+      }
+    },
+    "/api/v1/projects/{id}": {
+      "get": {
+        "x-required-scope": "projects:read",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Representación actual del recurso.",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "ETag fuerte de identidad y revisión del proyecto."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "404": {
+            "description": "404 PROJECT_NOT_FOUND: ausente o ajeno; no revela recursos de otros propietarios.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere únicamente projects:read. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota."
+      },
+      "put": {
+        "x-required-scope": "projects:write",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "ETag fuerte vigente obtenido por GET de proyecto; formato UUID:revision entre comillas."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Representación actual del recurso.",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "ETag fuerte de identidad y revisión del proyecto."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "412 PROJECT_CONFLICT: If-Match no corresponde a la versión actual.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "428 PRECONDITION_REQUIRED: falta If-Match.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "415": {
+            "description": "415 UNSUPPORTED_MEDIA_TYPE: esta escritura acepta application/json.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "404 PROJECT_NOT_FOUND: ausente o ajeno; no revela recursos de otros propietarios.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectEdit"
+              }
+            }
+          },
+          "required": true,
+          "description": "JSON con campos cerrados. Authorization selecciona Bearer; no requiere CSRF. Origin, si está presente, debe coincidir con el público. No admite claves duplicadas ni contenido posterior."
+        },
+        "description": "Requiere únicamente projects:write. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota."
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks": {
+      "get": {
+        "x-required-scope": "tasks:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Cursor opaco de la página anterior; no repetir este parámetro.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Representación actual del recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "404": {
+            "description": "404 RESOURCE_NOT_FOUND: ausente o ajeno; no revela recursos de otros propietarios.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere únicamente tasks:read. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota. Sólo los parámetros de consulta documentados, sin repeticiones."
+      },
+      "post": {
+        "x-required-scope": "tasks:write",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Representación actual del recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "description": "Ruta del recurso creado.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "415": {
+            "description": "415 UNSUPPORTED_MEDIA_TYPE: esta escritura acepta application/json.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "404 RESOURCE_NOT_FOUND: ausente o ajeno; no revela recursos de otros propietarios.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "409 PROJECT_COMPLETED: no se añaden tareas a un proyecto terminado.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskCreate"
+              }
+            }
+          },
+          "required": true,
+          "description": "JSON con campos cerrados. Authorization selecciona Bearer; no requiere CSRF. Origin, si está presente, debe coincidir con el público. No admite claves duplicadas ni contenido posterior."
+        },
+        "description": "Requiere únicamente tasks:write. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota. Creación no idempotente: no reintentar automáticamente tras pérdida de respuesta."
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{taskId}": {
+      "get": {
+        "x-required-scope": "tasks:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Representación actual del recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "404": {
+            "description": "404 RESOURCE_NOT_FOUND: ausente o ajeno; no revela recursos de otros propietarios.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere únicamente tasks:read. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota."
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{id}/status": {
+      "get": {
+        "x-required-scope": "tasks:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Representación actual del recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskStatus"
+                }
+              }
+            },
+            "headers": {
+              "ETag": {
+                "description": "ETag fuerte de la revisión task:taskId:version, entre comillas.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "404": {
+            "description": "404 RESOURCE_NOT_FOUND: ausente o ajeno; no revela recursos de otros propietarios.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere únicamente tasks:read. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota."
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{id}/parent": {
+      "get": {
+        "x-required-scope": "tasks:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Representación actual del recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskParent"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "404": {
+            "description": "404 RESOURCE_NOT_FOUND: ausente o ajeno; no revela recursos de otros propietarios.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere únicamente tasks:read. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota."
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{parentId}/subtasks": {
+      "get": {
+        "x-required-scope": "tasks:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "parentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Cursor opaco de la página anterior; no repetir este parámetro.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Representación actual del recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "404": {
+            "description": "404 RESOURCE_NOT_FOUND: ausente o ajeno; no revela recursos de otros propietarios.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere únicamente tasks:read. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota. Sólo los parámetros de consulta documentados, sin repeticiones."
+      }
+    },
+    "/api/v1/today": {
+      "get": {
+        "x-required-scope": "agenda:read",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Representación actual del recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Today"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          }
+        },
+        "description": "Requiere únicamente agenda:read. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota."
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{taskId}/blocks": {
+      "get": {
+        "x-required-scope": "agenda:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Cursor opaco, sin repetición.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Representación actual del recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "404": {
+            "description": "404 BLOCK_NOT_FOUND / RESOURCE_NOT_FOUND: ausente o ajeno; no revela recursos de otros propietarios.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere únicamente agenda:read. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota. Sólo los parámetros de consulta documentados, sin repeticiones."
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{taskId}/blocks/{blockId}": {
+      "get": {
+        "x-required-scope": "agenda:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "blockId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Representación actual del recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Block"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "404": {
+            "description": "404 BLOCK_NOT_FOUND / RESOURCE_NOT_FOUND: ausente o ajeno; no revela recursos de otros propietarios.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere únicamente agenda:read. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota."
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{taskId}/blocks/{blockId}/state": {
+      "get": {
+        "x-required-scope": "agenda:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "blockId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Representación actual del recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockState"
+                }
+              }
+            },
+            "headers": {
+              "ETag": {
+                "description": "ETag fuerte block:blockId:version, entre comillas.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "404": {
+            "description": "404 BLOCK_NOT_FOUND / RESOURCE_NOT_FOUND: ausente o ajeno; no revela recursos de otros propietarios.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere únicamente agenda:read. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota."
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{taskId}/blocks/by-request/{requestKey}": {
+      "get": {
+        "x-required-scope": "agenda:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Representación actual del recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Block"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "404": {
+            "description": "404 BLOCK_NOT_FOUND / RESOURCE_NOT_FOUND: ausente o ajeno; no revela recursos de otros propietarios.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere únicamente agenda:read. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota."
+      }
+    },
+    "/api/v1/history": {
+      "get": {
+        "x-required-scope": "history:read",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Cursor opaco de la página anterior. No repetir este parámetro.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "description": "Categoría opcional. No repetir este parámetro.",
+            "schema": {
+              "type": "string",
+              "enum": ["sessions", "task-status", "planning"]
+            }
+          },
+          {
+            "name": "projectId",
+            "in": "query",
+            "required": false,
+            "description": "Proyecto opcional. No repetir este parámetro.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "query",
+            "required": false,
+            "description": "Tarea opcional; exige projectId. No repetir este parámetro.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "Día UTC inclusivo, año 0001–9999; no posterior a to. No repetir este parámetro.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "description": "Día UTC inclusivo, año 0001–9999. No repetir este parámetro.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página del historial durable, sin republicar hechos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          }
+        },
+        "description": "Requiere únicamente history:read. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota. Sólo los parámetros de consulta documentados, sin repeticiones."
+      }
+    },
+    "/api/v1/weekly-review": {
+      "get": {
+        "x-required-scope": "history:read",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "description": "Fecha de la semana; no repetir. YYYY-MM-DD, año 0001–9999.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "zoneId",
+            "in": "query",
+            "required": false,
+            "description": "Zona IANA opcional; no repetir.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Representación actual del recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeeklyReview"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "409": {
+            "description": "409 WEEKLY_REVIEW_TIME_OUT_OF_RANGE: semana no representable.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere únicamente history:read. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota. Sólo los parámetros de consulta documentados, sin repeticiones."
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{id}/history": {
+      "get": {
+        "x-required-scope": "history:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Cursor opaco de la página anterior. No repetir este parámetro.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página del historial durable, sin republicar hechos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskHistoryPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/StorageUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "404": {
+            "description": "404 RESOURCE_NOT_FOUND: ausente o ajeno; no revela recursos de otros propietarios.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requiere únicamente history:read. Autenticación antes de Origin, operación/scope y cuota; errores de negocio posteriores consumen cuota. Sólo los parámetros de consulta documentados, sin repeticiones."
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Credencial personal limitada y revocable. No reintentar automáticamente altas ante respuesta perdida."
+      }
+    },
+    "schemas": {
+      "ProjectCreate": {
+        "additionalProperties": false,
+        "required": ["name"],
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "type": "string",
+            "x-normalizedMaxLength": 120,
+            "description": "Se retira Unicode White_Space de ambos extremos antes de validar: entre 1 y 120 puntos de código tras ese recorte. Los espacios laterales no cuentan para el límite."
+          },
+          "description": {
+            "type": ["string", "null"],
+            "maxLength": 4000
+          }
+        }
+      },
+      "ProjectEdit": {
+        "additionalProperties": false,
+        "required": ["name", "description"],
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "type": "string",
+            "x-normalizedMaxLength": 120,
+            "description": "Se retira Unicode White_Space de ambos extremos antes de validar: entre 1 y 120 puntos de código tras ese recorte. Los espacios laterales no cuentan para el límite."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 4000
+          }
+        }
+      },
+      "TaskCreate": {
+        "additionalProperties": false,
+        "required": ["title"],
+        "type": "object",
+        "properties": {
+          "title": {
+            "minLength": 1,
+            "type": "string",
+            "x-normalizedMaxLength": 160,
+            "description": "Se retira Unicode White_Space de ambos extremos antes de validar: entre 1 y 160 puntos de código tras ese recorte. Los espacios laterales no cuentan para el límite."
+          },
+          "completionCriterion": {
+            "type": ["string", "null"],
+            "maxLength": 2000
+          },
+          "estimatedMinutes": {
+            "maximum": 1440,
+            "minimum": 1,
+            "type": ["integer", "null"],
+            "description": "Opcional/null; si se proporciona, el contrato HTTP exige token JSON integral (7.0 no es admitido)."
+          }
+        }
+      },
+      "ProjectSummary": {
+        "type": "object",
+        "required": ["id", "name", "status", "createdAt", "updatedAt"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["idea", "active", "paused", "completed"]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Project": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "status",
+          "createdAt",
+          "updatedAt",
+          "ownerId",
+          "description"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["idea", "active", "paused", "completed"]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "Task": {
+        "type": "object",
+        "required": [
+          "id",
+          "projectId",
+          "title",
+          "completionCriterion",
+          "estimatedMinutes",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "completionCriterion": {
+            "type": "string"
+          },
+          "estimatedMinutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1440
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "completed"]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TaskParent": {
+        "type": "object",
+        "required": ["parent"],
+        "additionalProperties": false,
+        "properties": {
+          "parent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Task"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "TaskStatus": {
+        "type": "object",
+        "required": ["status", "completedAt", "updatedAt"],
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["pending", "completed"]
+          },
+          "completedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProjectPage": {
+        "type": "object",
+        "required": ["items", "nextCursor"],
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectSummary"
+            }
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "TaskPage": {
+        "type": "object",
+        "required": ["items", "nextCursor"],
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Task"
+            }
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "Block": {
+        "type": "object",
+        "required": [
+          "id",
+          "projectId",
+          "taskId",
+          "objective",
+          "startAt",
+          "endAt",
+          "zoneId",
+          "durationMinutes",
+          "createdAt"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "startAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "zoneId": {
+            "type": "string"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1440
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BlockPage": {
+        "type": "object",
+        "required": ["items", "nextCursor"],
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Block"
+            }
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "BlockState": {
+        "type": "object",
+        "required": ["block", "status", "updatedAt"],
+        "additionalProperties": false,
+        "properties": {
+          "block": {
+            "$ref": "#/components/schemas/Block"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["planned", "cancelled"]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Today": {
+        "type": "object",
+        "required": [
+          "serverNow",
+          "date",
+          "zoneId",
+          "zoneSource",
+          "availabilityZoneId",
+          "dayStartAt",
+          "dayEndAt",
+          "budgetMinutes",
+          "plannedSeconds",
+          "remainingSeconds",
+          "excessSeconds",
+          "currentBlockId",
+          "nextBlockId",
+          "closingAt",
+          "items"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "serverNow": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "zoneId": {
+            "type": "string"
+          },
+          "zoneSource": {
+            "type": "string",
+            "enum": ["AVAILABILITY", "UNCONFIGURED", "UNAVAILABLE"]
+          },
+          "availabilityZoneId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dayStartAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dayEndAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "budgetMinutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1440
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "plannedSeconds": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "remainingSeconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "excessSeconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "currentBlockId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "nextBlockId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "closingAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["block", "projectName", "taskTitle"],
+              "additionalProperties": false,
+              "properties": {
+                "block": {
+                  "$ref": "#/components/schemas/Block"
+                },
+                "projectName": {
+                  "type": "string"
+                },
+                "taskTitle": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "WeeklyTotals": {
+        "type": "object",
+        "required": [
+          "plannedMicroseconds",
+          "workedMicroseconds",
+          "capacityMicroseconds"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "plannedMicroseconds": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "workedMicroseconds": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "capacityMicroseconds": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]*)$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "WeeklyDay": {
+        "type": "object",
+        "required": [
+          "date",
+          "startAt",
+          "endAt",
+          "plannedMicroseconds",
+          "workedMicroseconds",
+          "capacityMicroseconds"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "startAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "plannedMicroseconds": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "workedMicroseconds": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "capacityMicroseconds": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]*)$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "WeeklyReview": {
+        "type": "object",
+        "required": [
+          "weekStart",
+          "weekEnd",
+          "zoneId",
+          "zoneSource",
+          "availabilityZoneId",
+          "serverNow",
+          "startAt",
+          "endAt",
+          "days",
+          "totals",
+          "unquantifiedSessionCount"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "weekStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "weekEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "zoneId": {
+            "type": "string"
+          },
+          "zoneSource": {
+            "type": "string"
+          },
+          "availabilityZoneId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "serverNow": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WeeklyDay"
+            },
+            "minItems": 7,
+            "maxItems": 7
+          },
+          "totals": {
+            "$ref": "#/components/schemas/WeeklyTotals"
+          },
+          "unquantifiedSessionCount": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          }
+        }
+      },
+      "TaskHistoryEntry": {
+        "type": "object",
+        "required": ["id", "fromStatus", "toStatus", "occurredAt"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromStatus": {
+            "type": "string",
+            "enum": ["pending", "completed"]
+          },
+          "toStatus": {
+            "type": "string",
+            "enum": ["pending", "completed"]
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TaskHistoryPage": {
+        "type": "object",
+        "required": ["items", "nextCursor"],
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskHistoryEntry"
+            }
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "SessionStart": {
+        "type": "object",
+        "required": [
+          "id",
+          "projectId",
+          "taskId",
+          "startedAt",
+          "plannedMinutes",
+          "plannedEndAt",
+          "zoneId"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "plannedMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1440
+          },
+          "plannedEndAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "zoneId": {
+            "type": "string"
+          }
+        }
+      },
+      "SessionState": {
+        "type": "object",
+        "required": [
+          "session",
+          "status",
+          "revision",
+          "changedAt",
+          "workedMicroseconds",
+          "runningSince"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "session": {
+            "$ref": "#/components/schemas/SessionStart"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["running", "paused", "closed"]
+          },
+          "revision": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "changedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "workedMicroseconds": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "runningSince": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "BlockChangeReceipt": {
+        "type": "object",
+        "required": [
+          "id",
+          "blockId",
+          "kind",
+          "revision",
+          "occurredAt",
+          "before",
+          "after"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "blockId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["RESCHEDULED", "CANCELLED"]
+          },
+          "revision": {
+            "type": "string",
+            "description": "ETag fuerte block:blockId:version, entre comillas."
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "before": {
+            "$ref": "#/components/schemas/Block"
+          },
+          "after": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Block"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "SessionTransitionReceipt": {
+        "type": "object",
+        "required": [
+          "id",
+          "sessionId",
+          "action",
+          "occurredAt",
+          "before",
+          "after"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "enum": ["PAUSE", "RESUME"]
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "before": {
+            "$ref": "#/components/schemas/SessionState"
+          },
+          "after": {
+            "$ref": "#/components/schemas/SessionState"
+          }
+        }
+      },
+      "SessionCloseReceipt": {
+        "type": "object",
+        "required": [
+          "id",
+          "sessionId",
+          "action",
+          "occurredAt",
+          "before",
+          "after",
+          "closure"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "const": "CLOSE"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "before": {
+            "$ref": "#/components/schemas/SessionState"
+          },
+          "after": {
+            "$ref": "#/components/schemas/SessionState"
+          },
+          "closure": {
+            "type": "object",
+            "required": ["progressNote", "nextStep", "workDate", "closeZoneId"],
+            "additionalProperties": false,
+            "properties": {
+              "progressNote": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "nextStep": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "workDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "closeZoneId": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "SessionExtensionReceipt": {
+        "type": "object",
+        "required": [
+          "id",
+          "sessionId",
+          "action",
+          "occurredAt",
+          "before",
+          "after",
+          "extension"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "const": "EXTEND"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "before": {
+            "$ref": "#/components/schemas/SessionState"
+          },
+          "after": {
+            "$ref": "#/components/schemas/SessionState"
+          },
+          "extension": {
+            "type": "object",
+            "required": [
+              "additionalMinutes",
+              "previousEndAt",
+              "effectiveEndAt"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "additionalMinutes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1440
+              },
+              "previousEndAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "effectiveEndAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "HistoryEntry": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "occurredAt",
+          "projectId",
+          "projectName",
+          "taskId",
+          "taskTitle",
+          "details"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "SESSION_STARTED",
+              "SESSION_CHANGED",
+              "TASK_STATUS_CHANGED",
+              "BLOCK_PLANNED",
+              "BLOCK_CHANGED"
+            ]
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "taskId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskTitle": {
+            "type": "string"
+          },
+          "details": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SessionStart"
+              },
+              {
+                "$ref": "#/components/schemas/SessionTransitionReceipt"
+              },
+              {
+                "$ref": "#/components/schemas/SessionCloseReceipt"
+              },
+              {
+                "$ref": "#/components/schemas/SessionExtensionReceipt"
+              },
+              {
+                "$ref": "#/components/schemas/TaskHistoryEntry"
+              },
+              {
+                "$ref": "#/components/schemas/Block"
+              },
+              {
+                "$ref": "#/components/schemas/BlockChangeReceipt"
+              }
+            ]
+          }
+        }
+      },
+      "HistoryPage": {
+        "type": "object",
+        "required": ["items", "nextCursor"],
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoryEntry"
+            }
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "Problem": {
+        "type": "object",
+        "required": ["type", "title", "status", "code"],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 400,
+            "maximum": 599
+          },
+          "code": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["field", "code", "message"],
+              "additionalProperties": false,
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      }
+    },
+    "responses": {
+      "Unauthenticated": {
+        "description": "401 API_UNAUTHENTICATED: formato, identidad, secreto, caducidad, revocación o bootstrap inválidos son indistinguibles. No consulta sesiones ni consume cuota.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        },
+        "headers": {
+          "WWW-Authenticate": {
+            "schema": {
+              "type": "string",
+              "const": "Bearer"
+            },
+            "description": "Desafío uniforme del canal Bearer."
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "403 UNTRUSTED_ORIGIN en escritura con Origin distinto del público, o API_SCOPE_DENIED para operación/scope no permitido. Sin cuota.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "429 API_RATE_LIMITED: se agotó la cuota por credencial o propietario; ninguna cuota se incrementa en ese rechazo.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        },
+        "headers": {
+          "Retry-After": {
+            "description": "Segundos hasta la siguiente ventana UTC; mínimo 1. No reintentar automáticamente un POST.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      },
+      "StorageUnavailable": {
+        "description": "503 STORAGE_UNAVAILABLE: autenticación/admisión o almacenamiento de negocio no disponible. Sin fallback a Cookie; una escritura puede requerir recuperación conforme a su contrato.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "Validation": {
+        "description": "400 VALIDATION_ERROR con errors de campo; en escrituras JSON ilegible también MALFORMED_JSON. No se repite automáticamente la petición.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "Internal": {
+        "description": "500 INTERNAL_ERROR con correlationId, sin datos internos.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Mismo origen público que entrega este documento."
+    }
+  ]
+}

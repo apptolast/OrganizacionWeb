@@ -1,0 +1,58 @@
+[
+  {
+    "path": "frontend/src/integration-api-client.ts",
+    "sha256": "BF4D09C113D4B144A70B08268C96441E428DF64650A09B24D26BFA3D275BC8D1"
+  },
+  {
+    "path": "frontend/src/integration-api-client.test.ts",
+    "sha256": "817B02CFD06A25454B0AC091E4494BC367CD1A54C19F76DFF150D09B4D7C0FFB"
+  },
+  {
+    "path": "frontend/src/integration-api-intent.ts",
+    "sha256": "42023DC8A305D3D53DD4195FE1DFFFAC53D0E8AB5D74CE347C5E9A53479AA21C"
+  },
+  {
+    "path": "frontend/src/integration-api-intent.test.ts",
+    "sha256": "F370CC9DD2BFD976C7EE0C622EAD661FB05B12B1828F7F6576E02804FA6F4EAE"
+  },
+  {
+    "path": "frontend/src/integration-api.tsx",
+    "sha256": "722889E2C667C29964147075DBDDDD3C1B2FB7BBA634E65C8E0C980F1189316C"
+  },
+  {
+    "path": "frontend/src/integration-api.test.tsx",
+    "sha256": "C111D2910FCB3F771425326654E278B3CF379FD87E626440CBDCE22FF9472C38"
+  },
+  {
+    "path": "frontend/src/App.tsx",
+    "sha256": "D8F2C09E0D0A7560B5431AD64B610C814B792B38D927B22DDEA9742572A2CE8D"
+  },
+  {
+    "path": "frontend/src/workspace.tsx",
+    "sha256": "81E8D4CB1F8CD7604E6C146E7C15D4AE80FA7C882C4E042DEB5EE3513CBE9E7B"
+  },
+  {
+    "path": "frontend/src/use-session.ts",
+    "sha256": "9777F03EEE7E6F134E0882971AC7FE9A20664316FA274593F80F3C9147353835"
+  },
+  {
+    "path": "frontend/src/styles.scss",
+    "sha256": "3AA65480945C6F3783A391EFC49A8D9C9C29757F74845C48B08604FF3F723E5F"
+  },
+  {
+    "path": "progress/integration24_frontend_review_final.log",
+    "sha256": "78BBA38451DA5FC46093E8361DB49BDAFE28358B0E616879B04EE37041AD3078"
+  },
+  {
+    "path": "progress/integration24_frontend_final_lint.log",
+    "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  {
+    "path": "progress/integration24_frontend_final_build.log",
+    "sha256": "C31081672CDFF4812ABAC475F8E31126A6476F6CA28E1472736374CAC1666613"
+  },
+  {
+    "path": "progress/integration24_browser_production.log",
+    "sha256": "41D782936A39A2F7581149A7E9291CBBA66965FF1B869123B0986E2901E2FB22"
+  }
+]

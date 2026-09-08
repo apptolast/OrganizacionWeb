@@ -458,10 +458,11 @@ a {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
   font-size: 17px;
   font-weight: 650;
   letter-spacing: -0.65px;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .brand-mark {
   display: grid;
@@ -476,6 +477,7 @@ a {
   padding-bottom: 5px;
 }
 .brand-light {
+  display: inline-block;
   font-weight: 400;
 }
 .sidebar-label {
@@ -1967,5 +1969,109 @@ button {
   }
   .availability .availability-days .field {
     padding: 12px;
+  }
+}
+
+.integration-api {
+  min-width: 0;
+  max-width: 880px;
+  overflow-wrap: anywhere;
+  h1 {
+    margin-bottom: 16px;
+  }
+  p {
+    line-height: 1.6;
+    margin-block: 12px;
+    max-width: 68ch;
+  }
+  > label {
+    display: grid;
+    gap: 8px;
+    margin-block: 20px;
+  }
+  input:not([type="checkbox"]),
+  select {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 12px;
+    font: inherit;
+    color: var(--ink);
+    background: var(--editable);
+    border: 1px solid var(--control-border);
+    border-radius: 8px;
+  }
+  fieldset {
+    min-width: 0;
+    margin-block: 20px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 44px;
+      padding-block: 8px;
+      cursor: pointer;
+    }
+    input {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      accent-color: var(--accent);
+    }
+    legend {
+      padding-inline: 8px;
+      font-weight: 600;
+    }
+  }
+  button {
+    min-height: 44px;
+    min-width: 44px;
+    max-width: 100%;
+    padding: 12px 18px;
+    margin-block: 8px;
+    margin-inline-end: 12px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    scroll-margin-block: 16px;
+    background: var(--panel);
+    color: var(--accent);
+    border: 1px solid currentColor;
+  }
+  &:not(:has(.credential-secret)) > button:first-of-type,
+  .credential-secret > button:first-of-type {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+  article,
+  > section,
+  .credential-secret {
+    min-width: 0;
+    padding: 20px;
+    margin-block: 20px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel);
+  }
+  .credential-secret {
+    border-color: var(--accent);
+    label {
+      display: grid;
+      gap: 8px;
+    }
+  }
+  [role="alert"] {
+    color: var(--error);
+    padding: 12px 16px;
+    border-inline-start: 3px solid currentColor;
+    background: var(--panel);
+  }
+}
+@media (max-width: 600px) {
+  .integration-api button {
+    width: 100%;
+    margin-inline-end: 0;
   }
 }

@@ -1,0 +1,147 @@
+{
+  "startedAt": "2026-09-08T16:31:34.987Z",
+  "status": "PASS",
+  "resourcePrefix": "ow-restore-v21-65c74410-7d29-4305-9615-070b547bdf5f",
+  "postgresImage": "postgres@sha256:9ae4e8f8d0284836a505f0b2e825144e32e20499856e7dc5f7b99e19d10eedd6",
+  "stages": [
+    "bounded-stdin-and-digest",
+    "fixed-image",
+    "owned-isolated-postgres",
+    "full-pg-restore",
+    "read-only-v21-snapshot"
+  ],
+  "cleanup": [
+    {
+      "kind": "container",
+      "name": "ow-restore-v21-65c74410-7d29-4305-9615-070b547bdf5f-pg",
+      "removed": true,
+      "absentBySuccessfulInventory": false
+    },
+    {
+      "kind": "volume",
+      "name": "ow-restore-v21-65c74410-7d29-4305-9615-070b547bdf5f-data",
+      "removed": true,
+      "absentBySuccessfulInventory": false
+    }
+  ],
+  "dump": {
+    "bytes": 60178,
+    "sha256": "085d1653e91753fd1d08a820e7fb3f6698acc832d7406c4fd583d5c6c8f0adc0"
+  },
+  "isolation": {
+    "network": "none",
+    "publishedPorts": 0,
+    "ownedVolumes": 1,
+    "database": "organization",
+    "role": "organization"
+  },
+  "fullRestorePerformed": true,
+  "snapshot": {
+    "tables": [
+      {
+        "name": "appearance_preferences",
+        "records": 1,
+        "sha256": "8613bdd83aac9d056caeddd216e5189c75772d72d17018377d0c28e970ac5664"
+      },
+      {
+        "name": "availability_preferences",
+        "records": 1,
+        "sha256": "5bffd6a2007b97e378196a7a70d723c76b9ba967f9745e2106f3bc98bdf7ee4c"
+      },
+      {
+        "name": "block_changes",
+        "records": 1,
+        "sha256": "aab856591ddee60642ece3c57ab620d2e14217d05e3dcb145fb5bb010be0c517"
+      },
+      {
+        "name": "block_projections",
+        "records": 1,
+        "sha256": "73a5608bfbc50d23258f8f3085854ece1cc1337b0ad5da9fcccf51b33c33479e"
+      },
+      {
+        "name": "customization_preferences",
+        "records": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "flyway_schema_history",
+        "records": 21,
+        "sha256": "13daa48b302ad0c21665dbf2ab3a312611f28b4c91ede64656e3cee792065fd4"
+      },
+      {
+        "name": "import_receipts",
+        "records": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "outbox_events",
+        "records": 9,
+        "sha256": "9a636bbb58e47fd2002b4a05575f7dd2b82cf19c90e81bc693aeea036461d0ce"
+      },
+      {
+        "name": "planned_blocks",
+        "records": 1,
+        "sha256": "05b1ae0365fd425a598b117986c0c2bc7bfe4a988e53ea0f17c2d5e380e6a272"
+      },
+      {
+        "name": "project_custom_field_values",
+        "records": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "projects",
+        "records": 1,
+        "sha256": "cce30e955466051cd11b9797f600286f01a3d9d06f4950d98241b7648dc4cfe2"
+      },
+      {
+        "name": "task_custom_field_values",
+        "records": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "task_status_history",
+        "records": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "tasks",
+        "records": 1,
+        "sha256": "4004e5eee81e8d4ee2107fa3f0fdf7a13e01b1f78e42c033572464c1c4cd4c0a"
+      },
+      {
+        "name": "work_session_changes",
+        "records": 3,
+        "sha256": "ebc8428aee1b3f68c166800fa86ac81aabdc8c7aadd9f871a283a69c03b1aec5"
+      },
+      {
+        "name": "work_session_intervals",
+        "records": 2,
+        "sha256": "6ac992e064e9c3a85f1a3bb69619ab8a4f6d21348952dd48778b93822dffe18b"
+      },
+      {
+        "name": "work_sessions",
+        "records": 1,
+        "sha256": "54f8df6c74cc1b116c1777c2ee2cee2158565aa518c341dfc48c95907af847dd"
+      }
+    ],
+    "flyway": {
+      "rows": 21,
+      "distinctVersions": 21,
+      "successful": 21,
+      "version21": 1,
+      "unexpectedVersions": 0
+    },
+    "publicTableCount": 19,
+    "columnsSha256": "44beedf82bcba4224b9a51069c59ac1262b5b450b1559922121e7fd973d56cf3",
+    "constraintsSha256": "be2f395c77c334783bb18a4e3ac7540414a404d3a5f9df5168eca31940376ad8",
+    "comparedTableCount": 17
+  },
+  "cleanupVerifiedBySuccessfulInventories": true,
+  "finishedAt": "2026-09-08T16:31:44.126Z",
+  "scriptSha256": "55a8bee255c680045fb5024131a42dfe9290b492dccc1595babcafd31c9c1c52",
+  "limitations": [
+    "No API, RabbitMQ, Swarm or offsite recovery exercised.",
+    "Restored counts and hashes are observations of this verified dump; comparison with production is a separate read-only step.",
+    "JavaScript/native runtime may retain internal copies; all dump and child-process output buffers owned by this helper are explicitly zeroed."
+  ]
+}

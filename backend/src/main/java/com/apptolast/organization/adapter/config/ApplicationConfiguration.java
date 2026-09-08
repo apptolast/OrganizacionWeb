@@ -9,6 +9,67 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  java.util.function.Predicate<String> enabledApiCredentialOwner(
+      @org.springframework.beans.factory.annotation.Value("${app.auth.username}")
+          String configuredOwner,
+      org.springframework.security.core.userdetails.UserDetailsService users) {
+    return owner -> {
+      if (!configuredOwner.equals(owner)) return false;
+      try {
+        var user = users.loadUserByUsername(owner);
+        return user.isEnabled() && user.getUsername().equals(owner);
+      } catch (org.springframework.security.core.userdetails.UsernameNotFoundException absent) {
+        return false;
+      }
+    };
+  }
+
+  @Bean
+  com.apptolast.organization.application.AuthenticateApiCredential authenticateApiCredential(
+      com.apptolast.organization.application.ApiCredentialAuthentication credentials,
+      Clock clock,
+      java.util.function.Predicate<String> enabledApiCredentialOwner) {
+    return new com.apptolast.organization.application.AuthenticateApiCredential(
+        credentials, clock, enabledApiCredentialOwner);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ConsumeApiQuota consumeApiQuota(
+      com.apptolast.organization.application.ApiQuotaAdmission store,
+      Clock clock,
+      java.util.function.Predicate<String> enabledApiCredentialOwner) {
+    return new com.apptolast.organization.application.ConsumeApiQuota(
+        store, clock, enabledApiCredentialOwner);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReadApiCredentials readApiCredentials(
+      com.apptolast.organization.application.ApiCredentialQueries queries) {
+    return new com.apptolast.organization.application.ReadApiCredentials(queries);
+  }
+
+  @Bean
+  com.apptolast.organization.application.RevokeApiCredential revokeApiCredential(
+      com.apptolast.organization.application.ApiCredentialRevocations store, Clock clock) {
+    return new com.apptolast.organization.application.RevokeApiCredential(store, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.adapter.persistence.PostgresApiCredentialStore apiCredentialStore(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions) {
+    return new com.apptolast.organization.adapter.persistence.PostgresApiCredentialStore(
+        jdbc, transactions);
+  }
+
+  @Bean
+  com.apptolast.organization.application.CreateApiCredential createApiCredential(
+      com.apptolast.organization.application.ApiCredentialCommit store, Clock clock) {
+    return new com.apptolast.organization.application.CreateApiCredential(
+        store, clock, new java.security.SecureRandom());
+  }
+
+  @Bean
   com.apptolast.organization.application.SaveCustomFieldValues saveCustomFieldValues(
       com.apptolast.organization.application.CustomFieldValuesEditing store, Clock clock) {
     return new com.apptolast.organization.application.SaveCustomFieldValues(store, clock);

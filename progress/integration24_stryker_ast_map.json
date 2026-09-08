@@ -1,0 +1,457 @@
+{
+  "base": "82a45c2^",
+  "head": "8d7d8b2d26a1f079becd9161de748f30298476d4",
+  "remaps": [
+    {
+      "config": "stryker.appearance.config.json",
+      "old": "src/App.tsx:31:8-31:44",
+      "kind": "VariableDeclaration",
+      "new": "src/App.tsx:32:8-32:44",
+      "oldText": "appearance = route === \"/apariencia\"",
+      "newText": "appearance = route === \"/apariencia\""
+    },
+    {
+      "config": "stryker.appearance.config.json",
+      "old": "src/App.tsx:45:14-57:30",
+      "kind": "ConditionalExpression",
+      "new": "src/App.tsx:49:16-61:32",
+      "oldText": "appearance\n              ? \"Apariencia\"\n              : route === \"/\"\n                ? \"Hoy\"\n                : weeklyReview\n                  ? \"Revisión semanal\"\n                  : history\n                    ? \"Historial\"\n                    : availability\n                      ? \"Disponibilidad\"\n                      : route.startsWith(\"/proyectos\")\n                        ? \"Proyectos\"\n                        : null",
+      "newText": "appearance\n                ? \"Apariencia\"\n                : route === \"/\"\n                  ? \"Hoy\"\n                  : weeklyReview\n                    ? \"Revisión semanal\"\n                    : history\n                      ? \"Historial\"\n                      : availability\n                        ? \"Disponibilidad\"\n                        : route.startsWith(\"/proyectos\")\n                          ? \"Proyectos\"\n                          : null"
+    },
+    {
+      "config": "stryker.appearance.config.json",
+      "old": "src/App.tsx:72:10-113:7",
+      "kind": "ConditionalExpression",
+      "new": "src/App.tsx:78:10-119:7",
+      "oldText": "appearance ? (\n        <Appearance />\n      ) : route === \"/\" ? (\n        <Today />\n      ) : route === \"/proyectos/nuevo\" ? (\n        <CreateProjectScreen />\n      ) : weeklyReview ? (\n        <WeeklyReview route={route} />\n      ) : history ? (\n        <History route={route} />\n      ) : availability ? (\n        <Availability />\n      ) : sessionRoute ? (\n        <WorkSessionReader\n          key={route}\n          projectId={sessionRoute[1]}\n          taskId={sessionRoute[2]}\n          id={sessionRoute[3]}\n        />\n      ) : taskRoute ? (\n        <TaskReader\n          key={route}\n          projectId={taskRoute[1]}\n          id={taskRoute[2]}\n          customization={customization}\n        />\n      ) : /^\\/proyectos\\/[^/?]+\\/editar$/.test(route) ? (\n        <ProjectEditor key={route} route={route} />\n      ) : /^\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/.test(route) ? (\n        <ProjectReader\n          key={route}\n          route={route}\n          customization={customization}\n        />\n      ) : (\n        <main id=\"proyectos\" tabIndex={-1}>\n          <h1>Página no encontrada</h1>\n          <RouteLink href=\"/\">Hoy</RouteLink>\n          {\" · \"}\n          <RouteLink href=\"/proyectos\">Proyectos</RouteLink>\n        </main>\n      )",
+      "newText": "appearance ? (\n        <Appearance />\n      ) : route === \"/\" ? (\n        <Today />\n      ) : route === \"/proyectos/nuevo\" ? (\n        <CreateProjectScreen />\n      ) : weeklyReview ? (\n        <WeeklyReview route={route} />\n      ) : history ? (\n        <History route={route} />\n      ) : availability ? (\n        <Availability />\n      ) : sessionRoute ? (\n        <WorkSessionReader\n          key={route}\n          projectId={sessionRoute[1]}\n          taskId={sessionRoute[2]}\n          id={sessionRoute[3]}\n        />\n      ) : taskRoute ? (\n        <TaskReader\n          key={route}\n          projectId={taskRoute[1]}\n          id={taskRoute[2]}\n          customization={customization}\n        />\n      ) : /^\\/proyectos\\/[^/?]+\\/editar$/.test(route) ? (\n        <ProjectEditor key={route} route={route} />\n      ) : /^\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/.test(route) ? (\n        <ProjectReader\n          key={route}\n          route={route}\n          customization={customization}\n        />\n      ) : (\n        <main id=\"proyectos\" tabIndex={-1}>\n          <h1>Página no encontrada</h1>\n          <RouteLink href=\"/\">Hoy</RouteLink>\n          {\" · \"}\n          <RouteLink href=\"/proyectos\">Proyectos</RouteLink>\n        </main>\n      )"
+    },
+    {
+      "config": "stryker.appearance.config.json",
+      "old": "src/workspace.tsx:76:10-81:22",
+      "kind": "JsxElement",
+      "new": "src/workspace.tsx:77:10-82:22",
+      "oldText": "<RouteLink\n            href=\"/apariencia\"\n            aria-current={section === \"Apariencia\" ? \"page\" : undefined}\n          >\n            Apariencia\n          </RouteLink>",
+      "newText": "<RouteLink\n            href=\"/apariencia\"\n            aria-current={section === \"Apariencia\" ? \"page\" : undefined}\n          >\n            Apariencia\n          </RouteLink>"
+    },
+    {
+      "config": "stryker.appearance.config.json",
+      "old": "src/use-session.ts:194:0-214:1",
+      "kind": "FunctionDeclaration",
+      "new": "src/use-session.ts:208:0-229:1",
+      "oldText": "function isPrivateRoute(path: string, search: string) {\n  if (path === \"/proyectos\") {\n    const query = new URLSearchParams(search);\n    return (\n      !search ||\n      (query.size === 1 && query.has(\"cursor\") && Boolean(query.get(\"cursor\")))\n    );\n  }\n  return (\n    !search &&\n    (path === \"/\" ||\n      path === \"/disponibilidad\" ||\n      path === \"/apariencia\" ||\n      path === \"/exportacion\" ||\n      path === \"/importacion\" ||\n      path === \"/proyectos/nuevo\" ||\n      /^\\/proyectos\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\\/editar|\\/tareas\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\\/sesiones\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?)?$/i.test(\n        path,\n      ))\n  );\n}",
+      "newText": "function isPrivateRoute(path: string, search: string) {\n  if (path === \"/proyectos\") {\n    const query = new URLSearchParams(search);\n    return (\n      !search ||\n      (query.size === 1 && query.has(\"cursor\") && Boolean(query.get(\"cursor\")))\n    );\n  }\n  return (\n    !search &&\n    (path === \"/\" ||\n      path === \"/disponibilidad\" ||\n      path === \"/apariencia\" ||\n      path === \"/exportacion\" ||\n      path === \"/importacion\" ||\n      path === \"/integraciones/api\" ||\n      path === \"/proyectos/nuevo\" ||\n      /^\\/proyectos\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\\/editar|\\/tareas\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\\/sesiones\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?)?$/i.test(\n        path,\n      ))\n  );\n}"
+    },
+    {
+      "config": "stryker.authentication-first-commit.config.json",
+      "old": "src/use-session.ts:10:0-10:100",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.authentication-replay.config.json",
+      "old": "src/use-session.ts:12:0-15:100",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.authentication-replay.config.json",
+      "old": "src/use-session.ts:23:0-23:100",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.authentication-replay.config.json",
+      "old": "src/use-session.ts:39:0-40:100",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.authentication-replay.config.json",
+      "old": "src/use-session.ts:53:0-54:100",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.authentication-replay.config.json",
+      "old": "src/use-session.ts:86:0-86:100",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.authentication-replay.config.json",
+      "old": "src/use-session.ts:91:0-91:100",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.authentication-replay.config.json",
+      "old": "src/use-session.ts:139:0-140:150",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.authentication-replay.config.json",
+      "old": "src/use-session.ts:145:0-145:100",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.authentication-replay.config.json",
+      "old": "src/use-session.ts:155:0-155:100",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.authentication-replay.config.json",
+      "old": "src/use-session.ts:180:0-181:150",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.authentication-replay.config.json",
+      "old": "src/use-session.ts:187:0-187:200",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.availability-replay.config.json",
+      "old": "src/workspace.tsx:30:0-30:200",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.availability-replay.config.json",
+      "old": "src/workspace.tsx:72:0-72:200",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.availability.config.json",
+      "old": "src/workspace.tsx:27:0-41:200",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.availability.config.json",
+      "old": "src/workspace.tsx:72:0-72:200",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.availability.config.json",
+      "old": "src/use-session.ts:187:0-187:200",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.availability.config.json",
+      "old": "src/App.tsx:11:0-11:200",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.availability.config.json",
+      "old": "src/App.tsx:14:0-16:200",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.custom-views-fields.config.json",
+      "old": "src/App.tsx:17:24-17:49",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.custom-views-fields.config.json",
+      "old": "src/App.tsx:64:8-69:10",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.custom-views-fields.config.json",
+      "old": "src/App.tsx:73:8-77:10",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.export-data.config.json",
+      "old": "src/App.tsx:29:8-29:45",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.export-data.config.json",
+      "old": "src/App.tsx:37:8-51:28",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.export-data.config.json",
+      "old": "src/App.tsx:54:7-97:7",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.export-data.config.json",
+      "old": "src/workspace.tsx:81:10-86:22",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.export-data.config.json",
+      "old": "src/use-session.ts:190:6-190:29",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.history.config.json",
+      "old": "src/App.tsx:14:8-14:57",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.history.config.json",
+      "old": "src/App.tsx:25:12-31:22",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.history.config.json",
+      "old": "src/App.tsx:38:10-62:7",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.history.config.json",
+      "old": "src/workspace.tsx:55:10-60:22",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.import-data.config.json",
+      "old": "src/App.tsx:27:8-27:41",
+      "kind": "VariableDeclaration",
+      "new": "src/App.tsx:28:8-28:41",
+      "oldText": "appearanceState = useAppearance()",
+      "newText": "appearanceState = useAppearance()"
+    },
+    {
+      "config": "stryker.import-data.config.json",
+      "old": "src/App.tsx:33:8-33:45",
+      "kind": "VariableDeclaration",
+      "new": "src/App.tsx:34:8-34:45",
+      "oldText": "importData = route === \"/importacion\"",
+      "newText": "importData = route === \"/importacion\""
+    },
+    {
+      "config": "stryker.import-data.config.json",
+      "old": "src/App.tsx:41:8-57:30",
+      "kind": "ConditionalExpression",
+      "new": "src/App.tsx:45:12-61:32",
+      "oldText": "importData\n          ? \"Importación\"\n          : exportData\n            ? \"Exportación\"\n            : appearance\n              ? \"Apariencia\"\n              : route === \"/\"\n                ? \"Hoy\"\n                : weeklyReview\n                  ? \"Revisión semanal\"\n                  : history\n                    ? \"Historial\"\n                    : availability\n                      ? \"Disponibilidad\"\n                      : route.startsWith(\"/proyectos\")\n                        ? \"Proyectos\"\n                        : null",
+      "newText": "importData\n            ? \"Importación\"\n            : exportData\n              ? \"Exportación\"\n              : appearance\n                ? \"Apariencia\"\n                : route === \"/\"\n                  ? \"Hoy\"\n                  : weeklyReview\n                    ? \"Revisión semanal\"\n                    : history\n                      ? \"Historial\"\n                      : availability\n                        ? \"Disponibilidad\"\n                        : route.startsWith(\"/proyectos\")\n                          ? \"Proyectos\"\n                          : null"
+    },
+    {
+      "config": "stryker.import-data.config.json",
+      "old": "src/App.tsx:60:7-113:7",
+      "kind": "ConditionalExpression",
+      "new": "src/App.tsx:66:10-119:7",
+      "oldText": "importData && username ? (\n        <ImportData\n          owner={username}\n          onImported={async (receipt) => {\n            customization.refreshAfterImport(receipt.insertedCounts);\n            if (receipt.insertedCounts.appearance > 0) {\n              await appearanceState.refreshAfterImport();\n            }\n          }}\n        />\n      ) : exportData && username ? (\n        <ExportData owner={username} />\n      ) : appearance ? (\n        <Appearance />\n      ) : route === \"/\" ? (\n        <Today />\n      ) : route === \"/proyectos/nuevo\" ? (\n        <CreateProjectScreen />\n      ) : weeklyReview ? (\n        <WeeklyReview route={route} />\n      ) : history ? (\n        <History route={route} />\n      ) : availability ? (\n        <Availability />\n      ) : sessionRoute ? (\n        <WorkSessionReader\n          key={route}\n          projectId={sessionRoute[1]}\n          taskId={sessionRoute[2]}\n          id={sessionRoute[3]}\n        />\n      ) : taskRoute ? (\n        <TaskReader\n          key={route}\n          projectId={taskRoute[1]}\n          id={taskRoute[2]}\n          customization={customization}\n        />\n      ) : /^\\/proyectos\\/[^/?]+\\/editar$/.test(route) ? (\n        <ProjectEditor key={route} route={route} />\n      ) : /^\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/.test(route) ? (\n        <ProjectReader\n          key={route}\n          route={route}\n          customization={customization}\n        />\n      ) : (\n        <main id=\"proyectos\" tabIndex={-1}>\n          <h1>Página no encontrada</h1>\n          <RouteLink href=\"/\">Hoy</RouteLink>\n          {\" · \"}\n          <RouteLink href=\"/proyectos\">Proyectos</RouteLink>\n        </main>\n      )",
+      "newText": "importData && username ? (\n        <ImportData\n          owner={username}\n          onImported={async (receipt) => {\n            customization.refreshAfterImport(receipt.insertedCounts);\n            if (receipt.insertedCounts.appearance > 0) {\n              await appearanceState.refreshAfterImport();\n            }\n          }}\n        />\n      ) : exportData && username ? (\n        <ExportData owner={username} />\n      ) : appearance ? (\n        <Appearance />\n      ) : route === \"/\" ? (\n        <Today />\n      ) : route === \"/proyectos/nuevo\" ? (\n        <CreateProjectScreen />\n      ) : weeklyReview ? (\n        <WeeklyReview route={route} />\n      ) : history ? (\n        <History route={route} />\n      ) : availability ? (\n        <Availability />\n      ) : sessionRoute ? (\n        <WorkSessionReader\n          key={route}\n          projectId={sessionRoute[1]}\n          taskId={sessionRoute[2]}\n          id={sessionRoute[3]}\n        />\n      ) : taskRoute ? (\n        <TaskReader\n          key={route}\n          projectId={taskRoute[1]}\n          id={taskRoute[2]}\n          customization={customization}\n        />\n      ) : /^\\/proyectos\\/[^/?]+\\/editar$/.test(route) ? (\n        <ProjectEditor key={route} route={route} />\n      ) : /^\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/.test(route) ? (\n        <ProjectReader\n          key={route}\n          route={route}\n          customization={customization}\n        />\n      ) : (\n        <main id=\"proyectos\" tabIndex={-1}>\n          <h1>Página no encontrada</h1>\n          <RouteLink href=\"/\">Hoy</RouteLink>\n          {\" · \"}\n          <RouteLink href=\"/proyectos\">Proyectos</RouteLink>\n        </main>\n      )"
+    },
+    {
+      "config": "stryker.import-data.config.json",
+      "old": "src/workspace.tsx:88:10-96:22",
+      "kind": "JsxElement",
+      "new": "src/workspace.tsx:89:10-97:22",
+      "oldText": "<RouteLink\n            href=\"/importacion\"\n            aria-current={section === \"Importación\" ? \"page\" : undefined}\n          >\n            <span aria-hidden=\"true\">↑</span> Importación\n            {section === \"Importación\" && (\n              <span className=\"nav-dot\" aria-hidden=\"true\" />\n            )}\n          </RouteLink>",
+      "newText": "<RouteLink\n            href=\"/importacion\"\n            aria-current={section === \"Importación\" ? \"page\" : undefined}\n          >\n            <span aria-hidden=\"true\">↑</span> Importación\n            {section === \"Importación\" && (\n              <span className=\"nav-dot\" aria-hidden=\"true\" />\n            )}\n          </RouteLink>"
+    },
+    {
+      "config": "stryker.import-data.config.json",
+      "old": "src/use-session.ts:5:0-11:1",
+      "kind": "FunctionDeclaration",
+      "new": "src/use-session.ts:9:0-20:1",
+      "oldText": "function retireImportRecovery() {\n  try {\n    clearImportIntent();\n  } catch {\n    /* Storage access must not prevent revoking access. */\n  }\n}",
+      "newText": "function retireImportRecovery() {\n  try {\n    clearImportIntent();\n  } catch {\n    /* Storage access must not prevent revoking access. */\n  }\n  try {\n    clearApiCredentialIntent();\n  } catch {\n    /* Storage failure must not retain access. */\n  }\n}"
+    },
+    {
+      "config": "stryker.import-data.config.json",
+      "old": "src/use-session.ts:44:6-50:36",
+      "kind": "IfStatement",
+      "new": "src/use-session.ts:53:6-64:36",
+      "oldText": "if (next.authenticated && next.username !== null) {\n        try {\n          readImportIntent(next.username);\n        } catch {\n          /* Session identity remains authoritative. */\n        }\n      } else retireImportRecovery();",
+      "newText": "if (next.authenticated && next.username !== null) {\n        try {\n          readImportIntent(next.username);\n        } catch {\n          /* Session identity remains authoritative. */\n        }\n        try {\n          readApiCredentialIntent(next.username);\n        } catch {\n          /* Identity remains authoritative. */\n        }\n      } else retireImportRecovery();"
+    },
+    {
+      "config": "stryker.import-data.config.json",
+      "old": "src/use-session.ts:68:6-68:29",
+      "kind": "ExpressionStatement",
+      "new": "src/use-session.ts:82:6-82:29",
+      "oldText": "retireImportRecovery();",
+      "newText": "retireImportRecovery();"
+    },
+    {
+      "config": "stryker.import-data.config.json",
+      "old": "src/use-session.ts:143:4-143:27",
+      "kind": "ExpressionStatement",
+      "new": "src/use-session.ts:157:4-157:27",
+      "oldText": "retireImportRecovery();",
+      "newText": "retireImportRecovery();"
+    },
+    {
+      "config": "stryker.import-data.config.json",
+      "old": "src/use-session.ts:208:6-208:29",
+      "kind": "BinaryExpression",
+      "new": "src/use-session.ts:222:6-222:29",
+      "oldText": "path === \"/importacion\"",
+      "newText": "path === \"/importacion\""
+    },
+    {
+      "config": "stryker.split-task.config.json",
+      "old": "src/App.tsx:10:0-14:200",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.split-task.config.json",
+      "old": "src/use-session.ts:187:0-189:200",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.split-task.replay.config.json",
+      "old": "src/App.tsx:10:0-10:200",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.today.config.json",
+      "old": "src/App.tsx:10:0-49:1",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.today.config.json",
+      "old": "src/workspace.tsx:27:0-54:22",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.today.config.json",
+      "old": "src/workspace.tsx:85:0-85:64",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.today.config.json",
+      "old": "src/use-session.ts:29:0-29:43",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.today.config.json",
+      "old": "src/use-session.ts:189:0-189:36",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.today.replay.config.json",
+      "old": "src/App.tsx:22:31-22:43",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.today.replay.config.json",
+      "old": "src/App.tsx:35:10-35:41",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.today.replay.config.json",
+      "old": "src/App.tsx:37:10-37:46",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.today.replay.config.json",
+      "old": "src/App.tsx:40:39-40:41",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.today.replay.config.json",
+      "old": "src/App.tsx:43:11-43:16",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.today.replay.config.json",
+      "old": "src/workspace.tsx:85:32-85:54",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.weekly-review.config.json",
+      "old": "src/App.tsx:15:8-15:69",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.weekly-review.config.json",
+      "old": "src/App.tsx:27:12-35:24",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.weekly-review.config.json",
+      "old": "src/App.tsx:42:10-68:7",
+      "kind": null,
+      "new": null
+    },
+    {
+      "config": "stryker.weekly-review.config.json",
+      "old": "src/workspace.tsx:67:10-72:22",
+      "kind": null,
+      "new": null
+    }
+  ],
+  "focal": [
+    {
+      "selector": "src/App.tsx:35:8-35:55",
+      "kind": "VariableDeclaration",
+      "text": "integrationApi = route === \"/integraciones/api\""
+    },
+    {
+      "selector": "src/App.tsx:43:8-61:32",
+      "kind": "ConditionalExpression",
+      "text": "integrationApi\n          ? \"API para integraciones\"\n          : importData\n            ? \"Importación\"\n            : exportData\n              ? \"Exportación\"\n              : appearance\n                ? \"Apariencia\"\n                : route === \"/\"\n                  ? \"Hoy\"\n                  : weeklyReview\n                    ? \"Revisión semanal\"\n                    : history\n                      ? \"Historial\"\n                      : availability\n                        ? \"Disponibilidad\"\n                        : route.startsWith(\"/proyectos\")\n                          ? \"Proyectos\"\n                          : null"
+    },
+    {
+      "selector": "src/App.tsx:64:7-119:7",
+      "kind": "ConditionalExpression",
+      "text": "integrationApi && username ? (\n        <IntegrationApi owner={username} />\n      ) : importData && username ? (\n        <ImportData\n          owner={username}\n          onImported={async (receipt) => {\n            customization.refreshAfterImport(receipt.insertedCounts);\n            if (receipt.insertedCounts.appearance > 0) {\n              await appearanceState.refreshAfterImport();\n            }\n          }}\n        />\n      ) : exportData && username ? (\n        <ExportData owner={username} />\n      ) : appearance ? (\n        <Appearance />\n      ) : route === \"/\" ? (\n        <Today />\n      ) : route === \"/proyectos/nuevo\" ? (\n        <CreateProjectScreen />\n      ) : weeklyReview ? (\n        <WeeklyReview route={route} />\n      ) : history ? (\n        <History route={route} />\n      ) : availability ? (\n        <Availability />\n      ) : sessionRoute ? (\n        <WorkSessionReader\n          key={route}\n          projectId={sessionRoute[1]}\n          taskId={sessionRoute[2]}\n          id={sessionRoute[3]}\n        />\n      ) : taskRoute ? (\n        <TaskReader\n          key={route}\n          projectId={taskRoute[1]}\n          id={taskRoute[2]}\n          customization={customization}\n        />\n      ) : /^\\/proyectos\\/[^/?]+\\/editar$/.test(route) ? (\n        <ProjectEditor key={route} route={route} />\n      ) : /^\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/.test(route) ? (\n        <ProjectReader\n          key={route}\n          route={route}\n          customization={customization}\n        />\n      ) : (\n        <main id=\"proyectos\" tabIndex={-1}>\n          <h1>Página no encontrada</h1>\n          <RouteLink href=\"/\">Hoy</RouteLink>\n          {\" · \"}\n          <RouteLink href=\"/proyectos\">Proyectos</RouteLink>\n        </main>\n      )"
+    },
+    {
+      "selector": "src/workspace.tsx:98:10-105:22",
+      "kind": "JsxElement",
+      "text": "<RouteLink\n            href=\"/integraciones/api\"\n            aria-current={\n              section === \"API para integraciones\" ? \"page\" : undefined\n            }\n          >\n            API para integraciones\n          </RouteLink>"
+    },
+    {
+      "selector": "src/use-session.ts:9:0-20:1",
+      "kind": "FunctionDeclaration",
+      "text": "function retireImportRecovery() {\n  try {\n    clearImportIntent();\n  } catch {\n    /* Storage access must not prevent revoking access. */\n  }\n  try {\n    clearApiCredentialIntent();\n  } catch {\n    /* Storage failure must not retain access. */\n  }\n}"
+    },
+    {
+      "selector": "src/use-session.ts:59:8-63:9",
+      "kind": "TryStatement",
+      "text": "try {\n          readApiCredentialIntent(next.username);\n        } catch {\n          /* Identity remains authoritative. */\n        }"
+    },
+    {
+      "selector": "src/use-session.ts:208:0-229:1",
+      "kind": "FunctionDeclaration",
+      "text": "function isPrivateRoute(path: string, search: string) {\n  if (path === \"/proyectos\") {\n    const query = new URLSearchParams(search);\n    return (\n      !search ||\n      (query.size === 1 && query.has(\"cursor\") && Boolean(query.get(\"cursor\")))\n    );\n  }\n  return (\n    !search &&\n    (path === \"/\" ||\n      path === \"/disponibilidad\" ||\n      path === \"/apariencia\" ||\n      path === \"/exportacion\" ||\n      path === \"/importacion\" ||\n      path === \"/integraciones/api\" ||\n      path === \"/proyectos/nuevo\" ||\n      /^\\/proyectos\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\\/editar|\\/tareas\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\\/sesiones\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?)?$/i.test(\n        path,\n      ))\n  );\n}"
+    }
+  ]
+}

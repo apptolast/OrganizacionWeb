@@ -1,0 +1,24 @@
+> Task :spotlessInternalRegisterDependencies UP-TO-DATE
+> Task :spotlessJava
+> Task :spotlessJavaApply
+> Task :spotlessApply
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :compileTestJava
+
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+Note: C:\Users\vhurt\Documents\Codex\2026-09-05\a-ver-necesito-o-me-gustar\work\OrganizacionWeb-integration-http\backend\src\test\java\com\apptolast\organization\adapter\IntegrationOpenApiTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+2026-09-08T17:10:30.120+02:00  INFO 19332 --- [organization-api] [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-09-08T17:10:30.144+02:00  INFO 19332 --- [organization-api] [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+> Task :test
+
+[Incubating] Problems report is available at: file:///C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb-integration-http/backend/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 17s
+7 actionable tasks: 4 executed, 3 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html

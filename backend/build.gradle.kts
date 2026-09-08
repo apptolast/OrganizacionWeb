@@ -35,6 +35,8 @@ pitest {
     pitestVersion.set("1.22.0")
     junit5PluginVersion.set("1.2.3")
     val scope = providers.gradleProperty("mutationScope").orNull
+    val integrationApiOnly = scope == "integration_api"
+    val integrationApiHttpOnly = scope == "integration_api_http"
     val importReaderOnly = scope == "import_data_reader"
     val importHttpOnly = scope == "import_data_http"
     val importPersistenceOnly = scope == "import_data_persistence"
@@ -57,6 +59,27 @@ pitest {
     val startWorkSessionOnly = scope == "start_work_session"
     val startWorkSessionReplayOnly = scope == "start_work_session_replay"
     val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
+    val integrationApiClasses = setOf(
+        "com.apptolast.organization.domain.ApiCredential*",
+        "com.apptolast.organization.application.ApiCredential*",
+        "com.apptolast.organization.application.CreateApiCredential*",
+        "com.apptolast.organization.application.ReadApiCredentials*",
+        "com.apptolast.organization.application.RevokeApiCredential*",
+        "com.apptolast.organization.application.AuthenticateApiCredential*",
+        "com.apptolast.organization.application.ConsumeApiQuota*",
+        "com.apptolast.organization.application.ApiQuotaAdmission*",
+        "com.apptolast.organization.application.ApiRateLimitedException*",
+        "com.apptolast.organization.application.ApiUnauthenticatedException*",
+        "com.apptolast.organization.adapter.persistence.PostgresApiCredentialStore*",
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration*"
+    )
+    val integrationApiHttpClasses = setOf(
+        "com.apptolast.organization.adapter.http.ApiCredentialController*",
+        "com.apptolast.organization.adapter.http.ApiCredentialSessionIdResolver*",
+        "com.apptolast.organization.adapter.http.ApiCredentialBearerFilter*",
+        "com.apptolast.organization.adapter.http.IntegrationOpenApiController*",
+        "com.apptolast.organization.adapter.config.SecurityConfiguration*"
+    )
     val importReaderClasses = setOf(
         "com.apptolast.organization.adapter.persistence.ImportJsonReader*",
         "com.apptolast.organization.adapter.persistence.ImportReceiptDecoder*"
@@ -396,6 +419,8 @@ pitest {
         "com.apptolast.organization.adapter.persistence.History*Test"
     )
     targetClasses.set(when {
+        integrationApiOnly -> integrationApiClasses
+        integrationApiHttpOnly -> integrationApiHttpClasses
         importReaderOnly -> importReaderClasses
         importHttpOnly -> importHttpClasses
         importPersistenceOnly -> importPersistenceClasses
@@ -417,9 +442,10 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses + integrationApiClasses + integrationApiHttpClasses
     })
     targetTests.set(when {
+        integrationApiOnly || integrationApiHttpOnly -> setOf("com.apptolast.organization.*")
         importReaderOnly -> importReaderTests
         importHttpOnly -> importHttpTests
         importPersistenceOnly -> importPersistenceTests
@@ -443,6 +469,8 @@ pitest {
         taskOnly -> taskTests
         else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests + weeklyReviewAdapterTests + appearanceAdapterTests + customizationAdapterTests + exportAdapterTests + importAdapterTests
     })
+    if (integrationApiOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-integration-api"))
+    if (integrationApiHttpOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-integration-api-http"))
     if (importReaderOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-reader"))
     if (importHttpOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-http"))
     if (importPersistenceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-persistence"))
@@ -477,7 +505,7 @@ pitest {
     mutationThreshold.set(80)
     outputFormats.set(setOf("HTML", "XML"))
     timestampedReports.set(false)
-    threads.set(4)
+    threads.set(if (integrationApiOnly || integrationApiHttpOnly) 8 else 4)
 }
 
 spotless { java { googleJavaFormat("1.31.0") } }

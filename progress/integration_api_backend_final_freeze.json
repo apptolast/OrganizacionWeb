@@ -1,0 +1,374 @@
+{
+  "scope": "backend24 final own scope; HTTP final and mutation campaigns pending integration/review",
+  "totals": {
+    "tests": 122,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "files": [
+    {
+      "path": "backend/build.gradle.kts",
+      "sha256": "460bed1c31c309ae5fe732a72de79e2aa6f35287c82bc5f72b7f47a4b0904cc5"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+      "sha256": "11f5b84bdf6b54100ca60232f3aad0603e3229b9ea2c12fb2387bb5b66711f8a"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresApiCredentialStore.java",
+      "sha256": "8a788cfb1a117d25a3c74b7b7045e44799abca44992c19bd4954b13ad1a692eb"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialAccess.java",
+      "sha256": "bac4583dd17693f8beff0627c4cbfc155f540a3016b6fdf817f6c3e7935b007d"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialAuthentication.java",
+      "sha256": "e98ae6dbdb533ec5cf9e380e67405a89435623876aa16e70e2755ef99c79b8ab"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialCommit.java",
+      "sha256": "519a663eeba94662179f93761e80c77a4622764857d92169da5b5a92bbb87d4a"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialConflictException.java",
+      "sha256": "19f232befa74d6a2fe827e7404191e70d091d5a3c5e64ff9c7cd35c1caa916eb"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialCreation.java",
+      "sha256": "8251e59a15323531382b40bfda60b4f02f1ef110d5e9ea07114affd94681e9f9"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialIssuance.java",
+      "sha256": "3d80d5baeb4faf1248a56fc10a207e8e0b9f8944f6a28f6505e21475625e0240"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialLimitException.java",
+      "sha256": "d9f692068f7570bad806ee53bd27acde31142c2ceaabd886e02a9dd5406e23ab"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialQueries.java",
+      "sha256": "4c5a1f983e4262069093832d2ec27d4d13b9ad4b86ffa251c9fef037dba6c4f1"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialRevocations.java",
+      "sha256": "ee3c0abadf46612eaf8e1cb1a4704cf2e9f4a695c645d082153196023d0a6582"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiQuotaAdmission.java",
+      "sha256": "d5bb7d1cb44997bae6d57eceba020b4dab82c280d92b9c4b4915f6f2cccb2184"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiRateLimitedException.java",
+      "sha256": "ce2bc19534baf3aafa4d115ca8726800306fa6b604658e32a858d4948b8f260d"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiUnauthenticatedException.java",
+      "sha256": "af98d20affa9cd9483fd2902abf5bd7fe5b2117a4254134bd8ed4406e50ba8b5"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/AuthenticateApiCredential.java",
+      "sha256": "b4443b28cd3219a13f4154bf73f06d11c752a1ae522f048c06d0dd206caf79c7"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/AuthenticateApiCredentialUseCase.java",
+      "sha256": "3a1fc490885c946c3f0689a17607d2b3172b7833c3d6b2b3dd8a7116bf20b664"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ConsumeApiQuota.java",
+      "sha256": "f896c5d986dd25eeb1b82fd4797b84a3426abb29471d2a3421a8cc7ee8c17c24"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ConsumeApiQuotaUseCase.java",
+      "sha256": "691eb6ea1b94df02749288c45dcfa2bc2dba6834fbc3e88abcc37bdaa3129e79"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/CreateApiCredential.java",
+      "sha256": "144be9c9821864e2c9702ca393984a4a4bdd0749e0abffa1b283b6d1f3071f85"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/CreateApiCredentialUseCase.java",
+      "sha256": "1c8006bc622494d9f7a8ffc2f91dc32896f1a7019e364a56bccb2122601f7de1"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadApiCredentials.java",
+      "sha256": "52c28a2f35689bbc9193ba35ba252cf0bd1fc67363c0ac20871a640e20466b22"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadApiCredentialsUseCase.java",
+      "sha256": "42ed3f8b0f7ccfcf4aaa5c87a2f587ce960d03d1e3c2f02740237b7c72e07d7d"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/RevokeApiCredential.java",
+      "sha256": "68a90cfefbca2d372bdbc5828b876ef1d313fbb7ed982f6045f3c589a7ab8445"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/RevokeApiCredentialUseCase.java",
+      "sha256": "72c9fdd68cdf7d2f7158dda1404fca71566a372d39f76186c7d43a22067aedef"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/ApiCredential.java",
+      "sha256": "79984954096da8511193b09ea032bff1ae52dc270f4535fc41f8fe4150f55d4d"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/ApiCredentialIntent.java",
+      "sha256": "0652582b68eb9e8d409e7ceda1a5e3ff3767364e3b5ed72c951c6c3f47f7971c"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/ApiCredentialInvalidException.java",
+      "sha256": "fb36af703d44e4db3327461d2a2c44aa67ff114c09ea20014fb488dd6c5ad331"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/ApiCredentialPage.java",
+      "sha256": "21a3aa230e0fa3ef27ca059b37451c04f4657966e0785dd56b0db8a2a80958c4"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V22__api_credentials.sql",
+      "sha256": "4f0cbb7c17dbbbb5f62475607a4918eea294be2722a4b4fc9349b8b7a7ef037d"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/config/ApplicationWiringTest.java",
+      "sha256": "6ed91b0b5f5a79dfbd8c9391e3818cc5c7cfff2908ae69a19cbf285bd980fe16"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/config/ProjectStateConfigurationTest.java",
+      "sha256": "77b9f84c71256b3f55eefa624437253bf9d90610fad87539a73be7788e4b1e3a"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ApiCredentialAuthenticationTest.java",
+      "sha256": "dcc1518d3748d9f6d34d7e4efe1d07b405d04202b3a350df7c209394be1c631f"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ApiCredentialCompatibilityTest.java",
+      "sha256": "7158aa9c15d116244d7658d02d8c5ffce760086546925936c786c268b16354fe"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ApiCredentialPersistenceTest.java",
+      "sha256": "c3856ed5234adcffd7bd84f560ba812e003e147435596a9695b8540fbc2b68aa"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ApiCredentialQuotaTest.java",
+      "sha256": "fc15e42e20deb7a9348d9ea8338702ffa55b0fde5e407313e00323c7dc6a6a39"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ApiCredentialWiringTest.java",
+      "sha256": "d02a09c869d3776251701decf7c7181539f5b42bb687383b8f645cf0137a1115"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/application/AuthenticateApiCredentialTest.java",
+      "sha256": "0750a7c60412827efcc5f46514fb6d310022a7967f1a9ef1b2c8bee4c1a23535"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/application/CreateApiCredentialTest.java",
+      "sha256": "bd7d111e0f14b203378a04f0932cc46b8db57531bfa7d566b555f7b066f5e306"
+    },
+    {
+      "path": "progress/integration_api_backend_handoff.md",
+      "sha256": "9cd92ee9faf7b8ac949af7944fcff0a4c8384c585a5c5b8f8b735915f69d0c1c"
+    },
+    {
+      "path": "progress/tdd_integration_api_backend.md",
+      "sha256": "0673f85d533f3c82f68f10deea98a189d80113ea0fb094302857b5d4d813859d"
+    }
+  ],
+  "xml": [
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-final-focal-xml\\TEST-com.apptolast.organization.adapter.config.ApplicationWiringTest.xml",
+      "sha256": "b38efb597e7dcb7a92ba6b7206cd7bdf43df2227c51b2a4acb740b2af6cf2fdb",
+      "tests": 24
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-final-focal-xml\\TEST-com.apptolast.organization.adapter.config.ProjectStateConfigurationTest.xml",
+      "sha256": "d83fb8c2d9fc6a6ce141b87ba4a627a46d9f21b531dc4ebfe2abdb769440f0f8",
+      "tests": 7
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-final-focal-xml\\TEST-com.apptolast.organization.adapter.persistence.ApiCredentialAuthenticationTest.xml",
+      "sha256": "fa1b6aaa8b1bab89bb56b0b9f5464b55391d6a24cdd79852cdc73ec067e8db66",
+      "tests": 9
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-final-focal-xml\\TEST-com.apptolast.organization.adapter.persistence.ApiCredentialCompatibilityTest.xml",
+      "sha256": "636ae7e6ad61d53375ef377efc4b35d53a72b977e548fef542e2cfa2a6c8667c",
+      "tests": 1
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-final-focal-xml\\TEST-com.apptolast.organization.adapter.persistence.ApiCredentialPersistenceTest.xml",
+      "sha256": "13ed99be396b72d056a2c965735ecb9dd580974a201a16ec4b3bcf5751ef4f52",
+      "tests": 34
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-final-focal-xml\\TEST-com.apptolast.organization.adapter.persistence.ApiCredentialQuotaTest.xml",
+      "sha256": "370a5dfeab5b6a2984374cafa8f9653fed4738e4e13a23e297abf8d682e8375b",
+      "tests": 18
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-final-focal-xml\\TEST-com.apptolast.organization.adapter.persistence.ApiCredentialWiringTest.xml",
+      "sha256": "f13bd4bbd90d2873e3d5f7ae410c5a0dddad3467b211b0b7a0fc890cb9555ac7",
+      "tests": 4
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-final-focal-xml\\TEST-com.apptolast.organization.application.AuthenticateApiCredentialTest.xml",
+      "sha256": "b51874bd0a304e936d080e9602b5e36202757e3b555882dd6de82531a4ca838d",
+      "tests": 8
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-final-focal-xml\\TEST-com.apptolast.organization.application.CreateApiCredentialTest.xml",
+      "sha256": "3e828078d56a355ff5cb675e2b89e854e76c547416934db78ff40c2a3872d713",
+      "tests": 17
+    }
+  ],
+  "evidence": [
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-27-legacy-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-27-legacy-green.log",
+      "sha256": "d4f673db9c5b71735ec5bb9fe43cb0bf639b44961d211d64ac5ebb61f97973ee"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-27-legacy-original.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-27-legacy-original.log",
+      "sha256": "9e95777c36735d9afdaad53c0ef8cdbb323465a0d95bd63c43c18858acca6305"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-28-initial.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-28-initial.log",
+      "sha256": "d0e114e2fcd8c081dadfc3f80c18eca826c4cb4c8a5a4a45f2f357cf69251069"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-29-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-29-green.log",
+      "sha256": "0e8f15a799fb904614ab1ea164ee16f8cd749378d38cae8f95260fd199464780"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-29-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-29-red.log",
+      "sha256": "32c4cc2ac37e43b1a2c5720cf1e6aa7646867dc6e33b42c9e6e5bd2195bb3202"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-30-initial.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-30-initial.log",
+      "sha256": "d0e114e2fcd8c081dadfc3f80c18eca826c4cb4c8a5a4a45f2f357cf69251069"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-31-initial.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-31-initial.log",
+      "sha256": "d0e114e2fcd8c081dadfc3f80c18eca826c4cb4c8a5a4a45f2f357cf69251069"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-32-initial.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-32-initial.log",
+      "sha256": "b5e548255c6a4365a7b2fb30b01e35330efb8e2d8dda452c13a7eb319be0be84"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-33-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-33-green.log",
+      "sha256": "763e6f1c320e10ec207d8f908d650164d5824be83519b9be21739f30e76eecb3"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-33-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-33-red.log",
+      "sha256": "2eafc31134d442dad3b5fa358a77323c683f9b309481c2cf5fe869fbc55f8ce7"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-34-initial.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-34-initial.log",
+      "sha256": "be674d9db1bc8a543a73a93ced003b24a983afc7e1c5cc0fa302af5a8f01b758"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-35-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-35-green.log",
+      "sha256": "2061a070dc5455f651ea0235d21ebf5311b65a314ccaa4b8d826515ab644f9a2"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-35-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-35-red.log",
+      "sha256": "dbe2aa479ae98b1054a70399b408e874a6cce892c1bd0c23fe56079544e4b4c8"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-36-initial.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-36-initial.log",
+      "sha256": "712c369ca675d5f8af297766ce431c52b2ec560c4658423819528fff75128289"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-37-initial.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-37-initial.log",
+      "sha256": "ea6e51bb8607cf7edb6c294b60fe69697799ea3b21cc70b0eeff91cdf4cb193e"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-38-initial.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-38-initial.log",
+      "sha256": "69eb01fb0f2f0a1105a33378208858a81fdf186286af66e19df01656e6841782"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-39-initial.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-39-initial.log",
+      "sha256": "d0e114e2fcd8c081dadfc3f80c18eca826c4cb4c8a5a4a45f2f357cf69251069"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-bearer-bitacora-original.md",
+      "sha256": "01a22202d13c08b3ec05e1661629fb14a5c140c5ce0ca669f3d41282cf79243c"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-final-focal.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-final-focal.log",
+      "sha256": "ca053bfad0de8ae30ce08204e6accd682ee80194cecdc365cfaf05afde9ec4ae"
+    }
+  ],
+  "command": "./backend/gradlew.bat -p backend spotlessApply spotlessCheck test --tests *CreateApiCredentialTest --tests *AuthenticateApiCredentialTest --tests *persistence.ApiCredential*Test --tests *ApplicationWiringTest --tests *ProjectStateConfigurationTest --daemon",
+  "exit": 0
+}

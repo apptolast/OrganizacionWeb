@@ -227,9 +227,12 @@ class ProjectApiTest {
     if (invalid) request.with(httpBasic("persona-a", "incorrect"));
     mvc.perform(request)
         .andExpect(status().isUnauthorized())
-        .andExpect(header().doesNotExist("WWW-Authenticate"))
+        .andExpect(
+            invalid
+                ? header().string("WWW-Authenticate", "Bearer")
+                : header().doesNotExist("WWW-Authenticate"))
         .andExpect(content().contentType("application/problem+json"))
-        .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
+        .andExpect(jsonPath("$.code").value(invalid ? "API_UNAUTHENTICATED" : "UNAUTHENTICATED"));
     assertEmpty();
   }
 

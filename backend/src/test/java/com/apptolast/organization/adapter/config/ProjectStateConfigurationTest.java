@@ -19,6 +19,15 @@ class ProjectStateConfigurationTest {
     var runner =
         new ApplicationContextRunner()
             .withUserConfiguration(ApplicationConfiguration.class)
+            .withPropertyValues("app.auth.username=owner")
+            .withBean(
+                org.springframework.security.core.userdetails.UserDetailsService.class,
+                () ->
+                    new org.springframework.security.provisioning.InMemoryUserDetailsManager(
+                        org.springframework.security.core.userdetails.User.withUsername("owner")
+                            .password("{noop}fixture-unused")
+                            .roles("USER")
+                            .build()))
             .withBean(
                 org.springframework.jdbc.core.JdbcTemplate.class,
                 () -> org.mockito.Mockito.mock(org.springframework.jdbc.core.JdbcTemplate.class))

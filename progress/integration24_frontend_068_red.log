@@ -1,0 +1,33 @@
+
+ RUN  v4.1.10 C:/Users/vhurt/Documents/Codex/2026-09-05/a-ver-necesito-o-me-gustar/work/OrganizacionWeb-integration-api/frontend
+
+ ❯ src/integration-api.test.tsx (37 tests | 1 failed | 36 skipped) 280ms
+   × @s2 malformed Unicode names are blocked while complete emoji remain valid 278ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/integration-api.test.tsx > @s2 malformed Unicode names are blocked while complete emoji remain valid
+Error: expect(element).toBeDisabled()
+
+Received element is not disabled:
+  <button />
+ ❯ src/integration-api.test.tsx:1430:110
+    1428|   stubApi(vi.fn());const user=userEvent.setup();render(<IntegrationApi…
+    1429|   await user.click(screen.getByRole("checkbox",{name:"Leer proyectos"}…
+    1430|   await user.click(name);await user.paste("Nombre \ud800");expect(scre…
+       |                                                                                                              ^
+    1431|   await user.clear(name);await user.paste("Nombre \udc00");expect(scre…
+    1432|   await user.clear(name);await user.paste("Nombre 😀");expect(screen.g…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 36 skipped (37)
+   Start at  16:48:47
+   Duration  3.36s (transform 810ms, setup 403ms, import 993ms, tests 280ms, environment 1.42s)
+
+undefined
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command "vitest" not found
+
+Did you mean "pnpm exec vitest"?

@@ -12,6 +12,12 @@ Instrucción del usuario (8 de septiembre, 19:31): sincronizar con el remoto, co
 - Modo oscuro: auditoría Playwright en curso (`progress/darkmode_audit.md`). Análisis estático previo: `frontend/src/today.scss` usa colores claros fijos sin variante oscura; `frontend/index.html` `theme-color` solo claro.
 - CI de main 34235036356 (commit de docs) falló por un E2E de exportación con `Protocol error (Network.getResponseBody)`: fallo de infraestructura de Playwright, no de producto; se vigila si se repite.
 
+## Corte por cuota y reanudación (9 de septiembre de 2026, 01:05 Madrid)
+
+La cuota de sesión se agotó sobre las 00:30 y detuvo los seis agentes a la vez; ninguno perdió trabajo en disco. Al reanudar: `main` está en f8570d7 con la feature 24 integrada (PR 29 squash 0277c50) y CI 34271043131 SUCCESS. El squash borró la sección 24 de `project-spec.md` y se restauró en un commit propio. Los seis carriles se relanzaron desde su último commit con instrucción explícita de commitear cada ciclo y de escribir los archivos con las herramientas de edición, no con heredocs (los escapes de iCalendar y de las plantillas se corrompían).
+
+Estado de los carriles al reanudar: webhooks con dominio/casos de uso y guardia de direcciones; automations con dominio de reglas y plantillas; darkmode con cuatro correcciones ya commiteadas (Hoy con tokens, theme-color, filtros de historial, separador); ics_calendar, github_connector y external_calendar con su dominio inicial sin commitear.
+
 ## Plan de carriles (worktrees en C:/Users/vhurt/ow-worktrees, ramas `claude/<feature>` desde `codex/integration-api`)
 
 - A: 25 webhooks → después 30 automations fase 2 (worker compartido y NOTIFY_WEBHOOK).

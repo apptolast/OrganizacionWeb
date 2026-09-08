@@ -1,0 +1,61 @@
+{
+  "archive": "integration24-http-pit-portable.zip",
+  "sha256": "E0C7D5ED89A9351D3855120F11F491B0E938E026519FAB5BD09FC045873D8CD1",
+  "bytes": 139608,
+  "entryCount": 10,
+  "entries": [
+    {
+      "entry": "integration_http_pit_before.json",
+      "bytes": 157902,
+      "sha256": "BB1D68A26921651B0DB75A135D26BFD03C6ABDEFC47F02822606A17B670ABDB7"
+    },
+    {
+      "entry": "integration_http_pit_after.json",
+      "bytes": 108231,
+      "sha256": "6AFFE9B1611869C26AB1669D8E25CB2647A131F24AEDE3CE714DC10456299864"
+    },
+    {
+      "entry": "integration_http_pit_results.json",
+      "bytes": 349,
+      "sha256": "AD464885335B2D6FAF887F85458D8C4671A72FB605762E612E9A43EB432037B5"
+    },
+    {
+      "entry": "integration_http_pit_original.log",
+      "bytes": 7404,
+      "sha256": "1575952D599A71456B71CC9D54E3149E8D253FD6299A8E7CE6FFCFF8F8F630D6"
+    },
+    {
+      "entry": "integration_http_pit_original.exit",
+      "bytes": 1,
+      "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+    },
+    {
+      "entry": "integration_http_pit_original.xml",
+      "bytes": 112784,
+      "sha256": "E23DD82DBDF556A15F4B051DA007B435994EBA71B8F1E5C25D68F1417A4CED2B"
+    },
+    {
+      "entry": "integration_http_pit_original_html.zip",
+      "bytes": 76530,
+      "sha256": "7097EE34D25EB5B106214D18967FDF86775DA0E3652FB6DB357D8B40FFDBD3C6"
+    },
+    {
+      "entry": "integration_http_pit_launch_resources_04.json",
+      "bytes": 305,
+      "sha256": "97D772F37FDC37C20732AF2FC6F327EB3F8BD94751E89EB1492DA46F87335392"
+    },
+    {
+      "entry": "mutation_integration_api_http.md",
+      "bytes": 2736,
+      "sha256": "3B8B8E8589E2B5061DCC62DB517E5322F84E24F6E3870CFB9D9DDDBB492F62B8"
+    },
+    {
+      "entry": "integration_http_pit_final_freeze.json",
+      "bytes": 3604,
+      "sha256": "6011D28EEC0C6E9DBD79F7D12F13ECB82AB8B6ED382911AEBC4F5877BCCF8146"
+    }
+  ],
+  "sourceFreezeSha256": "6011D28EEC0C6E9DBD79F7D12F13ECB82AB8B6ED382911AEBC4F5877BCCF8146",
+  "result": "EXIT0;114K/118total;535inputs unchanged",
+  "destination": "Evidence only; no product files"
+}

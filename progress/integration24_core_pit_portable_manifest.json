@@ -1,0 +1,158 @@
+{
+  "archive": "integration24-core-pit-originals.zip",
+  "size": 201428,
+  "sha256": "06009a36fa5326edd29fde1c507ce5ddd2c51c380a1affc0ec35ea3ad8536b81",
+  "entries": [
+    {
+      "path": "integration24-core-pit-before.json",
+      "size": 208494,
+      "sha256": "67d5e35a37f491463f2ba395bb334e67660a17a6a245de1e7e4986db74d53541"
+    },
+    {
+      "path": "integration24-core-pit-after.json",
+      "size": 208494,
+      "sha256": "67d5e35a37f491463f2ba395bb334e67660a17a6a245de1e7e4986db74d53541"
+    },
+    {
+      "path": "integration24-core-pit-effective-process.json",
+      "size": 22390,
+      "sha256": "b43ab636b7394dffbe566be30fe28f77b0f9adbb7d3e390750ce0702c271fdd7"
+    },
+    {
+      "path": "integration24-core-pit-original.log",
+      "size": 7312,
+      "sha256": "1996690bfd139523636625d23625a0907764556640bb433d9fa81fe6fb469e23"
+    },
+    {
+      "path": "integration24-core-pit-original.exit",
+      "size": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-core-pit-residues.json",
+      "size": 6536,
+      "sha256": "8ee57e75c875f20ea022d0a3286f3fd93e790185382c5a1d95a2384340a61759"
+    },
+    {
+      "path": "integration24-core-pit-results.json",
+      "size": 6101,
+      "sha256": "22f67ddc0e637d5fe58b8cc7074721c5c31a27f806dd2af83b3b7cc582eab9b4"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.adapter.config/ApplicationConfiguration.java.html",
+      "size": 219000,
+      "sha256": "baabd14ba4f89167a0cc57516d19e87d23e6ef77d1c1308f837716a17da53862"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.adapter.config/index.html",
+      "size": 2092,
+      "sha256": "9935a8b60e757b7f70143a93dda9abbcb3cb17f7588d138eee14a0a77077aae5"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.adapter.persistence/index.html",
+      "size": 2101,
+      "sha256": "26edeb48bd012670ea15fe92663ad285d6022a2b52c780b51a40667104f6aff6"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.adapter.persistence/PostgresApiCredentialStore.java.html",
+      "size": 202228,
+      "sha256": "41d74a9faab6233a219286ced8da0259810fca4fef91607d6e32c002b9566313"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.application/ApiCredentialAccess.java.html",
+      "size": 34037,
+      "sha256": "f0f357a308d728b4a23bd24f937d5d84d6f7317c3169747df437390c3ce39d72"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.application/ApiCredentialCreation.java.html",
+      "size": 23713,
+      "sha256": "abf2e82b8375d48385cd83ba2e6f00f374618876d2912c8f29b7c6d55e8aa2da"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.application/ApiCredentialIssuance.java.html",
+      "size": 32940,
+      "sha256": "bea16797fbf53f04e93de6ec9380342e75689dcd1775219b8b6df650a01fb72b"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.application/ApiRateLimitedException.java.html",
+      "size": 7916,
+      "sha256": "d9d9d3d0b890318f72f4aa4b5b58c27fe15d1707c012f9a6ee1a4511c766a0fe"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.application/AuthenticateApiCredential.java.html",
+      "size": 42219,
+      "sha256": "226d29ef7176aa173df7c40eff62a9cd259a9ac13db0927f18c6559527b6d78d"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.application/ConsumeApiQuota.java.html",
+      "size": 16901,
+      "sha256": "9b7be5eb6874f346be35f55df958889b20a57010ce27639335452cb1549c6bc6"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.application/CreateApiCredential.java.html",
+      "size": 70866,
+      "sha256": "722454ac64270bbe6445a714f145c6fa4a3cb417e2a5f1cd1ff5a3019602ada7"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.application/index.html",
+      "size": 7399,
+      "sha256": "9cf1796a5918a097523b9d5eee75300f6036c72530f9ec888dd60a3bf867d458"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.application/ReadApiCredentials.java.html",
+      "size": 12355,
+      "sha256": "8805afffcb2dcb1a33e67d843f3f760db637f5f4a7eaab43059b70edcdaa8a6e"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.application/RevokeApiCredential.java.html",
+      "size": 12765,
+      "sha256": "6e19ad9f0359841aad000404c747fcb3ac6e3e0287d86006978c82e2f89f8c9a"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.domain/ApiCredential.java.html",
+      "size": 34399,
+      "sha256": "f42540c6377e9094b0d67f08d95c719151dd4ed5c9efb3f1283adcacc595bba1"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.domain/ApiCredentialIntent.java.html",
+      "size": 54189,
+      "sha256": "c6c5d37ecfdcf5880138d1aeb7d44e0d6103c515f86cc7155dc1f723a0988a16"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.domain/ApiCredentialInvalidException.java.html",
+      "size": 15673,
+      "sha256": "2a2d47e63aa8f09730ddf5db317ffa2413096dccca6bd6d4fc691d9ae48b7855"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.domain/ApiCredentialPage.java.html",
+      "size": 6273,
+      "sha256": "0d65a46e0ceec5acdaaaf980a050b938ae9c12d2a57c19cf208040411b88e695"
+    },
+    {
+      "path": "integration24-core-pit-report-original/com.apptolast.organization.domain/index.html",
+      "size": 4070,
+      "sha256": "8e90d3673fc80f8f1d36bd83d28b047a8fb8fd15bb8afea862c917362d7a2499"
+    },
+    {
+      "path": "integration24-core-pit-report-original/index.html",
+      "size": 4584,
+      "sha256": "a226f076e0e7539d998ebca9db5fbad38f8c9bff2ef3c27afe8394b2f07af762"
+    },
+    {
+      "path": "integration24-core-pit-report-original/mutations.xml",
+      "size": 184279,
+      "sha256": "7fb66f7882a76aba362ed775499761923d816f3e9ba2b5758621116b3afc39d5"
+    },
+    {
+      "path": "integration24-core-pit-report-original/style.css",
+      "size": 5839,
+      "sha256": "78ea37fb78e124acd62b472b0dbdb1f80176d8b4c3353411668797fbf3db7976"
+    },
+    {
+      "path": "integration24-core-pit-freeze.json",
+      "size": 6620,
+      "sha256": "4a68f7ea739478e49c84d40566d5377cae160a327ce1a1f757a9a9b51a6c4038"
+    }
+  ],
+  "verification": "Every extracted entry hash equals its preserved original; no sources copied, protected V14 not read."
+}

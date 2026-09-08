@@ -1,21 +1,25 @@
 # Estado actual — API para integraciones (24)
 
-Las features 1–23 están desplegadas en https://organizacion.apptolast.com. Feature 24 permanece in_progress con los 42 escenarios aprobados. Las features 25–30 están pendientes; no se promete un 100 % sin validación. Autorización global de implementación, revisión, publicación y despliegue vigente. Ponytail full/Caveman lite; root coordina revisión/Git/ops, agentes escriben producto y tests.
+Las features 1–23 están desplegadas en https://organizacion.apptolast.com. Feature 24 sigue in_progress con 42 escenarios aprobados. Features 25–30 pendientes. Autorización global vigente; Ponytail full/Caveman lite.
 
 ## Validación confirmada
 
-Backend final 8d7d8b2: 122 tests focales y 87 entradas verificadas. HTTP/wiring 5b10287/1466f07: 138 tests y nueve casos PG con Clock fijo. Compatibilidad de negocio 20c3ac3: dos casos de ETag/outbox y errores que consumen cuota. OpenAPI final 32d3390: 18 operaciones, 181 referencias resueltas, 28 schemas, metavalidación oficial offline verde. E2E real 1/1 y 16 ejecuciones UX simuladas conservadas en ZIPs originales 6c77b6b; alcance y límites en ux_integration_api.md.
+Las tres campañas finales pasan con killed/total estricto: núcleo 180/188 (95,7447 %), HTTP 114/118 (96,6102 %) y frontend 836/997 (83,8516 %). Se conservan todos los estados residuales, originales y límites en los informes finales y ZIPs portables. El primer Stryker falló con 780/997 y queda preservado; el correctivo mantiene las mismas 997 identidades y configuración. No hay reclasificación.
 
-Init final aislado 360c7636: Node72, frontend2492/65 suites, Java3446/149 XML sin fallos, errores ni omisiones; 1039 entradas before/after idénticas. Incluye las dos correcciones de expectativas Basic heredadas fe6f87f. OAS final queda fuera de ese checkout; tiene validación focal independiente. CI final aún pendiente.
+Backend, HTTP, wiring, contrato OpenAPI y navegación real cuentan con evidencia revisada. Init aislado: Node72, frontend2492 y Java3446; los 15 refuerzos frontend posteriores tienen foco83/83. CI integrada final todavía pendiente.
 
-Stryker original terminó por debajo del umbral: 780/997 Killed, 208 Survived, 8 NoCoverage, 1 RuntimeError, 0 Timeout; estricto 78,2347 %. Original íntegro preservado. Se revisaron 15 casos adicionales de permisos, Unicode, clipboard e incertidumbre, inicialmente GREEN; foco83/83. No cambian producto ni config, no se atribuyen nuevas muertes todavía.
+Imágenes fe6f87f publicadas por digest, linux/amd64 y revisión comprobadas, 580 entradas de construcción sin cambios. Ensayo API24→23→24 PASS: 20 tablas y dos hashes de esquema preservados; límites explícitos en integration24_image_rollback_original.json.
+
+Copia real V21 de las 16:22 UTC restaurada completamente en PostgreSQL aislado: 19 tablas restauradas, 17 tablas de negocio/Flyway y esquema coinciden con observación live separada. Sin datos de autenticación en comparación ni restauración de ACL. Recursos efímeros retirados. Evidencia en integration24_backup_restore_original.json y comparison.json.
+
+Infraestructura candidata 1e873f0: bootstrap, validate, lint y check pasan; CI de PR40 verde. No se ha aplicado la entrega24. Se conserva el falso positivo original de Gitleaks y la excepción exacta revisada al digest público, con controles negativos.
 
 ## Trabajo activo
 
-A ejecuta una campaña oficial PIT núcleo (8 workers). C escalona PIT HTTP tras el baseline y comprobación de recursos. B prepara una única campaña correctiva Stryker con el mismo universo/config, tras doble revisión favorable. Root ensaya API24→23→24 aislado con helper V22 revisado, sin tocar producción. Imágenes candidatas fe6f87f publicadas y descargadas por digest, linux/amd64 y revisión verificadas; 580 entradas de construcción idénticas antes/después, V14 excluido antes de lectura.
+CI 34248649295 falló seis casos E2E: una expectativa Basic anterior al contrato Bearer, cuatro recorridos de teclado con presupuesto fijo insuficiente y una aserción de ancho con texto200 %. Las correcciones de autenticación y teclado pasan junto al caso de texto (6/6 en Windows); texto200 también pasa en Linux oficial. Su fallo original permanece sin causa demostrada: se añade diagnóstico al mismo oráculo, sin ocultar overflow ni ampliar límites. Pendiente revisión final y una CI integrada sobre el conjunto.
 
-Faltan resultados de mutación >=80 % estricto, CI final, ensayo de rollback, revisión de infraestructura, backup y aceptación HTTPS. Ninguna imagen24 se ha desplegado todavía. Plan externo integration24-release-checklist.md. La pregunta opcional sobre proveedores calendario/tareas no bloquea24.
+Después de CI verde: merge, aplicación oficial y aceptación HTTPS sin escrituras de negocio, y cierre24. Ninguna prueba local aislada sustituye esas puertas.
 
 ## Límites operativos
 
-COMMON/V14 protegido: no lectura/hash manual, copia, modificación o restauración. Excluir V14 de nuevas enumeraciones de contenido. Puertos8080/18080/18081 reservados. No forzar Git, parar procesos ajenos ni borrar artefactos históricos. Credenciales privadas fuera de Git/logs/chat. QA de escritura sólo efímero; aceptación live24 prevista sin escrituras de negocio. Evidencia UX es comprobación automatizada/heurística, no estudio con usuarios ni garantía universal.
+COMMON/V14 protegido, excluido antes de nuevas lecturas de contenido. Puertos8080/18080/18081 reservados. No alterar procesos, stacks ni datos ajenos. Credenciales fuera de Git/logs/chat. QA de escritura sólo efímero. Evidencia UX automatizada no equivale a estudio humano ni garantía universal.

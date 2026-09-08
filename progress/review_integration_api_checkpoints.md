@@ -86,3 +86,10 @@ Corrección de estabilidad de wiring aprobada e integrada: 7e3079a como 1466f07,
 APROBADOS los dos casos de compatibilidad 20c3ac3 (11 entradas verificadas), OpenAPI 32d3390 (freeze3b29be9d, diez originales, siete tests y metavalidación oficial del documento F5934EB8) y los ZIPs reales/simulados 6c77b6b (8 y73 entradas verificadas). Se corrigió el maxLength crudo de campos que normalizan Unicode White_Space antes del límite; no cambió lógica de negocio. La evidencia oficial queda en integration_openapi_official_validation.json; no sustituye los tests HTTP.
 
 Stryker original no pasa: 780/997 Killed (78,2347 %), con originales conservados. Root leyó los dos archivos nuevos de refuerzos; C verificó23/23 entradas del freeze D8C4C5EB y aprobó independientemente. Quince casos adicionales observables, inicialmente GREEN, foco83/83; configuración y producto intactos. Se autoriza una única campaña correctiva conservando universo997 y umbral80, sin reclasificar mutantes ni atribuir resultados antes de terminar.
+
+
+## Campañas finales y recuperación operativa
+
+Root verificó originales del núcleo (29/29 y ZIP30), HTTP (9/9 y copias, 535 identidades) y Stryker correctivo (194 entradas e identidad de 997 mutantes). A ratificó independientemente HTTP y frontend. Resultados estrictos: 180/188, 114/118 y 836/997; informes conservan supervivientes, NoCoverage y RuntimeError sin reclasificación.
+
+Helpers de rollback y backup/restore revisados antes de ejecución: rollback entre imágenes PASS; restauración íntegra V21 PASS con comparación de 17 tablas y esquema. No se atribuye recuperación Swarm completa ni comparación de filas de autenticación. Infraestructura revisada y check verde, todavía sin aplicación. CI final pendiente tras seis fallos E2E; no se declara cierre ni despliegue.

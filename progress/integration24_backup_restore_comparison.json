@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "backup": {
+    "path": "/var/backups/organizationweb/organization-20260908T162217Z-105b596a758f48e18021fdfaf12d90a7.dump",
+    "bytes": 60178,
+    "sha256": "085d1653e91753fd1d08a820e7fb3f6698acc832d7406c4fd583d5c6c8f0adc0",
+    "mode": "0600",
+    "owner": "root:root",
+    "container": "c85f0de047ff",
+    "archiveListValid": true,
+    "fullRestorePerformed": false
+  },
+  "restoreEvidence": "ow-restore-v21-65c74410-7d29-4305-9615-070b547bdf5f.json",
+  "restoredTables": 19,
+  "comparedTables": 17,
+  "differingTables": [],
+  "columnsMatch": true,
+  "constraintsMatch": true,
+  "resourcesRemoved": true,
+  "privateTransferBufferReleased": true,
+  "scope": "Separate live read-only observation matched the verified dump; not a shared exported transaction snapshot, no authentication row comparison, no ACL/offsite/Swarm/Rabbit recovery.",
+  "fullRestorePerformed": true,
+  "backupMetadataDescribesCreationStage": true
+}

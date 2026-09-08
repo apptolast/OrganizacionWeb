@@ -1,0 +1,46 @@
+{
+  "inputs": [
+    {
+      "path": "e2e/import-data.spec.mjs",
+      "sha256": "b3009dad5fc517be052ef917b90374d83446eee19efdc5dfee273e43473090cc"
+    },
+    {
+      "path": "e2e/export-data.spec.mjs",
+      "sha256": "bfe67aa80c278731711c095fea8fdb5b637541c48bcb84853238b2040654f7ff"
+    },
+    {
+      "path": "progress/review_import_real_nominal.md",
+      "sha256": "45db6ab584bcbf85a4603c7201a43747bc60f27e4116825722ae5533b312429c"
+    },
+    {
+      "path": "progress/import_real_e2e_nominal/import_real_before.json",
+      "sha256": "a31377d2e7fdfc90a1e851ae3787810003b32ea1803e840807cfdac2770cf90f"
+    },
+    {
+      "path": "progress/import_real_e2e_nominal/import_real_initial_after.json",
+      "sha256": "1af54d04859fb7f05674bafb689d92ad924b5d64340059b02012026142afcd3c"
+    },
+    {
+      "path": "progress/import_real_e2e_nominal/import_real_nominal.log",
+      "sha256": "c5037ff5a16f19cab0ace39df52c85a2f38c00029a5182ac8b096f1190505eb7"
+    },
+    {
+      "path": "progress/import_real_e2e_nominal/import_real_repaired.log",
+      "sha256": "5f5b7748b9ce0124a1e9ef10646c3f05f4be9fadaeb0f10c0aa846ed6620272e"
+    },
+    {
+      "path": "progress/import_real_e2e_nominal/import_real_repaired_after.json",
+      "sha256": "2257883c786d8c47500c2b5a8b713be837bd10deeef681b472fb63d251abe4cf"
+    },
+    {
+      "path": "progress/import_real_e2e_nominal/import_real_repaired_before.json",
+      "sha256": "dc57ac22b000824d3af1798fc56f49686ac61768b23463602f08b2a1ddec1b6f"
+    },
+    {
+      "path": "progress/import_real_e2e_nominal/result.json",
+      "sha256": "cb83e4a5552336f27090bd9c1c02cb26bde04b090f34debcc0f643375c2c7e82"
+    }
+  ],
+  "fixedCommit": "f3bed6f",
+  "result": "1/1 passed; nominal only"
+}

@@ -38,7 +38,5 @@
   "htmlReporter": {
     "fileName": "reports/mutation-import-data/mutation.html"
   },
-  "tempDirName": ".stryker-tmp-import-data",
-  "incremental": true,
-  "incrementalFile": "../progress/import_stryker_incremental/cache.json"
+  "tempDirName": ".stryker-tmp-import-data"
 }

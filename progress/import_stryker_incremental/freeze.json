@@ -1,0 +1,61 @@
+{
+  "inputs": [
+    {
+      "path": "progress/import_stryker_incremental/before.json",
+      "sha256": "c6e491f2104e66ffad0cf6c1aef5faba5b254c95bd159d1140438d433e603390"
+    },
+    {
+      "path": "progress/import_stryker_incremental/after.json",
+      "sha256": "c6e491f2104e66ffad0cf6c1aef5faba5b254c95bd159d1140438d433e603390"
+    },
+    {
+      "path": "progress/import_stryker_incremental/config.json",
+      "sha256": "565e8d9719d20035ce11b43842ce508a0f93bcba60eab62b8b4f867c7db6d8f6"
+    },
+    {
+      "path": "progress/import_stryker_incremental/seed-original.json",
+      "sha256": "58464b8eaa0996245f0a3c08f209c8cb57639ad69e613c8e2f80397beb7118dc"
+    },
+    {
+      "path": "progress/import_stryker_incremental/mutation.json",
+      "sha256": "81b74a80891c1a93609e749fb0215135a1819581de5201c07f7d76ece3819619"
+    },
+    {
+      "path": "progress/import_stryker_incremental/mutation.html",
+      "sha256": "27c36818db7ac16309c6d8ca428fc1fe03308ab76aa212d5d84d85686ca564b9"
+    },
+    {
+      "path": "progress/import_stryker_incremental/run.log",
+      "sha256": "35fd7a819ada8438fa45b82352fab998ef7ba848045fcfe64a5301b23262c7b2"
+    },
+    {
+      "path": "progress/import_stryker_incremental/exit.txt",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "progress/import_stryker_incremental/summary.json",
+      "sha256": "d3a3cc1fcf821413c10f10208f64d0ee73f04aae7dd4b5f0442ae1cfd60b66f5"
+    },
+    {
+      "path": "progress/review_import_frontend_mutation.md",
+      "sha256": "622381b3c843f91a4d2c09a8a92f64342f89630b709350a26f70f651c1b8854c"
+    },
+    {
+      "path": "frontend/src/import-data.mutation.test.tsx",
+      "sha256": "f7c6ec6231d0874bc6969159e70e71072d6671e36cab9ee22279dcc16727de42"
+    },
+    {
+      "path": "frontend/src/import-refresh.mutation.test.tsx",
+      "sha256": "511826f77b5d4ebf7f9726e88cd8defc52edb360fa05d40773e674ca02eb320d"
+    },
+    {
+      "path": "frontend/stryker.import-data.config.json",
+      "sha256": "565e8d9719d20035ce11b43842ce508a0f93bcba60eab62b8b4f867c7db6d8f6"
+    }
+  ],
+  "conservativeKilled": 651,
+  "total": 801,
+  "reused": 671,
+  "executed": 130,
+  "unchangedInputs": 183
+}

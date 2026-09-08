@@ -1,0 +1,112 @@
+{
+  "total": 801,
+  "counts": {
+    "Killed": 651,
+    "Survived": 145,
+    "NoCoverage": 4,
+    "RuntimeError": 1,
+    "Timeout": 0
+  },
+  "conservativePercent": 81.27340823970037,
+  "files": {
+    "src/App.tsx": {
+      "Killed": 52
+    },
+    "src/appearance-state.tsx": {
+      "NoCoverage": 2,
+      "Killed": 4,
+      "Survived": 1
+    },
+    "src/customization-state.ts": {
+      "Killed": 57,
+      "Survived": 15
+    },
+    "src/import-data-api.ts": {
+      "Killed": 198,
+      "Survived": 35,
+      "NoCoverage": 1
+    },
+    "src/import-data-intent.ts": {
+      "Killed": 42,
+      "Survived": 2
+    },
+    "src/import-data.tsx": {
+      "Killed": 280,
+      "Survived": 82,
+      "NoCoverage": 1,
+      "RuntimeError": 1
+    },
+    "src/use-session.ts": {
+      "Killed": 13,
+      "Survived": 4
+    },
+    "src/workspace.tsx": {
+      "Killed": 5,
+      "Survived": 6
+    }
+  },
+  "transitions": {
+    "Killed -> Killed": 617,
+    "Survived -> Killed": 31,
+    "NoCoverage -> NoCoverage": 4,
+    "Survived -> Survived": 145,
+    "NoCoverage -> Killed": 3,
+    "RuntimeError -> RuntimeError": 1
+  },
+  "signaturesIdentical": true,
+  "staticSurvivedPreserved": [
+    {
+      "file": "src/import-data.tsx",
+      "id": "440"
+    },
+    {
+      "file": "src/import-data.tsx",
+      "id": "441"
+    },
+    {
+      "file": "src/import-data.tsx",
+      "id": "443"
+    },
+    {
+      "file": "src/import-data.tsx",
+      "id": "444"
+    },
+    {
+      "file": "src/import-data.tsx",
+      "id": "445"
+    },
+    {
+      "file": "src/import-data.tsx",
+      "id": "447"
+    },
+    {
+      "file": "src/import-data.tsx",
+      "id": "446"
+    },
+    {
+      "file": "src/import-data.tsx",
+      "id": "448"
+    },
+    {
+      "file": "src/import-data.tsx",
+      "id": "450"
+    },
+    {
+      "file": "src/import-data.tsx",
+      "id": "449"
+    },
+    {
+      "file": "src/import-data.tsx",
+      "id": "451"
+    }
+  ],
+  "unchangedInputs": 183,
+  "originalSha256": "58464b8eaa0996245f0a3c08f209c8cb57639ad69e613c8e2f80397beb7118dc",
+  "seedSha256": "58464b8eaa0996245f0a3c08f209c8cb57639ad69e613c8e2f80397beb7118dc",
+  "finalSha256": "81b74a80891c1a93609e749fb0215135a1819581de5201c07f7d76ece3819619",
+  "cacheSha256": "2450b030dd5a12c4e637378c006fb083a4c10c9f74c90b536b1c6f279175ae00",
+  "reused": 671,
+  "executed": 130,
+  "reuseEvidence": "run.log IncrementalDiffer: 0 mutated files changed; 2 test files changed (+16 -0); 671 of 801 results reused",
+  "exitCode": 0
+}

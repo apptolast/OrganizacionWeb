@@ -245,7 +245,7 @@
       "description": "Importación propia JSON v1 con vista previa y fusión integral sin sobrescritura, recibo idempotente y recuperación.",
       "acceptance": ["features/import_data.feature: @s1–@s15 preservan catorce colecciones, tipos, historia, propiedad y conflictos integrales.", "@s16–@s32 cubren límites, recibos, atomicidad, concurrencia con escritores reales y frontera HTTP/proxy.", "@s33–@s42 cubren confirmación explícita, incertidumbre, recuperación privada, foco y matriz UX aplicable; no acreditan implementación."],
       "sdd": true,
-      "status": "spec_ready"
+      "status": "in_progress"
     },
     {
       "id": 24,

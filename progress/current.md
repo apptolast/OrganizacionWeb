@@ -2,7 +2,9 @@
 
 Funciones 1–22 desplegadas y aceptadas en https://organizacion.apptolast.com. Exportación22 queda done tras el judge aprobado, mutación conservadora y CI final 34190090017 SUCCESS. Aplicación main 83b027; infraestructura PR35 fba78f4, fuente aplicada 5a2b860. Aceptación live: dos descargas idénticas de 8568 bytes con un GET, datos y servicios preservados, cierre de acceso comprobado. Evidencia y límites en [judge_export_data.md](judge_export_data.md) y [export_live_acceptance.json](export_live_acceptance.json).
 
-Funciones 23–30 siguen pendientes; este cierre no inicia otra funcionalidad. No hay cambios productivos ni nuevas campañas en este corte documental. COMMON/V14 y artefactos ajenos siguen protegidos.
+Importación 23 entra en implementación: root aprobó los 42 escenarios bajo la autorización global del usuario. Contrato SHA256 5678995ED52A89E969D5ED2E36D74DFD4030E6BD8A9D92C43E14A6E64608211E y especificación 959BE37196F6E07FFAF969C1824BB33C86DCAE3E6DBD4872DF15437BEDF49369. Baseline oficial verificado: 2846 pruebas Java, 2295 frontend y 66 del arnés, sin fallos; dos huellas de logs y 123 XML comprobados en 7b7847. Revisión en review_import_data_gherkin.md. Funciones 24–30 siguen pendientes. COMMON/V14 y artefactos ajenos siguen protegidos.
+
+Infraestructura de cierre 22: PR36 fusionada en d1fa2114523800faada08915ef126d78a95db8d9, CI34192767162 SUCCESS. Main de aplicación 83b027 pasó CI34191778732. PR26 de cierre detectó una espera asíncrona heredada; reparación mínima 31c1ab0 revisada y trasladada aquí como 1daef57, sin cambiar producto. Diez huellas verificadas y frontend 2295/2295 verde; CI34194343037 del cierre sigue pendiente. No se repite despliegue por esos cambios documentales y de prueba.
 
 ## Registro histórico de preparación de esta entrega
 

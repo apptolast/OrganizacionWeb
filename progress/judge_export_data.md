@@ -282,3 +282,21 @@ verdes; no se inventa un RED. Root verificó seis huellas y el XML original
 de 39 pruebas correctas, sin errores ni skips, además del SHA productivo
 intacto (41828a). No hay replay, nuevas detecciones atribuidas ni cambios
 de configuración. Los tres resultados originales PIT se conservan.
+
+## Regresión completa final y espera de apariencia: APPROVED
+
+E2E completo nuevo EXIT 0: 156 correctos, cero fallos y un skip de zoom
+específico, con evidencia independiente previa. Duración 18,2 minutos;
+las matrices reparadas tardan 10,3 y 10,4 segundos. Root verificó cuatro
+huellas y 1924 entradas idénticas (b3e12c, 83f8f5). El stack se retiró.
+CI del candidato productivo 0030513, run 34187626169, también terminó
+SUCCESS con 156 E2E correctos y un skip; log original externo preservado.
+
+La primera CI de PR25 encontró un fallo intermitente en el test anterior
+de apariencia. Root revisó el ajuste 83f8f5: esperar el radio confirmado
+no esperaba necesariamente el efecto posterior que aplica dataset.theme.
+El mismo waitFor ahora comprueba ambas condiciones; conserva todos los
+otros oráculos y el timeout. No cambia producto. Diez huellas y 129
+entradas idénticas verificadas, suite 50/50 y frontend completo 2295/2295
+verdes (dcf580). El RED remoto original se conserva. Pendiente únicamente
+el nuevo gate del PR, publicación aplicada y aceptación HTTPS.

@@ -1413,10 +1413,10 @@ it("@s36 uses confirmed SYSTEM light accent when matchMedia is unavailable witho
       <Appearance />
     </AppearanceProvider>,
   );
-  await waitFor(() =>
-    expect(screen.getByRole("radio", { name: "Sistema" })).toBeChecked(),
-  );
-  expect(document.documentElement.dataset.theme).toBe("light");
+  await waitFor(() => {
+    expect(screen.getByRole("radio", { name: "Sistema" })).toBeChecked();
+    expect(document.documentElement.dataset.theme).toBe("light");
+  });
   expect(document.documentElement.style.colorScheme).toBe("light");
   expect(document.documentElement.style.getPropertyValue("--accent")).toBe(
     stored.accentLight,

@@ -1,6 +1,14 @@
 import { useEffect, useState, useRef, type FormEvent } from "react";
 import { setCsrfToken, observeAccess, isCsrfFailure } from "./api-client";
 import { readSession, type Session } from "./session-api";
+import { clearImportIntent, readImportIntent } from "./import-data-intent";
+function retireImportRecovery() {
+  try {
+    clearImportIntent();
+  } catch {
+    /* Storage access must not prevent revoking access. */
+  }
+}
 export function useSession() {
   const channel = useRef<BroadcastChannel | null>(null);
   const operation = useRef<AbortController | null>(null);
@@ -33,6 +41,13 @@ export function useSession() {
         window.dispatchEvent(new PopStateEvent("popstate"));
       }
       setCsrfToken(next.csrfToken);
+      if (next.authenticated && next.username !== null) {
+        try {
+          readImportIntent(next.username);
+        } catch {
+          /* Session identity remains authoritative. */
+        }
+      } else retireImportRecovery();
       setSession(next);
       setCsrfExpired(false);
       return next;
@@ -50,6 +65,7 @@ export function useSession() {
   useEffect(() => {
     channel.current = new BroadcastChannel("organization-session");
     function revoke() {
+      retireImportRecovery();
       operation.current?.abort();
       setPassword("");
       setSaving(false);
@@ -124,6 +140,7 @@ export function useSession() {
   }
   async function logout() {
     if (closing) return;
+    retireImportRecovery();
     const controller = new AbortController();
     operation.current = controller;
     setClosing(true);
@@ -188,6 +205,7 @@ function isPrivateRoute(path: string, search: string) {
       path === "/disponibilidad" ||
       path === "/apariencia" ||
       path === "/exportacion" ||
+      path === "/importacion" ||
       path === "/proyectos/nuevo" ||
       /^\/proyectos\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\/editar|\/tareas\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\/sesiones\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?)?$/i.test(
         path,

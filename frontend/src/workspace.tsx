@@ -15,6 +15,7 @@ export function Workspace({
     | "Revisión semanal"
     | "Apariencia"
     | "Exportación"
+    | "Importación"
     | null;
 }) {
   return (
@@ -83,6 +84,15 @@ export function Workspace({
             aria-current={section === "Exportación" ? "page" : undefined}
           >
             Exportación
+          </RouteLink>
+          <RouteLink
+            href="/importacion"
+            aria-current={section === "Importación" ? "page" : undefined}
+          >
+            <span aria-hidden="true">↑</span> Importación
+            {section === "Importación" && (
+              <span className="nav-dot" aria-hidden="true" />
+            )}
           </RouteLink>
         </nav>
         <div className="sidebar-note">

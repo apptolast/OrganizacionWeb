@@ -397,7 +397,8 @@ it("@s22 opens Exportación from the final navigation link without fetching an a
   const links = within(navigation).getAllByRole("link");
   expect(links[0]).toHaveAccessibleName("Hoy");
   const link = within(navigation).getByRole("link", { name: "Exportación" });
-  expect(links.at(-1)).toBe(link);
+  expect(links.at(-2)).toBe(link);
+  expect(links.at(-1)).toHaveAccessibleName("Importación");
   await userEvent.click(link);
   expect(window.location.pathname).toBe("/exportacion");
   expect(
@@ -409,7 +410,9 @@ it("@s22 opens Exportación from the final navigation link without fetching an a
   expect(link).toHaveAttribute("aria-current", "page");
   expect(screen.getByText(/JSON versionado/)).toBeVisible();
   expect(screen.getByText(/archivo personal/)).toBeVisible();
-  expect(screen.getByText(/importación aún no está disponible/)).toBeVisible();
+  expect(
+    screen.getByText(/En Importación puedes validar una copia propia/),
+  ).toBeVisible();
   expect(fetcher).not.toHaveBeenCalled();
 });
 it("@s28 explains an oversized export without offering an indefinite retry", async () => {

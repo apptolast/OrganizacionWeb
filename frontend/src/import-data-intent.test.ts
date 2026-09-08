@@ -6,6 +6,18 @@ import {
 } from "./import-data-intent";
 
 const key = "organizationweb.import.pending.v1";
+it("@s38 discards an uppercase UUID that the receipt endpoint would reject", () => {
+  sessionStorage.setItem(
+    key,
+    JSON.stringify({
+      owner: "Ana",
+      requestKey: "ABCDEFAB-0000-4000-8000-000000000001",
+      fileSha256: "a".repeat(64),
+    }),
+  );
+  expect(readImportIntent("Ana")).toBeNull();
+  expect(sessionStorage.getItem(key)).toBeNull();
+});
 afterEach(() => sessionStorage.removeItem(key));
 
 it("@s38 rejects a trailing newline after the stored digest", () => {

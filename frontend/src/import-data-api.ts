@@ -1,5 +1,6 @@
 import { apiRequest } from "./api-client";
 import type { ImportIntent } from "./import-data-intent";
+export class ImportFileMismatchError extends Error {}
 import { exact, instant, uuid } from "./schedule-block-api";
 const collections =
   "projects tasks taskStatusHistory availability plannedBlocks blockProjections blockChanges workSessions workSessionIntervals workSessionChanges appearance customization projectCustomFieldValues taskCustomFieldValues";
@@ -126,7 +127,7 @@ export async function confirmImportData(
   signal: AbortSignal,
 ) {
   if ((await fileHash(file, signal)) !== intent.fileSha256)
-    throw new Error("El archivo ha cambiado");
+    throw new ImportFileMismatchError("El archivo ha cambiado");
   signal.throwIfAborted();
   const response = await apiRequest("/api/v1/me/import", {
     method: "POST",

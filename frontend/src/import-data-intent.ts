@@ -32,6 +32,7 @@ export function readImportIntent(owner: string): ImportIntent | null {
     !exact(intent, "owner requestKey fileSha256") ||
     intent.owner !== owner ||
     !uuid(intent.requestKey) ||
+    intent.requestKey !== intent.requestKey.toLowerCase() ||
     typeof intent.fileSha256 !== "string" ||
     !/^[0-9a-f]{64}$/.test(intent.fileSha256)
   ) {

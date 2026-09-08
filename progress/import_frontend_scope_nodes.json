@@ -1,0 +1,120 @@
+[
+  {
+    "path": "frontend/src/import-data-api.ts",
+    "sha256": "f5317910cf9d54ff0c4467c59f01bc002265eeb71d61f348def09bc74c999032",
+    "scope": "full",
+    "nodes": []
+  },
+  {
+    "path": "frontend/src/import-data-intent.ts",
+    "sha256": "166fd68b4bb15434417464a1037331fbec15ff0f44f6437d9522fefa32f0bd68",
+    "scope": "full",
+    "nodes": []
+  },
+  {
+    "path": "frontend/src/import-data.tsx",
+    "sha256": "9991b0bfe6675523f8e506c7cfd27d2974fabd7eae6b9e68615ba5d9f9bd1222",
+    "scope": "full",
+    "nodes": []
+  },
+  {
+    "path": "frontend/src/App.tsx",
+    "sha256": "40ca517b2d87c84f3a96c682b0a8a5835bd8f20de61d6851beedff6f80995f18",
+    "scope": "nodes",
+    "nodes": [
+      {
+        "kind": "VariableDeclaration",
+        "range": "27:8-27:41",
+        "text": "appearanceState = useAppearance()"
+      },
+      {
+        "kind": "VariableDeclaration",
+        "range": "33:8-33:45",
+        "text": "importData = route === \"/importacion\""
+      },
+      {
+        "kind": "ConditionalExpression",
+        "range": "41:8-57:30",
+        "text": "importData\n          ? \"Importación\"\n          : exportData\n            ? \"Exportación\"\n            : appearance\n              ? \"Apariencia\"\n              : route === \"/\"\n                ? \"Hoy\"\n                : weeklyReview\n                  ? \"Revisión semanal\"\n                  : history\n                    ? \"Historial\"\n                    : availability\n                      ? \"Disponibilidad\"\n                      : route.startsWith(\"/proyectos\")\n                        ? \"Proyectos\"\n                        : null"
+      },
+      {
+        "kind": "ConditionalExpression",
+        "range": "60:7-113:7",
+        "text": "importData && username ? (\n        <ImportData\n          owner={username}\n          onImported={async (receipt) => {\n            customization.refreshAfterImport(receipt.insertedCounts);\n            if (receipt.insertedCounts.appearance > 0) {\n              await appearanceState.refreshAfterImport();\n            }\n          }}\n        />\n      ) : exportData && username ? (\n        <ExportData owner={username} />\n      ) : appearance ? (\n        <Appearance />\n      ) : route === \"/\" ? (\n        <Today />\n      ) : route === \"/proyectos/nuevo\" ? (\n        <CreateProjectScreen />\n      ) : weeklyReview ? (\n        <WeeklyReview route={route} />\n      ) : history ? (\n        <History route={route} />\n      ) : availability ? (\n        <Availability />\n      ) : sessionRoute ? (\n        <WorkSessionReader\n          key={route}\n          projectId={sessionRoute[1]}\n          taskId={sessionRoute[2]}\n          id={sessionRoute[3]}\n        />\n      ) : taskRoute ? (\n        <TaskReader\n          key={route}\n          projectId={taskRoute[1]}\n          id={taskRoute[2]}\n          customization={customization}\n        />\n      ) : /^\\/proyectos\\/[^/?]+\\/editar$/.test(route) ? (\n        <ProjectEditor key={route} route={route} />\n      ) : /^\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/.test(route) ? (\n        <ProjectReader\n          key={route}\n          route={route}\n          customization={customization}\n        />\n      ) : (\n        <main id=\"proyectos\" tabIndex={-1}>\n          <h1>Página no encontrada</h1>\n          <RouteLink href=\"/\">Hoy</RouteLink>\n          {\" · \"}\n          <RouteLink href=\"/proyectos\">Proyectos</RouteLink>\n        </main>\n      )"
+      }
+    ]
+  },
+  {
+    "path": "frontend/src/workspace.tsx",
+    "sha256": "85b830f48a1bcad228d194f637406cd07a998f7f68470876d445994bd44110a1",
+    "scope": "nodes",
+    "nodes": [
+      {
+        "kind": "JsxElement",
+        "range": "88:10-96:22",
+        "text": "<RouteLink\n            href=\"/importacion\"\n            aria-current={section === \"Importación\" ? \"page\" : undefined}\n          >\n            <span aria-hidden=\"true\">↑</span> Importación\n            {section === \"Importación\" && (\n              <span className=\"nav-dot\" aria-hidden=\"true\" />\n            )}\n          </RouteLink>"
+      }
+    ]
+  },
+  {
+    "path": "frontend/src/use-session.ts",
+    "sha256": "c7fc075d87dc8b2c0bcd5c16d456ed0bc240a5d4703ff2afe642b9f0e4b696e3",
+    "scope": "nodes",
+    "nodes": [
+      {
+        "kind": "FunctionDeclaration",
+        "range": "5:0-11:1",
+        "text": "function retireImportRecovery() {\n  try {\n    clearImportIntent();\n  } catch {\n    /* Storage access must not prevent revoking access. */\n  }\n}"
+      },
+      {
+        "kind": "IfStatement",
+        "range": "44:6-50:36",
+        "text": "if (next.authenticated && next.username !== null) {\n        try {\n          readImportIntent(next.username);\n        } catch {\n          /* Session identity remains authoritative. */\n        }\n      } else retireImportRecovery();"
+      },
+      {
+        "kind": "ExpressionStatement",
+        "range": "68:6-68:29",
+        "text": "retireImportRecovery();"
+      },
+      {
+        "kind": "ExpressionStatement",
+        "range": "143:4-143:27",
+        "text": "retireImportRecovery();"
+      },
+      {
+        "kind": "BinaryExpression",
+        "range": "208:6-208:29",
+        "text": "path === \"/importacion\""
+      }
+    ]
+  },
+  {
+    "path": "frontend/src/appearance-state.tsx",
+    "sha256": "d54a41e269e9b902541856594a5acb5324dc865c9f78765cab3d12ae41d4dfc9",
+    "scope": "nodes",
+    "nodes": [
+      {
+        "kind": "PropertyAssignment",
+        "range": "35:2-37:3",
+        "text": "refreshAfterImport: async () => {\n    throw new Error(\"Apariencia no disponible\");\n  }"
+      },
+      {
+        "kind": "PropertyAssignment",
+        "range": "171:8-177:9",
+        "text": "refreshAfterImport: async () => {\n          if (uncertain || writeRequest.current)\n            throw new Error(\n              \"Recupera primero el guardado de apariencia pendiente\",\n            );\n          return reload();\n        }"
+      }
+    ]
+  },
+  {
+    "path": "frontend/src/customization-state.ts",
+    "sha256": "d9ff514bf11b61d15bbe6f065e8040c5f9217917286c62c08b21f7b2554bcc1f",
+    "scope": "nodes",
+    "nodes": [
+      {
+        "kind": "PropertyAssignment",
+        "range": "411:4-466:5",
+        "text": "refreshAfterImport: (counts: Record<string, number>) => {\n      if (\n        counts.customization > 0 ||\n        counts.projectCustomFieldValues > 0 ||\n        counts.taskCustomFieldValues > 0\n      ) {\n        const next = { ...values };\n        for (const key of valueReads.current.keys()) {\n          if (\n            counts.customization <= 0 &&\n            counts[\n              key.endsWith(\"/\")\n                ? \"projectCustomFieldValues\"\n                : \"taskCustomFieldValues\"\n            ] <= 0\n          )\n            continue;\n          const [projectId, taskId] = key.split(\"/\");\n          retireValues(projectId, taskId || undefined);\n          setValueGenerations((current) => ({\n            ...current,\n            [key]: (current[key] ?? 0) + 1,\n          }));\n          if (Object.keys(currentValueDrafts.current[key] ?? {}).length) {\n            staleValues.current.add(key);\n            continue;\n          }\n          valueReads.current.delete(key);\n          delete next[key];\n        }\n        setValues(next);\n      }\n      if (counts.customization > 0) {\n        const next = { ...configs };\n        for (const scope of [\"PROJECT\", \"TASK\"] as const) {\n          retireConfigRead(scope);\n          if (uncertain.current.has(scope)) continue;\n          if (\n            viewDrafts[scope] !== undefined &&\n            JSON.stringify(viewDrafts[scope]) !==\n              JSON.stringify(configs[scope]?.visibleFields)\n          ) {\n            uncertain.current.add(scope);\n            setFailures((previous) => ({\n              ...previous,\n              [scope]:\n                \"La importación puede haber cambiado la vista. Conservamos tu borrador; recarga lo guardado antes de continuar.\",\n            }));\n          } else {\n            reads.current.delete(scope);\n            delete next[scope];\n          }\n        }\n        setConfigs(next);\n      }\n    }"
+      }
+    ]
+  }
+]

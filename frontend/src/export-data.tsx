@@ -96,8 +96,8 @@ function ExportPreparation({ owner }: { owner: string }) {
       <p>
         Incluye tus proyectos, tareas, planificación, trabajo registrado y
         preferencias en JSON versionado. Es un archivo personal: decide dónde
-        conservarlo y con quién compartirlo. La importación aún no está
-        disponible.
+        conservarlo y con quién compartirlo. En Importación puedes validar una
+        copia propia antes de confirmar su incorporación.
       </p>
       <p>
         El enlace sólo permanece disponible en esta vista. Salir no elimina un

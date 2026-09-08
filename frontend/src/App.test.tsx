@@ -5,6 +5,23 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { App } from "./App";
 beforeEach(() => window.history.replaceState(null, "", "/proyectos/nuevo"));
 afterEach(() => window.history.replaceState(null, "", "/"));
+it("@s33 import23 adds one private navigation route without starting a request", async () => {
+  const fetcher = vi.spyOn(globalThis, "fetch");
+  render(<App username="Ana" />);
+  const link = screen.getByRole("link", { name: "Importación" });
+  await userEvent.setup().click(link);
+  expect(window.location.pathname).toBe("/importacion");
+  expect(
+    screen.getByRole("heading", { level: 1, name: "Importar mis datos" }),
+  ).toBeVisible();
+  expect(link).toHaveAttribute("aria-current", "page");
+  expect(fetcher).not.toHaveBeenCalled();
+  const links = screen
+    .getByRole("navigation", { name: "Principal" })
+    .querySelectorAll("a");
+  expect(links[0]).toHaveAccessibleName("Hoy");
+  expect(links[links.length - 1]).toHaveAccessibleName("Importación");
+});
 describe("crear proyecto", () => {
   it("@s27 ofrece campos etiquetados y una acción de crear", () => {
     render(<App />);

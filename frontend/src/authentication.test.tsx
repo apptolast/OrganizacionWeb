@@ -56,6 +56,108 @@ afterEach(() => {
   window.history.replaceState(null, "", "/");
   vi.unstubAllGlobals();
 });
+it("@s39 import23 retires metadata on a current 401 before session recheck finishes", async () => {
+  const key = "organizationweb.import.pending.v1";
+  sessionStorage.setItem(
+    key,
+    JSON.stringify({
+      owner: "Pablo",
+      requestKey: "00000000-0000-4000-8000-000000000001",
+      fileSha256: "a".repeat(64),
+    }),
+  );
+  mockSessionTraffic()
+    .mockResolvedValueOnce(Response.json(authenticated))
+    .mockResolvedValueOnce(
+      Response.json({ code: "UNAUTHENTICATED" }, { status: 401 }),
+    )
+    .mockImplementationOnce(() => new Promise(() => {}));
+  render(<SessionGate />);
+  fireEvent.change(await screen.findByLabelText(/Nombre del proyecto/), {
+    target: { value: "Proyecto" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Crear proyecto" }));
+  await waitFor(() => expect(sessionStorage.getItem(key)).toBeNull());
+  expect(
+    screen.queryByRole("button", { name: "Crear proyecto" }),
+  ).not.toBeInTheDocument();
+});
+it("@s39 import23 retires another owner's metadata when session refresh changes account", async () => {
+  const key = "organizationweb.import.pending.v1";
+  sessionStorage.setItem(
+    key,
+    JSON.stringify({
+      owner: "Pablo",
+      requestKey: "00000000-0000-4000-8000-000000000001",
+      fileSha256: "a".repeat(64),
+    }),
+  );
+  mockSessionTraffic()
+    .mockResolvedValueOnce(Response.json(authenticated))
+    .mockResolvedValueOnce(
+      Response.json({ ...authenticated, username: "Bruno" }),
+    );
+  render(<SessionGate />);
+  await screen.findByRole("button", { name: "Cerrar sesión" });
+  expect(sessionStorage.getItem(key)).not.toBeNull();
+  vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+  fireEvent(document, new Event("visibilitychange"));
+  await waitFor(() => expect(sessionStorage.getItem(key)).toBeNull());
+  expect(screen.getByRole("button", { name: "Cerrar sesión" })).toBeVisible();
+});
+it("@s39 import23 storage cleanup failure never prevents logout", async () => {
+  const fetcher = mockSessionTraffic()
+    .mockResolvedValueOnce(Response.json(authenticated))
+    .mockResolvedValueOnce(new Response(null, { status: 204 }))
+    .mockResolvedValueOnce(Response.json(anonymous));
+  render(<SessionGate />);
+  const logout = await screen.findByRole("button", { name: "Cerrar sesión" });
+  vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {
+    throw new Error("storage blocked");
+  });
+  fireEvent.click(logout);
+  expect(
+    await screen.findByRole("button", { name: "Iniciar sesión" }),
+  ).toBeVisible();
+  expect(fetcher).toHaveBeenCalledTimes(3);
+});
+it("@s39 import23 retires pending metadata on logout from another route", async () => {
+  const key = "organizationweb.import.pending.v1";
+  sessionStorage.setItem(
+    key,
+    JSON.stringify({
+      owner: "Pablo",
+      requestKey: "00000000-0000-4000-8000-000000000001",
+      fileSha256: "a".repeat(64),
+    }),
+  );
+  const fetcher = mockSessionTraffic()
+    .mockResolvedValueOnce(Response.json(authenticated))
+    .mockResolvedValueOnce(new Response(null, { status: 204 }))
+    .mockResolvedValueOnce(Response.json(anonymous));
+  render(<SessionGate />);
+  fireEvent.click(await screen.findByRole("button", { name: "Cerrar sesión" }));
+  expect(sessionStorage.getItem(key)).toBeNull();
+  await screen.findByRole("button", { name: "Iniciar sesión" });
+  expect(fetcher).toHaveBeenCalledTimes(3);
+});
+it("@s33 import23 preserves its direct route after authentication without requesting an import", async () => {
+  window.history.replaceState(null, "", "/importacion");
+  const fetcher = mockSessionTraffic()
+    .mockResolvedValueOnce(Response.json(anonymous))
+    .mockResolvedValueOnce(new Response(null, { status: 204 }))
+    .mockResolvedValueOnce(Response.json(authenticated));
+  render(<SessionGate />);
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Iniciar sesión" }),
+  );
+  expect(
+    await screen.findByRole("heading", { name: "Importar mis datos" }),
+  ).toBeVisible();
+  expect(window.location.pathname).toBe("/importacion");
+  expect(fetcher).toHaveBeenCalledTimes(3);
+  expect(screen.getByRole("button", { name: "Cerrar sesión" })).toBeVisible();
+});
 it("@s1 comprueba acceso antes de montar vistas privadas", async () => {
   let firstCommit: string | undefined;
   let finish!: (response: Response) => void;

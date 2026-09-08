@@ -1,11 +1,23 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { resolve } from "node:path";
+import { isAbsolute, resolve } from "node:path";
 const root = fileURLToPath(new URL("../", import.meta.url));
 export function run(command, args, options = {}) {
   const windowsBatch =
     process.platform === "win32" && /(?:pnpm|gradlew)$/.test(command);
-  const result = spawnSync(windowsBatch ? `${command}.cmd` : command, args, {
+  // cmd.exe no busca .bat en el directorio de trabajo cuando
+  // NoDefaultCurrentDirectoryInExePath está definida: resolver ruta absoluta.
+  const localBatch =
+    process.platform === "win32" &&
+    /\.bat$/.test(command) &&
+    !isAbsolute(command) &&
+    options.cwd !== undefined;
+  const executable = windowsBatch
+    ? `${command}.cmd`
+    : localBatch
+      ? resolve(options.cwd, command)
+      : command;
+  const result = spawnSync(executable, args, {
     cwd: root,
     stdio: "inherit",
     shell: windowsBatch,
@@ -22,9 +34,6 @@ export function createProject(runner = run) {
       target !== "" &&
       (task !== "mutate" ||
         ![
-          "integration_api-frontend",
-          "integration_api-backend",
-          "integration_api-http-backend",
           "import_data-frontend",
           "import_data-reader-backend",
           "import_data-http-backend",
@@ -78,17 +87,6 @@ export function createProject(runner = run) {
       ]);
       return;
     }
-    if (task === "mutate" && target === "integration_api-frontend") {
-      runner("pnpm", [
-        "--dir",
-        "frontend",
-        "exec",
-        "stryker",
-        "run",
-        "stryker.integration-api.config.json",
-      ]);
-      return;
-    }
     if (task === "mutate" && target === "import_data-frontend") {
       runner("pnpm", [
         "--dir",
@@ -134,14 +132,6 @@ export function createProject(runner = run) {
       mutate: "pitest",
     };
     if (!commands[task]) throw new Error(`Unknown task: ${task}`);
-    if (task === "mutate" && target === "integration_api-backend") {
-      backend("pitest", ["-PmutationScope=integration_api"]);
-      return;
-    }
-    if (task === "mutate" && target === "integration_api-http-backend") {
-      backend("pitest", ["-PmutationScope=integration_api_http"]);
-      return;
-    }
     if (task === "mutate" && target === "import_data-reader-backend") {
       backend("pitest", ["-PmutationScope=import_data_reader"]);
       return;

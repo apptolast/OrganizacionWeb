@@ -35,27 +35,60 @@ public final class PostgresImportDataStore
                 status -> {
                   jdbc.queryForObject("SELECT pg_current_snapshot()::text", String.class);
                   try {
-                    var header =
-                        new ImportJsonReader()
-                            .read(
-                                body,
-                                (collection, row) -> {
-                                  throw new ImportInvalidFileException();
-                                });
+                    var header = stage(body);
                     if (!owner.equals(header.owner())) throw new ImportInvalidFileException();
+                    var identical = compare(owner);
                     return new ImportPreview(
                         header.fileSha256(),
                         header.byteLength(),
                         header.owner(),
                         header.exportedAt(),
                         header.counts(),
-                        header.counts(),
-                        header.counts(),
+                        header.counts().minus(identical),
+                        identical,
                         List.of());
                   } catch (IOException failure) {
                     throw new StorageUnavailableException(failure);
                   }
                 }));
+  }
+
+  private ImportJsonReader.Header stage(InputStream body) throws IOException {
+    jdbc.execute(
+        "CREATE TEMP TABLE import_stage(collection TEXT NOT NULL,payload JSONB NOT NULL) ON COMMIT DROP");
+    return new ImportJsonReader()
+        .read(
+            body,
+            (collection, row) ->
+                jdbc.update(
+                    "INSERT INTO import_stage(collection,payload) VALUES (?,?::jsonb)",
+                    collection,
+                    row.toString()));
+  }
+
+  private com.apptolast.organization.application.ImportCounts compare(String owner) {
+    long projects =
+        jdbc.queryForObject(
+            """
+        SELECT count(*) FROM import_stage s JOIN projects p ON p.id::text=s.payload->>'id'
+        WHERE s.collection='projects' AND p.owner_id=?
+          AND p.name=s.payload->>'name'
+          AND p.description IS NOT DISTINCT FROM s.payload->>'description'
+          AND p.status=s.payload->>'status'
+          AND p.version::text=s.payload->>'version'
+          AND p.created_at=(s.payload->>'createdAt')::timestamptz
+          AND p.updated_at=(s.payload->>'updatedAt')::timestamptz
+        """,
+            Long.class,
+            owner);
+    long occupiedProjects =
+        jdbc.queryForObject(
+            "SELECT count(*) FROM import_stage s JOIN projects p ON p.id::text=s.payload->>'id' WHERE s.collection='projects'",
+            Long.class);
+    if (occupiedProjects != projects)
+      throw new com.apptolast.organization.application.ImportConflictException();
+    return new com.apptolast.organization.application.ImportCounts(
+        projects, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   }
 
   public java.util.Optional<com.apptolast.organization.application.ImportReceipt> find(
@@ -97,27 +130,21 @@ public final class PostgresImportDataStore
       String expectedSha256,
       InputStream body,
       java.util.function.Supplier<java.time.Instant> recordedAt) {
-    final ImportJsonReader.Header header;
-    try {
-      header =
-          new ImportJsonReader()
-              .read(
-                  body,
-                  (collection, row) -> {
-                    throw new ImportInvalidFileException();
-                  });
-    } catch (IOException failure) {
-      throw new StorageUnavailableException(failure);
-    }
-    if (!expectedSha256.equals(header.fileSha256()))
-      throw new com.apptolast.organization.application.ImportFileChangedException();
-    if (!owner.equals(header.owner())) throw new ImportInvalidFileException();
     return stored(
         () ->
             writing.execute(
                 status -> {
                   jdbc.execute("SET LOCAL lock_timeout='2s'");
                   jdbc.execute("SET LOCAL statement_timeout='10s'");
+                  final ImportJsonReader.Header header;
+                  try {
+                    header = stage(body);
+                  } catch (IOException failure) {
+                    throw new StorageUnavailableException(failure);
+                  }
+                  if (!expectedSha256.equals(header.fileSha256()))
+                    throw new com.apptolast.organization.application.ImportFileChangedException();
+                  if (!owner.equals(header.owner())) throw new ImportInvalidFileException();
                   for (var scope : List.of("PROJECT", "TASK")) {
                     jdbc.queryForObject(
                         "SELECT pg_advisory_xact_lock(hashtextextended(?, 0))",
@@ -149,15 +176,30 @@ public final class PostgresImportDataStore
                       throw new com.apptolast.organization.application.ImportKeyReusedException();
                     return previous.get();
                   }
+                  var identical = compare(owner);
+                  var inserted = header.counts().minus(identical);
+                  int insertedProjects =
+                      jdbc.update(
+                          """
+                      INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at)
+                      SELECT (payload->>'id')::uuid,?,payload->>'name',payload->>'description',payload->>'status',
+                        (payload->>'version')::bigint,(payload->>'createdAt')::timestamptz,(payload->>'updatedAt')::timestamptz
+                      FROM import_stage s WHERE collection='projects'
+                        AND NOT EXISTS(SELECT 1 FROM projects p WHERE p.id::text=s.payload->>'id')
+                      """,
+                          owner);
+                  if (insertedProjects != inserted.projects())
+                    throw new StorageUnavailableException(
+                        new IllegalStateException("Imported projects were not persisted"));
                   var receipt =
                       new com.apptolast.organization.application.ImportReceipt(
                           key,
                           header.fileSha256(),
                           header.byteLength(),
                           recordedAt.get(),
-                          "NO_CHANGE",
-                          header.counts(),
-                          header.counts());
+                          insertedProjects == 0 ? "NO_CHANGE" : "IMPORTED",
+                          inserted,
+                          identical);
                   try {
                     var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
                     int affected =

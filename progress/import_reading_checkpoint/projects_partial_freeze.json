@@ -1,0 +1,54 @@
+{
+  "scope": "Nominal projects only; full import remains incomplete",
+  "exitCode": 0,
+  "result": "93541c",
+  "tests": 76,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "inputs": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ImportCounts.java",
+      "sha256": "A710812816A7679D238FAF14B30C6924AA1A9403C504B91F18E2F132D6E0CE4B",
+      "bytes": 1188
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ImportConflictException.java",
+      "sha256": "44C72F319A15AAE5E77BA7FA0860CD17CF169771D5D483AC2951564F1CFBA890",
+      "bytes": 240
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresImportDataStore.java",
+      "sha256": "492D60FDB4FC266A13F2B9C7D2ACC2C96D2F612258671E170D2D624ECC05063C",
+      "bytes": 11337
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportPersistenceTest.java",
+      "sha256": "74713F95403FBC20533095BFFD04894D5278C2A509C3E38FF37D6E99A7FAD419",
+      "bytes": 24880
+    },
+    {
+      "path": "progress/tdd_import_data.md",
+      "sha256": "D2F6E6F37BAA6F706382ED7C58B7070EC9059F8FBBC8915076A694A89294FB1B",
+      "bytes": 11586
+    }
+  ],
+  "xml": [
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\import23-projects-checkpoint-xml\\TEST-com.apptolast.organization.adapter.config.ImportWiringTest.xml",
+      "sha256": "1CCEDDBF55B21F54A7B94320A26D22E25F94CB5C3CCA00E5B0453F47155FF4A4"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\import23-projects-checkpoint-xml\\TEST-com.apptolast.organization.adapter.ImportDataApiTest.xml",
+      "sha256": "BA5A940DDD50064DB4044EF9D42625ECA393DB1822B80F2E42E0D5476F9CE467"
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\import23-projects-checkpoint-xml\\TEST-com.apptolast.organization.adapter.persistence.ImportPersistenceTest.xml",
+      "sha256": "9024424CFE9C31484A0D7571B91934A98CDE34D36DBCB425CD0E33FDD55BFD80"
+    }
+  ],
+  "logs": [
+    "../../deployment-preparation/import23-projects-checkpoint-green.log",
+    "../../deployment-preparation/import23-projects-format.log"
+  ]
+}

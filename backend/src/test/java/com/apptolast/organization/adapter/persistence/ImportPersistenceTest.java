@@ -19,6 +19,196 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 class ImportPersistenceTest {
+  @Test
+  void s3_existingProjectApplyKeepsPhysicalRowAndRecordsNoChange() throws Exception {
+    var owner = "apply-identical-project";
+    var id = java.util.UUID.fromString("00000000-0000-0000-0000-000000000999");
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) VALUES (?,?,?,'nota','idea',9223372036854775807,'2025-01-01T00:00:00.000001Z','2025-01-02T00:00:00.000002Z')",
+        id,
+        owner,
+        " Proyecto intacto ");
+    var before =
+        jdbc.queryForMap(
+            "SELECT xmin::text,ctid::text,row_to_json(p)::text AS contents FROM projects p WHERE id=?",
+            id);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T01:02:03.123456Z"))
+        .writeTo(bytes);
+    var input = bytes.toByteArray();
+    var sha =
+        java.util.HexFormat.of()
+            .formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input));
+    var store = new PostgresImportDataStore(jdbc, manager);
+    var receipt =
+        store.apply(
+            owner,
+            java.util.UUID.randomUUID(),
+            sha,
+            new ByteArrayInputStream(input),
+            () -> Instant.parse("2026-09-08T02:03:04.123456Z"));
+    assertThat(receipt.outcome()).isEqualTo("NO_CHANGE");
+    assertThat(receipt.identicalCounts())
+        .isEqualTo(new ImportCounts(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    assertThat(receipt.insertedCounts())
+        .isEqualTo(new ImportCounts(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    assertThat(
+            jdbc.queryForMap(
+                "SELECT xmin::text,ctid::text,row_to_json(p)::text AS contents FROM projects p WHERE id=?",
+                id))
+        .isEqualTo(before);
+    assertThat(store.find(owner, receipt.requestKey())).contains(receipt);
+  }
+
+  @Test
+  void s2_absentProjectIsInsertedWithItsOriginalFactsAndAtomicReceipt() throws Exception {
+    var owner = "insert-project";
+    var id = java.util.UUID.fromString("00000000-0000-0000-0000-000000000888");
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) VALUES (?,?,?,'nota original','idea',9007199254740993,'2025-01-01T00:00:00.000001Z','2025-01-02T00:00:00.000002Z')",
+        id,
+        owner,
+        " Proyecto histórico ñ ");
+    var original =
+        jdbc.queryForMap("SELECT row_to_json(p)::text AS contents FROM projects p WHERE id=?", id);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T01:02:03.123456Z"))
+        .writeTo(bytes);
+    jdbc.update("DELETE FROM projects WHERE id=?", id);
+    var input = bytes.toByteArray();
+    var sha =
+        java.util.HexFormat.of()
+            .formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input));
+    var key = java.util.UUID.fromString("00000000-0000-0000-0000-000000000889");
+    var store = new PostgresImportDataStore(jdbc, manager);
+    var receipt =
+        store.apply(
+            owner,
+            key,
+            sha,
+            new ByteArrayInputStream(input),
+            () -> Instant.parse("2026-09-08T02:03:04.123456Z"));
+    assertThat(receipt.outcome()).isEqualTo("IMPORTED");
+    assertThat(receipt.insertedCounts())
+        .isEqualTo(new ImportCounts(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    assertThat(receipt.identicalCounts())
+        .isEqualTo(new ImportCounts(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    assertThat(
+            jdbc.queryForMap(
+                "SELECT row_to_json(p)::text AS contents FROM projects p WHERE id=?", id))
+        .isEqualTo(original);
+    assertThat(store.find(owner, key)).contains(receipt);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM outbox_events WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+  }
+
+  @Test
+  void s4_previewRejectsChangedProjectWithoutChoosingTheNewerVersion() throws Exception {
+    var owner = "changed-project";
+    var id = java.util.UUID.fromString("00000000-0000-0000-0000-000000000777");
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) VALUES (?,?,?,'nota','idea',1,'2025-01-01T00:00:00.000001Z','2025-01-02T00:00:00.000002Z')",
+        id,
+        owner,
+        " Proyecto original ");
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T01:02:03.123456Z"))
+        .writeTo(bytes);
+    jdbc.update("UPDATE projects SET name='Proyecto cambiado',version=2 WHERE id=?", id);
+    var before =
+        jdbc.queryForMap(
+            "SELECT xmin::text,ctid::text,row_to_json(p)::text AS contents FROM projects p WHERE id=?",
+            id);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .preview(owner, new ByteArrayInputStream(bytes.toByteArray())))
+        .isInstanceOf(com.apptolast.organization.application.ImportConflictException.class);
+    assertThat(
+            jdbc.queryForMap(
+                "SELECT xmin::text,ctid::text,row_to_json(p)::text AS contents FROM projects p WHERE id=?",
+                id))
+        .isEqualTo(before);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM import_receipts WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+  }
+
+  @Test
+  void s3_s18_identicalProjectIsCountedWithoutUpdatingTheExistingRow() throws Exception {
+    var owner = "identical-project";
+    var id = java.util.UUID.fromString("00000000-0000-0000-0000-000000000666");
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) VALUES (?,?,?,'nota','idea',9007199254740993,'2025-01-01T00:00:00.000001Z','2025-01-02T00:00:00.000002Z')",
+        id,
+        owner,
+        "  Proyecto ñ  ");
+    var before =
+        jdbc.queryForMap(
+            "SELECT xmin::text,ctid::text,row_to_json(p)::text AS contents FROM projects p WHERE id=?",
+            id);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T01:02:03.123456Z"))
+        .writeTo(bytes);
+    var result =
+        new PostgresImportDataStore(jdbc, manager)
+            .preview(owner, new ByteArrayInputStream(bytes.toByteArray()));
+    assertThat(result.counts().projects()).isEqualTo(1);
+    assertThat(result.identicalCounts()).isEqualTo(result.counts());
+    assertThat(result.insertCounts())
+        .isEqualTo(new ImportCounts(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    assertThat(
+            jdbc.queryForMap(
+                "SELECT xmin::text,ctid::text,row_to_json(p)::text AS contents FROM projects p WHERE id=?",
+                id))
+        .isEqualTo(before);
+  }
+
+  @Test
+  void s18_absentProjectIsPlannedWithoutWritingOrNormalizingItsHistory() throws Exception {
+    var owner = "project-preview";
+    var id = java.util.UUID.fromString("00000000-0000-0000-0000-000000000555");
+    var bytes = new ByteArrayOutputStream();
+    new ExportJsonWriter()
+        .prepare(
+            owner,
+            Instant.parse("2026-09-08T01:02:03.123456Z"),
+            (collection, json) -> {
+              if (!collection.equals("projects")) return 0;
+              json.writeStartObject();
+              json.writeStringField("id", id.toString());
+              json.writeStringField("name", "  Histórico ñ  ");
+              json.writeStringField("description", "nota conservada");
+              json.writeStringField("status", "idea");
+              json.writeStringField("version", "9007199254740993");
+              json.writeStringField("createdAt", "2025-01-01T00:00:00.000001Z");
+              json.writeStringField("updatedAt", "2025-01-02T00:00:00.000002Z");
+              json.writeEndObject();
+              return 1;
+            })
+        .writeTo(bytes);
+    var result =
+        new PostgresImportDataStore(jdbc, manager)
+            .preview(owner, new ByteArrayInputStream(bytes.toByteArray()));
+    assertThat(result.counts().projects()).isEqualTo(1);
+    assertThat(result.insertCounts()).isEqualTo(result.counts());
+    assertThat(result.identicalCounts())
+        .isEqualTo(new ImportCounts(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    assertThat(jdbc.queryForObject("SELECT count(*) FROM projects WHERE id=?", Integer.class, id))
+        .isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM import_receipts WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+  }
+
   @Container
   static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17.9-alpine");
 
@@ -290,8 +480,14 @@ class ImportPersistenceTest {
                 owner,
                 key))
         .isEqualTo(sha);
-    assertThat(jdbc.queryForObject("SELECT count(*) FROM projects", Integer.class)).isZero();
-    assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events", Integer.class)).isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM projects WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM outbox_events WHERE owner_id=?", Integer.class, owner))
+        .isZero();
     org.mockito.Mockito.verify(clock).instant();
   }
 
@@ -342,7 +538,11 @@ class ImportPersistenceTest {
             "appearance_preferences",
             "customization_preferences",
             "outbox_events")) {
-      assertThat(jdbc.queryForObject("SELECT count(*) FROM " + table, Integer.class)).isZero();
+      String sql =
+          table.equals("tasks")
+              ? "SELECT count(*) FROM tasks t JOIN projects p ON p.id=t.project_id WHERE p.owner_id=?"
+              : "SELECT count(*) FROM " + table + " WHERE owner_id=?";
+      assertThat(jdbc.queryForObject(sql, Integer.class, "empty-preview")).isZero();
     }
   }
 }

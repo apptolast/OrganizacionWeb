@@ -24,3 +24,8 @@ COMMON/V14 protegido: no leer/hash/copiar/restaurar/modificar;8080protegido/1808
 Gestión backend 17e9b3b revisada: 41 pruebas y 54 artefactos verificados. HTTP eb3cb38 integrado como ee4f275; rama publicada hasta 36912bf. Autenticación y cuota nominal cefd1c9 revisadas: 67 pruebas, 75 artefactos verificados y puertos liberados para C. El fallo de listado 503 quedó corregido. A completa concurrencia, atomicidad, invariantes y dos fixtures de wiring heredados.
 
 B incorporó la ruta privada y navegación, recuperación por id, revocación incierta por credencial y tolerancia a almacenamiento inaccesible. Sigue cerrando UI/foco/SCSS y navegador; aún no hay freeze final. C integra los puertos reales y termina seguridad/OpenAPI; el mapa independiente de respuestas está en el artefacto externo integration24-openapi-source-map.md. A posee build.gradle.kts, B configuración Stryker y C scripts del arnés para las campañas de integración. No se ha lanzado una campaña ni suite global sobre ciclos activos.
+
+
+## Avance posterior — 17:03 Madrid
+
+Backend final propio 8d7d8b2 revisado: 122 pruebas/9 XML y 87 hashes verificados. Frontend 82a45c2 fijado, evidencia original en ZIP; revisados recuperación, privacidad, foco y guardas. Dispatcher integrado d153fbe. A revisa HTTP/Bearer parcial de C; C completa wiring real y OpenAPI; B cierra scope Stryker, rangos históricos y evidencia responsive. Campañas, regresión integrada, E2E real, rollback de imágenes y despliegue24 todavía pendientes.

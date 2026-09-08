@@ -60,3 +60,12 @@ Root verificó las 13 entradas de integration24_frontend_ui_freeze.json (SHA256 
 Cambios requeridos entregados a B: conservar acceso al listado si una confirmación llega antes del GET inicial; evitar ids duplicadas al paginar tras recuperar una credencial histórica; impedir que cerrar el panel permita divulgar el secreto de otra creación ya pendiente; comprobar retiro de contexto también antes de efectos compartidos de UI, especialmente limpiar intención local; asociar el error de Nombre al input; presentar caducidad legible con zona y dateTime original. La posible ventana entre resolución del cliente y accept requiere un oráculo reproducible, no se atribuye un fallo observado sin él.
 
 No se impone snapshot adicional de formulario: @s36 permite borrador reintroducido distinto con la misma id y conflicto explícito. B añadió ayuda que explica esa comparación. Incertidumbre de revocación por id, recuperación inicial inaccesible y cierre simple del secreto sí están ya implementados y cubiertos en el corte. No se aprueba aún UI final ni UX30 por estas pruebas.
+
+
+## Backend final propio y dispatcher — 17:03 Madrid
+
+APROBADO para integración el corte 8d7d8b2. Root verificó 87/87 entradas del freeze bc3811ee5f68dbdff06939e74a12e60ce5ccef947b2dd9a79af392899e45074a y leyó los nueve XML: 122 tests, cero fallos, errores u omisiones. La revisión del delta cefd1c9 confirma ambos UPSERT con resultado exactamente uno y rollback conjunto; las carreras requieren observar bloqueo PostgreSQL, y el wiring deshabilita el usuario real configurado. Se revisó el proxy de pérdida de confirmación tras COMMIT real: responde incierto, permite lectura/replay sin repetir secreto ni fecha. Compatibilidad V21 a V22/export/import aprobada en base efímera; todavía no acredita rollback entre imágenes.
+
+La guarda Unicode rechaza surrogates aislados antes del puerto, conserva pares válidos y el límite de 80 puntos. No se afirma pérdida física JDBC reproducida. Los scopes Gradle incluyen clases completas y configuración compartida; todos los JUnit siguen como candidatos y no cambia el umbral. PIT pendiente.
+
+Dispatcher a6eb3c0 revisado e integrado como d153fbe: tres targets exactos, sin alterar comandos anteriores ni flags. Sus 72 tests y ciclos originales se conservan. Frontend 82a45c2 ya fijado; scope Stryker nuevo revisado por lectura de los tres módulos completos y siete nodos de integración, pendiente freeze y campaña.

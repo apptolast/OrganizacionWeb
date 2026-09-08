@@ -24,4 +24,30 @@ class PrepareExportDataTest {
     verify(clock).instant();
     verifyNoMoreInteractions(clock);
   }
+
+  @Test
+  void s14_clockBeforeCivilYearOneCannotPrepareAnExport() {
+    ExportDataQueries source =
+        (owner, timestamp) -> {
+          timestamp.get();
+          return mock(PreparedExport.class);
+        };
+    var clock = Clock.fixed(Instant.parse("0000-12-31T23:59:59.999999Z"), java.time.ZoneOffset.UTC);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> new PrepareExportData(source, clock).prepare("owner-a"))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
+
+  @Test
+  void s14_clockAfterCivilYear9999CannotPrepareAnExport() {
+    ExportDataQueries source =
+        (owner, timestamp) -> {
+          timestamp.get();
+          return mock(PreparedExport.class);
+        };
+    var clock = Clock.fixed(Instant.parse("+10000-01-01T00:00:00Z"), java.time.ZoneOffset.UTC);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> new PrepareExportData(source, clock).prepare("owner-a"))
+        .isInstanceOf(StorageUnavailableException.class);
+  }
 }

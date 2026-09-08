@@ -92,3 +92,25 @@ JSON por recibo depende de la guarda de tamaño previa del lector SQL de A.
 Falta comprobar esa composición real, relaciones exteriores, snapshot y límites
 en conjunto. C continúa revisión de coherencia temporal y mutación de sus tres
 clases completas; este corte aislado no prueba una exportación de cuenta real.
+
+## Persistencia nominal y conexión con Spring
+
+Revisión de buffer, escritor, caso de uso, consultas y configuración, y lectura
+completa de sus pruebas (d75106, 141385, 332f35, 08ca6e, e907c8, 9cfa4c).
+Las nueve fuentes congeladas coinciden con sus hashes; los ocho XML acreditan
+111 pruebas sin fallos, errores o skips. Incluyen los 55 casos de recibos y los
+27 de HTTP ya descritos: no son 111 pruebas adicionales a esos conjuntos.
+
+Se aprueba el checkpoint nominal para integrar el contexto Spring real en la
+validación aislada de C. El bean utiliza PostgreSQL y Clock reales; no introduce
+un stub para resolver el fallo de arranque observado. Las catorce colecciones
+se escriben desde una transacción read-only REPEATABLE_READ, con cursor de una
+fila y buffer segmentado. La prueba de bytes cruza segmentos con valores no
+uniformes y demuestra que rechazar un bulk no altera lo escrito previamente.
+
+Los límites de registros y JSONB se comprueban en SQL antes de materializar
+payload; el tamaño bruto de JSONB desconocido produce fallo de almacenamiento,
+no un 413 injustificado. El lector reutilizado de personalización participa en
+la transacción exterior. Quedan pendientes guardas de relación/fila, snapshot
+con escritura concurrente, fallo tardío, límite inclusivo combinado y descarga
+por socket/proxy. Estas carencias impiden aprobar la funcionalidad completa.

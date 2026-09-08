@@ -1,0 +1,116 @@
+{
+  "status": "nominal checkpoint only",
+  "exit": 0,
+  "result": "ac618c",
+  "sources": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+      "sha256": "C97A3826CA6E2242A871A77E6DABE7CBFA80CEC252A9312B7A52ABA10B478A57"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ExportBuffer.java",
+      "sha256": "1612D92D3D15AC525F6E9954B770C86E84612DBC029B6009D290D8505C3B5BB7"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ExportJsonWriter.java",
+      "sha256": "69BB545F05A80F0FFE9CDA2FDB9237E20D13AA3049AA734915B8A916DBB1F76C"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresExportDataQueries.java",
+      "sha256": "B6BB8C99DB62F7682370099EAE75C540D29E2DBDB0243E43B29729CCC7E37F9D"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/PrepareExportData.java",
+      "sha256": "4CC1A4DDBB02441848F72DABB91EB365A5DC98910758D60C00ACA9A3869F893B"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/config/ExportWiringTest.java",
+      "sha256": "876128583373D93B8321DE3D0A5A427DD7BC43201F723CB20756D967485F2D9B"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ExportBufferTest.java",
+      "sha256": "A3A7688EEBF95C38E3653E16FC3D4442F4808A2030B5A862A62C00C3D085E696"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ExportPersistenceTest.java",
+      "sha256": "8C56423103E65F43A3CA48F694D74439AAE400ECE0A0B24E6E58CB262E7EFFAC"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/application/PrepareExportDataTest.java",
+      "sha256": "76ABC9DF581D0DAB94BA7CF986FA37A8522FA3F7683721AAB11EAAE03532463E"
+    }
+  ],
+  "xml": [
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\OrganizacionWeb-export-data\\progress\\export_backend_wiring_xml\\TEST-com.apptolast.organization.adapter.config.ExportWiringTest.xml",
+      "sha256": "76FA1BF53A1123F7E382BDDB30B8C70CDA428FCBCE928302472DB072A9FF283E",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\OrganizacionWeb-export-data\\progress\\export_backend_wiring_xml\\TEST-com.apptolast.organization.adapter.ExportDataApiTest.xml",
+      "sha256": "EA54A8E7A39B879F2E4672EBA8606F6AC594A4FB6AE6412DCF0B1D851C9DFFA2",
+      "tests": 25,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\OrganizacionWeb-export-data\\progress\\export_backend_wiring_xml\\TEST-com.apptolast.organization.adapter.http.ExportHeadersFilterTest.xml",
+      "sha256": "036E71FBE73170A39BE138E444DF33F8E3ACD88B87B621FBB9898B5741CCAD0F",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\OrganizacionWeb-export-data\\progress\\export_backend_wiring_xml\\TEST-com.apptolast.organization.adapter.persistence.ExportBufferTest.xml",
+      "sha256": "6153D1DA7E2E74EE29C4480B54C8ECF71CBDB59ABF4E4EB90453DD837610A433",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\OrganizacionWeb-export-data\\progress\\export_backend_wiring_xml\\TEST-com.apptolast.organization.adapter.persistence.ExportJsonWriterTest.xml",
+      "sha256": "12C1FC5F9467EB098FDA657F10669665672F0C55641B4D0F260F75FD9AC325F9",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\OrganizacionWeb-export-data\\progress\\export_backend_wiring_xml\\TEST-com.apptolast.organization.adapter.persistence.ExportPersistenceTest.xml",
+      "sha256": "CF8D8AF2E76D640FD1B650536D8ABF89AE667FA210969AD7441745E4B9328BED",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\OrganizacionWeb-export-data\\progress\\export_backend_wiring_xml\\TEST-com.apptolast.organization.adapter.persistence.ExportReceiptWriterTest.xml",
+      "sha256": "AA8FD7A181CA8CA4F15DF254C15170EC2C85989FFFBC9C9C1646A5B3C6CB83D6",
+      "tests": 55,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\OrganizacionWeb-export-data\\progress\\export_backend_wiring_xml\\TEST-com.apptolast.organization.application.PrepareExportDataTest.xml",
+      "sha256": "CB2A4A0583059E066E57C9692718A2CE3A4745221FA4ABA033B83EBDE5194E74",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "log": "progress/export_backend_nominal_wiring_final.log",
+  "pending": [
+    "remaining relation/row integrity",
+    "concurrent writer snapshot",
+    "late failure",
+    "combined inclusive size boundary"
+  ]
+}

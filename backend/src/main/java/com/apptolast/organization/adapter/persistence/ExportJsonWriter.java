@@ -2,7 +2,6 @@ package com.apptolast.organization.adapter.persistence;
 
 import com.apptolast.organization.application.PreparedExport;
 import com.fasterxml.jackson.core.JsonFactory;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Instant;
@@ -29,7 +28,17 @@ public final class ExportJsonWriter {
           "taskCustomFieldValues");
 
   public PreparedExport empty(String owner, Instant instant) throws IOException {
-    var buffer = new ByteArrayOutputStream();
+    return prepare(owner, instant, (collection, json) -> 0);
+  }
+
+  public interface CollectionWriter {
+    long write(String collection, com.fasterxml.jackson.core.JsonGenerator json) throws IOException;
+  }
+
+  public PreparedExport prepare(String owner, Instant instant, CollectionWriter writer)
+      throws IOException {
+    var counts = new java.util.LinkedHashMap<String, Long>();
+    var buffer = new ExportBuffer();
     try (var json = new JsonFactory().createGenerator(buffer)) {
       json.writeStartObject();
       json.writeStringField("format", "organizationweb-export");
@@ -43,11 +52,12 @@ public final class ExportJsonWriter {
       json.writeObjectFieldStart("data");
       for (var collection : COLLECTIONS) {
         json.writeArrayFieldStart(collection);
+        counts.put(collection, writer.write(collection, json));
         json.writeEndArray();
       }
       json.writeEndObject();
       json.writeObjectFieldStart("counts");
-      for (var collection : COLLECTIONS) json.writeNumberField(collection, 0);
+      for (var collection : COLLECTIONS) json.writeNumberField(collection, counts.get(collection));
       json.writeEndObject();
       json.writeEndObject();
     }

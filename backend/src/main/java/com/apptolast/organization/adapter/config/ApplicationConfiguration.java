@@ -293,4 +293,18 @@ public class ApplicationConfiguration {
       com.apptolast.organization.application.AppearanceEditing store, Clock clock) {
     return new com.apptolast.organization.application.SaveAppearance(store, clock);
   }
+
+  @Bean
+  com.apptolast.organization.adapter.persistence.PostgresExportDataQueries exportDataQueries(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions) {
+    return new com.apptolast.organization.adapter.persistence.PostgresExportDataQueries(
+        jdbc, transactions);
+  }
+
+  @Bean
+  com.apptolast.organization.application.PrepareExportData prepareExportData(
+      com.apptolast.organization.application.ExportDataQueries queries, Clock clock) {
+    return new com.apptolast.organization.application.PrepareExportData(queries, clock);
+  }
 }

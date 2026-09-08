@@ -73,3 +73,22 @@ todavía requiere navegador; no se atribuye al producto el fallo de precondició
 de JSDOM del ciclo 51. SCSS conserva tokens existentes y controles de 44 píxeles
 como intención de código, pendiente medición. Faltan E2E, matriz UX, integración
 real, revisión final y mutación. Este corte no declara export_data terminada.
+
+## Recibos históricos
+
+Lectura completa de ExportReceiptWriter y sus pruebas (60bb37, c022a4), contraste
+con WorkSessionState y ExtendWorkSession, cinco huellas verificadas y XML con
+55 pruebas sin fallos, errores o skips (16d785). Corte 19e8ece aprobado para
+integración de persistencia e incorporado en 0264b94. XML y log originales se
+conservan en el checkout export-http; el manifiesto versionado fija sus hashes.
+
+La salida selecciona campos conocidos y valida identidad, contexto original,
+tipos, instantes y transiciones antes de escribir el recibo. Los enteros largos
+se convierten a texto sin desbordamiento. Los offsets de intención null y los
+textos históricos se conservan; no se rehidratan comandos que los normalicen.
+No se consulta TZDB ni se recalcula la fecha civil de cierre. El único árbol
+JSON por recibo depende de la guarda de tamaño previa del lector SQL de A.
+
+Falta comprobar esa composición real, relaciones exteriores, snapshot y límites
+en conjunto. C continúa revisión de coherencia temporal y mutación de sus tres
+clases completas; este corte aislado no prueba una exportación de cuenta real.

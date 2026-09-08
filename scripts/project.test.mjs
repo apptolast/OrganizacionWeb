@@ -72,6 +72,110 @@ test("export frontend invokes only its fixed Stryker configuration", () => {
     ],
   ]);
 });
+test("export persistence target rejects other tasks and injected options before execution", () => {
+  const { calls, project } = capture();
+  assert.throws(
+    () => project("test", "export_data-persistence-backend"),
+    /Invalid target/,
+  );
+  assert.throws(
+    () =>
+      project(
+        "mutate",
+        "export_data-persistence-backend -PmutationScope=other",
+      ),
+    /Invalid target/,
+  );
+  assert.throws(
+    () => project("mutate", "export_data-persistence-backend-extra"),
+    /Invalid target/,
+  );
+  assert.deepEqual(calls, []);
+});
+
+test("export persistence PIT preserves complete classes and extends the default", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  const selected = build.match(
+    /val exportPersistenceClasses = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(selected);
+  assert.deepEqual(
+    [...selected.matchAll(/"([^"]+)"/g)].map((entry) => entry[1]),
+    [
+      "adapter.persistence.PostgresExportDataQueries*",
+      "adapter.persistence.ExportJsonWriter*",
+      "adapter.persistence.ExportBuffer*",
+      "application.PrepareExportData*",
+      "application.ExportDataUseCase*",
+      "application.ExportDataQueries*",
+      "application.PreparedExport*",
+      "application.ExportTooLargeException*",
+      "adapter.config.ApplicationConfiguration*",
+    ].map((name) => `com.apptolast.organization.${name}`),
+  );
+  assert.match(
+    build,
+    /val exportPersistenceOnly = scope == "export_data_persistence"/,
+  );
+  assert.match(build, /exportPersistenceOnly -> exportPersistenceClasses/);
+  assert.match(
+    build,
+    /exportPersistenceOnly -> setOf\("com\.apptolast\.organization\.\*"\)/,
+  );
+  assert.match(
+    build,
+    /else -> core \+ authenticationClasses[^\n]+ \+ customizationClasses \+ exportPersistenceClasses \+ exportHttpClasses/,
+  );
+  const http = build.match(
+    /val exportHttpClasses = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(http);
+  assert.deepEqual(
+    [...http.matchAll(/"([^"]+)"/g)].map((entry) => entry[1]),
+    [
+      "adapter.http.ExportDataController*",
+      "adapter.http.ExportHeadersFilter*",
+      "adapter.persistence.ExportReceiptWriter*",
+    ].map((name) => `com.apptolast.organization.${name}`),
+  );
+  const tests = build.match(
+    /val exportAdapterTests = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(tests);
+  assert.deepEqual(
+    [...tests.matchAll(/"([^"]+)"/g)].map((entry) => entry[1]),
+    [
+      "application.*Export*Test",
+      "adapter.Export*Test",
+      "adapter.http.Export*Test",
+      "adapter.persistence.Export*Test",
+      "adapter.config.Export*Test",
+    ].map((name) => `com.apptolast.organization.${name}`),
+  );
+  assert.match(
+    build,
+    /else -> core \+ authenticationTests[^\n]+ \+ customizationAdapterTests \+ exportAdapterTests/,
+  );
+  assert.match(
+    build,
+    /if \(exportPersistenceOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-export-data-persistence"\)\)/,
+  );
+  assert.match(build, /mutationThreshold\.set\(80\)/);
+  assert.match(build, /threads\.set\(4\)/);
+});
+
+test("export persistence backend invokes only its fixed PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "export_data-persistence-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=export_data_persistence"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
 test("customization default PIT exposes the real feature wiring test", () => {
   const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
   const tests = build.match(

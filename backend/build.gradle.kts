@@ -35,6 +35,7 @@ pitest {
     pitestVersion.set("1.22.0")
     junit5PluginVersion.set("1.2.3")
     val scope = providers.gradleProperty("mutationScope").orNull
+    val exportPersistenceOnly = scope == "export_data_persistence"
     val appearanceOnly = scope == "appearance"
     val customizationOnly = scope == "custom_views_fields"
     val weeklyReviewOnly = scope == "weekly_review"
@@ -258,6 +259,29 @@ pitest {
         "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher",
         "com.apptolast.organization.adapter.config.ApplicationConfiguration"
     )
+    val exportPersistenceClasses = setOf(
+        "com.apptolast.organization.adapter.persistence.PostgresExportDataQueries*",
+        "com.apptolast.organization.adapter.persistence.ExportJsonWriter*",
+        "com.apptolast.organization.adapter.persistence.ExportBuffer*",
+        "com.apptolast.organization.application.PrepareExportData*",
+        "com.apptolast.organization.application.ExportDataUseCase*",
+        "com.apptolast.organization.application.ExportDataQueries*",
+        "com.apptolast.organization.application.PreparedExport*",
+        "com.apptolast.organization.application.ExportTooLargeException*",
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration*"
+    )
+    val exportHttpClasses = setOf(
+        "com.apptolast.organization.adapter.http.ExportDataController*",
+        "com.apptolast.organization.adapter.http.ExportHeadersFilter*",
+        "com.apptolast.organization.adapter.persistence.ExportReceiptWriter*"
+    )
+    val exportAdapterTests = setOf(
+        "com.apptolast.organization.application.*Export*Test",
+        "com.apptolast.organization.adapter.Export*Test",
+        "com.apptolast.organization.adapter.http.Export*Test",
+        "com.apptolast.organization.adapter.persistence.Export*Test",
+        "com.apptolast.organization.adapter.config.Export*Test"
+    )
     val customizationClasses = setOf(
         "com.apptolast.organization.domain.Customization*",
         "com.apptolast.organization.domain.CustomField*",
@@ -331,6 +355,7 @@ pitest {
         "com.apptolast.organization.adapter.persistence.History*Test"
     )
     targetClasses.set(when {
+        exportPersistenceOnly -> exportPersistenceClasses
         customizationOnly -> customizationClasses
         appearanceOnly -> appearanceClasses
         weeklyReviewOnly -> weeklyReviewClasses
@@ -348,9 +373,10 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses
     })
     targetTests.set(when {
+        exportPersistenceOnly -> setOf("com.apptolast.organization.*")
         customizationOnly -> setOf("com.apptolast.organization.*")
         appearanceOnly -> setOf("com.apptolast.organization.*")
         weeklyReviewOnly -> setOf("com.apptolast.organization.*")
@@ -368,8 +394,9 @@ pitest {
         taskStatusOnly -> taskTests + taskStatusAdapterTests
         splitOnly -> taskTests
         taskOnly -> taskTests
-        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests + weeklyReviewAdapterTests + appearanceAdapterTests + customizationAdapterTests
+        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests + weeklyReviewAdapterTests + appearanceAdapterTests + customizationAdapterTests + exportAdapterTests
     })
+    if (exportPersistenceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-export-data-persistence"))
     if (customizationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-custom-views-fields"))
     if (appearanceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-appearance"))
     if (weeklyReviewOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-weekly-review"))

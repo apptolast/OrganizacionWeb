@@ -49,6 +49,7 @@ export function createProject(runner = run) {
           "schedule_block-backend",
           "schedule_block-frontend",
           "schedule_block-frontend-replay",
+          "export_data-persistence-backend",
         ].includes(target))
     ) {
       throw new Error(`Invalid target: ${target}`);
@@ -104,6 +105,10 @@ export function createProject(runner = run) {
       mutate: "pitest",
     };
     if (!commands[task]) throw new Error(`Unknown task: ${task}`);
+    if (task === "mutate" && target === "export_data-persistence-backend") {
+      backend("pitest", ["-PmutationScope=export_data_persistence"]);
+      return;
+    }
     if (task === "mutate" && target === "custom_views_fields-backend") {
       backend("pitest", ["-PmutationScope=custom_views_fields"]);
       return;

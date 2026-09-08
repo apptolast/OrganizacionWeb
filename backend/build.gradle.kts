@@ -505,7 +505,7 @@ pitest {
     mutationThreshold.set(80)
     outputFormats.set(setOf("HTML", "XML"))
     timestampedReports.set(false)
-    threads.set(4)
+    threads.set(if (integrationApiOnly || integrationApiHttpOnly) 8 else 4)
 }
 
 spotless { java { googleJavaFormat("1.31.0") } }

@@ -90,3 +90,16 @@ Precisión Unicode: un surrogate aislado no representa un punto Unicode escalar 
 La fixture PG es singleton por JVM: no arranca contenedor por instancia de test. Cada caso usa identidades propias; los triggers se retiran en finally. El caso de compatibilidad crea y retira una base propia dentro del mismo contenedor. Esto no promete reutilización entre JVM diferentes de PIT.
 
 Los scopes Gradle integration_api e integration_api_http abarcan clases completas, incluidos records con validación y configuración completa. Candidatos: todos los JUnit; controles DEFAULT, -FRECORD, umbral 80 y cuatro workers permanecen iguales. No se ha ejecutado mutación de 24.
+
+
+## Compatibilidad de negocio integrada y recursos PIT (40–41)
+
+Dos casos nuevos disjuntos en ApiCredentialBusinessCompatibilityTest, sin modificar producto ni los tests de C. Reutilizan su Database.PG singleton y FixedClock; propietario sintético business-owner independiente.
+
+40/@s25: inicialmente GREEN. PUT Bearer sin Origin/CSRF con If-Match vigente conserva normalización, timestamps, ETag versión 1 y exactamente un ProjectUpdated.v1 con sus siete campos. Ambos contadores valen uno.
+
+41/@s25/@s29: inicialmente GREEN. Conflicto de versión 412, precondición ausente 428 y recurso ajeno 404 conservan filas físicas y no añaden eventos; cada solicitud admitida incrementa ambos contadores exactamente una vez. Los contratos heredados no se duplican para las dieciocho rutas.
+
+Originales integration24-40-initial.log/exit e integration24-41-initial.log/exit. La pasada conjunta integration24-business-final.log/exit acredita ambos casos y formato. No se atribuye un RED de producto a casos ya correctos.
+
+Root autorizó ocho workers exclusivamente para los scopes integration_api e integration_api_http. Medición previa aportada por root: 24 cores, 25 % CPU, 24.26 GiB Windows libres; Docker 31.04 GiB disponibles y aproximadamente 0.8 GiB usados. Se conserva el mismo universo, todos los JUnit, mutadores, filtros, timeout y umbral 80; los demás scopes conservan cuatro workers. No se promete aceleración sin medir una campaña completa. No se ejecutó PIT en este corte.

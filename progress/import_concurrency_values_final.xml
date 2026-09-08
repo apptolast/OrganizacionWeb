@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" tests="22" skipped="0" failures="0" errors="0" timestamp="2026-09-08T10:29:28.607Z" hostname="PABLOHGDEV87" time="23.836">
+  <properties/>
+  <testcase name="s27_statementOverTenSecondsAbortsAndReleasesLocksWithoutPartialReceipt()" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="10.293"/>
+  <testcase name="[1] scope=PROJECT" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.329"/>
+  <testcase name="[2] scope=TASK" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.276"/>
+  <testcase name="[1] family=project" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.239"/>
+  <testcase name="[2] family=task" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.24"/>
+  <testcase name="[3] family=block" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.301"/>
+  <testcase name="[4] family=session" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.333"/>
+  <testcase name="[5] family=availability" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.22"/>
+  <testcase name="[6] family=appearance" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.212"/>
+  <testcase name="[1] scope=PROJECT" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.143"/>
+  <testcase name="[2] scope=TASK" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.141"/>
+  <testcase name="s23_deferredCommitRejectionRollsBackDataAndReceipt()" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.147"/>
+  <testcase name="[1] scope=PROJECT" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.31"/>
+  <testcase name="[2] scope=TASK" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.295"/>
+  <testcase name="s27_advisoryContentionTimesOutWithoutPartialDataOrReceipt()" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="2.093"/>
+  <testcase name="[1] scope=PROJECT" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.088"/>
+  <testcase name="[2] scope=TASK" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.128"/>
+  <testcase name="s27_deadlockWithOppositeWriterOrderAbortsImportWithoutPartialState()" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="1.164"/>
+  <testcase name="s24_activationRechecksQuotaAfterImportedActiveProjectsCommit()" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.31"/>
+  <testcase name="[1] scope=PROJECT" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.252"/>
+  <testcase name="[2] scope=TASK" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.241"/>
+  <testcase name="s27_tableContentionAfterPartialLocksRollsBackAndReleasesEverything()" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="2.088"/>
+  <system-out><![CDATA[12:29:28.640 [Test worker] INFO org.testcontainers.images.PullPolicy -- Image pull policy will be performed by: DefaultPullPolicy()
+12:29:28.646 [Test worker] INFO org.testcontainers.utility.ImageNameSubstitutor -- Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+12:29:28.762 [Test worker] INFO org.testcontainers.DockerClientFactory -- Testcontainers version: 1.21.4
+12:29:28.923 [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+12:29:29.118 [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+12:29:29.120 [Test worker] INFO org.testcontainers.DockerClientFactory -- Docker host IP address is localhost
+12:29:29.134 [Test worker] INFO org.testcontainers.DockerClientFactory -- Connected to docker: 
+  Server Version: 29.7.2
+  API Version: 1.55
+  Operating System: Docker Desktop
+  Total Memory: 31781 MB
+  Labels: 
+    com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+12:29:30.192 [Test worker] INFO tc.testcontainers/ryuk:0.12.0 -- Creating container for image: testcontainers/ryuk:0.12.0
+12:29:30.393 [Test worker] INFO tc.testcontainers/ryuk:0.12.0 -- Container testcontainers/ryuk:0.12.0 is starting: 77c246748f147628c21492e6fcf28cad19cf730dfa929fafde2b22f260337835
+12:29:30.625 [Test worker] INFO tc.testcontainers/ryuk:0.12.0 -- Container testcontainers/ryuk:0.12.0 started in PT0.4327871S
+12:29:30.629 [Test worker] INFO org.testcontainers.utility.RyukResourceReaper -- Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+12:29:30.630 [Test worker] INFO org.testcontainers.DockerClientFactory -- Checking the system...
+12:29:30.630 [Test worker] INFO org.testcontainers.DockerClientFactory -- ✔︎ Docker server version should be at least 1.6.0
+12:29:30.630 [Test worker] INFO tc.postgres:17.9-alpine -- Creating container for image: postgres:17.9-alpine
+12:29:30.683 [Test worker] INFO tc.postgres:17.9-alpine -- Container postgres:17.9-alpine is starting: 5941f73b830fda2a152b8da2136d76ac14690fd197fcbc854452e87b285db8e2
+12:29:31.791 [Test worker] INFO tc.postgres:17.9-alpine -- Container postgres:17.9-alpine started in PT1.1602415S
+12:29:31.792 [Test worker] INFO tc.postgres:17.9-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:62147/test?loggerLevel=OFF)
+12:29:32.121 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:62147/test?loggerLevel=OFF (PostgreSQL 17.9)
+12:29:32.169 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+12:29:32.173 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 21 migrations (execution time 00:00.031s)
+12:29:32.187 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+12:29:32.238 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+12:29:32.252 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - projects and outbox"
+12:29:32.277 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - outbox publication"
+12:29:32.291 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - project read index"
+12:29:32.305 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - project version"
+12:29:32.318 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - project states"
+12:29:32.331 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - jdbc sessions"
+12:29:32.347 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - tasks"
+12:29:32.362 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - task parent"
+12:29:32.377 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - task status history"
+12:29:32.397 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - availability preferences"
+12:29:32.409 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - planned blocks"
+12:29:32.422 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - block changes"
+12:29:32.436 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - block change integrity"
+12:29:32.457 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - work sessions"
+12:29:32.470 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - work session uniqueness"
+12:29:32.482 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - work session transitions"
+12:29:32.500 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - work session closure"
+12:29:32.510 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - work session end time"
+12:29:32.520 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "19 - appearance preferences"
+12:29:32.533 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - customization"
+12:29:32.549 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "21 - import receipts"
+12:29:32.560 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 21 migrations to schema "public", now at version v21 (execution time 00:00.132s)
+DEADLOCK import=40P01 writer=SUCCESS
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

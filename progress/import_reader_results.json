@@ -1,0 +1,18 @@
+{
+  "feature": "import_data",
+  "scope": "ImportJsonReaderTest",
+  "tests": 64,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "testExit": 0,
+  "formatExit": 0,
+  "testLog": "progress/import_reader_formatted_final.log",
+  "xml": "progress/import_reader_final_xml.xml",
+  "formatLog": "progress/import_reader_format_check.log",
+  "limits": [
+    "No PostgreSQL integration of all collections",
+    "No mutation campaign",
+    "No giant numeric stress run"
+  ]
+}

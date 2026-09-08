@@ -13,6 +13,8 @@ import { History } from "./history";
 import { WeeklyReview } from "./weekly-review";
 import { Appearance } from "./appearance";
 import { ExportData } from "./export-data";
+import { ImportData } from "./import-data";
+import { useAppearance } from "./appearance-state";
 export function App({
   sessionControls,
   username,
@@ -22,11 +24,13 @@ export function App({
 }) {
   const route = useRoute();
   const customization = useCustomizationSession();
+  const appearanceState = useAppearance();
   const weeklyReview = /^\/revision-semanal(?:\?[^#]*)?$/.test(route);
   const history = /^\/historial(?:\?[^#]*)?$/.test(route);
   const availability = route === "/disponibilidad";
   const appearance = route === "/apariencia";
   const exportData = route === "/exportacion";
+  const importData = route === "/importacion";
   const taskRoute = /^\/proyectos\/([^/]+)\/tareas\/([^/?]+)$/.exec(route);
   const sessionRoute =
     /^\/proyectos\/([^/]+)\/tareas\/([^/]+)\/sesiones\/([^/?]+)$/.exec(route);
@@ -34,24 +38,36 @@ export function App({
     <Workspace
       sessionControls={sessionControls}
       section={
-        exportData
-          ? "Exportación"
-          : appearance
-            ? "Apariencia"
-            : route === "/"
-              ? "Hoy"
-              : weeklyReview
-                ? "Revisión semanal"
-                : history
-                  ? "Historial"
-                  : availability
-                    ? "Disponibilidad"
-                    : route.startsWith("/proyectos")
-                      ? "Proyectos"
-                      : null
+        importData
+          ? "Importación"
+          : exportData
+            ? "Exportación"
+            : appearance
+              ? "Apariencia"
+              : route === "/"
+                ? "Hoy"
+                : weeklyReview
+                  ? "Revisión semanal"
+                  : history
+                    ? "Historial"
+                    : availability
+                      ? "Disponibilidad"
+                      : route.startsWith("/proyectos")
+                        ? "Proyectos"
+                        : null
       }
     >
-      {exportData && username ? (
+      {importData && username ? (
+        <ImportData
+          owner={username}
+          onImported={async (receipt) => {
+            customization.refreshAfterImport(receipt.insertedCounts);
+            if (receipt.insertedCounts.appearance > 0) {
+              await appearanceState.refreshAfterImport();
+            }
+          }}
+        />
+      ) : exportData && username ? (
         <ExportData owner={username} />
       ) : appearance ? (
         <Appearance />

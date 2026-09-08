@@ -1,0 +1,28 @@
+{
+  "stage": "preview client only; not full feature",
+  "checksExit": 0,
+  "tests": 26,
+  "testExit": 0,
+  "inputs": [
+    {
+      "path": "frontend/src/import-data-api.ts",
+      "sha256": "E697609FC395B6E9157C56678A3CDBBA4F0862285A4FFB5C7E8699B5830DBB71"
+    },
+    {
+      "path": "frontend/src/import-data-api.test.ts",
+      "sha256": "54B04CE4A908C459891ECED4143742849083AA03B4149D6B8620197BF054B74E"
+    },
+    {
+      "path": "progress/tdd_import_data_frontend.md",
+      "sha256": "8589014E5C2D8363BD0EF651C6E752FAD6E624ECAC5B27E99C72546A4967135B"
+    },
+    {
+      "path": "progress/import_frontend_preview_checks.log",
+      "sha256": "F20510A9DA4717C51C4CFFEE6D0DD88D6C9A723D0A83711D01216F5B48961283"
+    },
+    {
+      "path": "progress/import_frontend_preview_freeze.log",
+      "sha256": "9AD0BC52F573CE0CED038BE52333FC76FED8DEEDD7DA42C1262CCE42AC8FBA43"
+    }
+  ]
+}

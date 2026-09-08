@@ -1,0 +1,28 @@
+{
+  "scope": "ImportReceiptDecoder checkpoint",
+  "tests": 20,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "exit": 0,
+  "cycles": 8,
+  "pending": "Explicit canonical-long and ultrafine-fraction additional oracles; PostgreSQL integration belongs to A",
+  "artifacts": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ImportReceiptDecoder.java",
+      "sha256": "493FCAD7AD7CB5BEFCF63C6078A68CD6E305AF7A26ED884416B31C1A09CF2895"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportReceiptDecoderTest.java",
+      "sha256": "A6FEA68BAB755E8586BA07358E89F1B8198B8B42A5DC171975A4453D3BE6E80E"
+    },
+    {
+      "path": "progress/import_receipt_checkpoint_xml.xml",
+      "sha256": "CB04D48358DDD6ADF061795E66C5DA2D5B0F37139DA5F4A2F97D5825610AD415"
+    },
+    {
+      "path": "progress/import_receipt_checkpoint.log",
+      "sha256": "AA8638671037BC49F06C045189101091E515E408D90796437D8239C0B0384A82"
+    }
+  ]
+}

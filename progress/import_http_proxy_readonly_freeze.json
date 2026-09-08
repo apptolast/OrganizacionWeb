@@ -1,0 +1,50 @@
+{
+  "socketTests": 15,
+  "files": [
+    {
+      "sha256": "F4FC0BFDD91CA59960AEBC76508368E595FB3AC97BB27F761FB1513CF2009B2C",
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/ImportDataController.java"
+    },
+    {
+      "sha256": "8406A878458D463427BF52D81C4453D88441676E400AD9B519837A814941F518",
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/ImportDataApiTest.java"
+    },
+    {
+      "sha256": "E2A70E454FA0D703B8507AF9D89896BE1EE81F3FC63710B1D45685FCE5482E44",
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/config/ImportSocketTest.java"
+    },
+    {
+      "sha256": "A9B5244FE60E5CEB4F2C8F4916B5F95B3BAFCD11571CEC4929F59925F51DC416",
+      "path": "deploy/nginx.conf"
+    },
+    {
+      "sha256": "3C6DC479ED9494425F6BDF03B594DF789CCA347FA02AC3632BA13BB463F03785",
+      "path": "progress/tdd_import_data_http.md"
+    },
+    {
+      "sha256": "5F869FD9F29A7230C772D1DE9D928D0D9255AAFB6F7B2DAAE22FA5DAAE158CF2",
+      "path": "progress/import_http_final_xml.xml"
+    },
+    {
+      "sha256": "C1EC1FAB5C104DBF3CD31090ACB7A14ADABB56DF4543716CA395F9F6CAAD5D95",
+      "path": "progress/import_http_final.log"
+    },
+    {
+      "sha256": "6FCF64AF5A03EF3F76127907482B319DE73E3CF4FEB3151155BC2B592CA5A343",
+      "path": "progress/import_socket_readonly_final_xml.xml"
+    },
+    {
+      "sha256": "9B3FCA0A7DBF0CB02A7E2B2D2777E8E49770342D7B657C816ABC4B3B2A5FE742",
+      "path": "progress/import_socket_readonly_final.log"
+    },
+    {
+      "sha256": "9623D06F6A7907BA7400F9F58AF6C1F36521B7A24BCE48A26CE438F732722F26",
+      "path": "progress/import_socket_readonly_cleanup.json"
+    }
+  ],
+  "httpTests": 62,
+  "errors": 0,
+  "skipped": 0,
+  "failures": 0,
+  "base": "0c16b84"
+}

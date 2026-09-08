@@ -1,0 +1,119 @@
+{
+  "completedAt": "2026-09-08T06:43:12.710Z",
+  "backup": {
+    "path": "/var/backups/organizationweb/organization-20260908T064009Z-08ead20dd5f64153803dd361ffba0257.dump",
+    "bytes": 58237,
+    "sha256": "857ea9dace71ee5366061f2fd05893c0d2fe45804c058aa9c11fbdf0b9551dae",
+    "mode": "0600",
+    "owner": "root:root",
+    "container": "c85f0de047ff",
+    "archiveListValid": true,
+    "fullRestorePerformed": false
+  },
+  "backupOperationExit": 0,
+  "backupSourceRevision": "5a2b8607a80624fbd0c410a9a3a81955afa564a1",
+  "helperSha256": "3526f7127e81dce17a519218d87dddc7e0397e4ba3b17201a67fedea781e0e4b",
+  "archiveTransferredInMemory": true,
+  "fullRestorePerformed": true,
+  "restoreExit": 0,
+  "initialPublicTableCount": 0,
+  "postgresImage": "postgres@sha256:9ae4e8f8d0284836a505f0b2e825144e32e20499856e7dc5f7b99e19d10eedd6",
+  "isolation": {
+    "network": "none",
+    "ports": {},
+    "user": "70:70"
+  },
+  "restoredData": [
+    {
+      "name": "appearance_preferences",
+      "records": 1,
+      "checksum": "d2aeeae41b85c3d7b50ff30338660ba3"
+    },
+    {
+      "name": "availability_preferences",
+      "records": 1,
+      "checksum": "66ed7f15a4376b40ee32e1e1fb7361e2"
+    },
+    {
+      "name": "block_changes",
+      "records": 1,
+      "checksum": "640e8dbe19457ec915496c819adf7593"
+    },
+    {
+      "name": "block_projections",
+      "records": 1,
+      "checksum": "83cd468870dae71639d4776e917a0fad"
+    },
+    {
+      "name": "customization_preferences",
+      "records": 0,
+      "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "flyway_schema_history",
+      "records": 20,
+      "checksum": "5e5779ac6cb95748eaa22947b271980d"
+    },
+    {
+      "name": "outbox_events",
+      "records": 9,
+      "checksum": "16ee47c37105acac879dca1d083e79ef"
+    },
+    {
+      "name": "planned_blocks",
+      "records": 1,
+      "checksum": "73d88292803648749445eba6e09fc13d"
+    },
+    {
+      "name": "project_custom_field_values",
+      "records": 0,
+      "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "projects",
+      "records": 1,
+      "checksum": "c2afe4e7ad591bceb9d2b4799f58b48b"
+    },
+    {
+      "name": "task_custom_field_values",
+      "records": 0,
+      "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "task_status_history",
+      "records": 0,
+      "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "tasks",
+      "records": 1,
+      "checksum": "793aa79f7ffced4a9ca12850b84a3150"
+    },
+    {
+      "name": "work_session_changes",
+      "records": 3,
+      "checksum": "84f883090f3ac777ca2421d800b99000"
+    },
+    {
+      "name": "work_session_intervals",
+      "records": 2,
+      "checksum": "1dc0f2be4ae04424c7fb2ce2667b7495"
+    },
+    {
+      "name": "work_sessions",
+      "records": 1,
+      "checksum": "e1c549c37fb5a47daf92fe6d996aa4c0"
+    }
+  ],
+  "matchedProductionObservation": "export22-live-data-after.json",
+  "cleanup": {
+    "container": "8035a3a0bf5ea233196f643bddd801a09c129a2fb74f64de6be2bfb587a36ed9",
+    "volume": "ow-restore23-5f727b51-b5bc-459a-99af-6d4506491794-data",
+    "removed": true
+  },
+  "limitations": [
+    "No API, RabbitMQ or Swarm recovery was exercised.",
+    "This is an on-host logical PostgreSQL backup, not scheduled offsite custody.",
+    "It covers the schema 20 snapshot at backup creation; later writes and future migrations are not included."
+  ]
+}

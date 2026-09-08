@@ -1,0 +1,30 @@
+{
+  "xml": {
+    "sha256": "F201DC830A27D8EF2065CB64B9E1BFED649287BF48EDE5648264351C956428CF",
+    "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\import23-integrity-checkpoint.xml"
+  },
+  "failures": 0,
+  "skipped": 0,
+  "tests": 94,
+  "scope": "Partial integrity; union/concurrency/limits still pending",
+  "exit": 0,
+  "errors": 0,
+  "files": [
+    {
+      "sha256": "CF67877CB4232E4173F550B6AABB19F6D74CCD2B5DE20EAEC7F3D83F9FF957AB",
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresImportDataStore.java"
+    },
+    {
+      "sha256": "2F4F05C1E322FF74AB79E6607DD8B704481685370A2FF92FB517C08AE7A6B203",
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ImportRecordValidator.java"
+    },
+    {
+      "sha256": "08EF3BDC99F50F116BDED107376FD9A7FB3C6FD42DDE9D1B3E4B64008C50C553",
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportPersistenceTest.java"
+    },
+    {
+      "sha256": "F7578E1E46EE6C8B359C9FBFB59C660DE5B08FE1C016243283AF66322244656F",
+      "path": "progress/tdd_import_data.md"
+    }
+  ]
+}

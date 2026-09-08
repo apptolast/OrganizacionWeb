@@ -408,6 +408,62 @@ export function useCustomizationSession() {
     return loadConfig(scope);
   };
   return {
+    refreshAfterImport: (counts: Record<string, number>) => {
+      if (
+        counts.customization > 0 ||
+        counts.projectCustomFieldValues > 0 ||
+        counts.taskCustomFieldValues > 0
+      ) {
+        const next = { ...values };
+        for (const key of valueReads.current.keys()) {
+          if (
+            counts.customization <= 0 &&
+            counts[
+              key.endsWith("/")
+                ? "projectCustomFieldValues"
+                : "taskCustomFieldValues"
+            ] <= 0
+          )
+            continue;
+          const [projectId, taskId] = key.split("/");
+          retireValues(projectId, taskId || undefined);
+          setValueGenerations((current) => ({
+            ...current,
+            [key]: (current[key] ?? 0) + 1,
+          }));
+          if (Object.keys(currentValueDrafts.current[key] ?? {}).length) {
+            staleValues.current.add(key);
+            continue;
+          }
+          valueReads.current.delete(key);
+          delete next[key];
+        }
+        setValues(next);
+      }
+      if (counts.customization > 0) {
+        const next = { ...configs };
+        for (const scope of ["PROJECT", "TASK"] as const) {
+          retireConfigRead(scope);
+          if (uncertain.current.has(scope)) continue;
+          if (
+            viewDrafts[scope] !== undefined &&
+            JSON.stringify(viewDrafts[scope]) !==
+              JSON.stringify(configs[scope]?.visibleFields)
+          ) {
+            uncertain.current.add(scope);
+            setFailures((previous) => ({
+              ...previous,
+              [scope]:
+                "La importación puede haber cambiado la vista. Conservamos tu borrador; recarga lo guardado antes de continuar.",
+            }));
+          } else {
+            reads.current.delete(scope);
+            delete next[scope];
+          }
+        }
+        setConfigs(next);
+      }
+    },
     isValuesStale: (key: string) => staleValues.current.has(key),
     isValuesUncertain: (key: string) => uncertainValues.current.has(key),
     isConfigUncertain: (scope: CustomizationScope) =>

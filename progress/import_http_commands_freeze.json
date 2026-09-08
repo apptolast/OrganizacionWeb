@@ -1,0 +1,54 @@
+{
+  "failures": 0,
+  "skipped": 0,
+  "base": "eb1f79b",
+  "suites": 7,
+  "errors": 0,
+  "tests": 88,
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/ImportDataController.java",
+      "sha256": "009C930BF1EB876000E8302FE0B20C76C071F8FCCDD6B5551467C7E6D5D3F25E"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/ImportDataApiTest.java",
+      "sha256": "426A9FBB848A2C7C6B7CE7AA479191B3FADD9A79733AA1E4D4EB047A1A92B65F"
+    },
+    {
+      "path": "progress/tdd_import_data_http.md",
+      "sha256": "AD3DDE58055C854F3D3339788B6EC20929F5AD6E2509CD92D5E1950E87ABE43E"
+    },
+    {
+      "path": "progress/import_http_integrated_nominal.log",
+      "sha256": "7F7969D2DB962B7CEF4451F86335E605B4C51D631693757763284CC7B2DB1256"
+    },
+    {
+      "path": "progress/import_http_integrated_nominal_xml/TEST-com.apptolast.organization.adapter.config.ImportWiringTest.xml",
+      "sha256": "28E32CC8B852BF533C5A0B838554CB87F77205C28554D29BA22426C03C8BAE68"
+    },
+    {
+      "path": "progress/import_http_integrated_nominal_xml/TEST-com.apptolast.organization.adapter.ImportDataApiTest.xml",
+      "sha256": "0EA28064D59D1A75E804828AAFCB0FFAFB9E4143C582D17A14E50767AA00EB04"
+    },
+    {
+      "path": "progress/import_http_integrated_nominal_xml/TEST-com.apptolast.organization.adapter.persistence.ImportJsonReaderTest.xml",
+      "sha256": "27052DD63FB136E4051EA7ECBD2C910C54F5C360C360FD330958AA2EDA44930C"
+    },
+    {
+      "path": "progress/import_http_integrated_nominal_xml/TEST-com.apptolast.organization.adapter.persistence.ImportPersistenceTest.xml",
+      "sha256": "0B0104539C9EDB7447B1DCBDC6951C7DCA952CDA029B45AEA46E40D22B113BBA"
+    },
+    {
+      "path": "progress/import_http_integrated_nominal_xml/TEST-com.apptolast.organization.application.ApplyImportDataTest.xml",
+      "sha256": "EA05EF33FF368A0B01F87F423E5DD52C88EDA781EC7CAFC77CDD92EC8E4BDB5D"
+    },
+    {
+      "path": "progress/import_http_integrated_nominal_xml/TEST-com.apptolast.organization.application.PreviewImportDataTest.xml",
+      "sha256": "CE3042183E54C95B036A0DF3EFAF310DE7A59A5406D226A5F1D7E3DCDF31549F"
+    },
+    {
+      "path": "progress/import_http_integrated_nominal_xml/TEST-com.apptolast.organization.application.ReadImportReceiptTest.xml",
+      "sha256": "7C6BF5F0E0118B74DBF8C7751BD7DBA8185C3D518BBF8474712151D82CEF5470"
+    }
+  ]
+}

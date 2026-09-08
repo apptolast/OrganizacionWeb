@@ -1,0 +1,11 @@
+{
+  "archive": "../deployment-preparation/import23-frontend-evidence-final.zip",
+  "sha256": "3e5adf7bca573e047d247884257b0937467bef0a1935814ce97473efcb5f6287",
+  "bytes": 2787711,
+  "contains": [
+    "import_stryker_original",
+    "import_stryker_incremental",
+    "import_real_e2e_nominal"
+  ],
+  "note": "Immutable raw/log/HTML package, local operational evidence; summaries and manifests are versioned."
+}

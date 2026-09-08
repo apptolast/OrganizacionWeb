@@ -7,6 +7,136 @@ import { createHash } from "node:crypto";
 import * as commands from "./project.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
+test("import PIT targets reject other tasks and injected options before execution", () => {
+  const { calls, project } = capture();
+  for (const part of ["reader", "http", "persistence"]) {
+    assert.throws(
+      () => project("test", `import_data-${part}-backend`),
+      /Invalid target/,
+    );
+    assert.throws(
+      () =>
+        project("mutate", `import_data-${part}-backend -PmutationScope=other`),
+      /Invalid target/,
+    );
+  }
+  assert.deepEqual(calls, []);
+});
+test("import PIT keeps complete disjoint classes and dedicated tests while extending the default", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  const scopes = {
+    Reader: {
+      classes: [
+        "adapter.persistence.ImportJsonReader*",
+        "adapter.persistence.ImportReceiptDecoder*",
+      ],
+      tests: [
+        "adapter.persistence.ImportJsonReaderTest",
+        "adapter.persistence.ImportReceiptDecoderTest",
+      ],
+    },
+    Http: {
+      classes: [
+        "adapter.http.ImportDataController*",
+        "application.PreviewImportData*",
+        "application.ApplyImportData*",
+        "application.ReadImportReceipt*",
+      ],
+      tests: [
+        "adapter.ImportDataApiTest",
+        "application.PreviewImportDataTest",
+        "application.ApplyImportDataTest",
+        "application.ReadImportReceiptTest",
+      ],
+    },
+    Persistence: {
+      classes: [
+        "adapter.persistence.PostgresImportDataStore*",
+        "adapter.persistence.ImportRecordValidator*",
+        "adapter.persistence.ImportCustomizationValidator*",
+        "application.ImportCounts*",
+      ],
+      tests: [
+        "adapter.persistence.ImportPersistenceTest",
+        "adapter.persistence.ImportCustomizationValidatorTest",
+        "adapter.persistence.ImportConcurrencyTest",
+        "adapter.config.ImportScaleTest",
+        "adapter.config.ImportWiringTest",
+      ],
+    },
+  };
+  for (const [name, selected] of Object.entries(scopes)) {
+    const part = name.toLowerCase();
+    assert.ok(
+      build.includes(`val import${name}Only = scope == "import_data_${part}"`),
+    );
+    for (const [suffix, expected] of [
+      ["Classes", selected.classes],
+      ["Tests", selected.tests],
+    ]) {
+      const body = build.match(
+        new RegExp(
+          `val import${name}${suffix} = setOf\\(([\\s\\S]*?)\\n    \\)`,
+        ),
+      )?.[1];
+      assert.ok(body, name + suffix);
+      assert.deepEqual(
+        [...body.matchAll(/"([^"]+)"/g)].map((entry) => entry[1]),
+        expected.map((value) => "com.apptolast.organization." + value),
+      );
+      assert.ok(build.includes(`import${name}Only -> import${name}${suffix}`));
+    }
+    assert.ok(
+      build.includes(
+        `if (import${name}Only) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-${part}"))`,
+      ),
+    );
+  }
+  assert.match(
+    build,
+    /else -> core \+ authenticationClasses[^\n]+ \+ exportHttpClasses \+ importReaderClasses \+ importHttpClasses \+ importPersistenceClasses/,
+  );
+  assert.match(
+    build,
+    /else -> core \+ authenticationTests[^\n]+ \+ exportAdapterTests \+ importAdapterTests/,
+  );
+  assert.match(
+    build,
+    /"com\.apptolast\.organization\.adapter\.config\.Import\*Test"/,
+  );
+  assert.match(build, /mutationThreshold\.set\(80\)/);
+  assert.match(build, /threads\.set\(4\)/);
+});
+test("import backend targets invoke only their fixed PIT scopes", () => {
+  for (const part of ["reader", "http", "persistence"]) {
+    const { calls, project } = capture();
+    project("mutate", `import_data-${part}-backend`);
+    assert.deepEqual(calls, [
+      [
+        process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+        ["pitest", "--no-daemon", `-PmutationScope=import_data_${part}`],
+        { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+      ],
+    ]);
+  }
+});
+test("import frontend invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "import_data-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.import-data.config.json",
+      ],
+    ],
+  ]);
+});
 test("export Stryker keeps its complete modules and reviewed integration nodes with inherited gates", () => {
   const config = JSON.parse(
     readFileSync(
@@ -1620,12 +1750,12 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     "src/appearance-api.ts",
     "src/appearance-state.tsx",
     "src/appearance.tsx",
-    "src/App.tsx:28:8-28:44",
-    "src/App.tsx:39:12-51:28",
-    "src/App.tsx:56:10-97:7",
-    "src/workspace.tsx:75:10-80:22",
+    "src/App.tsx:31:8-31:44",
+    "src/App.tsx:45:14-57:30",
+    "src/App.tsx:72:10-113:7",
+    "src/workspace.tsx:76:10-81:22",
     "src/session-gate.tsx:32:2-52:6",
-    "src/use-session.ts:177:0-196:1",
+    "src/use-session.ts:194:0-214:1",
   ]);
   assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
   assert.equal(config.concurrency, 8);

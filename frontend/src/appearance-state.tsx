@@ -22,6 +22,7 @@ type AppearanceState = {
   reading: boolean;
   uncertain: boolean;
   reload: () => Promise<AppearanceSnapshot>;
+  refreshAfterImport: () => Promise<AppearanceSnapshot>;
   save: (input: AppearanceInput) => Promise<AppearanceSnapshot>;
 };
 const AppearanceContext = createContext<AppearanceState>({
@@ -29,6 +30,9 @@ const AppearanceContext = createContext<AppearanceState>({
   reading: true,
   uncertain: false,
   reload: async () => {
+    throw new Error("Apariencia no disponible");
+  },
+  refreshAfterImport: async () => {
     throw new Error("Apariencia no disponible");
   },
   save: async () => {
@@ -157,7 +161,21 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   }, [load]);
   return (
     <AppearanceContext
-      value={{ snapshot, failed, reading, uncertain, reload, save }}
+      value={{
+        snapshot,
+        failed,
+        reading,
+        uncertain,
+        reload,
+        save,
+        refreshAfterImport: async () => {
+          if (uncertain || writeRequest.current)
+            throw new Error(
+              "Recupera primero el guardado de apariencia pendiente",
+            );
+          return reload();
+        },
+      }}
     >
       {failed && !snapshot && (
         <div className="appearance-load-error">

@@ -1,0 +1,40 @@
+{
+  "scope": "PIT import_data support only",
+  "harnessTests": 70,
+  "exit": 0,
+  "campaignStarted": false,
+  "artifacts": [
+    {
+      "path": "backend/build.gradle.kts",
+      "sha256": "DE5A2E743143B7BEF2CA434DD63CA844E59516C7CEC07A55A5F6A597DAB9F7CF"
+    },
+    {
+      "path": "scripts/project.mjs",
+      "sha256": "16DBCDBC0DF876A87C761280FFFE7D8D03F68B38CC6CA977656B91EE48BDCB9A"
+    },
+    {
+      "path": "scripts/project.test.mjs",
+      "sha256": "1F256517BA61678675C7B27478EF13B2822A84089ED435CF65AD48F593D3F604"
+    },
+    {
+      "path": "progress/import_pit_scope_plan.md",
+      "sha256": "6915076A08046B83E367925AC3FAD670C086E0D9F979AD40E387D03600F87C9A"
+    },
+    {
+      "path": "progress/import_pit_harness_final.log",
+      "sha256": "FDCAB0558E39FDDD491833952A992903EE10D7B5BC90762ABF1E46DFECD07AEA"
+    },
+    {
+      "path": "progress/import_pit_reader_inspect.log",
+      "sha256": "7278A62D0D0C344D14D6413DCD7BA46A3A9022046402D407C85FF4E76CB35ACF"
+    },
+    {
+      "path": "progress/import_pit_http_inspect.log",
+      "sha256": "D0604BEDB33E32D35E9EAE5E2903F7B0FFFD97818CA2A785E403B93174682C35"
+    },
+    {
+      "path": "progress/import_pit_persistence_inspect.log",
+      "sha256": "B6DE456034FC82C1272B5EC0E4CD0D00EC999242E7EE236B99A2A83AF0500D59"
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import assert from "node:assert/strict";
 import { test, expect } from "./support/authenticated-test.mjs";
 import { create, sql } from "./support/projects.mjs";
 import { saveTask } from "./support/tasks.mjs";
@@ -66,37 +67,26 @@ test("start_work_session: responsive states preserve controls feedback and recov
         `${folder}/geometry.json`,
         JSON.stringify(evidence, null, 2),
       );
-      expect(
-        measured.scroll,
-        `${state}:${width} page overflow`,
-      ).toBeLessThanOrEqual(width);
+      assert.ok(measured.scroll <= width, `${state}:${width} page overflow`);
       for (const box of measured.controls) {
-        expect(
-          box.x,
-          `${state}:${width}:${box.name} left`,
-        ).toBeGreaterThanOrEqual(0);
-        expect(
-          box.x + box.width,
+        assert.ok(box.x >= 0, `${state}:${width}:${box.name} left`);
+        assert.ok(
+          box.x + box.width <= width + 1,
           `${state}:${width}:${box.name} right`,
-        ).toBeLessThanOrEqual(width + 1);
-        expect(
-          box.width,
-          `${state}:${width}:${box.name} width`,
-        ).toBeGreaterThanOrEqual(44);
-        expect(
-          box.height,
-          `${state}:${width}:${box.name} height`,
-        ).toBeGreaterThanOrEqual(44);
+        );
+        assert.ok(box.width >= 44, `${state}:${width}:${box.name} width`);
+        assert.ok(box.height >= 44, `${state}:${width}:${box.name} height`);
       }
       for (let a = 0; a < measured.controls.length; a++)
         for (let b = a + 1; b < measured.controls.length; b++) {
           const x = measured.controls[a],
             y = measured.controls[b];
-          expect(
+          assert.equal(
             Math.min(x.x + x.width, y.x + y.width) - Math.max(x.x, y.x) > 1 &&
               Math.min(x.y + x.height, y.y + y.height) - Math.max(x.y, y.y) > 1,
+            false,
             `${state}:${width} overlap ${x.name}/${y.name}`,
-          ).toBe(false);
+          );
         }
       if (width === 320 || width === 1440) {
         const skip = await page.locator(".skip-link").evaluate((el) => {
@@ -113,7 +103,7 @@ test("start_work_session: responsive states preserve controls feedback and recov
           `${folder}/${state}-${width}-skiplink.json`,
           JSON.stringify(skip, null, 2),
         );
-        if (!skip.focused) expect(skip.bottom).toBeLessThanOrEqual(0);
+        if (!skip.focused) assert.ok(skip.bottom <= 0);
         await page.screenshot({
           path: `${folder}/${state}-${width}-viewport.png`,
         });

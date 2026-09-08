@@ -1,0 +1,55 @@
+{
+  "rawSha256": "58464b8eaa0996245f0a3c08f209c8cb57639ad69e613c8e2f80397beb7118dc",
+  "total": 801,
+  "counts": {
+    "NoCoverage": 7,
+    "Killed": 617,
+    "Survived": 176,
+    "RuntimeError": 1
+  },
+  "byFile": {
+    "src/appearance-state.tsx": {
+      "NoCoverage": 2,
+      "Killed": 4,
+      "Survived": 1
+    },
+    "src/import-data-api.ts": {
+      "NoCoverage": 1,
+      "Killed": 192,
+      "Survived": 41
+    },
+    "src/import-data.tsx": {
+      "NoCoverage": 4,
+      "Killed": 263,
+      "Survived": 96,
+      "RuntimeError": 1
+    },
+    "src/App.tsx": {
+      "Killed": 50,
+      "Survived": 2
+    },
+    "src/customization-state.ts": {
+      "Killed": 50,
+      "Survived": 22
+    },
+    "src/import-data-intent.ts": {
+      "Killed": 40,
+      "Survived": 4
+    },
+    "src/use-session.ts": {
+      "Killed": 13,
+      "Survived": 4
+    },
+    "src/workspace.tsx": {
+      "Killed": 5,
+      "Survived": 6
+    }
+  },
+  "strictKilledOverAllPercent": 77.02871410736579,
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 80
+  },
+  "locationConvention": "Report locations preserved exactly; JSON source columns are one-based."
+}

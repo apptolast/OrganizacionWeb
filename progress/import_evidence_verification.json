@@ -1,0 +1,310 @@
+{
+  "freezeCount": 13,
+  "freezeMatches": 13,
+  "freeze": [
+    {
+      "path": "progress/import_stryker_incremental/before.json",
+      "expected": "c6e491f2104e66ffad0cf6c1aef5faba5b254c95bd159d1140438d433e603390",
+      "actual": "c6e491f2104e66ffad0cf6c1aef5faba5b254c95bd159d1140438d433e603390",
+      "matches": true
+    },
+    {
+      "path": "progress/import_stryker_incremental/after.json",
+      "expected": "c6e491f2104e66ffad0cf6c1aef5faba5b254c95bd159d1140438d433e603390",
+      "actual": "c6e491f2104e66ffad0cf6c1aef5faba5b254c95bd159d1140438d433e603390",
+      "matches": true
+    },
+    {
+      "path": "progress/import_stryker_incremental/config.json",
+      "expected": "565e8d9719d20035ce11b43842ce508a0f93bcba60eab62b8b4f867c7db6d8f6",
+      "actual": "565e8d9719d20035ce11b43842ce508a0f93bcba60eab62b8b4f867c7db6d8f6",
+      "matches": true
+    },
+    {
+      "path": "progress/import_stryker_incremental/seed-original.json",
+      "expected": "58464b8eaa0996245f0a3c08f209c8cb57639ad69e613c8e2f80397beb7118dc",
+      "actual": "58464b8eaa0996245f0a3c08f209c8cb57639ad69e613c8e2f80397beb7118dc",
+      "matches": true
+    },
+    {
+      "path": "progress/import_stryker_incremental/mutation.json",
+      "expected": "81b74a80891c1a93609e749fb0215135a1819581de5201c07f7d76ece3819619",
+      "actual": "81b74a80891c1a93609e749fb0215135a1819581de5201c07f7d76ece3819619",
+      "matches": true
+    },
+    {
+      "path": "progress/import_stryker_incremental/mutation.html",
+      "expected": "27c36818db7ac16309c6d8ca428fc1fe03308ab76aa212d5d84d85686ca564b9",
+      "actual": "27c36818db7ac16309c6d8ca428fc1fe03308ab76aa212d5d84d85686ca564b9",
+      "matches": true
+    },
+    {
+      "path": "progress/import_stryker_incremental/run.log",
+      "expected": "35fd7a819ada8438fa45b82352fab998ef7ba848045fcfe64a5301b23262c7b2",
+      "actual": "35fd7a819ada8438fa45b82352fab998ef7ba848045fcfe64a5301b23262c7b2",
+      "matches": true
+    },
+    {
+      "path": "progress/import_stryker_incremental/exit.txt",
+      "expected": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "actual": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "matches": true
+    },
+    {
+      "path": "progress/import_stryker_incremental/summary.json",
+      "expected": "d3a3cc1fcf821413c10f10208f64d0ee73f04aae7dd4b5f0442ae1cfd60b66f5",
+      "actual": "d3a3cc1fcf821413c10f10208f64d0ee73f04aae7dd4b5f0442ae1cfd60b66f5",
+      "matches": true
+    },
+    {
+      "path": "progress/review_import_frontend_mutation.md",
+      "expected": "622381b3c843f91a4d2c09a8a92f64342f89630b709350a26f70f651c1b8854c",
+      "actual": "622381b3c843f91a4d2c09a8a92f64342f89630b709350a26f70f651c1b8854c",
+      "matches": true
+    },
+    {
+      "path": "frontend/src/import-data.mutation.test.tsx",
+      "expected": "f7c6ec6231d0874bc6969159e70e71072d6671e36cab9ee22279dcc16727de42",
+      "actual": "f7c6ec6231d0874bc6969159e70e71072d6671e36cab9ee22279dcc16727de42",
+      "matches": true
+    },
+    {
+      "path": "frontend/src/import-refresh.mutation.test.tsx",
+      "expected": "511826f77b5d4ebf7f9726e88cd8defc52edb360fa05d40773e674ca02eb320d",
+      "actual": "511826f77b5d4ebf7f9726e88cd8defc52edb360fa05d40773e674ca02eb320d",
+      "matches": true
+    },
+    {
+      "path": "frontend/stryker.import-data.config.json",
+      "expected": "565e8d9719d20035ce11b43842ce508a0f93bcba60eab62b8b4f867c7db6d8f6",
+      "actual": "565e8d9719d20035ce11b43842ce508a0f93bcba60eab62b8b4f867c7db6d8f6",
+      "matches": true
+    }
+  ],
+  "archive": "../deployment-preparation/import23-frontend-evidence-final.zip",
+  "archiveExpectedSha256": "3e5adf7bca573e047d247884257b0937467bef0a1935814ce97473efcb5f6287",
+  "archiveActualSha256": "3e5adf7bca573e047d247884257b0937467bef0a1935814ce97473efcb5f6287",
+  "archiveMatches": true,
+  "entryCount": 31,
+  "entries": [
+    {
+      "path": "import_stryker_original/after.json",
+      "bytes": 27083,
+      "sha256": "1795418114d1e871240cee9427bcb8db7df715faf4bb571b03b8d6552a3af29b",
+      "originalSha256": "1795418114d1e871240cee9427bcb8db7df715faf4bb571b03b8d6552a3af29b",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_original/before.json",
+      "bytes": 27083,
+      "sha256": "1795418114d1e871240cee9427bcb8db7df715faf4bb571b03b8d6552a3af29b",
+      "originalSha256": "1795418114d1e871240cee9427bcb8db7df715faf4bb571b03b8d6552a3af29b",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_original/config.json",
+      "bytes": 1265,
+      "sha256": "80e89e1f8755a06c659a7e40f38fb0dad8e7ebe5b31799d6cda0576f2d7a5c01",
+      "originalSha256": "80e89e1f8755a06c659a7e40f38fb0dad8e7ebe5b31799d6cda0576f2d7a5c01",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_original/exit.txt",
+      "bytes": 3,
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+      "originalSha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_original/integrity.json",
+      "bytes": 40,
+      "sha256": "fa5f591d088a61c2bf806956631d9d0a72b75123f07afad239829f2c88e23aa7",
+      "originalSha256": "fa5f591d088a61c2bf806956631d9d0a72b75123f07afad239829f2c88e23aa7",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_original/inventory.json",
+      "bytes": 4116383,
+      "sha256": "55943865371e6f5335a47761919492e3be51463b4f937d4f3fe8d06e15ff46cd",
+      "originalSha256": "55943865371e6f5335a47761919492e3be51463b4f937d4f3fe8d06e15ff46cd",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_original/mutation.html",
+      "bytes": 5263442,
+      "sha256": "3171b7f0742b5181da3309829243159ec06ea7e2fc6ae1c7a54c7f9e50f77d86",
+      "originalSha256": "3171b7f0742b5181da3309829243159ec06ea7e2fc6ae1c7a54c7f9e50f77d86",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_original/mutation.json",
+      "bytes": 4911112,
+      "sha256": "58464b8eaa0996245f0a3c08f209c8cb57639ad69e613c8e2f80397beb7118dc",
+      "originalSha256": "58464b8eaa0996245f0a3c08f209c8cb57639ad69e613c8e2f80397beb7118dc",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_original/residues.json",
+      "bytes": 159130,
+      "sha256": "d5e0d7198e3b5bbf86657a08732cc6bfe83862944cd494337fa645efcb7fee09",
+      "originalSha256": "d5e0d7198e3b5bbf86657a08732cc6bfe83862944cd494337fa645efcb7fee09",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_original/run.log",
+      "bytes": 193962,
+      "sha256": "4421c353c5262ec82a3d9d74a53df19a4e429263cbab4989ed3ca79606ede21b",
+      "originalSha256": "4421c353c5262ec82a3d9d74a53df19a4e429263cbab4989ed3ca79606ede21b",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_original/summary.json",
+      "bytes": 1156,
+      "sha256": "522b887f8125c0cb4079ed4d0aa7e8365f903641b1a6f67a07b68e92cb13b8fd",
+      "originalSha256": "522b887f8125c0cb4079ed4d0aa7e8365f903641b1a6f67a07b68e92cb13b8fd",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_incremental/after.json",
+      "bytes": 27398,
+      "sha256": "c6e491f2104e66ffad0cf6c1aef5faba5b254c95bd159d1140438d433e603390",
+      "originalSha256": "c6e491f2104e66ffad0cf6c1aef5faba5b254c95bd159d1140438d433e603390",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_incremental/before.json",
+      "bytes": 27398,
+      "sha256": "c6e491f2104e66ffad0cf6c1aef5faba5b254c95bd159d1140438d433e603390",
+      "originalSha256": "c6e491f2104e66ffad0cf6c1aef5faba5b254c95bd159d1140438d433e603390",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_incremental/cache.json",
+      "bytes": 5921149,
+      "sha256": "2450b030dd5a12c4e637378c006fb083a4c10c9f74c90b536b1c6f279175ae00",
+      "originalSha256": "2450b030dd5a12c4e637378c006fb083a4c10c9f74c90b536b1c6f279175ae00",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_incremental/config.json",
+      "bytes": 1362,
+      "sha256": "565e8d9719d20035ce11b43842ce508a0f93bcba60eab62b8b4f867c7db6d8f6",
+      "originalSha256": "565e8d9719d20035ce11b43842ce508a0f93bcba60eab62b8b4f867c7db6d8f6",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_incremental/exit.txt",
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "originalSha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_incremental/freeze.json",
+      "bytes": 2207,
+      "sha256": "5b0062249be7cbce85d37387258354646736ff82b6549543d13ec9d1ad0a4441",
+      "originalSha256": "5b0062249be7cbce85d37387258354646736ff82b6549543d13ec9d1ad0a4441",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_incremental/inventory.json",
+      "bytes": 4237748,
+      "sha256": "4773813e7d9bd0493e769d94ca0842eb110b5de05e033ce958a35af012842077",
+      "originalSha256": "4773813e7d9bd0493e769d94ca0842eb110b5de05e033ce958a35af012842077",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_incremental/mutation.html",
+      "bytes": 5387858,
+      "sha256": "27c36818db7ac16309c6d8ca428fc1fe03308ab76aa212d5d84d85686ca564b9",
+      "originalSha256": "27c36818db7ac16309c6d8ca428fc1fe03308ab76aa212d5d84d85686ca564b9",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_incremental/mutation.json",
+      "bytes": 5032378,
+      "sha256": "81b74a80891c1a93609e749fb0215135a1819581de5201c07f7d76ece3819619",
+      "originalSha256": "81b74a80891c1a93609e749fb0215135a1819581de5201c07f7d76ece3819619",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_incremental/residues.json",
+      "bytes": 144203,
+      "sha256": "6039573b7419562d9e12e54bd38603efe95dc13df323a8bc152c769818a624e7",
+      "originalSha256": "6039573b7419562d9e12e54bd38603efe95dc13df323a8bc152c769818a624e7",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_incremental/run.log",
+      "bytes": 172343,
+      "sha256": "35fd7a819ada8438fa45b82352fab998ef7ba848045fcfe64a5301b23262c7b2",
+      "originalSha256": "35fd7a819ada8438fa45b82352fab998ef7ba848045fcfe64a5301b23262c7b2",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_incremental/seed-original.json",
+      "bytes": 4911112,
+      "sha256": "58464b8eaa0996245f0a3c08f209c8cb57639ad69e613c8e2f80397beb7118dc",
+      "originalSha256": "58464b8eaa0996245f0a3c08f209c8cb57639ad69e613c8e2f80397beb7118dc",
+      "matches": true
+    },
+    {
+      "path": "import_stryker_incremental/summary.json",
+      "bytes": 2480,
+      "sha256": "d3a3cc1fcf821413c10f10208f64d0ee73f04aae7dd4b5f0442ae1cfd60b66f5",
+      "originalSha256": "d3a3cc1fcf821413c10f10208f64d0ee73f04aae7dd4b5f0442ae1cfd60b66f5",
+      "matches": true
+    },
+    {
+      "path": "import_real_e2e_nominal/import_real_before.json",
+      "bytes": 127247,
+      "sha256": "a31377d2e7fdfc90a1e851ae3787810003b32ea1803e840807cfdac2770cf90f",
+      "originalSha256": "a31377d2e7fdfc90a1e851ae3787810003b32ea1803e840807cfdac2770cf90f",
+      "matches": true
+    },
+    {
+      "path": "import_real_e2e_nominal/import_real_initial_after.json",
+      "bytes": 127389,
+      "sha256": "1af54d04859fb7f05674bafb689d92ad924b5d64340059b02012026142afcd3c",
+      "originalSha256": "1af54d04859fb7f05674bafb689d92ad924b5d64340059b02012026142afcd3c",
+      "matches": true
+    },
+    {
+      "path": "import_real_e2e_nominal/import_real_nominal.log",
+      "bytes": 12373,
+      "sha256": "c5037ff5a16f19cab0ace39df52c85a2f38c00029a5182ac8b096f1190505eb7",
+      "originalSha256": "c5037ff5a16f19cab0ace39df52c85a2f38c00029a5182ac8b096f1190505eb7",
+      "matches": true
+    },
+    {
+      "path": "import_real_e2e_nominal/import_real_repaired_after.json",
+      "bytes": 127345,
+      "sha256": "2257883c786d8c47500c2b5a8b713be837bd10deeef681b472fb63d251abe4cf",
+      "originalSha256": "2257883c786d8c47500c2b5a8b713be837bd10deeef681b472fb63d251abe4cf",
+      "matches": true
+    },
+    {
+      "path": "import_real_e2e_nominal/import_real_repaired_before.json",
+      "bytes": 127247,
+      "sha256": "dc57ac22b000824d3af1798fc56f49686ac61768b23463602f08b2a1ddec1b6f",
+      "originalSha256": "dc57ac22b000824d3af1798fc56f49686ac61768b23463602f08b2a1ddec1b6f",
+      "matches": true
+    },
+    {
+      "path": "import_real_e2e_nominal/import_real_repaired.log",
+      "bytes": 8501,
+      "sha256": "5f5b7748b9ce0124a1e9ef10646c3f05f4be9fadaeb0f10c0aa846ed6620272e",
+      "originalSha256": "5f5b7748b9ce0124a1e9ef10646c3f05f4be9fadaeb0f10c0aa846ed6620272e",
+      "matches": true
+    },
+    {
+      "path": "import_real_e2e_nominal/result.json",
+      "bytes": 2887,
+      "sha256": "cb83e4a5552336f27090bd9c1c02cb26bde04b090f34debcc0f643375c2c7e82",
+      "originalSha256": "cb83e4a5552336f27090bd9c1c02cb26bde04b090f34debcc0f643375c2c7e82",
+      "matches": true
+    }
+  ],
+  "allEntriesMatch": true,
+  "note": "The E2E freeze was created after packaging and is versioned separately; every ZIP entry is checked against the preserved original."
+}

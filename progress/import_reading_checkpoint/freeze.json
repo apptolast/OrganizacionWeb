@@ -1,0 +1,35 @@
+{
+  "tests": 1,
+  "failures": 0,
+  "limit": "Application nominal only; no JSON or PG validation",
+  "entries": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ImportCounts.java",
+      "sha256": "b1ef764cb8032c3652d99f051d254afdcf1afc0fcda9f6b7d8a0028ba02f4fa6"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ImportPreview.java",
+      "sha256": "17702a25e414d299c6efa9e333408110d5c2d8e618ab997cee77a44dad1abfa8"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ImportDataUseCase.java",
+      "sha256": "5dbde16a3ebdc235cfb2d20326875876714386bbd5d8348b082f57c403de502a"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ImportDataQueries.java",
+      "sha256": "2cbd1530f1ce932d299c6794efa5aa8f9c0269cfac0989e872c49d2818f96402"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/PreviewImportData.java",
+      "sha256": "2e28ec5ec4104f93287a523e980b230642a30d36d80c97cc956a5d74e8d64197"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/application/PreviewImportDataTest.java",
+      "sha256": "461cffccb41540946c36e0672114a91e7b11ac909fdc291fc4d34e0a30590a8a"
+    },
+    {
+      "path": "progress/import_reading_checkpoint/PreviewImportDataTest.xml",
+      "sha256": "b3e88ab0398e048a8e280d320b00a7a782381a7c2e975fe655cf91e681212d93"
+    }
+  ]
+}

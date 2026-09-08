@@ -1,0 +1,42 @@
+{
+  "evidence": [
+    {
+      "path": "frontend/src/import-data.mutation.test.tsx",
+      "sha256": "F7C6EC6231D0874BC6969159E70E71072D6671E36CAB9EE22279DCC16727DE42"
+    },
+    {
+      "path": "frontend/src/import-refresh.mutation.test.tsx",
+      "sha256": "511826F77B5D4EBF7F9726E88CD8DEFC52EDB360FA05D40773E674CA02EB320D"
+    },
+    {
+      "path": "frontend/stryker.import-data.config.json",
+      "sha256": "565E8D9719D20035CE11B43842CE508A0F93BCBA60EAB62B8B4F867C7DB6D8F6"
+    },
+    {
+      "path": "progress/import_refined_global.log",
+      "sha256": "61CD6AB861CDC09B46CAB943395867928F89D5EC40169DEF832302FC43E76EDC"
+    },
+    {
+      "path": "progress/import_refined_lint_final.log",
+      "sha256": "B360C50EDBEE89E75E3E50737EA1C6176BF2DC17FBB6563C7FD0245F16DE835A"
+    },
+    {
+      "path": "progress/import_refinement_types_final.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "progress/import_refinement_focal.log",
+      "sha256": "545FF876C65E9BDAB6BD9F95DAAA40AC43C34C00B0315FC2C0A53D2B14B4EF5B"
+    },
+    {
+      "path": "progress/import_stryker_incremental/seed-original.json",
+      "sha256": "58464B8EAA0996245F0A3C08F209C8CB57639AD69E613C8E2F80397BEB7118DC"
+    }
+  ],
+  "testExit": 0,
+  "suites": 62,
+  "tests": 2424,
+  "typesExit": 0,
+  "lintExit": 0,
+  "effectiveInputs": "progress/import_stryker_incremental/before.json"
+}

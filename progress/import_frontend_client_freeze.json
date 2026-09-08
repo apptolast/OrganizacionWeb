@@ -1,0 +1,41 @@
+{
+  "inputs": [
+    {
+      "path": "frontend/src/import-data-api.ts",
+      "sha256": "C1B9459711FCDFA82801E7C3EECB3A6611F5466EA1E85BF0CBBCD0E815DBDF31"
+    },
+    {
+      "path": "frontend/src/import-data-api.test.ts",
+      "sha256": "0F10477CE286126FFDC0374259B03B5B2E3BC0648B069717A7227FD149E65AD7"
+    },
+    {
+      "path": "frontend/src/import-data-intent.ts",
+      "sha256": "91A92B3D4E65115C52708FD290EB45F341CA42757CB900B4422773864EAA14D1"
+    },
+    {
+      "path": "frontend/src/import-data-intent.test.ts",
+      "sha256": "7E7DC67ED3DC38A2166F9DA704938B8D988207A49AAE957DA7A12E0A88C38446"
+    },
+    {
+      "path": "progress/import_frontend_client_final.log",
+      "sha256": "28F669469597B08557A701A9156D763F5D4960001FF45ADABD9E73950F09920A"
+    },
+    {
+      "path": "progress/import_frontend_client_checks.log",
+      "sha256": "614EAC0A6F45BD12F0310314FBE998A0E318EB5DE56A8B2C8C85E233656C8C16"
+    },
+    {
+      "path": "progress/import_frontend_client_format_fix.log",
+      "sha256": "C02E5449686D501D068A801EE8D4FD6A0F2DD7A04908B357C91F2685B065B8C0"
+    },
+    {
+      "path": "progress/import_frontend_client_tdd_snapshot.md",
+      "sha256": "B5FF46F421FFD992D596FD9CBC0750CB3B3745BFC45B152333A3A02E8A1290E5"
+    }
+  ],
+  "tests": 56,
+  "finalFormatExit": 0,
+  "files": 2,
+  "stage": "Client and local intention; UI/session integration pending",
+  "testExit": 0
+}

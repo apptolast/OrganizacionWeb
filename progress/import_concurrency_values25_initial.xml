@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-09-08T10:26:46.862Z" hostname="PABLOHGDEV87" time="4.846">
+  <properties/>
+  <testcase name="[1] scope=PROJECT" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.381"/>
+  <testcase name="[2] scope=TASK" classname="com.apptolast.organization.adapter.persistence.ImportConcurrencyTest" time="0.229"/>
+  <system-out><![CDATA[12:26:46.889 [Test worker] INFO org.testcontainers.images.PullPolicy -- Image pull policy will be performed by: DefaultPullPolicy()
+12:26:46.894 [Test worker] INFO org.testcontainers.utility.ImageNameSubstitutor -- Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+12:26:47.003 [Test worker] INFO org.testcontainers.DockerClientFactory -- Testcontainers version: 1.21.4
+12:26:47.159 [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+12:26:47.365 [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+12:26:47.367 [Test worker] INFO org.testcontainers.DockerClientFactory -- Docker host IP address is localhost
+12:26:47.380 [Test worker] INFO org.testcontainers.DockerClientFactory -- Connected to docker: 
+  Server Version: 29.7.2
+  API Version: 1.55
+  Operating System: Docker Desktop
+  Total Memory: 31781 MB
+  Labels: 
+    com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+12:26:48.498 [Test worker] INFO tc.testcontainers/ryuk:0.12.0 -- Creating container for image: testcontainers/ryuk:0.12.0
+12:26:48.705 [Test worker] INFO tc.testcontainers/ryuk:0.12.0 -- Container testcontainers/ryuk:0.12.0 is starting: eddff61a697f56859bff3810bf7d7626202e814f512870bbf66ce16cecb02d41
+12:26:48.979 [Test worker] INFO tc.testcontainers/ryuk:0.12.0 -- Container testcontainers/ryuk:0.12.0 started in PT0.4813448S
+12:26:48.984 [Test worker] INFO org.testcontainers.utility.RyukResourceReaper -- Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+12:26:48.984 [Test worker] INFO org.testcontainers.DockerClientFactory -- Checking the system...
+12:26:48.984 [Test worker] INFO org.testcontainers.DockerClientFactory -- ✔︎ Docker server version should be at least 1.6.0
+12:26:48.985 [Test worker] INFO tc.postgres:17.9-alpine -- Creating container for image: postgres:17.9-alpine
+12:26:49.045 [Test worker] INFO tc.postgres:17.9-alpine -- Container postgres:17.9-alpine is starting: 66c318b1a1bf9943782264534f89924d19c5356773243349b9a311021ae855ba
+12:26:50.237 [Test worker] INFO tc.postgres:17.9-alpine -- Container postgres:17.9-alpine started in PT1.2526938S
+12:26:50.238 [Test worker] INFO tc.postgres:17.9-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:27569/test?loggerLevel=OFF)
+12:26:50.620 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:27569/test?loggerLevel=OFF (PostgreSQL 17.9)
+12:26:50.669 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+12:26:50.673 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 21 migrations (execution time 00:00.031s)
+12:26:50.688 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+12:26:50.741 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+12:26:50.753 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - projects and outbox"
+12:26:50.779 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - outbox publication"
+12:26:50.792 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - project read index"
+12:26:50.805 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - project version"
+12:26:50.817 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - project states"
+12:26:50.830 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - jdbc sessions"
+12:26:50.847 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - tasks"
+12:26:50.861 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - task parent"
+12:26:50.878 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - task status history"
+12:26:50.896 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - availability preferences"
+12:26:50.912 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - planned blocks"
+12:26:50.927 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - block changes"
+12:26:50.942 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - block change integrity"
+12:26:50.965 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - work sessions"
+12:26:50.979 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - work session uniqueness"
+12:26:50.991 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - work session transitions"
+12:26:51.009 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - work session closure"
+12:26:51.019 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - work session end time"
+12:26:51.030 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "19 - appearance preferences"
+12:26:51.041 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - customization"
+12:26:51.058 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "21 - import receipts"
+12:26:51.070 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 21 migrations to schema "public", now at version v21 (execution time 00:00.135s)
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

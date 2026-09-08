@@ -1,0 +1,31 @@
+{
+  "scope": "ImportReceiptDecoder final",
+  "tests": 25,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "exit": 0,
+  "productionUnchangedFrom": "3d5ae5db5c0e84364c4baedcbbf76308869d3720",
+  "artifacts": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ImportReceiptDecoder.java",
+      "sha256": "493FCAD7AD7CB5BEFCF63C6078A68CD6E305AF7A26ED884416B31C1A09CF2895"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportReceiptDecoderTest.java",
+      "sha256": "95FCD7D4E3A87E0D84E15E1A76A5FE65E3EE2CB449CEB872353ED091BF0CA83D"
+    },
+    {
+      "path": "progress/tdd_import_receipt_decoder.md",
+      "sha256": "3F40997C1483AEF2ADFCCC3BF9E8280A5FF8994D44FE54FA655ED5F23EE286C9"
+    },
+    {
+      "path": "progress/import_receipt_final_xml.xml",
+      "sha256": "EC9F489903E4D462AFA09EB68703177772C28BA4BC701A2ECFA5EED8CFE7297A"
+    },
+    {
+      "path": "progress/import_receipt_final.log",
+      "sha256": "04C28F5AD682DADEABE935A9676926390CF5179D7616A76A73B56B1E1A5368EC"
+    }
+  ]
+}

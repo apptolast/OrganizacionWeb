@@ -1,0 +1,101 @@
+{
+  "scope": "Nominal empty import, real PG and three beans; nonempty collections still rejected; not feature completion",
+  "totals": {
+    "tests": 27,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "entries": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ImportFileChangedException.java",
+      "size": 226,
+      "sha256": "da95c0ccb7912225bb8ba918970d532b66aebb6a5fa35bc677dba6032b4b4380"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ImportKeyReusedException.java",
+      "size": 218,
+      "sha256": "a43bb89411adcd260299e4e76b4f673b7a84e4010841ee181e965a5a8d00d8a4"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ImportJsonReader.java",
+      "size": 4682,
+      "sha256": "c95b470ac8c8fccfd9a7abafa2a7f832f00051cb5731f68e550b6cc420572203"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresImportDataStore.java",
+      "size": 8910,
+      "sha256": "9d2965e0a4a5e2ae0ae5fa155c8da850f6c0560b14af0e94e8c8f94809a1a71f"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+      "size": 14329,
+      "sha256": "aba7e3a4178e3468815abfd3d2dd78ad4c281640c7edc679241bbcaef5099249"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V21__import_receipts.sql",
+      "size": 561,
+      "sha256": "382fb75e86a62e371e312e22dcb01c00f4fa1721128b3308bf23cfd1826976c5"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportJsonReaderTest.java",
+      "size": 11217,
+      "sha256": "162c4f7ea910253756062b8da42f67fa446d04ebb3bb21c15ef361dc11fc5ab4"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportPersistenceTest.java",
+      "size": 15720,
+      "sha256": "dbf192d305fd8a789c30bd3dd7c76a1ebfb998273d8df82b4578d48334e8439f"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/config/ImportWiringTest.java",
+      "size": 2826,
+      "sha256": "33bad382d81adda1d338207e9a6a1bdab0a58c485ddf27e744e021c6fe50e892"
+    },
+    {
+      "path": "progress/tdd_import_data.md",
+      "size": 8109,
+      "sha256": "5dfebc5298632ebf6a31fa65d2935098f2cf9749d68a066ca21b20fb22781ad7"
+    },
+    {
+      "path": "../deployment-preparation/import23-reading-context-xml/TEST-com.apptolast.organization.application.PreviewImportDataTest.xml",
+      "size": 541,
+      "sha256": "97327b1e1c11e2db59a926e5a7cbfd12f4791aa7bdff17671bb88040e774a5f8"
+    },
+    {
+      "path": "../deployment-preparation/import23-reading-context-xml/TEST-com.apptolast.organization.application.ApplyImportDataTest.xml",
+      "size": 537,
+      "sha256": "023906d90c1bf56c60041b8706911aea680dafc3806692e9371bf27f22bb28a7"
+    },
+    {
+      "path": "../deployment-preparation/import23-reading-context-xml/TEST-com.apptolast.organization.application.ReadImportReceiptTest.xml",
+      "size": 531,
+      "sha256": "01b7c994be794274ea5812a8907df13fae71a6b7064c169f6a23b972140fdfbc"
+    },
+    {
+      "path": "../deployment-preparation/import23-reading-context-xml/TEST-com.apptolast.organization.adapter.persistence.ImportJsonReaderTest.xml",
+      "size": 2779,
+      "sha256": "3317e003bb31178df530bfeafc51042a8cbad4589665f380e0254509b8992f6e"
+    },
+    {
+      "path": "../deployment-preparation/import23-reading-context-xml/TEST-com.apptolast.organization.adapter.persistence.ImportPersistenceTest.xml",
+      "size": 7962,
+      "sha256": "15007dec84ad02e3f08d1be77c78e4191da6d9e70d244ed5ac76c1be5134d136"
+    },
+    {
+      "path": "../deployment-preparation/import23-reading-context-xml/TEST-com.apptolast.organization.adapter.config.ImportWiringTest.xml",
+      "size": 11506,
+      "sha256": "662dec6137fddbb25c8b7a380aacd6581f1697d84f33858fa0493aca399f2c89"
+    },
+    {
+      "path": "../deployment-preparation/import23-reading-context-green.log",
+      "size": 1134,
+      "sha256": "08ea950502e4a94ced46b73232fbb73cedda226ba2f22ee2b2e4492625a431bc"
+    },
+    {
+      "path": "../deployment-preparation/import23-reading-context-format.log",
+      "size": 693,
+      "sha256": "459c7d780342385e14fa57a8a6fcdb29a8efd59dfb265e0f1e5179eb8621b600"
+    }
+  ]
+}

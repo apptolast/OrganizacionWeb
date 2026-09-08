@@ -1,0 +1,42 @@
+{
+  "base": "ff7233e37908cbb922bfe2c333555be596274dfb",
+  "scope": "reader-only",
+  "tests": 64,
+  "artifacts": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ImportJsonReader.java",
+      "sha256": "55E1CF5B2FDEC329F739801CB186CD06A7022B515D9938FB0B6B11D7508E0862",
+      "bytes": 12621
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportJsonReaderTest.java",
+      "sha256": "BCD03713403782788ECB9B518E9F69D156CD796F3BEC0E370163C99CC606F3F5",
+      "bytes": 37921
+    },
+    {
+      "path": "progress/tdd_import_json_reader.md",
+      "sha256": "E2AD38AC23825EBDFB8EEA4A2D7A82D95575245BFA3605BB849A19E30A6E3A6C",
+      "bytes": 5456
+    },
+    {
+      "path": "progress/import_reader_results.json",
+      "sha256": "A2EACDF5A42C61BA6812718A761EABE539B7801BAA5BDED3B91E82B134BE03EF",
+      "bytes": 482
+    },
+    {
+      "path": "progress/import_reader_final_xml.xml",
+      "sha256": "3EC1A95F520863C8970B228E62445F4613FB7735124FD2FC2A345C8A70BBE14B",
+      "bytes": 10089
+    },
+    {
+      "path": "progress/import_reader_formatted_final.log",
+      "sha256": "0296DD7FD6BE56675069BD460450489251EC64F91B37F06182581C23F4509390",
+      "bytes": 384
+    },
+    {
+      "path": "progress/import_reader_format_check.log",
+      "sha256": "06FB5D5B9F919C7EDF080E679525A331CF47D98B026001AF571A62C624FD1AA2",
+      "bytes": 315
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "context": "407ccbf",
+  "exitCode": 0,
+  "tests": 22,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "inputs": [
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportConcurrencyTest.java",
+      "sha256": "0D659E9A9A1A07026515B7D46B316DB3EE79C50E6FFDA5F9D7969C99957A9A95"
+    },
+    {
+      "path": "progress/tdd_import_concurrency.md",
+      "sha256": "8293BBD24D5D3702D81643C1F8E00A38E84399ECB3295886011B360B81C9878D"
+    },
+    {
+      "path": "progress/import_concurrency_values25_initial.log",
+      "sha256": "83D91F377AFBD8230F748E1159F048F62504F8053EC9E3AFC9F95731F926B864"
+    },
+    {
+      "path": "progress/import_concurrency_values25_initial.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+    },
+    {
+      "path": "progress/import_concurrency_values25_initial.xml",
+      "sha256": "D465B8E98121098436966595220BB226EE5C927CBE1557141CD52FE2272371D0"
+    },
+    {
+      "path": "progress/import_concurrency_values26_initial.log",
+      "sha256": "58AB535FE662378FE15957BF4419127A43E87E1ABD14A66F5E7D26476F5047AC"
+    },
+    {
+      "path": "progress/import_concurrency_values26_initial.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+    },
+    {
+      "path": "progress/import_concurrency_values26_initial.xml",
+      "sha256": "CAB5E066AE1FDEEDC8E7F74A5550A97031887A93DFFFF1F4460D8C2957AF2685"
+    },
+    {
+      "path": "progress/import_concurrency_snapshot18_initial.log",
+      "sha256": "58AB535FE662378FE15957BF4419127A43E87E1ABD14A66F5E7D26476F5047AC"
+    },
+    {
+      "path": "progress/import_concurrency_snapshot18_initial.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+    },
+    {
+      "path": "progress/import_concurrency_snapshot18_initial.xml",
+      "sha256": "2B5F3BCC2B1DD8C86B76737F68AA394AB6AB79059980090F2A63224D59738793"
+    },
+    {
+      "path": "progress/import_concurrency_values_format.log",
+      "sha256": "A1AB1667D970CCF86FF4788A46EA5AC9995ED009596152E1DE4C4AD7C4346BA2"
+    },
+    {
+      "path": "progress/import_concurrency_values_final.log",
+      "sha256": "DA35B021652F068110EA3A61778D4602364C76B0A3A0E2865099CEB13A317579"
+    },
+    {
+      "path": "progress/import_concurrency_values_final.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+    },
+    {
+      "path": "progress/import_concurrency_values_final.xml",
+      "sha256": "29688120106934E4ADEF5D09B09143E94E4F1F888D41BFCF6E03AFF0612F6932"
+    }
+  ]
+}

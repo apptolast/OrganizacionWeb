@@ -1,0 +1,29 @@
+{
+  "skipped": 0,
+  "tests": 20,
+  "errors": 0,
+  "base": "2060322",
+  "files": [
+    {
+      "sha256": "41DE6DDC566C96ED742CD7B4A7BC9DC017AB3D40660FAE96A746850A4E9EC800",
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/ImportDataController.java"
+    },
+    {
+      "sha256": "2FCD0B4AFE56E7AFD8F39C1DFEF1A8F3C703C73C891A3969C2478AFB7F2600C7",
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/ImportDataApiTest.java"
+    },
+    {
+      "sha256": "8D1B96286F44FA6A7FA68099535AE33309D11B652828F5672B875CD3BCBBDAC0",
+      "path": "progress/tdd_import_data_http.md"
+    },
+    {
+      "sha256": "6CEC10086FF4D94933A8EBE997949E136AD5E7D1C92538C9A9524259A0781AA8",
+      "path": "progress/import_http_preview_reviewed_xml.xml"
+    },
+    {
+      "sha256": "4CACF58108DCD9DE699F7A4CAFC1730763037FB0666788D2D500AE777D351A74",
+      "path": "progress/import_http_preview_reviewed_final.log"
+    }
+  ],
+  "failures": 0
+}

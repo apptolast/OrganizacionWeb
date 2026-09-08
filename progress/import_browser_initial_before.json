@@ -1,0 +1,306 @@
+[
+  {
+    "path": "frontend/src\\appearance.tsx",
+    "sha256": "F221223CA940B000E393864E599FD2B6E522341D33CFA8C3662EA7794EEADA68"
+  },
+  {
+    "path": "frontend/src\\navigation.tsx",
+    "sha256": "9D801F6A3D8FC8CBC6B06DE884F9B14706D0D61A845E9B5DB017BF7666C0F2EA"
+  },
+  {
+    "path": "frontend/src\\appearance-state.tsx",
+    "sha256": "D54A41E269E9B902541856594A5ACB5324DC865C9F78765CAB3D12AE41D4DFC9"
+  },
+  {
+    "path": "frontend/src\\custom-fields-api.ts",
+    "sha256": "5D0EA08122722B22BB445E7FDF1DF506F93F8390337E394785CFB0E367F5AAD1"
+  },
+  {
+    "path": "frontend/src\\main.tsx",
+    "sha256": "34C4F217EB45208F2C856A29BA80249D90051A85A328E6D39FED74CF8B1A8627"
+  },
+  {
+    "path": "frontend/src\\App.tsx",
+    "sha256": "40CA517B2D87C84F3A96C682B0A8A5835BD8F20DE61D6851BEEDFF6F80995F18"
+  },
+  {
+    "path": "frontend/src\\api-client.ts",
+    "sha256": "19B8D5C0BACB65F5E219BA66035F80392924D80DDD521949D682DC5A995DA7AC"
+  },
+  {
+    "path": "frontend/src\\appearance-api.ts",
+    "sha256": "CEA492E9795510120A4935BD93372CE4F6A27468E2C6B703EA9EF83AE885A23C"
+  },
+  {
+    "path": "frontend/src\\import-data.tsx",
+    "sha256": "CE5BFFF6CCEF58F137938AF4E8BF551095E3F97A03EB900275FA6AA1A66055A0"
+  },
+  {
+    "path": "frontend/src\\change-submit.tsx",
+    "sha256": "E12B6C1F5ABB4777976EF3792520D4365D53B8A4F5C8E3F06D1AE057A692FB02"
+  },
+  {
+    "path": "frontend/src\\block-details.tsx",
+    "sha256": "73E9D94D56036F08CDE58B8FE2F7CE1C102E7D002D49CB846CF0528DE0846C85"
+  },
+  {
+    "path": "frontend/src\\block-confirmation.tsx",
+    "sha256": "6A882F6A46FF3B718D30676BA39E0838C820806C0A8C14664E94A876DCC8F73E"
+  },
+  {
+    "path": "frontend/src\\availability.tsx",
+    "sha256": "042C68F09ABA85B895E0D39A91646E6DFFC141FF2C78E2E30CBFC9F4D7F62AFA"
+  },
+  {
+    "path": "frontend/src\\edit-project-api.ts",
+    "sha256": "BDFFF194BA33CC79C40C5359DDCD6768FC2C16148D75A0A234BCB6F594377A29"
+  },
+  {
+    "path": "frontend/src\\customization.tsx",
+    "sha256": "3734C32B4C1D47C9C4ADD218D68EE46553CB11A59D4C34124D221091D713D5C5"
+  },
+  {
+    "path": "frontend/src\\history.scss",
+    "sha256": "526A83C2C4CC79CC8A24B29DD8254088B30E6E8085D49795499A9972D633DCE7"
+  },
+  {
+    "path": "frontend/src\\customization-state.ts",
+    "sha256": "D9FF514BF11B61D15BBE6F065E8040C5F9217917286C62C08B21F7B2554BCC1F"
+  },
+  {
+    "path": "frontend/src\\import-data-intent.ts",
+    "sha256": "166FD68B4BB15434417464A1037331FBEC15FF0F44F6437D9522FEFA32F0BD68"
+  },
+  {
+    "path": "frontend/src\\customization-api.ts",
+    "sha256": "CF121AF437C95B1D758F9437F7540DAAD5A14BF2E4C201C43E4D88BBC9C0530C"
+  },
+  {
+    "path": "frontend/src\\custom-fields.tsx",
+    "sha256": "40D34D084EE6A5DF8500D845DD48EBC5CD5205163F22DCF9E35E269AC851910A"
+  },
+  {
+    "path": "frontend/src\\history.tsx",
+    "sha256": "539B0F7B2C07E6DA35FD1CFB6F85452FA6BD93BA3904E2160C591410226D8500"
+  },
+  {
+    "path": "frontend/src\\availability-api.ts",
+    "sha256": "24E01D1EC98516B36CCF468C95AD4C4F50F2B2DAB4E6629AA1EEFB1B2ED3C6CD"
+  },
+  {
+    "path": "frontend/src\\import-data-api.ts",
+    "sha256": "F5317910CF9D54FF0C4467C59F01BC002265EEB71D61F348DEF09BC74C999032"
+  },
+  {
+    "path": "frontend/src\\history-api.ts",
+    "sha256": "768EFA248169C13F2FA07E1BA752A1990D060DF65601F4F500ADCB3FA173DAE0"
+  },
+  {
+    "path": "frontend/src\\export-data.tsx",
+    "sha256": "2EBAC6D43F72002A692EECB5B361209954F13D0D0C6FE06F295DD416C8152798"
+  },
+  {
+    "path": "frontend/src\\project-tasks.tsx",
+    "sha256": "FE9D3C46F59609B8A677FA3505D43C02DEAC3D105494C43FCC51AEC5AE78D161"
+  },
+  {
+    "path": "frontend/src\\export-data-api.ts",
+    "sha256": "19F91F62609E7CBED8CAB00AB79075BA1ACA64FF5A5B1D12643F3B93E1DA1D23"
+  },
+  {
+    "path": "frontend/src\\project-status.ts",
+    "sha256": "3566378978C9124C74D9377ABB82FFFEE2808E64AF3B111B5C1263623E8B62AC"
+  },
+  {
+    "path": "frontend/src\\project-status-control.tsx",
+    "sha256": "F2BE40A3362709971106D38E5492CAAA1AED78EEF6F6153D293093FB09594BB1"
+  },
+  {
+    "path": "frontend/src\\project-reader.tsx",
+    "sha256": "5E53712172EEC0406A062D25ED343F56ABA5A562854A9C3A451983827F2C4506"
+  },
+  {
+    "path": "frontend/src\\today.tsx",
+    "sha256": "930495AEE7F67E1101FC966C6C42DB448788208B76FE228AC6EEA63FD99A8D1C"
+  },
+  {
+    "path": "frontend/src\\today.scss",
+    "sha256": "A3317B64D2B02990B728094B46138181174978B034FADDF5A06DA1067357DD62"
+  },
+  {
+    "path": "frontend/src\\today-fixture.ts",
+    "sha256": "8388B2372934A59FDB1E1985B7AC88C74B5C75A6A77A9D41A3C822B5AC1C54EB"
+  },
+  {
+    "path": "frontend/src\\today-api.ts",
+    "sha256": "96EECDADA067B78AEA8DA95FFE21B3E5DD663C7BD162736228B0DD40B0A93FBA"
+  },
+  {
+    "path": "frontend/src\\test-setup.ts",
+    "sha256": "1C1F608698CEA6A2BDF222D68EF48FB2A8F6BB99297AFE3ED87151CB67739A99"
+  },
+  {
+    "path": "frontend/src\\tasks-api.ts",
+    "sha256": "5E6BE9A3F902D3BB3C6C1F8C29A6C057548CF1A7DF2D1B2C338AAB051058CC32"
+  },
+  {
+    "path": "frontend/src\\task-validation.ts",
+    "sha256": "656D59DAC2C0DC8829F57753221C06D1C1793DF4E0D2DBC9414EB1B471D3BA97"
+  },
+  {
+    "path": "frontend/src\\styles.scss",
+    "sha256": "443BFC617E6DB44F5721DF2CF80F2CDD18E6475EEDF0469B133364A861C7F9F6"
+  },
+  {
+    "path": "frontend/src\\read-projects-api.ts",
+    "sha256": "9674E0CE4E84D24F281FB3D13BC581AA8E7B97A4545D57ADE5AC830E3510B445"
+  },
+  {
+    "path": "frontend/src\\session-gate.tsx",
+    "sha256": "626CCE448FCEF04CF976D90B267E8C687164FDB88065A516226DE7E56BDADCE6"
+  },
+  {
+    "path": "frontend/src\\projects-api.ts",
+    "sha256": "B94FB5B2F52C5FF088FD726CF2F8D0B61AC0F3ECF6D8607EE26C3FCE4D60B2F2"
+  },
+  {
+    "path": "frontend/src\\session-api.ts",
+    "sha256": "C9ADDB2D3DB74AA308E6250084EB499122CA476BEACCB2B62A0A97720F0C283B"
+  },
+  {
+    "path": "frontend/src\\schedule-block-api.ts",
+    "sha256": "6CCA4B6A14620B2F30483CB2774292C784F7DCCB0EF2090EFAF16C426DA26D0C"
+  },
+  {
+    "path": "frontend/src\\reschedule-history.tsx",
+    "sha256": "7C2E037F9573395D651C259A7E4BB8B83E1D0F63DC85D17FFA05EE8050C52C56"
+  },
+  {
+    "path": "frontend/src\\task-reader.tsx",
+    "sha256": "4B28EC5D74241D9BCCE62C3AEDE69374CD0CFB74347AC5CB9C767A305091D236"
+  },
+  {
+    "path": "frontend/src\\task-blocks.tsx",
+    "sha256": "EC2D7AC254DD1D96410FC4618C7D5AEDCAD51B02CE049160113EF8206D5FD5A3"
+  },
+  {
+    "path": "frontend/src\\task-parent.tsx",
+    "sha256": "D586AD1021403351CBE1C2CCC3C40C4D73695DA0DC29F1F46E345FBF67A5D63B"
+  },
+  {
+    "path": "frontend/src\\task-history.tsx",
+    "sha256": "90885F84E6B221E35A0E7AFB7707B19233E8DFD6DF88BC63302F89394E279BAD"
+  },
+  {
+    "path": "frontend/src\\task-state.tsx",
+    "sha256": "9EB8B493CA43772D7B12F0D040526E135CE8A572F8CB5E191D3B8BFA7C1EC7A3"
+  },
+  {
+    "path": "frontend/src\\task-status-api.ts",
+    "sha256": "4A388755E135974CCDF85B3DEB59D5060088F0365A59BE31DB6D376563899CEA"
+  },
+  {
+    "path": "frontend/src\\reschedule-api.ts",
+    "sha256": "CD71FDF6304A44528835C3CD5591DF6D1728C83FEB997F49AD7EAF8C4CB7CC09"
+  },
+  {
+    "path": "frontend/src\\use-read-projects.ts",
+    "sha256": "3169323DC28556C1F20F66134F5B85D7D7BE86F3225ED925697F27B53780C1A4"
+  },
+  {
+    "path": "frontend/src\\use-project-tasks.ts",
+    "sha256": "615EE659F49B03AA38D348709A632EDED08A0806F2D867361CA057AD014446A2"
+  },
+  {
+    "path": "frontend/src\\use-work-session-decision.ts",
+    "sha256": "A17E547AE2CF14CE074B8BD4C51EF32592573837F5C56D213FCDC2CC2FF8060B"
+  },
+  {
+    "path": "frontend/src\\use-project-status.ts",
+    "sha256": "A843D44BF719371ACEE7E6CCDE1BB90B0562BDB0EC31745F15273E8C65B1F36F"
+  },
+  {
+    "path": "frontend/src\\use-edit-project.ts",
+    "sha256": "A5CA25FFA8BC1DCBFFFAF7F32C31FB15FA254DF8740DB9B821056B277BC016E2"
+  },
+  {
+    "path": "frontend/src\\use-session.ts",
+    "sha256": "C7FC075D87DC8B2C0BCD5C16D456ED0BC240A5D4703FF2AFE642B9F0E4B696E3"
+  },
+  {
+    "path": "frontend/src\\use-create-project.ts",
+    "sha256": "5EECFACADA0488227E52F55B8056B5AF95AD9FAF6C51FEE1E5869206DE024A91"
+  },
+  {
+    "path": "frontend/src\\vite-env.d.ts",
+    "sha256": "65996936FBB042915F7B74A200FCDDE7E410F32A669B1AB9597CFAA4B0FADDB5"
+  },
+  {
+    "path": "frontend/src\\reschedule-block.tsx",
+    "sha256": "F923BBEEAD7EFCE5FC2ED40DF994B8149B3D8B22B6A99C22752F762AB0242972"
+  },
+  {
+    "path": "frontend/src\\project-editor.tsx",
+    "sha256": "1B7BE5A821F9D94A0CEDB2CBAB3B2DCC8301C768A921EF37D2C8BBED7ABE05A6"
+  },
+  {
+    "path": "frontend/src\\weekly-review-api.ts",
+    "sha256": "9A9C336BD6946099E23C7CC1CF655C229A698365C38308A8EF1DC8BD94631F76"
+  },
+  {
+    "path": "frontend/src\\workspace.tsx",
+    "sha256": "85B830F48A1BCAD228D194F637406CD07A998F7F68470876D445994BD44110A1"
+  },
+  {
+    "path": "frontend/src\\work-session.tsx",
+    "sha256": "113D20EADD6313AEB590235EA86D1E13B79F17A518E7C5841C40BDD42AEE3E7D"
+  },
+  {
+    "path": "frontend/src\\work-session.scss",
+    "sha256": "0E41A5408141BFE004548018AC35CF5C32E9B239955759FA18E304D7DB84FC80"
+  },
+  {
+    "path": "frontend/src\\work-session-state.tsx",
+    "sha256": "3EBB7CDAC83986BC0A55FD2423B8BAC67A570F2E8035E0846E1E73E6DFCE2ACD"
+  },
+  {
+    "path": "frontend/src\\work-session-state-api.ts",
+    "sha256": "2F98191AB9C715600891026D0711E896CBD622930F4755C3010C0F5FD21C0A15"
+  },
+  {
+    "path": "frontend/src\\work-session-reader.tsx",
+    "sha256": "FD83DD0B37EC1B3CDDED8857B4D8E512EDDD4A53C27A4817BEE4A4B0E8F54153"
+  },
+  {
+    "path": "frontend/src\\work-session-end.tsx",
+    "sha256": "667FA2EEBA44225BD2CB19A9E7DA02BFE664AB158F7212EF106CE1872CEDFBFA"
+  },
+  {
+    "path": "frontend/src\\work-session-end-api.ts",
+    "sha256": "A7BD65AA29827DE31BE60286C528E55710ACA53F2A968C4B11F6454D267CFCE6"
+  },
+  {
+    "path": "frontend/src\\work-session-api.ts",
+    "sha256": "8B37B3C856FC208EB8A873A676D757E3C8945A60470C50A2739A7602540520C3"
+  },
+  {
+    "path": "frontend/src\\weekly-review.tsx",
+    "sha256": "284098F9B523FD289E026C5BFD60C626C9437D9A89354CEC684F4AA2A11FE16C"
+  },
+  {
+    "path": "e2e/import-data-browser.spec.mjs",
+    "sha256": "BEBA2DBE01C4CA33DBDF36B760D3E5CCCED865C2824EE270F44DDD83393F5100"
+  },
+  {
+    "path": "e2e/import-data-browser.config.mjs",
+    "sha256": "E10C4A5022A12FD5A5B329C6F615E293C0EDD3AB04683FD61E6D2BAEA86C48FE"
+  },
+  {
+    "path": "frontend/vite.config.ts",
+    "sha256": "953482A1689E9DF968D799095068BA42C4B5E683C04639E5D25D0D2A8FADCAA8"
+  },
+  {
+    "path": "pnpm-lock.yaml",
+    "sha256": "B3151E08C2AF7E480D7F6F5AEAFB2A230E92C9DD5AAF18DFCD787EE71C8BA655"
+  }
+]

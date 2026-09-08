@@ -1,0 +1,16 @@
+// Original PIT campaign for the three complete export adapters in this checkout.
+allprojects {
+    afterEvaluate { project ->
+        def pit = project.extensions.findByName('pitest')
+        if (pit != null) {
+            pit.targetClasses.set([
+                'com.apptolast.organization.adapter.http.ExportDataController*',
+                'com.apptolast.organization.adapter.http.ExportHeadersFilter*',
+                'com.apptolast.organization.adapter.persistence.ExportReceiptWriter*'
+            ] as Set)
+            pit.targetTests.set(['com.apptolast.organization.*'] as Set)
+            pit.reportDir.set(project.layout.buildDirectory.dir('reports/pitest-export-http-receipt-wired'))
+        }
+    }
+}
+

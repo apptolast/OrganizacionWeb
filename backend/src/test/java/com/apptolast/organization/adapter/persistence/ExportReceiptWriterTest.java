@@ -44,6 +44,47 @@ class ExportReceiptWriterTest {
 
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+  void s5_beforeSnapshotCannotSubstituteAnotherProject(boolean session) throws Exception {
+    var block = receipt();
+    var change = pauseReceipt();
+    var tree =
+        (com.fasterxml.jackson.databind.node.ObjectNode) json.valueToTree(session ? change : block);
+    var before = tree.at(session ? "/before/session" : "/before");
+    ((com.fasterxml.jackson.databind.node.ObjectNode) before)
+        .put("projectId", UUID.randomUUID().toString());
+    var output = new ByteArrayOutputStream();
+    try (var generator = json.getFactory().createGenerator(output)) {
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+              () -> {
+                var writer = new ExportReceiptWriter(json);
+                if (session)
+                  writer.session(
+                      generator,
+                      tree.toString(),
+                      change.id(),
+                      change.before().session(),
+                      change.action(),
+                      1,
+                      change.occurredAt());
+                else
+                  writer.block(
+                      generator,
+                      tree.toString(),
+                      block.id(),
+                      block.blockId(),
+                      block.before().projectId(),
+                      block.before().taskId(),
+                      block.kind(),
+                      block.version(),
+                      block.occurredAt());
+              })
+          .isInstanceOf(IllegalArgumentException.class);
+    }
+    assertThat(output.size()).isZero();
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
   void s5_invalidReceiptTimestampUsesTheStorageFailureBoundary(boolean session) throws Exception {
     var block = receipt();
     var change = pauseReceipt();
@@ -452,15 +493,30 @@ class ExportReceiptWriterTest {
     if (extension == null) tree.remove("extension");
     var output = new ByteArrayOutputStream();
     try (var generator = json.getFactory().createGenerator(output)) {
+      generator.writeStartArray();
       new ExportReceiptWriter(json)
           .session(generator, tree.toString(), receipt.id(), original, action, 1, now);
+      generator.writeString("next-receipt");
+      generator.writeEndArray();
     }
-    var actual = json.readTree(output.toByteArray());
+    var array = json.readTree(output.toByteArray());
+    assertThat(array.isArray()).isTrue();
+    assertThat(array.size()).isEqualTo(2);
+    assertThat(array.path(1).textValue()).isEqualTo("next-receipt");
+    var actual = array.path(0);
     assertThat(actual.has("closure")).isFalse();
     assertThat(actual.size()).isEqualTo(extension == null ? 6 : 7);
     assertThat(actual.at("/after/status").textValue()).isEqualTo(after.status());
     assertThat(actual.at("/after/workedMicroseconds").textValue())
         .isEqualTo(Long.toString(after.workedMicroseconds()));
+    for (var name : java.util.List.of("before", "after")) {
+      var state = name.equals("before") ? before : after;
+      var since = actual.path(name).path("runningSince");
+      if (state.runningSince() == null) assertThat(since.isNull()).isTrue();
+      else
+        assertThat(since.textValue())
+            .isEqualTo(state.runningSince().toString().replace("Z", ".000000Z"));
+    }
     if (extension != null) {
       assertThat(actual.at("/extension/additionalMinutes").intValue()).isEqualTo(15);
       assertThat(actual.at("/extension/previousEndAt").textValue())
@@ -500,6 +556,7 @@ class ExportReceiptWriterTest {
     tree.remove("extension");
     var output = new ByteArrayOutputStream();
     try (var generator = json.getFactory().createGenerator(output)) {
+      generator.writeStartArray();
       new ExportReceiptWriter(json)
           .session(
               generator,
@@ -509,8 +566,14 @@ class ExportReceiptWriterTest {
               "CLOSE",
               before.revision(),
               occurred);
+      generator.writeString("next-receipt");
+      generator.writeEndArray();
     }
-    var actual = json.readTree(output.toByteArray());
+    var array = json.readTree(output.toByteArray());
+    assertThat(array.isArray()).isTrue();
+    assertThat(array.size()).isEqualTo(2);
+    assertThat(array.path(1).textValue()).isEqualTo("next-receipt");
+    var actual = array.path(0);
     assertThat(actual.properties())
         .extracting(java.util.Map.Entry::getKey)
         .containsExactly("id", "sessionId", "action", "occurredAt", "before", "after", "closure");

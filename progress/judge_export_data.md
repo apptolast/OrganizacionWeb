@@ -189,3 +189,29 @@ catorce cantidades coherentes, filas/eventos intactos y URL revocada al salir.
 El log confirma retirada del stack y volumen propios. No hubo cambios de
 producto para este resultado. No acredita las guardas ni el rendimiento
 del WIP posterior de A, ni aceptación sobre HTTPS productivo.
+
+## Persistencia final y regresión global: APPROVED parcial
+
+Fuente final e9350e9: root leyó el diff SQL completo y los nuevos oráculos
+de snapshot, límites inclusivos, fallo tardío, integridad y proxy real
+(d68c94, 989925, 23573e). Diez XML originales acreditan 138 pruebas,
+sin fallos, errores ni skips; sus hashes coinciden. Las seis huellas del
+freeze final también coinciden (deffb0). La auditoría independiente de C
+confirma los cuatro últimos campos cerrados sobre la misma fuente.
+
+Los lotes fijos se limitan a columnas acotadas por SQL; los demás escalares
+usan el máximo del mismo snapshot y un presupuesto calculado. Los recibos
+continúan de uno en uno. Las 55000 reservas pasan por Nginx sin modificar
+su timeout de 15 segundos. El fallo tardío mantiene sus oráculos y desplaza
+únicamente el seam a monday_minutes, porque zone_id ahora se lee en la
+guarda previa legítima. Los intentos y errores de fixture anteriores se
+conservan en la bitácora.
+
+Init oficial final EXIT 0 (49110a): 2844 pruebas Java en 123 suites,
+2295 frontend en 56 archivos y 66 del arnés. XML verificados directamente
+(d47362), copias en export_global_xml y manifiesto export_final_init_results.json.
+Log SHA256 C43A7FC02862D9F9BC7EEA41E14C9440E954D3375FC1F9863FCFFEB035547570.
+Build backend y TypeScript/Vite EXIT 0 (d19fa5), log SHA256
+DE6ABD901FB1251EAAEAE2CF0D9BA7BA86A752B554729C0F7EE0D2511934B062.
+Fuentes, pruebas y configuración permanecen sin diferencias frente al commit.
+Faltan el resultado PIT de persistencia, el cierre de E2E global y publicación.

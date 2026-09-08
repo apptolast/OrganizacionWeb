@@ -533,6 +533,141 @@ class ImportPersistenceTest {
   }
 
   @Test
+  void s9_oversizedInvalidIdentityIsRejectedBeforeIndexConstruction() throws Exception {
+    var owner = "invalid-index-key-" + java.util.UUID.randomUUID();
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = json.readTree(invalidProjectText(owner, "Proyecto"));
+    var invalid = new StringBuilder();
+    for (int i = 0; i < 1000; i++) invalid.append(java.util.UUID.randomUUID());
+    ((com.fasterxml.jackson.databind.node.ObjectNode) file.path("data").path("projects").get(0))
+        .put("id", invalid.toString());
+    var body = json.writeValueAsBytes(file);
+    var sha =
+        java.util.HexFormat.of()
+            .formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(body));
+    var store = new PostgresImportDataStore(jdbc, manager);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> store.preview(owner, new ByteArrayInputStream(body)))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                store.apply(
+                    owner,
+                    java.util.UUID.randomUUID(),
+                    sha,
+                    new ByteArrayInputStream(body),
+                    () -> {
+                      throw new AssertionError("Invalid identity must not read clock");
+                    }))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM projects WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM import_receipts WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "block_changes,false",
+    "work_session_changes,false",
+    "block_changes,true",
+    "work_session_changes,true"
+  })
+  void s22_existingHistoricalReceiptCorruptionIsStorageUnavailable(String table, boolean oversized)
+      throws Exception {
+    var owner = "existing-corrupt-" + java.util.UUID.randomUUID();
+    var ids = seedCompleteAccount(owner);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T15:00:00Z"))
+        .writeTo(bytes);
+    var where = table.equals("block_changes") ? "project_id=?" : "session_id=?";
+    var id = table.equals("block_changes") ? ids[0] : ids[3];
+    var original =
+        jdbc.queryForObject(
+            "SELECT receipt::text FROM " + table + " WHERE " + where, String.class, id);
+    try {
+      jdbc.update(
+          "UPDATE "
+              + table
+              + " SET receipt=jsonb_build_object('unknown',repeat('x',?)) WHERE "
+              + where,
+          oversized ? 33554433 : 1,
+          id);
+      var before =
+          jdbc.queryForMap(
+              "SELECT xmin::text,ctid::text,md5(receipt::text) AS digest FROM "
+                  + table
+                  + " WHERE "
+                  + where,
+              id);
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+              () ->
+                  new PostgresImportDataStore(jdbc, manager)
+                      .preview(owner, new ByteArrayInputStream(bytes.toByteArray())))
+          .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+      assertThat(
+              jdbc.queryForMap(
+                  "SELECT xmin::text,ctid::text,md5(receipt::text) AS digest FROM "
+                      + table
+                      + " WHERE "
+                      + where,
+                  id))
+          .isEqualTo(before);
+    } finally {
+      jdbc.update("UPDATE " + table + " SET receipt=?::jsonb WHERE " + where, original, id);
+    }
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(strings = {"effectiveEndAt", "lastDecisionAt"})
+  void s10_extendedSessionKeepsTheConfirmedEndAndLastDecision(String field) throws Exception {
+    var owner = "extended-snapshot-" + java.util.UUID.randomUUID();
+    var ids = seedCompleteAccount(owner);
+    var json =
+        new com.fasterxml.jackson.databind.ObjectMapper()
+            .findAndRegisterModules()
+            .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    var at = Instant.parse("2026-09-08T12:02:00Z");
+    new com.apptolast.organization.application.ExtendWorkSession(
+            new PostgresWorkSessionStore(jdbc, manager, json),
+            java.time.Clock.fixed(at, java.time.ZoneOffset.UTC))
+        .extend(
+            owner,
+            ids[3],
+            java.util.UUID.randomUUID(),
+            new com.apptolast.organization.application.WorkSessionRevision(ids[3], 2),
+            5);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> at.plusSeconds(1))
+        .writeTo(bytes);
+    var store = new PostgresImportDataStore(jdbc, manager);
+    assertThat(
+            store
+                .preview(owner, new ByteArrayInputStream(bytes.toByteArray()))
+                .identicalCounts()
+                .workSessions())
+        .isEqualTo(1);
+    var file = json.readTree(bytes.toByteArray());
+    ((com.fasterxml.jackson.databind.node.ObjectNode) file.path("data").path("workSessions").get(0))
+        .put(
+            field,
+            field.equals("effectiveEndAt")
+                ? "2026-09-08T12:31:00.000000Z"
+                : "2026-09-08T12:03:00.000000Z");
+    var before = businessRows();
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> store.preview(owner, new ByteArrayInputStream(json.writeValueAsBytes(file))))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+    assertThat(businessRows()).isEqualTo(before);
+  }
+
+  @Test
   void s10_projectionIntervalMustMatchLatestReceiptWithoutRecalculatingZone() throws Exception {
     var owner = "projection-snapshot-" + java.util.UUID.randomUUID();
     var ids = seedCompleteAccount(owner);

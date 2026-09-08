@@ -91,16 +91,58 @@ public final class PostgresImportDataStore
             .build();
     jdbc.execute(
         "CREATE TEMP TABLE import_stage(collection TEXT NOT NULL,raw TEXT NOT NULL,payload JSONB,durable_receipt JSONB,existing_receipt JSONB) ON COMMIT DROP");
+    var collections = new java.util.ArrayList<String>();
+    var records = new java.util.ArrayList<String>();
+    int[] pendingBytes = {0};
     ImportJsonReader.RecordConsumer consumer =
-        (collection, row) ->
-            jdbc.update(
-                "INSERT INTO import_stage(collection,raw) VALUES (?,?)",
-                collection,
-                json.writeValueAsString(row));
+        (collection, row) -> {
+          var raw = json.writeValueAsString(row);
+          // ASCII escaping makes string length the encoded byte count. One oversized row is flushed
+          // alone.
+          if (!records.isEmpty()
+              && (records.size() == 128 || pendingBytes[0] + (long) raw.length() > 65536)) {
+            flushStage(collections, records);
+            pendingBytes[0] = 0;
+          }
+          collections.add(collection);
+          records.add(raw);
+          pendingBytes[0] += raw.length();
+          if (pendingBytes[0] >= 65536) {
+            flushStage(collections, records);
+            pendingBytes[0] = 0;
+          }
+        };
     var reader = new ImportJsonReader();
-    return expectedSha == null
-        ? reader.read(body, consumer)
-        : reader.read(body, consumer, expectedSha);
+    var header =
+        expectedSha == null
+            ? reader.read(body, consumer)
+            : reader.read(body, consumer, expectedSha);
+    flushStage(collections, records);
+    return header;
+  }
+
+  private void flushStage(java.util.List<String> collections, java.util.List<String> records) {
+    if (records.isEmpty()) return;
+    jdbc.execute(
+        (org.springframework.jdbc.core.ConnectionCallback<Void>)
+            connection -> {
+              var names = connection.createArrayOf("text", collections.toArray(String[]::new));
+              var bodies = connection.createArrayOf("text", records.toArray(String[]::new));
+              try (var statement =
+                  connection.prepareStatement(
+                      "INSERT INTO import_stage(collection,raw) SELECT * FROM unnest(?::text[],?::text[])")) {
+                statement.setArray(1, names);
+                statement.setArray(2, bodies);
+                if (statement.executeUpdate() != records.size())
+                  throw new java.sql.SQLException("Staging rows were not persisted");
+              } finally {
+                names.free();
+                bodies.free();
+              }
+              return null;
+            });
+    collections.clear();
+    records.clear();
   }
 
   private com.apptolast.organization.application.ImportCounts compare(String owner) {
@@ -448,6 +490,20 @@ public final class PostgresImportDataStore
   }
 
   private void existingReceipts(String owner) {
+    if (jdbc.queryForObject(
+        """
+        SELECT EXISTS(SELECT 1 FROM import_stage s JOIN block_changes c ON c.id::text=s.payload->>'id'
+          JOIN projects p ON p.id=c.project_id WHERE s.collection='blockChanges' AND p.owner_id=?
+            AND octet_length(c.receipt::text)::bigint+octet_length(c.kind)>33554432)
+        OR EXISTS(SELECT 1 FROM import_stage s JOIN work_session_changes c ON c.id::text=s.payload->>'id'
+          JOIN work_sessions w ON w.id=c.session_id WHERE s.collection='workSessionChanges' AND c.owner_id=?
+            AND octet_length(c.receipt::text)::bigint+octet_length(c.action)+octet_length(w.zone_id)>33554432)
+        """,
+        Boolean.class,
+        owner,
+        owner))
+      throw new StorageUnavailableException(
+          new IllegalArgumentException("Stored receipt exceeds the bounded reader budget"));
     var queries =
         List.of(
             """
@@ -523,7 +579,7 @@ public final class PostgresImportDataStore
                         != 1)
                       throw new StorageUnavailableException(
                           new IllegalStateException("Receipt comparison was not prepared"));
-                  } catch (IOException failure) {
+                  } catch (IOException | IllegalArgumentException failure) {
                     throw new StorageUnavailableException(failure);
                   }
                 }
@@ -546,6 +602,44 @@ public final class PostgresImportDataStore
         "SELECT EXISTS(SELECT 1 FROM import_stage WHERE NOT pg_input_is_valid(raw,'jsonb'))",
         Boolean.class)) throw new ImportInvalidFileException();
     jdbc.update("UPDATE import_stage SET payload=raw::jsonb");
+    long largestRow =
+        jdbc.queryForObject(
+            "SELECT coalesce(max(octet_length(payload::text)),1) FROM import_stage", Long.class);
+    int validationBatch = (int) Math.max(1, Math.min(128, 65536 / (2 * largestRow)));
+    jdbc.query(
+        connection -> {
+          var statement =
+              connection.prepareStatement("SELECT collection,payload::text FROM import_stage");
+          statement.setFetchSize(validationBatch);
+          return statement;
+        },
+        (org.springframework.jdbc.core.ResultSetExtractor<Void>)
+            rows -> {
+              var json =
+                  new com.fasterxml.jackson.databind.ObjectMapper()
+                      .enable(
+                          com.fasterxml.jackson.databind.DeserializationFeature
+                              .USE_BIG_DECIMAL_FOR_FLOATS);
+              while (rows.next()) {
+                try {
+                  var row = json.readTree(rows.getString(2));
+                  ImportRecordValidator.row(rows.getString(1), row, owner);
+                  switch (rows.getString(1)) {
+                    case "appearance" -> ImportCustomizationValidator.appearance(row);
+                    case "customization" -> ImportCustomizationValidator.configuration(row);
+                    default -> {}
+                  }
+                } catch (IOException invalidStorage) {
+                  throw new StorageUnavailableException(invalidStorage);
+                }
+              }
+              return null;
+            });
+
+    for (var field :
+        List.of("id", "projectId", "taskId", "parentId", "blockId", "sessionId", "scope"))
+      jdbc.execute("CREATE INDEX ON import_stage (collection, (payload->>'" + field + "'))");
+    jdbc.execute("ANALYZE import_stage");
     if (jdbc.queryForObject(
         """
         SELECT EXISTS(SELECT 1 FROM import_stage
@@ -645,8 +739,9 @@ public final class PostgresImportDataStore
                   FROM import_stage s LEFT JOIN import_stage c
                     ON c.collection='customization' AND c.payload->>'scope'=CASE s.collection
                       WHEN 'projectCustomFieldValues' THEN 'PROJECT' WHEN 'taskCustomFieldValues' THEN 'TASK' END
+                  WHERE s.collection IN ('projectCustomFieldValues','taskCustomFieldValues')
                   """);
-          statement.setFetchSize(1);
+          statement.setFetchSize(validationBatch);
           return statement;
         },
         (org.springframework.jdbc.core.ResultSetExtractor<Void>)
@@ -659,10 +754,7 @@ public final class PostgresImportDataStore
               while (rows.next()) {
                 try {
                   var row = json.readTree(rows.getString(2));
-                  ImportRecordValidator.row(rows.getString(1), row, owner);
                   switch (rows.getString(1)) {
-                    case "appearance" -> ImportCustomizationValidator.appearance(row);
-                    case "customization" -> ImportCustomizationValidator.configuration(row);
                     case "projectCustomFieldValues", "taskCustomFieldValues" ->
                         ImportCustomizationValidator.values(
                             row.path("values"),
@@ -727,6 +819,16 @@ public final class PostgresImportDataStore
             (c.payload#>>'{receipt,after,changedAt}')::timestamptz,
             (c.payload#>>'{receipt,after,workedMicroseconds}')::bigint,
             (c.payload#>>'{receipt,after,runningSince}')::timestamptz))
+        OR EXISTS(SELECT 1 FROM import_stage s JOIN latest_sessions c ON c.payload->>'sessionId'=s.payload->>'id'
+          WHERE s.collection='workSessions' AND s.payload->>'lastDecisionAt' IS NOT NULL
+            AND (s.payload->>'lastDecisionAt')::timestamptz IS DISTINCT FROM (c.payload->>'occurredAt')::timestamptz)
+        OR EXISTS(SELECT 1 FROM import_stage s JOIN LATERAL (
+          SELECT c.payload FROM import_stage c WHERE c.collection='workSessionChanges'
+            AND c.payload->>'sessionId'=s.payload->>'id' AND c.payload->>'action'='EXTEND'
+          ORDER BY (c.payload->>'expectedRevision')::bigint DESC LIMIT 1) extension ON true
+          WHERE s.collection='workSessions' AND
+            coalesce(s.payload->>'effectiveEndAt',s.payload->>'plannedEndAt')::timestamptz
+              IS DISTINCT FROM (extension.payload#>>'{receipt,extension,effectiveEndAt}')::timestamptz)
         OR EXISTS(SELECT 1 FROM import_stage h JOIN import_stage t
           ON t.collection='tasks' AND t.payload->>'id'=h.payload->>'taskId'
           WHERE h.collection='taskStatusHistory' AND (h.payload->>'taskVersion')::bigint>(t.payload->>'version')::bigint)

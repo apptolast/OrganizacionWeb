@@ -1,0 +1,73 @@
+{
+  "scope": "A final persistence/wiring and B real scale; global/CI/PIT pending",
+  "inputs": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresImportDataStore.java",
+      "sha256": "a784163e4bed7ee515d138d5bc6175b7d7f0b84d0bb86f5e887784088043d5f8"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ImportRecordValidator.java",
+      "sha256": "4cabd89273d117325c13c65740baa960a5d66feb2bf4ae597854ba9e02b2965d"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+      "sha256": "0d319ddfa4988cd27a6e5c48a198c9eafa1b59808d614a2ddc7b758195969b0f"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportPersistenceTest.java",
+      "sha256": "f09f4d775f89f20df713890ea0ad71cd1daf9d608c5bc9a8be372baf74ceee9f"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/config/ImportScaleTest.java",
+      "sha256": "8445326b5e7f3bc21beec132f5f0b44b79c0b98ea4dde8e65c560281c9173eea"
+    },
+    {
+      "path": "progress/tdd_import_data.md",
+      "sha256": "1cb942c9444bb781eec48baea4055f5c70535420df86d9f862ca80b5b0c754b8"
+    }
+  ],
+  "xml": [
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\import23-backend-final-ImportPersistenceTest.xml",
+      "sha256": "cf11c2a10a6e5d6db9abdcf79d4d5b78d777206fcbb47334dc1b98d298feb221",
+      "tests": 137,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\import23-backend-final-ImportWiringTest.xml",
+      "sha256": "14c8994df546a50ad4478d68fdc7ebf57d5ced032b45282bf91a02d30164c641",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\import23-backend-final-ImportScaleTest.xml",
+      "sha256": "c4b8dc0fd43d070d514f90917ef633842bbc9d4788a2428412b110a7d761c737",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "logs": [
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\import23-backend-final-focal.log",
+      "sha256": "065c0ba501476eb31db08f7c3930949af1586eeb6c536319ac0558045e839ca9",
+      "exitCode": 0
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\import23-backend-final-scale.log",
+      "sha256": "2b6e9b29ee959a66ef03558c940f9be01c3e95aa18729a823a38a8e02d88589f",
+      "exitCode": 0
+    }
+  ],
+  "totals": {
+    "tests": 140,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

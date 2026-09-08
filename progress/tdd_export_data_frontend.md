@@ -119,3 +119,15 @@ Physical focus RED 8844ac; same keyboard preparation GREEN c5643f after restorin
 Dispatcher target RED 570e12 / GREEN 79ec59; missing config RED 8b7082 / GREEN df6a20. Full harness 63/63 after AST remapping historical Appearance nodes and retaining exact startsWith assertions. Default Workspace is a reviewed superset. No historical campaign executed.
 
 Global initial 2294/2295 failed only the legacy last-navigation expectation; contract 22 adds Exportación after Apariencia. Authorized fixture correction preserves Hoy first and remaining assertions. Final global 2295/2295 in 56 files (cbb659), 170 inputs unchanged through test/lint/build. Initial lint failed only formatting export-data.test.tsx; Prettier correction changes no oracle and is listed separately in export_frontend_final_freeze.json. Build/tsc EXIT0. No repeated global for formatting alone.
+
+## Original mutation and integrated E2E preparation
+
+Original campaign EXIT0 d6af28, 7 min 27 s: 261 Killed / 60 Survived / 4 NoCoverage / 1 Timeout, 326 total. Conservative 261/326=80.06134969%, no reclassification. 170 inputs unchanged. Full inventory, raw JSON/HTML, before/after and analysis preserved in export_stryker_original_freeze.json. No replay or refinement executed.
+
+First integrated E2E in e2e/export-data.spec.mjs is prepared, syntax and format checked only (fbb46c). It uses real HTTP login and project/task writes, a foreign-owner SQL fixture, byte-exact native downloads and owner-scoped cleanup. No server started and no test result claimed until the coordinated fixed backend stack is available.
+
+## Post-campaign refinement authorized by root
+
+Original residue 300 motivated one public overlap oracle in the existing cancellation test. A is cancelled, B begins, then A resolves; B remains busy and cancelable, its signal remains current and no old Blob/third GET appears. B then completes normally. All earlier cancellation assertions remain. Initially GREEN f79d9b; no fake RED or production edit. Focal client+view and formatting/lint logs: export_overlap_focal_final.log, export_overlap_lint.log, export_overlap_format_check.log. Original campaign untouched and no replay executed.
+
+Integrated E2E header comparison now accepts UTF-8 case variations using the same anchored semantic media-type check as the client. C already observed uppercase UTF-8 on the real server. This E2E has not yet run, so this is fixture preparation, not a claimed RED/GREEN integration result. Freeze export_overlap_freeze.json records both test hashes and the explicit post-campaign delta.

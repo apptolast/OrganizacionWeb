@@ -575,19 +575,28 @@ it("@s28 reports temporary failure and retries only after a new deliberate gestu
     "No se pudo preparar la exportación",
   );
 });
-it("@s29 cancels preparation and ignores its late complete response", async () => {
+it("@s29 keeps a newer preparation pending when a cancelled response arrives late", async () => {
   let finish!: (value: Response) => void;
-  const fetcher = vi.fn().mockReturnValue(
-    new Promise<Response>((resolve) => {
-      finish = resolve;
-    }),
-  );
+  let finishCurrent!: (value: Response) => void;
+  const fetcher = vi
+    .fn()
+    .mockReturnValueOnce(
+      new Promise<Response>((resolve) => {
+        finish = resolve;
+      }),
+    )
+    .mockReturnValueOnce(
+      new Promise<Response>((resolve) => {
+        finishCurrent = resolve;
+      }),
+    );
   vi.stubGlobal("fetch", fetcher);
-  const create = vi.fn();
+  const create = vi.fn().mockReturnValue("blob:current");
   vi.stubGlobal(
     "URL",
     class extends URL {
       static createObjectURL = create;
+      static revokeObjectURL = vi.fn();
     },
   );
   render(<ExportData owner="ana" />);
@@ -602,6 +611,11 @@ it("@s29 cancels preparation and ignores its late complete response", async () =
   expect(
     screen.getByRole("button", { name: "Preparar exportación" }),
   ).toBeEnabled();
+  await userEvent.click(
+    screen.getByRole("button", { name: "Preparar exportación" }),
+  );
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  const currentSignal = fetcher.mock.calls[1][1].signal as AbortSignal;
   await act(async () => {
     finish(archiveResponse());
   });
@@ -609,6 +623,25 @@ it("@s29 cancels preparation and ignores its late complete response", async () =
   expect(
     screen.queryByRole("link", { name: "Descargar archivo JSON" }),
   ).not.toBeInTheDocument();
+  expect(screen.getByRole("status")).toHaveTextContent(
+    "Preparando exportación…",
+  );
+  expect(
+    screen.getByRole("button", { name: "Preparar exportación" }),
+  ).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Cancelar preparación" }),
+  ).toBeEnabled();
+  expect(currentSignal.aborted).toBe(false);
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  await act(async () => {
+    finishCurrent(archiveResponse());
+  });
+  expect(
+    screen.getByRole("link", { name: "Descargar archivo JSON" }),
+  ).toHaveAttribute("href", "blob:current");
+  expect(create).toHaveBeenCalledOnce();
+  expect(fetcher).toHaveBeenCalledTimes(2);
 });
 it("@s23 synchronously blocks repeated activation while announcing preparation", () => {
   const fetcher = vi.fn().mockReturnValue(new Promise<Response>(() => {}));

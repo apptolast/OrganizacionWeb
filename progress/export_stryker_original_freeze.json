@@ -1,0 +1,60 @@
+{
+  "files": [
+    {
+      "path": "progress/export_stryker_original/mutation.json",
+      "sha256": "9082109b1571c1bcbb1a9c78641d1c085fb9fff6b4b46d79fc5d29a0592f1db5"
+    },
+    {
+      "path": "progress/export_stryker_original/mutation.html",
+      "sha256": "ae1ea6c013d725821ee60ec71e93dda467e650f1ce38a3bdb1c6eea008d6cd63"
+    },
+    {
+      "path": "progress/export_stryker_original.log",
+      "sha256": "b590ece36ccc5639a247a6375d438be36b2b136bc7218944fb5afb4f7d153d8b"
+    },
+    {
+      "path": "progress/export_stryker_original_exit.json",
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "path": "progress/export_stryker_original_config.json",
+      "sha256": "e0643d675917cf8e8a69672095f98d91da16d22a0481ab33adebcfe22f608234"
+    },
+    {
+      "path": "progress/export_stryker_before.json",
+      "sha256": "2df67f93e7664ee502ec6f2d0276b5b5f03069d3de6ab4d9ee665b4eb9405820"
+    },
+    {
+      "path": "progress/export_stryker_after.json",
+      "sha256": "54ef1c3a18a2afcdef34948a52fb982a017812602be394b9d1a6046444fea2b7"
+    },
+    {
+      "path": "progress/export_stryker_inventory.json",
+      "sha256": "46272452e81bc01e37bb2a587cbe1edae9465d669cfcf2f0d01581c99235d586"
+    },
+    {
+      "path": "progress/export_stryker_residues.json",
+      "sha256": "b6e9a5486763259f615554f2ff1323f56e4ea4c9e2186b99b01eee90e160438a"
+    },
+    {
+      "path": "progress/mutation_export_data_frontend.md",
+      "sha256": "7b48ed9bfdb2c595e31b6648639e32fa5c792a90b5c21399cd4dced32775bb69"
+    },
+    {
+      "path": "e2e/export-data.spec.mjs",
+      "sha256": "e6e3c1cf528e393d43d2d2131c3888a28c8919207673b296b5f87dae9bb6ac6e"
+    }
+  ],
+  "states": {
+    "Killed": 261,
+    "Survived": 60,
+    "NoCoverage": 4,
+    "Timeout": 1
+  },
+  "total": 326,
+  "conservativeScore": 80.06134969325154,
+  "exitCode": 0,
+  "afterInputs": 170,
+  "inputDeltas": 0,
+  "realE2e": "Prepared only; not executed. Awaiting coordinated backend freeze."
+}

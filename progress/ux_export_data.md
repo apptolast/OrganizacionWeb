@@ -49,7 +49,7 @@ nativo y foco. Captura nueva 320 revisada: acciones completas y separadas.
 
 Límites reales: no dispositivos físicos, teclado virtual, lector de pantalla
 real ni evaluación humana de facilidad de uso. No cobertura universal. La
-simulación no sustituye el E2E integrado y ninguna campaña de mutación corrió.
+simulación no sustituye el E2E integrado. La campaña de mutación posterior se registra por separado en mutation_export_data_frontend.md.
 
 ## Matriz de los 30 principios
 

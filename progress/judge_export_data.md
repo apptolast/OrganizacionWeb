@@ -137,3 +137,24 @@ La imagen estándar vacía se conserva; la captura del compositor muestra texto
 legible y acciones completas, con Descargar principal. No acredita dispositivos
 físicos, lector de pantalla humano ni API real. Se autoriza comenzar mutación,
 sin declarar cerrada ni desplegada la función.
+
+## Mutación frontend y refuerzo posterior: APPROVED parcial
+
+Root leyó el informe completo y verificó el JSON original: 261 Killed,
+60 Survived, 4 NoCoverage y 1 Timeout. El score conservador 261/326 es
+80,06134969%; supera el umbral sin reclasificar estados. Once huellas
+coinciden y las 170 entradas antes/después son idénticas (c86461, 4b7d2a).
+Los residuos distinguen redundancia, límites de recursos y oráculos ausentes;
+no se sostiene que todos sean equivalentes ni que la campaña pruebe el backend.
+
+El refuerzo posterior modifica una prueba pública existente: cancelar A,
+iniciar B y resolver A tarde conserva B pendiente, cancelable y sin archivo
+obsoleto; después B produce su archivo. Inicialmente GREEN, sin producto
+nuevo. Root revisó el diff completo (af0f7f), seis huellas y el log de 54/54
+pruebas focales (591626). Se conserva el resultado original de mutación y
+su superviviente 300; no se suma una detección sin replay.
+
+El E2E real preparado valida dos descargas nativas de los mismos bytes,
+un único GET, propietario, exclusión ajena, datos intactos y revocación al
+salir. Su revisión no equivale a ejecución. La comparación de charset admite
+mayúsculas/minúsculas válidas sin debilitar JSON/UTF-8.

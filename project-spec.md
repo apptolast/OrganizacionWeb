@@ -1586,7 +1586,9 @@ Una relación o recibo incoherente dentro del conjunto propio causa 503; no se
 oculta una fila ni se incluyen datos ajenos para completar una relación corrupta.
 
 `exportedAt` es un único instante obtenido del reloj inyectado al preparar el
-snapshot. Identifica esta preparación, no es una marca causal de commit ni un
+snapshot y truncado a microsegundos, sin redondear. Ese mismo instante normalizado
+se reutiliza en el envelope y el nombre del archivo; no modifica instantes
+persistidos. Identifica esta preparación, no es una marca causal de commit ni un
 avance de sesiones abiertas. Fallo del reloj o instante fuera de 0001–9999 produce
 503 sin archivo. No se requiere RabbitMQ ni se consulta el estado de publicación.
 
@@ -1602,6 +1604,9 @@ No basta contar 100000 filas y materializarlas completas antes de comprobar sus
 bytes. El presupuesto incluye datos leídos, relaciones de validación y salida;
 no puede crecer con todo el volumen de texto de la cuenta. Campos persistidos
 anormalmente grandes también se rechazan antes de materializarlos sin límite.
+413 exige exceso demostrado de bytes exportables; el tamaño bruto de JSONB
+desconocido o corrupto no lo demuestra. Corrupción sin exceso demostrado conserva
+503, respetando la precedencia ya definida para fallos de preparación.
 La salida se acumula en un buffer privado limitado a 32 MiB; la comprobación se
 hace antes de cada ampliación, sin duplicar primero el documento entero para
 medirlo. Al fallar o cancelar se descartan buffers, se cierra el cursor y termina
@@ -1798,6 +1803,9 @@ que el navegador ya descargó queda bajo control del usuario, no se promete borr
 
 Se reutilizan RouteLink, apiRequest, identidad y estilos/tokens actuales. No hay
 Provider global nuevo ni alteración de borradores de proyectos, tareas o campos.
+No se añaden mutaciones ni resets de estado compartido a los efectos propios del
+ciclo de navegación existente; no se exige persistir globalmente borradores
+locales de rutas desmontadas.
 Controles nativos, foco visible, nombres accesibles y anuncios de estado/error;
 restaurar foco lógico sólo cuando desaparece el iniciador y el usuario no lo movió.
 Mantener 44px, reflow a320, texto/zoom200, temas, forced-colors y movimiento

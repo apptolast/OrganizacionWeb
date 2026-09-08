@@ -59,7 +59,7 @@ Feature: Incorporar una copia propia sin sobrescribir datos ni repetir historia
 
   @s6
   Scenario Outline: Una clave alternativa ocupada no permite remapear
-    Given un archivo internamente válido cuyo UUID nuevo colisiona por <clave> con otro registro del destino
+    Given un archivo internamente válido cuyo registro distinto colisiona por <clave> con otra identidad o registro del destino
     When confirma el archivo
     Then recibe 409 IMPORT_CONFLICT sin remapear IDs ni insertar parcialmente
     Examples:
@@ -194,7 +194,7 @@ Feature: Incorporar una copia propia sin sobrescribir datos ni repetir historia
   @s17
   Scenario: Una carga excesiva no se materializa completa
     Given un emisor cuyo cuerpo excede 33554432 bytes sin Content-Length
-    And el resto del cuerpo aún no se ha recibido y puede ser inválido
+    And el prefijo recibido hasta el límite es estructuralmente válido y todavía podría completarse como JSON válido
     When la API autenticada recibe el byte que excede el límite
     Then rechaza con 413 IMPORT_TOO_LARGE sin esperar ni materializar el resto
     And descarta preparación privada y libera recursos sin datos parciales
@@ -266,7 +266,7 @@ Feature: Incorporar una copia propia sin sobrescribir datos ni repetir historia
       | fallo |
       | fallo de almacenamiento después de insertar varias colecciones |
       | fallo al persistir el recibo |
-      | fallo real al confirmar la transacción |
+      | rechazo comprobable del commit por una constraint diferida |
 
   @s24
   Scenario Outline: Writers existentes no pierden cambios ante importación

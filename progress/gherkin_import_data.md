@@ -25,3 +25,5 @@ válido, únicamente ficha23 modificada; fuente normativa conserva su hash.
 No hay parser Cucumber instalado: conteo e inspección léxicos, no ejecución
 Gherkin ni tests. Diffcheck limpio. Estado23 spec_ready, pendiente revisiónroot
 antes de in_progress/TDD;24–30 y todos los cierres anteriores se conservan.
+
+Revisión final de root: s6 usa registro distinto sin exigir UUID a intervalos; s17 parte de prefijo todavía válido; s23 exige rechazo comprobable del commit, distinto de resultado incierto de red cubierto por s37/s38. Sin cambio de alcance ni nuevos escenarios.

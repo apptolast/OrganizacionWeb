@@ -218,7 +218,8 @@ test("authentication: public access screen rejects bad credentials then opens th
     },
   });
   expect(basicOnly.status()).toBe(401);
-  expect(basicOnly.headers()["www-authenticate"]).toBeUndefined();
+  expect(basicOnly.headers()["www-authenticate"]).toBe("Bearer");
+  expect((await basicOnly.json()).code).toBe("API_UNAUTHENTICATED");
   await user.fill("e2e-user");
   await password.fill("incorrect-test-password");
   let release;

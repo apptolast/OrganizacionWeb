@@ -37,8 +37,10 @@ public final class ImportJsonReader {
     String owner = null;
     Instant exportedAt = null;
     ImportCounts counts = null;
+    var actualCounts = new java.util.LinkedHashMap<String, Long>();
     try (var parser = mapper.getFactory().createParser(counted)) {
       parser.disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
+      parser.enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
       parser.nextToken();
       while (parser.nextToken() != JsonToken.END_OBJECT) {
         String field = parser.currentName();
@@ -47,13 +49,30 @@ public final class ImportJsonReader {
           case "owner" -> owner = parser.getText();
           case "exportedAt" -> exportedAt = Instant.parse(parser.getText());
           case "counts" -> counts = mapper.readValue(parser, ImportCounts.class);
-          case "data" -> parser.skipChildren();
+          case "data" -> {
+            if (parser.currentToken() != JsonToken.START_OBJECT)
+              throw new ImportInvalidFileException();
+            while (parser.nextToken() != JsonToken.END_OBJECT) {
+              String collection = parser.currentName();
+              parser.nextToken();
+              long count = 0;
+              while (parser.nextToken() != JsonToken.END_ARRAY) {
+                consumer.accept(collection, mapper.readTree(parser));
+                count++;
+              }
+              actualCounts.put(collection, count);
+            }
+          }
           case "format", "schemaVersion" -> parser.skipChildren();
           default -> throw new ImportInvalidFileException();
         }
       }
-      parser.nextToken();
+      if (parser.nextToken() != null) throw new ImportInvalidFileException();
+    } catch (com.fasterxml.jackson.core.JsonProcessingException invalid) {
+      throw new ImportInvalidFileException();
     }
+    if (counts == null || !mapper.valueToTree(counts).equals(mapper.valueToTree(actualCounts)))
+      throw new ImportInvalidFileException();
     return new Header(
         owner, exportedAt, HexFormat.of().formatHex(digest.digest()), counted.length, counts);
   }

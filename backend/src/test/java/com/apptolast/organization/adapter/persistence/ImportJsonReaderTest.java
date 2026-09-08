@@ -12,6 +12,108 @@ import org.junit.jupiter.api.Test;
 
 class ImportJsonReaderTest {
   @Test
+  void s8_dataMustBeAnObjectBeforeAnyRowsArePrepared() {
+    var body =
+        new ByteArrayInputStream("{\"data\":[]}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new ImportJsonReader()
+                    .read(body, (collection, row) -> fail("Malformed data must not stage a row")))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+  }
+
+  @Test
+  void s8_declaredCountsMustEqualTheRecordsActuallyRead() throws Exception {
+    var original = new ByteArrayOutputStream();
+    new ExportJsonWriter()
+        .empty("owner-a", Instant.parse("2026-09-08T01:02:03.123456Z"))
+        .writeTo(original);
+    String json =
+        original
+            .toString(java.nio.charset.StandardCharsets.UTF_8)
+            .replace("\"projects\":0", "\"projects\":1");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new ImportJsonReader()
+                    .read(
+                        new ByteArrayInputStream(
+                            json.getBytes(java.nio.charset.StandardCharsets.UTF_8)),
+                        (collection, row) -> fail("Empty file")))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+  }
+
+  @Test
+  void s8_secondDocumentAfterValidExportIsRejected() throws Exception {
+    var original = new ByteArrayOutputStream();
+    new ExportJsonWriter()
+        .empty("owner-a", Instant.parse("2026-09-08T01:02:03.123456Z"))
+        .writeTo(original);
+    original.writeBytes(" {}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new ImportJsonReader()
+                    .read(
+                        new ByteArrayInputStream(original.toByteArray()),
+                        (collection, row) -> fail("Empty file")))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+  }
+
+  @Test
+  void s8_duplicateRootPropertyIsRejectedWithoutLeakingItsValue() throws Exception {
+    var original = new ByteArrayOutputStream();
+    new ExportJsonWriter()
+        .empty("owner-a", Instant.parse("2026-09-08T01:02:03.123456Z"))
+        .writeTo(original);
+    String json = original.toString(java.nio.charset.StandardCharsets.UTF_8);
+    var body =
+        new ByteArrayInputStream(
+            (json.substring(0, json.length() - 1) + ",\"owner\":\"private-other\"}")
+                .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> new ImportJsonReader().read(body, (collection, row) -> fail("Empty file")))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class)
+        .hasMessage("El archivo de importación no es válido.");
+  }
+
+  @Test
+  void s2_s18_nonemptyCollectionIsDeliveredOneRecordAtATimeWithExactText() throws Exception {
+    var original = new ByteArrayOutputStream();
+    var id = "00000000-0000-0000-0000-000000000123";
+    new ExportJsonWriter()
+        .prepare(
+            "owner-a",
+            Instant.parse("2026-09-08T01:02:03.123456Z"),
+            (collection, json) -> {
+              if (!collection.equals("projects")) return 0;
+              json.writeStartObject();
+              json.writeStringField("id", id);
+              json.writeStringField("name", "  proyecto ñ  ");
+              json.writeStringField("description", "nota histórica");
+              json.writeStringField("status", "pending");
+              json.writeStringField("createdAt", "2026-09-07T01:02:03.123456Z");
+              json.writeStringField("updatedAt", "2026-09-07T01:02:03.123456Z");
+              json.writeStringField("version", "0");
+              json.writeEndObject();
+              return 1;
+            })
+        .writeTo(original);
+    var records = new java.util.ArrayList<com.fasterxml.jackson.databind.JsonNode>();
+    var header =
+        new ImportJsonReader()
+            .read(
+                new ByteArrayInputStream(original.toByteArray()),
+                (collection, row) -> {
+                  assertThat(collection).isEqualTo("projects");
+                  records.add(row);
+                });
+    assertThat(records).hasSize(1);
+    assertThat(records.getFirst().path("id").textValue()).isEqualTo(id);
+    assertThat(records.getFirst().path("name").textValue()).isEqualTo("  proyecto ñ  ");
+    assertThat(records.getFirst().path("version").textValue()).isEqualTo("0");
+    assertThat(header.counts().projects()).isEqualTo(1);
+  }
+
+  @Test
   void s8_unknownEnvelopeFieldCannotBeUsedAsAnImport() throws Exception {
     var original = new ByteArrayOutputStream();
     new ExportJsonWriter()

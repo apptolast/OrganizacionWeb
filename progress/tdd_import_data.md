@@ -23,3 +23,13 @@ Ciclo2 @s1/@s18: REDcf2afd clase ausente; GREEN6cd4e0, exportación vacía real 
 Ciclo3 @s16/@s17: REDdc7276 por excepción ausente; GREENcc3376 (dos casos). Stream sintético ilimitado de espacios exige ImportTooLargeException y consumo exactamente33554433bytes, sin almacenar ese contenido. El wrapper limita cada read a presupuesto restante más el primer byte de exceso.
 
 Ciclo4 @s8: RED1c45fb por error ausente; GREEN247447 (tres casos). Campo exterior desconocido exige ImportInvalidFileException con mensaje seguro sin payload. Formato real de cuatro paths e6204d. Esas dos excepciones se entregan para HTTP; validación restante, callbacks de filas, PG y beans siguen pendientes. No se presenta este checkpoint como parser completo. Logs externos import23-cycle02/03/04-* preservados.
+
+## Ciclos5–9 — tokens y conteos
+
+5 @s2/@s18: RED3750c0 callback no invocado, GREENe2b77e4casos: primer proyecto entregado registro a registro con texto/version exactos. 6 @s8: RED266df6 duplicado aceptado, GREEN7bb9925casos: STRICT_DUPLICATE_DETECTION y traducción de error Jackson a400seguro. 7 @s8: RED680525 segundo documento aceptado, GREEN597e4f6casos: exige EOF tras raíz. 8 @s8: RED9bce59 counts discordantes aceptados, GREEN42fb8f7casos: compara recuentos observados con declarados. 9 @s8: RED814ece data[] genera error incorrecto/callback, GREENe677bd8casos: exige objeto antes de preparar filas. Aún faltan otras guardas de esquema/tipos y validación durable; no afirmar decoder completo.
+
+## Ciclos10–11 — confirmación/lectura, puertos nominales
+
+10 @s1: REDd78293 tipos ausentes, GREEN2e5418: ApplyImportData entrega owner/key/hash/stream sin transformación y permite al puerto obtener recordedAt desde Clock, truncado a micros, dentro de su operación. Fixture controlado no acredita commit/idempotencia durable; límites de Clock pendientes. Nombre inicialmente incluía@s23, corregido a@s1 porque aún no prueba fallo transaccional.
+
+11 @s22: REDdd1856 tipos ausentes, GREEN177511: consulta de recibo conserva owner/key y resultado cerrado, sin cuerpo/archivo ni comando de importación. Foco conjunto11casos/4suites, formato realafe6de. API real para C: ApplyImportDataUseCase.apply(owner,UUID,expectedSha256,InputStream) devuelve ImportReceipt(requestKey,fileSha256,byteLength,recordedAt,outcome,insertedCounts,identicalCounts); ReadImportReceiptUseCase.find(owner,UUID) devuelve Optional<ImportReceipt>. No beans provisionales. Los errores de conflicto/hash seguirán tras sus ciclos PG/decoder reales. Logs originales externos import23-cycle05–11-*.

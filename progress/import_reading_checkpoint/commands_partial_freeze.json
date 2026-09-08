@@ -1,0 +1,67 @@
+{
+  "tests": 11,
+  "failures": 0,
+  "limit": "Application ports and partial decoder; PG/commit/idempotence pending",
+  "entries": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ImportReceipt.java",
+      "sha256": "07472b1d1f82916057ba75449dcaf1e917e53105cd3632095c0ab4c7036b8d6b"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApplyImportDataUseCase.java",
+      "sha256": "c914b5cf4af463e195ff66d416f2c3551b5df9c7e2fbfd282bd2f1b588e1af24"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ImportDataCommands.java",
+      "sha256": "1eea8b8adfe9f8ca603b98eb7a94b2c6ccf24fb5e032faed468f83f38662dc3c"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApplyImportData.java",
+      "sha256": "69c94ce1493870c038f4e912c7bc1ed07e9767a1935ab7a091b0f82f2eaf21ec"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadImportReceiptUseCase.java",
+      "sha256": "cf8c7f363a165cba4ccaff2ce2e85a9d907ce25b22640490ebc9c043b3497fd8"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ImportReceiptQueries.java",
+      "sha256": "ac74f1ad267057a9ecf1a3a6f503d9b7c23265ab0b546dfd6c2351b536561a32"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadImportReceipt.java",
+      "sha256": "e84a20ca222ff8a8b89aa3f780443edef7c12c6c3bdfa4655f700cdf1b36c2a8"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/application/ApplyImportDataTest.java",
+      "sha256": "3bd7ee5a22e32d253e0696826751c375e97aaa5edbaec5d48791497d28a534d0"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/application/ReadImportReceiptTest.java",
+      "sha256": "77f91245ee6499da29fde42ef0e112774ea42633c4f39ee58254a8e44a121fe1"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ImportJsonReader.java",
+      "sha256": "eb87a57c655b2d758a1fe451ae3fb212eae459ba20dc5c13da568510eccad6a1"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportJsonReaderTest.java",
+      "sha256": "38f87c6574a68bd869d7b461f22460cd619813b1bd9b06d33048294b02ad34da"
+    },
+    {
+      "path": "../deployment-preparation/import23-cycle11-application.ApplyImportDataTest.xml",
+      "sha256": "b226ac95f5e36463504ad5a0045fb11fbc77232b1200afa74745a4a8fb2b7ecc"
+    },
+    {
+      "path": "../deployment-preparation/import23-cycle11-application.ReadImportReceiptTest.xml",
+      "sha256": "d74d5fec1ecb9859100620aed00366590fe9e1234e92be061513ec9304f909ae"
+    },
+    {
+      "path": "../deployment-preparation/import23-cycle11-application.PreviewImportDataTest.xml",
+      "sha256": "e7a9192d82bb98ee304fe5217457c48c27defb128dada58a6693aee41fc9c15c"
+    },
+    {
+      "path": "../deployment-preparation/import23-cycle11-adapter.persistence.ImportJsonReaderTest.xml",
+      "sha256": "ae79c9572fff3826496cadb8521e4f479980a8d75c52706e6ba2da08f9fb594e"
+    }
+  ]
+}

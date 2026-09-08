@@ -781,6 +781,314 @@ class ImportConcurrencyTest {
     return failure == null ? "SUCCESS" : failure.getClass().getSimpleName();
   }
 
+  @ParameterizedTest
+  @EnumSource(CustomizationScope.class)
+  void s25_valuesWriterAlreadyReadCannotBeOverwritten(CustomizationScope scope) throws Exception {
+    var f = valuesFixture(scope);
+    removeValues(f);
+    var writer = customizationStore("values-writer-" + f.owner());
+    var importerName = "values-import-" + f.owner();
+    var importer = importer(importerName);
+    var entered = new CountDownLatch(1);
+    var release = new CountDownLatch(1);
+    var winner = UUID.randomUUID();
+    var key = UUID.randomUUID();
+    try (var pool = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+      var first =
+          pool.submit(
+              () ->
+                  writer.changeValues(
+                      f.owner(),
+                      scope,
+                      f.project(),
+                      f.entity(),
+                      (configuration, previous) -> {
+                        assertThat(configuration.orElseThrow().id()).isEqualTo(f.schema());
+                        assertThat(previous).isEmpty();
+                        entered.countDown();
+                        await(release);
+                        return new CustomFieldValuesCollection(
+                            winner, java.util.Map.of(f.field(), "writer"), 0, NOW);
+                      }));
+      try {
+        await(entered);
+        var second =
+            pool.submit(
+                () ->
+                    importer.apply(
+                        f.owner(),
+                        key,
+                        sha(f.bytes()),
+                        new ByteArrayInputStream(f.bytes()),
+                        () -> NOW));
+        blocked(importerName);
+        release.countDown();
+        assertThat(first.get(10, TimeUnit.SECONDS).revision().id()).isEqualTo(winner);
+        assertThatThrownBy(() -> second.get(10, TimeUnit.SECONDS))
+            .hasCauseInstanceOf(ImportConflictException.class);
+        var stored = writer.find(f.owner(), scope, f.project(), f.entity());
+        assertThat(stored.revision()).isEqualTo(new CustomizationRevision(winner, 0));
+        assertThat(stored.values().get(0).value()).isEqualTo("writer");
+        assertThat(importer.find(f.owner(), key)).isEmpty();
+        assertNoCustomizationEvents(f.owner());
+      } finally {
+        release.countDown();
+      }
+    }
+  }
+
+  @ParameterizedTest
+  @EnumSource(CustomizationScope.class)
+  void s26_valuesWriterStartingDuringImportRevalidatesCompositeRevision(CustomizationScope scope)
+      throws Exception {
+    var f = valuesFixture(scope);
+    removeValues(f);
+    var importer = importer("values-import-" + f.owner());
+    var writerName = "values-writer-" + f.owner();
+    var store = customizationStore(writerName);
+    var command =
+        new SaveCustomFieldValues(store, java.time.Clock.fixed(NOW, java.time.ZoneOffset.UTC));
+    var expected =
+        new CustomFieldValuesRevision(
+            scope,
+            f.entity(),
+            new CustomizationRevision(f.schema(), 0),
+            new CustomizationRevision(null, 0));
+    var entered = new CountDownLatch(1);
+    var release = new CountDownLatch(1);
+    var key = UUID.randomUUID();
+    try (var pool = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+      var first =
+          pool.submit(
+              () ->
+                  importer.apply(
+                      f.owner(),
+                      key,
+                      sha(f.bytes()),
+                      new ByteArrayInputStream(f.bytes()),
+                      () -> {
+                        entered.countDown();
+                        await(release);
+                        return NOW;
+                      }));
+      try {
+        await(entered);
+        var second =
+            pool.submit(
+                () ->
+                    command.save(
+                        f.owner(),
+                        scope,
+                        f.project(),
+                        f.entity(),
+                        expected,
+                        List.of(new CustomFieldInput(f.field(), "writer"))));
+        blocked(writerName);
+        release.countDown();
+        assertThat(first.get(10, TimeUnit.SECONDS).outcome()).isEqualTo("IMPORTED");
+        assertThatThrownBy(() -> second.get(10, TimeUnit.SECONDS))
+            .hasCauseInstanceOf(CustomizationConflictException.class);
+        var stored = store.find(f.owner(), scope, f.project(), f.entity());
+        assertThat(stored.schema()).isEqualTo(new CustomizationRevision(f.schema(), 0));
+        assertThat(stored.revision()).isEqualTo(new CustomizationRevision(f.valuesId(), 0));
+        assertThat(stored.values().get(0).value()).isEqualTo("imported");
+        assertThat(importer.find(f.owner(), key)).isPresent();
+        assertNoCustomizationEvents(f.owner());
+      } finally {
+        release.countDown();
+      }
+    }
+  }
+
+  @ParameterizedTest
+  @EnumSource(CustomizationScope.class)
+  void s18_previewKeepsOneSnapshotWhileSchemaAndValuesCommit(CustomizationScope scope)
+      throws Exception {
+    var f = valuesFixture(scope);
+    var name = "snapshot-" + f.owner();
+    var preview = importer(name);
+    var entered = new CountDownLatch(1);
+    var release = new CountDownLatch(1);
+    var input =
+        new java.io.FilterInputStream(new ByteArrayInputStream(f.bytes())) {
+          private boolean reached;
+
+          @Override
+          public int read(byte[] bytes, int offset, int length) throws java.io.IOException {
+            if (!reached) {
+              reached = true;
+              entered.countDown();
+              await(release);
+            }
+            return super.read(bytes, offset, length);
+          }
+        };
+    var writerSource = source("snapshot-writer-" + f.owner());
+    var writer =
+        new PostgresCustomizationStore(
+            new JdbcTemplate(writerSource), new DataSourceTransactionManager(writerSource), JSON);
+    var transaction =
+        new org.springframework.transaction.support.TransactionTemplate(
+            new DataSourceTransactionManager(writerSource));
+    try (var pool = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+      var first = pool.submit(() -> preview.preview(f.owner(), input));
+      try {
+        await(entered);
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT count(*) FROM pg_stat_activity WHERE application_name=? AND backend_xmin IS NOT NULL",
+                    Integer.class,
+                    name))
+            .isEqualTo(1);
+        var second =
+            pool.submit(
+                () ->
+                    transaction.execute(
+                        status -> {
+                          writer.change(
+                              f.owner(),
+                              scope,
+                              previous -> {
+                                var old = previous.orElseThrow();
+                                return new Customization(
+                                    old.id(),
+                                    f.owner(),
+                                    scope,
+                                    old.visibleFields(),
+                                    List.of(
+                                        new CustomFieldDefinition(
+                                            f.field(), "Renamed", CustomFieldType.TEXT, true)),
+                                    1,
+                                    NOW.plusSeconds(1));
+                              });
+                          return new SaveCustomFieldValues(
+                                  writer,
+                                  java.time.Clock.fixed(
+                                      NOW.plusSeconds(1), java.time.ZoneOffset.UTC))
+                              .save(
+                                  f.owner(),
+                                  scope,
+                                  f.project(),
+                                  f.entity(),
+                                  new CustomFieldValuesRevision(
+                                      scope,
+                                      f.entity(),
+                                      new CustomizationRevision(f.schema(), 1),
+                                      new CustomizationRevision(f.valuesId(), 0)),
+                                  List.of(new CustomFieldInput(f.field(), "updated")));
+                        }));
+        var changed = second.get(10, TimeUnit.SECONDS);
+        assertThat(changed.schema().version()).isEqualTo(1);
+        assertThat(changed.revision().version()).isEqualTo(1);
+        assertThat(changed.values().get(0).label()).isEqualTo("Renamed");
+        assertThat(changed.values().get(0).value()).isEqualTo("updated");
+        assertThat(first).isNotDone();
+        release.countDown();
+        var observed = first.get(10, TimeUnit.SECONDS);
+        assertThat(observed.identicalCounts().customization()).isEqualTo(1);
+        assertThat(
+                scope == CustomizationScope.PROJECT
+                    ? observed.identicalCounts().projectCustomFieldValues()
+                    : observed.identicalCounts().taskCustomFieldValues())
+            .isEqualTo(1);
+        assertThat(observed.insertCounts().customization()).isZero();
+        assertThatThrownBy(() -> preview.preview(f.owner(), new ByteArrayInputStream(f.bytes())))
+            .isInstanceOf(ImportConflictException.class);
+        assertThat(writer.find(f.owner(), scope, f.project(), f.entity())).isEqualTo(changed);
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT count(*) FROM import_receipts WHERE owner_id=?",
+                    Integer.class,
+                    f.owner()))
+            .isZero();
+        assertNoCustomizationEvents(f.owner());
+      } finally {
+        release.countDown();
+      }
+    }
+  }
+
+  private record ValuesFixture(
+      String owner,
+      CustomizationScope scope,
+      UUID project,
+      UUID entity,
+      UUID schema,
+      UUID field,
+      UUID valuesId,
+      byte[] bytes) {}
+
+  private static PostgresCustomizationStore customizationStore(String name) {
+    var source = source(name);
+    return new PostgresCustomizationStore(
+        new JdbcTemplate(source), new DataSourceTransactionManager(source), JSON);
+  }
+
+  private static ValuesFixture valuesFixture(CustomizationScope scope) throws Exception {
+    var owner = "values-" + UUID.randomUUID();
+    var project = UUID.randomUUID();
+    var entity = scope == CustomizationScope.PROJECT ? project : UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,?,'Project','','idea',?,?)",
+        project,
+        owner,
+        java.sql.Timestamp.from(NOW),
+        java.sql.Timestamp.from(NOW));
+    if (scope == CustomizationScope.TASK)
+      jdbc.update(
+          "INSERT INTO tasks(id,project_id,title,completion_criterion,status,created_at,updated_at) VALUES (?,?,'Task','','pending',?,?)",
+          entity,
+          project,
+          java.sql.Timestamp.from(NOW),
+          java.sql.Timestamp.from(NOW));
+    var schema = UUID.randomUUID();
+    var field = UUID.randomUUID();
+    var values = UUID.randomUUID();
+    var store = customizationStore("seed-" + owner);
+    store.change(
+        owner,
+        scope,
+        previous ->
+            new Customization(
+                schema,
+                owner,
+                scope,
+                List.of("createdAt"),
+                List.of(new CustomFieldDefinition(field, "Text", CustomFieldType.TEXT, true)),
+                0,
+                NOW));
+    store.changeValues(
+        owner,
+        scope,
+        project,
+        entity,
+        (configuration, previous) ->
+            new CustomFieldValuesCollection(values, java.util.Map.of(field, "imported"), 0, NOW));
+    var bytes = new ByteArrayOutputStream();
+    var source = source("export-" + owner);
+    new PostgresExportDataQueries(
+            new JdbcTemplate(source), new DataSourceTransactionManager(source))
+        .prepare(owner, () -> NOW)
+        .writeTo(bytes);
+    return new ValuesFixture(
+        owner, scope, project, entity, schema, field, values, bytes.toByteArray());
+  }
+
+  private static void removeValues(ValuesFixture f) {
+    var table =
+        f.scope() == CustomizationScope.PROJECT
+            ? "project_custom_field_values"
+            : "task_custom_field_values";
+    assertThat(jdbc.update("DELETE FROM " + table + " WHERE owner_id=?", f.owner())).isEqualTo(1);
+  }
+
+  private static void assertNoCustomizationEvents(String owner) {
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM outbox_events WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+  }
+
   private static void released(String owner, String name) {
     assertThat(
             jdbc.queryForObject(

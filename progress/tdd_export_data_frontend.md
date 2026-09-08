@@ -145,3 +145,17 @@ Original and second logs/contexts, byte metadata and hashes are in export_e2e_no
 Detached e9350e9, locks identical and no reinstall. Existing scripts/e2e.mjs executed all157 cases. Original EXIT1 (307fd3):154PASS,2FAIL,1SKIP in24.2min. Both failures are inherited responsive matrices timing out at180000ms in page.setViewportSize: end-time-notification-ux:330 and pause-resume-session:278. No failed business assertion. All export cases executed in this run pass; native zoom is explicitly restricted to the named Chromium project and has separate prior evidence.
 
 All1924 versioned inputs unchanged after run (c6cdce). Own stack52200/network/volume removed,18080free. Logs, contexts, byte metadata and hashes preserved in export_e2e_global_freeze.json. No source/config/test changes, timeout increases or automatic replay. Await resource release before authorized same-code directed replay; it cannot retroactively make the original global GREEN.
+
+## Directed same-code replay after resource review
+
+Root changed sequence based on measured available CPU/RAM after global init/build ended, while one PIT minion remained; no claim of an idle machine. Same e9350e9 and1924 inputs, no changes to config/timeouts/oracles. Directed runner selected only end-time:330 and pause:278. EXIT1 ebd275: end-time GREEN in2.8min with155 measurements; pause timed out180s again at setViewportSize after139 measurements, query-error through701px. No geometry assertion failed.
+
+Static diagnostic counts: completed end-time executes60,047 pair expects plus17,236 box expects; partial pause executes50,463 pair expects plus15,260 box expects. This suggests runner assertion overhead, but no phase timing was recorded and causality is not yet established. No timeout increase or further retry. Proposal to root: measure phases or aggregate the same violation predicates into one empty-list assertion per width, preserving every comparison and evidence.
+
+Before/after1924 identical, stack3840 removed and18080free. Directed original log/context/geometry preserved independently in export_e2e_directed_freeze.json. This does not change the original global result.
+
+## Geometric assertion instrumentation, authorized bounded repair
+
+Root reviewed both inspectors and authorized node:assert/strict for their purely synchronous numeric/overlap checks. Only six calls per inspector and one import changed. Positive <=/>= predicates preserve NaN rejection; all values/tolerances/messages, nested pairs,31widths,5states, async locator/poll assertions, font closeTo, screenshots, axe and180s timeout remain. Equivalence evidence covers66 numeric combinations and2booleans (the first console label incorrectly said198; JSON count is66).
+
+Original global and same-code directed failures remain preserved. After this isolated instrumentation change, both matrices pass in8.3s each,2/2GREEN18.7s total (1df4e6/663dcb), each155measurements. This controlled delta supports Playwright step instrumentation overhead as the source of the time budget exhaustion; no product performance fix is claimed. No further replay or timeout change. Before/after1924 inputs identical through repaired run; only the two authorized E2E files differ from e9350e9. Stack41992/network/volume removed; evidence freeze export_geometry_assert_freeze.json. Files await root review before transfer to primary.

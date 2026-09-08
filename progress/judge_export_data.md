@@ -227,3 +227,21 @@ simulados ejecutados pasan. El zoom nativo exige proyecto Chromium con
 nombre y conserva su validación independiente previa. No se considera
 verde el global original. Pendiente repetir sólo los dos fallidos sin
 modificar código, oráculos ni timeout después de liberar recursos PIT.
+
+## Reparación de instrumentación E2E: APPROVED
+
+El replay sin cambios dejó end-time verde en 2,8 minutos y pause nuevamente
+en timeout. La revisión identificó decenas de miles de pasos Playwright
+para comparaciones síncronas de geometría. El cambio se limita a usar
+node:assert/strict en esos dos bucles, con las mismas desigualdades,
+tolerancias, mensajes, controles y pares. Locators, polling, fuentes,
+screenshots, axe, estados, anchos y timeout de 180 segundos permanecen.
+Root revisó el diff a8b862 y las nueve huellas originales 229739.
+
+Con esa única modificación, ambas matrices pasan en 8,3 segundos cada una
+(18,7 segundos total, EXIT 0). Cada una conserva 155 mediciones: cinco
+estados por 31 anchos. Las 1924 entradas son idénticas antes y después.
+Se compararon además 66 combinaciones numéricas y dos booleanas, incluidos
+NaN y bordes, con el mismo resultado. Los originales fallidos se conservan.
+Esto acredita la reparación dirigida del arnés, no convierte el global
+anterior en un éxito ni cambia producto, mutación o límites de aceptación.

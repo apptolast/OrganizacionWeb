@@ -1,0 +1,469 @@
+{
+  "numericComparisons": 66,
+  "booleanComparisons": 2,
+  "results": [
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 0,
+      "value": "NaN",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 0,
+      "value": "-Infinity",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 0,
+      "value": "Infinity",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 0,
+      "value": "-1",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 0,
+      "value": "0",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 0,
+      "value": "43.999",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 0,
+      "value": "44",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 0,
+      "value": "44.001",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 0,
+      "value": "320",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 0,
+      "value": "321",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 0,
+      "value": "321.001",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 44,
+      "value": "NaN",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 44,
+      "value": "-Infinity",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 44,
+      "value": "Infinity",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 44,
+      "value": "-1",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 44,
+      "value": "0",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 44,
+      "value": "43.999",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 44,
+      "value": "44",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 44,
+      "value": "44.001",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 44,
+      "value": "320",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 44,
+      "value": "321",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 44,
+      "value": "321.001",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 321,
+      "value": "NaN",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 321,
+      "value": "-Infinity",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 321,
+      "value": "Infinity",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 321,
+      "value": "-1",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 321,
+      "value": "0",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 321,
+      "value": "43.999",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 321,
+      "value": "44",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 321,
+      "value": "44.001",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 321,
+      "value": "320",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 321,
+      "value": "321",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeLessThanOrEqual",
+      "bound": 321,
+      "value": "321.001",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 0,
+      "value": "NaN",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 0,
+      "value": "-Infinity",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 0,
+      "value": "Infinity",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 0,
+      "value": "-1",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 0,
+      "value": "0",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 0,
+      "value": "43.999",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 0,
+      "value": "44",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 0,
+      "value": "44.001",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 0,
+      "value": "320",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 0,
+      "value": "321",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 0,
+      "value": "321.001",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 44,
+      "value": "NaN",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 44,
+      "value": "-Infinity",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 44,
+      "value": "Infinity",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 44,
+      "value": "-1",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 44,
+      "value": "0",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 44,
+      "value": "43.999",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 44,
+      "value": "44",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 44,
+      "value": "44.001",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 44,
+      "value": "320",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 44,
+      "value": "321",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 44,
+      "value": "321.001",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 321,
+      "value": "NaN",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 321,
+      "value": "-Infinity",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 321,
+      "value": "Infinity",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 321,
+      "value": "-1",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 321,
+      "value": "0",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 321,
+      "value": "43.999",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 321,
+      "value": "44",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 321,
+      "value": "44.001",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 321,
+      "value": "320",
+      "old": false,
+      "now": false
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 321,
+      "value": "321",
+      "old": true,
+      "now": true
+    },
+    {
+      "method": "toBeGreaterThanOrEqual",
+      "bound": 321,
+      "value": "321.001",
+      "old": true,
+      "now": true
+    }
+  ],
+  "notes": "Numeric DOM coordinates remain numbers. Positive inequalities reject NaN. Same overlap boolean expression and strict false."
+}

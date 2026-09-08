@@ -2,6 +2,8 @@
 
 ## Corte vigente de importación 23 — 8 de septiembre, validación final
 
+Actualización posterior: las CI 34217454004 (4c74e18) y 34219923300 (2ddb576) terminaron SUCCESS, ambas con 161 E2E correctos y dos omisiones documentadas. El catálogo corregido 7712fc8 pasa CI 34220016597, lint de directorio/historial y check oficial: 27 correctas, dos cambios previstos, cero fallos, 11 omitidas; bloqueo liberado. Los dos falsos positivos de digests públicos se resolvieron con una excepción exacta por regla/ruta/línea, conservando cinco controles negativos. El marcador del lint fallido se archivó mediante recuperación oficial y prueba de controlador detenido. Evidencias portátiles en import_operational_original_evidence.zip (SHA256 0ea13b18d8e4c7e9df3c749d61c9582b95edcb00bb70dfbe7868f80e55165d85) e import_ci_evidence.json. Falta el dictamen final de PIT de persistencia, apply y aceptación real. El texto siguiente conserva los cortes anteriores de esta validación.
+
 La función 23 sigue en progreso y todavía no está desplegada. El producto candidato es 4c74e183e49afa6d280115b399dbaffedc7bfe7f; bda0195 añade únicamente la corrección revisada de instrumentación de dos pruebas E2E. PR27 permanece en borrador. Las funciones 1–22 continúan disponibles en el servidor; 24–30 siguen pendientes.
 
 Init y build oficiales del candidato terminaron con EXIT 0: 3215 pruebas Java en 135 suites, 2424 frontend y 70 del arnés. Root contrastó los seis artefactos originales, los XML y las 843 entradas antes/después sin cambios. La primera ejecución fallida por coordenadas antiguas de Stryker se conserva; 4c74e18 corrige sólo esas coordenadas y su expectativa del arnés, sin cambios productivos.

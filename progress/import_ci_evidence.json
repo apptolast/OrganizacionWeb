@@ -1,0 +1,28 @@
+{
+  "product": "4c74e183e49afa6d280115b399dbaffedc7bfe7f",
+  "testCorrection": "2ddb576030a412552e884612d92c6b94bce502ab",
+  "runs": [
+    {
+      "id": 34217454004,
+      "commit": "4c74e183e49afa6d280115b399dbaffedc7bfe7f",
+      "file": "import23-ci-4c74e18-original.log",
+      "conclusion": "success",
+      "e2e": {
+        "passed": 161,
+        "skipped": 2
+      },
+      "sha256": "7f1eaa62add97e184700182cf2503145ea87e31c6edf33256b7333bd5419810b"
+    },
+    {
+      "id": 34219923300,
+      "commit": "2ddb576030a412552e884612d92c6b94bce502ab",
+      "file": "import23-ci-2ddb576-original.log",
+      "conclusion": "success",
+      "e2e": {
+        "passed": 161,
+        "skipped": 2
+      },
+      "sha256": "b71abd26f9e34f56b9a6663e75264f191e59a969e14841f66d7bdc043758c451"
+    }
+  ]
+}

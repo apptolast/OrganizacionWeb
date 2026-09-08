@@ -79,3 +79,10 @@ Root verificó el freeze de wiring 6cdccbc1: 12 actuales y 12 originales, 138 te
 
 
 Corrección de estabilidad de wiring aprobada e integrada: 7e3079a como 1466f07, tras HTTP 7eb911c como 5b10287. Root verificó los siete originales del freeze d7442ac4, incluido el XML focal de nueve casos verdes con Clock fijo y PG17.9. No cambió producto adicional. El helper operacional V22 está preparado y revisado; incorpora auditoría privada de logs, aún no ejecutada ni atribuida a aceptación. Se detectaron brechas acotadas s25/s29 en negocio real, s40 en recuperación ya confirmada y s42 en evidencia de logs; sus responsables cierran oráculos sin duplicar la matriz de 18 rutas.
+
+
+## Contrato final, navegador y refuerzos de mutación
+
+APROBADOS los dos casos de compatibilidad 20c3ac3 (11 entradas verificadas), OpenAPI 32d3390 (freeze3b29be9d, diez originales, siete tests y metavalidación oficial del documento F5934EB8) y los ZIPs reales/simulados 6c77b6b (8 y73 entradas verificadas). Se corrigió el maxLength crudo de campos que normalizan Unicode White_Space antes del límite; no cambió lógica de negocio. La evidencia oficial queda en integration_openapi_official_validation.json; no sustituye los tests HTTP.
+
+Stryker original no pasa: 780/997 Killed (78,2347 %), con originales conservados. Root leyó los dos archivos nuevos de refuerzos; C verificó23/23 entradas del freeze D8C4C5EB y aprobó independientemente. Quince casos adicionales observables, inicialmente GREEN, foco83/83; configuración y producto intactos. Se autoriza una única campaña correctiva conservando universo997 y umbral80, sin reclasificar mutantes ni atribuir resultados antes de terminar.

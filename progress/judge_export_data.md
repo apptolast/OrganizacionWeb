@@ -158,3 +158,21 @@ El E2E real preparado valida dos descargas nativas de los mismos bytes,
 un único GET, propietario, exclusión ajena, datos intactos y revocación al
 salir. Su revisión no equivale a ejecución. La comparación de charset admite
 mayúsculas/minúsculas válidas sin debilitar JSON/UTF-8.
+
+## Soporte PIT de persistencia: APPROVED parcial
+
+Se revisaron las tres modificaciones de configuración/dispatcher y sus
+pruebas, once huellas y los logs de 64/64 y Gradle help (51cfd6, 15f3ed).
+El selector incluye nueve patrones completos y todos los candidatos JUnit;
+el default suma las clases de exportación sin retirar las anteriores. Las
+tres clases HTTP/recibos, ya medidas, mantienen un scope disjunto. Umbral,
+mutadores, cuatro workers y controles históricos permanecen intactos.
+
+Integración 3e42941: ambas ramas insertaban pruebas al inicio del mismo
+archivo. Root conservó ambos bloques íntegros y retiró sólo los marcadores
+del conflicto. Una invocación encadenada intentó ejecutar Node antes de
+resolverlo y falló por esos marcadores (aaf825), no por producto. Tras resolver,
+66/66 pruebas del arnés combinado pasan (5403b2,
+export_combined_harness.log). El manifiesto original describe el aislado;
+los scripts combinados contienen además el target frontend revisado.
+Este dictamen autoriza el soporte, no una campaña sobre fuentes todavía WIP.

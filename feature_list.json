@@ -233,10 +233,10 @@
       "id": 22,
       "name": "export_data",
       "title": "Exportación",
-      "description": "Exportación privada JSON v1: contrato de 33 escenarios revisado y aprobado bajo autorización global; implementación en curso.",
+      "description": "Exportación privada JSON v1 de catorce colecciones: 33 escenarios revisados, pruebas y mutación aprobadas; desplegada y aceptada.",
       "acceptance": ["Cumplir @s1–@s33 de features/export_data.feature con revisión, pruebas y mutación antes del cierre."],
       "sdd": true,
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 23,

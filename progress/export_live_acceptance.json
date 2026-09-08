@@ -1,0 +1,201 @@
+{
+  "acceptedAt": "2026-09-08T05:53:38.398Z",
+  "url": "https://organizacion.apptolast.com",
+  "release": "0030513fa402502b5db87efa87d97fb979171b4e",
+  "appMain": "83b02756ece65c9772421ee8523f1887d6cf0d74",
+  "infraSource": "5a2b8607a80624fbd0c410a9a3a81955afa564a1",
+  "apply": {
+    "exitCode": 0,
+    "ok": 38,
+    "changed": 4,
+    "failed": 0,
+    "skipped": 0
+  },
+  "export": {
+    "status": 200,
+    "bytes": 8568,
+    "counts": {
+      "projects": 1,
+      "tasks": 1,
+      "taskStatusHistory": 0,
+      "availability": 1,
+      "plannedBlocks": 1,
+      "blockProjections": 1,
+      "blockChanges": 1,
+      "workSessions": 1,
+      "workSessionIntervals": 2,
+      "workSessionChanges": 3,
+      "appearance": 1,
+      "customization": 0,
+      "projectCustomFieldValues": 0,
+      "taskCustomFieldValues": 0
+    },
+    "downloads": [
+      {
+        "filename": "organizationweb-export-v1-20260908T055149651097Z.json",
+        "bytes": 8568,
+        "sha256": "44fb29722f3f29fe315f4132192c07036744aa4aafb5179bb0d3dc0eb7a9ff3f"
+      },
+      {
+        "filename": "organizationweb-export-v1-20260908T055149651097Z.json",
+        "bytes": 8568,
+        "sha256": "44fb29722f3f29fe315f4132192c07036744aa4aafb5179bb0d3dc0eb7a9ff3f"
+      }
+    ],
+    "prepareRequests": 1,
+    "requestsOnOpen": 0,
+    "headers": {
+      "cacheControl": "no-store, private, no-transform",
+      "contentType": "application/json;charset=utf-8",
+      "contentDisposition": "attachment; filename=\"organizationweb-export-v1-20260908T055149651097Z.json\"",
+      "contentLength": "8568"
+    },
+    "geometry": [
+      {
+        "width": 320,
+        "scrollWidth": 320
+      },
+      {
+        "width": 768,
+        "scrollWidth": 768
+      },
+      {
+        "width": 1280,
+        "scrollWidth": 1280
+      }
+    ],
+    "axeViolations": 0,
+    "blobRevoked": true,
+    "logoutStatus": 204,
+    "anonymousStatus": 401
+  },
+  "integrity": {
+    "tables": [
+      {
+        "name": "appearance_preferences",
+        "records": 1,
+        "checksum": "d2aeeae41b85c3d7b50ff30338660ba3"
+      },
+      {
+        "name": "availability_preferences",
+        "records": 1,
+        "checksum": "66ed7f15a4376b40ee32e1e1fb7361e2"
+      },
+      {
+        "name": "block_changes",
+        "records": 1,
+        "checksum": "640e8dbe19457ec915496c819adf7593"
+      },
+      {
+        "name": "block_projections",
+        "records": 1,
+        "checksum": "83cd468870dae71639d4776e917a0fad"
+      },
+      {
+        "name": "customization_preferences",
+        "records": 0,
+        "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "flyway_schema_history",
+        "records": 20,
+        "checksum": "5e5779ac6cb95748eaa22947b271980d"
+      },
+      {
+        "name": "outbox_events",
+        "records": 9,
+        "checksum": "16ee47c37105acac879dca1d083e79ef"
+      },
+      {
+        "name": "planned_blocks",
+        "records": 1,
+        "checksum": "73d88292803648749445eba6e09fc13d"
+      },
+      {
+        "name": "project_custom_field_values",
+        "records": 0,
+        "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "projects",
+        "records": 1,
+        "checksum": "c2afe4e7ad591bceb9d2b4799f58b48b"
+      },
+      {
+        "name": "task_custom_field_values",
+        "records": 0,
+        "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "task_status_history",
+        "records": 0,
+        "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "name": "tasks",
+        "records": 1,
+        "checksum": "793aa79f7ffced4a9ca12850b84a3150"
+      },
+      {
+        "name": "work_session_changes",
+        "records": 3,
+        "checksum": "84f883090f3ac777ca2421d800b99000"
+      },
+      {
+        "name": "work_session_intervals",
+        "records": 2,
+        "checksum": "1dc0f2be4ae04424c7fb2ce2667b7495"
+      },
+      {
+        "name": "work_sessions",
+        "records": 1,
+        "checksum": "e1c549c37fb5a47daf92fe6d996aa4c0"
+      }
+    ],
+    "dataUnchanged": true,
+    "services": 20,
+    "allReplicasHealthy": true,
+    "unchangedContainers": 18,
+    "postgresContainer": "c85f0de047ff",
+    "rabbitContainer": "10270883bd46"
+  },
+  "legacy": [
+    {
+      "host": "kropia",
+      "status": 200
+    },
+    {
+      "host": "minecraft-stats",
+      "status": 200
+    },
+    {
+      "host": "n8n",
+      "status": 200
+    },
+    {
+      "host": "openclaw",
+      "status": 200
+    },
+    {
+      "host": "passbolt",
+      "status": 302
+    },
+    {
+      "host": "albertohidalgo",
+      "status": 307
+    },
+    {
+      "host": "pablohurtadohg",
+      "status": 200
+    },
+    {
+      "host": "generadorcodigosqr",
+      "status": 404
+    }
+  ],
+  "limitations": [
+    "Browser acceptance used headless Chromium, not physical devices or a human UX study.",
+    "Production fixture is small; large export boundaries were verified locally.",
+    "Existing restore evidence covers schema 19; no new schema 20 backup restore was performed."
+  ]
+}

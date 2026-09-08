@@ -1,6 +1,6 @@
 # Plan de entrega
 
-Actualizado el 8 de septiembre de 2026. Las funcionalidades 1–21 están desplegadas y verificadas en https://organizacion.apptolast.com. Exportación22 está en implementación con contrato aprobado;23–30 siguen pendientes. Este recuento de funcionalidades no mide un porcentaje de esfuerzo ni garantiza ausencia de errores.
+Actualizado el 8 de septiembre de 2026. Las funcionalidades 1–22 están desplegadas y verificadas en https://organizacion.apptolast.com. Exportación22 está aceptada en producción; 23–30 siguen pendientes. Este recuento de funcionalidades no mide un porcentaje de esfuerzo ni garantiza ausencia de errores.
 
 ## Estado comprobado
 
@@ -20,16 +20,16 @@ Se creó una copia PostgreSQL real en el servidor y se restauró en una instanci
 
 ## Orden de trabajo
 
-1. Vistas y campos21 cerrada: mutación incremental completa81,91% conservador,2.241 pruebas frontend, CI34173869406 con151 E2E y publicador verdes. PR24/infra33 fusionadas; apply38/5/0, aceptación HTTPS y Chromium completa dentro del alcance documentado. La campaña original76,64% se conserva y no se reescribe. Exportación22 tiene 33 escenarios aprobados y desarrollo paralelo del backend, HTTP e interfaz. Los primeros núcleos nominales pasan pruebas focales; todavía no acreditan la funcionalidad completa.
+1. Vistas y campos21 cerrada: mutación incremental completa81,91% conservador,2.241 pruebas frontend, CI34173869406 con151 E2E y publicador verdes. PR24/infra33 fusionadas; apply38/5/0, aceptación HTTPS y Chromium completa dentro del alcance documentado. La campaña original76,64% se conserva y no se reescribe. Exportación22 cerrada con 33 escenarios, CI final 34190090017 SUCCESS y aceptación live: dos descargas idénticas de 8568 bytes mediante un GET, sin alterar datos ni servicios. PR25/infra35 fusionadas; apply 38/4/0/0. Evidencia y límites en progress/judge_export_data.md y progress/export_live_acceptance.json.
 2. Conservar la aceptación del MVP y completar las obligaciones operativas de respaldo externo y recuperación que siguen pendientes.
-3. Continuar22–30 con contratos acotados: exportación22 antes de importación23; credenciales/API24 antes de webhooks25; calendarioICS26; después GitHub27, calendario externo28, otros conectores29 y automatizaciones30. Definir proveedor, dirección de sincronización, permisos y conflictos antes de cada integración. La autorización global del usuario permite continuar sin repetir la aprobación de cada contrato.
+3. Continuar23–30 con contratos acotados: importación23 después de la exportación22 ya entregada; credenciales/API24 antes de webhooks25; calendarioICS26; después GitHub27, calendario externo28, otros conectores29 y automatizaciones30. Definir proveedor, dirección de sincronización, permisos y conflictos antes de cada integración. La autorización global del usuario permite continuar sin repetir la aprobación de cada contrato.
 
 La mejora DNS está desplegada con aplicación4d9469a y catálogo770b736. PR22 y PR30 fusionadas con CI verde; check27/2/0 y apply38/5/0, ambos liberados correctamente. API/web terminaron su actualización, PostgreSQL/Rabbit conservaron sus contenedores, los20servicios están1/1 y las ocho rutas anteriores mantienen sus respuestas. La aceptación HTTPS posterior conserva sesión cerrada, tiempo neto, historial y revisión semanal. La sesión privada utilizada para verificarlo se cerró correctamente.
 
 ## Estimaciones y límites
 
-El MVP ya se puede usar, incluida apariencia persistente20 y vistas/campos21 (release dfac90edcabdf04e442b906f0ab6db8894cbc4b2). La aceptación, evidencias y límites están en progress/judge_appearance.md y progress/judge_custom_views_fields.md. Los datos anteriores y los16 servicios ajenos a la aplicación se conservan.
+El MVP ya se puede usar, incluida exportación22 (release 0030513fa402502b5db87efa87d97fb979171b4e), además de apariencia20 y vistas/campos21. La aceptación, evidencias y límites están en progress/judge_appearance.md y progress/judge_custom_views_fields.md. Los datos anteriores y los16 servicios ajenos a la aplicación se conservan.
 
 Como referencia de tiempo observado, apariencia20 ocupó unas3h27 desde contrato hasta cierre;21 superaba4h16 al corte de esta revisión y seguía en validación. Incluyen trabajo paralelo y esperas; no son horas de CPU ni una velocidad garantizada. La campaña original de mutación frontend21 duró44min8s. La campaña incremental oficial posterior terminó en21min10s con1494/1824 mutantes detectados (81,91% conservador), conservando el universo completo y las dos evidencias. CI de main34176109030 terminó también SUCCESS.
 
-Estimación provisional de baja confianza para planificación:22–26 podrían requerir15–30 horas adicionales de ejecución y validación;27,28 y30 otras15–35 horas si proveedores y permisos están disponibles. No incluye29, cuyo inventario sigue abierto, ni esperas externas ni hallazgos nuevos. Es un orden de magnitud de varias jornadas, no un compromiso de completar todo hoy. Con cuota limitada, el siguiente resultado prioritario es exportación22. No hay garantía de terminar el alcance completo con una recarga o cuota concreta.
+Estimación histórica previa al cierre de22, de baja confianza y pendiente de recalcular:22–26 podrían requerir15–30 horas adicionales de ejecución y validación;27,28 y30 otras15–35 horas si proveedores y permisos están disponibles. No incluye29, cuyo inventario sigue abierto, ni esperas externas ni hallazgos nuevos. Es un orden de magnitud de varias jornadas, no un compromiso de completar todo hoy. El siguiente resultado del orden de trabajo es importación23; no se inicia en este cierre. No hay garantía de terminar el alcance completo con una recarga o cuota concreta.

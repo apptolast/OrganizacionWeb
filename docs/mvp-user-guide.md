@@ -1,6 +1,6 @@
 # Usar el MVP para trabajar con un horario
 
-Las funcionalidades 1–21, incluidos Historial, Revisión semanal, Apariencia y campos personales, están disponibles en [OrganizationWeb](https://organizacion.apptolast.com). El estado de despliegue está en [el plan](mvp-delivery-plan.md). La exportación está en desarrollo; las funcionalidades 22–30 todavía no están publicadas.
+Las funcionalidades 1–22, incluidos Historial, Revisión semanal, Apariencia, campos personales y Exportación, están disponibles en [OrganizationWeb](https://organizacion.apptolast.com). El estado de despliegue está en [el plan](mvp-delivery-plan.md). Las funcionalidades 23–30 todavía no están publicadas.
 
 ## Preparar el trabajo
 
@@ -58,6 +58,14 @@ Abre **Gestionar campos personales** para añadir información propia de proyect
 En el detalle del proyecto o tarea, rellena sus valores y pulsa **Guardar campos**. Desactivar una definición oculta el campo y conserva los valores existentes; volver a activarla permite recuperarlos. Vaciar un valor y guardarlo es una acción distinta de desactivar el campo.
 
 Si un guardado no puede confirmarse o los campos cambiaron en otra pestaña, utiliza **Recargar guardado** antes de decidir otro envío. Esa consulta reemplaza el borrador al recuperar la versión confirmada. No interpretes una consulta fallida como ausencia de datos.
+
+## Exportar tus datos
+
+Abre **Exportación** y pulsa **Preparar exportación**. Abrir la pantalla no consulta tus datos para exportarlos. Cuando termine, pulsa **Descargar archivo JSON** para guardar el archivo; prepararlo no inicia una descarga automática. Puedes descargar otra vez el mismo archivo preparado sin repetir la consulta.
+
+**Cancelar preparación** interrumpe la espera. Si falla, reintenta explícitamente; **Preparar de nuevo** obtiene una instantánea nueva. Salir de la vista o cerrar el acceso retira el archivo preparado de la aplicación, pero no borra las copias que ya guardaste en tu dispositivo.
+
+El JSON privado reúne catorce colecciones de tu cuenta, incluidos historial y campos desactivados. Guárdalo donde puedas proteger su contenido. La exportación admite hasta 100000 registros y 32 MiB; si supera un límite, no entrega un archivo parcial. Esta función no importa archivos ni sustituye una copia de seguridad del servidor.
 
 ## Datos y servidor
 

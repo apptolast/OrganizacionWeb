@@ -1,0 +1,41 @@
+{
+  "commit": "6fab913e3a6ab825d4725ffd232309ddc7ef88b1",
+  "tests": 16,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "entries": [
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportConcurrencyTest.java",
+      "sha256": "7BAE9E1A518863F2D889341A98D25B379CA335979639711CB56817B0B93F4A9E"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresImportDataStore.java",
+      "sha256": "CF67877CB4232E4173F550B6AABB19F6D74CCD2B5DE20EAEC7F3D83F9FF957AB"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ImportRecordValidator.java",
+      "sha256": "2F4F05C1E322FF74AB79E6607DD8B704481685370A2FF92FB517C08AE7A6B203"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ImportCounts.java",
+      "sha256": "A710812816A7679D238FAF14B30C6924AA1A9403C504B91F18E2F132D6E0CE4B"
+    },
+    {
+      "path": "progress/tdd_import_concurrency.md",
+      "sha256": "DCBB9393819502160986D9C64A6B17492EE7AF702C53242619A65F7BD2D17122"
+    },
+    {
+      "path": "progress/import_concurrency_complete_final.log",
+      "sha256": "0F70B91AD11189AA980B5E5535A6A77B6D41ABBA3AF2FE8DAA88D37F97A34F7B"
+    },
+    {
+      "path": "progress/import_concurrency_complete_final.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+    },
+    {
+      "path": "progress/import_concurrency_complete_final_xml.xml",
+      "sha256": "67F2FD5442756D4CA585E25FE18685A40C5D8B1F6837091D9619759851BA21AC"
+    }
+  ]
+}

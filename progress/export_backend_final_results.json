@@ -1,0 +1,102 @@
+{
+  "command": "./backend/gradlew.bat -p backend --init-script .gradle/export-format.init.gradle spotlessApply spotlessCheck test --tests *Export*Test --no-daemon",
+  "exitCode": 0,
+  "log": "progress/export_backend_final_verified.log",
+  "suites": [
+    {
+      "class": "com.apptolast.organization.adapter.config.ExportSocketTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "path": "progress/export_backend_final_xml/TEST-com.apptolast.organization.adapter.config.ExportSocketTest.xml",
+      "sha256": "66981F4C5B09903D1DEB72FBFFF53B11BA6FBB34AD05C93C5F9ADF060356B25A"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.config.ExportWiringTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "path": "progress/export_backend_final_xml/TEST-com.apptolast.organization.adapter.config.ExportWiringTest.xml",
+      "sha256": "00B577E8F0385717B873EF09E6EE8AD9BB7BC1513AD50F7A6E38DF903D14AA84"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.ExportDataApiTest",
+      "tests": 25,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "path": "progress/export_backend_final_xml/TEST-com.apptolast.organization.adapter.ExportDataApiTest.xml",
+      "sha256": "155F6BDEEECC93D383807363CE1B2C5A9835D74B131DD6E812E11F10517897C5"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.ExportDataHttpPersistenceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "path": "progress/export_backend_final_xml/TEST-com.apptolast.organization.adapter.ExportDataHttpPersistenceTest.xml",
+      "sha256": "926D68D563D9639C24632B1405A9017F02DF4B3FBC5177B2DE82F970CE6D3903"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.http.ExportHeadersFilterTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "path": "progress/export_backend_final_xml/TEST-com.apptolast.organization.adapter.http.ExportHeadersFilterTest.xml",
+      "sha256": "F7695F464AE912AC2AE13AB7B61F5928868C83F3B6D0BC6F83BD3658E0A2C26C"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.persistence.ExportBufferTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "path": "progress/export_backend_final_xml/TEST-com.apptolast.organization.adapter.persistence.ExportBufferTest.xml",
+      "sha256": "6AEA0FAD789C44FEE00621B9BED0189A63E4AB1C3862F5509FE4CEE906573B3C"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.persistence.ExportJsonWriterTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "path": "progress/export_backend_final_xml/TEST-com.apptolast.organization.adapter.persistence.ExportJsonWriterTest.xml",
+      "sha256": "0D68E19A2EF8C89A2E77A2927FAB2E8B84E77F3993EE1896A19BDDAD3F8BE955"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.persistence.ExportPersistenceTest",
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "path": "progress/export_backend_final_xml/TEST-com.apptolast.organization.adapter.persistence.ExportPersistenceTest.xml",
+      "sha256": "436467DA9D9935D0B2DE207AEF419BF2D031F7A1C7E9ABC67B4A7CEF973A95A9"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.persistence.ExportReceiptWriterTest",
+      "tests": 58,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "path": "progress/export_backend_final_xml/TEST-com.apptolast.organization.adapter.persistence.ExportReceiptWriterTest.xml",
+      "sha256": "EEEB032326DFE8370C48779D3C26F98562840C2A58B0A04BDEBC5095BE1C2B63"
+    },
+    {
+      "class": "com.apptolast.organization.application.PrepareExportDataTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "path": "progress/export_backend_final_xml/TEST-com.apptolast.organization.application.PrepareExportDataTest.xml",
+      "sha256": "80A1B6BF27A9BF81C72B71C6ED3004E9BD1AEDDFFD38987ACA8B3FE46B42A1FA"
+    }
+  ],
+  "tests": 138,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "executionReference": "c13d51"
+}

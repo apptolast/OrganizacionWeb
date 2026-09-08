@@ -335,6 +335,8 @@ class ExportPersistenceTest {
     var b = "22345678-0000-0000-0000-000000000001";
     var c = "32345678-0000-0000-0000-000000000001";
     var d = "42345678-0000-0000-0000-000000000001";
+    var e = "52345678-0000-0000-0000-000000000001";
+    var f = "62345678-0000-0000-0000-000000000001";
     jdbc.update(
         "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) VALUES (?,'values-owner','P','','idea',0,now(),now())",
         project);
@@ -344,18 +346,27 @@ class ExportPersistenceTest {
             new String[] {a, "NUMBER"},
             new String[] {b, "BOOLEAN"},
             new String[] {c, "TEXT"},
-            new String[] {d, "DATE"}))
+            new String[] {d, "DATE"},
+            new String[] {e, "DATE"},
+            new String[] {f, "TEXT"}))
       definitions
           .addObject()
           .put("id", pair[0])
-          .put("label", pair[1])
+          .put("label", pair[1] + pair[0])
           .put("type", pair[1])
           .put("active", false);
     jdbc.update(
         "INSERT INTO customization_preferences(id,owner_id,scope,visible_fields,custom_fields,version,updated_at) VALUES (?,'values-owner','PROJECT','[]'::jsonb,?::jsonb,1,now())",
         java.util.UUID.randomUUID(),
         definitions.toString());
-    var values = new ObjectMapper().createObjectNode().put(b, false).putNull(c).put(a, 0);
+    var values =
+        new ObjectMapper()
+            .createObjectNode()
+            .put(b, false)
+            .putNull(c)
+            .put(a, 0)
+            .put(e, "0001-01-01")
+            .put(f, "  Texto 🧭\nexacto  ");
     jdbc.update(
         "INSERT INTO project_custom_field_values(id,owner_id,project_id,field_values,version,updated_at) VALUES (?,'values-owner',?,?::jsonb,7,'2026-09-08Z')",
         java.util.UUID.randomUUID(),
@@ -374,7 +385,10 @@ class ExportPersistenceTest {
     assertThat(row.path("projectId").asText()).isEqualTo(project.toString());
     assertThat(row.path("version").asText()).isEqualTo("7");
     var exported = row.path("values");
-    assertThat(exported).hasSize(3);
+    assertThat(exported).hasSize(5);
+    assertThat(exported.get(3).path("fieldId").asText()).isEqualTo(e);
+    assertThat(exported.get(3).path("value").asText()).isEqualTo("0001-01-01");
+    assertThat(exported.get(4).path("value").asText()).isEqualTo("  Texto 🧭\nexacto  ");
     assertThat(exported.get(0).path("fieldId").asText()).isEqualTo(a);
     assertThat(exported.get(0).path("value").isIntegralNumber()).isTrue();
     assertThat(exported.get(0).path("value").intValue()).isZero();
@@ -865,5 +879,432 @@ class ExportPersistenceTest {
     assertThat(row.path("receipt").properties())
         .extracting(java.util.Map.Entry::getKey)
         .containsExactly("id", "sessionId", "action", "occurredAt", "before", "after");
+  }
+
+  @Test
+  void s4_concurrentCommitCannotMixConfigurationValuesOrCounts() throws Exception {
+    var context = task("snapshot-owner");
+    var field = java.util.UUID.randomUUID();
+    var definition =
+        "[{\"id\":\"" + field + "\",\"label\":\"Antes\",\"type\":\"TEXT\",\"active\":true}]";
+    jdbc.update(
+        "INSERT INTO customization_preferences(id,owner_id,scope,visible_fields,custom_fields,version,updated_at) VALUES (?,'snapshot-owner','PROJECT','[]'::jsonb,?::jsonb,0,'2026-09-01Z')",
+        java.util.UUID.randomUUID(),
+        definition);
+    jdbc.update(
+        "INSERT INTO project_custom_field_values(id,owner_id,project_id,field_values,version,updated_at) VALUES (?,'snapshot-owner',?,?::jsonb,0,'2026-09-01Z')",
+        java.util.UUID.randomUUID(),
+        context.project(),
+        "{\"" + field + "\":\"valor anterior\"}");
+    var calls = new java.util.concurrent.atomic.AtomicInteger();
+    var file =
+        new PostgresExportDataQueries(jdbc, manager)
+            .prepare(
+                "snapshot-owner",
+                () -> {
+                  calls.incrementAndGet();
+                  var outerPid = jdbc.queryForObject("SELECT pg_backend_pid()", Integer.class);
+                  var writer =
+                      new org.springframework.transaction.support.TransactionTemplate(manager);
+                  writer.setPropagationBehavior(
+                      org.springframework.transaction.TransactionDefinition
+                          .PROPAGATION_REQUIRES_NEW);
+                  writer.executeWithoutResult(
+                      status -> {
+                        assertThat(jdbc.queryForObject("SELECT pg_backend_pid()", Integer.class))
+                            .isNotEqualTo(outerPid);
+                        jdbc.update(
+                            "UPDATE customization_preferences SET custom_fields=?::jsonb,version=1 WHERE owner_id='snapshot-owner'",
+                            definition.replace("Antes", "Después"));
+                        jdbc.update(
+                            "UPDATE project_custom_field_values SET field_values=?::jsonb,version=1 WHERE owner_id='snapshot-owner'",
+                            "{\"" + field + "\":\"valor posterior\"}");
+                        jdbc.update(
+                            "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) VALUES (?,'snapshot-owner','Posterior','','idea',0,'2026-09-01Z','2026-09-01Z')",
+                            java.util.UUID.randomUUID());
+                      });
+                  return Instant.EPOCH;
+                });
+    var output = new ByteArrayOutputStream();
+    file.writeTo(output);
+    var json = new ObjectMapper().readTree(output.toByteArray());
+    assertThat(calls.get()).isEqualTo(1);
+    assertThat(json.path("counts").path("projects").intValue()).isEqualTo(1);
+    assertThat(json.at("/data/customization/0/customFields/0/label").asText()).isEqualTo("Antes");
+    assertThat(json.at("/data/projectCustomFieldValues/0/values/0/value").asText())
+        .isEqualTo("valor anterior");
+    assertThat(json.at("/data/projectCustomFieldValues/0/version").asText()).isEqualTo("0");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM projects WHERE owner_id='snapshot-owner'", Integer.class))
+        .isEqualTo(2);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT version FROM project_custom_field_values WHERE owner_id='snapshot-owner'",
+                Long.class))
+        .isEqualTo(1L);
+  }
+
+  @Test
+  void s17_lateSqlFailureDoesNotReturnPreparedBytesOrChangeFacts() {
+    var context = task("late-sql-owner");
+    jdbc.update(
+        "INSERT INTO availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at) VALUES (?,'late-sql-owner','UTC',0,0,0,0,0,0,0,0,'2026-09-01Z','2026-09-01Z')",
+        java.util.UUID.randomUUID());
+    jdbc.execute(
+        "CREATE FUNCTION export_fail_minutes() RETURNS integer LANGUAGE plpgsql STABLE AS 'BEGIN RAISE EXCEPTION ''private late SQL failure''; END'");
+    jdbc.execute("ALTER TABLE availability_preferences RENAME TO export_availability_backing");
+    try {
+      jdbc.execute(
+          "CREATE VIEW availability_preferences AS SELECT id,owner_id,zone_id,CASE WHEN owner_id='late-sql-owner' THEN export_fail_minutes() ELSE monday_minutes END AS monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at FROM export_availability_backing");
+      var clockCalls = new java.util.concurrent.atomic.AtomicInteger();
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+              () ->
+                  new PostgresExportDataQueries(jdbc, manager)
+                      .prepare(
+                          "late-sql-owner",
+                          () -> {
+                            clockCalls.incrementAndGet();
+                            return Instant.EPOCH;
+                          }))
+          .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class)
+          .hasMessage("El almacenamiento no está disponible.");
+      assertThat(clockCalls.get()).isEqualTo(1);
+      assertThat(
+              org.springframework.transaction.support.TransactionSynchronizationManager
+                  .isActualTransactionActive())
+          .isFalse();
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT count(*) FROM projects WHERE id=?", Integer.class, context.project()))
+          .isEqualTo(1);
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT count(*) FROM outbox_events WHERE owner_id='late-sql-owner'",
+                  Integer.class))
+          .isZero();
+    } finally {
+      jdbc.execute("DROP VIEW IF EXISTS availability_preferences");
+      jdbc.execute("ALTER TABLE export_availability_backing RENAME TO availability_preferences");
+      jdbc.execute("DROP FUNCTION export_fail_minutes()");
+    }
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT zone_id FROM availability_preferences WHERE owner_id='late-sql-owner'",
+                String.class))
+        .isEqualTo("UTC");
+  }
+
+  @Test
+  void s15_exactRecordAndByteLimitsKeepEveryRowAndRejectOneMoreByte(
+      @org.junit.jupiter.api.io.TempDir java.nio.file.Path directory) throws Exception {
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) SELECT md5('export-inclusive-'||n)::uuid,'inclusive-owner','P','','idea',0,'2026-09-01Z','2026-09-01Z' FROM generate_series(1,100000) n");
+    var queries = new PostgresExportDataQueries(jdbc, manager);
+    var firstStart = System.nanoTime();
+    long baseLength = queries.prepare("inclusive-owner", () -> Instant.EPOCH).contentLength();
+    long padding = 33554432 - baseLength;
+    assertThat(padding).isBetween(1L, 399999999L);
+    jdbc.update(
+        "WITH ordered AS (SELECT id,row_number() OVER(ORDER BY id)-1 AS n FROM projects WHERE owner_id='inclusive-owner') UPDATE projects p SET description=repeat('x',greatest(0,least(4000,? - ordered.n*4000))::int) FROM ordered WHERE p.id=ordered.id",
+        padding);
+    var started = System.nanoTime();
+    var file = queries.prepare("inclusive-owner", () -> Instant.EPOCH);
+    long elapsedMillis = (System.nanoTime() - started) / 1000000;
+    assertThat(file.contentLength()).isEqualTo(33554432L);
+    var path = directory.resolve("inclusive.json");
+    try (var output = java.nio.file.Files.newOutputStream(path)) {
+      file.writeTo(output);
+    }
+    assertThat(java.nio.file.Files.size(path)).isEqualTo(33554432L);
+    int rows = 0;
+    String previous = "";
+    var reader = new ObjectMapper();
+    try (var parser = reader.getFactory().createParser(path.toFile())) {
+      while (parser.nextToken() != null) {
+        if (parser.currentToken() == com.fasterxml.jackson.core.JsonToken.FIELD_NAME
+            && parser.currentName().equals("projects")) {
+          var token = parser.nextToken();
+          if (token == com.fasterxml.jackson.core.JsonToken.START_ARRAY) {
+            while (parser.nextToken() != com.fasterxml.jackson.core.JsonToken.END_ARRAY) {
+              com.fasterxml.jackson.databind.JsonNode row = reader.readTree(parser);
+              var id = row.path("id").asText();
+              assertThat(id.compareTo(previous)).isPositive();
+              previous = id;
+              rows++;
+            }
+          } else assertThat(parser.getIntValue()).isEqualTo(100000);
+        }
+      }
+    }
+    assertThat(rows).isEqualTo(100000);
+    jdbc.update(
+        "UPDATE projects SET description=description||'x' WHERE id=(SELECT id FROM projects WHERE owner_id='inclusive-owner' AND description='' ORDER BY id LIMIT 1)");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> queries.prepare("inclusive-owner", () -> Instant.EPOCH))
+        .isInstanceOf(com.apptolast.organization.application.ExportTooLargeException.class);
+    System.out.println(
+        "export-inclusive: records=100000 bytes=33554432 prepareMillis="
+            + elapsedMillis
+            + " totalMillis="
+            + (System.nanoTime() - firstStart) / 1000000);
+  }
+
+  @Test
+  void s5_ownedTaskValuesCannotExposeTheForeignTasksProject() {
+    var context = task("foreign-task-values-project");
+    jdbc.update(
+        "INSERT INTO task_custom_field_values(id,owner_id,task_id,field_values,version,updated_at) VALUES (?,'broken-task-values',?,'{}'::jsonb,0,'2026-09-01Z')",
+        java.util.UUID.randomUUID(),
+        context.task());
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresExportDataQueries(jdbc, manager)
+                    .prepare("broken-task-values", () -> Instant.EPOCH))
+        .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+  }
+
+  @Test
+  void s5_changeOwnerCannotExposeAnotherOwnersImmutableSession() throws Exception {
+    var context = task("foreign-change-session");
+    var session = java.util.UUID.randomUUID();
+    var change = java.util.UUID.randomUUID();
+    var start = Instant.parse("2026-09-08T12:00:00Z");
+    var original =
+        new com.apptolast.organization.domain.SessionStart(
+            session, context.project(), context.task(), start, 25, start.plusSeconds(1500), "UTC");
+    var before =
+        new com.apptolast.organization.domain.WorkSessionState(
+            original, "running", 1, start, 0, start);
+    var after =
+        new com.apptolast.organization.domain.WorkSessionState(
+            original, "paused", 2, start.plusSeconds(60), 60000000, null);
+    var receipt =
+        new com.apptolast.organization.application.WorkSessionTransitionReceipt(
+            change, session, "PAUSE", after.changedAt(), before, after);
+    var mapper =
+        new ObjectMapper()
+            .findAndRegisterModules()
+            .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    jdbc.update(
+        "INSERT INTO work_sessions(id,owner_id,project_id,task_id,request_key,started_at,planned_minutes,planned_end_at,zone_id,status,revision,changed_at,worked_microseconds) VALUES (?,'foreign-change-session',?,?,?,'2026-09-08T12:00:00Z',25,'2026-09-08T12:25:00Z','UTC','paused',2,'2026-09-08T12:01:00Z',60000000)",
+        session,
+        context.project(),
+        context.task(),
+        session);
+    jdbc.update(
+        "INSERT INTO work_session_changes(id,owner_id,session_id,request_key,action,expected_revision,occurred_at,receipt) VALUES (?,'broken-change-owner',?,?,'PAUSE',1,'2026-09-08T12:01:00Z',?::jsonb)",
+        change,
+        session,
+        change,
+        mapper.writeValueAsString(receipt));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresExportDataQueries(jdbc, manager)
+                    .prepare("broken-change-owner", () -> Instant.EPOCH))
+        .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+  }
+
+  @Test
+  void s5_s13_unrepresentableStoredInstantCannotProduceAnInvalidTimestamp() {
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) VALUES (?,'ancient-owner','P','','idea',0,'0001-01-01 BC','2026-09-01Z')",
+        java.util.UUID.randomUUID());
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresExportDataQueries(jdbc, manager)
+                    .prepare("ancient-owner", () -> Instant.EPOCH))
+        .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+  }
+
+  @Test
+  void s5_negativeSessionRevisionCannotBeExportedAsAValidLong() {
+    var context = task("negative-session-revision");
+    var session = java.util.UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO work_sessions(id,owner_id,project_id,task_id,request_key,started_at,planned_minutes,planned_end_at,zone_id,status,revision,worked_microseconds) VALUES (?,'negative-session-revision',?,?,?,'2026-09-08T12:00:00Z',25,'2026-09-08T12:25:00Z','UTC','running',-1,0)",
+        session,
+        context.project(),
+        context.task(),
+        session);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresExportDataQueries(jdbc, manager)
+                    .prepare("negative-session-revision", () -> Instant.EPOCH))
+        .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT revision FROM work_sessions WHERE id=?", Long.class, session))
+        .isEqualTo(-1L);
+  }
+
+  @Test
+  void s5_negativeIntervalRevisionCannotBeExportedAsAValidLong() {
+    var context = task("negative-interval-revision");
+    var session = java.util.UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO work_sessions(id,owner_id,project_id,task_id,request_key,started_at,planned_minutes,planned_end_at,zone_id,status,revision,worked_microseconds) VALUES (?,'negative-interval-revision',?,?,?,'2026-09-08T12:00:00Z',25,'2026-09-08T12:25:00Z','UTC','running',1,0)",
+        session,
+        context.project(),
+        context.task(),
+        session);
+    jdbc.update(
+        "INSERT INTO work_session_intervals(session_id,revision,start_at,end_at) VALUES (?,-1,'2026-09-08T12:00:00Z','2026-09-08T12:01:00Z')",
+        session);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresExportDataQueries(jdbc, manager)
+                    .prepare("negative-interval-revision", () -> Instant.EPOCH))
+        .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT revision FROM work_session_intervals WHERE session_id=?",
+                Long.class,
+                session))
+        .isEqualTo(-1L);
+  }
+
+  @Test
+  void s5_invalidStoredAppearanceContrastCannotBecomeASuccessfulExport() {
+    jdbc.update(
+        "INSERT INTO appearance_preferences(id,owner_id,theme,accent_light,accent_dark,version,updated_at) VALUES (?,'broken-appearance','LIGHT','#FFFFFF','#00FFFF',0,'2026-09-08Z')",
+        java.util.UUID.randomUUID());
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresExportDataQueries(jdbc, manager)
+                    .prepare("broken-appearance", () -> Instant.EPOCH))
+        .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT accent_light FROM appearance_preferences WHERE owner_id='broken-appearance'",
+                String.class))
+        .isEqualTo("#FFFFFF");
+  }
+
+  @Test
+  void s16_oversizedUnvalidatedZoneIsRejectedBeforeMaterializingTextOrClock() {
+    jdbc.update(
+        "INSERT INTO availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at) VALUES (?,'oversized-zone',repeat('z',33554433),0,0,0,0,0,0,0,0,'2026-09-08Z','2026-09-08Z')",
+        java.util.UUID.randomUUID());
+    var calls = new java.util.concurrent.atomic.AtomicInteger();
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresExportDataQueries(jdbc, manager)
+                    .prepare(
+                        "oversized-zone",
+                        () -> {
+                          calls.incrementAndGet();
+                          return Instant.EPOCH;
+                        }))
+        .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+    assertThat(calls).hasValue(0);
+  }
+
+  @Test
+  void s16_oversizedSessionStatusIsRejectedBeforeClock() {
+    var context = task("oversized-status");
+    var session = java.util.UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO work_sessions(id,owner_id,project_id,task_id,request_key,started_at,planned_minutes,planned_end_at,zone_id,status,revision,worked_microseconds) VALUES (?,'oversized-status',?,?,?,'2026-09-08T12:00:00Z',25,'2026-09-08T12:25:00Z','UTC',repeat('s',33554433),1,0)",
+        session,
+        context.project(),
+        context.task(),
+        session);
+    var calls = new java.util.concurrent.atomic.AtomicInteger();
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresExportDataQueries(jdbc, manager)
+                    .prepare(
+                        "oversized-status",
+                        () -> {
+                          calls.incrementAndGet();
+                          return Instant.EPOCH;
+                        }))
+        .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+    assertThat(calls).hasValue(0);
+  }
+
+  @Test
+  void s16_oversizedChangeActionIsRejectedBeforeClock() {
+    var context = task("oversized-action");
+    var session = java.util.UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO work_sessions(id,owner_id,project_id,task_id,request_key,started_at,planned_minutes,planned_end_at,zone_id,status,revision,worked_microseconds) VALUES (?,'oversized-action',?,?,?,'2026-09-08T12:00:00Z',25,'2026-09-08T12:25:00Z','UTC','running',1,0)",
+        session,
+        context.project(),
+        context.task(),
+        session);
+    jdbc.update(
+        "INSERT INTO work_session_changes(id,owner_id,session_id,request_key,action,expected_revision,occurred_at,receipt) VALUES (?,'oversized-action',?,?,repeat('a',33554433),1,'2026-09-08T12:01:00Z','{}'::jsonb)",
+        java.util.UUID.randomUUID(),
+        session,
+        java.util.UUID.randomUUID());
+    var calls = new java.util.concurrent.atomic.AtomicInteger();
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresExportDataQueries(jdbc, manager)
+                    .prepare(
+                        "oversized-action",
+                        () -> {
+                          calls.incrementAndGet();
+                          return Instant.EPOCH;
+                        }))
+        .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+    assertThat(calls).hasValue(0);
+  }
+
+  @Test
+  void s5_unknownStoredSessionStatusCannotEscapeTheClosedSchema() {
+    var context = task("unknown-status");
+    var session = java.util.UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO work_sessions(id,owner_id,project_id,task_id,request_key,started_at,planned_minutes,planned_end_at,zone_id,status,revision,worked_microseconds) VALUES (?,'unknown-status',?,?,?,'2026-09-08T12:00:00Z',25,'2026-09-08T12:25:00Z','UTC','alien',1,0)",
+        session,
+        context.project(),
+        context.task(),
+        session);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresExportDataQueries(jdbc, manager)
+                    .prepare("unknown-status", () -> Instant.EPOCH))
+        .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT status FROM work_sessions WHERE id=?", String.class, session))
+        .isEqualTo("alien");
+  }
+
+  @Test
+  void s5_s8_invalidOriginalOffsetCannotBecomeAnExportedOffset() {
+    var context = task("invalid-block-offset");
+    var id = block(context);
+    jdbc.update("UPDATE planned_blocks SET start_offset='bogus' WHERE id=?", id);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresExportDataQueries(jdbc, manager)
+                    .prepare("invalid-block-offset", () -> Instant.EPOCH))
+        .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT start_offset FROM planned_blocks WHERE id=?", String.class, id))
+        .isEqualTo("bogus");
+  }
+
+  @Test
+  void s5_s8_invalidProjectionEndOffsetIsRejectedWithoutChangingItsOriginal() {
+    var context = task("invalid-projection-offset");
+    var id = block(context);
+    jdbc.update(
+        "INSERT INTO block_projections(block_id,version,status,updated_at,start_local,end_local,zone_id,start_offset,end_offset,start_at,end_at,duration_minutes) SELECT id,1,'planned','2026-09-02Z',start_local,end_local,zone_id,start_offset,'bogus',start_at,end_at,duration_minutes FROM planned_blocks WHERE id=?",
+        id);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresExportDataQueries(jdbc, manager)
+                    .prepare("invalid-projection-offset", () -> Instant.EPOCH))
+        .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT end_offset FROM planned_blocks WHERE id=?", String.class, id))
+        .isEqualTo("+02:00");
   }
 }

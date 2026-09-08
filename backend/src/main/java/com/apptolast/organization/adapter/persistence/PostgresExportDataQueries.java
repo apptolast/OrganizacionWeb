@@ -42,7 +42,16 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
                 "SELECT EXISTS(SELECT 1 FROM project_custom_field_values v LEFT JOIN projects p ON p.id=v.project_id WHERE v.owner_id=? AND p.owner_id IS DISTINCT FROM v.owner_id)",
                 Boolean.class,
                 owner)) throw new IllegalArgumentException("Invalid project values relationship");
-            guardJsonSize(owner);
+            if (jdbc.queryForObject(
+                "SELECT EXISTS(SELECT 1 FROM task_custom_field_values v LEFT JOIN tasks t ON t.id=v.task_id LEFT JOIN projects p ON p.id=t.project_id WHERE v.owner_id=? AND p.owner_id IS DISTINCT FROM v.owner_id)",
+                Boolean.class,
+                owner)) throw new IllegalArgumentException("Invalid task values relationship");
+            if (jdbc.queryForObject(
+                "SELECT EXISTS(SELECT 1 FROM work_session_changes c LEFT JOIN work_sessions s ON s.id=c.session_id WHERE (c.owner_id=? OR s.owner_id=?) AND c.owner_id IS DISTINCT FROM s.owner_id)",
+                Boolean.class,
+                owner,
+                owner)) throw new IllegalArgumentException("Invalid session change relationship");
+            guardRawSize(owner);
             if (recordCount(owner) > 100000)
               throw new com.apptolast.organization.application.ExportTooLargeException();
             if (jdbc.queryForObject(
@@ -86,6 +95,14 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
     }
   }
 
+  private int scalarBatch(String owner, String sizeQuery) {
+    long maximumBytes = jdbc.queryForObject(sizeQuery, Long.class, owner);
+    if (maximumBytes > ExportBuffer.LIMIT)
+      throw new IllegalArgumentException("Stored scalar exceeds the bounded reader");
+    // Account for UTF-16 decoding and fixed JDBC columns; large rows remain single-row reads.
+    return (int) Math.max(1, Math.min(64, 1048576L / (2 * maximumBytes + 4096)));
+  }
+
   private long projects(String owner, com.fasterxml.jackson.core.JsonGenerator json) {
     return jdbc.query(
         connection -> {
@@ -95,7 +112,7 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
                   java.sql.ResultSet.TYPE_FORWARD_ONLY,
                   java.sql.ResultSet.CONCUR_READ_ONLY);
           query.setString(1, owner);
-          query.setFetchSize(1);
+          query.setFetchSize(64);
           return query;
         },
         (org.springframework.jdbc.core.ResultSetExtractor<Long>)
@@ -115,12 +132,7 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
                                 name.equals("createdAt") ? "created_at" : "updated_at",
                                 java.time.OffsetDateTime.class)
                             .toInstant();
-                    json.writeStringField(
-                        name,
-                        java.time.format.DateTimeFormatter.ofPattern(
-                                "uuuu-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
-                            .withZone(java.time.ZoneOffset.UTC)
-                            .format(instant));
+                    json.writeStringField(name, instant(instant));
                   }
                   json.writeEndObject();
                   count++;
@@ -152,7 +164,8 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
           time(json, row, "createdAt", "created_at");
           time(json, row, "updatedAt", "updated_at");
           json.writeEndObject();
-        });
+        },
+        64);
   }
 
   private interface RowWriter {
@@ -160,13 +173,17 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
   }
 
   private long rows(String sql, String owner, RowWriter writer) {
+    return rows(sql, owner, writer, 1);
+  }
+
+  private long rows(String sql, String owner, RowWriter writer, int fetchSize) {
     return jdbc.query(
         connection -> {
           var statement =
               connection.prepareStatement(
                   sql, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
           statement.setString(1, owner);
-          statement.setFetchSize(1);
+          statement.setFetchSize(fetchSize);
           return statement;
         },
         (org.springframework.jdbc.core.ResultSetExtractor<Long>)
@@ -191,13 +208,17 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
       String column)
       throws IOException, java.sql.SQLException {
     var value = row.getObject(column, java.time.OffsetDateTime.class);
-    json.writeStringField(
-        field,
-        value == null
-            ? null
-            : java.time.format.DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
-                .withZone(java.time.ZoneOffset.UTC)
-                .format(value.toInstant()));
+    json.writeStringField(field, value == null ? null : instant(value.toInstant()));
+  }
+
+  private static final java.time.format.DateTimeFormatter INSTANT =
+      new java.time.format.DateTimeFormatterBuilder().appendInstant(6).toFormatter();
+
+  private static String instant(Instant value) {
+    int year = value.atOffset(java.time.ZoneOffset.UTC).getYear();
+    if (year < 1 || year > 9999)
+      throw new IllegalArgumentException("Unrepresentable stored instant");
+    return INSTANT.format(value);
   }
 
   private long taskHistory(String owner, com.fasterxml.jackson.core.JsonGenerator json) {
@@ -214,7 +235,8 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
           json.writeStringField("toStatus", row.getString("to_status"));
           time(json, row, "occurredAt", "occurred_at");
           json.writeEndObject();
-        });
+        },
+        64);
   }
 
   private long availability(String owner, com.fasterxml.jackson.core.JsonGenerator json) {
@@ -241,6 +263,14 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
         "SELECT id,theme,accent_light,accent_dark,version,updated_at FROM appearance_preferences WHERE owner_id=? ORDER BY id",
         owner,
         row -> {
+          var values =
+              new com.apptolast.organization.domain.AppearanceValues(
+                  row.getString("theme"),
+                  row.getString("accent_light"),
+                  row.getString("accent_dark"));
+          if (!values.accentLight().equals(row.getString("accent_light"))
+              || !values.accentDark().equals(row.getString("accent_dark")))
+            throw new IllegalArgumentException("Noncanonical stored appearance");
           json.writeStartObject();
           json.writeStringField("id", row.getString("id"));
           json.writeStringField("theme", row.getString("theme"));
@@ -380,15 +410,29 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
           local(json, row, "startLocal", "start_local");
           local(json, row, "endLocal", "end_local");
           json.writeStringField("zoneId", row.getString("zone_id"));
-          json.writeStringField("startOffset", row.getString("start_offset"));
-          json.writeStringField("endOffset", row.getString("end_offset"));
+          offset(json, row, "startOffset", "start_offset");
+          offset(json, row, "endOffset", "end_offset");
           json.writeBooleanField("allowOverBudget", row.getBoolean("allow_over_budget"));
           time(json, row, "startAt", "start_at");
           time(json, row, "endAt", "end_at");
           json.writeNumberField("durationMinutes", row.getInt("duration_minutes"));
           time(json, row, "createdAt", "created_at");
           json.writeEndObject();
-        });
+        },
+        scalarBatch(
+            owner,
+            "SELECT coalesce(max(octet_length(b.objective)::bigint+octet_length(b.zone_id)+coalesce(octet_length(b.start_offset),0)+coalesce(octet_length(b.end_offset),0)),0) FROM planned_blocks b JOIN projects p ON p.id=b.project_id WHERE p.owner_id=?"));
+  }
+
+  private static void offset(
+      com.fasterxml.jackson.core.JsonGenerator json,
+      java.sql.ResultSet row,
+      String field,
+      String column)
+      throws IOException, java.sql.SQLException {
+    var value = row.getString(column);
+    if (value != null) java.time.ZoneOffset.of(value);
+    json.writeStringField(field, value);
   }
 
   private static void local(
@@ -418,15 +462,18 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
           local(json, row, "startLocal", "start_local");
           local(json, row, "endLocal", "end_local");
           json.writeStringField("zoneId", row.getString("zone_id"));
-          json.writeStringField("startOffset", row.getString("start_offset"));
-          json.writeStringField("endOffset", row.getString("end_offset"));
+          offset(json, row, "startOffset", "start_offset");
+          offset(json, row, "endOffset", "end_offset");
           time(json, row, "startAt", "start_at");
           time(json, row, "endAt", "end_at");
           var duration = row.getObject("duration_minutes", Integer.class);
           if (duration == null) json.writeNullField("durationMinutes");
           else json.writeNumberField("durationMinutes", duration);
           json.writeEndObject();
-        });
+        },
+        scalarBatch(
+            owner,
+            "SELECT coalesce(max(coalesce(octet_length(v.zone_id),0)::bigint+coalesce(octet_length(v.start_offset),0)+coalesce(octet_length(v.end_offset),0)),0) FROM block_projections v JOIN planned_blocks b ON b.id=v.block_id JOIN projects p ON p.id=b.project_id WHERE p.owner_id=?"));
   }
 
   private long sessions(String owner, com.fasterxml.jackson.core.JsonGenerator json) {
@@ -434,6 +481,10 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
         "SELECT id,project_id,task_id,request_key,started_at,planned_minutes,planned_end_at,zone_id,status,revision,changed_at,worked_microseconds,running_since,effective_end_at,last_decision_at FROM work_sessions WHERE owner_id=? ORDER BY id",
         owner,
         row -> {
+          if (row.getLong("revision") < 0)
+            throw new IllegalArgumentException("Invalid session revision");
+          if (!java.util.Set.of("running", "paused", "closed").contains(row.getString("status")))
+            throw new IllegalArgumentException("Invalid session status");
           json.writeStartObject();
           json.writeStringField("id", row.getString("id"));
           json.writeStringField("projectId", row.getString("project_id"));
@@ -451,7 +502,10 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
           time(json, row, "effectiveEndAt", "effective_end_at");
           time(json, row, "lastDecisionAt", "last_decision_at");
           json.writeEndObject();
-        });
+        },
+        scalarBatch(
+            owner,
+            "SELECT coalesce(max(octet_length(zone_id)::bigint+octet_length(status)),0) FROM work_sessions WHERE owner_id=?"));
   }
 
   private long intervals(String owner, com.fasterxml.jackson.core.JsonGenerator json) {
@@ -459,13 +513,16 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
         "SELECT i.session_id,i.revision,i.start_at,i.end_at FROM work_session_intervals i JOIN work_sessions s ON s.id=i.session_id WHERE s.owner_id=? ORDER BY i.session_id,i.revision",
         owner,
         row -> {
+          if (row.getLong("revision") < 0)
+            throw new IllegalArgumentException("Invalid interval revision");
           json.writeStartObject();
           json.writeStringField("sessionId", row.getString("session_id"));
           json.writeStringField("revision", row.getString("revision"));
           time(json, row, "startAt", "start_at");
           time(json, row, "endAt", "end_at");
           json.writeEndObject();
-        });
+        },
+        64);
   }
 
   private long recordCount(String owner) {
@@ -495,13 +552,17 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
         java.util.Collections.nCopies(sources.size(), owner).toArray());
   }
 
-  private void guardJsonSize(String owner) {
+  private void guardRawSize(String owner) {
     var sources =
         java.util.List.of(
             "SELECT greatest(octet_length(visible_fields::text),octet_length(custom_fields::text)) AS bytes FROM customization_preferences WHERE owner_id=?",
             "SELECT octet_length(field_values::text) FROM project_custom_field_values WHERE owner_id=?",
             "SELECT octet_length(field_values::text) FROM task_custom_field_values WHERE owner_id=?",
-            "SELECT octet_length(receipt::text) FROM work_session_changes WHERE owner_id=?",
+            "SELECT octet_length(receipt::text)::bigint+octet_length(action) FROM work_session_changes WHERE owner_id=?",
+            "SELECT octet_length(zone_id) FROM availability_preferences WHERE owner_id=?",
+            "SELECT octet_length(zone_id)::bigint+octet_length(status) FROM work_sessions WHERE owner_id=?",
+            "SELECT octet_length(b.objective)::bigint+octet_length(b.zone_id)+coalesce(octet_length(b.start_offset),0)+coalesce(octet_length(b.end_offset),0) FROM planned_blocks b JOIN projects p ON p.id=b.project_id WHERE p.owner_id=?",
+            "SELECT coalesce(octet_length(v.zone_id),0)::bigint+coalesce(octet_length(v.start_offset),0)+coalesce(octet_length(v.end_offset),0) FROM block_projections v JOIN planned_blocks b ON b.id=v.block_id JOIN projects p ON p.id=b.project_id WHERE p.owner_id=?",
             "SELECT octet_length(c.receipt::text) FROM block_changes c JOIN projects p ON p.id=c.project_id WHERE p.owner_id=?");
     if (jdbc.queryForObject(
         "SELECT EXISTS(SELECT 1 FROM ("
@@ -511,7 +572,7 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
             + ")",
         Boolean.class,
         java.util.Collections.nCopies(sources.size(), owner).toArray()))
-      throw new IllegalArgumentException("Stored JSON exceeds the bounded reader");
+      throw new IllegalArgumentException("Stored payload exceeds the bounded reader");
   }
 
   private long blockChanges(String owner, com.fasterxml.jackson.core.JsonGenerator json) {

@@ -1938,3 +1938,54 @@ Controles de al menos 44 px, teclado, foco visible y anuncios de progreso/error/
 Toda confirmación de aceptación se ejecutará exclusivamente en PostgreSQL y cuentas locales efímeras. En live sólo se autoriza vista previa sin escrituras; no se borran datos productivos para preparar una importación. La aceptación debe acreditar copia propia útil, no-op, conflicto integral, colisiones privadas, recibos e intervalos completos, sesión RUNNING preservada con aviso, límites de recursos, carrera con writer existente y commit con respuesta perdida.
 
 Root ha aprobado la lista física y el orden de locks, respuestas y recuperación, cero evento nuevo, recordedAt previo al commit y límites por bloqueo/sentencia sin SLA global nuevo. C ha ratificado coordinación con los writers existentes y el límite del proxy. La destilación deberá conservar estas decisiones; todavía no hay implementación validada de 23.
+
+## 24. API para integraciones
+
+Contrato aprobado por root bajo la autorización global del usuario, preparado aisladamente desde `99cd366` mientras 23 completa sus gates. No implica implementación ni cierre de 23. La [propuesta aprobada](progress/proposal_integration_api.md), SHA256 `B948AB34566EA6CE1EED299B5CD7DF1DF42B3E22C56E13EA38F680A25CAE349B`, se incorpora como detalle normativo de este contrato; sus expresiones «propuesta»/«para revisión» identifican su origen histórico, no decisiones pendientes. [Revisión independiente](progress/review_integration_api_proposal.md), SHA256 `ACC931B5` abreviado, APPROVED. Destilación Gherkin antes de TDD.
+
+### Superficie y seguridad
+
+Credenciales personales creadas por sesión humana; consumidor Bearer stateless, sin OAuth ni nuevos proveedores. Se reutilizan las rutas y casos de uso existentes, con allowlist exacta por método/ruta:
+
+| Scope | Operaciones |
+| --- | --- |
+| `projects:read` | GET `/api/v1/projects` y `/api/v1/projects/{id}` |
+| `projects:write` | POST `/api/v1/projects`; PUT `/api/v1/projects/{id}` |
+| `tasks:read` | GET `/api/v1/projects/{projectId}/tasks`, `.../tasks/{taskId}`, `.../tasks/{id}/status`, `.../tasks/{id}/parent`, `.../tasks/{parentId}/subtasks` |
+| `tasks:write` | POST `/api/v1/projects/{projectId}/tasks` |
+| `agenda:read` | GET `/api/v1/today`; GET `/api/v1/projects/{projectId}/tasks/{taskId}/blocks`, `.../blocks/{blockId}`, `.../blocks/{blockId}/state`, `.../blocks/by-request/{requestKey}` |
+| `history:read` | GET `/api/v1/history`, `/api/v1/weekly-review`, `/api/v1/projects/{projectId}/tasks/{id}/history` |
+
+Los segmentos `...` de la tabla conservan el prefijo explícito de su fila; no son matchers ni permisos comodín. Escritura no concede lectura. Se preservan cuerpos, paginación, errores, ETags, precondiciones, ownership y outbox existentes. El token no permite otras operaciones, gestión de sesión/credenciales, preferencias, export/import ni transiciones de estado. HEAD/OPTIONS no heredan GET.
+
+Cualquier Authorization selecciona el canal Bearer: no fallback a cookie. Header único, esquema Bearer case-insensitive, un espacio y token canónico; sin query alternativa, comas ni valores duplicados. Precedencia: formato/autenticación 401 `API_UNAUTHENTICATED` con `WWW-Authenticate: Bearer`; después Origin ajeno explícito en método distinto de GET/HEAD/OPTIONS 403 `UNTRUSTED_ORIGIN`; después ruta/scope 403 `API_SCOPE_DENIED`; después cuota 429; después negocio. Credencial inválida/caducada/revocada o de owner distinto del bootstrap actualmente habilitado produce el mismo 401 genérico.
+
+Principal conserva owner de la credencial, nunca su id. El canal Bearer no consulta/crea sesión JDBC ni emite Set-Cookie, ignora cookie inválida y no depende de disponibilidad del almacenamiento de sesión. No se prescribe refactor de filtros globales si configuración estándar cumple esos observables. Authorization ausente conserva cadena cookie, CSRF, OriginGuard y precedencia actuales. No habilitar CORS.
+
+### Credenciales, gestión e incertidumbre
+
+Token `owp_<uuid>.<secret>`: UUID canónico minúsculo, secret de 32 bytes SecureRandom base64url sin padding; persistir sólo SHA-256 de esos bytes y comparación constante. Sin secretos/verificadores en logs, listados, export v1/import23 o almacenamiento cliente. Gestión y errores de autenticación llevan no-store.
+
+Metadatos cerrados `{id,name,scopes,createdAt,expiresAt,revokedAt}`. Nombre tras strip Unicode 1–80 puntos de código sin controles; duplicados de nombre permitidos. Scopes 1–6 conocidos sin repetición, orden canónico de tabla. Caducidad elegida 7/30/90 días UTC desde creación, default UI 30; reloj inyectado, microsegundos, años 0001–9999. Válida sólo si now < expiresAt. No editar permisos ni renovar: sustitución explícita. Máximo 10 válidas por owner, conteo e inserción serializados; caducadas/revocadas liberan cupo. Historial paginado conservado.
+
+Gestión sólo cookie en `/api/v1/me/api-credentials`:
+
+- PUT `/{id}` con JSON cerrado `{name,scopes,expiresInDays}`: primera creación 201 y Location, `{credential,secret}` sólo tras commit. Id elegida antes del envío identifica intento. Replay misma intención/id/owner 200 `{credential,secret:null}`, sin regenerar ni extender fechas ni exigir otro cupo. Intención diferente o colisión ajena 409 `API_CREDENTIAL_CONFLICT`, sin revelar owner.
+- GET `/{id}`: credential o 404 `API_CREDENTIAL_NOT_FOUND`, ajena igual a ausente. GET colección: `{items,nextCursor}`, 50 por página, createdAt DESC/id DESC, sin N+1 ni escrituras al leer.
+- PUT `/{id}/revocation`, sin cuerpo/query: 200 credential; primera revocación fija fecha y repeticiones la conservan, irreversible. Ajena/ausente 404; no ETag necesario para esta transición única.
+
+JSON cerrado, duplicados/trailing tokens inválidos, límite 4 KiB antes de materializar. 400 `API_CREDENTIAL_INVALID`, 409 `API_CREDENTIAL_LIMIT`, 413 `API_CREDENTIAL_TOO_LARGE`, 503 `STORAGE_UNAVAILABLE`; sesión conserva sus errores actuales. Prioridad de gestión: seguridad, método/ruta, tamaño/estructura/valores, idempotencia, cupo, escritura. Reloj inválido 503 sin inserción. COMMIT incierto no garantiza rollback: recuperación por id.
+
+UI `/integraciones/api`, nav al final y ruta privada reconocida, H1 «Credenciales para integraciones». Nombre/scopes/caducidad, lista y revocación explícita con consecuencia. Antes de crear guarda sólo `{owner,id}` en sessionStorage propio; si falla, no envía. Formulario y secreto sólo en memoria. Secreto visible una vez, selección manual y Copiar sin clipboard automático; ocultar al abandonar/desmontar/cambiar owner/logout. Ninguna llegada tardía lo publica a otra identidad.
+
+Ante respuesta perdida, bloquear otra creación y «Comprobar creación» manual de misma id. Encontrada sin secreto: informar pérdida irrecuperable y permitir revocar/crear otra explícitamente. 404 no libera id: tras reload verificar/revocar o reintroducir misma intención y reenviar manualmente con la misma id; replay siempre secret:null. No id nueva antes de resolver. Intención se retira al confirmar resolución; fallos al limpiar almacenamiento no invalidan éxito ni impiden logout. Revocación incierta se comprueba con GET manual y sólo se reenvía deliberadamente. Reutilizar guardas identidad/abort/foco, conservar otros borradores y evitar Provider/GET global.
+
+### Cuotas, documentación y aceptación
+
+Cuota compartida PostgreSQL, ventana fija UTC de un minuto: 60 por credencial y 120 por owner. Contadores compactos de ventana actual, comprobación/incremento atómicos en orden owner antes de credencial, sin gasto parcial al rechazar. Sólo tokens válidos y operaciones admitidas consumen; errores posteriores de negocio sí. 429 `API_RATE_LIMITED`, Retry-After entero hasta próxima ventana mínimo 1; DB inaccesible 503 sin bypass. No limita sesiones humanas ni promete defensa volumétrica anónima.
+
+Revocación serializada con autorización/cuota: una solicitud autorizada antes de su commit puede terminar después; toda autenticación posterior rechaza, sin caché permisiva. Caducidad se verifica al autorizar. No modificar idempotencia de POST de negocio ni reintentar automáticamente altas ante respuesta perdida.
+
+GET exacto `/api/v1/integration-openapi.json`: OpenAPI 3.1 versionado/validado, disponible a sesión propia o cualquier Bearer válido, sin scope adicional ni cuota; Bearer sigue sin sesión/Set-Cookie. Sólo allowlist documentada, seguridad y contratos existentes; ejemplos ficticios, sin Swagger UI/dependencia nueva. Excepción exacta, no apertura de prefijos.
+
+Pruebas se centran en fronteras de seguridad, concurrencia, secreto único, recuperación/privacidad y cuotas, reutilizando oráculos de negocio existentes sin replicarlos. UI conserva tokens/temas, 44px, teclado/foco, contraste, reduced motion y matriz UX30 con evidencia en tres motores. Escrituras de aceptación en entorno efímero; LIVE sólo autorización explícita. Nuevas tablas fuera de export/import, migración y rollback aditivo comprobados antes de despliegue.

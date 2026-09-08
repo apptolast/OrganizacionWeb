@@ -1,5 +1,9 @@
 # Estado actual
 
+## Preparación aislada de 24 — contrato aprobado para destilación
+
+En rama `codex/integration-api`, baseline `99cd366` con CI 34223544959 SUCCESS, root aprobó propuesta B948AB34 y revisión independiente C ACC931B5 bajo autorización global. Se incorpora sección 24 y detalle normativo en proposal_integration_api.md. Sólo documentos: sin Gherkin, implementación, cambios de feature_list ni init repetido. El cierre de 23 continúa separado y no se declara done. Próximo paso: destilación y revisión de Gherkin antes de TDD. El estado histórico siguiente se conserva íntegro.
+
 ## Corte vigente de importación 23 — 8 de septiembre, validación final
 
 Actualización posterior: las CI 34217454004 (4c74e18) y 34219923300 (2ddb576) terminaron SUCCESS, ambas con 161 E2E correctos y dos omisiones documentadas. El catálogo corregido 7712fc8 pasa CI 34220016597, lint de directorio/historial y check oficial: 27 correctas, dos cambios previstos, cero fallos, 11 omitidas; bloqueo liberado. Los dos falsos positivos de digests públicos se resolvieron con una excepción exacta por regla/ruta/línea, conservando cinco controles negativos. El marcador del lint fallido se archivó mediante recuperación oficial y prueba de controlador detenido. Evidencias portátiles en import_operational_original_evidence.zip (SHA256 0ea13b18d8e4c7e9df3c749d61c9582b95edcb00bb70dfbe7868f80e55165d85) e import_ci_evidence.json. Falta el dictamen final de PIT de persistencia, apply y aceptación real. El texto siguiente conserva los cortes anteriores de esta validación.
@@ -108,7 +112,11 @@ Esta prueba amplía la evidencia de recuperación al snapshot indicado del esque
 
 Infra PR37 registra esta prueba posterior, fusionada en 42eb63f27d46532825ae8de3f1c1879ebd3b89fe tras CI34196987114 SUCCESS. Es documentación: no requiere apply. Cortes parciales de importación revisados en review_import_data_checkpoints.md: cliente/intención 56 pruebas y HTTP preview corregido 20 pruebas MVC. Persistencia continúa en su primer corte PostgreSQL; interfaz, integración, mutación y despliegue 23 siguen pendientes.
 
-## Estado actual de importación tras revisión consolidada
+## Estado actual
+
+## Preparación aislada de 24 — contrato aprobado para destilación
+
+En rama `codex/integration-api`, baseline `99cd366` con CI 34223544959 SUCCESS, root aprobó propuesta B948AB34 y revisión independiente C ACC931B5 bajo autorización global. Se incorpora sección 24 y detalle normativo en proposal_integration_api.md. Sólo documentos: sin Gherkin, implementación, cambios de feature_list ni init repetido. El cierre de 23 continúa separado y no se declara done. Próximo paso: destilación y revisión de Gherkin antes de TDD. El estado histórico siguiente se conserva íntegro. de importación tras revisión consolidada
 
 22/30 funcionalidades completadas y publicadas. Importación 23 sigue in_progress. Frontend aprobado: 2424 pruebas y mutación conservadora 81,27 % con 801 firmas intactas. Lector/HTTP tienen PIT aprobado; concurrencia aislada 16/16 revisada e integrada. El registro detallado y límites de cada corte están en review_import_data_checkpoints.md.
 

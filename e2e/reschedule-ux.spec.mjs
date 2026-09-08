@@ -1,3 +1,4 @@
+import assert from "node:assert/strict";
 import { test, expect } from "./support/authenticated-test.mjs";
 import { create, sql } from "./support/projects.mjs";
 import { saveTask } from "./support/tasks.mjs";
@@ -98,32 +99,21 @@ test("reschedule: main panel states retain geometry keyboard and accessible sema
         `${folder}/geometry.json`,
         JSON.stringify(evidence, null, 2),
       );
-      expect(measure.scroll, `${state}:${width} overflow`).toBeLessThanOrEqual(
-        width,
-      );
+      assert.ok(measure.scroll <= width, `${state}:${width} overflow`);
       for (const box of measure.controls) {
-        expect(
-          box.x,
-          `${state}:${width}:${box.name} left`,
-        ).toBeGreaterThanOrEqual(0);
-        expect(
-          box.x + box.width,
+        assert.ok(box.x >= 0, `${state}:${width}:${box.name} left`);
+        assert.ok(
+          box.x + box.width <= width + 1,
           `${state}:${width}:${box.name} right`,
-        ).toBeLessThanOrEqual(width + 1);
-        expect(
-          box.width,
-          `${state}:${width}:${box.name} width`,
-        ).toBeGreaterThanOrEqual(44);
-        expect(
-          box.height,
-          `${state}:${width}:${box.name} height`,
-        ).toBeGreaterThanOrEqual(44);
+        );
+        assert.ok(box.width >= 44, `${state}:${width}:${box.name} width`);
+        assert.ok(box.height >= 44, `${state}:${width}:${box.name} height`);
         if (box.tag === "INPUT" || box.tag === "SELECT") {
           expect(
             box.borderStyle,
             `${state}:${width}:${box.name} border`,
           ).not.toBe("none");
-          expect(box.borderWidth).toBeGreaterThan(0);
+          assert.ok(box.borderWidth > 0);
         }
       }
       for (let a = 0; a < measure.controls.length; a++)
@@ -134,10 +124,11 @@ test("reschedule: main panel states retain geometry keyboard and accessible sema
             Math.min(x.x + x.width, y.x + y.width) - Math.max(x.x, y.x);
           const intersectionHeight =
             Math.min(x.y + x.height, y.y + y.height) - Math.max(x.y, y.y);
-          expect(
+          assert.equal(
             intersectionWidth > 1 && intersectionHeight > 1,
+            false,
             `${state}:${width} overlap ${x.name}/${y.name}`,
-          ).toBe(false);
+          );
         }
     }
     await page.setViewportSize({ width: 1440, height: 900 });

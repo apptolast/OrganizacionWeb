@@ -7,6 +7,23 @@ import { createHash } from "node:crypto";
 import * as commands from "./project.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
+test("import frontend invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "import_data-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.import-data.config.json",
+      ],
+    ],
+  ]);
+});
 test("export Stryker keeps its complete modules and reviewed integration nodes with inherited gates", () => {
   const config = JSON.parse(
     readFileSync(

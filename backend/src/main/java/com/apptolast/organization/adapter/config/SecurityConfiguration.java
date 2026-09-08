@@ -40,6 +40,7 @@ public class SecurityConfiguration {
           quota)
       throws Exception {
     return http.securityMatcher(request -> request.getHeader("Authorization") != null)
+        .logout(logout -> logout.disable())
         .csrf(csrf -> csrf.disable())
         .requestCache(cache -> cache.disable())
         .sessionManagement(

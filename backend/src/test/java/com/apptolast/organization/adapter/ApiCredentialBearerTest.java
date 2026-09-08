@@ -46,7 +46,7 @@ class ApiCredentialBearerTest {
           "owner",
           List.of("projects:read"));
   private final String token =
-      "owk1_ac87ee68-133b-4851-82e7-e3ec419df62a_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+      "owp_ac87ee68-133b-4851-82e7-e3ec419df62a_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.ValueSource(

@@ -1,0 +1,42 @@
+[
+  {
+    "path": "inputs_after.json",
+    "bytes": 99856,
+    "sha256": "847FE2DE5CC7A1A4E745115C5FC79E47B9A5FC36B76C0325253A0C954132D108"
+  },
+  {
+    "path": "inputs_before.json",
+    "bytes": 99856,
+    "sha256": "847FE2DE5CC7A1A4E745115C5FC79E47B9A5FC36B76C0325253A0C954132D108"
+  },
+  {
+    "path": "integration-api.spec.mjs",
+    "bytes": 4438,
+    "sha256": "CA7F668B315F355FCCE92DF68DDBD355365FB70A6B603F38876D2C881D572C85"
+  },
+  {
+    "path": "results.json",
+    "bytes": 630,
+    "sha256": "B9ABC2C7E3BF2D327F657EF8DF80F8A3628C6624EE931660827CDF9BE9BD18F8"
+  },
+  {
+    "path": "run.exit",
+    "bytes": 1,
+    "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+  },
+  {
+    "path": "run.json",
+    "bytes": 323,
+    "sha256": "19A71E787FEDA106986F36B7F002F7238010B7B570B2305F9ADF3CA957874D24"
+  },
+  {
+    "path": "run.log",
+    "bytes": 12466,
+    "sha256": "BC5E65AC50CD7E83F46CD440C5884730274CA519A819A55AED549E0EC10707F9"
+  },
+  {
+    "path": "runner.mjs",
+    "bytes": 3575,
+    "sha256": "35D99585759EE5DBF7BEFDB454191F3A44DB77D5E622FC5198839D2DB2C87A1B"
+  }
+]

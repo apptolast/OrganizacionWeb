@@ -1,0 +1,585 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OrganizationWeb Integration API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/projects": {
+      "get": {
+        "x-required-scope": "projects:read",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        }
+      },
+      "post": {
+        "x-required-scope": "projects:write",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCreate"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/v1/projects/{id}": {
+      "get": {
+        "x-required-scope": "projects:read",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación.",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "ETag fuerte de identidad y revisión del proyecto."
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "x-required-scope": "projects:write",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "ETag fuerte vigente obtenido por GET de proyecto; formato UUID:revision entre comillas."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación.",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "ETag fuerte de identidad y revisión del proyecto."
+              }
+            }
+          },
+          "412": {
+            "description": "PROJECT_CONFLICT: versión obsoleta, sin sobrescritura."
+          },
+          "428": {
+            "description": "PRECONDITION_REQUIRED: falta If-Match."
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectEdit"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks": {
+      "get": {
+        "x-required-scope": "tasks:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        }
+      },
+      "post": {
+        "x-required-scope": "tasks:write",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskCreate"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{taskId}": {
+      "get": {
+        "x-required-scope": "tasks:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{id}/status": {
+      "get": {
+        "x-required-scope": "tasks:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{id}/parent": {
+      "get": {
+        "x-required-scope": "tasks:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{parentId}/subtasks": {
+      "get": {
+        "x-required-scope": "tasks:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "parentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        }
+      }
+    },
+    "/api/v1/today": {
+      "get": {
+        "x-required-scope": "agenda:read",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{taskId}/blocks": {
+      "get": {
+        "x-required-scope": "agenda:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{taskId}/blocks/{blockId}": {
+      "get": {
+        "x-required-scope": "agenda:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "blockId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{taskId}/blocks/{blockId}/state": {
+      "get": {
+        "x-required-scope": "agenda:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "blockId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{taskId}/blocks/by-request/{requestKey}": {
+      "get": {
+        "x-required-scope": "agenda:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        }
+      }
+    },
+    "/api/v1/history": {
+      "get": {
+        "x-required-scope": "history:read",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        }
+      }
+    },
+    "/api/v1/weekly-review": {
+      "get": {
+        "x-required-scope": "history:read",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectId}/tasks/{id}/history": {
+      "get": {
+        "x-required-scope": "history:read",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta del contrato vigente de esta operación."
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Credencial personal limitada y revocable. No reintentar automáticamente altas ante respuesta perdida."
+      }
+    },
+    "schemas": {
+      "ProjectCreate": {
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "type": "string",
+            "maxLength": 120
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 4000
+          }
+        }
+      },
+      "ProjectEdit": {
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "description"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "type": "string",
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 4000
+          }
+        }
+      },
+      "TaskCreate": {
+        "additionalProperties": false,
+        "required": [
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "minLength": 1,
+            "type": "string",
+            "maxLength": 160
+          },
+          "completionCriterion": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000
+          },
+          "estimatedMinutes": {
+            "maximum": 1440,
+            "minimum": 1,
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

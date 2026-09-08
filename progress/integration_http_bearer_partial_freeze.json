@@ -1,0 +1,111 @@
+{
+  "context": "4015ce19fbfdf9c36c5ac2f38923dcf4f5b69cfe",
+  "status": "partial",
+  "tests": 129,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "exit": 0,
+  "limits": [
+    "OpenAPI response schemas incomplete",
+    "MVC uses mocked application ports and session repository",
+    "No mutation or global gate"
+  ],
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/config/SecurityConfiguration.java",
+      "sha256": "7E25300435B03D82A7C539A976B43E2D48B95A41F811EAB22A810616F32458B1",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\backend\\src\\main\\java\\com\\apptolast\\organization\\adapter\\config\\SecurityConfiguration.java"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/ApiCredentialController.java",
+      "sha256": "F98EB0E9F03651C8D21A9A4A23143E43558102FCDA0605912C9E66E7BBA7495A",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\backend\\src\\main\\java\\com\\apptolast\\organization\\adapter\\http\\ApiCredentialController.java"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/ApiCredentialSessionIdResolver.java",
+      "sha256": "4E537CFCD5D821ADB0FACE462501ECA49676C03E7D00FE49BC17576F3EC15036",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\backend\\src\\main\\java\\com\\apptolast\\organization\\adapter\\http\\ApiCredentialSessionIdResolver.java"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/ApiCredentialBearerFilter.java",
+      "sha256": "C4ABA928AA26927E80139B5C3A06EEB46CC6DDB010886D672C3EC2800A3BAD48",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\backend\\src\\main\\java\\com\\apptolast\\organization\\adapter\\http\\ApiCredentialBearerFilter.java"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/IntegrationOpenApiController.java",
+      "sha256": "6B1D2D762EB93AAF50B61EFB3C484DE68E40DD80DF14FD2F2CD8BD45210578FC",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\backend\\src\\main\\java\\com\\apptolast\\organization\\adapter\\http\\IntegrationOpenApiController.java"
+    },
+    {
+      "path": "backend/src/main/resources/integration-openapi.json",
+      "sha256": "20D07E2CC744BBA06C41F3999165D9E5576FCE4DFC8AACFB5D99411C7E6457D9",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\backend\\src\\main\\resources\\integration-openapi.json"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/ApiCredentialApiTest.java",
+      "sha256": "7F04029A242C7E974F9ABAA5FE9EAA31002E6D470820B7B9C504659EB6C8C6E5",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\backend\\src\\test\\java\\com\\apptolast\\organization\\adapter\\ApiCredentialApiTest.java"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/ApiCredentialSessionIsolationTest.java",
+      "sha256": "11FE43C5DD50254EB7F764C495A006CA942DB94586A1FD3B9522A61678241DC7",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\backend\\src\\test\\java\\com\\apptolast\\organization\\adapter\\ApiCredentialSessionIsolationTest.java"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/ApiCredentialBearerTest.java",
+      "sha256": "458EB6D60EBFA620EBB438B4E585530E2218A64CD539D595109CDDBDEA2569E1",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\backend\\src\\test\\java\\com\\apptolast\\organization\\adapter\\ApiCredentialBearerTest.java"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/ApiCredentialBearerAdmissionTest.java",
+      "sha256": "2B9B8F0710A59C48BC2EC8D9E39B6BA4C58DFB340BFF636397129EC9075D00B3",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\backend\\src\\test\\java\\com\\apptolast\\organization\\adapter\\ApiCredentialBearerAdmissionTest.java"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/IntegrationOpenApiTest.java",
+      "sha256": "831BECA070987F9954404E9F309248C2508652913F92300DD71A333FEDA50792",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\backend\\src\\test\\java\\com\\apptolast\\organization\\adapter\\IntegrationOpenApiTest.java"
+    },
+    {
+      "path": "progress/tdd_integration_api_http.md",
+      "sha256": "2071DEA7700831E695622C3B3E2E5672FAD28B7CCC570161FC2938DF9ADB512E",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\progress\\tdd_integration_api_http.md"
+    },
+    {
+      "path": "progress/integration_http_bearer_partial_final.log",
+      "sha256": "12F9908EA7D980537C523CBF6E09C44881120C7605D329E6EF9A727451691844",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\progress\\integration_http_bearer_partial_final.log"
+    },
+    {
+      "path": "progress/integration_http_bearer_partial_final.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\progress\\integration_http_bearer_partial_final.exit"
+    },
+    {
+      "path": "progress/integration_http_bearer_partial_xml/TEST-com.apptolast.organization.adapter.ApiCredentialApiTest.xml",
+      "sha256": "A59C3CDFF2D3D94BFC588CE0BC5010D28BDC722CA085C3E08EB974C9E782DA70",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\progress\\integration_http_bearer_partial_xml\\TEST-com.apptolast.organization.adapter.ApiCredentialApiTest.xml"
+    },
+    {
+      "path": "progress/integration_http_bearer_partial_xml/TEST-com.apptolast.organization.adapter.ApiCredentialBearerAdmissionTest.xml",
+      "sha256": "7C2AA2C8B194C0E04705B60BE7B476812825AECE42DA41CB45227EBF56721839",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\progress\\integration_http_bearer_partial_xml\\TEST-com.apptolast.organization.adapter.ApiCredentialBearerAdmissionTest.xml"
+    },
+    {
+      "path": "progress/integration_http_bearer_partial_xml/TEST-com.apptolast.organization.adapter.ApiCredentialBearerTest.xml",
+      "sha256": "46E913813DC5556927B1BD6EF530470CC720B04BFA0716595BE7695EBDD76235",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\progress\\integration_http_bearer_partial_xml\\TEST-com.apptolast.organization.adapter.ApiCredentialBearerTest.xml"
+    },
+    {
+      "path": "progress/integration_http_bearer_partial_xml/TEST-com.apptolast.organization.adapter.ApiCredentialSessionIsolationTest.xml",
+      "sha256": "62947459D2116B3BEA8346759A8F763852C9D48705F189773288678D42F7AD40",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\progress\\integration_http_bearer_partial_xml\\TEST-com.apptolast.organization.adapter.ApiCredentialSessionIsolationTest.xml"
+    },
+    {
+      "path": "progress/integration_http_bearer_partial_xml/TEST-com.apptolast.organization.adapter.IntegrationOpenApiTest.xml",
+      "sha256": "3A88ED305D0350BAE747960EE43B4E2DFEF95B8725F48FA14E330BB32C3C0092",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-http-bearer-partial-original\\progress\\integration_http_bearer_partial_xml\\TEST-com.apptolast.organization.adapter.IntegrationOpenApiTest.xml"
+    }
+  ]
+}

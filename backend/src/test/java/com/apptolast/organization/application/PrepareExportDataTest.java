@@ -13,12 +13,13 @@ class PrepareExportDataTest {
     var clock = mock(Clock.class);
     when(clock.instant()).thenReturn(Instant.parse("2026-09-08T01:02:03.123456789Z"));
     var file = mock(PreparedExport.class);
-    ExportDataQueries source = (owner, timestamp) -> {
-      assertThat(owner).isEqualTo("dueño");
-      verifyNoInteractions(clock);
-      assertThat(timestamp.get()).isEqualTo(Instant.parse("2026-09-08T01:02:03.123456Z"));
-      return file;
-    };
+    ExportDataQueries source =
+        (owner, timestamp) -> {
+          assertThat(owner).isEqualTo("dueño");
+          verifyNoInteractions(clock);
+          assertThat(timestamp.get()).isEqualTo(Instant.parse("2026-09-08T01:02:03.123456Z"));
+          return file;
+        };
     assertThat(new PrepareExportData(source, clock).prepare("dueño")).isSameAs(file);
     verify(clock).instant();
     verifyNoMoreInteractions(clock);

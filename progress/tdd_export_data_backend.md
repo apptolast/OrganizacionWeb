@@ -13,3 +13,5 @@ Firmas públicas compilables: ExportDataUseCase.prepare(String owner) devuelve P
 
 Freeze7archivos en export_backend_nominal_freeze.json. A congela esas fuentes para revisiónroot/handoffC. Producto completo22 NO terminado: datos14familias/PG/recibos/integridad/ownership/bytebudget/cursor/RR/relojfallido/errores/wiring pendientes. No mutación ni campañasglobales.
 Precisión de trazabilidad: reloj es @s14. Nombre corregido y foco2/2 verificado en export_backend_nominal_tag_final.log; sin cambio de asserts ni producción.
+
+Corrección de evidencia de formato: el comando fc2d80 devolvióEXIT0 pero avisó que spotlessIdeHook requería ruta absoluta, por lo que NO acredita formato aplicado. Se conserva ese log. Selector explícito de sólo7paths en backend/.gradle/export-format.init.gradle; spotlessApply y spotlessCheck EXIT0 26a6a7, export_backend_format_actual.log. Diff y contenido confirman formatoGoogle real en writer/tests, sin editar WIPHTTP. Nuevo manifiesto export_backend_formatted_freeze.json; no tests repetidos por formato.

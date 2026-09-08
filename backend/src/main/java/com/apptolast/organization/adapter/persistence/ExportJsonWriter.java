@@ -11,9 +11,22 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public final class ExportJsonWriter {
-  private static final List<String> COLLECTIONS = List.of("projects", "tasks", "taskStatusHistory", "availability", "plannedBlocks",
-      "blockProjections", "blockChanges", "workSessions", "workSessionIntervals", "workSessionChanges",
-      "appearance", "customization", "projectCustomFieldValues", "taskCustomFieldValues");
+  private static final List<String> COLLECTIONS =
+      List.of(
+          "projects",
+          "tasks",
+          "taskStatusHistory",
+          "availability",
+          "plannedBlocks",
+          "blockProjections",
+          "blockChanges",
+          "workSessions",
+          "workSessionIntervals",
+          "workSessionChanges",
+          "appearance",
+          "customization",
+          "projectCustomFieldValues",
+          "taskCustomFieldValues");
 
   public PreparedExport empty(String owner, Instant instant) throws IOException {
     var buffer = new ByteArrayOutputStream();
@@ -21,21 +34,41 @@ public final class ExportJsonWriter {
       json.writeStartObject();
       json.writeStringField("format", "organizationweb-export");
       json.writeNumberField("schemaVersion", 1);
-      json.writeStringField("exportedAt", DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSSSS'Z'").withZone(ZoneOffset.UTC).format(instant));
+      json.writeStringField(
+          "exportedAt",
+          DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
+              .withZone(ZoneOffset.UTC)
+              .format(instant));
       json.writeStringField("owner", owner);
       json.writeObjectFieldStart("data");
-      for (var collection : COLLECTIONS) { json.writeArrayFieldStart(collection); json.writeEndArray(); }
+      for (var collection : COLLECTIONS) {
+        json.writeArrayFieldStart(collection);
+        json.writeEndArray();
+      }
       json.writeEndObject();
       json.writeObjectFieldStart("counts");
       for (var collection : COLLECTIONS) json.writeNumberField(collection, 0);
       json.writeEndObject();
       json.writeEndObject();
     }
-    var filename = "organizationweb-export-v1-" + DateTimeFormatter.ofPattern("uuuuMMdd'T'HHmmssSSSSSS'Z'").withZone(ZoneOffset.UTC).format(instant) + ".json";
+    var filename =
+        "organizationweb-export-v1-"
+            + DateTimeFormatter.ofPattern("uuuuMMdd'T'HHmmssSSSSSS'Z'")
+                .withZone(ZoneOffset.UTC)
+                .format(instant)
+            + ".json";
     return new PreparedExport() {
-      public String filename() { return filename; }
-      public long contentLength() { return buffer.size(); }
-      public void writeTo(OutputStream output) throws IOException { buffer.writeTo(output); }
+      public String filename() {
+        return filename;
+      }
+
+      public long contentLength() {
+        return buffer.size();
+      }
+
+      public void writeTo(OutputStream output) throws IOException {
+        buffer.writeTo(output);
+      }
     };
   }
 }

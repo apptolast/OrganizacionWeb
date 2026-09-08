@@ -12,6 +12,75 @@ import org.junit.jupiter.api.Test;
 
 class ImportJsonReaderTest {
   @Test
+  void s8_malformedUtf8IsAFileErrorRatherThanAStorageFailure() {
+    var body =
+        new ByteArrayInputStream(new byte[] {'{', '"', (byte) 0xc3, '(', '"', ':', '0', '}'});
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> new ImportJsonReader().read(body, (collection, row) -> fail("No malformed row")))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+  }
+
+  @Test
+  void s8_utf8BomIsNotPartOfTheAcceptedExportFormat() throws Exception {
+    var original = new ByteArrayOutputStream();
+    original.writeBytes(new byte[] {(byte) 0xef, (byte) 0xbb, (byte) 0xbf});
+    new ExportJsonWriter()
+        .empty("owner-a", Instant.parse("2026-09-08T01:02:03.123456Z"))
+        .writeTo(original);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new ImportJsonReader()
+                    .read(
+                        new ByteArrayInputStream(original.toByteArray()),
+                        (collection, row) -> fail("Empty file")))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+  }
+
+  @Test
+  void s8_eofWithinRecordArrayIsRejectedWithoutPreparingAnIncompleteRow() {
+    var body =
+        new ByteArrayInputStream(
+            "{\"data\":{\"projects\":[{\"id\":\"partial\""
+                .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new ImportJsonReader()
+                    .read(body, (collection, row) -> fail("No incomplete row at EOF")))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+  }
+
+  @Test
+  void s8_eofWithinDataObjectIsRejectedWithoutPreparingAnyRow() {
+    var body =
+        new ByteArrayInputStream(
+            "{\"data\":{\"projects\":[]".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> new ImportJsonReader().read(body, (collection, row) -> fail("No row at EOF")))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+  }
+
+  @Test
+  void s8_eofWithinRootIsRejectedWithoutPreparingAnyRow() {
+    var body =
+        new ByteArrayInputStream(
+            "{\"owner\":\"owner-a\"".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> new ImportJsonReader().read(body, (collection, row) -> fail("No row at EOF")))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+  }
+
+  @Test
+  void s8_eofBeforeRootIsRejectedWithoutPreparingAnyRow() {
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new ImportJsonReader()
+                    .read(
+                        new ByteArrayInputStream(new byte[0]),
+                        (collection, row) -> fail("No row at EOF")))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+  }
+
+  @Test
   void s8_dataMustBeAnObjectBeforeAnyRowsArePrepared() {
     var body =
         new ByteArrayInputStream("{\"data\":[]}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
@@ -89,7 +158,7 @@ class ImportJsonReaderTest {
               json.writeStringField("id", id);
               json.writeStringField("name", "  proyecto ñ  ");
               json.writeStringField("description", "nota histórica");
-              json.writeStringField("status", "pending");
+              json.writeStringField("status", "idea");
               json.writeStringField("createdAt", "2026-09-07T01:02:03.123456Z");
               json.writeStringField("updatedAt", "2026-09-07T01:02:03.123456Z");
               json.writeStringField("version", "0");

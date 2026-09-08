@@ -38,13 +38,19 @@ public final class ImportJsonReader {
     Instant exportedAt = null;
     ImportCounts counts = null;
     var actualCounts = new java.util.LinkedHashMap<String, Long>();
-    try (var parser = mapper.getFactory().createParser(counted)) {
+    var utf8 =
+        java.nio.charset.StandardCharsets.UTF_8
+            .newDecoder()
+            .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+            .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT);
+    try (var parser =
+        mapper.getFactory().createParser(new java.io.InputStreamReader(counted, utf8))) {
       parser.disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
       parser.enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
-      parser.nextToken();
-      while (parser.nextToken() != JsonToken.END_OBJECT) {
+      if (nextRequired(parser) != JsonToken.START_OBJECT) throw new ImportInvalidFileException();
+      while (nextRequired(parser) != JsonToken.END_OBJECT) {
         String field = parser.currentName();
-        parser.nextToken();
+        nextRequired(parser);
         switch (field) {
           case "owner" -> owner = parser.getText();
           case "exportedAt" -> exportedAt = Instant.parse(parser.getText());
@@ -52,11 +58,11 @@ public final class ImportJsonReader {
           case "data" -> {
             if (parser.currentToken() != JsonToken.START_OBJECT)
               throw new ImportInvalidFileException();
-            while (parser.nextToken() != JsonToken.END_OBJECT) {
+            while (nextRequired(parser) != JsonToken.END_OBJECT) {
               String collection = parser.currentName();
-              parser.nextToken();
+              nextRequired(parser);
               long count = 0;
-              while (parser.nextToken() != JsonToken.END_ARRAY) {
+              while (nextRequired(parser) != JsonToken.END_ARRAY) {
                 consumer.accept(collection, mapper.readTree(parser));
                 count++;
               }
@@ -68,13 +74,20 @@ public final class ImportJsonReader {
         }
       }
       if (parser.nextToken() != null) throw new ImportInvalidFileException();
-    } catch (com.fasterxml.jackson.core.JsonProcessingException invalid) {
+    } catch (com.fasterxml.jackson.core.JsonProcessingException
+        | java.nio.charset.CharacterCodingException invalid) {
       throw new ImportInvalidFileException();
     }
     if (counts == null || !mapper.valueToTree(counts).equals(mapper.valueToTree(actualCounts)))
       throw new ImportInvalidFileException();
     return new Header(
         owner, exportedAt, HexFormat.of().formatHex(digest.digest()), counted.length, counts);
+  }
+
+  private static JsonToken nextRequired(JsonParser parser) throws IOException {
+    var token = parser.nextToken();
+    if (token == null) throw new ImportInvalidFileException();
+    return token;
   }
 
   private static final class CountedInput extends FilterInputStream {

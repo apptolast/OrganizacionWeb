@@ -307,4 +307,30 @@ public class ApplicationConfiguration {
       com.apptolast.organization.application.ExportDataQueries queries, Clock clock) {
     return new com.apptolast.organization.application.PrepareExportData(queries, clock);
   }
+
+  @Bean
+  com.apptolast.organization.adapter.persistence.PostgresImportDataStore importDataStore(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions) {
+    return new com.apptolast.organization.adapter.persistence.PostgresImportDataStore(
+        jdbc, transactions);
+  }
+
+  @Bean
+  com.apptolast.organization.application.PreviewImportData previewImportData(
+      com.apptolast.organization.application.ImportDataQueries queries) {
+    return new com.apptolast.organization.application.PreviewImportData(queries);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ApplyImportData applyImportData(
+      com.apptolast.organization.application.ImportDataCommands commands, Clock clock) {
+    return new com.apptolast.organization.application.ApplyImportData(commands, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReadImportReceipt readImportReceipt(
+      com.apptolast.organization.application.ImportReceiptQueries queries) {
+    return new com.apptolast.organization.application.ReadImportReceipt(queries);
+  }
 }

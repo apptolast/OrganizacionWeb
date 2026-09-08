@@ -1,0 +1,193 @@
+package com.apptolast.organization.adapter.persistence;
+
+import com.apptolast.organization.application.ImportDataQueries;
+import com.apptolast.organization.application.ImportInvalidFileException;
+import com.apptolast.organization.application.ImportPreview;
+import com.apptolast.organization.application.StorageUnavailableException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
+
+public final class PostgresImportDataStore
+    implements ImportDataQueries,
+        com.apptolast.organization.application.ImportDataCommands,
+        com.apptolast.organization.application.ImportReceiptQueries {
+  private final JdbcTemplate jdbc;
+  private final TransactionTemplate reading;
+  private final TransactionTemplate writing;
+
+  public PostgresImportDataStore(JdbcTemplate jdbc, PlatformTransactionManager transactions) {
+    this.jdbc = jdbc;
+    reading = new TransactionTemplate(transactions);
+    reading.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
+    writing = new TransactionTemplate(transactions);
+    writing.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
+  }
+
+  public ImportPreview preview(String owner, InputStream body) {
+    return stored(
+        () ->
+            reading.execute(
+                status -> {
+                  jdbc.queryForObject("SELECT pg_current_snapshot()::text", String.class);
+                  try {
+                    var header =
+                        new ImportJsonReader()
+                            .read(
+                                body,
+                                (collection, row) -> {
+                                  throw new ImportInvalidFileException();
+                                });
+                    if (!owner.equals(header.owner())) throw new ImportInvalidFileException();
+                    return new ImportPreview(
+                        header.fileSha256(),
+                        header.byteLength(),
+                        header.owner(),
+                        header.exportedAt(),
+                        header.counts(),
+                        header.counts(),
+                        header.counts(),
+                        List.of());
+                  } catch (IOException failure) {
+                    throw new StorageUnavailableException(failure);
+                  }
+                }));
+  }
+
+  public java.util.Optional<com.apptolast.organization.application.ImportReceipt> find(
+      String owner, java.util.UUID key) {
+    return stored(
+        () ->
+            jdbc
+                .query(
+                    "SELECT request_key,file_sha256,byte_length,recorded_at,outcome,inserted_counts::text,identical_counts::text FROM import_receipts WHERE owner_id=? AND request_key=?",
+                    (row, index) -> {
+                      try {
+                        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        return new com.apptolast.organization.application.ImportReceipt(
+                            row.getObject("request_key", java.util.UUID.class),
+                            row.getString("file_sha256"),
+                            row.getLong("byte_length"),
+                            row.getObject("recorded_at", java.time.OffsetDateTime.class)
+                                .toInstant(),
+                            row.getString("outcome"),
+                            mapper.readValue(
+                                row.getString("inserted_counts"),
+                                com.apptolast.organization.application.ImportCounts.class),
+                            mapper.readValue(
+                                row.getString("identical_counts"),
+                                com.apptolast.organization.application.ImportCounts.class));
+                      } catch (IOException invalid) {
+                        throw new StorageUnavailableException(invalid);
+                      }
+                    },
+                    owner,
+                    key)
+                .stream()
+                .findFirst());
+  }
+
+  public com.apptolast.organization.application.ImportReceipt apply(
+      String owner,
+      java.util.UUID key,
+      String expectedSha256,
+      InputStream body,
+      java.util.function.Supplier<java.time.Instant> recordedAt) {
+    final ImportJsonReader.Header header;
+    try {
+      header =
+          new ImportJsonReader()
+              .read(
+                  body,
+                  (collection, row) -> {
+                    throw new ImportInvalidFileException();
+                  });
+    } catch (IOException failure) {
+      throw new StorageUnavailableException(failure);
+    }
+    if (!expectedSha256.equals(header.fileSha256()))
+      throw new com.apptolast.organization.application.ImportFileChangedException();
+    if (!owner.equals(header.owner())) throw new ImportInvalidFileException();
+    return stored(
+        () ->
+            writing.execute(
+                status -> {
+                  jdbc.execute("SET LOCAL lock_timeout='2s'");
+                  jdbc.execute("SET LOCAL statement_timeout='10s'");
+                  for (var scope : List.of("PROJECT", "TASK")) {
+                    jdbc.queryForObject(
+                        "SELECT pg_advisory_xact_lock(hashtextextended(?, 0))",
+                        Object.class,
+                        "customization:" + owner + ":" + scope);
+                  }
+                  for (var table :
+                      List.of(
+                          "appearance_preferences",
+                          "availability_preferences",
+                          "block_changes",
+                          "block_projections",
+                          "customization_preferences",
+                          "import_receipts",
+                          "planned_blocks",
+                          "project_custom_field_values",
+                          "projects",
+                          "task_custom_field_values",
+                          "task_status_history",
+                          "tasks",
+                          "work_session_changes",
+                          "work_session_intervals",
+                          "work_sessions")) {
+                    jdbc.execute("LOCK TABLE " + table + " IN EXCLUSIVE MODE");
+                  }
+                  var previous = find(owner, key);
+                  if (previous.isPresent()) {
+                    if (!previous.get().fileSha256().equals(header.fileSha256()))
+                      throw new com.apptolast.organization.application.ImportKeyReusedException();
+                    return previous.get();
+                  }
+                  var receipt =
+                      new com.apptolast.organization.application.ImportReceipt(
+                          key,
+                          header.fileSha256(),
+                          header.byteLength(),
+                          recordedAt.get(),
+                          "NO_CHANGE",
+                          header.counts(),
+                          header.counts());
+                  try {
+                    var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    int affected =
+                        jdbc.update(
+                            "INSERT INTO import_receipts(owner_id,request_key,file_sha256,byte_length,recorded_at,outcome,inserted_counts,identical_counts) VALUES (?,?,?,?,?,?,?::jsonb,?::jsonb)",
+                            owner,
+                            key,
+                            receipt.fileSha256(),
+                            receipt.byteLength(),
+                            java.time.OffsetDateTime.ofInstant(
+                                receipt.recordedAt(), java.time.ZoneOffset.UTC),
+                            receipt.outcome(),
+                            mapper.writeValueAsString(receipt.insertedCounts()),
+                            mapper.writeValueAsString(receipt.identicalCounts()));
+                    if (affected != 1)
+                      throw new StorageUnavailableException(
+                          new IllegalStateException("Import receipt was not persisted"));
+                  } catch (IOException failure) {
+                    throw new StorageUnavailableException(failure);
+                  }
+                  return receipt;
+                }));
+  }
+
+  private static <T> T stored(java.util.function.Supplier<T> operation) {
+    try {
+      return operation.get();
+    } catch (org.springframework.dao.DataAccessException
+        | org.springframework.transaction.TransactionException failure) {
+      throw new StorageUnavailableException(failure);
+    }
+  }
+}

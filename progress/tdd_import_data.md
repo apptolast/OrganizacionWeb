@@ -33,3 +33,21 @@ Ciclo4 @s8: RED1c45fb por error ausente; GREEN247447 (tres casos). Campo exterio
 10 @s1: REDd78293 tipos ausentes, GREEN2e5418: ApplyImportData entrega owner/key/hash/stream sin transformación y permite al puerto obtener recordedAt desde Clock, truncado a micros, dentro de su operación. Fixture controlado no acredita commit/idempotencia durable; límites de Clock pendientes. Nombre inicialmente incluía@s23, corregido a@s1 porque aún no prueba fallo transaccional.
 
 11 @s22: REDdd1856 tipos ausentes, GREEN177511: consulta de recibo conserva owner/key y resultado cerrado, sin cuerpo/archivo ni comando de importación. Foco conjunto11casos/4suites, formato realafe6de. API real para C: ApplyImportDataUseCase.apply(owner,UUID,expectedSha256,InputStream) devuelve ImportReceipt(requestKey,fileSha256,byteLength,recordedAt,outcome,insertedCounts,identicalCounts); ReadImportReceiptUseCase.find(owner,UUID) devuelve Optional<ImportReceipt>. No beans provisionales. Los errores de conflicto/hash seguirán tras sus ciclos PG/decoder reales. Logs originales externos import23-cycle05–11-*.
+
+## Ciclos12–17 — cierre de EOF y UTF-8
+
+12 @s8: REDdf33ed cuerpo vacío producía NPE; GREEN243b33 con nextRequired en raíz/data/array, sin posibilidad de repetir EOF en un bucle. 13 raíz truncada217600,14data truncada590057 y15registro incompleto en arrayb23d85 fueron inicialmenteGREEN: Jackson ya rechaza los EOF internos y nunca entrega una fila incompleta. No se fabricaron fallos para esos refuerzos solicitados por revisión.
+
+16 @s8: REDba9633 BOM aceptado; GREEN2ce519 al usar InputStreamReader con decoderUTF8 explícito. Fixture del primer proyecto corregido de statuspending a idea (enum real), sin cambiar sus oráculos de texto/UUID/versión. 17 @s8: RED81c374 UTF8 malformado escapaba como error de entrada/salida; GREENa092b1 al traducir CharacterCodingException a ImportInvalidFileException, preservando IO real para503. Continúan pendientes formato/versión y todos los campos tipados del esquema.
+
+## Ciclos18–27 — PostgreSQL y contexto nominal
+
+18 @s1/@s18: RED309e13 store ausente; GREENff6ee5, preview vacío usa snapshotRR real y no crea defaults/negocio/outbox. 19 @s7: RED99dcc1 owner del archivo adoptado; GREEN223436, comparación exacta contra identidad autenticada.
+
+20 @s1: RED6e1bfe puerto de comandos no implementado; GREEN8c1c13. V21 añade sólo import_receipts, sinFK nuevas ni modificación de migraciones previas. Apply prepara el archivo antes de locks, configura READ COMMITTED/lock_timeout2s/statement_timeout10s y adquiere PROJECT/TASK compartidos antes de las15tablas en orden contractual. El callbackClock comprueba pg_locks, parámetros y ausencia de recibo antes de recordedAt. Commit vacío confirmaNO_CHANGE, sólo recibo operativo, sin outbox.
+
+21 @s22: RED42e65a falta lectura real; GREENc684ee, recupera recibo PG completo sin archivo. 22 @s20: REDff4573 falta excepción412; GREENb25da6, hashdiscordante precede a ownerajeno y no consultaClock/crearecibo. 23 @s21: REDc7a1c1 replay vuelve a consultarClock; GREEN1cc388 conserva recibo y xmin/ctid exactos. 24 @s21: RED02e23c falta error dekeyreutilizada; GREEN512087 rechaza otrosbytes válidos con409 y conserva original.
+
+25 @s1/@s18/@s22: REDc424da faltaban beans; GREENec4fa5 en SpringBoot+PG real: exportvacío,preview,apply yfind usan los tres puertos reales. 26 @s23: RED6f6993 errorSQL de trigger escapaba; GREEN63d084 con traducción local DataAccessException/TransactionException a STORAGE_UNAVAILABLE, sin adviceglobal.27 @s23: REDe0e54b triggerRETURNNULL permitía éxito falso; GREENd0f4ba exige exactly1fila afectada para elrecibo y rollback si no.
+
+Límite explícito del checkpoint: sólo vacío entra al store; una fila no vacía aún se rechaza mientras se implementan staging, validación y fusión de14colecciones. No se afirma integridad completa, carreras, límites inclusivos, rowmetadata corrupta ni rechazoCOMMIT diferido todavía. Los beans reales permiten integración/sockets nominales de C, no despliegue23 ni estado done. Formato focalreal0fe993; foco final de seis suites en import23-reading-context-green.log. No Java global/init/PIT.

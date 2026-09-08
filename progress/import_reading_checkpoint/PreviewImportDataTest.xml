@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.apptolast.organization.application.PreviewImportDataTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-08T06:35:31.478Z" hostname="PABLOHGDEV87" time="0.058">
+  <properties/>
+  <testcase name="s1_s18_emptyPreviewPreservesThePreparedSnapshotWithoutOwningTheRequestStream()" classname="com.apptolast.organization.application.PreviewImportDataTest" time="0.044"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

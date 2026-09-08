@@ -59,8 +59,11 @@ test("import: own durable project preview and deliberate atomic addition with no
       exact: true,
     });
     await expect(nav.getByRole("link").first()).toHaveAccessibleName("Hoy");
-    await expect(nav.getByRole("link").last()).toHaveAccessibleName(
+    await expect(nav.getByRole("link").nth(-2)).toHaveAccessibleName(
       "Importación",
+    );
+    await expect(nav.getByRole("link").last()).toHaveAccessibleName(
+      "API para integraciones",
     );
     await nav.getByRole("link", { name: "Importación", exact: true }).click();
     await expect(

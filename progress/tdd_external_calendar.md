@@ -1,0 +1,47 @@
+# TDD — external_calendar (feature 28)
+
+Feature en curso: 28 — external_calendar. Worktree `C:/Users/vhurt/ow-worktrees/external-calendar`, rama `claude/external-calendar`.
+Contrato: `features/external_calendar.feature` (@s1…@s40). Ponytail full / Caveman lite.
+
+## Orden de trabajo
+
+1. Parser iCalendar puro (dominio) — @s14, @s15, @s16, @s17, @s18, @s19, @s20, @s21, @s22.
+2. Ventana y truncamiento (dominio) — @s23, @s24.
+3. Validación de etiqueta y URL (dominio) — @s4, @s5.
+4. Guardia de direcciones — @s4 (DNS), @s11.
+5. Cifrado AES-GCM — @s2, @s3, @s9, @s29.
+6. Persistencia V26 con Testcontainers — @s2, @s3, @s6, @s7, @s25, @s26, @s30, @s31, @s33.
+7. Casos de uso — @s6, @s11, @s12, @s14, @s16, @s26, @s27, @s28, @s29.
+8. Cliente HTTP del feed — @s12, @s13.
+9. HTTP MockMvc — @s1, @s2, @s4, @s8, @s10, @s28, @s31, @s32; Hoy intacto — @s34.
+10. Frontend — @s35…@s40; E2E; docs; registro de mutación.
+
+## Bitácora de ciclos
+
+### Ciclo 1 — parser iCalendar puro (@s14…@s22, @s12 malformado)
+
+- ROJO: `IcsCalendarTest` cubre instantes UTC, TZID con DST real, VALUE=DATE y
+  flotantes en la zona de instantánea, DURATION, cancelados y recurrentes,
+  desplegado de líneas y escapes, UID duplicado, inválidos y componentes ajenos.
+  Fixtures reales en `backend/src/test/resources/ics/`.
+- VERDE: `IcsCalendar`, `ExternalEvent`, `IcsMalformedException`.
+- Detalle de escapes: `\n`/`\N` → salto de línea, `\\` → barra, `\,` y `\;` →
+  literales. El desplegado quita `CRLF`/`LF` seguidos de espacio o tabulador.
+
+### Ciclo 2 — ventana y truncamiento (@s23, @s24)
+
+- ROJO: `ExternalCalendarSnapshotTest` (intersección semiabierta, orden
+  `startAt, uid`, corte en 500 con `truncated`).
+- VERDE: `ExternalCalendarSnapshot`.
+
+### Ciclo 3 — validación de etiqueta y URL (@s4 sintáctico, @s5)
+
+- ROJO: `ExternalCalendarInputTest`.
+- VERDE: `ExternalCalendarInput`.
+- Corrección: el test del límite de 2048 usaba `url.substring(1)`, que rompía el
+  esquema `https` y hacía fallar el caso frontera. Se separó en dos tests:
+  2049 → `TOO_LONG` y 2048 exactos → aceptado con `urlTail` "WXYZ".
+
+Comando: `backend\gradlew.bat test --no-daemon --tests '...domain.IcsCalendarTest'
+--tests '...domain.ExternalCalendar*'` → 77 tests, 0 fallos.
+

@@ -20,6 +20,544 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 class ImportPersistenceTest {
   @Test
+  void s2_allFourteenCollectionsAreRestoredTogetherAndUnrelatedFactsSurvive() throws Exception {
+    var owner = "complete-import";
+    var ids = seedCompleteAccount(owner);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T15:00:00.123456Z"))
+        .writeTo(bytes);
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var expected = json.readTree(bytes.toByteArray());
+    assertThat(expected.get("counts").size()).isEqualTo(14);
+    expected.get("counts").forEach(count -> assertThat(count.intValue()).isPositive());
+    var originalPreview =
+        new PostgresImportDataStore(jdbc, manager)
+            .preview(owner, new ByteArrayInputStream(bytes.toByteArray()));
+    assertThat(originalPreview.identicalCounts())
+        .isEqualTo(json.treeToValue(expected.get("counts"), ImportCounts.class));
+    assertThat(originalPreview.insertCounts())
+        .isEqualTo(new ImportCounts(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    for (var table : java.util.List.of("block_changes", "task_status_history", "planned_blocks")) {
+      if (table.equals("planned_blocks"))
+        jdbc.update("DELETE FROM block_projections WHERE block_id=?", ids[2]);
+      jdbc.update("DELETE FROM " + table + " WHERE project_id=?", ids[0]);
+    }
+    jdbc.update("DELETE FROM work_session_changes WHERE owner_id=?", owner);
+    jdbc.update("DELETE FROM work_session_intervals WHERE session_id=?", ids[3]);
+    for (var table :
+        java.util.List.of(
+            "work_sessions",
+            "project_custom_field_values",
+            "task_custom_field_values",
+            "customization_preferences",
+            "availability_preferences",
+            "appearance_preferences"))
+      jdbc.update("DELETE FROM " + table + " WHERE owner_id=?", owner);
+    jdbc.update("DELETE FROM tasks WHERE project_id=?", ids[0]);
+    jdbc.update("DELETE FROM projects WHERE id=?", ids[0]);
+    var unrelated = java.util.UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) VALUES (?,?,'Otra idea','','idea',0,'2026-09-01Z','2026-09-01Z')",
+        unrelated,
+        owner);
+    var untouched =
+        jdbc.queryForMap(
+            "SELECT xmin::text,ctid::text,row_to_json(p)::text AS contents FROM projects p WHERE id=?",
+            unrelated);
+    var outboxBefore =
+        jdbc.queryForList(
+            "SELECT xmin::text,ctid::text,row_to_json(o)::text AS contents FROM outbox_events o ORDER BY event_id");
+    var input = bytes.toByteArray();
+    var sha =
+        java.util.HexFormat.of()
+            .formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input));
+    var store = new PostgresImportDataStore(jdbc, manager);
+    var receipt =
+        store.apply(
+            owner,
+            java.util.UUID.randomUUID(),
+            sha,
+            new ByteArrayInputStream(input),
+            () -> Instant.parse("2026-09-08T16:00:00.123456Z"));
+    assertThat(receipt.outcome()).isEqualTo("IMPORTED");
+    assertThat(receipt.insertedCounts())
+        .isEqualTo(json.treeToValue(expected.get("counts"), ImportCounts.class));
+    assertThat(receipt.identicalCounts())
+        .isEqualTo(new ImportCounts(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    assertThat(store.find(owner, receipt.requestKey())).contains(receipt);
+    var after = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T17:00:00.123456Z"))
+        .writeTo(after);
+    var data = json.readTree(after.toByteArray()).get("data");
+    var projects = (com.fasterxml.jackson.databind.node.ArrayNode) data.get("projects");
+    for (int i = projects.size() - 1; i >= 0; i--)
+      if (projects.get(i).get("id").textValue().equals(unrelated.toString())) projects.remove(i);
+    assertThat(data).isEqualTo(expected.get("data"));
+    assertThat(
+            jdbc.queryForMap(
+                "SELECT xmin::text,ctid::text,row_to_json(p)::text AS contents FROM projects p WHERE id=?",
+                unrelated))
+        .isEqualTo(untouched);
+    assertThat(
+            jdbc.queryForList(
+                "SELECT xmin::text,ctid::text,row_to_json(o)::text AS contents FROM outbox_events o ORDER BY event_id"))
+        .isEqualTo(outboxBefore);
+    var physical = businessRows();
+    var repeated =
+        store.apply(
+            owner,
+            java.util.UUID.randomUUID(),
+            sha,
+            new ByteArrayInputStream(input),
+            () -> Instant.parse("2026-09-08T18:00:00.123456Z"));
+    assertThat(repeated.outcome()).isEqualTo("NO_CHANGE");
+    assertThat(repeated.insertedCounts()).isEqualTo(receipt.identicalCounts());
+    assertThat(repeated.identicalCounts()).isEqualTo(receipt.insertedCounts());
+    assertThat(businessRows()).isEqualTo(physical);
+  }
+
+  private java.util.Map<String, java.util.List<java.util.Map<String, Object>>> businessRows() {
+    var result =
+        new java.util.LinkedHashMap<String, java.util.List<java.util.Map<String, Object>>>();
+    for (var table :
+        java.util.List.of(
+            "projects",
+            "tasks",
+            "task_status_history",
+            "availability_preferences",
+            "planned_blocks",
+            "block_projections",
+            "block_changes",
+            "work_sessions",
+            "work_session_intervals",
+            "work_session_changes",
+            "appearance_preferences",
+            "customization_preferences",
+            "project_custom_field_values",
+            "task_custom_field_values")) {
+      result.put(
+          table,
+          jdbc.queryForList(
+              "SELECT xmin::text,ctid::text,row_to_json(r)::text AS contents FROM "
+                  + table
+                  + " r ORDER BY contents"));
+    }
+    return result;
+  }
+
+  private java.util.UUID[] seedCompleteAccount(String owner) throws Exception {
+    var project = java.util.UUID.randomUUID();
+    var task = java.util.UUID.randomUUID();
+    var block = java.util.UUID.randomUUID();
+    var session = java.util.UUID.randomUUID();
+    var json =
+        new com.fasterxml.jackson.databind.ObjectMapper()
+            .findAndRegisterModules()
+            .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) VALUES (?,?,' Proyecto ñ ',' Descripción ','idea',9007199254740993,'2026-09-01Z','2026-09-02Z')",
+        project,
+        owner);
+    jdbc.update(
+        "INSERT INTO tasks(id,project_id,title,completion_criterion,estimated_minutes,status,version,created_at,updated_at) VALUES (?,?,' Tarea ',' Criterio ',30,'pending',2,'2026-09-01Z','2026-09-03Z')",
+        task,
+        project);
+    jdbc.update(
+        "INSERT INTO task_status_history(id,project_id,task_id,task_version,from_status,to_status,occurred_at) VALUES (?,?,?,1,'pending','completed','2026-09-02Z'),(?,?,?,2,'completed','pending','2026-09-03Z')",
+        java.util.UUID.randomUUID(),
+        project,
+        task,
+        java.util.UUID.randomUUID(),
+        project,
+        task);
+    jdbc.update(
+        "INSERT INTO availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at) VALUES (?,?,'Europe/Madrid',0,1,30,60,120,1440,90,7,'2026-09-01Z','2026-09-02Z')",
+        java.util.UUID.randomUUID(),
+        owner);
+    jdbc.update(
+        "INSERT INTO planned_blocks(id,project_id,task_id,request_key,objective,start_local,end_local,zone_id,start_offset,end_offset,allow_over_budget,start_at,end_at,duration_minutes,created_at) VALUES (?,?,?,?,'Objetivo','2026-09-08T16:00:00','2026-09-08T16:30:00','Europe/Madrid','+02:00','+02:00',true,'2026-09-08T14:00:00Z','2026-09-08T14:30:00Z',30,'2026-09-01Z')",
+        block,
+        project,
+        task,
+        java.util.UUID.randomUUID());
+    var local = java.time.LocalDateTime.parse("2026-09-08T16:00:00");
+    var offset = java.time.ZoneOffset.ofHours(2);
+    var planned =
+        new com.apptolast.organization.domain.PlannedBlock(
+            block,
+            project,
+            task,
+            new com.apptolast.organization.domain.BlockRequest(
+                "Objetivo", local, local.plusMinutes(30), "Europe/Madrid", offset, offset, true),
+            new com.apptolast.organization.domain.ResolvedBlockTime(
+                local.toInstant(offset),
+                local.plusMinutes(30).toInstant(offset),
+                offset,
+                offset,
+                30),
+            Instant.parse("2026-09-01T00:00:00Z"));
+    var change =
+        new com.apptolast.organization.domain.BlockChangeReceipt(
+            java.util.UUID.randomUUID(),
+            block,
+            "CANCELLED",
+            1,
+            Instant.parse("2026-09-08T12:00:00Z"),
+            planned,
+            null);
+    jdbc.update(
+        "INSERT INTO block_projections(block_id,version,status,updated_at) VALUES (?,1,'cancelled','2026-09-08T12:00:00Z')",
+        block);
+    jdbc.update(
+        "INSERT INTO block_changes(id,project_id,task_id,block_id,request_key,kind,version,occurred_at,receipt) VALUES (?,?,?,?,?,'CANCELLED',1,'2026-09-08T12:00:00Z',?::jsonb)",
+        change.id(),
+        project,
+        task,
+        block,
+        java.util.UUID.randomUUID(),
+        json.writeValueAsString(change));
+    var started = Instant.parse("2026-09-08T12:00:00Z");
+    var original =
+        new com.apptolast.organization.domain.SessionStart(
+            session, project, task, started, 25, started.plusSeconds(1500), "UTC");
+    var before =
+        new com.apptolast.organization.domain.WorkSessionState(
+            original, "running", 1, started, 0, started);
+    var paused =
+        new com.apptolast.organization.domain.WorkSessionState(
+            original, "paused", 2, started.plusSeconds(60), 60000000, null);
+    var transition =
+        new com.apptolast.organization.application.WorkSessionTransitionReceipt(
+            java.util.UUID.randomUUID(), session, "PAUSE", started.plusSeconds(60), before, paused);
+    jdbc.update(
+        "INSERT INTO work_sessions(id,owner_id,project_id,task_id,request_key,started_at,planned_minutes,planned_end_at,zone_id,status,revision,changed_at,worked_microseconds) VALUES (?,?,?,?,?,'2026-09-08T12:00:00Z',25,'2026-09-08T12:25:00Z','UTC','paused',2,'2026-09-08T12:01:00Z',60000000)",
+        session,
+        owner,
+        project,
+        task,
+        java.util.UUID.randomUUID());
+    jdbc.update(
+        "INSERT INTO work_session_intervals(session_id,revision,start_at,end_at) VALUES (?,2,'2026-09-08T12:00:00Z','2026-09-08T12:01:00Z')",
+        session);
+    jdbc.update(
+        "INSERT INTO work_session_changes(id,owner_id,session_id,request_key,action,expected_revision,occurred_at,receipt) VALUES (?,?,?,?,'PAUSE',1,'2026-09-08T12:01:00Z',?::jsonb)",
+        transition.id(),
+        owner,
+        session,
+        java.util.UUID.randomUUID(),
+        json.writeValueAsString(transition));
+    jdbc.update(
+        "INSERT INTO appearance_preferences(id,owner_id,theme,accent_light,accent_dark,version,updated_at) VALUES (?,?,'DARK','#0000FF','#00FFFF',8,'2026-09-08T01:02:03.123456Z')",
+        java.util.UUID.randomUUID(),
+        owner);
+    var projectField = java.util.UUID.randomUUID().toString();
+    var taskField = java.util.UUID.randomUUID().toString();
+    var projectDefinitions = json.createArrayNode();
+    projectDefinitions
+        .addObject()
+        .put("id", projectField)
+        .put("label", "Carga")
+        .put("type", "NUMBER")
+        .put("active", false);
+    var taskDefinitions = json.createArrayNode();
+    taskDefinitions
+        .addObject()
+        .put("id", taskField)
+        .put("label", "Control")
+        .put("type", "BOOLEAN")
+        .put("active", false);
+    jdbc.update(
+        "INSERT INTO customization_preferences(id,owner_id,scope,visible_fields,custom_fields,version,updated_at) VALUES (?,?,'PROJECT','[]'::jsonb,?::jsonb,7,'2026-09-08Z'),(?,?,'TASK','[\"estimatedMinutes\",\"completionCriterion\"]'::jsonb,?::jsonb,8,'2026-09-08Z')",
+        java.util.UUID.randomUUID(),
+        owner,
+        projectDefinitions.toString(),
+        java.util.UUID.randomUUID(),
+        owner,
+        taskDefinitions.toString());
+    jdbc.update(
+        "INSERT INTO project_custom_field_values(id,owner_id,project_id,field_values,version,updated_at) VALUES (?,?,?,?::jsonb,7,'2026-09-08Z')",
+        java.util.UUID.randomUUID(),
+        owner,
+        project,
+        json.createObjectNode().put(projectField, 0).toString());
+    jdbc.update(
+        "INSERT INTO task_custom_field_values(id,owner_id,task_id,field_values,version,updated_at) VALUES (?,?,?,?::jsonb,8,'2026-09-08Z')",
+        java.util.UUID.randomUUID(),
+        owner,
+        task,
+        json.createObjectNode().put(taskField, false).toString());
+    return new java.util.UUID[] {project, task, block, session};
+  }
+
+  @Test
+  void s9_fractionalTaskEstimateCannotBeRoundedIntoAValidMinute() throws Exception {
+    var owner = "fractional-task-estimate";
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = taskFile(owner);
+    ((com.fasterxml.jackson.databind.node.ObjectNode) file.get("data").get("tasks").get(0))
+        .put("estimatedMinutes", new java.math.BigDecimal("1.25"));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .preview(owner, new ByteArrayInputStream(json.writeValueAsBytes(file))))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+  }
+
+  @Test
+  void s9_integralDecimalTaskEstimateIsAcceptedAndComparedAsAnInteger() throws Exception {
+    var owner = "decimal-task-estimate";
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = taskFile(owner);
+    var task =
+        (com.fasterxml.jackson.databind.node.ObjectNode) file.get("data").get("tasks").get(0);
+    task.put("estimatedMinutes", new java.math.BigDecimal("1.0"));
+    var input = json.writeValueAsBytes(file);
+    var sha =
+        java.util.HexFormat.of()
+            .formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input));
+    var store = new PostgresImportDataStore(jdbc, manager);
+    var result =
+        store.apply(
+            owner,
+            java.util.UUID.randomUUID(),
+            sha,
+            new ByteArrayInputStream(input),
+            () -> Instant.parse("2026-09-08T02:03:04.123456Z"));
+    assertThat(result.outcome()).isEqualTo("IMPORTED");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT estimated_minutes FROM tasks WHERE id=?",
+                Integer.class,
+                java.util.UUID.fromString(task.get("id").textValue())))
+        .isEqualTo(1);
+    var repeated = store.preview(owner, new ByteArrayInputStream(input));
+    assertThat(repeated.identicalCounts()).isEqualTo(result.insertedCounts());
+    assertThat(repeated.insertCounts())
+        .isEqualTo(new ImportCounts(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  }
+
+  @Test
+  void s2_availabilityIsRestoredAsOneCompletePreference() throws Exception {
+    var owner = "import-availability";
+    var id = java.util.UUID.fromString("00000000-0000-0000-0000-000000000240");
+    jdbc.update(
+        "INSERT INTO availability_preferences(id,owner_id,zone_id,monday_minutes,tuesday_minutes,wednesday_minutes,thursday_minutes,friday_minutes,saturday_minutes,sunday_minutes,version,created_at,updated_at) VALUES (?,?,'Europe/Madrid',0,1,30,60,120,1440,90,9223372036854775807,'2026-09-01Z','2026-09-02Z')",
+        id,
+        owner);
+    var before =
+        jdbc.queryForMap(
+            "SELECT row_to_json(a)::text AS contents FROM availability_preferences a WHERE owner_id=?",
+            owner);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T01:02:03.123456Z"))
+        .writeTo(bytes);
+    jdbc.update("DELETE FROM availability_preferences WHERE owner_id=?", owner);
+    var input = bytes.toByteArray();
+    var sha =
+        java.util.HexFormat.of()
+            .formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input));
+    var result =
+        new PostgresImportDataStore(jdbc, manager)
+            .apply(
+                owner,
+                java.util.UUID.randomUUID(),
+                sha,
+                new ByteArrayInputStream(input),
+                () -> Instant.parse("2026-09-08T02:03:04.123456Z"));
+    assertThat(result.outcome()).isEqualTo("IMPORTED");
+    assertThat(result.insertedCounts())
+        .isEqualTo(new ImportCounts(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    assertThat(
+            jdbc.queryForMap(
+                "SELECT row_to_json(a)::text AS contents FROM availability_preferences a WHERE owner_id=?",
+                owner))
+        .isEqualTo(before);
+    var physical =
+        jdbc.queryForMap(
+            "SELECT xmin::text,ctid::text,row_to_json(a)::text AS contents FROM availability_preferences a WHERE owner_id=?",
+            owner);
+    var repeated =
+        new PostgresImportDataStore(jdbc, manager)
+            .apply(
+                owner,
+                java.util.UUID.randomUUID(),
+                sha,
+                new ByteArrayInputStream(input),
+                () -> Instant.parse("2026-09-08T04:05:06.123456Z"));
+    assertThat(repeated.outcome()).isEqualTo("NO_CHANGE");
+    assertThat(repeated.identicalCounts()).isEqualTo(result.insertedCounts());
+    assertThat(repeated.insertedCounts())
+        .isEqualTo(new ImportCounts(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    assertThat(
+            jdbc.queryForMap(
+                "SELECT xmin::text,ctid::text,row_to_json(a)::text AS contents FROM availability_preferences a WHERE owner_id=?",
+                owner))
+        .isEqualTo(physical);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM appearance_preferences WHERE owner_id=?",
+                Integer.class,
+                owner))
+        .isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM outbox_events WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+  }
+
+  @Test
+  void s2_taskStatusHistoryIsRestoredWithoutReplayingItsTransitions() throws Exception {
+    var owner = "import-task-history";
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = taskFile(owner);
+    var project =
+        (com.fasterxml.jackson.databind.node.ObjectNode) file.get("data").get("projects").get(0);
+    project.put("id", "00000000-0000-0000-0000-000000000230");
+    var task =
+        (com.fasterxml.jackson.databind.node.ObjectNode) file.get("data").get("tasks").get(0);
+    task.put("id", "00000000-0000-0000-0000-000000000231")
+        .put("projectId", project.get("id").textValue())
+        .put("version", "2")
+        .put("updatedAt", "2025-01-01T01:00:00.000002Z");
+    var history =
+        (com.fasterxml.jackson.databind.node.ArrayNode) file.get("data").get("taskStatusHistory");
+    history
+        .addObject()
+        .put("id", "00000000-0000-0000-0000-000000000232")
+        .put("projectId", project.get("id").textValue())
+        .put("taskId", task.get("id").textValue())
+        .put("taskVersion", "1")
+        .put("fromStatus", "pending")
+        .put("toStatus", "completed")
+        .put("occurredAt", "2025-01-01T00:30:00.000001Z");
+    history
+        .addObject()
+        .put("id", "00000000-0000-0000-0000-000000000233")
+        .put("projectId", project.get("id").textValue())
+        .put("taskId", task.get("id").textValue())
+        .put("taskVersion", "2")
+        .put("fromStatus", "completed")
+        .put("toStatus", "pending")
+        .put("occurredAt", "2025-01-01T01:00:00.000002Z");
+    ((com.fasterxml.jackson.databind.node.ObjectNode) file.get("counts"))
+        .put("taskStatusHistory", 2);
+    var input = json.writeValueAsBytes(file);
+    var sha =
+        java.util.HexFormat.of()
+            .formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input));
+    var result =
+        new PostgresImportDataStore(jdbc, manager)
+            .apply(
+                owner,
+                java.util.UUID.randomUUID(),
+                sha,
+                new ByteArrayInputStream(input),
+                () -> Instant.parse("2026-09-08T02:03:04.123456Z"));
+    assertThat(result.insertedCounts())
+        .isEqualTo(new ImportCounts(1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    var after = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T03:04:05.123456Z"))
+        .writeTo(after);
+    assertThat(json.readTree(after.toByteArray()).get("data")).isEqualTo(file.get("data"));
+    var historyBefore =
+        jdbc.queryForList(
+            "SELECT xmin::text,ctid::text,row_to_json(h)::text AS contents FROM task_status_history h WHERE project_id=? ORDER BY task_version",
+            java.util.UUID.fromString(project.get("id").textValue()));
+    var repeated =
+        new PostgresImportDataStore(jdbc, manager)
+            .apply(
+                owner,
+                java.util.UUID.randomUUID(),
+                sha,
+                new ByteArrayInputStream(input),
+                () -> Instant.parse("2026-09-08T04:05:06.123456Z"));
+    assertThat(repeated.outcome()).isEqualTo("NO_CHANGE");
+    assertThat(repeated.identicalCounts()).isEqualTo(result.insertedCounts());
+    assertThat(repeated.insertedCounts())
+        .isEqualTo(new ImportCounts(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    assertThat(
+            jdbc.queryForList(
+                "SELECT xmin::text,ctid::text,row_to_json(h)::text AS contents FROM task_status_history h WHERE project_id=? ORDER BY task_version",
+                java.util.UUID.fromString(project.get("id").textValue())))
+        .isEqualTo(historyBefore);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM outbox_events WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+  }
+
+  @Test
+  void s10_taskParentCycleIsInvalidEvenWhenEveryIdentityExistsInTheFile() throws Exception {
+    var owner = "task-cycle";
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = taskFile(owner);
+    var tasks = (com.fasterxml.jackson.databind.node.ArrayNode) file.get("data").get("tasks");
+    var first = (com.fasterxml.jackson.databind.node.ObjectNode) tasks.get(0);
+    var second = first.deepCopy();
+    second
+        .put("id", "00000000-0000-0000-0000-000000000128")
+        .put("parentId", first.get("id").textValue());
+    first.put("parentId", second.get("id").textValue());
+    tasks.add(second);
+    ((com.fasterxml.jackson.databind.node.ObjectNode) file.get("counts")).put("tasks", 2);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .preview(owner, new ByteArrayInputStream(json.writeValueAsBytes(file))))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+  }
+
+  @Test
+  void s10_taskCannotBorrowItsMissingProjectFromTheDestination() throws Exception {
+    var owner = "missing-file-project";
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = taskFile(owner);
+    var projectId =
+        java.util.UUID.fromString(file.get("data").get("projects").get(0).get("id").textValue());
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) VALUES (?,?,'Proyecto','','idea',0,'2025-01-01Z','2025-01-01Z')",
+        projectId,
+        owner);
+    ((com.fasterxml.jackson.databind.node.ArrayNode) file.get("data").get("projects")).removeAll();
+    ((com.fasterxml.jackson.databind.node.ObjectNode) file.get("counts")).put("projects", 0);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .preview(owner, new ByteArrayInputStream(json.writeValueAsBytes(file))))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM tasks WHERE project_id=?", Integer.class, projectId))
+        .isZero();
+  }
+
+  private com.fasterxml.jackson.databind.JsonNode taskFile(String owner) throws Exception {
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = json.readTree(invalidProjectText(owner, "Proyecto"));
+    ((com.fasterxml.jackson.databind.node.ObjectNode) file.get("data").get("projects").get(0))
+        .put("id", java.util.UUID.randomUUID().toString());
+    ((com.fasterxml.jackson.databind.node.ObjectNode) file.get("counts")).put("tasks", 1);
+    var task =
+        ((com.fasterxml.jackson.databind.node.ArrayNode) file.get("data").get("tasks")).addObject();
+    task.put("id", java.util.UUID.randomUUID().toString())
+        .put("projectId", file.get("data").get("projects").get(0).get("id").textValue())
+        .putNull("parentId")
+        .put("title", "Tarea")
+        .put("completionCriterion", "")
+        .putNull("estimatedMinutes")
+        .put("status", "pending")
+        .put("version", "0")
+        .putNull("completedAt")
+        .put("createdAt", "2025-01-01T00:00:00.000001Z")
+        .put("updatedAt", "2025-01-01T00:00:00.000001Z");
+    return file;
+  }
+
+  @Test
   void s8_projectLengthUsesTheOriginalTextRatherThanTheNormalizedConstructorValue()
       throws Exception {
     var owner = "raw-project-length";

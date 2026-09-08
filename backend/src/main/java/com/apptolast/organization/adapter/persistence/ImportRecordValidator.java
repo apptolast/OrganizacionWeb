@@ -33,4 +33,29 @@ final class ImportRecordValidator {
     if (value == null || !value.isTextual()) throw new ImportInvalidFileException();
     return value.textValue();
   }
+
+  static void task(JsonNode row) {
+    try {
+      var title = text(row, "title");
+      if (title.codePointCount(0, title.length()) > 160) throw new ImportInvalidFileException();
+      var estimate = row.get("estimatedMinutes");
+      if (estimate == null || (!estimate.isNull() && !estimate.isNumber()))
+        throw new ImportInvalidFileException();
+      Integer minutes = estimate.isNull() ? null : estimate.decimalValue().intValueExact();
+      new com.apptolast.organization.domain.Task(
+          UUID.fromString(text(row, "id")),
+          UUID.fromString(text(row, "projectId")),
+          title,
+          text(row, "completionCriterion"),
+          minutes,
+          text(row, "status"),
+          Instant.parse(text(row, "createdAt")),
+          Instant.parse(text(row, "updatedAt")));
+    } catch (IllegalArgumentException
+        | ArithmeticException
+        | java.time.DateTimeException
+        | com.apptolast.organization.domain.ValidationException invalid) {
+      throw new ImportInvalidFileException();
+    }
+  }
 }

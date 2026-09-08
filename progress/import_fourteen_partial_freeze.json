@@ -1,0 +1,30 @@
+{
+  "skipped": 0,
+  "scope": "Nominal fourteen collections; final integrity and limits pending",
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresImportDataStore.java",
+      "sha256": "D7EC15FA1953B9E4778199FE8956DBBCAC277726C703903282576855FC1578BA"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ImportRecordValidator.java",
+      "sha256": "EE5782503FF14B2F1C17D713C6CDAEC34ED6ED78564F4960A370289251743CB6"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportPersistenceTest.java",
+      "sha256": "889A2D7816A369BC43756033A905616B5204D80495F27C4CA3C869004C1D5D37"
+    },
+    {
+      "path": "progress/tdd_import_data.md",
+      "sha256": "420274A2887FDB58799B2D75E667CED970317194C2F89069CAE28BA3BC6DDE70"
+    }
+  ],
+  "tests": 31,
+  "exit": 0,
+  "xml": {
+    "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\import23-fourteen-checkpoint.xml",
+    "sha256": "817F525587D3BB2C75DD2CC2F746861C352D4B7AE32345A23A6ABBDFDFD8C49B"
+  },
+  "failures": 0,
+  "errors": 0
+}

@@ -89,3 +89,9 @@ El 8 de septiembre a las 06:40:09 UTC se creó una copia PostgreSQL nueva median
 Esta prueba amplía la evidencia de recuperación al snapshot indicado del esquema 20. No modifica la limitación histórica del restore 19 ni acredita escrituras posteriores, futuras migraciones, recuperación integral de API/RabbitMQ/Swarm o custodia externa. No se ha ejecutado ninguna importación productiva.
 
 Infra PR37 registra esta prueba posterior, fusionada en 42eb63f27d46532825ae8de3f1c1879ebd3b89fe tras CI34196987114 SUCCESS. Es documentación: no requiere apply. Cortes parciales de importación revisados en review_import_data_checkpoints.md: cliente/intención 56 pruebas y HTTP preview corregido 20 pruebas MVC. Persistencia continúa en su primer corte PostgreSQL; interfaz, integración, mutación y despliegue 23 siguen pendientes.
+
+## Estado actual de importación tras revisión consolidada
+
+22/30 funcionalidades completadas y publicadas. Importación 23 sigue in_progress. Frontend aprobado: 2424 pruebas y mutación conservadora 81,27 % con 801 firmas intactas. Lector/HTTP tienen PIT aprobado; concurrencia aislada 16/16 revisada e integrada. El registro detallado y límites de cada corte están en review_import_data_checkpoints.md.
+
+A cierra integridad histórica y escala sobre persistencia. Sus nuevos ciclos de recibo corrupto y rollback tras catorce colecciones están en la bitácora; todavía no se atribuye aprobación final de root a ese trabajo mutable. Quedan corte backend fijo, revisión final, regresión integrada, PIT de persistencia, E2E completo, rollback efímero por digest y publicación/aceptación. No se ha desplegado importación ni se ha cambiado el estado de las funcionalidades 24–30.

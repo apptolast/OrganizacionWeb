@@ -215,3 +215,15 @@ Build backend y TypeScript/Vite EXIT 0 (d19fa5), log SHA256
 DE6ABD901FB1251EAAEAE2CF0D9BA7BA86A752B554729C0F7EE0D2511934B062.
 Fuentes, pruebas y configuración permanecen sin diferencias frente al commit.
 Faltan el resultado PIT de persistencia, el cierre de E2E global y publicación.
+
+## E2E completo: cierre pendiente
+
+El original sobre e9350e9 termina EXIT 1: 154 correctos, dos timeouts de
+180 segundos y un skip. Root comprobó las siete huellas del manifiesto y
+las 1924 entradas idénticas antes/después (7a3a91, 4e1a89). Los dos fallos
+ocurren al agotar el plazo en setViewportSize, en las matrices heredadas
+de end-time-notification y pause-resume. La exportación real y los casos
+simulados ejecutados pasan. El zoom nativo exige proyecto Chromium con
+nombre y conserva su validación independiente previa. No se considera
+verde el global original. Pendiente repetir sólo los dos fallidos sin
+modificar código, oráculos ni timeout después de liberar recursos PIT.

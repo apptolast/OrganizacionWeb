@@ -139,3 +139,9 @@ Detached checkout work/OrganizacionWeb-export-e2e from ee4ca8d, dependencies ins
 Same real nominal GREEN 1/1 e52761 / EXIT0 2cfea5 after transfer of that test only. Product remains ee4ca8d. HTTP-created project and task, explicit foreign-owner PG fixture, 14 collection counts, owner exclusion, 1332 original bytes equal both native downloads, one export GET and no view writes. Own rows/event payloads unchanged. Leaving revokes the Blob URL, verified by its fetch rejection. Runner removed containers/network/volume; port 18080 free (72e40b).
 
 Original and second logs/contexts, byte metadata and hashes are in export_e2e_nominal_freeze.json. Only the E2E fixture differs from the baseline; no production edit. This does not attribute final backend guard/performance validation to the nominal cutoff.
+
+## Official complete E2E on final backend cutoff
+
+Detached e9350e9, locks identical and no reinstall. Existing scripts/e2e.mjs executed all157 cases. Original EXIT1 (307fd3):154PASS,2FAIL,1SKIP in24.2min. Both failures are inherited responsive matrices timing out at180000ms in page.setViewportSize: end-time-notification-ux:330 and pause-resume-session:278. No failed business assertion. All export cases executed in this run pass; native zoom is explicitly restricted to the named Chromium project and has separate prior evidence.
+
+All1924 versioned inputs unchanged after run (c6cdce). Own stack52200/network/volume removed,18080free. Logs, contexts, byte metadata and hashes preserved in export_e2e_global_freeze.json. No source/config/test changes, timeout increases or automatic replay. Await resource release before authorized same-code directed replay; it cannot retroactively make the original global GREEN.

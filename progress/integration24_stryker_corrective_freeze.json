@@ -1,0 +1,57 @@
+[
+  {
+    "path": "config_original.json",
+    "bytes": 1053,
+    "sha256": "963CB33EA43916D7523B5C014C7DCE41855C350FC428CB8F42BBF21CCF7514BB"
+  },
+  {
+    "path": "head.txt",
+    "bytes": 40,
+    "sha256": "E3300F78B0C2D6E68893CE85BC2A93E005238CF45D79E041283D6545DD26DB10"
+  },
+  {
+    "path": "inputs_after.json",
+    "bytes": 28274,
+    "sha256": "3316C192E83DF103AAA444291695EC7CCDBB23CC60F7EC55E958974B3AA7A50F"
+  },
+  {
+    "path": "inputs_before.json",
+    "bytes": 28274,
+    "sha256": "3316C192E83DF103AAA444291695EC7CCDBB23CC60F7EC55E958974B3AA7A50F"
+  },
+  {
+    "path": "inventory.json",
+    "bytes": 4707575,
+    "sha256": "E59BEAF957E861317C4F1990269ADD17D1F9ECAF4EAA23B54471FE4110652E36"
+  },
+  {
+    "path": "mutation.html",
+    "bytes": 6395094,
+    "sha256": "EDBCA53C4AC4505A18E06789747BC06B9670407A801F8BF9B9CD9547AECEFD40"
+  },
+  {
+    "path": "mutation.json",
+    "bytes": 6017294,
+    "sha256": "A8A2371419518AB4D869D8A16D38C31B12D59E272919F08E7FF3E880DCC5702F"
+  },
+  {
+    "path": "results.json",
+    "bytes": 999,
+    "sha256": "89A97FD3269CE0952057F05C486D80290291D521324EE5909CD918785DFAD0B9"
+  },
+  {
+    "path": "run.exit",
+    "bytes": 1,
+    "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+  },
+  {
+    "path": "run.log",
+    "bytes": 188019,
+    "sha256": "7F1612A9D1DFC1D0D90C50A7ADE72E78317CC40EBA339762A9BA6D119878C095"
+  },
+  {
+    "path": "transitions.json",
+    "bytes": 118133,
+    "sha256": "B52E8E5C1E4101AD9F391BA15AEDC4AA221B614855AE8ECE04690CBE76EB5704"
+  }
+]

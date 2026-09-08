@@ -283,3 +283,15 @@ Ninguno demuestra un nuevo RED productivo; son refuerzos sobre comportamiento ex
 Global 1ca242 EXIT1:2240/2241 en54 suites. Único fallo appearance.test.tsx@s24 línea1240: colorScheme vacío al esperar light tras findByRole Sistema. Lint/formato f3144f y tipos/build3dca8b EXIT0. Manifiesto169 antes/después idéntico e38f86.
 
 Root autorizó una única ejecución focal sin cambios: appearance50 dio49/50 (2c9d07). s24 pasó; s20 línea765 mostró el mismo patrón (colorScheme vacío frente dark tras radio Oscuro). La lectura muestra que el formulario aparece al renderizar snapshot y la pintura de documentElement sucede en useEffect([snapshot]); encontrar el radio no es el oráculo de que ese efecto ya se ejecutó. Logs originales conservados customization_refined_frontend_global.log y customization_refined_appearance_focal.log. No se atribuye a producto21 ni se relanza indefinidamente. Se propuso esperar el efecto observable con waitFor predeterminado en esos dos asserts, sin modificar producción ni quitar oráculos; pendiente coordinación root. Campaña incremental no iniciada.
+
+
+## Gate corregido y arranque incremental completo
+
+Root autorizó exclusivamente await waitFor predeterminado en los dos asserts de colorScheme, sin quitar comprobaciones ni cambiar producción. C aprobó diff0b61ec. Focal50/50 0431b6, global2241/54 1dcf10, lint/formato e4f326 y tiposdcf769 EXIT0. Build previo del mismo producto3dca8b EXIT0. Before/after final169 iguales. appearance.test.tsx ahoraSHA2D9B9C57CBD20DE40E10396C24534C3766F8BC97B4F59EA5C42A29CED62AB2B1 se declara cambiado respecto al original; el motor incremental decidirá su reutilización con el diff real.
+
+Nueva campaña completa autorizada por root, mismo target y universo, documentación/config/before en customization_stryker_refined/. Original intacto, seed copiado con hash igual. No se suma un subconjunto al resultado previo.
+
+
+## Campaña incremental completa finalizada
+
+EXIT0 b0fbc5,21min10s.1494K/318S/7NC/5RuntimeError/0Timeout,1824 firmas idénticas verificadas b47ade. Score82,1330%; conservador81,9079%, ambos≥80. Stryker reutiliza1484 resultados y programa340; no bandera individual de reuse en raw, sin inferirla de estado idéntico. After169:168 iguales, único delta autorizado del arnés Node scripts/project.test.mjs. Fuentes/tests Vitest/config intactos. Informe mutation_custom_views_fields_frontend_refined.md y carpeta customization_stryker_refined preservan originales, mapping e inventarios. No nuevas campañas.

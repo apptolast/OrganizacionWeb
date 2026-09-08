@@ -1,0 +1,360 @@
+{
+  "checkedAt": "2026-09-08T01:10:29.190Z",
+  "applicationRevision": "dfac90edcabdf04e442b906f0ab6db8894cbc4b2",
+  "appMerge": "e9c4cc810544c84e238d192a5395ab653943030e",
+  "infraRevision": "0bb939bc29ab6e78edb4b0e28d3d6fd01859f415",
+  "infraMerge": "5add5b851d9edb12c3f7ac6a63b58faf8da4a150",
+  "ci": 34173869406,
+  "mutation": {
+    "total": 1824,
+    "Killed": 1494,
+    "Survived": 318,
+    "RuntimeError": 5,
+    "NoCoverage": 7,
+    "conservativeScore": 81.90789473684211,
+    "identicalSignatures": true
+  },
+  "apply": {
+    "exit": 0,
+    "ok": 38,
+    "changed": 5,
+    "failed": 0,
+    "operation": "c92fef1adddbebfecda4b396c9285dc699695398b023c46bc81f581efc36c60d"
+  },
+  "newReads": [
+    {
+      "path": "/api/v1/me/customization/PROJECT",
+      "status": 200,
+      "etag": "\"customization:PROJECT:unconfigured\"",
+      "cacheControl": "no-cache, no-store, max-age=0, must-revalidate",
+      "body": {
+        "configured": false,
+        "visibleFields": [
+          "createdAt"
+        ],
+        "customFields": [],
+        "updatedAt": null
+      }
+    },
+    {
+      "path": "/api/v1/me/customization/TASK",
+      "status": 200,
+      "etag": "\"customization:TASK:unconfigured\"",
+      "cacheControl": "no-cache, no-store, max-age=0, must-revalidate",
+      "body": {
+        "configured": false,
+        "visibleFields": [
+          "completionCriterion",
+          "estimatedMinutes"
+        ],
+        "customFields": [],
+        "updatedAt": null
+      }
+    },
+    {
+      "path": "/api/v1/projects/aa637205-abc3-4e22-91cb-c05a678dfe13/custom-fields",
+      "status": 200,
+      "etag": "\"custom-values:PROJECT:aa637205-abc3-4e22-91cb-c05a678dfe13:schema:unconfigured:values:unconfigured\"",
+      "cacheControl": "no-cache, no-store, max-age=0, must-revalidate",
+      "body": {
+        "configured": false,
+        "values": [],
+        "updatedAt": null
+      }
+    },
+    {
+      "path": "/api/v1/projects/aa637205-abc3-4e22-91cb-c05a678dfe13/tasks/6d145186-206f-4148-a34d-da64973101ae/custom-fields",
+      "status": 200,
+      "etag": "\"custom-values:TASK:6d145186-206f-4148-a34d-da64973101ae:schema:unconfigured:values:unconfigured\"",
+      "cacheControl": "no-cache, no-store, max-age=0, must-revalidate",
+      "body": {
+        "configured": false,
+        "values": [],
+        "updatedAt": null
+      }
+    }
+  ],
+  "preserved": [
+    {
+      "path": "/api/v1/projects",
+      "status": 200,
+      "etag": null,
+      "sha256": "436bcfe739eba0b52a136f786b0f1fe621e501a4c534955aaa555e6f2ca4e20f"
+    },
+    {
+      "path": "/api/v1/projects/aa637205-abc3-4e22-91cb-c05a678dfe13",
+      "status": 200,
+      "etag": "\"aa637205-abc3-4e22-91cb-c05a678dfe13:1\"",
+      "sha256": "30417eaffd95a51e08ef5a474133ca65fb26ed247dbbc5d49f8018c86214aea3"
+    },
+    {
+      "path": "/api/v1/projects/aa637205-abc3-4e22-91cb-c05a678dfe13/tasks/6d145186-206f-4148-a34d-da64973101ae",
+      "status": 200,
+      "etag": null,
+      "sha256": "69f6477b592c327f11b88538884eb99cde1aeb9d163e8e94527b8e26c010375c"
+    },
+    {
+      "path": "/api/v1/work-sessions/f6642c4a-cb5c-49de-b491-18026a203286/state",
+      "status": 200,
+      "etag": null,
+      "sha256": "822ec945ffae56268f3d403de3437ca3f05c6a49818583d109f533775ea79402"
+    },
+    {
+      "path": "/api/v1/me/appearance",
+      "status": 200,
+      "etag": "\"appearance:58cd81d6-9a72-4e8f-8330-d0da4a3c3766:2\"",
+      "sha256": "e760bbe6bc980864009dde3d7a326bbc06393f2e9393636e5c9b0c8ad2fa1759"
+    }
+  ],
+  "ignoredDynamicStateKey": "serverNow",
+  "services": [
+    [
+      "edge_traefik",
+      "1/1",
+      "traefik@sha256:652929a140a32d7cafafb13c6cdfab5376cfeff800f51397b87b524501ed02a8"
+    ],
+    [
+      "organizationweb_backend",
+      "1/1",
+      "ocholoko888/organizationweb-api@sha256:83e75c196f05054fde4370c9d7f30605acd12995e63fbbc85ca118d3084472fd"
+    ],
+    [
+      "organizationweb_postgres",
+      "1/1",
+      "postgres@sha256:9ae4e8f8d0284836a505f0b2e825144e32e20499856e7dc5f7b99e19d10eedd6"
+    ],
+    [
+      "organizationweb_rabbitmq",
+      "1/1",
+      "rabbitmq@sha256:ac1201d1dc227779d93c607f976e7f9156fd5b551ee5ff7946cab6c242091bf3"
+    ],
+    [
+      "organizationweb_web",
+      "1/1",
+      "ocholoko888/organizationweb-web@sha256:9fd69f52549c7c764fcc36d9fa8eaa658f50e73f3465d22094352a29e2a79cb9"
+    ],
+    [
+      "workloads_kropia",
+      "1/1",
+      "apptolast/kropia-web@sha256:d40cd6c2a7e5fe025840fc170a448648fec17505f9eb8e2bfda69dad490d2862"
+    ],
+    [
+      "workloads_minecraft",
+      "1/1",
+      "itzg/minecraft-server@sha256:f29173ca0edfee411bd9e08820aa1bfc508787d7fd02876cfa4c96a3a2a7a77c"
+    ],
+    [
+      "workloads_minecraft-stats",
+      "1/1",
+      "ocholoko888/minecraft-stats-web@sha256:d442292036c7177502b0185c1a6cf9c35892e91629a9b80dc4786ce4cae4f6b5"
+    ],
+    [
+      "workloads_n8n",
+      "1/1",
+      "n8nio/n8n:2.31.5"
+    ],
+    [
+      "workloads_n8n-db",
+      "1/1",
+      "pgvector/pgvector@sha256:7d400e340efb42f4d8c9c12c6427adb253f726881a9985d2a471bf0eed824dff"
+    ],
+    [
+      "workloads_n8n-runners",
+      "1/1",
+      "apptolast/n8n-runners:src-ec369147df4fb6cc69b324c23ceed6fd476eab31a2e533e2cfd1552eee7eac8a"
+    ],
+    [
+      "workloads_openclaw",
+      "1/1",
+      "ghcr.io/openclaw/openclaw:2026.7.1"
+    ],
+    [
+      "workloads_passbolt",
+      "1/1",
+      "passbolt/passbolt@sha256:f5ac218f5155e9cb026edc1d8152af788ea420fac61b205d7d80262fd64359c1"
+    ],
+    [
+      "workloads_passbolt-db",
+      "1/1",
+      "postgres@sha256:fceb6f86328c36f2438fae3b851b0cc57c4a7e69a58c866d9ce24281f2cf0c9c"
+    ],
+    [
+      "workloads_portfolio-alberto",
+      "1/1",
+      "hgarciaalberto/personal-website:latest"
+    ],
+    [
+      "workloads_portfolio-pablo",
+      "1/1",
+      "ocholoko888/personal-website@sha256:41c4b0f97f6991f767cd1d1f0b0d4a938b8e37784cb9a014b56ecab3112aa1a3"
+    ],
+    [
+      "workloads_redis-coordinator",
+      "1/1",
+      "redis@sha256:1a34bdba051ecd8a58ec8a3cc460acef697a1605e918149cc53d920673c1a0a7"
+    ],
+    [
+      "workloads_selenium",
+      "1/1",
+      "selenium/standalone-chrome@sha256:b4d4e3f64280c4cd69198c8eb2c1daa74b3d206ff87a647728fc070affee94b0"
+    ],
+    [
+      "workloads_shlink",
+      "1/1",
+      "apptolast/shlink-apptolast@sha256:5655db8e5fe9ecd292c87412f3f9c15095501ea5a7aae85aa3198e08a51d0914"
+    ],
+    [
+      "workloads_shlink-db",
+      "1/1",
+      "postgres@sha256:66266770619a23ab310c7fa60043b6d1fa041038cb232ced59d2c509fecd297b"
+    ]
+  ],
+  "containers": [
+    [
+      "58eccf0e1999",
+      "organizationweb_web.1.xwvlk7t9v0auru200949bhyil",
+      "Up 2 minutes (healthy)"
+    ],
+    [
+      "40fbc54da61a",
+      "organizationweb_backend.1.ohn9wt8cko53rqv68242x62u5",
+      "Up 2 minutes (healthy)"
+    ],
+    [
+      "c85f0de047ff",
+      "organizationweb_postgres.1.qjcodki9t2ni9gpi9z6wykuhe",
+      "Up 9 hours (healthy)"
+    ],
+    [
+      "10270883bd46",
+      "organizationweb_rabbitmq.1.a2he9y3v7nck3o2z982sfe39e",
+      "Up 9 hours (healthy)"
+    ]
+  ],
+  "database": {
+    "code": 0,
+    "output": "BEGIN\n20|20|V20__customization.sql|t\ncustomization_preferences|0\nproject_custom_field_values|0\ntask_custom_field_values|0\nprojects|1\ntasks|1\nwork_sessions|1\nappearance_preferences|1\noutbox_events|9\nCOMMIT\n"
+  },
+  "ui": [
+    {
+      "surface": "project-view",
+      "width": 320,
+      "viewport": 320,
+      "scrollWidth": 320,
+      "axeViolations": []
+    },
+    {
+      "surface": "project-view",
+      "width": 768,
+      "viewport": 768,
+      "scrollWidth": 768,
+      "axeViolations": []
+    },
+    {
+      "surface": "project-view",
+      "width": 1280,
+      "viewport": 1280,
+      "scrollWidth": 1280,
+      "axeViolations": []
+    },
+    {
+      "surface": "task-fields-manager",
+      "width": 320,
+      "viewport": 320,
+      "scrollWidth": 320,
+      "axeViolations": []
+    },
+    {
+      "surface": "task-detail-after-reload",
+      "width": 320,
+      "viewport": 320,
+      "scrollWidth": 320,
+      "axeViolations": []
+    }
+  ],
+  "legacy": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "host": "kropia",
+        "status": 200,
+        "expected": 200,
+        "unchanged": true
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "host": "minecraft-stats",
+        "status": 200,
+        "expected": 200,
+        "unchanged": true
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "host": "n8n",
+        "status": 200,
+        "expected": 200,
+        "unchanged": true
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "host": "openclaw",
+        "status": 200,
+        "expected": 200,
+        "unchanged": true
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "host": "passbolt",
+        "status": 302,
+        "expected": 302,
+        "unchanged": true
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "host": "albertohidalgo",
+        "status": 307,
+        "expected": 307,
+        "unchanged": true
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "host": "pablohurtadohg",
+        "status": 200,
+        "expected": 200,
+        "unchanged": true
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "host": "generadorcodigosqr",
+        "status": 404,
+        "expected": 404,
+        "unchanged": true
+      }
+    }
+  ],
+  "logout": {
+    "api": 204,
+    "anonymous": true,
+    "protected": 401,
+    "browser": true
+  },
+  "limits": [
+    "Production customization reads only; no QA definitions or values were created.",
+    "Creation, updates and rollback tested in isolated environments.",
+    "Production browser acceptance used Chromium; broader pre-release UX evidence remains separate."
+  ]
+}

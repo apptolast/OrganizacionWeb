@@ -1,0 +1,54 @@
+[
+  {
+    "path": "progress/mutation_custom_views_fields_frontend_refined.md",
+    "sha256": "D90940E5133E4DC3EEE8B7A98D2434E74D0A484ED2B8CDF9DEC1BD7200D915D6"
+  },
+  {
+    "path": "progress/customization_stryker_refined/before.json",
+    "sha256": "17778169FC39E8F75FC5B4C44B8628588A4B6430F6007F31A69D565BE6A73910"
+  },
+  {
+    "path": "progress/customization_stryker_refined/after.json",
+    "sha256": "57E11C9EDD4272949DC83FC2C44721E080849076E1D4EE11D054545DD1C0F750"
+  },
+  {
+    "path": "progress/customization_stryker_refined/config.json",
+    "sha256": "D5E38935564067252AD2900EB7B9ABBE239269BD3B744B513E6CB8D2F14413B0"
+  },
+  {
+    "path": "progress/customization_stryker_refined/seed_manifest.json",
+    "sha256": "73EE3B03106BE1B51E04BFAD6EFDFD71F28200276FEF23AACB64BEC965A930E6"
+  },
+  {
+    "path": "progress/customization_stryker_refined/authorized_deltas.json",
+    "sha256": "D1C3556F685DA5CE4C5B813E67A095A6375197D8335F098F8157B70B94053797"
+  },
+  {
+    "path": "progress/customization_stryker_refined/mutation.json",
+    "sha256": "D97A11B5EC5A5F6311BA6A1BDDF882AEE00477B4B0DB8A9683255FF77E8470C0"
+  },
+  {
+    "path": "progress/customization_stryker_refined/mutation.html",
+    "sha256": "0E3BF65544ECFEDCD8AE67618272607400DE40F4F46B70D85E906A4F33D77FE2"
+  },
+  {
+    "path": "progress/customization_stryker_refined/run.log",
+    "sha256": "C2EC8EDA4F497E5E81082431A703457C9508ADCF66F30877479F22DD4E4D092E"
+  },
+  {
+    "path": "progress/customization_stryker_refined/inventory.json",
+    "sha256": "CF839E889C8608DF64214934A31E0F1BE022B5E831C908E9A065C0A3FD5393A2"
+  },
+  {
+    "path": "progress/customization_stryker_refined/residues.json",
+    "sha256": "59137F2AE8BE1F9DAC9666D09C171923FDECB7D9D4F2F1B990E85F72622F62D3"
+  },
+  {
+    "path": "progress/customization_stryker_refined/mapping.json",
+    "sha256": "0A494B81572706569938D40C947992EE8467AC58506E38C915322AFB2E9B57BD"
+  },
+  {
+    "path": "progress/customization_stryker_refined/reuse.json",
+    "sha256": "926DCE1902D9CE936F4FABA9FA984C957E53287C28DB47A15781A9C66CE863A9"
+  }
+]

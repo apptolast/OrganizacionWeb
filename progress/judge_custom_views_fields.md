@@ -234,3 +234,63 @@ La revisión independiente review_customization_acceptance_final.md no señala
 huecos adicionales en los 42 escenarios. No sustituye las puertas pendientes:
 Stryker frontend, corrección del arnés de rangos históricos, init/CI integrada,
 rollback y aceptación productiva. Feature21 conserva in_progress.
+
+## Calidad frontend aprobada tras incremental oficial
+
+Revisión independiente C sobre evidencia preservada de B: comparación711ef3
+confirma1824 firmas únicas exactas entre original e incremental (archivo,
+rango, mutador y reemplazo), sin añadir ni perder mutantes. Raw final
+customization_stryker_refined/mutation.json SHA256:
+`D97A11B5EC5A5F6311BA6A1BDDF882AEE00477B4B0DB8A9683255FF77E8470C0`.
+Resultado1494 Killed,318 Survived,5 RuntimeError y7 NoCoverage; ceroTimeout.
+Conservador1494/1824=81.9078947%, también superior a80 sin excluir errores;
+el motor informa82.13 y EXIT0. Original76.64 preservado, sin sumar campañas.
+
+El log declara1484 resultados reutilizados y340 pendientes de ejecución del
+mismo universo; no son1824 ejecuciones nuevas. Seed original idéntico antes
+de iniciar, modos perTest/8workers/80 y cinco módulos/once nodos intactos.
+Los cinco RuntimeError481/583/592/597/1672 conservan esa clasificación; no se
+convierten en equivalentes niKilled. Manifiestos169 before/after:168 iguales,
+único delta autorizado scripts/project.test.mjs para tres expectativas de
+rutas refined, externo a candidatosVitest. La corrección temporal de dos
+waitFor en appearance.test.tsx consta explícita en el seed_manifest y en
+la entrada inicial del incremental; no se trató ese test original como igual.
+
+Refuerzos de clientes, formularios, estado y metadatos revisados por autoría
+independiente. Globalfrontend2241/54 EXIT0, formato/lint/tipos/build verdes;
+los fallos previos y correcciones de fixture se conservan. La corrección
+posterior de tres rutas exactas del arnés tiene61/61Node y revisiónC, sin
+cambiar umbral, universo ni configuración de campaña.
+
+**APROBADO en calidad técnica21**, condicionado a la nueva CI integrada
+34173869406 y a la aceptación real del candidato publicado. Backend y UX
+conservan sus revisiones y límites anteriores, incluidos WebKitWindows y
+modalidades humanas no acreditadas. Rollback local21/20/21 está verificado
+por root, sin extrapolarlo a Swarm/TLS. No se declara done ni despliegue;
+feature21 sigue in_progress hasta registrar esas puertas finales.
+
+## Cierre real revisado
+
+**APROBADO para cierre21.** Root confirma CI34173869406 SUCCESS y merges
+aplicación e9c4cc8 (PR24) e infraestructura5add5b8 (PR33). Se contrastaron
+los13 hashes del manifiesto incremental final sin diferencias (ea74d3).
+Aceptación externa organizationweb-customization-acceptance.json SHA256
+`57449BC710183E77A7BC9DE04A586BDAE9968F38E15A850D0307A885295BD55A`,
+leída junto a check/apply. Check27/2/0 y apply38/5/0 liberaron limpiamente
+sus operaciones; cuatro contenedores saludables y20servicios1/1. Las ocho
+rutas legacy conservaron sus respuestas. Producto publicado dfac90e y
+los dos digests coinciden con el catálogo candidato revisado.
+
+Lecturas HTTPS de PROJECT/TASK y valores propios devuelven defaults/ETags
+unconfigured y no-store; V20 aplicada, las tres tablas21 siguen vacías.
+No hubo altas QA ni escrituras de personalización en producción. Proyecto,
+tarea, sesión y apariencia previos conservados; sólo serverNow dinámico se
+excluyó al comparar estado. Logout204, sesión anónima y API protegida401,
+además de retirada en navegador. Escrituras, reinicio y rollback conservan
+la evidencia de entornos aislados, sin atribuirlos a esta aceptación.
+
+UX productiva Chromium: proyecto320/768/1280, gestorTASK320 y detalleTASK320
+tras recarga, cinco axe sin violaciones y sin overflow. Complementa la UX
+previa; no sustituye sus límites WebKit, dispositivos y evaluación humana.
+Root actualizará el estado/publicación documental; esta revisión sólo cambia
+dictamen y alcance UX, sin operaciones remotas ni modificaciones de producto.

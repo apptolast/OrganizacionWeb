@@ -42,3 +42,20 @@ Evidencia complementaria: zoom nativo Chromium200 (getZoom2/DPR3/viewport320), a
 Límites: WebKit teclado incompleto, zoom nativo sólo Chromium, sin Safari físico ni teléfonos/tabletas reales, teclado virtual/áreas seguras no medidos, sin lector de pantalla humano ni estudio de comprensión. Las capturas y axe no sustituyen esas verificaciones. Los errores No tests found son preparación de comando, no fallos de producto. No se transforma WebKit EXIT1 en GREEN.
 
 Actualización posterior autorizada: único ensayo separado WebKit ea4a15 EXIT0,1/1. Acceso al detalle por clic exclusivamente win32+WebKit; el resto conserva teclado y demuestra recuperación164. El3/4 original permanece fallido; no acredita enlace conTab. Root revisó físicamente zoom y Firefox recovery-focus-viewport sin recorte y leyó el delta completo de scripts. Formato focal final0bf94b verde.
+
+## Aceptación productiva21
+
+Root ejecutó aceptación Chromium sobre dfac90e, después de CI34173869406
+SUCCESS y apply38/5/0. JSON externo organizationweb-customization-acceptance.json
+SHA57449BC710183E77A7BC9DE04A586BDAE9968F38E15A850D0307A885295BD55A,
+revisado con logs por C. Proyecto a320/768/1280 y dos superficies extra a320
+(gestor de camposTASK y detalleTASK tras recarga): cinco axe0 y scrollWidth
+igual al viewport. Las tablas21 siguen vacías: son lecturas/defaults, sin
+crear definiciones o valores QA. Las escrituras se acreditan por los E2E
+previos aislados, no por estas pantallas vacías de producción.
+
+Logout de navegador y HTTP204, anonimato y acceso protegido401 acreditados.
+Datos previos conservados, salvo exclusión explícita del serverNow dinámico.
+Cuatro contenedores saludables,20servicios1/1 y ocho rutas legacy iguales.
+No amplía evidencia a Safari/dispositivos físicos ni resuelve por decreto
+el límite de Tab de enlaces en WebKitWindows; esos límites siguen vigentes.

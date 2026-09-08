@@ -1,0 +1,13 @@
+{
+  "source": "run.log IncrementalDiffer, 02:34:24",
+  "total": 1824,
+  "reused": 1484,
+  "scheduledForExecution": 340,
+  "changedMutatedFiles": 0,
+  "changedTestFiles": 6,
+  "addedTests": 82,
+  "removedTests": 50,
+  "dryRunTests": 954,
+  "perMutantReuseMarkerAvailable": false,
+  "note": "Raw reports preserve statusReason/testsCompleted without a reused flag. Mapping verifies status transitions; an unchanged status alone does not prove reuse. No manual merge of reports."
+}

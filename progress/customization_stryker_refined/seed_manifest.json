@@ -1,0 +1,17 @@
+{
+  "source": "progress/customization_stryker_original/mutation.json",
+  "sha256": "3DC6D9B548B532389660A53B9915B620683C552032FEF8E3510A10AFAE997942",
+  "copy": "frontend/reports/mutation-custom-views-fields-refined/incremental.json",
+  "scope": "Same five complete modules and eleven AST nodes; no reduced mutate selection",
+  "changedOriginalTest": "frontend/src/appearance.test.tsx",
+  "changedOriginalTestSha256": "2D9B9C57CBD20DE40E10396C24534C3766F8BC97B4F59EA5C42A29CED62AB2B1",
+  "validation": {
+    "tests": 2241,
+    "suites": 54,
+    "focalAppearance": 50,
+    "lint": 0,
+    "types": 0,
+    "build": 0
+  },
+  "inputs": 169
+}

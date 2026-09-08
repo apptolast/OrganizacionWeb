@@ -15,3 +15,9 @@ El corte 8691edd entrega siete fuentes de aplicación y dos pruebas nominales pa
 Freeze import_frontend_preview_freeze.json, SHA 7B224B591F6A1DB390AEE2A767191C2912B5A358EDF5A19EBF021A34E8BC8383: cinco huellas coincidentes, 26 pruebas verdes originales y checks EXIT 0. La lectura de código confirma transporte del File original mediante el cliente CSRF existente, sobre cerrado, propietario y longitud exactos, cantidades coherentes de catorce colecciones, hash SHA-256 de los bytes y cancelación tras cada frontera asíncrona. Reutiliza los validadores existentes y no interpreta otra vez las filas del archivo en el navegador.
 
 Aceptado como corte parcial. Quedan positivos inclusivos de 32 MiB y 100000 registros y avisos RUNNING válidos; su autor los incorpora antes del cierre. No incluye todavía confirmación, recibos, recuperación, interfaz, navegador real, mutación ni prueba integral. La bitácora seguirá creciendo: el hash del freeze describe el instante de revisión, no futuras versiones de esa bitácora.
+
+## Primer adaptador HTTP de vista previa
+
+Freeze aislado import_http_preview_freeze.json, SHA DA9C0871BB1912746236A09937791F573F64B539F3088AA1B3B8B5AC553E7DBB: cinco huellas coincidentes y 18 pruebas MVC verdes. Usa puerto real mockeado en slice; no acredita socket ni PostgreSQL. El mapping 405 local agrupado sigue el patrón de exportación y conserva el error 500 anterior como RED real. Las fechas mantienen seis decimales y el stream pertenece al caller.
+
+Revisión pendiente de un ajuste concreto: la guarda de query precede al charset/Content-Encoding dentro del handler, pero la sección 23 exige media antes de query. Root y autor identificaron el mismo caso combinado; se solicita un único RED y la corrección mínima, conservando el freeze original. No se integra el controlador en el contexto completo antes de existir wiring real. La fixture del mapper con RUNNING debe distinguirse de un contrato de negocio válido si mantiene counts cero.

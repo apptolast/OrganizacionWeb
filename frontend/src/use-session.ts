@@ -2,11 +2,20 @@ import { useEffect, useState, useRef, type FormEvent } from "react";
 import { setCsrfToken, observeAccess, isCsrfFailure } from "./api-client";
 import { readSession, type Session } from "./session-api";
 import { clearImportIntent, readImportIntent } from "./import-data-intent";
+import {
+  clearApiCredentialIntent,
+  readApiCredentialIntent,
+} from "./integration-api-intent";
 function retireImportRecovery() {
   try {
     clearImportIntent();
   } catch {
     /* Storage access must not prevent revoking access. */
+  }
+  try {
+    clearApiCredentialIntent();
+  } catch {
+    /* Storage failure must not retain access. */
   }
 }
 export function useSession() {
@@ -46,6 +55,11 @@ export function useSession() {
           readImportIntent(next.username);
         } catch {
           /* Session identity remains authoritative. */
+        }
+        try {
+          readApiCredentialIntent(next.username);
+        } catch {
+          /* Identity remains authoritative. */
         }
       } else retireImportRecovery();
       setSession(next);
@@ -206,6 +220,7 @@ function isPrivateRoute(path: string, search: string) {
       path === "/apariencia" ||
       path === "/exportacion" ||
       path === "/importacion" ||
+      path === "/integraciones/api" ||
       path === "/proyectos/nuevo" ||
       /^\/proyectos\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\/editar|\/tareas\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\/sesiones\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?)?$/i.test(
         path,

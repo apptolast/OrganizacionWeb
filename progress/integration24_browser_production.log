@@ -1,0 +1,17 @@
+
+Running 6 tests using 1 worker
+
+(node:19280) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › e2e\integration-api-browser.spec.mjs:7:1 › integration simulated API: keyboard creation, transient secret and responsive readability @s33 @s37 @s41 (1.9s)
+  ok 2 [chromium] › e2e\integration-api-browser.spec.mjs:45:1 › integration simulated API: manual creation and revocation recovery retain identity and physical focus @s35 @s36 @s40 (414ms)
+(node:60808) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 3 [firefox] › e2e\integration-api-browser.spec.mjs:7:1 › integration simulated API: keyboard creation, transient secret and responsive readability @s33 @s37 @s41 (2.5s)
+  ok 4 [firefox] › e2e\integration-api-browser.spec.mjs:45:1 › integration simulated API: manual creation and revocation recovery retain identity and physical focus @s35 @s36 @s40 (606ms)
+(node:47252) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 5 [webkit] › e2e\integration-api-browser.spec.mjs:7:1 › integration simulated API: keyboard creation, transient secret and responsive readability @s33 @s37 @s41 (2.0s)
+  ok 6 [webkit] › e2e\integration-api-browser.spec.mjs:45:1 › integration simulated API: manual creation and revocation recovery retain identity and physical focus @s35 @s36 @s40 (1.0s)
+
+  6 passed (12.9s)

@@ -16,6 +16,7 @@ export function Workspace({
     | "Apariencia"
     | "Exportación"
     | "Importación"
+    | "API para integraciones"
     | null;
 }) {
   return (
@@ -93,6 +94,14 @@ export function Workspace({
             {section === "Importación" && (
               <span className="nav-dot" aria-hidden="true" />
             )}
+          </RouteLink>
+          <RouteLink
+            href="/integraciones/api"
+            aria-current={
+              section === "API para integraciones" ? "page" : undefined
+            }
+          >
+            API para integraciones
           </RouteLink>
         </nav>
         <div className="sidebar-note">

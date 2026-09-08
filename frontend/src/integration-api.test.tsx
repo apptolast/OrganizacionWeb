@@ -1,0 +1,1442 @@
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { afterEach, expect, it, vi } from "vitest";
+import { IntegrationApi } from "./integration-api";
+import { useLayoutEffect } from "react";
+import { SessionGate } from "./session-gate";
+const id = "12345678-1234-4234-8234-123456789abc";
+const key = "organizationweb.api-credential.pending.v1";
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+  sessionStorage.clear();
+  window.history.replaceState(null, "", "/");
+});
+it("@s33 prepares owner and stable id before sending and displays the one-time secret only after confirmation", async () => {
+  vi.spyOn(crypto, "randomUUID").mockReturnValue(id);
+  const secret = `owp_${id}.${"A".repeat(43)}`;
+  let reply!: (response: Response) => void;
+  const fetcher = vi.fn().mockImplementation(() => {
+    expect(JSON.parse(sessionStorage.getItem(key)!)).toEqual({
+      owner: "Ana",
+      id,
+    });
+    return new Promise<Response>((resolve) => {
+      reply = resolve;
+    });
+  });
+  stubApi(fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  expect(
+    screen.getByRole("heading", { name: "Credenciales para integraciones" }),
+  ).toBeVisible();
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Mi integración",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(screen.queryByDisplayValue(secret)).not.toBeInTheDocument();
+  reply(
+    Response.json(
+      {
+        credential: {
+          id,
+          name: "Mi integración",
+          scopes: ["projects:read"],
+          createdAt: "2026-09-08T10:00:00.123456Z",
+          expiresAt: "2026-10-08T10:00:00.123456Z",
+          revokedAt: null,
+        },
+        secret,
+      },
+      { status: 201 },
+    ),
+  );
+  await waitFor(() =>
+    expect(screen.getByLabelText("Secreto de la credencial")).toHaveValue(
+      secret,
+    ),
+  );
+  expect(sessionStorage.getItem(key)).toBeNull();
+  expect(
+    screen.getByText("Guárdalo ahora. No podremos mostrarlo de nuevo."),
+  ).toBeVisible();
+});
+
+it("@s34 an unavailable intention store explains the failure and sends nothing", async () => {
+  vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+    throw new Error("denied");
+  });
+  const fetcher = vi.fn();
+  stubApi(fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Mi integración",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "No se puede conservar la recuperación",
+  );
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it("@s35 a pending or uncertain creation blocks another identity and retains its recovery key", async () => {
+  vi.spyOn(crypto, "randomUUID").mockReturnValue(id);
+  let reply!: (response: Response) => void;
+  const fetcher = vi.fn().mockImplementation(
+    () =>
+      new Promise<Response>((resolve) => {
+        reply = resolve;
+      }),
+  );
+  stubApi(fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Mi integración",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  const create = screen.getByRole("button", { name: "Crear" });
+  await user.click(create);
+  expect(create).toBeDisabled();
+  reply(new Response(null, { status: 503 }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "No podemos confirmar la creación",
+  );
+  expect(create).toBeDisabled();
+  await user.click(create);
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(JSON.parse(sessionStorage.getItem(key)!)).toEqual({
+    owner: "Ana",
+    id,
+  });
+});
+
+it("@s35 reload keeps the pending id and 404 never enables a different creation", async () => {
+  sessionStorage.setItem(key, JSON.stringify({ owner: "Ana", id }));
+  const fetcher = vi.fn().mockResolvedValue(
+    Response.json(
+      {
+        status: 404,
+        type: "urn:organization:problem:api_credential_not_found",
+        code: "API_CREDENTIAL_NOT_FOUND",
+      },
+      { status: 404 },
+    ),
+  );
+  stubApi(fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  expect(fetcher).not.toHaveBeenCalled();
+  expect(screen.getByRole("button", { name: "Crear" })).toBeDisabled();
+  await user.click(screen.getByRole("button", { name: "Comprobar creación" }));
+  expect(
+    await screen.findByText(
+      "Todavía no se encuentra la credencial. El envío anterior puede seguir en curso.",
+    ),
+  ).toBeVisible();
+  expect(screen.getByRole("button", { name: "Crear" })).toBeDisabled();
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(fetcher.mock.calls[0][0]).toBe(`/api/v1/me/api-credentials/${id}`);
+  expect(JSON.parse(sessionStorage.getItem(key)!)).toEqual({
+    owner: "Ana",
+    id,
+  });
+});
+
+it("@s37 changing owner aborts a pending creation and a late secret cannot appear in the new identity", async () => {
+  vi.spyOn(crypto, "randomUUID").mockReturnValue(id);
+  let reply!: (response: Response) => void;
+  const fetcher = vi.fn().mockImplementation(
+    () =>
+      new Promise<Response>((resolve) => {
+        reply = resolve;
+      }),
+  );
+  stubApi(fetcher);
+  const user = userEvent.setup();
+  const view = render(<IntegrationApi owner="Ana" />);
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Mi integración",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  const signal = fetcher.mock.calls[0][1].signal;
+  view.rerender(<IntegrationApi owner="Bruno" />);
+  expect(signal.aborted).toBe(true);
+  const secret = `owp_${id}.${"A".repeat(43)}`;
+  reply(
+    Response.json(
+      {
+        credential: {
+          id,
+          name: "Mi integración",
+          scopes: ["projects:read"],
+          createdAt: "2026-09-08T10:00:00Z",
+          expiresAt: "2026-10-08T10:00:00Z",
+          revokedAt: null,
+        },
+        secret,
+      },
+      { status: 201 },
+    ),
+  );
+  await waitFor(() =>
+    expect(screen.getByRole("textbox", { name: "Nombre" })).toHaveValue(""),
+  );
+  expect(screen.queryByDisplayValue(secret)).not.toBeInTheDocument();
+  expect(sessionStorage.getItem(key)).toBeNull();
+});
+
+it("@s35 finding a committed creation explains the lost secret and resolves the stored identity", async () => {
+  sessionStorage.setItem(key, JSON.stringify({ owner: "Ana", id }));
+  const fetcher = vi.fn().mockResolvedValue(
+    Response.json({
+      id,
+      name: "Mi integración",
+      scopes: ["projects:read"],
+      createdAt: "2026-09-08T10:00:00Z",
+      expiresAt: "2026-10-08T10:00:00Z",
+      revokedAt: null,
+    }),
+  );
+  stubApi(fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.click(screen.getByRole("button", { name: "Comprobar creación" }));
+  expect(
+    await screen.findByText(
+      "La credencial existe, pero su secreto no se puede recuperar.",
+    ),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: "Revocar Mi integración" }),
+  ).toBeEnabled();
+  expect(sessionStorage.getItem(key)).toBeNull();
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});
+
+it("@s38 failed storage cleanup does not turn a confirmed secret into an uncertain creation", async () => {
+  vi.spyOn(crypto, "randomUUID").mockReturnValue(id);
+  const secret = `owp_${id}.${"A".repeat(43)}`;
+  stubApi(
+    vi.fn().mockResolvedValue(
+      Response.json(
+        {
+          credential: {
+            id,
+            name: "Mi integración",
+            scopes: ["projects:read"],
+            createdAt: "2026-09-08T10:00:00Z",
+            expiresAt: "2026-10-08T10:00:00Z",
+            revokedAt: null,
+          },
+          secret,
+        },
+        { status: 201 },
+      ),
+    ),
+  );
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {
+    throw new Error("denied");
+  });
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Mi integración",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  await waitFor(() =>
+    expect(screen.getByLabelText("Secreto de la credencial")).toHaveValue(
+      secret,
+    ),
+  );
+  expect(
+    screen.queryByText(/No podemos confirmar la creación/),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Comprobar creación" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "La operación está confirmada, pero no se pudo limpiar la recuperación local.",
+    ),
+  ).toBeVisible();
+});
+
+it("@s36 after reload and 404 the explicit retry uses the original id and treats replay secret as lost", async () => {
+  sessionStorage.setItem(key, JSON.stringify({ owner: "Ana", id }));
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(new Response(null, { status: 404 }))
+    .mockResolvedValueOnce(
+      Response.json({
+        credential: {
+          id,
+          name: "Mi integración",
+          scopes: ["projects:read"],
+          createdAt: "2026-09-08T10:00:00Z",
+          expiresAt: "2026-10-08T10:00:00Z",
+          revokedAt: null,
+        },
+        secret: null,
+      }),
+    );
+  stubApi(fetcher);
+  const random = vi.spyOn(crypto, "randomUUID");
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.click(screen.getByRole("button", { name: "Comprobar creación" }));
+  await screen.findByText(
+    "Todavía no se encuentra la credencial. El envío anterior puede seguir en curso.",
+  );
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Mi integración",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(
+    screen.getByRole("button", { name: "Reenviar el mismo intento" }),
+  );
+  expect(
+    await screen.findByText(
+      "La credencial existe, pero su secreto no se puede recuperar.",
+    ),
+  ).toBeVisible();
+  expect(random).not.toHaveBeenCalled();
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  expect(fetcher.mock.calls[1][0]).toBe(`/api/v1/me/api-credentials/${id}`);
+  expect(fetcher.mock.calls[1][1].method).toBe("PUT");
+});
+
+it("@s2 @s3 an invalid name or absent permission cannot send a credential creation", async () => {
+  const fetcher = vi.fn();
+  stubApi(fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  const create = screen.getByRole("button", { name: "Crear" });
+  expect(create).toBeDisabled();
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "a".repeat(81),
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  expect(create).toBeDisabled();
+  expect(
+    screen.getByText(
+      "El nombre debe tener entre 1 y 80 caracteres y no incluir controles.",
+    ),
+  ).toBeVisible();
+  expect(fetcher).not.toHaveBeenCalled();
+  expect(sessionStorage.getItem(key)).toBeNull();
+});
+
+it("@s36 a definitive quota rejection permits a deliberate correction with the same id", async () => {
+  vi.spyOn(crypto, "randomUUID").mockReturnValue(id);
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(
+      Response.json(
+        {
+          type: "urn:organization:problem:api_credential_limit",
+          status: 409,
+          code: "API_CREDENTIAL_LIMIT",
+        },
+        { status: 409 },
+      ),
+    )
+    .mockResolvedValueOnce(
+      Response.json(
+        {
+          credential: {
+            id,
+            name: "Mi integración",
+            scopes: ["projects:read"],
+            createdAt: "2026-09-08T10:00:00Z",
+            expiresAt: "2026-10-08T10:00:00Z",
+            revokedAt: null,
+          },
+          secret: `owp_${id}.${"A".repeat(43)}`,
+        },
+        { status: 201 },
+      ),
+    );
+  stubApi(fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Mi integración",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  expect(
+    await screen.findByText(
+      "Ya hay diez credenciales válidas. Revoca una o espera a su caducidad antes de reintentar.",
+    ),
+  ).toBeVisible();
+  await user.click(
+    screen.getByRole("button", {
+      name: "Corregir y reenviar el mismo intento",
+    }),
+  );
+  await screen.findByLabelText("Secreto de la credencial");
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  expect(fetcher.mock.calls[1][0]).toBe(fetcher.mock.calls[0][0]);
+});
+
+it("@s36 a definitive validation rejection preserves the draft for correction", async () => {
+  stubApi(
+    vi.fn().mockResolvedValue(
+      Response.json(
+        {
+          type: "urn:organization:problem:api_credential_invalid",
+          status: 400,
+          code: "API_CREDENTIAL_INVALID",
+        },
+        { status: 400 },
+      ),
+    ),
+  );
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Mi integración",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  expect(
+    await screen.findByText(
+      "Revisa el nombre, los permisos y la caducidad. La creación fue rechazada.",
+    ),
+  ).toBeVisible();
+  expect(screen.getByRole("textbox", { name: "Nombre" })).toHaveValue(
+    "Mi integración",
+  );
+  expect(
+    screen.getByRole("button", {
+      name: "Corregir y reenviar el mismo intento",
+    }),
+  ).toBeEnabled();
+});
+
+it("@s35 a correction cannot retain its definitive-rejection permission after a new uncertain result", async () => {
+  stubApi(
+    vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json(
+          {
+            type: "urn:organization:problem:api_credential_limit",
+            status: 409,
+            code: "API_CREDENTIAL_LIMIT",
+          },
+          { status: 409 },
+        ),
+      )
+      .mockResolvedValueOnce(new Response(null, { status: 503 })),
+  );
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Mi integración",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  await user.click(
+    await screen.findByRole("button", {
+      name: "Corregir y reenviar el mismo intento",
+    }),
+  );
+  await screen.findByText(/No podemos confirmar la creación/);
+  expect(
+    screen.queryByRole("button", {
+      name: "Corregir y reenviar el mismo intento",
+    }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Comprobar creación" }),
+  ).toBeEnabled();
+});
+
+// This suite isolates only the route's lazy list GET. Other methods and URLs
+// reach each test's original transport mock; its counts concern that flow.
+function stubApi(fetcher: typeof fetch) {
+  vi.stubGlobal("fetch", (url: RequestInfo | URL, options?: RequestInit) =>
+    url === "/api/v1/me/api-credentials" &&
+    (!options?.method || options.method === "GET")
+      ? Promise.resolve(Response.json({ items: [], nextCursor: null }))
+      : fetcher(url, options),
+  );
+}
+
+it("@s13 @s41 opens the own credential list lazily and displays its metadata without secrets", async () => {
+  const fetcher = vi.fn().mockResolvedValue(
+    Response.json({
+      items: [
+        {
+          id,
+          name: "Automatización propia",
+          scopes: ["projects:read"],
+          createdAt: "2026-09-08T10:00:00Z",
+          expiresAt: "2026-10-08T10:00:00Z",
+          revokedAt: null,
+        },
+      ],
+      nextCursor: null,
+    }),
+  );
+  vi.stubGlobal("fetch", fetcher);
+  render(<IntegrationApi owner="Ana" />);
+  expect(
+    await screen.findByRole("button", {
+      name: "Revocar Automatización propia",
+    }),
+  ).toBeEnabled();
+  expect(screen.getByText("8 oct 2026, 10:00:00 UTC")).toHaveAttribute(
+    "datetime",
+    "2026-10-08T10:00:00Z",
+  );
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(fetcher.mock.calls[0][0]).toBe("/api/v1/me/api-credentials");
+  expect(
+    screen.queryByLabelText("Secreto de la credencial"),
+  ).not.toBeInTheDocument();
+});
+
+it("@s41 a list failure offers a manual retry and does not erase the creation draft", async () => {
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(new Response(null, { status: 503 }))
+    .mockResolvedValueOnce(Response.json({ items: [], nextCursor: null }));
+  vi.stubGlobal("fetch", fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  expect(
+    await screen.findByText("No se puede consultar el listado."),
+  ).toBeVisible();
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Borrador propio",
+  );
+  await user.click(screen.getByRole("button", { name: "Recargar listado" }));
+  expect(
+    await screen.findByText("Todavía no tienes credenciales."),
+  ).toBeVisible();
+  expect(screen.getByRole("textbox", { name: "Nombre" })).toHaveValue(
+    "Borrador propio",
+  );
+  expect(fetcher).toHaveBeenCalledTimes(2);
+});
+
+it("@s13 pagination loads another page only on deliberate request", async () => {
+  const first = Array.from({ length: 50 }, (_, index) => ({
+    id: `12345678-1234-4234-8234-${index.toString(16).padStart(12, "0")}`,
+    name: `Credencial ${index}`,
+    scopes: ["projects:read"],
+    createdAt: "2026-09-08T10:00:00Z",
+    expiresAt: "2026-10-08T10:00:00Z",
+    revokedAt: null,
+  }));
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(
+      Response.json({ items: first, nextCursor: "next-page" }),
+    )
+    .mockResolvedValueOnce(
+      Response.json({
+        items: [{ ...first[0], id, name: "Última" }],
+        nextCursor: null,
+      }),
+    );
+  vi.stubGlobal("fetch", fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await screen.findByRole("button", { name: "Revocar Credencial 49" });
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  await user.click(
+    screen.getByRole("button", { name: "Mostrar más credenciales" }),
+  );
+  expect(
+    await screen.findByRole("button", { name: "Revocar Última" }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: "Revocar Credencial 0" }),
+  ).toBeVisible();
+  expect(fetcher.mock.calls[1][0]).toBe(
+    "/api/v1/me/api-credentials?cursor=next-page",
+  );
+  expect(
+    screen.queryByRole("button", { name: "Mostrar más credenciales" }),
+  ).not.toBeInTheDocument();
+});
+
+it("@s16 revocation names the credential and requires its separate confirmation", async () => {
+  const credential = {
+    id,
+    name: "Mi integración",
+    scopes: ["projects:read"],
+    createdAt: "2026-09-08T10:00:00Z",
+    expiresAt: "2026-10-08T10:00:00Z",
+    revokedAt: null,
+  };
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(
+      Response.json({ items: [credential], nextCursor: null }),
+    )
+    .mockResolvedValueOnce(
+      Response.json({ ...credential, revokedAt: credential.createdAt }),
+    );
+  vi.stubGlobal("fetch", fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.click(
+    await screen.findByRole("button", { name: "Revocar Mi integración" }),
+  );
+  expect(
+    screen.getByText(
+      "Mi integración dejará de autorizar nuevas solicitudes. Esta acción no se puede deshacer.",
+    ),
+  ).toBeVisible();
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  await user.click(
+    screen.getByRole("button", { name: "Confirmar revocación" }),
+  );
+  expect(await screen.findByText("Revocada")).toBeVisible();
+  expect(fetcher.mock.calls[1][0]).toBe(
+    `/api/v1/me/api-credentials/${id}/revocation`,
+  );
+  expect(
+    screen.queryByRole("button", { name: "Confirmar revocación" }),
+  ).not.toBeInTheDocument();
+});
+
+it("@s40 an uncertain revocation checks manually before offering a deliberate repeat", async () => {
+  const credential = {
+    id,
+    name: "Mi integración",
+    scopes: ["projects:read"],
+    createdAt: "2026-09-08T10:00:00Z",
+    expiresAt: "2026-10-08T10:00:00Z",
+    revokedAt: null,
+  };
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(
+      Response.json({ items: [credential], nextCursor: null }),
+    )
+    .mockResolvedValueOnce(new Response(null, { status: 503 }))
+    .mockResolvedValueOnce(Response.json(credential))
+    .mockResolvedValueOnce(
+      Response.json({ ...credential, revokedAt: credential.createdAt }),
+    );
+  vi.stubGlobal("fetch", fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.click(
+    await screen.findByRole("button", { name: "Revocar Mi integración" }),
+  );
+  await user.click(
+    screen.getByRole("button", { name: "Confirmar revocación" }),
+  );
+  expect(
+    await screen.findByText(
+      "No se puede confirmar la revocación. Comprueba su estado antes de repetirla.",
+    ),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: "Confirmar revocación" }),
+  ).toBeDisabled();
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  await user.click(
+    screen.getByRole("button", { name: "Comprobar revocación" }),
+  );
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Confirmar revocación" }),
+    ).toBeEnabled(),
+  );
+  expect(fetcher.mock.calls[2][1].method).toBeUndefined();
+  await user.click(
+    screen.getByRole("button", { name: "Confirmar revocación" }),
+  );
+  expect(await screen.findByText("Revocada")).toBeVisible();
+  expect(fetcher).toHaveBeenCalledTimes(4);
+});
+
+it("@s39 copying is deliberate and falls back to selecting the transient secret", async () => {
+  vi.spyOn(crypto, "randomUUID").mockReturnValue(id);
+  const secret = `owp_${id}.${"A".repeat(43)}`;
+  stubApi(
+    vi.fn().mockResolvedValue(
+      Response.json(
+        {
+          credential: {
+            id,
+            name: "Mi integración",
+            scopes: ["projects:read"],
+            createdAt: "2026-09-08T10:00:00Z",
+            expiresAt: "2026-10-08T10:00:00Z",
+            revokedAt: null,
+          },
+          secret,
+        },
+        { status: 201 },
+      ),
+    ),
+  );
+  const user = userEvent.setup();
+  const copy = vi
+    .spyOn(navigator.clipboard, "writeText")
+    .mockRejectedValue(new Error("unavailable"));
+  render(<IntegrationApi owner="Ana" />);
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Mi integración",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  const input = (await screen.findByLabelText(
+    "Secreto de la credencial",
+  )) as HTMLInputElement;
+  expect(copy).not.toHaveBeenCalled();
+  await user.click(screen.getByRole("button", { name: "Copiar" }));
+  expect(
+    await screen.findByText(
+      "Selecciona y copia el secreto manualmente. No podremos mostrarlo de nuevo.",
+    ),
+  ).toBeVisible();
+  expect(input.selectionStart).toBe(0);
+  expect(input.selectionEnd).toBe(secret.length);
+});
+
+it("@s37 a pending list is retired when the owner changes before it can affect the next session", async () => {
+  let reply!: (response: Response) => void;
+  const fetcher = vi
+    .fn()
+    .mockImplementationOnce(
+      () =>
+        new Promise<Response>((resolve) => {
+          reply = resolve;
+        }),
+    )
+    .mockResolvedValue(Response.json({ items: [], nextCursor: null }));
+  vi.stubGlobal("fetch", fetcher);
+  const view = render(<IntegrationApi owner="Ana" />);
+  const signal = fetcher.mock.calls[0][1].signal;
+  view.rerender(<IntegrationApi owner="Bruno" />);
+  expect(signal.aborted).toBe(true);
+  reply(new Response(null, { status: 401 }));
+  expect(
+    await screen.findByText("Todavía no tienes credenciales."),
+  ).toBeVisible();
+});
+
+it("@s37 the old list is already aborted in the new identity layout phase", () => {
+  const fetcher = vi
+    .fn()
+    .mockImplementation(() => new Promise<Response>(() => {}));
+  vi.stubGlobal("fetch", fetcher);
+  const view = render(<IntegrationApi owner="Ana" />);
+  const signal = fetcher.mock.calls[0][1].signal;
+  let retiredAtLayout = false;
+  function Probe() {
+    useLayoutEffect(() => {
+      retiredAtLayout = signal.aborted;
+    }, []);
+    return null;
+  }
+  view.rerender(
+    <>
+      <IntegrationApi owner="Bruno" />
+      <Probe />
+    </>,
+  );
+  expect(retiredAtLayout).toBe(true);
+});
+
+it("@s41 a direct private route survives real login and adds one final navigation link", async () => {
+  window.history.replaceState(null, "", "/integraciones/api");
+  let authenticated = false;
+  const fetcher = vi
+    .fn()
+    .mockImplementation(async (url: string, options?: RequestInit) => {
+      if (url === "/api/session" && options?.method === "POST") {
+        authenticated = true;
+        return new Response(null, { status: 204 });
+      }
+      if (url === "/api/session")
+        return Response.json({
+          authenticated,
+          username: authenticated ? "Ana" : null,
+          csrfToken: "session-csrf",
+          csrfHeaderName: "X-CSRF-TOKEN",
+        });
+      if (url === "/api/v1/me/appearance")
+        return Response.json(
+          {
+            configured: false,
+            theme: "SYSTEM",
+            accentLight: "#244C3C",
+            accentDark: "#B7E4C7",
+            updatedAt: null,
+          },
+          { headers: { ETag: '"appearance:unconfigured"' } },
+        );
+      if (url === "/api/v1/me/api-credentials")
+        return Response.json({ items: [], nextCursor: null });
+      throw new Error(`Unexpected endpoint ${url}`);
+    });
+  vi.stubGlobal("fetch", fetcher);
+  const user = userEvent.setup();
+  render(<SessionGate />);
+  await user.type(await screen.findByLabelText("Usuario"), "Ana");
+  await user.type(screen.getByLabelText("Contraseña"), "not-a-real-password");
+  await user.click(screen.getByRole("button", { name: "Iniciar sesión" }));
+  expect(
+    await screen.findByRole("heading", {
+      name: "Credenciales para integraciones",
+    }),
+  ).toBeVisible();
+  expect(window.location.pathname).toBe("/integraciones/api");
+  const links = screen
+    .getByRole("navigation", { name: "Principal" })
+    .querySelectorAll("a");
+  expect(links[0]).toHaveAccessibleName("Hoy");
+  expect(links[links.length - 1]).toHaveAccessibleName(
+    "API para integraciones",
+  );
+  expect(links[links.length - 1]).toHaveAttribute("aria-current", "page");
+});
+
+it("@s37 real logout retires the credential intention before its response arrives", async () => {
+  window.history.replaceState(null, "", "/integraciones/api");
+  sessionStorage.setItem(key, JSON.stringify({ owner: "Ana", id }));
+  const fetcher = vi.fn().mockImplementation(async (url: string) => {
+    if (url === "/api/session/logout") return new Promise<Response>(() => {});
+    if (url === "/api/session")
+      return Response.json({
+        authenticated: true,
+        username: "Ana",
+        csrfToken: "session-csrf",
+        csrfHeaderName: "X-CSRF-TOKEN",
+      });
+    if (url === "/api/v1/me/appearance")
+      return Response.json(
+        {
+          configured: false,
+          theme: "SYSTEM",
+          accentLight: "#244C3C",
+          accentDark: "#B7E4C7",
+          updatedAt: null,
+        },
+        { headers: { ETag: '"appearance:unconfigured"' } },
+      );
+    if (url === "/api/v1/me/api-credentials")
+      return Response.json({ items: [], nextCursor: null });
+    throw new Error(`Unexpected endpoint ${url}`);
+  });
+  vi.stubGlobal("fetch", fetcher);
+  const user = userEvent.setup();
+  render(<SessionGate />);
+  await user.click(
+    await screen.findByRole("button", { name: "Cerrar sesión" }),
+  );
+  expect(sessionStorage.getItem(key)).toBeNull();
+  expect(
+    fetcher.mock.calls.filter(([url]) => url === "/api/session/logout"),
+  ).toHaveLength(1);
+  expect(
+    screen.queryByRole("heading", { name: "Credenciales para integraciones" }),
+  ).not.toBeInTheDocument();
+});
+
+it("@s37 establishing a different session removes the foreign intention even outside the integration route", async () => {
+  window.history.replaceState(null, "", "/proyectos/nuevo");
+  sessionStorage.setItem(key, JSON.stringify({ owner: "Ana", id }));
+  const fetcher = vi.fn().mockImplementation(async (url: string) => {
+    if (url === "/api/session")
+      return Response.json({
+        authenticated: true,
+        username: "Bruno",
+        csrfToken: "session-csrf",
+        csrfHeaderName: "X-CSRF-TOKEN",
+      });
+    if (url === "/api/v1/me/appearance")
+      return Response.json(
+        {
+          configured: false,
+          theme: "SYSTEM",
+          accentLight: "#244C3C",
+          accentDark: "#B7E4C7",
+          updatedAt: null,
+        },
+        { headers: { ETag: '"appearance:unconfigured"' } },
+      );
+    throw new Error(`Unexpected endpoint ${url}`);
+  });
+  vi.stubGlobal("fetch", fetcher);
+  render(<SessionGate />);
+  await screen.findByRole("button", { name: "Cerrar sesión" });
+  expect(sessionStorage.getItem(key)).toBeNull();
+  expect(
+    fetcher.mock.calls.some(([url]) =>
+      url.startsWith("/api/v1/me/api-credentials"),
+    ),
+  ).toBe(false);
+});
+
+it("@s40 revocation uncertainty belongs to its credential across panel changes", async () => {
+  const first = {
+    id,
+    name: "Primera",
+    scopes: ["projects:read"],
+    createdAt: "2026-09-08T10:00:00Z",
+    expiresAt: "2026-10-08T10:00:00Z",
+    revokedAt: null,
+  };
+  const second = {
+    ...first,
+    id: "12345678-1234-4234-8234-123456789abd",
+    name: "Segunda",
+  };
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(
+      Response.json({ items: [first, second], nextCursor: null }),
+    )
+    .mockResolvedValueOnce(new Response(null, { status: 503 }));
+  vi.stubGlobal("fetch", fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.click(
+    await screen.findByRole("button", { name: "Revocar Primera" }),
+  );
+  await user.click(
+    screen.getByRole("button", { name: "Confirmar revocación" }),
+  );
+  await screen.findByRole("button", { name: "Comprobar revocación" });
+  await user.click(screen.getByRole("button", { name: "Cancelar revocación" }));
+  await user.click(screen.getByRole("button", { name: "Revocar Segunda" }));
+  expect(
+    screen.getByRole("button", { name: "Confirmar revocación" }),
+  ).toBeEnabled();
+  expect(
+    screen.queryByRole("button", { name: "Comprobar revocación" }),
+  ).not.toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Cancelar revocación" }));
+  await user.click(screen.getByRole("button", { name: "Revocar Primera" }));
+  expect(
+    screen.getByRole("button", { name: "Confirmar revocación" }),
+  ).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Comprobar revocación" }),
+  ).toBeEnabled();
+  expect(fetcher).toHaveBeenCalledTimes(2);
+});
+
+it("@s38 unavailable recovery storage leaves the list usable and blocks creation", async () => {
+  const get = Storage.prototype.getItem;
+  vi.spyOn(Storage.prototype, "getItem").mockImplementation(function (
+    this: Storage,
+    name: string,
+  ) {
+    if (name === key) throw new Error("unavailable");
+    return get.call(this, name);
+  });
+  const fetcher = vi.fn();
+  stubApi(fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  expect(
+    await screen.findByText(
+      "No se puede leer la recuperación local. No se crearán credenciales hasta recuperarla.",
+    ),
+  ).toBeVisible();
+  expect(
+    await screen.findByText("Todavía no tienes credenciales."),
+  ).toBeVisible();
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Mi integración",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  expect(screen.getByRole("button", { name: "Crear" })).toBeDisabled();
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it("@s37 closing the secret panel removes it without persisting or recovering it", async () => {
+  vi.spyOn(crypto, "randomUUID").mockReturnValue(id);
+  const secret = `owp_${id}.${"A".repeat(43)}`;
+  const fetcher = vi.fn().mockResolvedValue(
+    Response.json(
+      {
+        credential: {
+          id,
+          name: "Mi integración",
+          scopes: ["projects:read"],
+          createdAt: "2026-09-08T10:00:00Z",
+          expiresAt: "2026-10-08T10:00:00Z",
+          revokedAt: null,
+        },
+        secret,
+      },
+      { status: 201 },
+    ),
+  );
+  stubApi(fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Mi integración",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  await screen.findByLabelText("Secreto de la credencial");
+  await user.click(screen.getByRole("button", { name: "Cerrar secreto" }));
+  expect(
+    screen.queryByLabelText("Secreto de la credencial"),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Revocar Mi integración" }),
+  ).toBeVisible();
+  expect(sessionStorage.getItem(key)).toBeNull();
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});
+
+it("@s41 closing a keyboard focused secret action restores focus to the route heading", async () => {
+  vi.spyOn(crypto, "randomUUID").mockReturnValue(id);
+  stubApi(
+    vi.fn().mockResolvedValue(
+      Response.json(
+        {
+          credential: {
+            id,
+            name: "Mi integración",
+            scopes: ["projects:read"],
+            createdAt: "2026-09-08T10:00:00Z",
+            expiresAt: "2026-10-08T10:00:00Z",
+            revokedAt: null,
+          },
+          secret: `owp_${id}.${"A".repeat(43)}`,
+        },
+        { status: 201 },
+      ),
+    ),
+  );
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Mi integración",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  const close = await screen.findByRole("button", { name: "Cerrar secreto" });
+  close.focus();
+  await user.keyboard("{Enter}");
+  expect(
+    screen.getByRole("heading", { name: "Credenciales para integraciones" }),
+  ).toHaveFocus();
+});
+
+it("@s41 an asynchronous creation does not steal focus moved voluntarily to the name", async () => {
+  vi.spyOn(crypto, "randomUUID").mockReturnValue(id);
+  let reply!: (value: Response) => void;
+  stubApi(
+    vi.fn().mockImplementation(
+      () =>
+        new Promise<Response>((resolve) => {
+          reply = resolve;
+        }),
+    ),
+  );
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  const name = screen.getByRole("textbox", { name: "Nombre" });
+  await user.type(name, "Mi integración");
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  await user.click(name);
+  reply(
+    Response.json(
+      {
+        credential: {
+          id,
+          name: "Mi integración",
+          scopes: ["projects:read"],
+          createdAt: "2026-09-08T10:00:00Z",
+          expiresAt: "2026-10-08T10:00:00Z",
+          revokedAt: null,
+        },
+        secret: `owp_${id}.${"A".repeat(43)}`,
+      },
+      { status: 201 },
+    ),
+  );
+  await screen.findByLabelText("Secreto de la credencial");
+  expect(name).toHaveFocus();
+});
+
+it("@s13 consecutive confirmations preserve every newly created credential in the visible list", async () => {
+  const secondId = "12345678-1234-4234-8234-123456789abd";
+  vi.spyOn(crypto, "randomUUID")
+    .mockReturnValueOnce(id)
+    .mockReturnValueOnce(secondId);
+  const metadata = {
+    scopes: ["projects:read"],
+    createdAt: "2026-09-08T10:00:00Z",
+    expiresAt: "2026-10-08T10:00:00Z",
+    revokedAt: null,
+  };
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(
+      Response.json(
+        {
+          credential: { ...metadata, id, name: "Primera" },
+          secret: `owp_${id}.${"A".repeat(43)}`,
+        },
+        { status: 201 },
+      ),
+    )
+    .mockResolvedValueOnce(
+      Response.json(
+        {
+          credential: { ...metadata, id: secondId, name: "Segunda" },
+          secret: `owp_${secondId}.${"A".repeat(43)}`,
+        },
+        { status: 201 },
+      ),
+    );
+  stubApi(fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  const name = screen.getByRole("textbox", { name: "Nombre" });
+  await user.type(name, "Primera");
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  await screen.findByRole("button", { name: "Revocar Primera" });
+  await user.click(screen.getByRole("button", { name: "Cerrar secreto" }));
+  await user.clear(name);
+  await user.type(name, "Segunda");
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  await screen.findByRole("button", { name: "Revocar Segunda" });
+  expect(screen.getByRole("button", { name: "Revocar Primera" })).toBeVisible();
+  expect(
+    screen.queryByText("Todavía no tienes credenciales."),
+  ).not.toBeInTheDocument();
+});
+
+it("@s36 a conflicting replay explains the difference and requires checking the same id", async () => {
+  sessionStorage.setItem(key, JSON.stringify({ owner: "Ana", id }));
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(new Response(null, { status: 404 }))
+    .mockResolvedValueOnce(
+      Response.json(
+        {
+          status: 409,
+          code: "API_CREDENTIAL_CONFLICT",
+          type: "urn:organization:problem:api_credential_conflict",
+        },
+        { status: 409 },
+      ),
+    );
+  stubApi(fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.click(screen.getByRole("button", { name: "Comprobar creación" }));
+  await screen.findByRole("button", { name: "Reenviar el mismo intento" });
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Intención diferente",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer tareas" }));
+  await user.click(
+    screen.getByRole("button", { name: "Reenviar el mismo intento" }),
+  );
+  expect(
+    await screen.findByText(
+      "Esta identidad ya corresponde a otra intención. Comprueba la credencial antes de continuar.",
+    ),
+  ).toBeVisible();
+  expect(screen.getByRole("button", { name: "Crear" })).toBeDisabled();
+  expect(
+    screen.queryByRole("button", { name: "Reenviar el mismo intento" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Comprobar creación" }),
+  ).toBeEnabled();
+  expect(sessionStorage.getItem(key)).toBe(
+    JSON.stringify({ owner: "Ana", id }),
+  );
+});
+
+it("@s13 a creation preceding the initial list leaves a manual path to all credentials", async () => {
+  vi.spyOn(crypto, "randomUUID").mockReturnValue(id);
+  let listReply!: (response: Response) => void;
+  const credential = {
+    id,
+    name: "Nueva",
+    scopes: ["projects:read"],
+    createdAt: "2026-09-08T10:00:00Z",
+    expiresAt: "2026-10-08T10:00:00Z",
+    revokedAt: null,
+  };
+  const older = {
+    ...credential,
+    id: "12345678-1234-4234-8234-123456789abd",
+    name: "Anterior",
+  };
+  const fetcher = vi
+    .fn()
+    .mockImplementationOnce(
+      () =>
+        new Promise<Response>((resolve) => {
+          listReply = resolve;
+        }),
+    )
+    .mockResolvedValueOnce(
+      Response.json(
+        { credential, secret: `owp_${id}.${"A".repeat(43)}` },
+        { status: 201 },
+      ),
+    )
+    .mockResolvedValueOnce(
+      Response.json({ items: [credential, older], nextCursor: null }),
+    );
+  vi.stubGlobal("fetch", fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.type(screen.getByRole("textbox", { name: "Nombre" }), "Nueva");
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  await screen.findByLabelText("Secreto de la credencial");
+  expect(fetcher.mock.calls[0][1].signal.aborted).toBe(true);
+  listReply(Response.json({ items: [older], nextCursor: null }));
+  await user.click(screen.getByRole("button", { name: "Recargar listado" }));
+  expect(
+    await screen.findByRole("button", { name: "Revocar Anterior" }),
+  ).toBeVisible();
+  expect(screen.getByRole("button", { name: "Revocar Nueva" })).toBeVisible();
+  expect(fetcher).toHaveBeenCalledTimes(3);
+});
+
+it("@s13 a later page cannot duplicate or replace confirmed recovered metadata", async () => {
+  sessionStorage.setItem(key, JSON.stringify({ owner: "Ana", id }));
+  const credential = {
+    id,
+    name: "Recuperada",
+    scopes: ["projects:read"],
+    createdAt: "2026-09-08T10:00:00Z",
+    expiresAt: "2026-10-08T10:00:00Z",
+    revokedAt: "2026-09-08T11:00:00Z",
+  };
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(Response.json({ items: [], nextCursor: "page2" }))
+    .mockResolvedValueOnce(Response.json(credential))
+    .mockResolvedValueOnce(
+      Response.json({
+        items: [{ ...credential, revokedAt: null }],
+        nextCursor: null,
+      }),
+    );
+  vi.stubGlobal("fetch", fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await screen.findByRole("button", { name: "Mostrar más credenciales" });
+  await user.click(screen.getByRole("button", { name: "Comprobar creación" }));
+  await screen.findByText("Revocada");
+  await user.click(
+    screen.getByRole("button", { name: "Mostrar más credenciales" }),
+  );
+  await waitFor(() =>
+    expect(
+      screen.queryByRole("button", { name: "Mostrar más credenciales" }),
+    ).not.toBeInTheDocument(),
+  );
+  expect(screen.getAllByRole("heading", { name: "Recuperada" })).toHaveLength(
+    1,
+  );
+  expect(
+    screen.queryByRole("button", { name: "Revocar Recuperada" }),
+  ).not.toBeInTheDocument();
+  expect(screen.getByText("Revocada")).toBeVisible();
+});
+
+it("@s37 closing an old secret during the next creation retires its late response and keeps recovery", async () => {
+  const secondId = "12345678-1234-4234-8234-123456789abd";
+  vi.spyOn(crypto, "randomUUID")
+    .mockReturnValueOnce(id)
+    .mockReturnValueOnce(secondId);
+  const metadata = {
+    name: "Mi integración",
+    scopes: ["projects:read"],
+    createdAt: "2026-09-08T10:00:00Z",
+    expiresAt: "2026-10-08T10:00:00Z",
+    revokedAt: null,
+  };
+  let reply!: (response: Response) => void;
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(
+      Response.json(
+        {
+          credential: { ...metadata, id },
+          secret: `owp_${id}.${"A".repeat(43)}`,
+        },
+        { status: 201 },
+      ),
+    )
+    .mockImplementationOnce(
+      () =>
+        new Promise<Response>((resolve) => {
+          reply = resolve;
+        }),
+    );
+  stubApi(fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Mi integración",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  await screen.findByLabelText("Secreto de la credencial");
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  await user.click(screen.getByRole("button", { name: "Cerrar secreto" }));
+  expect(fetcher.mock.calls[1][1].signal.aborted).toBe(true);
+  reply(
+    Response.json(
+      {
+        credential: { ...metadata, id: secondId },
+        secret: `owp_${secondId}.${"A".repeat(43)}`,
+      },
+      { status: 201 },
+    ),
+  );
+  expect(
+    await screen.findByRole("button", { name: "Comprobar creación" }),
+  ).toBeEnabled();
+  expect(
+    screen.queryByLabelText("Secreto de la credencial"),
+  ).not.toBeInTheDocument();
+  expect(sessionStorage.getItem(key)).toBe(
+    JSON.stringify({ owner: "Ana", id: secondId }),
+  );
+  expect(screen.getByRole("button", { name: "Crear" })).toBeDisabled();
+});
+
+it("@s37 a client result retired before the UI continuation cannot clear the new owner intention", async () => {
+  const client = await import("./integration-api-client");
+  const nextId = "12345678-1234-4234-8234-123456789abd";
+  stubApi(vi.fn());
+
+  vi.spyOn(client, "createApiCredential").mockImplementationOnce(() => {
+    queueMicrotask(() => {
+      view.rerender(<IntegrationApi owner="Bruno" />);
+      sessionStorage.setItem(
+        key,
+        JSON.stringify({ owner: "Bruno", id: nextId }),
+      );
+    });
+    return Promise.resolve({
+      credential: {
+        id,
+        name: "Mi integración",
+        scopes: ["projects:read"],
+        createdAt: "2026-09-08T10:00:00Z",
+        expiresAt: "2026-10-08T10:00:00Z",
+        revokedAt: null,
+      },
+      secret: `owp_${id}.${"A".repeat(43)}`,
+    });
+  });
+  const user = userEvent.setup();
+  const view = render(<IntegrationApi owner="Ana" />);
+  await user.type(
+    screen.getByRole("textbox", { name: "Nombre" }),
+    "Mi integración",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  await user.click(screen.getByRole("button", { name: "Crear" }));
+  expect(sessionStorage.getItem(key)).toBe(
+    JSON.stringify({ owner: "Bruno", id: nextId }),
+  );
+  expect(
+    screen.queryByLabelText("Secreto de la credencial"),
+  ).not.toBeInTheDocument();
+});
+
+it("@s41 invalid name feedback is associated with its editable control", async () => {
+  stubApi(vi.fn());
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  const name = screen.getByRole("textbox", { name: "Nombre" });
+  await user.type(name, "x".repeat(81));
+  expect(name).toHaveAttribute("aria-invalid", "true");
+  expect(name).toHaveAccessibleDescription(
+    "El nombre debe tener entre 1 y 80 caracteres y no incluir controles.",
+  );
+  await user.clear(name);
+  await user.type(name, "Correcto");
+  expect(name).not.toHaveAttribute("aria-invalid", "true");
+  expect(name).not.toHaveAttribute("aria-describedby");
+});
+
+it("@s13 recovery observes expiry at its own confirmation time", async () => {
+  sessionStorage.setItem(key, JSON.stringify({ owner: "Ana", id }));
+  const now = vi
+    .spyOn(Date, "now")
+    .mockReturnValue(Date.parse("2026-10-08T09:59:59Z"));
+  const credential = {
+    id,
+    name: "Recuperada",
+    scopes: ["projects:read"],
+    createdAt: "2026-09-08T10:00:00Z",
+    expiresAt: "2026-10-08T10:00:00Z",
+    revokedAt: null,
+  };
+  stubApi(vi.fn().mockResolvedValue(Response.json(credential)));
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await screen.findByText("Todavía no tienes credenciales.");
+  now.mockReturnValue(Date.parse("2026-10-08T10:00:01Z"));
+  await user.click(screen.getByRole("button", { name: "Comprobar creación" }));
+  expect(await screen.findByText("Caducada")).toBeVisible();
+  expect(screen.queryByText("Vigente")).not.toBeInTheDocument();
+});
+
+it("@s2 malformed Unicode names are blocked while complete emoji remain valid", async () => {
+  stubApi(vi.fn());
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.click(screen.getByRole("checkbox", { name: "Leer proyectos" }));
+  const name = screen.getByRole("textbox", { name: "Nombre" });
+  await user.click(name);
+  await user.paste("Nombre \ud800");
+  expect(screen.getByRole("button", { name: "Crear" })).toBeDisabled();
+  await user.clear(name);
+  await user.paste("Nombre \udc00");
+  expect(screen.getByRole("button", { name: "Crear" })).toBeDisabled();
+  await user.clear(name);
+  await user.paste("Nombre 😀");
+  expect(screen.getByRole("button", { name: "Crear" })).toBeEnabled();
+});

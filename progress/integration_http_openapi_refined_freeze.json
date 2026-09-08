@@ -1,0 +1,60 @@
+{
+  "context": "7e3079acb09ac1c8c188ff0b7a2f50b9b4a209a6",
+  "tests": 7,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "exit": 0,
+  "files": [
+    {
+      "path": "backend/src/main/resources/integration-openapi.json",
+      "sha256": "F5934EB88A62331D385F5F0E869A9D031482F3445051A9CE88CA921F8B6EE929",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-openapi-refined-original\\backend\\src\\main\\resources\\integration-openapi.json"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/IntegrationOpenApiTest.java",
+      "sha256": "49CFA12CD1CC341DFC07A196BF229F381860B209C9FE1AE7DD3CEDF1505AB7F1",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-openapi-refined-original\\backend\\src\\test\\java\\com\\apptolast\\organization\\adapter\\IntegrationOpenApiTest.java"
+    },
+    {
+      "path": "progress/tdd_integration_api_openapi.md",
+      "sha256": "29022BEC5E30B754668F0697208B0FB9B27E92D8D7FDCAAC7CBA742CECA79B07",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-openapi-refined-original\\progress\\tdd_integration_api_openapi.md"
+    },
+    {
+      "path": "progress/integration_http_openapi_refined_original.xml",
+      "sha256": "E038D9A3B82B35CAB7B9CBFBFE2EC67F8618C98AEF5E4F1B412AF665B469C315",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-openapi-refined-original\\progress\\integration_http_openapi_refined_original.xml"
+    },
+    {
+      "path": "progress/integration_http_cycle48_red.log",
+      "sha256": "818C17AEA6B50D24ABAB8B45398588706F89368CA34B139E54252CB505E65129",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-openapi-refined-original\\progress\\integration_http_cycle48_red.log"
+    },
+    {
+      "path": "progress/integration_http_cycle48_red.exit",
+      "sha256": "F1B2F662800122BED0FF255693DF89C4487FBDCF453D3524A42D4EC20C3D9C04",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-openapi-refined-original\\progress\\integration_http_cycle48_red.exit"
+    },
+    {
+      "path": "progress/integration_http_cycle48_green.log",
+      "sha256": "598B641B4C6B742B08C6F03754F2DEA69C78E7ECA9EC1B9668B8014543BBD2D6",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-openapi-refined-original\\progress\\integration_http_cycle48_green.log"
+    },
+    {
+      "path": "progress/integration_http_cycle48_green.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-openapi-refined-original\\progress\\integration_http_cycle48_green.exit"
+    },
+    {
+      "path": "progress/integration_http_openapi_refined_format.log",
+      "sha256": "450531A6555C2584792D7AAA6E35506B489C8A3DCBFA36BD2718311CE6AD4357",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-openapi-refined-original\\progress\\integration_http_openapi_refined_format.log"
+    },
+    {
+      "path": "progress/integration_http_openapi_refined_format.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "original": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\integration24-openapi-refined-original\\progress\\integration_http_openapi_refined_format.exit"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# OpenAPI de la integración API (24)
+
+Recurso estático OpenAPI 3.1, sin dependencias runtime nuevas. Conserva exactamente las 18 operaciones y scopes del contrato. Describe cuerpos, respuestas, parámetros, ETags, Location, errores Bearer y Retry-After. No expone gestión de credenciales ni secretos.
+
+Fuentes contrastadas: mapa independiente integration24-openapi-source-map.md de root; controladores Project/Task/Block/Today/History/WeeklyReview y sus DTO; TodayWindow, Task, BlockState, SessionStart, WorkSessionClosure/Extension y conversión de recibos de WorkSessionStateController. Páginas de proyectos contienen ProjectSummary de cinco campos; Task tiene ocho. Today usa segundos numéricos y presupuestos nullable. Revisión semanal y estados de sesión conservan contadores textuales. History details enumera siete representaciones concretas, incluidos CLOSE/EXTEND. Estados correctos pending/completed y planned/cancelled: se corrigieron los literales provisionales de borrador al contrastarlos con dominio, sin cambio de negocio.
+
+TDD por grupo: ciclo 44 respuestas de proyectos/tareas RED cf7e83 y GREEN ab0716; ciclo 45 agenda/semanal RED ff20b8 y GREEN 027ce2; ciclo 46 historial/recibos RED 0949f6 y GREEN c9206e; ciclo 47 errores y referencias locales resolubles RED 0ac881 y GREEN 3cecd3. Los tres tests anteriores de versión/allowlist/escrituras se conservan.
+
+Regresión focal y formato Java e27d08: siete pruebas, cero F/E/S. Prettier detectó formato JSON y lo corrigió (ef3aad); únicamente whitespace. Reejecución sobre bytes finales: spotlessCheck y siete pruebas GREEN 7ac4e5, EXIT 0. Validador oficial de schema-base y revisión independiente los ejecuta root; no se atribuyen antes de su resultado. No gate global ni mutación en este corte.
+
+No se endurece el comportamiento histórico: POST proyectos usa su parser existente; no se promete rechazo de duplicados allí, ni rechazo global de queries en handlers que no los inspeccionan. El documento no crea operaciones nuevas. Root coordina casos reales PUT/precondición/cuota con A y captura operacional de logs.
+
+Revisión root del primer documento: schema-base oficial PASS, 181 referencias resueltas y 18 operaciones correctas. Hallazgo documental en name/title: límite medido tras recortar Unicode White_Space, no sobre longitud raw. Ciclo 48 RED 5b7934; se retira maxLength únicamente de ProjectCreate.name, ProjectEdit.name y TaskCreate.title, conservando type/minLength y documentando x-normalizedMaxLength 120/160. Descripción/criterion conservan límites raw. No código de negocio ni parser modificado. Formato y siete tests GREEN 4187dc. Se preservan siete XML anteriores y documento B494A776 en originales externos; root repetirá sólo metavalidación del nuevo documento.

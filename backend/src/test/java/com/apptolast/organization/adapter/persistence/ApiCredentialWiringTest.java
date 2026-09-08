@@ -33,6 +33,30 @@ class ApiCredentialWiringTest {
   @Autowired com.apptolast.organization.application.ReadApiCredentialsUseCase read;
   @Autowired com.apptolast.organization.application.RevokeApiCredentialUseCase revoke;
 
+  @Autowired com.apptolast.organization.application.AuthenticateApiCredentialUseCase authenticate;
+  @Autowired com.apptolast.organization.application.ConsumeApiQuotaUseCase consume;
+
+  @Test
+  void s20_s26_realAuthenticationAndQuotaBeansUseEnabledBootstrapOwner() {
+    var created =
+        create.create("owner", UUID.randomUUID(), "Bootstrap", List.of("projects:write"), 7);
+    var access = authenticate.authenticate(created.secret());
+    assertEquals("owner", access.owner());
+    assertEquals(List.of("projects:write"), access.scopes());
+    consume.consume(access);
+    assertEquals(
+        1,
+        jdbc.queryForObject(
+            "SELECT used FROM api_credential_quotas WHERE credential_id=?",
+            Integer.class,
+            access.id()));
+    var orphan =
+        create.create("other-owner", UUID.randomUUID(), "Orphan", List.of("projects:read"), 7);
+    assertThrows(
+        com.apptolast.organization.application.ApiUnauthenticatedException.class,
+        () -> authenticate.authenticate(orphan.secret()));
+  }
+
   @Test
   void s12_s13_s15_realBeansReadListAndRevoke() {
     var owner = "management-wiring-" + UUID.randomUUID();

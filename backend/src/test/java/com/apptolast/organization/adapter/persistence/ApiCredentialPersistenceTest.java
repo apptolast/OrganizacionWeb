@@ -335,6 +335,18 @@ class ApiCredentialPersistenceTest {
   }
 
   @Test
+  void s13_storageFailureInListUsesStorageUnavailable() {
+    var unavailable =
+        new DriverManagerDataSource(
+            Database.PG.getJdbcUrl(), Database.PG.getUsername(), "fixture-invalid-password");
+    var store =
+        new PostgresApiCredentialStore(
+            new JdbcTemplate(unavailable), new DataSourceTransactionManager(unavailable));
+    assertThrows(
+        StorageUnavailableException.class, () -> new ReadApiCredentials(store).list("owner", null));
+  }
+
+  @Test
   void s15_s16_revocationIsOwnedDurableAndKeepsFirstClockEvenWhenItRegresses() {
     var owner = "revoke-" + UUID.randomUUID();
     var store = new PostgresApiCredentialStore(Database.JDBC, Database.TRANSACTIONS);

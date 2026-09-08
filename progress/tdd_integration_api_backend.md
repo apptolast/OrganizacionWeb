@@ -46,3 +46,20 @@ Límites del corte: emisión y replay/cupo/escritura probados; no acredita aún 
 Ajustes de oráculo aprobados por root sobre creación: replay caducado ahora nace con fecha antigua y siete días coherentes, sin UPDATE artificial de expiresAt. La carrera exige haber observado transacciones PostgreSQL bloqueadas antes de liberar la primera. Son refuerzos de fixture inicialmente verdes en el checkpoint conjunto, no RED de producto.
 
 Checkpoint de gestión: SpotlessApply/Check y tres suites propias, 41 tests, cero fallos/errores/omisiones. XML originales externos `integration24-management-checkpoint-xml/`, log/EXIT `integration24-management-checkpoint.*`; ciclos originales 13–18 preservados. Pendientes autenticación, cuota, fronteras de seguridad durables y pérdida incierta de respuesta COMMIT; ninguna campaña general o PIT todavía.
+
+## Corte 4: autenticación y admisión nominal (ciclos 19–26)
+
+| Ciclo | Comportamiento | Resultado original |
+| --- | --- | --- |
+| 19 | @s13 listado ante conexión PostgreSQL rechazada | RED CannotGetJdbcConnectionException; GREEN traducción StorageUnavailableException. Hallazgo root. |
+| 20 | @s20 token válido autentica owner/scopes, sin escritura física | RED puertos ausentes; GREEN contra PG y SHA-256. |
+| 21 | @s19 token canónico antes de almacenamiento: prefijo, UUID, base64/padding/bits, tamaño y separador | Ocho RED; GREEN parser acotado a 84 caracteres. |
+| 22 | @s19/@s21/@s31 desconocido, secreto incorrecto, revocado, owner deshabilitado/renombrado, instante antes/exacto/después de expiry | Ocho casos inicialmente GREEN. No cambio productivo ni RED inventado. |
+| 23 | @s26 última solicitud inclusiva, contadores 59/119 pasan a 60/120 | RED puertos ausentes; GREEN transacción y dos contadores compactos. |
+| 24 | @s26 rechazo por cualquiera de los dos límites conserva ambos | RED excepción ausente; GREEN comprobación antes de escribir y Retry-After 40 con fracción de segundo. |
+| 25 | @s21/@s30/@s31 admisión revalida revocación/expiry/owner bajo locks | Cuatro RED por ausencia de revalidación; GREEN antes de consultar/incrementar cuotas. |
+| 26 | @s20/@s26 beans reales, owner bootstrap habilitado y rechazo de owner huérfano | RED beans ausentes; GREEN contexto Spring/PG. |
+
+Checkpoint: seis suites propias, 67 tests, cero fallos/errores/omisiones, SpotlessApply/Check verdes. Originales `integration24-bearer-checkpoint-xml/` y log/EXIT homónimos; ciclos 19–26 sin sobrescribir. Parser y SQL no reciben el header Authorization completo: HTTP extrae el token y A protege su formato. SHA-256 compara mediante MessageDigest.isEqual, no igualdad textual ni secreto persistido.
+
+Límites pendientes: concurrencia de cuotas/revocación, ventana siguiente, rollback de contadores y conservación operacional V22, validación durable acotada y pérdida incierta de COMMIT. Este corte habilita HTTP aislado; no declara backend final ni ejecución de PIT. V22 agrega ahora dos tablas de contadores compactos y sigue en desarrollo hasta su revisión final.

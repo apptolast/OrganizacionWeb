@@ -10,3 +10,14 @@ CREATE TABLE api_credentials (
   revoked_at TIMESTAMPTZ
 );
 CREATE INDEX api_credentials_owner_history ON api_credentials (owner_id, created_at DESC, id DESC);
+
+CREATE TABLE api_owner_quotas (
+  owner_id TEXT PRIMARY KEY,
+  window_start TIMESTAMPTZ NOT NULL,
+  used INTEGER NOT NULL
+);
+CREATE TABLE api_credential_quotas (
+  credential_id UUID PRIMARY KEY REFERENCES api_credentials(id),
+  window_start TIMESTAMPTZ NOT NULL,
+  used INTEGER NOT NULL
+);

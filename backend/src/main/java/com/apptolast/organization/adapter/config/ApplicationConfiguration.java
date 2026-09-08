@@ -9,6 +9,40 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  java.util.function.Predicate<String> enabledApiCredentialOwner(
+      @org.springframework.beans.factory.annotation.Value("${app.auth.username}")
+          String configuredOwner,
+      org.springframework.security.core.userdetails.UserDetailsService users) {
+    return owner -> {
+      if (!configuredOwner.equals(owner)) return false;
+      try {
+        var user = users.loadUserByUsername(owner);
+        return user.isEnabled() && user.getUsername().equals(owner);
+      } catch (org.springframework.security.core.userdetails.UsernameNotFoundException absent) {
+        return false;
+      }
+    };
+  }
+
+  @Bean
+  com.apptolast.organization.application.AuthenticateApiCredential authenticateApiCredential(
+      com.apptolast.organization.application.ApiCredentialAuthentication credentials,
+      Clock clock,
+      java.util.function.Predicate<String> enabledApiCredentialOwner) {
+    return new com.apptolast.organization.application.AuthenticateApiCredential(
+        credentials, clock, enabledApiCredentialOwner);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ConsumeApiQuota consumeApiQuota(
+      com.apptolast.organization.application.ApiQuotaAdmission store,
+      Clock clock,
+      java.util.function.Predicate<String> enabledApiCredentialOwner) {
+    return new com.apptolast.organization.application.ConsumeApiQuota(
+        store, clock, enabledApiCredentialOwner);
+  }
+
+  @Bean
   com.apptolast.organization.application.ReadApiCredentials readApiCredentials(
       com.apptolast.organization.application.ApiCredentialQueries queries) {
     return new com.apptolast.organization.application.ReadApiCredentials(queries);

@@ -1,0 +1,313 @@
+{
+  "scope": "bearer nominal and guards; concurrency and final durability pending",
+  "totals": {
+    "tests": 67,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+      "sha256": "11f5b84bdf6b54100ca60232f3aad0603e3229b9ea2c12fb2387bb5b66711f8a"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresApiCredentialStore.java",
+      "sha256": "48aa46ae2858a2c5610cf70825d6d56a40ec1b164ca14ad1256d72bbf6bc4aaf"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialAccess.java",
+      "sha256": "bac4583dd17693f8beff0627c4cbfc155f540a3016b6fdf817f6c3e7935b007d"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialAuthentication.java",
+      "sha256": "e98ae6dbdb533ec5cf9e380e67405a89435623876aa16e70e2755ef99c79b8ab"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialCommit.java",
+      "sha256": "519a663eeba94662179f93761e80c77a4622764857d92169da5b5a92bbb87d4a"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialConflictException.java",
+      "sha256": "19f232befa74d6a2fe827e7404191e70d091d5a3c5e64ff9c7cd35c1caa916eb"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialCreation.java",
+      "sha256": "8251e59a15323531382b40bfda60b4f02f1ef110d5e9ea07114affd94681e9f9"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialIssuance.java",
+      "sha256": "3d80d5baeb4faf1248a56fc10a207e8e0b9f8944f6a28f6505e21475625e0240"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialLimitException.java",
+      "sha256": "d9f692068f7570bad806ee53bd27acde31142c2ceaabd886e02a9dd5406e23ab"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialQueries.java",
+      "sha256": "4c5a1f983e4262069093832d2ec27d4d13b9ad4b86ffa251c9fef037dba6c4f1"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialRevocations.java",
+      "sha256": "ee3c0abadf46612eaf8e1cb1a4704cf2e9f4a695c645d082153196023d0a6582"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiQuotaAdmission.java",
+      "sha256": "d5bb7d1cb44997bae6d57eceba020b4dab82c280d92b9c4b4915f6f2cccb2184"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiRateLimitedException.java",
+      "sha256": "ce2bc19534baf3aafa4d115ca8726800306fa6b604658e32a858d4948b8f260d"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiUnauthenticatedException.java",
+      "sha256": "af98d20affa9cd9483fd2902abf5bd7fe5b2117a4254134bd8ed4406e50ba8b5"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/AuthenticateApiCredential.java",
+      "sha256": "b4443b28cd3219a13f4154bf73f06d11c752a1ae522f048c06d0dd206caf79c7"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/AuthenticateApiCredentialUseCase.java",
+      "sha256": "3a1fc490885c946c3f0689a17607d2b3172b7833c3d6b2b3dd8a7116bf20b664"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ConsumeApiQuota.java",
+      "sha256": "f896c5d986dd25eeb1b82fd4797b84a3426abb29471d2a3421a8cc7ee8c17c24"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ConsumeApiQuotaUseCase.java",
+      "sha256": "691eb6ea1b94df02749288c45dcfa2bc2dba6834fbc3e88abcc37bdaa3129e79"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/CreateApiCredential.java",
+      "sha256": "144be9c9821864e2c9702ca393984a4a4bdd0749e0abffa1b283b6d1f3071f85"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/CreateApiCredentialUseCase.java",
+      "sha256": "1c8006bc622494d9f7a8ffc2f91dc32896f1a7019e364a56bccb2122601f7de1"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadApiCredentials.java",
+      "sha256": "52c28a2f35689bbc9193ba35ba252cf0bd1fc67363c0ac20871a640e20466b22"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ReadApiCredentialsUseCase.java",
+      "sha256": "42ed3f8b0f7ccfcf4aaa5c87a2f587ce960d03d1e3c2f02740237b7c72e07d7d"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/RevokeApiCredential.java",
+      "sha256": "68a90cfefbca2d372bdbc5828b876ef1d313fbb7ed982f6045f3c589a7ab8445"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/RevokeApiCredentialUseCase.java",
+      "sha256": "72c9fdd68cdf7d2f7158dda1404fca71566a372d39f76186c7d43a22067aedef"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/ApiCredential.java",
+      "sha256": "79984954096da8511193b09ea032bff1ae52dc270f4535fc41f8fe4150f55d4d"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/ApiCredentialIntent.java",
+      "sha256": "b00d52f2f594c4a34ae72c15c4a0450fa81bbd1ffa84de072822ae63feba324e"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/ApiCredentialInvalidException.java",
+      "sha256": "fb36af703d44e4db3327461d2a2c44aa67ff114c09ea20014fb488dd6c5ad331"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/ApiCredentialPage.java",
+      "sha256": "21a3aa230e0fa3ef27ca059b37451c04f4657966e0785dd56b0db8a2a80958c4"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V22__api_credentials.sql",
+      "sha256": "7e10ce1f4e18b76b0d18b2c4f99da98c1e42244ff2457f7c34b20f92b2fe612a"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ApiCredentialAuthenticationTest.java",
+      "sha256": "dcc1518d3748d9f6d34d7e4efe1d07b405d04202b3a350df7c209394be1c631f"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ApiCredentialPersistenceTest.java",
+      "sha256": "6d4701201117d1770150d062f41eeba23c515d600b7dc922e528e22cb520646b"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ApiCredentialQuotaTest.java",
+      "sha256": "8bde3db70972a6dd015910dab0a096b89f0f91f3f4cc55e5552782141f2c4547"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ApiCredentialWiringTest.java",
+      "sha256": "afc88eb6bedbe8c71204d438c9b3fd5a420c008d220f48f50879d8370c70fdc8"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/application/AuthenticateApiCredentialTest.java",
+      "sha256": "0750a7c60412827efcc5f46514fb6d310022a7967f1a9ef1b2c8bee4c1a23535"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/application/CreateApiCredentialTest.java",
+      "sha256": "f9e7f13a014e254ee5e181e14b95e3609ff35920ea4c8eca206dca76b6c516c4"
+    },
+    {
+      "path": "progress/integration_api_backend_handoff.md",
+      "sha256": "062f0955f614b5d7ae776c000d225a64baba42027cd6669883c7dc721c6da863"
+    },
+    {
+      "path": "progress/tdd_integration_api_backend.md",
+      "sha256": "01a22202d13c08b3ec05e1661629fb14a5c140c5ce0ca669f3d41282cf79243c"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "integration24-19-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-19-green.log",
+      "sha256": "e7a4bd0dd7a8b2b74d853dfea8432b7a6a1d1f7ed762b2accebfb33ae43eb983"
+    },
+    {
+      "path": "integration24-19-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-19-red.log",
+      "sha256": "cf505c9e6f8ba3f7ee2e44b1825c44710eabb9b48dd4e4e370d21287cb89e76f"
+    },
+    {
+      "path": "integration24-20-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-20-green.log",
+      "sha256": "99b06aad35d56180009525ed80d2dcc14ef306b2654252f62a344688f9bd5618"
+    },
+    {
+      "path": "integration24-20-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-20-red.log",
+      "sha256": "357c3f0018245f4818d00796c7eacc84cb9b655b1ac2fa4a62646d88537a7fe3"
+    },
+    {
+      "path": "integration24-21-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-21-green.log",
+      "sha256": "8ab8c7b699f09cb6417f48700fe6c1e39c0e47a255a02a1d4842e847ff32a7b3"
+    },
+    {
+      "path": "integration24-21-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-21-red.log",
+      "sha256": "b73e45d421961285b64cdad18ce167a8ee82ae8d607dfc2ce27ae3a02991253c"
+    },
+    {
+      "path": "integration24-22-initial.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-22-initial.log",
+      "sha256": "d0e114e2fcd8c081dadfc3f80c18eca826c4cb4c8a5a4a45f2f357cf69251069"
+    },
+    {
+      "path": "integration24-23-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-23-green.log",
+      "sha256": "09df0f8bbdc36d990fc5c1b986d52104bce463edbae13aa8da5fb46d6d39050c"
+    },
+    {
+      "path": "integration24-23-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-23-red.log",
+      "sha256": "ba94ee358f512606801bc6e2240e329b21b3cbc3dfe6fde0787189818268f9bd"
+    },
+    {
+      "path": "integration24-24-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-24-green.log",
+      "sha256": "8ab8c7b699f09cb6417f48700fe6c1e39c0e47a255a02a1d4842e847ff32a7b3"
+    },
+    {
+      "path": "integration24-24-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-24-red.log",
+      "sha256": "0716b4f6c86145d87ba3f60a3c18dbd58c8db63c6b0c26a20636e110e51c8df7"
+    },
+    {
+      "path": "integration24-25-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-25-green.log",
+      "sha256": "e7a4bd0dd7a8b2b74d853dfea8432b7a6a1d1f7ed762b2accebfb33ae43eb983"
+    },
+    {
+      "path": "integration24-25-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-25-red.log",
+      "sha256": "7765173a1615615ba9abdc1398861e4290db6846a3380726b096ed584c08430a"
+    },
+    {
+      "path": "integration24-26-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-26-green.log",
+      "sha256": "faf8177812095ece6f9346657a0f5f7d0ea00393bc7eacf1e59558c786f40705"
+    },
+    {
+      "path": "integration24-26-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-26-red.log",
+      "sha256": "02a907f60477768376efb125f150e14c03f0ecbca92ac86b5a7fd1bffdfe0bd3"
+    },
+    {
+      "path": "integration24-bearer-checkpoint-xml/TEST-com.apptolast.organization.adapter.persistence.ApiCredentialAuthenticationTest.xml",
+      "sha256": "016641e7420621e9ca9c8d9dc2bd05dd34e07a98c0c54958c01c5212745452a7"
+    },
+    {
+      "path": "integration24-bearer-checkpoint-xml/TEST-com.apptolast.organization.adapter.persistence.ApiCredentialPersistenceTest.xml",
+      "sha256": "8a1f8eca78008a5cf0b4dbad7ba4fe825abf817b6671c7e34f6837eb0ae7bb38"
+    },
+    {
+      "path": "integration24-bearer-checkpoint-xml/TEST-com.apptolast.organization.adapter.persistence.ApiCredentialQuotaTest.xml",
+      "sha256": "83850c32f44c7c77affd02a8e52ad3306f1a853e63254ddd431d20b43c58041f"
+    },
+    {
+      "path": "integration24-bearer-checkpoint-xml/TEST-com.apptolast.organization.adapter.persistence.ApiCredentialWiringTest.xml",
+      "sha256": "ed687342ac167507aa5540cb359593756f82ae7e1ec666b71ac63316579b2f46"
+    },
+    {
+      "path": "integration24-bearer-checkpoint-xml/TEST-com.apptolast.organization.application.AuthenticateApiCredentialTest.xml",
+      "sha256": "a21223a79ccfb0bcd84710a53fe5f35bdd8e5909a3428caf932c2a48473f933a"
+    },
+    {
+      "path": "integration24-bearer-checkpoint-xml/TEST-com.apptolast.organization.application.CreateApiCredentialTest.xml",
+      "sha256": "da5364caae7afdc30422a8c0070c15243acd871db760ccea9c3fa7fc8580732e"
+    },
+    {
+      "path": "integration24-bearer-checkpoint.log",
+      "sha256": "fbc6933a14b71f3048459ac9a2f755fb25a2810a7ff687449b24db7e46038834"
+    },
+    {
+      "path": "integration24-bearer-checkpoint.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    }
+  ]
+}

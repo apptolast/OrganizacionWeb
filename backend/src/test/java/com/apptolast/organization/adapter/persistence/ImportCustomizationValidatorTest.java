@@ -12,8 +12,8 @@ class ImportCustomizationValidatorTest {
   @org.junit.jupiter.params.provider.ValueSource(
       strings = {
         "{}",
-        "{\"theme\":1,\"accentLight\":\"#244c3c\",\"accentDark\":\"#b8e0c2\"}",
-        "{\"theme\":\"LIGHT\",\"accentLight\":\"#ffffff\",\"accentDark\":\"#b8e0c2\"}"
+        "{\"theme\":1,\"accentLight\":\"#244C3C\",\"accentDark\":\"#B8E0C2\"}",
+        "{\"theme\":\"LIGHT\",\"accentLight\":\"#ffffff\",\"accentDark\":\"#B8E0C2\"}"
       })
   void s9_invalidAppearanceHasSafeImportError(String raw) throws Exception {
     var row = json.readTree(raw);
@@ -23,10 +23,10 @@ class ImportCustomizationValidatorTest {
   }
 
   @Test
-  void s9_validAppearancePreservesHistoricalColorSpelling() throws Exception {
+  void s9_validAppearancePreservesDurableColorSpelling() throws Exception {
     var row =
         json.readTree(
-            "{\"theme\":\"DARK\",\"accentLight\":\"#244c3c\",\"accentDark\":\"#b8e0c2\"}");
+            "{\"theme\":\"DARK\",\"accentLight\":\"#244C3C\",\"accentDark\":\"#B8E0C2\"}");
     var before = row.deepCopy();
     ImportCustomizationValidator.appearance(row);
     assertThat(row).isEqualTo(before);
@@ -228,5 +228,17 @@ class ImportCustomizationValidatorTest {
               ImportCustomizationValidator.values(values, defs);
             })
         .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+  }
+
+  @Test
+  void s9_lowercaseAppearanceCannotBeRepresentedByDurableConstraint() throws Exception {
+    var row =
+        json.readTree(
+            "{\"theme\":\"DARK\",\"accentLight\":\"#244c3c\",\"accentDark\":\"#B8E0C2\"}");
+    var before = row.deepCopy();
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> ImportCustomizationValidator.appearance(row))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+    assertThat(row).isEqualTo(before);
   }
 }

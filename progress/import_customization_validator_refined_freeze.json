@@ -1,0 +1,31 @@
+{
+  "tests": 38,
+  "failures": 0,
+  "errors": 0,
+  "entries": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ImportCustomizationValidator.java",
+      "sha256": "71EEAB9A29175EE69D14279306F541C82880EF230B4263CA9A16CBE3F6662149"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportCustomizationValidatorTest.java",
+      "sha256": "151DB66489F749FB903D5ECEE623AEAE9D02AB03F46156928FDF6384C542994F"
+    },
+    {
+      "path": "progress/tdd_import_customization_validator.md",
+      "sha256": "DF5D128E648647BEAD228524DA302F7B76F4ABDD8051EF1F78BD5466E4660802"
+    },
+    {
+      "path": "progress/import_customization_refined_final.log",
+      "sha256": "F9B6C443E9BFAF052729CEA0CAC8C56CE7B08294EC8824DC5E9E2470981F4045"
+    },
+    {
+      "path": "progress/import_customization_refined_final.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+    },
+    {
+      "path": "progress/import_customization_refined_final_xml.xml",
+      "sha256": "81430FE88F940CC0CDCB27B55A8C5AACF52F27236C5A4C4288E4A2C09410183E"
+    }
+  ]
+}

@@ -25,7 +25,12 @@ public final class ImportCustomizationValidator {
 
   public static void appearance(JsonNode row) {
     try {
-      new AppearanceValues(text(row, "theme"), text(row, "accentLight"), text(row, "accentDark"));
+      var canonical =
+          new AppearanceValues(
+              text(row, "theme"), text(row, "accentLight"), text(row, "accentDark"));
+      if (!canonical.accentLight().equals(text(row, "accentLight"))
+          || !canonical.accentDark().equals(text(row, "accentDark")))
+        throw new ImportInvalidFileException();
     } catch (ValidationException invalid) {
       throw new ImportInvalidFileException();
     }

@@ -37,6 +37,7 @@ public final class PostgresImportDataStore
                   try {
                     var header = stage(body);
                     if (!owner.equals(header.owner())) throw new ImportInvalidFileException();
+                    validate(owner);
                     var identical = compare(owner);
                     return new ImportPreview(
                         header.fileSha256(),
@@ -54,16 +55,20 @@ public final class PostgresImportDataStore
   }
 
   private ImportJsonReader.Header stage(InputStream body) throws IOException {
+    var json =
+        com.fasterxml.jackson.databind.json.JsonMapper.builder()
+            .enable(com.fasterxml.jackson.core.json.JsonWriteFeature.ESCAPE_NON_ASCII)
+            .build();
     jdbc.execute(
-        "CREATE TEMP TABLE import_stage(collection TEXT NOT NULL,payload JSONB NOT NULL) ON COMMIT DROP");
+        "CREATE TEMP TABLE import_stage(collection TEXT NOT NULL,raw TEXT NOT NULL,payload JSONB) ON COMMIT DROP");
     return new ImportJsonReader()
         .read(
             body,
             (collection, row) ->
                 jdbc.update(
-                    "INSERT INTO import_stage(collection,payload) VALUES (?,?::jsonb)",
+                    "INSERT INTO import_stage(collection,raw) VALUES (?,?)",
                     collection,
-                    row.toString()));
+                    json.writeValueAsString(row)));
   }
 
   private com.apptolast.organization.application.ImportCounts compare(String owner) {
@@ -87,8 +92,70 @@ public final class PostgresImportDataStore
             Long.class);
     if (occupiedProjects != projects)
       throw new com.apptolast.organization.application.ImportConflictException();
+    long tasks =
+        jdbc.queryForObject(
+            """
+        SELECT count(*) FROM import_stage s JOIN tasks t ON t.id::text=s.payload->>'id'
+          JOIN projects p ON p.id=t.project_id
+        WHERE s.collection='tasks' AND p.owner_id=?
+          AND t.project_id::text=s.payload->>'projectId'
+          AND t.parent_id::text IS NOT DISTINCT FROM s.payload->>'parentId'
+          AND t.title=s.payload->>'title'
+          AND t.completion_criterion=s.payload->>'completionCriterion'
+          AND t.estimated_minutes IS NOT DISTINCT FROM (s.payload->>'estimatedMinutes')::integer
+          AND t.status=s.payload->>'status' AND t.version::text=s.payload->>'version'
+          AND t.completed_at IS NOT DISTINCT FROM (s.payload->>'completedAt')::timestamptz
+          AND t.created_at=(s.payload->>'createdAt')::timestamptz
+          AND t.updated_at=(s.payload->>'updatedAt')::timestamptz
+        """,
+            Long.class,
+            owner);
+    long occupiedTasks =
+        jdbc.queryForObject(
+            "SELECT count(*) FROM import_stage s JOIN tasks t ON t.id::text=s.payload->>'id' WHERE s.collection='tasks'",
+            Long.class);
+    if (occupiedTasks != tasks)
+      throw new com.apptolast.organization.application.ImportConflictException();
     return new com.apptolast.organization.application.ImportCounts(
-        projects, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        projects, tasks, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  }
+
+  private void validate(String owner) {
+    if (jdbc.queryForObject(
+        "SELECT EXISTS(SELECT 1 FROM import_stage WHERE NOT pg_input_is_valid(raw,'jsonb'))",
+        Boolean.class)) throw new ImportInvalidFileException();
+    jdbc.update("UPDATE import_stage SET payload=raw::jsonb");
+    if (jdbc.queryForObject(
+        """
+        SELECT EXISTS(SELECT 1 FROM import_stage WHERE collection='projects' AND
+          (jsonb_typeof(payload)='object'
+            AND jsonb_typeof(payload->'version')='string'
+            AND (payload->>'version') ~ '^(0|[1-9][0-9]*)$'
+            AND pg_input_is_valid(payload->>'version','bigint')
+            AND payload ?& ARRAY['id','name','description','status','version','createdAt','updatedAt']
+            AND payload-ARRAY['id','name','description','status','version','createdAt','updatedAt']='{}'::jsonb) IS NOT TRUE)
+        """,
+        Boolean.class)) throw new ImportInvalidFileException();
+    jdbc.query(
+        connection -> {
+          var statement =
+              connection.prepareStatement(
+                  "SELECT payload::text FROM import_stage WHERE collection='projects'");
+          statement.setFetchSize(1);
+          return statement;
+        },
+        (org.springframework.jdbc.core.ResultSetExtractor<Void>)
+            rows -> {
+              var json = new com.fasterxml.jackson.databind.ObjectMapper();
+              while (rows.next()) {
+                try {
+                  ImportRecordValidator.project(json.readTree(rows.getString(1)), owner);
+                } catch (IOException invalidStorage) {
+                  throw new StorageUnavailableException(invalidStorage);
+                }
+              }
+              return null;
+            });
   }
 
   public java.util.Optional<com.apptolast.organization.application.ImportReceipt> find(
@@ -145,6 +212,7 @@ public final class PostgresImportDataStore
                   if (!expectedSha256.equals(header.fileSha256()))
                     throw new com.apptolast.organization.application.ImportFileChangedException();
                   if (!owner.equals(header.owner())) throw new ImportInvalidFileException();
+                  validate(owner);
                   for (var scope : List.of("PROJECT", "TASK")) {
                     jdbc.queryForObject(
                         "SELECT pg_advisory_xact_lock(hashtextextended(?, 0))",
@@ -191,13 +259,27 @@ public final class PostgresImportDataStore
                   if (insertedProjects != inserted.projects())
                     throw new StorageUnavailableException(
                         new IllegalStateException("Imported projects were not persisted"));
+                  int insertedTasks =
+                      jdbc.update(
+                          """
+                      INSERT INTO tasks(id,project_id,parent_id,title,completion_criterion,estimated_minutes,status,version,completed_at,created_at,updated_at)
+                      SELECT (payload->>'id')::uuid,(payload->>'projectId')::uuid,(payload->>'parentId')::uuid,
+                        payload->>'title',payload->>'completionCriterion',(payload->>'estimatedMinutes')::integer,
+                        payload->>'status',(payload->>'version')::bigint,(payload->>'completedAt')::timestamptz,
+                        (payload->>'createdAt')::timestamptz,(payload->>'updatedAt')::timestamptz
+                      FROM import_stage s WHERE collection='tasks'
+                        AND NOT EXISTS(SELECT 1 FROM tasks t WHERE t.id::text=s.payload->>'id')
+                      """);
+                  if (insertedTasks != inserted.tasks())
+                    throw new StorageUnavailableException(
+                        new IllegalStateException("Imported tasks were not persisted"));
                   var receipt =
                       new com.apptolast.organization.application.ImportReceipt(
                           key,
                           header.fileSha256(),
                           header.byteLength(),
                           recordedAt.get(),
-                          insertedProjects == 0 ? "NO_CHANGE" : "IMPORTED",
+                          insertedProjects + insertedTasks == 0 ? "NO_CHANGE" : "IMPORTED",
                           inserted,
                           identical);
                   try {

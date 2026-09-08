@@ -20,6 +20,324 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 class ImportPersistenceTest {
   @Test
+  void s8_projectLengthUsesTheOriginalTextRatherThanTheNormalizedConstructorValue()
+      throws Exception {
+    var owner = "raw-project-length";
+    var input = invalidProjectText(owner, " " + "a".repeat(120) + " ");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .preview(owner, new ByteArrayInputStream(input)))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM projects WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+  }
+
+  @Test
+  void s3_identicalTaskIsNotUpdatedOrReinserted() throws Exception {
+    var owner = "identical-task";
+    var project = java.util.UUID.fromString("00000000-0000-0000-0000-000000000210");
+    var task = java.util.UUID.fromString("00000000-0000-0000-0000-000000000211");
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) VALUES (?,?,'Proyecto','','idea',0,'2026-09-01Z','2026-09-01Z')",
+        project,
+        owner);
+    jdbc.update(
+        "INSERT INTO tasks(id,project_id,title,completion_criterion,estimated_minutes,status,version,created_at,updated_at) VALUES (?,?,' Tarea ñ ',' Criterio ',null,'pending',9223372036854775807,'2026-09-01Z','2026-09-01Z')",
+        task,
+        project);
+    var before =
+        jdbc.queryForMap(
+            "SELECT xmin::text,ctid::text,row_to_json(t)::text AS contents FROM tasks t WHERE id=?",
+            task);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T01:02:03.123456Z"))
+        .writeTo(bytes);
+    var input = bytes.toByteArray();
+    var sha =
+        java.util.HexFormat.of()
+            .formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input));
+    var result =
+        new PostgresImportDataStore(jdbc, manager)
+            .apply(
+                owner,
+                java.util.UUID.randomUUID(),
+                sha,
+                new ByteArrayInputStream(input),
+                () -> Instant.parse("2026-09-08T02:03:04.123456Z"));
+    assertThat(result.outcome()).isEqualTo("NO_CHANGE");
+    assertThat(result.identicalCounts())
+        .isEqualTo(new ImportCounts(1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    assertThat(result.insertedCounts())
+        .isEqualTo(new ImportCounts(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    assertThat(
+            jdbc.queryForMap(
+                "SELECT xmin::text,ctid::text,row_to_json(t)::text AS contents FROM tasks t WHERE id=?",
+                task))
+        .isEqualTo(before);
+  }
+
+  @Test
+  void s2_tasksAndSubtasksKeepAllFactsWhenTheirParentAppearsLaterInTheFile() throws Exception {
+    var owner = "import-tasks";
+    var project = java.util.UUID.fromString("00000000-0000-0000-0000-000000000200");
+    var parent = java.util.UUID.fromString("00000000-0000-0000-0000-000000000202");
+    var child = java.util.UUID.fromString("00000000-0000-0000-0000-000000000201");
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) VALUES (?,?,'Proyecto','','idea',0,'2026-09-01Z','2026-09-01Z')",
+        project,
+        owner);
+    jdbc.update(
+        "INSERT INTO tasks(id,project_id,title,completion_criterion,estimated_minutes,status,version,created_at,updated_at) VALUES (?,?,'Padre','',null,'pending',0,'2026-09-01Z','2026-09-01Z')",
+        parent,
+        project);
+    jdbc.update(
+        "INSERT INTO tasks(id,project_id,parent_id,title,completion_criterion,estimated_minutes,status,version,completed_at,created_at,updated_at) VALUES (?,?,?,' Hija ñ ',' Resultado ',25,'completed',9007199254740993,'2026-09-02Z','2026-09-01Z','2026-09-02Z')",
+        child,
+        project,
+        parent);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T01:02:03.123456Z"))
+        .writeTo(bytes);
+    var input = bytes.toByteArray();
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var expected = json.readTree(input);
+    assertThat(expected.get("data").get("tasks").get(0).get("parentId").textValue())
+        .isEqualTo(parent.toString());
+    jdbc.update("DELETE FROM tasks WHERE project_id=?", project);
+    jdbc.update("DELETE FROM projects WHERE id=?", project);
+    var sha =
+        java.util.HexFormat.of()
+            .formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input));
+    var result =
+        new PostgresImportDataStore(jdbc, manager)
+            .apply(
+                owner,
+                java.util.UUID.randomUUID(),
+                sha,
+                new ByteArrayInputStream(input),
+                () -> Instant.parse("2026-09-08T02:03:04.123456Z"));
+    assertThat(result.insertedCounts())
+        .isEqualTo(new ImportCounts(1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    var after = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T03:04:05.123456Z"))
+        .writeTo(after);
+    assertThat(json.readTree(after.toByteArray()).get("data")).isEqualTo(expected.get("data"));
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM outbox_events WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+  }
+
+  @Test
+  void s8_projectStateMustSatisfyTheExistingDomainBeforePlanning() throws Exception {
+    var owner = "invalid-project-state";
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = json.readTree(invalidProjectText(owner, "Proyecto válido"));
+    ((com.fasterxml.jackson.databind.node.ObjectNode) file.get("data").get("projects").get(0))
+        .put("status", "archived");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .preview(owner, new ByteArrayInputStream(json.writeValueAsBytes(file))))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+  }
+
+  @Test
+  void s8_negativeProjectVersionIsInvalidBeforeSqlInsertion() throws Exception {
+    var owner = "negative-project-version";
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = json.readTree(invalidProjectText(owner, "Proyecto válido"));
+    ((com.fasterxml.jackson.databind.node.ObjectNode) file.get("data").get("projects").get(0))
+        .put("version", "-1");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .preview(owner, new ByteArrayInputStream(json.writeValueAsBytes(file))))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+  }
+
+  @Test
+  void s8_unpairedEscapedSurrogateCannotBeSilentlyReplacedDuringStaging() throws Exception {
+    var owner = "unpaired-surrogate";
+    var input = invalidProjectText(owner, "Proyecto" + (char) 0xd800);
+    assertThat(
+            new String(input, java.nio.charset.StandardCharsets.UTF_8)
+                .toLowerCase(java.util.Locale.ROOT))
+        .contains("\\ud800");
+    var sha =
+        java.util.HexFormat.of()
+            .formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .apply(
+                        owner,
+                        java.util.UUID.randomUUID(),
+                        sha,
+                        new ByteArrayInputStream(input),
+                        () -> Instant.parse("2026-09-08T02:03:04.123456Z")))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM projects WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM import_receipts WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+  }
+
+  @Test
+  void s8_matchingHashRejectsEscapedNulAsInvalidFileNotStorageFailure() throws Exception {
+    var owner = "nul-after-hash";
+    var input = invalidProjectText(owner, "Proyecto" + (char) 0);
+    var sha =
+        java.util.HexFormat.of()
+            .formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .apply(
+                        owner,
+                        java.util.UUID.randomUUID(),
+                        sha,
+                        new ByteArrayInputStream(input),
+                        () -> {
+                          throw new AssertionError("Invalid file must not read the clock");
+                        }))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM import_receipts WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+  }
+
+  private byte[] invalidProjectText(String owner, String name) throws Exception {
+    var bytes = new ByteArrayOutputStream();
+    new ExportJsonWriter()
+        .empty(owner, Instant.parse("2026-09-08T01:02:03.123456Z"))
+        .writeTo(bytes);
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = json.readTree(bytes.toByteArray());
+    ((com.fasterxml.jackson.databind.node.ObjectNode) file.get("counts")).put("projects", 1);
+    ((com.fasterxml.jackson.databind.node.ArrayNode) file.get("data").get("projects"))
+        .addObject()
+        .put("id", "00000000-0000-0000-0000-000000000126")
+        .put("name", name)
+        .put("description", "")
+        .put("status", "idea")
+        .put("version", "0")
+        .put("createdAt", "2025-01-01T00:00:00.000001Z")
+        .put("updatedAt", "2025-01-01T00:00:00.000001Z");
+    return json.writeValueAsBytes(file);
+  }
+
+  @Test
+  void s20_hashMismatchPrecedesJsonbRejectionOfEscapedNul() throws Exception {
+    var owner = "nul-before-hash";
+    var bytes = new ByteArrayOutputStream();
+    new ExportJsonWriter()
+        .empty(owner, Instant.parse("2026-09-08T01:02:03.123456Z"))
+        .writeTo(bytes);
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = json.readTree(bytes.toByteArray());
+    ((com.fasterxml.jackson.databind.node.ObjectNode) file.get("counts")).put("projects", 1);
+    ((com.fasterxml.jackson.databind.node.ArrayNode) file.get("data").get("projects"))
+        .addObject()
+        .put("id", "00000000-0000-0000-0000-000000000125")
+        .put("name", "Proyecto" + (char) 0)
+        .put("description", "")
+        .put("status", "idea")
+        .put("version", "0")
+        .put("createdAt", "2025-01-01T00:00:00.000001Z")
+        .put("updatedAt", "2025-01-01T00:00:00.000001Z");
+    var input = json.writeValueAsBytes(file);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .apply(
+                        owner,
+                        java.util.UUID.randomUUID(),
+                        "0".repeat(64),
+                        new ByteArrayInputStream(input),
+                        () -> {
+                          throw new AssertionError("Invalid file must not read the clock");
+                        }))
+        .isInstanceOf(com.apptolast.organization.application.ImportFileChangedException.class);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM import_receipts WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+  }
+
+  @Test
+  void s8_projectVersionMustRemainATextualBigint() throws Exception {
+    var owner = "invalid-project-version";
+    var bytes = new ByteArrayOutputStream();
+    new ExportJsonWriter()
+        .empty(owner, Instant.parse("2026-09-08T01:02:03.123456Z"))
+        .writeTo(bytes);
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = json.readTree(bytes.toByteArray());
+    ((com.fasterxml.jackson.databind.node.ObjectNode) file.get("counts")).put("projects", 1);
+    ((com.fasterxml.jackson.databind.node.ArrayNode) file.get("data").get("projects"))
+        .addObject()
+        .put("id", "00000000-0000-0000-0000-000000000124")
+        .put("name", "Proyecto")
+        .put("description", "")
+        .put("status", "idea")
+        .put("version", 9007199254740993L)
+        .put("createdAt", "2025-01-01T00:00:00.000001Z")
+        .put("updatedAt", "2025-01-01T00:00:00.000001Z");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .preview(owner, new ByteArrayInputStream(json.writeValueAsBytes(file))))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+  }
+
+  @Test
+  void s8_unknownProjectFieldIsInvalidBeforeDestinationComparison() throws Exception {
+    var owner = "invalid-project-field";
+    var bytes = new ByteArrayOutputStream();
+    new ExportJsonWriter()
+        .prepare(
+            owner,
+            Instant.parse("2026-09-08T01:02:03.123456Z"),
+            (collection, json) -> {
+              if (!collection.equals("projects")) return 0;
+              json.writeStartObject();
+              json.writeStringField("id", "00000000-0000-0000-0000-000000000123");
+              json.writeStringField("name", "Proyecto");
+              json.writeStringField("description", "");
+              json.writeStringField("status", "idea");
+              json.writeStringField("version", "0");
+              json.writeStringField("createdAt", "2025-01-01T00:00:00.000001Z");
+              json.writeStringField("updatedAt", "2025-01-01T00:00:00.000001Z");
+              json.writeStringField("unexpected", "private payload");
+              json.writeEndObject();
+              return 1;
+            })
+        .writeTo(bytes);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .preview(owner, new ByteArrayInputStream(bytes.toByteArray())))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class)
+        .hasMessageNotContaining("private payload");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM projects WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+  }
+
+  @Test
   void s3_existingProjectApplyKeepsPhysicalRowAndRecordsNoChange() throws Exception {
     var owner = "apply-identical-project";
     var id = java.util.UUID.fromString("00000000-0000-0000-0000-000000000999");

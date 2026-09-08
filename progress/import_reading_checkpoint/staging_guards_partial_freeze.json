@@ -1,0 +1,57 @@
+{
+  "scope": "Partial staging guards and nominal projects/tasks; remaining12 families incomplete",
+  "exitCode": 0,
+  "result": "0596aa",
+  "tests": 87.0,
+  "failures": 0.0,
+  "errors": 0.0,
+  "skipped": 0.0,
+  "inputs": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresImportDataStore.java",
+      "sha256": "4D32821A8677A1C5EA5AE1C8083C968FF9B73ABFE0C3872FC2B0881B09DFAA3D",
+      "bytes": 15737
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ImportRecordValidator.java",
+      "sha256": "50BA5A628DCFCF3DF8A80BDCCE1E70D73C032D9CC3D735A1CE4CCD960B831F6A",
+      "bytes": 1241
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportPersistenceTest.java",
+      "sha256": "4F0B27EEC196CB14ED4B14A4367B9CB94D2274DE4C36FF182AC2A0E5E959418D",
+      "bytes": 39814
+    },
+    {
+      "path": "progress/tdd_import_data.md",
+      "sha256": "20DD31F21434B19D0596397FD098818FC4800CC4BA1C83F72140E09615C6529D",
+      "bytes": 15098
+    }
+  ],
+  "xml": [
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\import23-staging-guards-xml\\TEST-com.apptolast.organization.adapter.config.ImportWiringTest.xml",
+      "sha256": "897BCA801DED136E50A08C703C1E27160B0ACA75B4CA8F7C75F20097CA28708D",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\import23-staging-guards-xml\\TEST-com.apptolast.organization.adapter.ImportDataApiTest.xml",
+      "sha256": "5F50363BB03F27E9C825D7771B2F4CDDD09605E39E875D943841F9E2D0B1C07E",
+      "tests": 62,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\import23-staging-guards-xml\\TEST-com.apptolast.organization.adapter.persistence.ImportPersistenceTest.xml",
+      "sha256": "2955A92D9144B344B96F95189FDCCFEEB4B926926A8A4B26BAF2B6E4755E11D0",
+      "tests": 24,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ]
+}

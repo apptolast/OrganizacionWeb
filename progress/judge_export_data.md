@@ -1,11 +1,20 @@
 # Revisión de export_data
 
-## Estado: revisión parcial; funcionalidad en desarrollo
+## Estado: APPROVED; funcionalidad desplegada y aceptada
 
-Contrato de 33 escenarios aprobado bajo autorización global. Esta revisión no
-declara la función terminada, desplegada ni por encima del umbral de mutación.
-Root coordina y revisa; A, B y C escriben producto y pruebas mediante TDD.
-Ponytail full y Caveman lite conservan arquitectura, privacidad y legibilidad.
+## Cierre aprobado y aceptación live — 8 de septiembre de 2026
+
+Root aprueba el cierre de los 33 escenarios y las campañas de mutación conservadoras ya revisadas. Feature 22 queda done. CI final 34190090017 SUCCESS; PR25 fusionada en aplicación 83b02756ece65c9772421ee8523f1887d6cf0d74. Infraestructura PR35 fusionada en fba78f495796cea69217812e6634a35d8bfc63b8; fuente 5a2b8607a80624fbd0c410a9a3a81955afa564a1 aplicada con EXIT 0: 38 correctas, 4 cambios, 0 fallos y 0 omitidas. Release productiva 0030513fa402502b5db87efa87d97fb979171b4e, sin migración nueva.
+
+[La evidencia pública](export_live_acceptance.json) conserva los bytes originales, SHA256 750ba94d94fc5aebe36889b41a30c03cc1fe7a74f90df6232559660572b0f137. HTTPS real: abrir la vista no hace GET; una preparación permite dos descargas idénticas de 8568 bytes, con cabeceras privadas y Blob URL revocada al salir. Chromium comprobó 320, 768 y 1280 px sin desbordamiento y axe sin incidencias. Logout devuelve 204 y la lectura anónima 401. Las 16 tablas conservan cantidades y huellas; 20 servicios siguen 1/1, 18 contenedores no se reemplazan (sólo API/web cambian) y ocho rutas heredadas conservan sus respuestas.
+
+Root verificó además, sin guardar contenido privado ni revelar el usuario, que owner coincide con la cuenta autenticada, el envelope tiene exactamente seis claves, data/counts comparten exactamente catorce claves y cada cantidad coincide con su array. Content-Encoding está ausente o es identity y X-Content-Type-Options es nosniff. Esta comprobación complementaria no altera el JSON congelado.
+
+Se conservan los originales y sus límites: PIT HTTP/recibos 216/259, persistencia 356/359 y Stryker 261/326, sin sumar universos ni contar errores como Killed. Los refuerzos inicialmente verdes no atribuyen nuevas eliminaciones. La aceptación live usa una muestra pequeña y Chromium sin dispositivos físicos ni estudio humano; los límites masivos se verificaron localmente. La restauración previa acredita esquema 19, no una restauración nueva de esquema 20 ni recuperación RabbitMQ/offhost. Este cierre documental no repite suites ni cambia producto o pruebas.
+
+## Revisiones históricas conservadas
+
+Los apartados siguientes registran cortes anteriores; sus pendientes describen ese momento y quedan resueltos por el cierre superior cuando corresponde.
 
 ## Núcleo nominal del backend
 

@@ -1,5 +1,13 @@
 # Estado actual
 
+Funciones 1–22 desplegadas y aceptadas en https://organizacion.apptolast.com. Exportación22 queda done tras el judge aprobado, mutación conservadora y CI final 34190090017 SUCCESS. Aplicación main 83b027; infraestructura PR35 fba78f4, fuente aplicada 5a2b860. Aceptación live: dos descargas idénticas de 8568 bytes con un GET, datos y servicios preservados, cierre de acceso comprobado. Evidencia y límites en [judge_export_data.md](judge_export_data.md) y [export_live_acceptance.json](export_live_acceptance.json).
+
+Funciones 23–30 siguen pendientes; este cierre no inicia otra funcionalidad. No hay cambios productivos ni nuevas campañas en este corte documental. COMMON/V14 y artefactos ajenos siguen protegidos.
+
+## Registro histórico de preparación de esta entrega
+
+Los estados y pendientes siguientes pertenecen a sus cortes originales; el estado vigente es el cierre anterior.
+
 ## Entrega publicada
 
 Funciones1–21 desplegadas y aceptadas en https://organizacion.apptolast.com. Cierre de aplicación en main5a5464c; infraestructura PR34 fusionada en8b488544caf6220835d2bd4b33a35db9485e17a2 con CI34176136643 SUCCESS. Evidencia21 en judge_custom_views_fields.md y customization_live_acceptance.json. CI de main34176109030 también terminó SUCCESS.

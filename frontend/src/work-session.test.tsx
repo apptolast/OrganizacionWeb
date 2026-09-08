@@ -393,7 +393,7 @@ it("@s33 recovers a retained start after the task becomes completed", async () =
   fireEvent.click(screen.getByRole("button", { name: "Comprobar inicio" }));
   expect(await screen.findByText("Sesión iniciada")).toBeVisible();
   expect(fetcher.mock.calls[2][0]).toContain("/by-request/");
-  expect(fetcher).toHaveBeenCalledTimes(5);
+  await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(5));
   expect(fetcher.mock.calls[3][0]).toBe(
     `/api/v1/work-sessions/${receipt.id}/state`,
   );
@@ -710,7 +710,7 @@ it("@s32 retains the exact intention after an idempotency conflict", async () =>
     `/api/v1/work-sessions/by-request/${requestKey}`,
   );
   expect(fetcher.mock.calls[2][1].method).toBeUndefined();
-  expect(fetcher).toHaveBeenCalledTimes(5);
+  await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(5));
   expect(fetcher.mock.calls[3][0]).toBe(
     `/api/v1/work-sessions/${receipt.id}/state`,
   );

@@ -1,0 +1,81 @@
+{
+  "base": "42639f73fa78201b952135330e07d928d78e029d",
+  "inputs": 171,
+  "changedFromBase": [
+    {
+      "path": "frontend/src/work-session.test.tsx",
+      "before": "0483eb2cceda6a2b7270ce5eb0ffecbe5ce6a70e2d3a1e58453b15ddafd5db64",
+      "current": "7245706ed9d56e90d04b5cfc8668817e11906124d7d159c24cdcff6d4766e678",
+      "after": "7245706ed9d56e90d04b5cfc8668817e11906124d7d159c24cdcff6d4766e678"
+    }
+  ],
+  "duringGatesChanges": 0,
+  "results": {
+    "initialEnvironmentExit": 1,
+    "installExit": 0,
+    "unchangedFocalExit": 0,
+    "suite": {
+      "exit": 0,
+      "tests": 47
+    },
+    "global": {
+      "exit": 0,
+      "tests": 2295,
+      "files": 56
+    },
+    "formatExit": 0,
+    "lintExit": 0
+  },
+  "evidence": [
+    {
+      "path": "export22-closure-ci-failure.log",
+      "size": 110665,
+      "sha256": "4da4fd096ca795ec6ef4d67f4a66df975dbb8dd80ca6972c22a05be55a3280a5"
+    },
+    {
+      "path": "export22-closure-work-session-before.log",
+      "size": 519,
+      "sha256": "425b49c5e39a88a895b2e9c9485735c2fd5a9399444c546e0dcb0347ec8d78c3"
+    },
+    {
+      "path": "export22-closure-install.log",
+      "size": 2555,
+      "sha256": "c3c9abbcc65fb69cb53cc037da18e2db599a9d5d19440ef81b4869d3975ecd25"
+    },
+    {
+      "path": "export22-closure-work-session-unchanged.log",
+      "size": 594,
+      "sha256": "d927f9cae531da37137a95e5c30292d70d87a5e059d3c32947563ac1c18aa3ac"
+    },
+    {
+      "path": "export22-closure-work-session-suite.log",
+      "size": 516,
+      "sha256": "2721a64521e9d7926ec267051fbaf45c5fb6a9c9fedac3480ffe46e46efc6bee"
+    },
+    {
+      "path": "export22-closure-frontend-global.log",
+      "size": 502,
+      "sha256": "40057173d929bc28b2c89cb2bae0094a43999b1de6ae0651beb79c30938d7e86"
+    },
+    {
+      "path": "export22-closure-work-session-format.log",
+      "size": 68,
+      "sha256": "f20510a9da4717c51c4cffee6d0dd88d6c9a723d0a83711d01216f5b48961283"
+    },
+    {
+      "path": "export22-closure-frontend-lint.log",
+      "size": 261,
+      "sha256": "c2bb7009ed2e5247b137c58962f23326cd2306a210246ffd6ef108c5210991ab"
+    },
+    {
+      "path": "export22-closure-frontend-before.json",
+      "size": 38441,
+      "sha256": "5fdeca410b167dde5e001b33eedfd4bf33d085c3d50438c5f508cec21e243d57"
+    },
+    {
+      "path": "export22-closure-frontend-after.json",
+      "size": 52292,
+      "sha256": "3b0b34c06263fc107eb535b052217e65a7aff9d66d9e0c130b0cabae3edef6bd"
+    }
+  ]
+}

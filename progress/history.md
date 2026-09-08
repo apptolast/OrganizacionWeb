@@ -483,3 +483,10 @@ Apply oficial sobre infraestructura0bb939b:38 correctas,5 cambios,0 fallos, oper
 Aceptación Chromium: editor de vista a320/768/1280 y gestión/detalle TASK a320, sin overflow y cinco axe completos sin incidencias; recarga y logout verificados. No altasQA ni escrituras de personalización en producción. CRUD/tipos/rollback cuentan con ensayos aislados. Se mantienen límites de dispositivos físicos y WebKit previos. Evidencia externa organizationweb-customization-acceptance.json SHA57449bc710183e77a7bc9de04a586bdae9968f38e15a850d0307a885295bd55a; apply log SHA54e7a0bec2525cb59489e20d26aea48596de722b9edd4d9d44032b898dbfbb71.
 
 Root y revisión independiente aprueban cierre21. Feature22 exportación sigue pendiente de contrato propio, bajo autorización global existente. Se conservan V14 ajeno y artefactos locales originales; no se afirma limpieza total del checkout compartido.
+
+
+## 2026-09-08 — Exportación22 desplegada y aceptada
+
+Feature 22 export_data queda done tras aprobación de root como judge y revisión de las mutaciones conservadoras: HTTP/recibos 216/259, persistencia 356/359 y frontend 261/326, conservando originales, residuos y límites sin agregar universos. CI final 34190090017 SUCCESS; aplicación PR25 main 83b027, infraestructura PR35 fba78f4 y fuente 5a2b860 aplicada con 38 correctas/4 cambios/0 fallos/0 omitidas. Release 0030513fa402502b5db87efa87d97fb979171b4e.
+
+Aceptación HTTPS real: cero GET al abrir; una preparación y dos descargas idénticas de 8568 bytes; revocación Blob, axe 0, tres anchuras sin overflow, logout 204 y anónimo 401. Dieciséis tablas idénticas, veinte servicios 1/1, dieciocho contenedores sin reemplazar y ocho rutas heredadas conservadas. Evidencia pública exacta en export_live_acceptance.json (SHA256 750ba94d94fc5aebe36889b41a30c03cc1fe7a74f90df6232559660572b0f137); dictamen en judge_export_data.md. La muestra live es pequeña y usa Chromium; límites masivos acreditados localmente y restore previo sólo de esquema 19. Guía y plan actualizados; sin cambios de producto/tests ni nuevas suites. Funciones 23–30 permanecen pendientes.

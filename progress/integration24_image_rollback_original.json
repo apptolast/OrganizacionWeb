@@ -1,0 +1,181 @@
+{
+  "prefix": "ow-v22-rollback-3246d487-388a-48a2-b862-7b855aa8b8ef",
+  "images": {
+    "current": "ocholoko888/organizationweb-api@sha256:1e67de8d415835d9f55debf043b51d24e0aa64ada7184238eef0436ed55f1ed7",
+    "previous": "ocholoko888/organizationweb-api@sha256:313446ebc241ec2812c2d5dcbfb5618a3bc398253e9b4e78b55b6730c650216d",
+    "pg": "postgres@sha256:9ae4e8f8d0284836a505f0b2e825144e32e20499856e7dc5f7b99e19d10eedd6"
+  },
+  "candidate": "fe6f87fb013c34973214788f589375121dbad4bd",
+  "startedAt": "2026-09-08T15:50:09.922Z",
+  "stages": [
+    "API24 creates V22, two credentials, one admission and one revocation; export v1 excludes credentials and quotas",
+    "API23 starts on V22 and preserves all 17 prior tables, 3 integration tables and schema",
+    "API24 returns with identical metadata and physically unchanged durable rows and schema before any further Bearer admission",
+    "Separate post-snapshot check: revoked token remains rejected; active token remains usable and changes only its quota rows"
+  ],
+  "cleanup": [
+    "container:ow-v22-rollback-3246d487-388a-48a2-b862-7b855aa8b8ef-api",
+    "container:ow-v22-rollback-3246d487-388a-48a2-b862-7b855aa8b8ef-pg",
+    "volume:ow-v22-rollback-3246d487-388a-48a2-b862-7b855aa8b8ef-data",
+    "network:ow-v22-rollback-3246d487-388a-48a2-b862-7b855aa8b8ef"
+  ],
+  "status": "PASS",
+  "imageIds": {
+    "current": "sha256:1e67de8d415835d9f55debf043b51d24e0aa64ada7184238eef0436ed55f1ed7",
+    "previous": "sha256:313446ebc241ec2812c2d5dcbfb5618a3bc398253e9b4e78b55b6730c650216d",
+    "pg": "sha256:9ae4e8f8d0284836a505f0b2e825144e32e20499856e7dc5f7b99e19d10eedd6"
+  },
+  "revisions": {
+    "current": "fe6f87fb013c34973214788f589375121dbad4bd",
+    "previous": "4c74e183e49afa6d280115b399dbaffedc7bfe7f"
+  },
+  "beforeHashes": {
+    "flyway_schema_history": "3177bd3d5a2b6821e009919cb4d0dca667e81b6f564ccd50fb32165db037ae66",
+    "appearance_preferences": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "availability_preferences": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "block_changes": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "block_projections": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "customization_preferences": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "import_receipts": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "planned_blocks": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "project_custom_field_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "projects": "c2246347cf0cc70879bc0083fe027a11c749b02d52e8b2924f60feb4ca67be9d",
+    "task_custom_field_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "task_status_history": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "tasks": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "work_session_changes": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "work_session_intervals": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "work_sessions": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "outbox_events": "49528528a6c2c688ca633f9014cf97a130b18fe4e88f8286d642dcfb94526c04",
+    "api_credentials": "878490f90ce8154fcc2cf184b37774ffc8e38f4befe89e28c39984a8136b7394",
+    "api_owner_quotas": "f6c18d0950abd63317c19695d47d760d177dbc84da408afd4332b3a02f1476e9",
+    "api_credential_quotas": "e0b7b75095038cda83fa0b2a6e2eb7daeaa903b9a2bd9f63f4f253c0e19b1ce4",
+    "columns": "d79074353884ea63a4f116d3c40fa022d7c84f0d1befede2496ae0a7e5db8f80",
+    "constraints": "7bbd54432b6275f67eebd118c4331da6a947b058a7b668e6bcb94658d4c13a2d"
+  },
+  "projectId": "0dab75f8-9d6e-40cf-9edb-445070e6b55b",
+  "credentialIds": [
+    "fef26c4a-7364-4f66-9a1c-0bbf7efe0ab0",
+    "7adf0557-29d4-444f-80dc-09633349b599"
+  ],
+  "exportCounts": {
+    "projects": 1,
+    "tasks": 0,
+    "taskStatusHistory": 0,
+    "availability": 0,
+    "plannedBlocks": 0,
+    "blockProjections": 0,
+    "blockChanges": 0,
+    "workSessions": 0,
+    "workSessionIntervals": 0,
+    "workSessionChanges": 0,
+    "appearance": 0,
+    "customization": 0,
+    "projectCustomFieldValues": 0,
+    "taskCustomFieldValues": 0
+  },
+  "logAudits": [
+    {
+      "sha256": "fa6833cdfdd24676bbecf4271f4c8418e8c498b10c5320af8cb365da603835fd",
+      "bytes": 8184,
+      "checkedValues": 10,
+      "clean": true
+    },
+    {
+      "sha256": "36b672df08cbf20399b5af6ee35c7a3dfc15dfae14a0449b47e8f2d4513739c6",
+      "bytes": 4031,
+      "checkedValues": 10,
+      "clean": true
+    },
+    {
+      "sha256": "c37e57cb927ccf484841da9688393995ebf1f10cb5328f04e0e29fa554a14a2a",
+      "bytes": 3821,
+      "checkedValues": 10,
+      "clean": true
+    }
+  ],
+  "previousHashes": {
+    "flyway_schema_history": "3177bd3d5a2b6821e009919cb4d0dca667e81b6f564ccd50fb32165db037ae66",
+    "appearance_preferences": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "availability_preferences": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "block_changes": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "block_projections": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "customization_preferences": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "import_receipts": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "planned_blocks": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "project_custom_field_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "projects": "c2246347cf0cc70879bc0083fe027a11c749b02d52e8b2924f60feb4ca67be9d",
+    "task_custom_field_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "task_status_history": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "tasks": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "work_session_changes": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "work_session_intervals": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "work_sessions": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "outbox_events": "49528528a6c2c688ca633f9014cf97a130b18fe4e88f8286d642dcfb94526c04",
+    "api_credentials": "878490f90ce8154fcc2cf184b37774ffc8e38f4befe89e28c39984a8136b7394",
+    "api_owner_quotas": "f6c18d0950abd63317c19695d47d760d177dbc84da408afd4332b3a02f1476e9",
+    "api_credential_quotas": "e0b7b75095038cda83fa0b2a6e2eb7daeaa903b9a2bd9f63f4f253c0e19b1ce4",
+    "columns": "d79074353884ea63a4f116d3c40fa022d7c84f0d1befede2496ae0a7e5db8f80",
+    "constraints": "7bbd54432b6275f67eebd118c4331da6a947b058a7b668e6bcb94658d4c13a2d"
+  },
+  "afterHashes": {
+    "flyway_schema_history": "3177bd3d5a2b6821e009919cb4d0dca667e81b6f564ccd50fb32165db037ae66",
+    "appearance_preferences": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "availability_preferences": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "block_changes": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "block_projections": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "customization_preferences": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "import_receipts": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "planned_blocks": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "project_custom_field_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "projects": "c2246347cf0cc70879bc0083fe027a11c749b02d52e8b2924f60feb4ca67be9d",
+    "task_custom_field_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "task_status_history": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "tasks": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "work_session_changes": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "work_session_intervals": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "work_sessions": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "outbox_events": "49528528a6c2c688ca633f9014cf97a130b18fe4e88f8286d642dcfb94526c04",
+    "api_credentials": "878490f90ce8154fcc2cf184b37774ffc8e38f4befe89e28c39984a8136b7394",
+    "api_owner_quotas": "f6c18d0950abd63317c19695d47d760d177dbc84da408afd4332b3a02f1476e9",
+    "api_credential_quotas": "e0b7b75095038cda83fa0b2a6e2eb7daeaa903b9a2bd9f63f4f253c0e19b1ce4",
+    "columns": "d79074353884ea63a4f116d3c40fa022d7c84f0d1befede2496ae0a7e5db8f80",
+    "constraints": "7bbd54432b6275f67eebd118c4331da6a947b058a7b668e6bcb94658d4c13a2d"
+  },
+  "postReturnBearer": {
+    "activeStatus": 200,
+    "revokedStatus": 401,
+    "conservationComparedBeforeAdmission": true,
+    "hashes": {
+      "flyway_schema_history": "3177bd3d5a2b6821e009919cb4d0dca667e81b6f564ccd50fb32165db037ae66",
+      "appearance_preferences": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "availability_preferences": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "block_changes": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "block_projections": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "customization_preferences": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "import_receipts": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "planned_blocks": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "project_custom_field_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "projects": "c2246347cf0cc70879bc0083fe027a11c749b02d52e8b2924f60feb4ca67be9d",
+      "task_custom_field_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "task_status_history": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "tasks": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "work_session_changes": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "work_session_intervals": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "work_sessions": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "outbox_events": "49528528a6c2c688ca633f9014cf97a130b18fe4e88f8286d642dcfb94526c04",
+      "api_credentials": "878490f90ce8154fcc2cf184b37774ffc8e38f4befe89e28c39984a8136b7394",
+      "api_owner_quotas": "3ad1e819c8bde6d52daa84358c17bec5a7976bd988aab33c96539aa61bf5cb2d",
+      "api_credential_quotas": "5b6168b5bd69a87ec9b2bcaa777670e78afff70efca947f7a4b0cdf8996a0329",
+      "columns": "d79074353884ea63a4f116d3c40fa022d7c84f0d1befede2496ae0a7e5db8f80",
+      "constraints": "7bbd54432b6275f67eebd118c4331da6a947b058a7b668e6bcb94658d4c13a2d"
+    }
+  },
+  "remaining": {
+    "containers": "",
+    "volumes": "",
+    "networks": ""
+  },
+  "finishedAt": "2026-09-08T15:51:07.129Z",
+  "scriptSha256": "3fe66f5642d9b0ce82852abd9ddef257f46ed67fa9eee778286e29028769ef4c"
+}

@@ -52,10 +52,62 @@ client_lint_final.log y client_format_final.log. El primer lint fcb759 detectó
 dos escapes innecesarios en el fixture filename*, corregidos sin cambio lógico.
 Manifiesto export_frontend_client_freeze.json. Sin suite global ni mutación.
 
+## Ciclos UI y composición
+
+33–43. Un RED y mínimo GREEN por ciclo, logs export_frontend_33 a43:
+entrada sin GET (bedb42/314de8); Blob y enlace nativo con bytes originales
+(ca4640/ac5014); duplicados y feedback (cbf8da/51c01c); cancelar y HTTP tardío
+(58c443/a79ee8);503 manual (a31f3a/a5dee4); desmontaje (551043/0a05ca);
+revoke (45cf09/2b50b1); preparar de nuevo (a3f0ff/2e5328); identidad
+(a1bb6a/42cdd0);413 explicado (c645a2/83b7ac); navegación (341cf0/599120).
+No se usa RouteLink para descargar. El fichero sólo se crea tras validar bytes.
+
+44. Composición SessionGate con identidad real. Los primeros logs red/green
+fallaron por una ruta de fixture equivocada (/api/v1/auth/session). Corregida a
+/api/session según session-api, se retiró la nueva prop para verificar RED real
+f66108 (Página no encontrada), y se repuso: GREEN215c6b. Se preservan ambos
+intentos originales sin atribuirles validación. No se altera la API de sesión.
+45. Retorno tras login conserva /exportacion:3951b7/a9d351. Sólo nueva ruta
+privada; no cambios de persistencia ni resets de formularios ajenos.
+46–49. Foco al desaparecer Cancelar, desaparición por413, movimiento voluntario
+seguido de blur, entrada por navegación. RED/GREEN respectivos c34b51/7ae8d7,
+b6c8af/20f9de,76e61c/b3b788,a070df/379b7b.
+50. Ana → logout → Bruno →401 tardío, composición real SessionGate/apiRequest:
+GREEN inicial1b9294. No petición adicional ni revocación de Bruno.
+51. Intento de simular blur automático falló en la precondición: JSDOM conserva
+foco sobre el botón disabled al invocar blur. Logs51_red y51_green preservan
+ese límite, no acreditan defecto del producto. Se retiró la modificación de foco
+propuesta y el caso se ajustó a lo observable en DOM: conserva el control que
+sigue enfocado, GREEN inicial ef66cf. El comportamiento físico queda para UX.
+También se hace explícita la guarda local tras await del cliente antes de Blob;
+el mismo controller/identidad protege finalmente el resultado y los errores.
+52–55. GREEN inicial, uno por ciclo:401 vigente retira acceso (8c0afa), respuesta
+incompatible no crea URL (12ea1b), reutilizar enlace conserva archivo sin GET
+(62e8f6), JSON de error resuelto después de cancelar no restaura fallo (34adb6).
+56. Revisión root corrigió el h1 contractual y ayuda:8a27ee/46bc9e. Nombre final
+«Exportar mis datos»; enlace de navegación «Exportación». Se explica JSON
+versionado, archivo personal e importación todavía no disponible.
+57. Revisión root: cleanup pasivo dejaba ventana hasta layout del nuevo owner.
+El caso de identidad previo ahora observa revoke desde un probe de layout:
+RED36747d, GREENe05ed1. Cleanup de layout aborta y revoca antes del nuevo owner.
+
+## Corte funcional para revisión
+
+Cliente aprobado en832331f, sin cambios posteriores. UI22 +cliente32 y
+regresión App/auth:143/143 (aa6cee y focal_verified). Tipos52570e y lint5ee54c
+EXIT0; formato5d37ab. Se añadió después una guarda simétrica antes de consumir
+el error tardío; focal_verified conserva143. Build frontend registrado en
+export_frontend_ui_build.log. SCSS local usa tokens existentes, áreas44px,
+wrap y separación; sólo revisión de código hasta UX real, sin afirmar geometría.
+Manifiesto export_frontend_ui_freeze.json. Ninguna suite global/Java/mutación.
+
 ## Mapa y pendientes
 
 @s1/@s24: bytes nominales y frontera máxima. @s25: variantes de transporte y
 envelope cubiertas; @s28: Response preservada; @s29: abortos/401 tardío cliente.
 @s2–21/@s33: servidor/contrato HTTP son responsabilidad de A/C; el cliente no
-reinterpreta registros de negocio. @s22–32: falta montaje UI, feedback, descarga
-nativa, lifecycle del objectURL y foco. No hay evidencia E2E/UX ni mutación.
+reinterpreta registros de negocio. @s22–29: composición, descarga y lifecycle
+acreditados en DOM; @s30 memoria local por diseño (refs, Blob/objectURL y cleanup,
+sin llamadas a almacenamiento web), pendiente observación E2E. @s31 foco DOM
+acreditado, comportamiento físico de disabled pendiente. @s32 UX real pendiente.
+Todavía no hay E2E/UX ni mutación frontend22 ni gate global de este corte.

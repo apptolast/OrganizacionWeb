@@ -41,6 +41,7 @@ export function SessionGate() {
           <button onClick={() => refresh(true)}>Recuperar acceso</button>
         </div>
         <App
+          username={session.username}
           sessionControls={
             <button className="session-logout" onClick={logout}>
               Cerrar sesión

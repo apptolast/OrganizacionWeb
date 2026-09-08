@@ -54,3 +54,22 @@ Root retiró su sospecha sobre charset en Accept JSON al consultar
 Ese parámetro no define otra codificación de JSON; no se presenta el ensayo
 retirado como un defecto confirmado. Los intentos previos de Tomcat y OPTIONS
 se conservan con sus resultados reales en la bitácora de C.
+
+## Vista y composición de sesión
+
+Lectura completa de la vista, sus 22 pruebas y las diferencias de navegación,
+sesión y SCSS (a317ff, cbf402, 12164c). Las quince huellas del corte coinciden
+(e740b7); el resultado focal acredita 143 pruebas en cuatro archivos, sin fallos.
+Tipos, lint, formato y build tienen resultados conservados en el manifiesto.
+
+Se aprueba este corte funcional para continuar validación: identidad recibida
+de SessionGate, revocación y aborto durante cleanup de layout, descarga mediante
+enlace nativo y conservación de bytes. La respuesta tardía de una sesión cerrada
+no retira la identidad nueva. La ayuda y el encabezado corresponden al contrato.
+Los cambios de navegación no introducen almacenamiento o estados globales nuevos.
+
+El foco está probado en DOM, pero el comportamiento físico de un botón disabled
+todavía requiere navegador; no se atribuye al producto el fallo de precondición
+de JSDOM del ciclo 51. SCSS conserva tokens existentes y controles de 44 píxeles
+como intención de código, pendiente medición. Faltan E2E, matriz UX, integración
+real, revisión final y mutación. Este corte no declara export_data terminada.

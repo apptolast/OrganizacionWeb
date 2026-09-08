@@ -87,6 +87,7 @@ pitest {
         "com.apptolast.organization.adapter.persistence.ImportPersistenceTest",
         "com.apptolast.organization.adapter.persistence.ImportCustomizationValidatorTest",
         "com.apptolast.organization.adapter.persistence.ImportConcurrencyTest",
+        "com.apptolast.organization.adapter.config.ImportScaleTest",
         "com.apptolast.organization.adapter.config.ImportWiringTest"
     )
     val importAdapterTests = setOf(

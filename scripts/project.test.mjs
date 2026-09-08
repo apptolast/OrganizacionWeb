@@ -60,6 +60,7 @@ test("import PIT keeps complete disjoint classes and dedicated tests while exten
         "adapter.persistence.ImportPersistenceTest",
         "adapter.persistence.ImportCustomizationValidatorTest",
         "adapter.persistence.ImportConcurrencyTest",
+        "adapter.config.ImportScaleTest",
         "adapter.config.ImportWiringTest",
       ],
     },

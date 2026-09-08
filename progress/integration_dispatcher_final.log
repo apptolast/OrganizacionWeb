@@ -1,0 +1,442 @@
+TAP version 13
+# Subtest: import PIT targets reject other tasks and injected options before execution
+ok 1 - import PIT targets reject other tasks and injected options before execution
+  ---
+  duration_ms: 1.6571
+  type: 'test'
+  ...
+# Subtest: import PIT keeps complete disjoint classes and dedicated tests while extending the default
+ok 2 - import PIT keeps complete disjoint classes and dedicated tests while extending the default
+  ---
+  duration_ms: 0.9451
+  type: 'test'
+  ...
+# Subtest: import backend targets invoke only their fixed PIT scopes
+ok 3 - import backend targets invoke only their fixed PIT scopes
+  ---
+  duration_ms: 0.2975
+  type: 'test'
+  ...
+# Subtest: integration backend targets invoke only their fixed PIT scopes
+ok 4 - integration backend targets invoke only their fixed PIT scopes
+  ---
+  duration_ms: 0.1854
+  type: 'test'
+  ...
+# Subtest: integration frontend invokes only its fixed Stryker configuration
+ok 5 - integration frontend invokes only its fixed Stryker configuration
+  ---
+  duration_ms: 0.1969
+  type: 'test'
+  ...
+# Subtest: import frontend invokes only its fixed Stryker configuration
+ok 6 - import frontend invokes only its fixed Stryker configuration
+  ---
+  duration_ms: 0.0761
+  type: 'test'
+  ...
+# Subtest: export Stryker keeps its complete modules and reviewed integration nodes with inherited gates
+ok 7 - export Stryker keeps its complete modules and reviewed integration nodes with inherited gates
+  ---
+  duration_ms: 2.4926
+  type: 'test'
+  ...
+# Subtest: export frontend invokes only its fixed Stryker configuration
+ok 8 - export frontend invokes only its fixed Stryker configuration
+  ---
+  duration_ms: 0.0871
+  type: 'test'
+  ...
+# Subtest: export persistence target rejects other tasks and injected options before execution
+ok 9 - export persistence target rejects other tasks and injected options before execution
+  ---
+  duration_ms: 0.3007
+  type: 'test'
+  ...
+# Subtest: export persistence PIT preserves complete classes and extends the default
+ok 10 - export persistence PIT preserves complete classes and extends the default
+  ---
+  duration_ms: 0.7506
+  type: 'test'
+  ...
+# Subtest: export persistence backend invokes only its fixed PIT scope
+ok 11 - export persistence backend invokes only its fixed PIT scope
+  ---
+  duration_ms: 0.1709
+  type: 'test'
+  ...
+# Subtest: customization default PIT exposes the real feature wiring test
+ok 12 - customization default PIT exposes the real feature wiring test
+  ---
+  duration_ms: 0.2364
+  type: 'test'
+  ...
+# Subtest: customization targets fail closed outside mutation
+ok 13 - customization targets fail closed outside mutation
+  ---
+  duration_ms: 0.1261
+  type: 'test'
+  ...
+# Subtest: customization Stryker includes new modules without weakening inherited gates
+ok 14 - customization Stryker includes new modules without weakening inherited gates
+  ---
+  duration_ms: 1.0733
+  type: 'test'
+  ...
+# Subtest: customization frontend invokes only its fixed Stryker configuration
+ok 15 - customization frontend invokes only its fixed Stryker configuration
+  ---
+  duration_ms: 0.0858
+  type: 'test'
+  ...
+# Subtest: customization PIT includes complete families and exposes their adapter tests by default
+ok 16 - customization PIT includes complete families and exposes their adapter tests by default
+  ---
+  duration_ms: 0.4496
+  type: 'test'
+  ...
+# Subtest: customization backend invokes only its fixed PIT scope
+ok 17 - customization backend invokes only its fixed PIT scope
+  ---
+  duration_ms: 0.104
+  type: 'test'
+  ...
+# Subtest: end time Stryker preserves protection and measures both integrated surfaces
+ok 18 - end time Stryker preserves protection and measures both integrated surfaces
+  ---
+  duration_ms: 0.86
+  type: 'test'
+  ...
+# Subtest: end time PIT preserves shared guards, all JUnit candidates and threshold
+ok 19 - end time PIT preserves shared guards, all JUnit candidates and threshold
+  ---
+  duration_ms: 0.3307
+  type: 'test'
+  ...
+# Subtest: end time frontend invokes only its fixed Stryker configuration
+ok 20 - end time frontend invokes only its fixed Stryker configuration
+  ---
+  duration_ms: 0.0722
+  type: 'test'
+  ...
+# Subtest: end time backend invokes only its fixed PIT scope
+ok 21 - end time backend invokes only its fixed PIT scope
+  ---
+  duration_ms: 0.0847
+  type: 'test'
+  ...
+# Subtest: close work Stryker includes shared navigation and protects previous reports
+ok 22 - close work Stryker includes shared navigation and protects previous reports
+  ---
+  duration_ms: 1.4397
+  type: 'test'
+  ...
+# Subtest: close work PIT scope includes changed core and shared adapters with all JUnit candidates
+ok 23 - close work PIT scope includes changed core and shared adapters with all JUnit candidates
+  ---
+  duration_ms: 0.3224
+  type: 'test'
+  ...
+# Subtest: close work frontend invokes only its fixed Stryker configuration
+ok 24 - close work frontend invokes only its fixed Stryker configuration
+  ---
+  duration_ms: 0.0781
+  type: 'test'
+  ...
+# Subtest: close work backend invokes only its fixed PIT scope
+ok 25 - close work backend invokes only its fixed PIT scope
+  ---
+  duration_ms: 0.0788
+  type: 'test'
+  ...
+# Subtest: pause resume frontend invokes only its fixed Stryker configuration
+ok 26 - pause resume frontend invokes only its fixed Stryker configuration
+  ---
+  duration_ms: 0.0519
+  type: 'test'
+  ...
+# Subtest: pause resume backend invokes only its fixed PIT scope
+ok 27 - pause resume backend invokes only its fixed PIT scope
+  ---
+  duration_ms: 0.0594
+  type: 'test'
+  ...
+# Subtest: start work PIT selects the complete feature and shared publication with all JUnit candidates
+ok 28 - start work PIT selects the complete feature and shared publication with all JUnit candidates
+  ---
+  duration_ms: 0.295
+  type: 'test'
+  ...
+# Subtest: start work backend rejects a non-mutation task before execution
+ok 29 - start work backend rejects a non-mutation task before execution
+  ---
+  duration_ms: 0.0813
+  type: 'test'
+  ...
+# Subtest: start work frontend rejects injected configuration before execution
+ok 30 - start work frontend rejects injected configuration before execution
+  ---
+  duration_ms: 0.1211
+  type: 'test'
+  ...
+# Subtest: default frontend scope retains the complete new work session sources
+ok 31 - default frontend scope retains the complete new work session sources
+  ---
+  duration_ms: 0.8137
+  type: 'test'
+  ...
+# Subtest: start work frontend scope includes the session flow and its task reader integration
+ok 32 - start work frontend scope includes the session flow and its task reader integration
+  ---
+  duration_ms: 1.9763
+  type: 'test'
+  ...
+# Subtest: start work backend invokes only its fixed PIT scope
+ok 33 - start work backend invokes only its fixed PIT scope
+  ---
+  duration_ms: 0.1092
+  type: 'test'
+  ...
+# Subtest: start work frontend invokes only its fixed Stryker configuration
+ok 34 - start work frontend invokes only its fixed Stryker configuration
+  ---
+  duration_ms: 0.0604
+  type: 'test'
+  ...
+# Subtest: today backend scope runs only its fixed PIT target
+ok 35 - today backend scope runs only its fixed PIT target
+  ---
+  duration_ms: 0.0609
+  type: 'test'
+  ...
+# Subtest: reschedule frontend scope runs only its fixed Stryker configuration
+ok 36 - reschedule frontend scope runs only its fixed Stryker configuration
+  ---
+  duration_ms: 0.135
+  type: 'test'
+  ...
+# Subtest: today frontend scope runs only its fixed Stryker configuration
+ok 37 - today frontend scope runs only its fixed Stryker configuration
+  ---
+  duration_ms: 0.0504
+  type: 'test'
+  ...
+# Subtest: today replay runs only its fixed separate Stryker configuration
+ok 38 - today replay runs only its fixed separate Stryker configuration
+  ---
+  duration_ms: 0.0404
+  type: 'test'
+  ...
+# Subtest: today replay preserves 63 reviewed identities plus the new focus region without rewriting initial measurement
+ok 39 - today replay preserves 63 reviewed identities plus the new focus region without rewriting initial measurement
+  ---
+  duration_ms: 41.0735
+  type: 'test'
+  ...
+# Subtest: today configuration preserves its historical source and shared-region selection
+ok 40 - today configuration preserves its historical source and shared-region selection
+  ---
+  duration_ms: 5.2627
+  type: 'test'
+  ...
+# Subtest: backend scope runs only the configured schedule_block PIT target
+ok 41 - backend scope runs only the configured schedule_block PIT target
+  ---
+  duration_ms: 0.244
+  type: 'test'
+  ...
+# Subtest: frontend scope includes new code and both shared guards without changing thresholds
+ok 42 - frontend scope includes new code and both shared guards without changing thresholds
+  ---
+  duration_ms: 0.1428
+  type: 'test'
+  ...
+# Subtest: unknown or misplaced targets fail before starting any subprocess
+ok 43 - unknown or misplaced targets fail before starting any subprocess
+  ---
+  duration_ms: 0.279
+  type: 'test'
+  ...
+# Subtest: frontend replay invokes only its fixed isolated report configuration
+ok 44 - frontend replay invokes only its fixed isolated report configuration
+  ---
+  duration_ms: 0.0558
+  type: 'test'
+  ...
+# Subtest: frontend replay keeps measurement policy and writes separate reports
+ok 45 - frontend replay keeps measurement policy and writes separate reports
+  ---
+  duration_ms: 0.7671
+  type: 'test'
+  ...
+# Subtest: absent or empty target preserves both full mutation suites
+ok 46 - absent or empty target preserves both full mutation suites
+  ---
+  duration_ms: 0.1508
+  type: 'test'
+  ...
+# Subtest: final replay selects the reviewed outstanding identities without changing history
+ok 47 - final replay selects the reviewed outstanding identities without changing history
+  ---
+  duration_ms: 1.4582
+  type: 'test'
+  ...
+# Subtest: harness placeholder and CLI deliver the selected target unchanged
+ok 48 - harness placeholder and CLI deliver the selected target unchanged
+  ---
+  duration_ms: 0.7149
+  type: 'test'
+  ...
+# Subtest: normal CI test and lint include the script regression
+ok 49 - normal CI test and lint include the script regression
+  ---
+  duration_ms: 0.1208
+  type: 'test'
+  ...
+# Subtest: CLI rejects extra arguments instead of silently discarding them
+ok 50 - CLI rejects extra arguments instead of silently discarding them
+  ---
+  duration_ms: 0.0816
+  type: 'test'
+  ...
+# Subtest: today final runs only its fixed Stryker configuration
+ok 51 - today final runs only its fixed Stryker configuration
+  ---
+  duration_ms: 0.0506
+  type: 'test'
+  ...
+# Subtest: today final selects only the two unresolved exact identities
+ok 52 - today final selects only the two unresolved exact identities
+  ---
+  duration_ms: 3.3467
+  type: 'test'
+  ...
+# Subtest: reschedule backend invokes only its fixed PIT scope
+ok 53 - reschedule backend invokes only its fixed PIT scope
+  ---
+  duration_ms: 0.1284
+  type: 'test'
+  ...
+# Subtest: reschedule backend rejects shell suffix before execution
+ok 54 - reschedule backend rejects shell suffix before execution
+  ---
+  duration_ms: 0.0838
+  type: 'test'
+  ...
+# Subtest: reschedule backend rejects extra Gradle flags before execution
+ok 55 - reschedule backend rejects extra Gradle flags before execution
+  ---
+  duration_ms: 0.058
+  type: 'test'
+  ...
+# Subtest: reschedule backend rejects non-mutation task before execution
+ok 56 - reschedule backend rejects non-mutation task before execution
+  ---
+  duration_ms: 0.0494
+  type: 'test'
+  ...
+# Subtest: start work replay limits PIT to its event record without replacing the original report
+ok 57 - start work replay limits PIT to its event record without replacing the original report
+  ---
+  duration_ms: 0.2485
+  type: 'test'
+  ...
+# Subtest: history backend invokes only its fixed PIT scope
+ok 58 - history backend invokes only its fixed PIT scope
+  ---
+  duration_ms: 0.088
+  type: 'test'
+  ...
+# Subtest: history PIT includes complete new modules and wiring with all JUnit candidates
+ok 59 - history PIT includes complete new modules and wiring with all JUnit candidates
+  ---
+  duration_ms: 0.3366
+  type: 'test'
+  ...
+# Subtest: default PIT exposes history adapter tests for the newly selected classes
+ok 60 - default PIT exposes history adapter tests for the newly selected classes
+  ---
+  duration_ms: 0.2681
+  type: 'test'
+  ...
+# Subtest: history frontend invokes only its fixed Stryker configuration
+ok 61 - history frontend invokes only its fixed Stryker configuration
+  ---
+  duration_ms: 0.0642
+  type: 'test'
+  ...
+# Subtest: history frontend rejects use outside mutation before any runner call
+ok 62 - history frontend rejects use outside mutation before any runner call
+  ---
+  duration_ms: 0.0676
+  type: 'test'
+  ...
+# Subtest: history Stryker covers new modules and complete integration nodes with inherited gates
+ok 63 - history Stryker covers new modules and complete integration nodes with inherited gates
+  ---
+  duration_ms: 0.6475
+  type: 'test'
+  ...
+# Subtest: default Stryker retains history modules and full new integration nodes
+ok 64 - default Stryker retains history modules and full new integration nodes
+  ---
+  duration_ms: 0.61
+  type: 'test'
+  ...
+# Subtest: weekly review backend invokes only its fixed PIT scope
+ok 65 - weekly review backend invokes only its fixed PIT scope
+  ---
+  duration_ms: 0.1173
+  type: 'test'
+  ...
+# Subtest: weekly review frontend invokes only its fixed Stryker configuration
+ok 66 - weekly review frontend invokes only its fixed Stryker configuration
+  ---
+  duration_ms: 0.0626
+  type: 'test'
+  ...
+# Subtest: weekly review PIT includes complete new modules and wiring with all JUnit candidates
+ok 67 - weekly review PIT includes complete new modules and wiring with all JUnit candidates
+  ---
+  duration_ms: 0.3619
+  type: 'test'
+  ...
+# Subtest: default PIT exposes weekly review adapter tests for the newly selected classes
+ok 68 - default PIT exposes weekly review adapter tests for the newly selected classes
+  ---
+  duration_ms: 0.2814
+  type: 'test'
+  ...
+# Subtest: appearance backend invokes only its fixed PIT scope
+ok 69 - appearance backend invokes only its fixed PIT scope
+  ---
+  duration_ms: 0.0964
+  type: 'test'
+  ...
+# Subtest: appearance PIT includes all new modules and makes their tests available by default
+ok 70 - appearance PIT includes all new modules and makes their tests available by default
+  ---
+  duration_ms: 0.4126
+  type: 'test'
+  ...
+# Subtest: appearance frontend invokes only its fixed Stryker configuration
+ok 71 - appearance frontend invokes only its fixed Stryker configuration
+  ---
+  duration_ms: 0.0661
+  type: 'test'
+  ...
+# Subtest: appearance Stryker preserves all candidates and reviewed integration nodes
+ok 72 - appearance Stryker preserves all candidates and reviewed integration nodes
+  ---
+  duration_ms: 4.3014
+  type: 'test'
+  ...
+1..72
+# tests 72
+# suites 0
+# pass 72
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 171.0407

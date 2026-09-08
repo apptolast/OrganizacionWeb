@@ -120,6 +120,39 @@ test("import backend targets invoke only their fixed PIT scopes", () => {
     ]);
   }
 });
+test("integration backend targets invoke only their fixed PIT scopes", () => {
+  for (const [target, scope] of [
+    ["integration_api-backend", "integration_api"],
+    ["integration_api-http-backend", "integration_api_http"],
+  ]) {
+    const { calls, project } = capture();
+    project("mutate", target);
+    assert.deepEqual(calls, [
+      [
+        process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+        ["pitest", "--no-daemon", `-PmutationScope=${scope}`],
+        { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+      ],
+    ]);
+  }
+});
+test("integration frontend invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "integration_api-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.integration-api.config.json",
+      ],
+    ],
+  ]);
+});
 test("import frontend invokes only its fixed Stryker configuration", () => {
   const { calls, project } = capture();
   project("mutate", "import_data-frontend");

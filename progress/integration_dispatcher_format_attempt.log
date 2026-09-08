@@ -1,0 +1,4 @@
+"prettier" no se reconoce como un comando interno o externo,
+programa o archivo por lotes ejecutable.
+undefined
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command "prettier" not found

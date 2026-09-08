@@ -44,6 +44,51 @@ corregido sin supresión. Regresión final `import_http_preview_final.log`, EXIT
 
 ## Límites y siguiente corte
 
+## Confirmación y recuperación
+
+Contratos revisados incorporados en `2060322` (7 fuentes de aplicación y 2
+pruebas, desde `8691edd`). Contexto nominal PostgreSQL en `eb1f79b`: exactamente
+9 paths de `a21dc627`, sus SHA-256 verificados antes del commit. Incluye V21 y
+los tres beans reales; rechaza archivos no vacíos, no acredita todavía las
+catorce colecciones. No se modifica ninguna de esas fuentes de A.
+
+Constructor actual: `ImportDataController(ImportDataUseCase,
+ApplyImportDataUseCase, ReadImportReceiptUseCase)`.
+
+| Ciclo | Oráculo | Evidencia |
+| --- | --- | --- |
+| 16 | s20: bytes originales, owner, key/hash y recibo cerrado | RED a64f3b → GREEN 3ffda7 |
+| 17 | s29: clave completa y canónica | RED a2d2fb → GREEN 7697d5 |
+| 18 | s29: clave obligatoria | RED 1bca83 → GREEN 18d1db |
+| 19 | s29: clave duplicada no se elige silenciosamente | RED 517a27 → GREEN 3ebf51 |
+| 20 | s29: hash obligatorio, 64 hex minúsculas | RED 974642 → GREEN 27111f |
+| 21 | s29: media antes de query/cabeceras de confirmación | RED 4a0679 → GREEN 1b6aa4; helper media compartido |
+| 22 | s29: query rechazada antes del comando | RED 4410de → GREEN 22118a |
+| 23 | s22: GET con owner vigente devuelve recibo original | RED 485184 → GREEN cdff4d |
+| 24 | s22: Optional vacío → 404 privado | RED 79603c → GREEN 6008b1 |
+| 25 | s29: GET con query/cuerpo no consulta | RED d52703 → GREEN 972742 |
+| 26 | s29: métodos ajenos sobre confirmación | RED e73432 → GREEN cc7ea1; reutiliza mappings de preview |
+| 27 | s29: escrituras sobre recibos no consultan | RED d584c1 → GREEN 8a1a44 |
+| 28 | s28: auth previa en confirmación/recibo | Inicialmente GREEN 15fa18 |
+| 29 | s28: CSRF/origen previo en confirmación | Inicialmente GREEN 4ead4b |
+| 30 | s23: error de almacenamiento sin éxito/datos privados | Fixture inicial lanzaba JDBC crudo (500, 739350); se corrigió al error del puerto StorageUnavailableException, GREEN c6e563 sin cambio productivo. A confirmó envoltura JDBC/TX en su store. No se acredita rollback en este slice. |
+| 31 | s17: stream cerrado después de éxito/error | Inicialmente GREEN 11ab4e. Prueba directa del adaptador con stream observable, no socket. |
+| 32 | s29: sintaxis canónica de ruta antes de lookup | Inicialmente GREEN df9e07 |
+| 33 | s21: error real de hash → 412 sin recibo | RED 54ae90 → GREEN 24e230 |
+| 34 | s21: error real de clave reutilizada → 409 sin recibo | RED 7dfe39 → GREEN bf043c |
+
+Las cabeceras/códigos globales de sesión no cambian. HEAD sobre POST tiene
+respuesta local vacía; la consulta GET conserva semántica HEAD del framework.
+No se añade política de Accept. Los límites reales de lectura y la decisión
+idempotente permanecen dentro del núcleo.
+
+Foco integrado nominal `import_http_integrated_nominal.log`: **88 pruebas / 7
+suites, cero fallos/errores/omisiones**, EXIT 0 `e4038e`; 61 casos del adaptador
+(dos invocaciones directas para cierre del stream), 27 del núcleo/PG/wiring.
+Incluye contexto Spring con el constructor de tres puertos. XML preservados
+en `progress/import_http_integrated_nominal_xml`. Spotless ejecutado en el mismo
+comando; diff sólo en controller/test/bitácora propios. Sin campaña de mutación.
+
 Revisión independiente de root: 5 hashes y XML iniciales verificados. Ratificó
 el mapping agrupado local y detectó también la precedencia media/query.
 Ciclo 15: una prueba parametrizada (charset ISO y gzip, ambos con query)
@@ -51,17 +96,23 @@ RED `c802f7` → GREEN `b1de42`, moviendo únicamente la guarda de query despué
 de media. Se corrigió la fixture de warning legado para incluir una sesión
 nueva en counts/insertCounts. Regresión formateada **20/20**, EXIT 0 `c20667`,
 `import_http_preview_reviewed_final.log` y `import_http_preview_reviewed_xml.xml`.
-El manifiesto inicial permanece como evidencia histórica; el vigente es
-`import_http_preview_reviewed_freeze.json`.
+El manifiesto inicial y el revisado permanecen como evidencia histórica del
+primer corte; el vigente de comandos es `import_http_commands_freeze.json`.
 
 Este corte acredita transporte MVC y filtros reales con puertos mockeados, no
 socket, transacciones ni validación integral del archivo. Los tags indican los
 oráculos concretos anteriores, no cobertura total de sus escenarios.
 
-Pendientes: confirmación y consulta de recibos sobre los contratos reales que
+Pendientes históricos del primer corte (resueltos en ciclos 16–34): confirmación
+y consulta de recibos sobre los contratos reales que
 root aprobó en `8691edd`; métodos y seguridad de esas rutas, cierre del stream
 en errores, regresión de sesiones/headers, errores adicionales cuando A los
 entregue. Para proxy se necesita el bean real de vista previa y decoder/PG
 estable. Entonces se usará Spring RANDOM_PORT + Nginx Testcontainers, puertos
 dinámicos y las dos locations exactas autorizadas. Sin 8080 ajeno ni cambios de
 infraestructura. No mutación ni declaración de cierre de la feature.
+
+Estado actual: confirmación, consulta y tres beans reales disponibles. Pendientes
+socket/proxy, datos no vacíos y conflicto integral que desarrolla A. La prueba
+de proxy usa el contexto nominal vacío y puertos dinámicos, sin atribuir cobertura
+de catorce colecciones. Root revisó 11 hashes y 88/7 XML del corte integrado.

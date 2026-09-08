@@ -35,6 +35,392 @@ import org.springframework.test.web.servlet.MockMvc;
 class ImportDataApiTest {
   @Autowired MockMvc mvc;
   @MockitoBean ImportDataUseCase imports;
+  @MockitoBean com.apptolast.organization.application.ApplyImportDataUseCase applyImports;
+  @MockitoBean com.apptolast.organization.application.ReadImportReceiptUseCase receipts;
+
+  @Test
+  void s21_reusedKeyReturns409WithoutAnotherOwnersData() throws Exception {
+    when(applyImports.apply(anyString(), any(), anyString(), any()))
+        .thenThrow(new com.apptolast.organization.application.ImportKeyReusedException());
+    mvc.perform(
+            post("/api/v1/me/import")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("Idempotency-Key", "6322225a-3bf8-42fd-a2b6-756e1a72928c")
+                .header("X-Import-Content-SHA256", "b".repeat(64))
+                .contentType("application/json")
+                .content("{}"))
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.code").value("IMPORT_KEY_REUSED"))
+        .andExpect(jsonPath("$.recordedAt").doesNotExist());
+  }
+
+  @Test
+  void s21_changedFileIs412WithoutReturningAReceipt() throws Exception {
+    when(applyImports.apply(anyString(), any(), anyString(), any()))
+        .thenThrow(new com.apptolast.organization.application.ImportFileChangedException());
+    mvc.perform(
+            post("/api/v1/me/import")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("Idempotency-Key", "6322225a-3bf8-42fd-a2b6-756e1a72928c")
+                .header("X-Import-Content-SHA256", "b".repeat(64))
+                .contentType("application/json")
+                .content("{}"))
+        .andExpect(status().isPreconditionFailed())
+        .andExpect(jsonPath("$.code").value("IMPORT_FILE_CHANGED"))
+        .andExpect(jsonPath("$.recordedAt").doesNotExist());
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"invalid", "1-1-1-1-1", "6322225A-3BF8-42FD-A2B6-756E1A72928C"})
+  void s29_receiptKeyUsesCanonicalSyntaxBeforeLookup(String key) throws Exception {
+    mvc.perform(get("/api/v1/me/imports/by-key/" + key).with(user("owner")))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("IMPORT_INVALID_REQUEST"));
+    verifyNoInteractions(imports, applyImports, receipts);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+  void s17_adapterClosesItsRequestStreamAfterPreparationOrFailure(boolean failure)
+      throws Exception {
+    var closed = new java.util.concurrent.atomic.AtomicBoolean();
+    var input =
+        new java.io.ByteArrayInputStream("{}".getBytes(StandardCharsets.UTF_8)) {
+          @Override
+          public void close() {
+            closed.set(true);
+          }
+        };
+    var request =
+        new org.springframework.mock.web.MockHttpServletRequest() {
+          @Override
+          public jakarta.servlet.ServletInputStream getInputStream() {
+            return new org.springframework.mock.web.DelegatingServletInputStream(input);
+          }
+        };
+    request.setContentType("application/json");
+    var zeros = new ImportCounts(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    when(imports.preview(eq("owner"), any()))
+        .thenAnswer(
+            call -> {
+              assertFalse(closed.get());
+              assertArrayEquals(
+                  "{}".getBytes(StandardCharsets.UTF_8),
+                  ((InputStream) call.getArgument(1)).readAllBytes());
+              if (failure)
+                throw new com.apptolast.organization.application.ImportInvalidFileException();
+              return new ImportPreview(
+                  "a".repeat(64), 2, "owner", Instant.EPOCH, zeros, zeros, zeros, List.of());
+            });
+    var controller = new ImportDataController(imports, applyImports, receipts);
+    if (failure)
+      assertThrows(
+          com.apptolast.organization.application.ImportInvalidFileException.class,
+          () ->
+              controller.preview(
+                  () -> "owner", request, new org.springframework.util.LinkedMultiValueMap<>()));
+    else
+      controller.preview(
+          () -> "owner", request, new org.springframework.util.LinkedMultiValueMap<>());
+    assertTrue(closed.get());
+  }
+
+  @Test
+  void s23_failedApplicationHasNoSuccessReceiptOrPrivateDatabaseDetail() throws Exception {
+    when(applyImports.apply(anyString(), any(), anyString(), any()))
+        .thenThrow(
+            new com.apptolast.organization.application.StorageUnavailableException(
+                new IllegalStateException("private table owner password")));
+    mvc.perform(
+            post("/api/v1/me/import")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("Idempotency-Key", "6322225a-3bf8-42fd-a2b6-756e1a72928c")
+                .header("X-Import-Content-SHA256", "b".repeat(64))
+                .contentType("application/json")
+                .content("{}"))
+        .andExpect(status().isServiceUnavailable())
+        .andExpect(jsonPath("$.code").value("STORAGE_UNAVAILABLE"))
+        .andExpect(jsonPath("$.recordedAt").doesNotExist())
+        .andExpect(
+            header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")))
+        .andExpect(
+            content()
+                .string(
+                    org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("private table"))));
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+  void s28_confirmationKeepsCsrfAndOriginBeforeHeaders(boolean origin) throws Exception {
+    var request =
+        post("/api/v1/me/import").with(user("owner")).contentType("text/plain").content("private");
+    if (origin) request.with(csrf().asHeader()).header("Origin", "https://other.example");
+    mvc.perform(request)
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value(origin ? "UNTRUSTED_ORIGIN" : "CSRF_INVALID"));
+    verifyNoInteractions(imports, applyImports, receipts);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "POST,/api/v1/me/import",
+    "GET,/api/v1/me/imports/by-key/invalid"
+  })
+  void s28_confirmAndReceiptRequireAuthenticationBeforeSyntax(String method, String path)
+      throws Exception {
+    mvc.perform(
+            request(org.springframework.http.HttpMethod.valueOf(method), path)
+                .contentType("text/plain")
+                .content("private"))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
+        .andExpect(header().doesNotExist("WWW-Authenticate"))
+        .andExpect(
+            header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")));
+    verifyNoInteractions(imports, applyImports, receipts);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"POST", "PUT", "PATCH", "DELETE", "OPTIONS"})
+  void s29_receiptRejectsUnsupportedWritesWithoutLookup(String method) throws Exception {
+    mvc.perform(
+            request(
+                    org.springframework.http.HttpMethod.valueOf(method),
+                    "/api/v1/me/imports/by-key/6322225a-3bf8-42fd-a2b6-756e1a72928c")
+                .with(user("owner"))
+                .with(csrf().asHeader()))
+        .andExpect(status().isMethodNotAllowed())
+        .andExpect(header().string("Allow", "GET"));
+    verifyNoInteractions(imports, applyImports, receipts);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"HEAD", "GET", "PUT", "PATCH", "DELETE", "OPTIONS"})
+  void s29_confirmationUnsupportedMethodsDoNotInvokePorts(String method) throws Exception {
+    mvc.perform(
+            request(org.springframework.http.HttpMethod.valueOf(method), "/api/v1/me/import")
+                .with(user("owner"))
+                .with(csrf().asHeader()))
+        .andExpect(status().isMethodNotAllowed())
+        .andExpect(header().string("Allow", "POST"));
+    verifyNoInteractions(imports, applyImports, receipts);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+  void s29_receiptQueryOrBodyPrecedesLookup(boolean body) throws Exception {
+    var request =
+        get("/api/v1/me/imports/by-key/6322225a-3bf8-42fd-a2b6-756e1a72928c").with(user("owner"));
+    if (body) request.content("private");
+    else request.param("extra", "value");
+    mvc.perform(request)
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("IMPORT_INVALID_REQUEST"));
+    verifyNoInteractions(imports, applyImports, receipts);
+  }
+
+  @Test
+  void s22_missingOrInaccessibleReceiptIsTheSamePrivate404() throws Exception {
+    var key = java.util.UUID.fromString("6322225a-3bf8-42fd-a2b6-756e1a72928c");
+    when(receipts.find("owner", key)).thenReturn(java.util.Optional.empty());
+    mvc.perform(get("/api/v1/me/imports/by-key/" + key).with(user("owner")))
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType("application/problem+json"))
+        .andExpect(jsonPath("$.code").value("IMPORT_NOT_FOUND"))
+        .andExpect(
+            content()
+                .string(
+                    org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString(key.toString()))));
+    verify(receipts).find("owner", key);
+    verifyNoInteractions(imports, applyImports);
+  }
+
+  @Test
+  void s22_receiptRecoveryUsesCurrentOwnerAndReturnsTheOriginalReceipt() throws Exception {
+    var key = java.util.UUID.fromString("6322225a-3bf8-42fd-a2b6-756e1a72928c");
+    var inserted = new ImportCounts(2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    var identical = new ImportCounts(1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    when(receipts.find("second-owner", key))
+        .thenReturn(
+            java.util.Optional.of(
+                new com.apptolast.organization.application.ImportReceipt(
+                    key,
+                    "c".repeat(64),
+                    12345,
+                    Instant.parse("2026-09-07T12:30:01.123456Z"),
+                    "IMPORTED",
+                    inserted,
+                    identical)));
+    mvc.perform(get("/api/v1/me/imports/by-key/" + key).with(user("second-owner")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.*", org.hamcrest.Matchers.hasSize(7)))
+        .andExpect(jsonPath("$.requestKey").value(key.toString()))
+        .andExpect(jsonPath("$.fileSha256").value("c".repeat(64)))
+        .andExpect(jsonPath("$.byteLength").value(12345))
+        .andExpect(jsonPath("$.recordedAt").value("2026-09-07T12:30:01.123456Z"))
+        .andExpect(jsonPath("$.outcome").value("IMPORTED"))
+        .andExpect(jsonPath("$.insertedCounts.projects").value(2))
+        .andExpect(jsonPath("$.identicalCounts.projects").value(1));
+    verify(receipts).find("second-owner", key);
+    verifyNoInteractions(imports, applyImports);
+  }
+
+  @Test
+  void s29_confirmationQueryIsRejectedBeforeCallingTheCommand() throws Exception {
+    mvc.perform(
+            post("/api/v1/me/import")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .param("extra", "value")
+                .header("Idempotency-Key", "6322225a-3bf8-42fd-a2b6-756e1a72928c")
+                .header("X-Import-Content-SHA256", "b".repeat(64))
+                .contentType("application/json")
+                .content("{}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("IMPORT_INVALID_REQUEST"));
+    verifyNoInteractions(applyImports, imports, receipts);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "application/json; charset=ISO-8859-1,identity",
+    "application/json,gzip"
+  })
+  void s29_confirmationMediaPrecedesQueryAndHeaderSyntax(String media, String encoding)
+      throws Exception {
+    mvc.perform(
+            post("/api/v1/me/import")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .param("extra", "value")
+                .contentType(media)
+                .header("Content-Encoding", encoding)
+                .content("{}"))
+        .andExpect(status().isUnsupportedMediaType())
+        .andExpect(jsonPath("$.code").value("UNSUPPORTED_MEDIA_TYPE"));
+    verifyNoInteractions(applyImports, imports, receipts);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.NullAndEmptySource
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {
+        "abc",
+        "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg"
+      })
+  void s29_hashMustBePresentAndCanonical(String hash) throws Exception {
+    var request =
+        post("/api/v1/me/import")
+            .with(user("owner"))
+            .with(csrf().asHeader())
+            .header("Idempotency-Key", "6322225a-3bf8-42fd-a2b6-756e1a72928c")
+            .contentType("application/json")
+            .content("private");
+    if (hash != null) request.header("X-Import-Content-SHA256", hash);
+    mvc.perform(request)
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("IMPORT_INVALID_REQUEST"));
+    verifyNoInteractions(applyImports, imports, receipts);
+  }
+
+  @Test
+  void s29_duplicateConfirmationKeyIsNotSilentlySelected() throws Exception {
+    var key = "6322225a-3bf8-42fd-a2b6-756e1a72928c";
+    mvc.perform(
+            post("/api/v1/me/import")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("Idempotency-Key", key, key)
+                .header("X-Import-Content-SHA256", "b".repeat(64))
+                .contentType("application/json")
+                .content("private"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("IMPORT_INVALID_REQUEST"));
+    verifyNoInteractions(applyImports, imports, receipts);
+  }
+
+  @Test
+  void s29_missingConfirmationKeyDoesNotReadTheFile() throws Exception {
+    mvc.perform(
+            post("/api/v1/me/import")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("X-Import-Content-SHA256", "b".repeat(64))
+                .contentType("application/json")
+                .content("private"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("IMPORT_INVALID_REQUEST"));
+    verifyNoInteractions(applyImports, imports, receipts);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"invalid", "1-1-1-1-1", "6322225A-3BF8-42FD-A2B6-756E1A72928C"})
+  void s29_nonCanonicalConfirmationKeyIsRejectedBeforeTheFile(String key) throws Exception {
+    mvc.perform(
+            post("/api/v1/me/import")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("Idempotency-Key", key)
+                .header("X-Import-Content-SHA256", "b".repeat(64))
+                .contentType("application/json")
+                .content("invalid private file"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("IMPORT_INVALID_REQUEST"));
+    verifyNoInteractions(applyImports, imports, receipts);
+  }
+
+  @Test
+  void s20_confirmationForwardsRawBytesAndReturnsOnlyTheCommittedReceipt() throws Exception {
+    var requestKey = java.util.UUID.fromString("6322225a-3bf8-42fd-a2b6-756e1a72928c");
+    var hash = "b".repeat(64);
+    var zeros = new ImportCounts(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    var body = "{\"raw\": \"prueba á\"}".getBytes(StandardCharsets.UTF_8);
+    when(applyImports.apply(eq("owner"), eq(requestKey), eq(hash), any()))
+        .thenAnswer(
+            call -> {
+              assertArrayEquals(body, ((InputStream) call.getArgument(3)).readAllBytes());
+              return new com.apptolast.organization.application.ImportReceipt(
+                  requestKey,
+                  hash,
+                  body.length,
+                  Instant.parse("2026-09-08T01:02:03Z"),
+                  "NO_CHANGE",
+                  zeros,
+                  zeros);
+            });
+    mvc.perform(
+            post("/api/v1/me/import")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("Origin", "https://organization.example")
+                .header("Idempotency-Key", requestKey)
+                .header("X-Import-Content-SHA256", hash)
+                .contentType("application/json")
+                .content(body))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.*", org.hamcrest.Matchers.hasSize(7)))
+        .andExpect(jsonPath("$.requestKey").value(requestKey.toString()))
+        .andExpect(jsonPath("$.fileSha256").value(hash))
+        .andExpect(jsonPath("$.byteLength").value(body.length))
+        .andExpect(jsonPath("$.recordedAt").value("2026-09-08T01:02:03.000000Z"))
+        .andExpect(jsonPath("$.outcome").value("NO_CHANGE"))
+        .andExpect(jsonPath("$.insertedCounts.*", org.hamcrest.Matchers.hasSize(14)))
+        .andExpect(jsonPath("$.identicalCounts.*", org.hamcrest.Matchers.hasSize(14)))
+        .andExpect(jsonPath("$.insertedCounts.projects").value(0))
+        .andExpect(jsonPath("$.identicalCounts.taskCustomFieldValues").value(0));
+    verify(applyImports).apply(eq("owner"), eq(requestKey), eq(hash), any());
+    verifyNoInteractions(imports, receipts);
+  }
 
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.CsvSource({

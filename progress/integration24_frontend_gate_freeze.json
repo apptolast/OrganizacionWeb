@@ -1,0 +1,66 @@
+[
+  {
+    "path": "frontend/stryker.integration-api.config.json",
+    "sha256": "963CB33EA43916D7523B5C014C7DCE41855C350FC428CB8F42BBF21CCF7514BB"
+  },
+  {
+    "path": "frontend/stryker.appearance.config.json",
+    "sha256": "15C45A328A21588821BD005B2ADC4DA49CB7D0DEC4B5E9B2A37853E297DF474C"
+  },
+  {
+    "path": "frontend/stryker.import-data.config.json",
+    "sha256": "3A69500FBAAEF3DF992B5B807772DB401292A78350771DF54D8F54C0B65C1AF8"
+  },
+  {
+    "path": "frontend/stryker.config.json",
+    "sha256": "30995EFED6FD299F8B680184984CD1C098E650751F2ABDDB9ED06BB00CB1732B"
+  },
+  {
+    "path": "scripts/project.test.mjs",
+    "sha256": "834A6CAE9C5818E03DD0BB66C3ECA147E9E4A9DBBCE212166392CADA961A4DDD"
+  },
+  {
+    "path": "frontend/src/App.test.tsx",
+    "sha256": "E10D8483F8B724947155D367D8FAC68BDF20287D1825751FE7818BC587D87854"
+  },
+  {
+    "path": "frontend/src/appearance.test.tsx",
+    "sha256": "B0CA1C5638C41ECCDBCEA314D5FD0A3CA41D3BC9C1B7E926EE6484010196CEF4"
+  },
+  {
+    "path": "frontend/src/export-data.test.tsx",
+    "sha256": "C911F82C0399C81F18BAF75C3E0D47E001CFC3E19DD1EE5B4DE53548AEA56EE4"
+  },
+  {
+    "path": "frontend/src/integration-api.test.tsx",
+    "sha256": "E32B14294C7D5440B4249652658C096B3710BD78B940696E693546CA33F8D5A0"
+  },
+  {
+    "path": "progress/integration24_frontend_global_before.json",
+    "sha256": "9B0B21F9923CDA76131EEFEAF3E862D31229BB6A63A335B4FF7F44828D033356"
+  },
+  {
+    "path": "progress/integration24_frontend_global_after.json",
+    "sha256": "9B0B21F9923CDA76131EEFEAF3E862D31229BB6A63A335B4FF7F44828D033356"
+  },
+  {
+    "path": "progress/integration24_frontend_global_final.log",
+    "sha256": "4C3C63FFEA533541FAF292B4DE6241B981DB4144A556F372AEF33B2AB895C968"
+  },
+  {
+    "path": "progress/integration24_frontend_global_final.exit",
+    "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+  },
+  {
+    "path": "progress/integration24_frontend_global_lint.log",
+    "sha256": "D5B417597DF5394671896FF0ABEC5D82791226542245AB5E05D92BF1DEE1CFE1"
+  },
+  {
+    "path": "progress/integration24_frontend_global_build.log",
+    "sha256": "82D389BF33A955F8BCFAE37B06FB9987EC696500EAD703D6EAB681C1159A95C1"
+  },
+  {
+    "path": "progress/integration24_frontend_harness_final.log",
+    "sha256": "5AC9ED933B8D1F140491F71E85233D580C3A8F668CC7B3DAA8EB783D79845D24"
+  }
+]

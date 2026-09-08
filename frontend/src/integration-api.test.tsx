@@ -1440,3 +1440,50 @@ it("@s2 malformed Unicode names are blocked while complete emoji remain valid", 
   await user.paste("Nombre 😀");
   expect(screen.getByRole("button", { name: "Crear" })).toBeEnabled();
 });
+
+it("@s40 finding revocation already committed confirms without another PUT and restores focus", async () => {
+  const credential = {
+    id,
+    name: "Mi integración",
+    scopes: ["projects:read"],
+    createdAt: "2026-09-08T10:00:00Z",
+    expiresAt: "2026-10-08T10:00:00Z",
+    revokedAt: null,
+  };
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(
+      Response.json({ items: [credential], nextCursor: null }),
+    )
+    .mockResolvedValueOnce(new Response(null, { status: 503 }))
+    .mockResolvedValueOnce(
+      Response.json({ ...credential, revokedAt: "2026-09-08T12:00:00Z" }),
+    );
+  vi.stubGlobal("fetch", fetcher);
+  const user = userEvent.setup();
+  render(<IntegrationApi owner="Ana" />);
+  await user.click(
+    await screen.findByRole("button", { name: "Revocar Mi integración" }),
+  );
+  await user.click(
+    screen.getByRole("button", { name: "Confirmar revocación" }),
+  );
+  await user.click(
+    await screen.findByRole("button", { name: "Comprobar revocación" }),
+  );
+  expect(await screen.findByText("Revocada")).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Confirmar revocación" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Comprobar revocación" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: "Credenciales para integraciones" }),
+  ).toHaveFocus();
+  expect(
+    fetcher.mock.calls.filter(([, options]) => options?.method === "PUT"),
+  ).toHaveLength(1);
+  expect(fetcher.mock.calls[2][0]).toBe(`/api/v1/me/api-credentials/${id}`);
+  expect(fetcher.mock.calls[2][1].method).toBeUndefined();
+});

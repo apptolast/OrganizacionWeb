@@ -20,7 +20,10 @@ it("@s33 import23 adds one private navigation route without starting a request",
     .getByRole("navigation", { name: "Principal" })
     .querySelectorAll("a");
   expect(links[0]).toHaveAccessibleName("Hoy");
-  expect(links[links.length - 1]).toHaveAccessibleName("Importación");
+  expect(links[links.length - 2]).toHaveAccessibleName("Importación");
+  expect(links[links.length - 1]).toHaveAccessibleName(
+    "API para integraciones",
+  );
 });
 describe("crear proyecto", () => {
   it("@s27 ofrece campos etiquetados y una acción de crear", () => {

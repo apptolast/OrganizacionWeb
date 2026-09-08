@@ -1783,12 +1783,12 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     "src/appearance-api.ts",
     "src/appearance-state.tsx",
     "src/appearance.tsx",
-    "src/App.tsx:31:8-31:44",
-    "src/App.tsx:45:14-57:30",
-    "src/App.tsx:72:10-113:7",
-    "src/workspace.tsx:76:10-81:22",
+    "src/App.tsx:32:8-32:44",
+    "src/App.tsx:49:16-61:32",
+    "src/App.tsx:78:10-119:7",
+    "src/workspace.tsx:77:10-82:22",
     "src/session-gate.tsx:32:2-52:6",
-    "src/use-session.ts:194:0-214:1",
+    "src/use-session.ts:208:0-229:1",
   ]);
   assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
   assert.equal(config.concurrency, 8);

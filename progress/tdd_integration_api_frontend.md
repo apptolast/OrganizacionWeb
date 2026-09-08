@@ -113,3 +113,11 @@ Navegador de recuperación original sobre Vite de desarrollo: 1/3; Chromium/WebK
 - 068/s2: precisión de texto Unicode acordada con backend: unidades surrogate aisladas altas y bajas bloqueadas; emoji completo permitido. RED y GREEN. Guarda Cs con flag Unicode conserva pares válidos; no altera el límite de 80 puntos de código.
 
 El test histórico del freeze 33D925 está preservado byte a byte en integration24_reviewed_ui_test.snapshot.txt (SHA C111D2910FCB3F771425326654E278B3CF379FD87E626440CBDCE22FF9472C38); el test actual añade el ciclo 068. El delta Unicode tiene manifiesto propio integration24_frontend_unicode_freeze.json y build/lint propios; no se presenta el log 66/66 como 67/67. La matriz de texto 200 %, movimiento reducido y colores forzados pasa 3/3 sobre el build funcional anterior, sin modificación de CSS/DOM por Unicode. Color-contrast de axe sólo se desactiva para colores nativos forzados, limitación declarada; los temas normales conservan la comprobación.
+
+## Gates antes de mutación
+
+Global original: 2488/2491, tres oráculos heredados de posición del menú (App, Apariencia y Exportación), con 192 entradas before/after sin diferencias. Root autorizó únicamente desplazar posiciones conservando Hoy primero y los oráculos de contenido/ruta/tráfico. Las tres suites focales pasan 88/88; sus originales se conservan.
+
+El auditor señaló la variante s40 con revokedAt presente. Ciclo 069 inicialmente GREEN: comprobar manualmente confirma revocación sin segundo PUT, elimina controles de recuperación y devuelve foco al H1. No cambió producción.
+
+Global final: 2492/2492, 65 suites; lint (incluido formato), tipos/build y arnés Node 72/72 verdes. Los 192 inputs frontend/harness coinciden antes/después. Logs global_original/global_final, exits y manifests están bajo progress/integration24_frontend_*. La campaña nueva mantiene tres módulos completos, siete nodos AST, umbral 80, ocho workers y perTest. Los cinco literales históricos de Apariencia se sincronizaron por AST con RED/ GREEN focal Node conservados; no se relaja deepEqual ni startsWith.

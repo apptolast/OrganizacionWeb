@@ -785,14 +785,17 @@ it("@s20 opens appearance through the principal navigation at its stable route",
     screen.getByRole("navigation", { name: "Principal" }),
   );
   expect(navigation.getAllByRole("link")[0]).toHaveAccessibleName("Hoy");
-  expect(navigation.getAllByRole("link").at(-3)).toHaveAccessibleName(
+  expect(navigation.getAllByRole("link").at(-4)).toHaveAccessibleName(
     "Apariencia",
   );
-  expect(navigation.getAllByRole("link").at(-2)).toHaveAccessibleName(
+  expect(navigation.getAllByRole("link").at(-3)).toHaveAccessibleName(
     "Exportación",
   );
-  expect(navigation.getAllByRole("link").at(-1)).toHaveAccessibleName(
+  expect(navigation.getAllByRole("link").at(-2)).toHaveAccessibleName(
     "Importación",
+  );
+  expect(navigation.getAllByRole("link").at(-1)).toHaveAccessibleName(
+    "API para integraciones",
   );
   await userEvent.click(screen.getByRole("link", { name: "Apariencia" }));
   expect(window.location.pathname).toBe("/apariencia");

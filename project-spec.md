@@ -1539,3 +1539,267 @@ usuario no movió foco, teclado/44px/reflow320/texto y zoom200, ambos temas,
 forced-colors y movimiento reducido. La evidencia nueva cubrirá nominal,
 restauración sin pérdida, tipos/null, conflicto y privacidad; las 30 filas UX
 se revisan con límites. No se atribuye esa evidencia antes de implementar.
+
+## Feature 22: export_data — exportación privada y portable
+
+### Propósito y frontera
+
+Descargar todos los datos de organización propios que las funcionalidades 1–21
+conservan de forma durable, incluidos los hechos históricos y datos ocultos por
+personalización. El archivo permite inspección y transporte fuera del servicio;
+no es un backup operativo ni acredita restauración/importación, que pertenece a
+23. Contrato técnico revisado bajo la autorización global vigente. La destilación
+Gherkin y su revisión preceden a la implementación.
+
+Un único formato: JSON UTF-8 sin BOM, identificado y versionado. El alcance
+original no exige CSV, ZIP, PDF ni hojas de cálculo; no se presentan como formatos
+ya aprobados. ICS pertenece a 26. No incluye conectores, correos, programación
+periódica, enlaces públicos ni almacenamiento de archivos en el servidor.
+
+### Recurso HTTP y snapshot
+
+GET `/api/v1/me/export`, sin parámetros de consulta ni cuerpo, sólo para la sesión
+autenticada. El propietario procede exclusivamente del Principal. Cualquier
+parámetro, incluso ownerId, format, cursor o uno vacío, produce 400
+`INVALID_EXPORT_QUERY`; no se permite un filtro implícito que omita datos.
+Se conserva la política GET de seguridad existente: no exige CSRF, no crea una
+sesión de trabajo, no produce una mutación de negocio ni registra una outbox.
+
+Accept ausente o que admita application/json con calidad positiva permite el
+formato; se respetan listas, comodines y exclusiones específicas de negociación
+HTTP. Si no admite JSON, responde 406 `EXPORT_FORMAT_NOT_ACCEPTABLE`, sin preparar
+el snapshot. Una cabecera Accept mal formada o un cuerpo GET no vacío produce
+400 `INVALID_EXPORT_REQUEST`; un cuerpo de longitud cero equivale a ausencia.
+HEAD autenticado responde 405 con Allow: GET y sin cuerpo ni lectura de negocio;
+no se deja que el soporte HEAD automático construya una exportación para
+descartarla. Los métodos no admitidos conservan primero los filtros de seguridad
+existentes y después 405. No se añaden métodos de escritura.
+
+La respuesta 200 contiene el archivo íntegro. Todas las colecciones, sus conteos
+y validaciones pertenecen a una única transacción PostgreSQL read-only con
+snapshot repeatable-read; no se compone exportando páginas HTTP independientes.
+Una escritura concurrente queda enteramente dentro o fuera del snapshot, sin
+mezclar definición nueva y valor anterior ni una tarea sin su proyecto visible
+en ese mismo snapshot. Las relaciones se filtran por propietario en todas las
+consultas, también tablas sin owner_id mediante su proyecto/sesión padre propio.
+Una relación o recibo incoherente dentro del conjunto propio causa 503; no se
+oculta una fila ni se incluyen datos ajenos para completar una relación corrupta.
+
+`exportedAt` es un único instante obtenido del reloj inyectado al preparar el
+snapshot. Identifica esta preparación, no es una marca causal de commit ni un
+avance de sesiones abiertas. Fallo del reloj o instante fuera de 0001–9999 produce
+503 sin archivo. No se requiere RabbitMQ ni se consulta el estado de publicación.
+
+La serialización debe completarse dentro del límite antes de enviar estado 200
+o bytes de descarga. No se sirve un archivo parcial como éxito si falla una
+consulta, la validación o la serialización. Una interrupción posterior de la red
+puede impedir recibir el archivo completo; el cliente no la anuncia como éxito.
+No se introducen tablas, recibos de exportación ni eventos por esta lectura.
+
+La lectura, validación y serialización deben tener memoria acotada: cursor/lotes
+de registros dentro del mismo snapshot, o un presupuesto equivalente comprobable.
+No basta contar 100000 filas y materializarlas completas antes de comprobar sus
+bytes. El presupuesto incluye datos leídos, relaciones de validación y salida;
+no puede crecer con todo el volumen de texto de la cuenta. Campos persistidos
+anormalmente grandes también se rechazan antes de materializarlos sin límite.
+La salida se acumula en un buffer privado limitado a 32 MiB; la comprobación se
+hace antes de cada ampliación, sin duplicar primero el documento entero para
+medirlo. Al fallar o cancelar se descartan buffers, se cierra el cursor y termina
+la transacción. Esto no exige streaming de bytes al navegador antes de validar:
+el envío empieza sólo cuando el documento completo y su tamaño están confirmados.
+
+### Documento JSON v1 cerrado
+
+El objeto exterior tiene exactamente `format`, `schemaVersion`, `exportedAt`,
+`owner`, `data` y `counts`. `format` es `organizationweb-export`, `schemaVersion`
+es el número entero 1, `owner` es el nombre de la identidad autenticada y no una
+credencial. `data` y `counts` contienen exactamente las siguientes catorce claves.
+Cada clave de data es siempre un array; cada clave de counts es su longitud
+entera no negativa. Ausencia de una preferencia persistida se representa como
+array vacío, sin insertar ni materializar defaults ficticios.
+
+| Colección | Campos exactos de cada registro |
+| --- | --- |
+| projects | id, name, description, status, version, createdAt, updatedAt |
+| tasks | id, projectId, parentId, title, completionCriterion, estimatedMinutes, status, version, completedAt, createdAt, updatedAt |
+| taskStatusHistory | id, projectId, taskId, taskVersion, fromStatus, toStatus, occurredAt |
+| availability | id, zoneId, mondayMinutes, tuesdayMinutes, wednesdayMinutes, thursdayMinutes, fridayMinutes, saturdayMinutes, sundayMinutes, version, createdAt, updatedAt |
+| plannedBlocks | id, projectId, taskId, requestKey, objective, startLocal, endLocal, zoneId, startOffset, endOffset, allowOverBudget, startAt, endAt, durationMinutes, createdAt |
+| blockProjections | blockId, version, status, updatedAt, startLocal, endLocal, zoneId, startOffset, endOffset, startAt, endAt, durationMinutes |
+| blockChanges | id, projectId, taskId, blockId, requestKey, kind, version, occurredAt, receipt |
+| workSessions | id, projectId, taskId, requestKey, startedAt, plannedMinutes, plannedEndAt, zoneId, status, revision, changedAt, workedMicroseconds, runningSince, effectiveEndAt, lastDecisionAt |
+| workSessionIntervals | sessionId, revision, startAt, endAt |
+| workSessionChanges | id, sessionId, requestKey, action, expectedRevision, occurredAt, receipt |
+| appearance | id, theme, accentLight, accentDark, version, updatedAt |
+| customization | id, scope, visibleFields, customFields, version, updatedAt |
+| projectCustomFieldValues | id, projectId, values, version, updatedAt |
+| taskCustomFieldValues | id, projectId, taskId, values, version, updatedAt |
+
+Los registros son cerrados: no se serializan filas SQL ni JSONB completos mediante
+un mecanismo genérico. `customFields` contiene los cuatro campos de definición
+de 21 (`id`, `label`, `type`, `active`), incluidas las desactivadas, en su orden
+guardado. `visibleFields` conserva su orden. `values` contiene los pares cerrados
+`fieldId`, `value` que están realmente persistidos, también si la definición está
+inactiva; se ordenan por fieldId. Un valor ausente sigue ausente y un null
+persistido sigue null. No se inventan valores para definiciones recién creadas.
+Cada fieldId debe resolver una definición del mismo propietario y ámbito.
+
+`receipt` de blockChanges tiene exactamente los siete campos durables de
+BlockChangeReceipt: `id`, `blockId`, `kind`, `version`, `occurredAt`, `before`
+y `after`. Se conserva el nombre `version`, como string decimal canónico de long;
+no se sustituye por el `revision` del DTO HTTP. `kind` es RESCHEDULED o CANCELLED;
+before siempre es un snapshot PlannedBlock completo, after es otro snapshot
+completo para RESCHEDULED y null para CANCELLED.
+
+Cada PlannedBlock anidado contiene exactamente `id`, `projectId`, `taskId`,
+`request`, `time` y `createdAt`. `request` contiene exactamente los siete campos
+`objective`, `startLocal`, `endLocal`, `zoneId`, `startOffset`, `endOffset` y
+`allowOverBudget`. `time` contiene exactamente los cinco campos `startAt`,
+`endAt`, `startOffset`, `endOffset` y `durationMinutes`.
+
+Los offsets de request expresan la intención persistida y pueden ser null;
+los de time son offsets resueltos no nulos. Se conservan ambos pares y sus
+valores propios: no se completan los null de intención con el resultado, no se
+fusionan ni se recalculan usando la zona actual. Cuando un offset de intención
+está presente debe coincidir con el correspondiente resuelto. Los offsets se
+representan como strings ISO de ZoneOffset, incluido Z; las fechas locales,
+instantes, boolean y duración mantienen las reglas de fidelidad de este archivo.
+id/projectId/taskId y los snapshots deben corresponder al bloque y sus entidades
+propias. Esta estructura conserva la intención y resolución históricas, incluso
+allowOverBudget; no utiliza el BlockResponse público de nueve campos, que omite
+parte de esa información. No se aplana ni se exporta JSONB abierto.
+
+`receipt` de workSessionChanges conserva los contratos de 15–17: id, sessionId,
+action, occurredAt, before y after; sólo CLOSE añade closure y sólo EXTEND añade
+extension. Los snapshots State6 y los campos de cierre/expansión mantienen sus
+formas originales. Los campos de la fila y del recibo duplicados deben coincidir.
+Los enteros largos de esas representaciones también usan el formato decimal
+textual definido a continuación. No se exportan campos extra de JSONB desconocidos.
+
+Las colecciones se ordenan por UUID canónico ascendente del id, excepto:
+blockProjections por blockId; workSessionIntervals por sessionId y luego revision
+numérica ascendente; customization por scope (PROJECT, TASK). Arrays de
+availability y appearance tienen cero o un registro; customization de cero a dos.
+El orden técnico no pretende ser cronológico ni imponer causalidad entre UUID.
+No hay duplicados por identidad ni referencias a entidades fuera del archivo.
+
+### Fidelidad y precisión
+
+Se conservan identificadores, vínculos de subtareas, estados, revisiones,
+objetivos, notas, zona/fecha histórica de cierre y todas las preferencias
+persistidas. Las claves de petición son identificadores históricos de las
+operaciones, no credenciales ni una orden de repetirlas al abrir el archivo.
+Los nombres/descripciones/notas conservan Unicode y espacios; el exportador no
+vuelve a normalizarlos con reglas de edición. Los textos se escapan como JSON,
+sin interpretarlos como HTML, fórmulas, CSS ni contenido ejecutable.
+
+Todos los BIGINT —version, revision, taskVersion, expectedRevision y
+workedMicroseconds, incluso en recibos anidados— son strings decimales canónicos
+sin signo positivo, espacios, exponente ni ceros iniciales, dentro del rango
+no negativo de long. Los campos enteros acotados, schemaVersion y counts siguen
+siendo números JSON; NUMBER personal sigue siendo un entero entre -1000000000
+y 1000000000. BOOLEAN false, NUMBER 0, texto y null mantienen tipos distintos.
+
+Instantes se escriben en UTC con Z y seis decimales de microsegundo, sin pasar por
+Date de JavaScript ni redondear. Fechas civiles mantienen YYYY-MM-DD; horas
+locales de planificación mantienen YYYY-MM-DDTHH:mm:ss con segundos cero.
+Zonas IANA y offsets persistidos se conservan, sin consultar la TZDB actual para
+recalcular instantes o atribución de cierres. Null históricos admitidos por las
+migraciones permanecen null, especialmente changedAt, runningSince,
+effectiveEndAt y lastDecisionAt de sesiones legadas. No se fabrican recibos para
+sesiones antiguas cerradas ni se afirma que ausencia de recibo signifique cero
+trabajo conocido.
+
+La reserva original y su proyección se exportan por separado. Ausencia de
+proyección significa que sigue vigente la reserva original según 13, no una
+fila de proyección nueva. Los intervalos cerrados y runningSince se conservan;
+no se añade trabajo hasta exportedAt, no se cierra ni pausa una sesión y no se
+altera una tarea. Los informes Hoy/Historial/Revisión semanal no se exportan
+como copias derivadas ni se agregan totales de productividad.
+
+Se excluyen tablas Spring Session, contraseñas/hashes, cookies, CSRF, secretos,
+variables de entorno, credenciales de integraciones, outbox/publicación/DLQ,
+backups operativos y datos de otras identidades. No se inventa historia de
+ediciones que no está conservada como dato de negocio fuera de infraestructura.
+
+### Límites, errores y cabeceras
+
+Límites inclusivos propuestos: 100000 registros sumando las catorce colecciones
+exteriores y 33554432 bytes (32 MiB) del JSON UTF-8 sin comprimir. Los elementos
+anidados cuentan para bytes; los límites existentes de definiciones/valores y
+notas siguen vigentes. Se comprueba el límite de registros y se limita la salida
+durante serialización; exceder cualquiera produce 413 `EXPORT_TOO_LARGE` sin
+JSON parcial. No se recortan registros ni se entrega silenciosamente una página.
+
+Precedencia: autenticación 401 `AUTHENTICATION_REQUIRED` antes de validar consulta;
+para GET, consulta inválida 400 `INVALID_EXPORT_QUERY`, cuerpo no vacío o Accept
+mal formado 400 `INVALID_EXPORT_REQUEST`, negociación no aceptable 406
+`EXPORT_FORMAT_NOT_ACCEPTABLE`; después tamaño 413 cuando se acredita su exceso,
+o 503 `STORAGE_UNAVAILABLE` ante fallo de lectura, coherencia, reloj o
+serialización. Los errores son application/problem+json con códigos y mensajes
+españoles, sin nombres/datos privados de filas ni trazas. No se promete precedencia
+entre un fallo de almacenamiento y un exceso que todavía no se pudo comprobar.
+No hay 204, 206, 304, ETag ni exportación vacía sin envelope: una cuenta sin datos
+recibe 200 con catorce arrays vacíos y sus counts cero.
+
+200 usa Content-Type `application/json; charset=utf-8`, Content-Disposition
+`attachment` y un nombre fijo seguro generado por servidor:
+`organizationweb-export-v1-YYYYMMDDTHHmmssffffffZ.json`, derivado de exportedAt.
+Content-Disposition tiene exactamente la disposición attachment y un único
+parámetro filename entre comillas con ese nombre ASCII; no hay filename* ni
+nombres alternativos. No incorpora usuario, texto libre ni separadores de ruta.
+200 incluye Content-Length decimal exacto de los bytes UTF-8 del documento,
+mayor que cero y como máximo 33554432. Se entrega sin compresión ni otra
+transformación (Content-Encoding ausente o identity); si el cliente excluye
+identity mediante Accept-Encoding, responde 406 sin preparar archivo. El camino
+API/proxy debe conservar esta representación y su longitud, sin gzip automático
+para esta respuesta. Todas las respuestas conservan Cache-Control
+`no-store, private, no-transform` y X-Content-Type-Options `nosniff`;
+no se crea una URL pública ni se permiten orígenes cruzados nuevos.
+Las respuestas de error no llevan Content-Disposition de descarga.
+
+### Recorrido de descarga y privacidad del cliente
+
+Ruta propia `/exportacion`, alcanzable mediante «Exportación» al final de
+navegación Principal, sin desplazar Hoy. Encabezado h1 «Exportar mis datos» y ayuda
+breve sobre contenidos, JSON versionado, archivo personal e importación futura
+no implementada. Abrir la vista no inicia GET. Una acción primaria «Preparar
+exportación» obtiene el archivo; mientras tanto anuncia «Preparando exportación…»
+antes de 400 ms, sin porcentaje ficticio, e impide solicitudes duplicadas incluso
+por doble clic/Enter. «Cancelar preparación» aborta y vuelve al estado inicial.
+
+El cliente sólo ofrece «Descargar archivo JSON» después de recibir íntegramente
+el cuerpo, respetar el límite y validar Content-Type, envelope/version/owner,
+colecciones y counts coherentes. Antes de consumirlo valida Content-Length,
+codificación y nombre seguros del contrato. Lee los bytes con un contador
+acotado; si exceden la longitud declarada o el límite, aborta. Al acabar exige
+igualdad exacta entre bytes recibidos y Content-Length, UTF-8 válido y JSON
+completo. Falta de longitud, discrepancia, stream interrumpido o vacío se trata
+como fallo: no crea Blob descargable ni enlace, aunque el estado HTTP fuera 200.
+No reconstruye ni redondea el contenido para
+crear el Blob. El servidor valida todos los registros; el cliente valida el
+formato de transporte y no reinterpreta cada dato de negocio para renderizarlo.
+Una respuesta incompatible no produce enlace ni descarga.
+
+El enlace nativo con download requiere el gesto deliberado final del usuario,
+con nombre seguro del contrato. Se anuncia «Archivo preparado»; no se afirma que
+el navegador lo guardó en disco. Puede volver a pulsar el enlace mientras siga
+en la vista sin hacer otro GET. «Preparar de nuevo» retira el archivo anterior y
+consulta un snapshot nuevo. Error de red/503 ofrece reintento manual; 413 explica
+el límite sin recomendar pulsar indefinidamente ni ofrecer una exportación parcial.
+
+El estado de preparación/archivo es local a esta sesión y vista, sin persistir
+bytes en localStorage, IndexedDB, caché de aplicación ni logs. Cancelar, abandonar
+la ruta, logout o cambio de identidad aborta la petición e invalida su generación;
+revoca ObjectURL y referencias al archivo. Una respuesta HTTP/JSON/Blob tardía se
+descarta antes de notificar un 401 a otra sesión o de crear un enlace/descarga.
+Un 401 vigente conserva el flujo de retirada de acceso existente. El archivo
+que el navegador ya descargó queda bajo control del usuario, no se promete borrarlo.
+
+Se reutilizan RouteLink, apiRequest, identidad y estilos/tokens actuales. No hay
+Provider global nuevo ni alteración de borradores de proyectos, tareas o campos.
+Controles nativos, foco visible, nombres accesibles y anuncios de estado/error;
+restaurar foco lógico sólo cuando desaparece el iniciador y el usuario no lo movió.
+Mantener 44px, reflow a320, texto/zoom200, temas, forced-colors y movimiento
+reducido. La matriz de30 principios UX se revisará con evidencias y límites,
+sin atribuir ahora pruebas, rendimiento o conformidad universal.

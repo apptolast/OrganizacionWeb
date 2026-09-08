@@ -19,6 +19,272 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 class ImportPersistenceTest {
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {
+        "appearance",
+        "customization",
+        "projectCustomFieldValues",
+        "taskCustomFieldValues"
+      })
+  void s9_preferencesAndValuesAreValidatedAgainstTheFileInsteadOfDestination(String collection)
+      throws Exception {
+    var owner = "preferences-" + java.util.UUID.randomUUID();
+    seedCompleteAccount(owner);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T15:00:00Z"))
+        .writeTo(bytes);
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = json.readTree(bytes.toByteArray());
+    if (collection.equals("appearance"))
+      ((com.fasterxml.jackson.databind.node.ObjectNode) file.path("data").path(collection).get(0))
+          .put("theme", "unknown");
+    else if (collection.equals("customization"))
+      ((com.fasterxml.jackson.databind.node.ObjectNode) file.path("data").path(collection).get(0))
+          .set("visibleFields", json.createArrayNode().add("unknown"));
+    else {
+      String scope = collection.equals("projectCustomFieldValues") ? "PROJECT" : "TASK";
+      for (var config : file.path("data").path("customization"))
+        if (config.path("scope").asText().equals(scope))
+          ((com.fasterxml.jackson.databind.node.ArrayNode) config.path("customFields")).removeAll();
+    }
+    var before = businessRows();
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .preview(owner, new ByteArrayInputStream(json.writeValueAsBytes(file))))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+    assertThat(businessRows()).isEqualTo(before);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {
+        "taskStatusHistory",
+        "availability",
+        "plannedBlocks",
+        "blockChanges",
+        "workSessions",
+        "workSessionChanges",
+        "appearance",
+        "customization",
+        "projectCustomFieldValues",
+        "taskCustomFieldValues"
+      })
+  void s6_alternativeKeyCannotBeTakenByANewIdentity(String collection) throws Exception {
+    var owner = "alternative-" + java.util.UUID.randomUUID();
+    var ids = seedCompleteAccount(owner);
+    if (collection.equals("workSessions")) {
+      jdbc.update("DELETE FROM work_session_changes WHERE session_id=?", ids[3]);
+      jdbc.update("DELETE FROM work_session_intervals WHERE session_id=?", ids[3]);
+      jdbc.update(
+          "UPDATE work_sessions SET status='closed',worked_microseconds=0,changed_at=NULL,running_since=NULL WHERE id=?",
+          ids[3]);
+    }
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T15:00:00Z"))
+        .writeTo(bytes);
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = json.readTree(bytes.toByteArray());
+    var original = file.path("data").path(collection).get(0).path("id").textValue();
+    if (collection.equals("plannedBlocks")) {
+      for (var child : java.util.List.of("blockChanges", "blockProjections")) {
+        ((com.fasterxml.jackson.databind.node.ArrayNode) file.path("data").path(child)).removeAll();
+        ((com.fasterxml.jackson.databind.node.ObjectNode) file.path("counts")).put(child, 0);
+      }
+    }
+    var input =
+        json.writeValueAsString(file)
+            .replace(original, java.util.UUID.randomUUID().toString())
+            .getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    var before = businessRows();
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .preview(owner, new ByteArrayInputStream(input)))
+        .isInstanceOf(com.apptolast.organization.application.ImportConflictException.class);
+    assertThat(businessRows()).isEqualTo(before);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {
+        "projects",
+        "tasks",
+        "taskStatusHistory",
+        "availability",
+        "plannedBlocks",
+        "blockProjections",
+        "blockChanges",
+        "workSessions",
+        "workSessionIntervals",
+        "workSessionChanges",
+        "appearance",
+        "customization",
+        "projectCustomFieldValues",
+        "taskCustomFieldValues"
+      })
+  void s10_duplicateDurableIdentityIsInvalidEvenWhenRowsAreIdentical(String collection)
+      throws Exception {
+    var owner = "duplicate-" + java.util.UUID.randomUUID();
+    seedCompleteAccount(owner);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T15:00:00Z"))
+        .writeTo(bytes);
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = json.readTree(bytes.toByteArray());
+    var rows = (com.fasterxml.jackson.databind.node.ArrayNode) file.path("data").path(collection);
+    rows.add(rows.get(0).deepCopy());
+    ((com.fasterxml.jackson.databind.node.ObjectNode) file.path("counts"))
+        .put(collection, rows.size());
+    var before = businessRows();
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .preview(owner, new ByteArrayInputStream(json.writeValueAsBytes(file))))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+    assertThat(businessRows()).isEqualTo(before);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "availability,mondayMinutes",
+    "plannedBlocks,durationMinutes",
+    "workSessions,plannedMinutes",
+    "tasks,estimatedMinutes"
+  })
+  void s9_mathematicallyIntegralNumbersAreIdenticalWithoutLexicalCoercion(
+      String collection, String field) throws Exception {
+    var owner = "integral-" + java.util.UUID.randomUUID();
+    seedCompleteAccount(owner);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T15:00:00Z"))
+        .writeTo(bytes);
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = json.readTree(bytes.toByteArray());
+    var row =
+        (com.fasterxml.jackson.databind.node.ObjectNode) file.path("data").path(collection).get(0);
+    row.set(
+        field,
+        com.fasterxml.jackson.databind.node.DecimalNode.valueOf(
+            new java.math.BigDecimal(row.get(field).asText() + ".0")));
+    var before = businessRows();
+    var preview =
+        new PostgresImportDataStore(jdbc, manager)
+            .preview(owner, new ByteArrayInputStream(json.writeValueAsBytes(file)));
+    assertThat(preview.identicalCounts())
+        .isEqualTo(json.treeToValue(file.path("counts"), ImportCounts.class));
+    assertThat(businessRows()).isEqualTo(before);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.MethodSource("invalidTypedRows")
+  void s9_closedRowsRejectCoercionAndUnrepresentableFacts(
+      String collection, String field, String value) throws Exception {
+    invalidMutation(collection, field, value);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "taskStatusHistory,taskId", "plannedBlocks,projectId", "blockProjections,blockId",
+    "blockChanges,blockId", "workSessions,taskId", "workSessionIntervals,sessionId",
+    "workSessionChanges,sessionId", "projectCustomFieldValues,projectId",
+        "taskCustomFieldValues,taskId"
+  })
+  void s10_everyFamilyMustReferenceFactsInsideItsOwnFile(String collection, String field)
+      throws Exception {
+    invalidMutation(collection, field, "\"" + java.util.UUID.randomUUID() + "\"");
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "tasks,parentId", "taskStatusHistory,projectId", "plannedBlocks,projectId",
+    "blockChanges,projectId", "workSessions,projectId", "taskCustomFieldValues,projectId"
+  })
+  void s10_relatedFactsMustBelongToTheSameProject(String collection, String field)
+      throws Exception {
+    invalidMutation(collection, field, "cross-project");
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.MethodSource("inconsistentHistoricalFacts")
+  void s10_historicalFactsKeepTheirDurableInvariants(String collection, String field, String value)
+      throws Exception {
+    invalidMutation(collection, field, value);
+  }
+
+  static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments>
+      inconsistentHistoricalFacts() {
+    return java.util.stream.Stream.of(
+        org.junit.jupiter.params.provider.Arguments.of("plannedBlocks", "durationMinutes", "31"),
+        org.junit.jupiter.params.provider.Arguments.of("taskStatusHistory", "taskVersion", "\"3\""),
+        org.junit.jupiter.params.provider.Arguments.of("blockProjections", "version", "\"2\""),
+        org.junit.jupiter.params.provider.Arguments.of("workSessionIntervals", "revision", "\"3\""),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "workSessions", "workedMicroseconds", "\"60000001\""),
+        org.junit.jupiter.params.provider.Arguments.of("availability", "mondayMinutes", "1441"),
+        org.junit.jupiter.params.provider.Arguments.of("workSessions", "status", "\"alien\""),
+        org.junit.jupiter.params.provider.Arguments.of("plannedBlocks", "objective", "123"));
+  }
+
+  private void invalidMutation(String collection, String field, String value) throws Exception {
+
+    var owner = "typed-" + java.util.UUID.randomUUID();
+    var originalIds = seedCompleteAccount(owner);
+    if (value.equals("cross-project")) {
+      var project = java.util.UUID.randomUUID();
+      var task = java.util.UUID.randomUUID();
+      jdbc.update(
+          "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) VALUES (?,?,'Segundo','','idea',0,'2026-09-01Z','2026-09-01Z')",
+          project,
+          owner);
+      jdbc.update(
+          "INSERT INTO tasks(id,project_id,title,completion_criterion,status,version,created_at,updated_at) VALUES (?,?,'Segunda','Hecha','pending',0,'2026-09-01Z','2026-09-01Z')",
+          task,
+          project);
+      value = "\"" + (field.equals("parentId") ? task : project) + "\"";
+    }
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T15:00:00.123456Z"))
+        .writeTo(bytes);
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = json.readTree(bytes.toByteArray());
+    var selected = file.path("data").path(collection).get(0);
+    if (collection.equals("tasks") && field.equals("parentId")) {
+      for (var candidate : file.path("data").path("tasks"))
+        if (candidate.path("id").asText().equals(originalIds[1].toString())) selected = candidate;
+    }
+    ((com.fasterxml.jackson.databind.node.ObjectNode) selected).set(field, json.readTree(value));
+    var before = businessRows();
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new PostgresImportDataStore(jdbc, manager)
+                    .preview(owner, new ByteArrayInputStream(json.writeValueAsBytes(file))))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+    assertThat(businessRows()).isEqualTo(before);
+  }
+
+  static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments> invalidTypedRows() {
+    return java.util.stream.Stream.of(
+        org.junit.jupiter.params.provider.Arguments.of("tasks", "unknown", "true"),
+        org.junit.jupiter.params.provider.Arguments.of("availability", "mondayMinutes", "\"60\""),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "blockProjections", "durationMinutes", "\"30\""),
+        org.junit.jupiter.params.provider.Arguments.of("workSessions", "revision", "\"-1\""),
+        org.junit.jupiter.params.provider.Arguments.of("taskCustomFieldValues", "version", "1"),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "workSessionIntervals", "endAt", "\"2026-09-08T12:01:00.1234567Z\""),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "plannedBlocks", "allowOverBudget", "\"true\""),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "customization", "updatedAt", "\"2026-09-08T12:00:00\""));
+  }
+
   @Test
   void s2_allFourteenCollectionsAreRestoredTogetherAndUnrelatedFactsSurvive() throws Exception {
     var owner = "complete-import";

@@ -39,6 +39,7 @@ public final class PostgresImportDataStore
                     if (!owner.equals(header.owner())) throw new ImportInvalidFileException();
                     validate(owner);
                     prepareReceipts();
+                    validateHistoricalRelations();
                     var identical = compare(owner);
                     return new ImportPreview(
                         header.fileSha256(),
@@ -79,6 +80,48 @@ public final class PostgresImportDataStore
   }
 
   private com.apptolast.organization.application.ImportCounts compare(String owner) {
+    if (jdbc.queryForObject(
+        """
+        SELECT EXISTS(
+          SELECT 1 FROM import_stage s JOIN availability_preferences r ON r.owner_id=?
+            WHERE s.collection='availability' AND r.id::text<>s.payload->>'id'
+          UNION ALL SELECT 1 FROM import_stage s JOIN appearance_preferences r ON r.owner_id=?
+            WHERE s.collection='appearance' AND r.id::text<>s.payload->>'id'
+          UNION ALL SELECT 1 FROM import_stage s JOIN customization_preferences r
+            ON r.owner_id=? AND r.scope=s.payload->>'scope'
+            WHERE s.collection='customization' AND r.id::text<>s.payload->>'id'
+          UNION ALL SELECT 1 FROM import_stage s JOIN project_custom_field_values r
+            ON r.owner_id=? AND r.project_id::text=s.payload->>'projectId'
+            WHERE s.collection='projectCustomFieldValues' AND r.id::text<>s.payload->>'id'
+          UNION ALL SELECT 1 FROM import_stage s JOIN task_custom_field_values r
+            ON r.owner_id=? AND r.task_id::text=s.payload->>'taskId'
+            WHERE s.collection='taskCustomFieldValues' AND r.id::text<>s.payload->>'id'
+          UNION ALL SELECT 1 FROM import_stage s JOIN planned_blocks r
+            ON r.task_id::text=s.payload->>'taskId' AND r.request_key::text=s.payload->>'requestKey'
+            WHERE s.collection='plannedBlocks' AND r.id::text<>s.payload->>'id'
+          UNION ALL SELECT 1 FROM import_stage s JOIN block_changes r
+            ON (r.task_id::text=s.payload->>'taskId' AND r.request_key::text=s.payload->>'requestKey')
+              OR (r.block_id::text=s.payload->>'blockId' AND r.version::text=s.payload->>'version')
+            WHERE s.collection='blockChanges' AND r.id::text<>s.payload->>'id'
+          UNION ALL SELECT 1 FROM import_stage s JOIN task_status_history r
+            ON r.task_id::text=s.payload->>'taskId' AND r.task_version::text=s.payload->>'taskVersion'
+            WHERE s.collection='taskStatusHistory' AND r.id::text<>s.payload->>'id'
+          UNION ALL SELECT 1 FROM import_stage s JOIN work_sessions r
+            ON r.owner_id=? AND r.request_key::text=s.payload->>'requestKey'
+            WHERE s.collection='workSessions' AND r.id::text<>s.payload->>'id'
+          UNION ALL SELECT 1 FROM import_stage s JOIN work_session_changes r ON r.owner_id=? AND (
+            r.request_key::text=s.payload->>'requestKey' OR
+            r.action='CLOSE' AND s.payload->>'action'='CLOSE' AND r.session_id::text=s.payload->>'sessionId')
+            WHERE s.collection='workSessionChanges' AND r.id::text<>s.payload->>'id')
+        """,
+        Boolean.class,
+        owner,
+        owner,
+        owner,
+        owner,
+        owner,
+        owner,
+        owner)) throw new com.apptolast.organization.application.ImportConflictException();
     existingReceipts(owner);
     long projects =
         jdbc.queryForObject(
@@ -460,6 +503,48 @@ public final class PostgresImportDataStore
     jdbc.update("UPDATE import_stage SET payload=raw::jsonb");
     if (jdbc.queryForObject(
         """
+        SELECT EXISTS(SELECT 1 FROM import_stage GROUP BY collection,
+          CASE collection WHEN 'workSessionIntervals' THEN jsonb_build_array(payload->'sessionId',payload->'revision')
+            WHEN 'blockProjections' THEN jsonb_build_array(payload->'blockId')
+            ELSE jsonb_build_array(payload->'id') END
+          HAVING count(*)>1)
+        """,
+        Boolean.class)) throw new ImportInvalidFileException();
+    if (jdbc.queryForObject(
+        """
+        SELECT EXISTS(
+          SELECT 1 FROM import_stage child
+          JOIN (VALUES ('tasks','parentId','tasks'),('taskStatusHistory','taskId','tasks'),
+            ('plannedBlocks','taskId','tasks'),('blockChanges','taskId','tasks'),
+            ('blockChanges','blockId','plannedBlocks'),('workSessions','taskId','tasks'),
+            ('taskCustomFieldValues','taskId','tasks')) edge(collection,field,target)
+            ON edge.collection=child.collection
+          JOIN import_stage parent ON parent.collection=edge.target AND parent.payload->>'id'=child.payload->>edge.field
+          WHERE child.payload->>'projectId' IS DISTINCT FROM parent.payload->>'projectId'
+            OR edge.target='plannedBlocks' AND child.payload->>'taskId' IS DISTINCT FROM parent.payload->>'taskId')
+        """,
+        Boolean.class)) throw new ImportInvalidFileException();
+    if (jdbc.queryForObject(
+        """
+        SELECT EXISTS(
+          SELECT 1 FROM import_stage child
+          JOIN (VALUES
+            ('tasks','projectId','projects'),('tasks','parentId','tasks'),
+            ('taskStatusHistory','projectId','projects'),('taskStatusHistory','taskId','tasks'),
+            ('plannedBlocks','projectId','projects'),('plannedBlocks','taskId','tasks'),
+            ('blockProjections','blockId','plannedBlocks'),
+            ('blockChanges','projectId','projects'),('blockChanges','taskId','tasks'),('blockChanges','blockId','plannedBlocks'),
+            ('workSessions','projectId','projects'),('workSessions','taskId','tasks'),
+            ('workSessionIntervals','sessionId','workSessions'),('workSessionChanges','sessionId','workSessions'),
+            ('projectCustomFieldValues','projectId','projects'),
+            ('taskCustomFieldValues','projectId','projects'),('taskCustomFieldValues','taskId','tasks')
+          ) edge(collection,field,target) ON edge.collection=child.collection
+          LEFT JOIN import_stage parent ON parent.collection=edge.target AND parent.payload->>'id'=child.payload->>edge.field
+          WHERE child.payload->>edge.field IS NOT NULL AND parent.payload IS NULL)
+        """,
+        Boolean.class)) throw new ImportInvalidFileException();
+    if (jdbc.queryForObject(
+        """
         WITH RECURSIVE reachable(id) AS (
           SELECT payload->>'id' FROM import_stage WHERE collection='tasks' AND payload->>'parentId' IS NULL
           UNION
@@ -490,7 +575,12 @@ public final class PostgresImportDataStore
         connection -> {
           var statement =
               connection.prepareStatement(
-                  "SELECT collection,payload::text FROM import_stage WHERE collection IN ('projects','tasks')");
+                  """
+                  SELECT s.collection,s.payload::text,c.payload->'customFields' AS definitions
+                  FROM import_stage s LEFT JOIN import_stage c
+                    ON c.collection='customization' AND c.payload->>'scope'=CASE s.collection
+                      WHEN 'projectCustomFieldValues' THEN 'PROJECT' WHEN 'taskCustomFieldValues' THEN 'TASK' END
+                  """);
           statement.setFetchSize(1);
           return statement;
         },
@@ -504,15 +594,48 @@ public final class PostgresImportDataStore
               while (rows.next()) {
                 try {
                   var row = json.readTree(rows.getString(2));
-                  if (rows.getString(1).equals("projects"))
-                    ImportRecordValidator.project(row, owner);
-                  else ImportRecordValidator.task(row);
+                  ImportRecordValidator.row(rows.getString(1), row, owner);
+                  switch (rows.getString(1)) {
+                    case "appearance" -> ImportCustomizationValidator.appearance(row);
+                    case "customization" -> ImportCustomizationValidator.configuration(row);
+                    case "projectCustomFieldValues", "taskCustomFieldValues" ->
+                        ImportCustomizationValidator.values(
+                            row.path("values"),
+                            rows.getString("definitions") == null
+                                ? json.createArrayNode()
+                                : json.readTree(rows.getString("definitions")));
+                    default -> {}
+                  }
                 } catch (IOException invalidStorage) {
                   throw new StorageUnavailableException(invalidStorage);
                 }
               }
               return null;
             });
+  }
+
+  private void validateHistoricalRelations() {
+    if (jdbc.queryForObject(
+        """
+        SELECT EXISTS(SELECT 1 FROM import_stage h JOIN import_stage t
+          ON t.collection='tasks' AND t.payload->>'id'=h.payload->>'taskId'
+          WHERE h.collection='taskStatusHistory' AND (h.payload->>'taskVersion')::bigint>(t.payload->>'version')::bigint)
+        OR EXISTS(SELECT 1 FROM import_stage i JOIN import_stage s
+          ON s.collection='workSessions' AND s.payload->>'id'=i.payload->>'sessionId'
+          WHERE i.collection='workSessionIntervals' AND (
+            (i.payload->>'revision')::bigint>(s.payload->>'revision')::bigint
+            OR (i.payload->>'endAt')::timestamptz<(i.payload->>'startAt')::timestamptz
+            OR (i.payload->>'startAt')::timestamptz<(s.payload->>'startedAt')::timestamptz))
+        OR EXISTS(SELECT 1 FROM import_stage s WHERE s.collection='workSessions' AND
+          (s.payload->>'workedMicroseconds')::numeric<>coalesce((
+            SELECT sum(extract(epoch FROM ((i.payload->>'endAt')::timestamptz-(i.payload->>'startAt')::timestamptz))*1000000)
+            FROM import_stage i WHERE i.collection='workSessionIntervals' AND i.payload->>'sessionId'=s.payload->>'id'),0))
+        OR EXISTS(SELECT 1 FROM import_stage p WHERE p.collection='blockProjections' AND
+          (p.payload->>'version')::bigint IS DISTINCT FROM (
+            SELECT max((c.payload->>'version')::bigint) FROM import_stage c
+            WHERE c.collection='blockChanges' AND c.payload->>'blockId'=p.payload->>'blockId'))
+        """,
+        Boolean.class)) throw new ImportInvalidFileException();
   }
 
   private void prepareReceipts() {
@@ -648,6 +771,7 @@ public final class PostgresImportDataStore
                   if (!owner.equals(header.owner())) throw new ImportInvalidFileException();
                   validate(owner);
                   prepareReceipts();
+                  validateHistoricalRelations();
                   for (var scope : List.of("PROJECT", "TASK")) {
                     jdbc.queryForObject(
                         "SELECT pg_advisory_xact_lock(hashtextextended(?, 0))",

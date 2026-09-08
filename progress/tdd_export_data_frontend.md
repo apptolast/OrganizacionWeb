@@ -131,3 +131,11 @@ First integrated E2E in e2e/export-data.spec.mjs is prepared, syntax and format 
 Original residue 300 motivated one public overlap oracle in the existing cancellation test. A is cancelled, B begins, then A resolves; B remains busy and cancelable, its signal remains current and no old Blob/third GET appears. B then completes normally. All earlier cancellation assertions remain. Initially GREEN f79d9b; no fake RED or production edit. Focal client+view and formatting/lint logs: export_overlap_focal_final.log, export_overlap_lint.log, export_overlap_format_check.log. Original campaign untouched and no replay executed.
 
 Integrated E2E header comparison now accepts UTF-8 case variations using the same anchored semantic media-type check as the client. C already observed uppercase UTF-8 on the real server. This E2E has not yet run, so this is fixture preparation, not a claimed RED/GREEN integration result. Freeze export_overlap_freeze.json records both test hashes and the explicit post-campaign delta.
+
+## First integrated browser run on fixed product
+
+Detached checkout work/OrganizacionWeb-export-e2e from ee4ca8d, dependencies installed from frozen locks, 18080 confirmed free. Existing scripts/e2e.mjs owns creation and cleanup. First run RED 422af3: raw text assertion received aria-hidden icon plus Hoy; accessible name was correct. Corrected only first/last navigation assertions to toHaveAccessibleName, preserving order. All 1913 versioned inputs unchanged during that original run.
+
+Same real nominal GREEN 1/1 e52761 / EXIT0 2cfea5 after transfer of that test only. Product remains ee4ca8d. HTTP-created project and task, explicit foreign-owner PG fixture, 14 collection counts, owner exclusion, 1332 original bytes equal both native downloads, one export GET and no view writes. Own rows/event payloads unchanged. Leaving revokes the Blob URL, verified by its fetch rejection. Runner removed containers/network/volume; port 18080 free (72e40b).
+
+Original and second logs/contexts, byte metadata and hashes are in export_e2e_nominal_freeze.json. Only the E2E fixture differs from the baseline; no production edit. This does not attribute final backend guard/performance validation to the nominal cutoff.

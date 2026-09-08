@@ -1,0 +1,13 @@
+{
+  "owner": "e2e-user",
+  "projectId": "f70e04ed-89be-4abe-873a-b8920038e63e",
+  "taskId": "7f5fe601-660b-49bd-901b-9a09acc101e4",
+  "excludedProjectId": "c40930f5-5ea7-4559-9906-8709ed5c146a",
+  "filename": "organizationweb-export-v1-20260908T033708720146Z.json",
+  "length": 1332,
+  "sha256": "f600017dfe660d80cbddabcb8519e1fb28b5ce433105491d505f87d95b6346f3",
+  "downloadCount": 2,
+  "exportRequests": 1,
+  "databaseUnchanged": true,
+  "objectUrlRevoked": true
+}

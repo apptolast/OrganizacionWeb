@@ -1,0 +1,53 @@
+{
+  "commit": "ee4ca8dcff30d5508ceedca330447c8ac207732a",
+  "checkout": "work/OrganizacionWeb-export-e2e",
+  "files": [
+    {
+      "path": "e2e/export-data.spec.mjs",
+      "sha256": "6ef8b8aa8ceb3795e6af4b951a1a2bea190dbee01ba992fc1a8e3f28c591672c"
+    },
+    {
+      "path": "progress/export_e2e_nominal_before.json",
+      "sha256": "087c0fe192582deb39b930992e61964659a4ad766b50882a11600cf82afcdfb3"
+    },
+    {
+      "path": "progress/export_e2e_nominal_after.json",
+      "sha256": "45192876dbfcbf61b31a19ae4aa20a0aabe7ea0635dc4c6eed07492bfe04d76f"
+    },
+    {
+      "path": "progress/export_e2e_nominal_original.log",
+      "sha256": "5ba978a1fa9901c4452a701cf1ea66056c731b0cef1bd3de8d39eb0163c341e9"
+    },
+    {
+      "path": "progress/export_e2e_nominal_original_exit.json",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "path": "progress/export_e2e_nominal_original_context.md",
+      "sha256": "a8e8cedca935408979d4509d98942ba1e07ac97587e3cfa405ed092b2014788c"
+    },
+    {
+      "path": "progress/export_e2e_nominal_second.log",
+      "sha256": "b24bb36f265a1ed179dd8efbd64ed0fa5206e54283c2ee3d59c8df812216756d"
+    },
+    {
+      "path": "progress/export_e2e_nominal_second_exit.json",
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "path": "progress/export_e2e_nominal_second_after.json",
+      "sha256": "dbcb76a55f4885c9c5768d410e0c1efa6ad09ecba3b3d0820ee155fba932663b"
+    },
+    {
+      "path": "progress/export_e2e_nominal_download.json",
+      "sha256": "ea0554377c4b858014c5414f155dd84f2a9b94f4bf741773adb49420a939f9e0"
+    }
+  ],
+  "result": "1/1 GREEN; original fixture failure preserved separately",
+  "inputs": 1913,
+  "productDeltas": 0,
+  "testDelta": "accessible-name assertions replace raw text containing aria-hidden icon",
+  "stackRemoved": "organizationweb-e2e-15480",
+  "port18080": "free after runner",
+  "limits": "Real nominal HTTP/PG/UI/download only. Does not validate later backend guard or performance changes."
+}

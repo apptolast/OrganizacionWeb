@@ -176,3 +176,16 @@ resolverlo y falló por esos marcadores (aaf825), no por producto. Tras resolver
 export_combined_harness.log). El manifiesto original describe el aislado;
 los scripts combinados contienen además el target frontend revisado.
 Este dictamen autoriza el soporte, no una campaña sobre fuentes todavía WIP.
+
+## Navegador integrado nominal: APPROVED parcial
+
+Sobre producto fijo ee4ca8d, el arnés existente crea PostgreSQL, API y Nginx
+efímeros. Root verificó las diez huellas, el log de 1/1 GREEN y el único
+delta entre 1913 entradas: el oráculo de nombre accesible del test
+(c400f4, 08cd28, 2258df). El fallo inicial por icono aria-hidden se conserva.
+La segunda ejecución prueba 1332 bytes originales iguales a dos descargas
+nativas con un GET, propietario correcto y proyecto ajeno excluido,
+catorce cantidades coherentes, filas/eventos intactos y URL revocada al salir.
+El log confirma retirada del stack y volumen propios. No hubo cambios de
+producto para este resultado. No acredita las guardas ni el rendimiento
+del WIP posterior de A, ni aceptación sobre HTTPS productivo.

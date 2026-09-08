@@ -51,8 +51,10 @@ test("export: real owner snapshot downloads original bytes twice without another
       name: "Principal",
       exact: true,
     });
-    await expect(nav.getByRole("link").first()).toHaveText("Hoy");
-    await expect(nav.getByRole("link").last()).toHaveText("Exportación");
+    await expect(nav.getByRole("link").first()).toHaveAccessibleName("Hoy");
+    await expect(nav.getByRole("link").last()).toHaveAccessibleName(
+      "Exportación",
+    );
     await nav.getByRole("link", { name: "Exportación", exact: true }).click();
     await expect(page).toHaveURL(/\/exportacion$/);
     await expect(

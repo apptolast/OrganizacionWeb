@@ -349,6 +349,19 @@ test("integration simulated API: text 200 percent and existing media modes @s41"
         .evaluate((element) => ({
           width: innerWidth,
           scroll: document.documentElement.scrollWidth,
+          clientWidth: document.documentElement.clientWidth,
+          offending: [...document.body.querySelectorAll("*")]
+            .map((node) => {
+              const box = node.getBoundingClientRect();
+              return {
+                tag: node.tagName,
+                className: String(node.className),
+                right: box.right,
+                width: box.width,
+              };
+            })
+            .filter((box) => box.width > 0 && box.right > innerWidth + 0.5)
+            .slice(0, 10),
           controls: [
             ...element.querySelectorAll(
               "button,select,input:not([type=checkbox]),label:has(input[type=checkbox])",
@@ -358,7 +371,16 @@ test("integration simulated API: text 200 percent and existing media modes @s41"
             return { x: r.x, width: r.width, height: r.height };
           }),
         }));
-      assert.ok(geometry.scroll <= width, "text200 page fits");
+      assert.ok(
+        geometry.scroll <= width,
+        `text200 page fits: ${JSON.stringify({
+          expectedWidth: width,
+          innerWidth: geometry.width,
+          clientWidth: geometry.clientWidth,
+          scroll: geometry.scroll,
+          offending: geometry.offending,
+        })}`,
+      );
       for (const r of geometry.controls) {
         assert.ok(r.width >= 44 && r.height >= 44, "text200 target");
         assert.ok(

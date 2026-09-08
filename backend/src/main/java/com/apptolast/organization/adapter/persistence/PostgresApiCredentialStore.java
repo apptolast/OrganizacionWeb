@@ -306,16 +306,22 @@ public final class PostgresApiCredentialStore
             if (ownerUsed >= 120 || credentialUsed >= 60)
               throw new ApiRateLimitedException(
                   60 - (int) Math.floorMod(instant.getEpochSecond(), 60));
-            jdbc.update(
-                "INSERT INTO api_owner_quotas VALUES (?,?::timestamptz,?) ON CONFLICT(owner_id) DO UPDATE SET window_start=EXCLUDED.window_start,used=EXCLUDED.used",
-                access.owner(),
-                window,
-                ownerUsed + 1);
-            jdbc.update(
-                "INSERT INTO api_credential_quotas VALUES (?,?::timestamptz,?) ON CONFLICT(credential_id) DO UPDATE SET window_start=EXCLUDED.window_start,used=EXCLUDED.used",
-                access.id(),
-                window,
-                credentialUsed + 1);
+            if (jdbc.update(
+                    "INSERT INTO api_owner_quotas VALUES (?,?::timestamptz,?) ON CONFLICT(owner_id) DO UPDATE SET window_start=EXCLUDED.window_start,used=EXCLUDED.used",
+                    access.owner(),
+                    window,
+                    ownerUsed + 1)
+                != 1)
+              throw new StorageUnavailableException(
+                  new IllegalStateException("Quota write was not confirmed"));
+            if (jdbc.update(
+                    "INSERT INTO api_credential_quotas VALUES (?,?::timestamptz,?) ON CONFLICT(credential_id) DO UPDATE SET window_start=EXCLUDED.window_start,used=EXCLUDED.used",
+                    access.id(),
+                    window,
+                    credentialUsed + 1)
+                != 1)
+              throw new StorageUnavailableException(
+                  new IllegalStateException("Quota write was not confirmed"));
           });
     } catch (org.springframework.dao.DataAccessException
         | org.springframework.transaction.TransactionException error) {

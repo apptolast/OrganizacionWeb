@@ -36,6 +36,45 @@ class ApiCredentialWiringTest {
   @Autowired com.apptolast.organization.application.AuthenticateApiCredentialUseCase authenticate;
   @Autowired com.apptolast.organization.application.ConsumeApiQuotaUseCase consume;
 
+  @Autowired org.springframework.security.core.userdetails.UserDetailsService users;
+
+  @Test
+  void s21_realDisabledBootstrapUserCannotAuthenticateOrConsume() {
+    var created = create.create("owner", UUID.randomUUID(), "Disabled", List.of("tasks:read"), 7);
+    var access = authenticate.authenticate(created.secret());
+    var original = users.loadUserByUsername("owner");
+    var manager = (org.springframework.security.provisioning.UserDetailsManager) users;
+    var before =
+        jdbc.queryForList(
+            "SELECT row_to_json(q)::text||xmin::text||ctid::text FROM api_owner_quotas q WHERE owner_id='owner'",
+            String.class);
+    try {
+      manager.updateUser(
+          org.springframework.security.core.userdetails.User.withUserDetails(original)
+              .disabled(true)
+              .build());
+      assertThrows(
+          com.apptolast.organization.application.ApiUnauthenticatedException.class,
+          () -> authenticate.authenticate(created.secret()));
+      assertThrows(
+          com.apptolast.organization.application.ApiUnauthenticatedException.class,
+          () -> consume.consume(access));
+      assertEquals(
+          before,
+          jdbc.queryForList(
+              "SELECT row_to_json(q)::text||xmin::text||ctid::text FROM api_owner_quotas q WHERE owner_id='owner'",
+              String.class));
+      assertEquals(
+          0,
+          jdbc.queryForObject(
+              "SELECT count(*) FROM api_credential_quotas WHERE credential_id=?",
+              Integer.class,
+              access.id()));
+    } finally {
+      manager.updateUser(original);
+    }
+  }
+
   @Test
   void s20_s26_realAuthenticationAndQuotaBeansUseEnabledBootstrapOwner() {
     var created =

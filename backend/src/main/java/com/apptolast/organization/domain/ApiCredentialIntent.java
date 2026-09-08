@@ -18,7 +18,8 @@ public record ApiCredentialIntent(String name, List<String> scopes, int expiresI
     name = name.replaceAll("(?U)^\\s+|\\s+$", "");
     if (name.isEmpty()
         || name.codePointCount(0, name.length()) > 80
-        || name.codePoints().anyMatch(Character::isISOControl))
+        || name.codePoints()
+            .anyMatch(point -> Character.isISOControl(point) || point >= 0xd800 && point <= 0xdfff))
       throw new ApiCredentialInvalidException("name");
     if (scopes == null
         || scopes.isEmpty()

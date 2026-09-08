@@ -15,6 +15,35 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 class ApiCredentialPersistenceTest {
+  @Test
+  void s3_unicodeNamesPreserveEightyCodePointsAndAllowDuplicateNames() {
+    var owner = "unicode-" + UUID.randomUUID();
+    var store = new PostgresApiCredentialStore(Database.JDBC, Database.TRANSACTIONS);
+    var create = new CreateApiCredential(store, Clock.systemUTC(), new SecureRandom());
+    var name = "\ud83d\ude00".repeat(80);
+    var first =
+        create.create(
+            owner,
+            UUID.randomUUID(),
+            "\u00a0\u0085" + name + "\u2003",
+            List.of("projects:read"),
+            7);
+    var second = create.create(owner, UUID.randomUUID(), name, List.of("projects:read"), 7);
+    assertNotEquals(first.credential().id(), second.credential().id());
+    assertEquals(name, first.credential().name());
+    assertEquals(name, second.credential().name());
+    assertEquals(
+        List.of(name, name),
+        Database.JDBC.queryForList(
+            "SELECT name FROM api_credentials WHERE owner_id=?", String.class, owner));
+    assertEquals(
+        80,
+        Database.JDBC.queryForObject(
+            "SELECT char_length(name) FROM api_credentials WHERE id=?",
+            Integer.class,
+            first.credential().id()));
+  }
+
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.ValueSource(strings = {"current", "expired", "revoked"})
   void s9_replayReturnsOriginalWithoutClockEntropyOrPhysicalWrite(String state) {
@@ -33,6 +62,16 @@ class ApiCredentialPersistenceTest {
             .create(owner, id, "Same", List.of("projects:read"), 7);
     if (state.equals("revoked"))
       jdbc.update("UPDATE api_credentials SET revoked_at='2026-09-09Z' WHERE id=?", id);
+    var current = Clock.fixed(Instant.parse("2026-09-08T12:00:00Z"), ZoneOffset.UTC);
+    for (int i = 0; i < (state.equals("current") ? 9 : 10); i++)
+      new CreateApiCredential(store, current, new SecureRandom())
+          .create(owner, UUID.randomUUID(), "Capacity", List.of("tasks:read"), 7);
+    assertEquals(
+        10,
+        jdbc.queryForObject(
+            "SELECT count(*) FROM api_credentials WHERE owner_id=? AND expires_at>'2026-09-08T12:00:00Z' AND revoked_at IS NULL",
+            Integer.class,
+            owner));
     var before =
         jdbc.queryForObject(
             "SELECT row_to_json(c)::text || xmin::text || ctid::text FROM api_credentials c WHERE id=?",
@@ -47,6 +86,7 @@ class ApiCredentialPersistenceTest {
             () -> {
               throw new AssertionError("Replay requested new secret or clock");
             });
+    assertEquals(Optional.of(result.credential()), new ReadApiCredentials(store).find(owner, id));
     assertNull(result.secret());
     assertEquals(first.credential().createdAt(), result.credential().createdAt());
     assertEquals(id, result.credential().id());
@@ -334,6 +374,104 @@ class ApiCredentialPersistenceTest {
     }
   }
 
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"verifier", "scope", "ownerQuota", "credentialQuota"})
+  void s1_s26_databaseRetainsFiniteVerifierScopeAndQuotaBounds(String field) {
+    var owner = "schema-" + UUID.randomUUID();
+    var id = UUID.randomUUID();
+    var jdbc = Database.JDBC;
+    var store = new PostgresApiCredentialStore(jdbc, Database.TRANSACTIONS);
+    new CreateApiCredential(store, Clock.systemUTC(), new SecureRandom())
+        .create(owner, id, "Stored", List.of("tasks:read"), 7);
+    assertThrows(
+        org.springframework.dao.DataIntegrityViolationException.class,
+        () -> {
+          switch (field) {
+            case "verifier" ->
+                jdbc.update("UPDATE api_credentials SET verifier=? WHERE id=?", new byte[31], id);
+            case "scope" ->
+                jdbc.update(
+                    "UPDATE api_credentials SET scopes=ARRAY['unknown:write'] WHERE id=?", id);
+            case "ownerQuota" ->
+                jdbc.update("INSERT INTO api_owner_quotas VALUES (?,now(),121)", owner);
+            case "credentialQuota" ->
+                jdbc.update("INSERT INTO api_credential_quotas VALUES (?,now(),61)", id);
+            default -> throw new AssertionError(field);
+          }
+        });
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(strings = {"create", "revoke"})
+  void s17_lostCommitAcknowledgementIsUncertainAndRecoverableWithoutAnotherSecret(
+      String operation) {
+    var owner = "commit-uncertain-" + UUID.randomUUID();
+    var id = UUID.randomUUID();
+    var clock = Clock.fixed(Instant.parse("2026-09-08T12:00:00Z"), ZoneOffset.UTC);
+    var healthy = new PostgresApiCredentialStore(Database.JDBC, Database.TRANSACTIONS);
+    if (operation.equals("revoke"))
+      new CreateApiCredential(healthy, clock, new SecureRandom())
+          .create(owner, id, "Recover", List.of("tasks:read"), 7);
+    var lost = new java.util.concurrent.atomic.AtomicBoolean(true);
+    var source =
+        new org.springframework.jdbc.datasource.DelegatingDataSource(
+            Database.JDBC.getDataSource()) {
+          @Override
+          public java.sql.Connection getConnection() throws java.sql.SQLException {
+            var connection = super.getConnection();
+            return (java.sql.Connection)
+                java.lang.reflect.Proxy.newProxyInstance(
+                    java.sql.Connection.class.getClassLoader(),
+                    new Class<?>[] {java.sql.Connection.class},
+                    (proxy, method, args) -> {
+                      try {
+                        var result = method.invoke(connection, args);
+                        if (method.getName().equals("commit") && lost.compareAndSet(true, false))
+                          throw new java.sql.SQLException("Commit acknowledgement fixture lost");
+                        return result;
+                      } catch (java.lang.reflect.InvocationTargetException error) {
+                        throw error.getCause();
+                      }
+                    });
+          }
+        };
+    var uncertain =
+        new PostgresApiCredentialStore(
+            new JdbcTemplate(source), new DataSourceTransactionManager(source));
+    assertThrows(
+        StorageUnavailableException.class,
+        () -> {
+          if (operation.equals("create"))
+            new CreateApiCredential(uncertain, clock, new SecureRandom())
+                .create(owner, id, "Recover", List.of("tasks:read"), 7);
+          else new RevokeApiCredential(uncertain, clock).revoke(owner, id);
+        });
+    assertFalse(lost.get(), "Fixture must lose acknowledgement after real commit");
+    var recovered = healthy.find(owner, id).orElseThrow();
+    assertEquals("Recover", recovered.name());
+    if (operation.equals("create")) {
+      var replay =
+          new CreateApiCredential(healthy, clock, new SecureRandom())
+              .create(owner, id, "Recover", List.of("tasks:read"), 7);
+      assertNull(replay.secret());
+      assertEquals(recovered, replay.credential());
+    } else
+      assertEquals(
+          Optional.of(recovered),
+          healthy.revoke(
+              owner,
+              id,
+              () -> {
+                throw new AssertionError("Confirmed revocation cannot reset clock");
+              }));
+    assertEquals(operation.equals("revoke") ? clock.instant() : null, recovered.revokedAt());
+    assertEquals(
+        1,
+        Database.JDBC.queryForObject(
+            "SELECT count(*) FROM api_credentials WHERE owner_id=?", Integer.class, owner));
+  }
+
   @Test
   void s13_storageFailureInListUsesStorageUnavailable() {
     var unavailable =
@@ -491,7 +629,7 @@ class ApiCredentialPersistenceTest {
 
   // One PostgreSQL process and migration per JVM, independent of test-instance lifecycle.
   static final class Database {
-    static final PostgreSQLContainer<?> PG = new PostgreSQLContainer<>("postgres:17-alpine");
+    static final PostgreSQLContainer<?> PG = new PostgreSQLContainer<>("postgres:17.9-alpine");
     static final JdbcTemplate JDBC;
     static final DataSourceTransactionManager TRANSACTIONS;
 

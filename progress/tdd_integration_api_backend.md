@@ -63,3 +63,30 @@ Checkpoint de gestión: SpotlessApply/Check y tres suites propias, 41 tests, cer
 Checkpoint: seis suites propias, 67 tests, cero fallos/errores/omisiones, SpotlessApply/Check verdes. Originales `integration24-bearer-checkpoint-xml/` y log/EXIT homónimos; ciclos 19–26 sin sobrescribir. Parser y SQL no reciben el header Authorization completo: HTTP extrae el token y A protege su formato. SHA-256 compara mediante MessageDigest.isEqual, no igualdad textual ni secreto persistido.
 
 Límites pendientes: concurrencia de cuotas/revocación, ventana siguiente, rollback de contadores y conservación operacional V22, validación durable acotada y pérdida incierta de COMMIT. Este corte habilita HTTP aislado; no declara backend final ni ejecución de PIT. V22 agrega ahora dos tablas de contadores compactos y sigue en desarrollo hasta su revisión final.
+
+
+## Cierre de oráculos y durabilidad (27–39)
+
+Los originales de cada ejecución permanecen fuera del repositorio en `../deployment-preparation/integration24-NN-*.log` y `.exit`. No se reconstruye ningún RED posterior.
+
+| Ciclo | Comportamiento | Evidencia |
+|---|---|---|
+| 27 | Dos slices heredados de configuración requieren identidad explícita | Fallo original reproducido; dependencia UserDetailsService y app.auth.username añadida únicamente a fixtures. GREEN 31 tests, mismos oráculos. |
+| 28 | Ventanas UTC siguientes y Retry-After inclusivo de un segundo | Dos ventanas y contadores compactos, inicialmente GREEN. |
+| 29 | Fallo SQL, cero filas o COMMIT diferido en cualquiera de los dos contadores | Dos RED de seis variantes por falsa confirmación de cero filas; ambos UPSERT ahora exigen exactamente una fila. Rollback físico de ambos contadores. |
+| 30 | Dos réplicas compiten por última cuota de credencial o propietario | Inicialmente GREEN, bloqueo PostgreSQL observado y exigido antes de liberar. Sólo una admisión y sin contador parcial. |
+| 31 | Revocación antes/después de admisión concurrente | Inicialmente GREEN en ambos órdenes, bloqueo real exigido y autenticación posterior rechazada. |
+| 32 | Bootstrap realmente deshabilitado mediante UserDetailsService configurado | Inicialmente GREEN: autenticar y consumir rechazan, cuotas intactas. Usuario original restaurado. |
+| 33 | Restricciones durables de verificador, scopes y cuotas | Cuatro RED; CHECKs simples de V22, sin trasladar validación exhaustiva de importación. |
+| 34 | Migración aditiva 21→22 y exclusión export/import | Inicialmente GREEN: base propia, hechos previos y export iguales, import NO_CHANGE no modifica credenciales/cuotas. No acredita rollback de imágenes desplegadas. |
+| 35 | Nombre con surrogate UTF-16 aislado | RED alcanzaba el puerto de commit; GREEN rechazo de name antes del puerto. No se afirma reproducción de sustitución física JDBC. |
+| 36 | COMMIT real confirmado pero respuesta de conexión perdida | Dos casos inicialmente GREEN: creación/revocación devuelven almacenamiento incierto, lectura/replay recupera estado durable sin nuevo secreto ni fecha. |
+| 37 | Expiración exacta 7/30/90 días y reloj único | Tres casos inicialmente GREEN, truncado a microsegundos. |
+| 38 | Replay con capacidad completa en estado vigente/caducado/revocado | Tres casos inicialmente GREEN; fechas caducadas coherentes y lectura propia conserva metadata. PG fijado a postgres:17.9-alpine existente en el proyecto. |
+| 39 | Nombre Unicode de 80 puntos suplementarios y nombres duplicados | Inicialmente GREEN contra PG; conserva ambos nombres exactos e IDs diferentes, retira White_Space lateral. |
+
+Precisión Unicode: un surrogate aislado no representa un punto Unicode escalar y puede perder fidelidad al codificar a UTF-8. La guarda comparte el criterio de CustomFieldLabel; acepta pares válidos fuera de BMP. Los espacios laterales Unicode se retiran antes de validar controles, conforme al contrato ratificado.
+
+La fixture PG es singleton por JVM: no arranca contenedor por instancia de test. Cada caso usa identidades propias; los triggers se retiran en finally. El caso de compatibilidad crea y retira una base propia dentro del mismo contenedor. Esto no promete reutilización entre JVM diferentes de PIT.
+
+Los scopes Gradle integration_api e integration_api_http abarcan clases completas, incluidos records con validación y configuración completa. Candidatos: todos los JUnit; controles DEFAULT, -FRECORD, umbral 80 y cuatro workers permanecen iguales. No se ha ejecutado mutación de 24.

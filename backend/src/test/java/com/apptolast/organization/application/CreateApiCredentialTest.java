@@ -70,6 +70,60 @@ class CreateApiCredentialTest {
         () -> useCase.create("owner", UUID.randomUUID(), "name", List.of("projects:read"), 30));
   }
 
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+    "7,2026-09-15T12:34:56.123456Z",
+    "30,2026-10-08T12:34:56.123456Z",
+    "90,2026-12-07T12:34:56.123456Z"
+  })
+  void s5_eachTermUsesOneUtcClockCapture(int days, String expiry) {
+    var calls = new java.util.concurrent.atomic.AtomicInteger();
+    var clock =
+        new Clock() {
+          @Override
+          public java.time.ZoneId getZone() {
+            return ZoneOffset.UTC;
+          }
+
+          @Override
+          public Clock withZone(java.time.ZoneId zone) {
+            return this;
+          }
+
+          @Override
+          public Instant instant() {
+            assertEquals(1, calls.incrementAndGet());
+            return Instant.parse("2026-09-08T12:34:56.123456789Z");
+          }
+        };
+    ApiCredentialCommit commit =
+        (owner, id, intent, issue) -> {
+          var value = issue.get();
+          return new ApiCredentialCreation(value.credential(), value.secret());
+        };
+    var result =
+        new CreateApiCredential(commit, clock, new SecureRandom())
+            .create("owner", UUID.randomUUID(), "Term", List.of("tasks:read"), days);
+    assertEquals(Instant.parse("2026-09-08T12:34:56.123456Z"), result.credential().createdAt());
+    assertEquals(Instant.parse(expiry), result.credential().expiresAt());
+    assertEquals(1, calls.get());
+  }
+
+  @Test
+  void s2_unpairedSurrogateCannotBeSilentlyChangedByPersistenceEncoding() {
+    ApiCredentialCommit commit =
+        (owner, id, intent, issue) -> {
+          throw new AssertionError("Invalid Unicode reached JDBC");
+        };
+    var create = new CreateApiCredential(commit, Clock.systemUTC(), new SecureRandom());
+    var invalid = "name" + Character.toString((char) 0xd800);
+    var error =
+        assertThrows(
+            com.apptolast.organization.domain.ApiCredentialInvalidException.class,
+            () -> create.create("owner", UUID.randomUUID(), invalid, List.of("tasks:read"), 7));
+    assertEquals("name", error.errors().getFirst().field());
+  }
+
   @Test
   void s1_metadataAndVerifierRetainOwnershipAcrossPort() {
     var scopes = new java.util.ArrayList<>(List.of("projects:read"));

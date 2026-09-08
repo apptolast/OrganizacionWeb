@@ -15,3 +15,12 @@ Corte de gestión: `ReadApiCredentialsUseCase.find(owner, UUID)` devuelve Option
 
 
 Corte Bearer nominal compilable: `AuthenticateApiCredentialUseCase.authenticate(String token)` devuelve `ApiCredentialAccess(UUID id,String owner,List<String> scopes)`. `ConsumeApiQuotaUseCase.consume(ApiCredentialAccess)` devuelve void. `ApiUnauthenticatedException` es el rechazo uniforme; `ApiRateLimitedException.retryAfterSeconds()` devuelve int; `StorageUnavailableException` conserva 503. Beans reales disponibles. Authenticate no consume cuota. Consume revalida owner habilitado, scopes, revocación y caducidad después de los locks owner/id; usa Clock dentro de la frontera. Predicate de propietario consulta UserDetailsService bootstrap, sin Spring Session JDBC. La selección de canal y el orden Origin/allowlist siguen siendo de C. OpenAPI sólo authenticate.
+
+
+## Precisión final del núcleo
+
+El nombre se normaliza con White_Space Unicode lateral y se valida después: 1–80 puntos, sin controles internos ni surrogate aislado. Los pares válidos suplementarios se preservan, incluidos 80 puntos persistidos y nombres duplicados con IDs distintos. No se exige revokedAt >= createdAt: una regresión del reloj conserva la primera fecha de revocación.
+
+La admisión revalida propietario habilitado, revocación y caducidad bajo los locks, y ambos UPSERT deben afectar exactamente una fila. Cero filas, error SQL o fallo de COMMIT revierte ambos contadores. Una pérdida de confirmación posterior a COMMIT se comunica como almacenamiento incierto; lectura/replay revela el estado real sin volver a revelar el secreto.
+
+Scopes PIT acordados: integration_api (núcleo/PG/ApplicationConfiguration completos) e integration_api_http (cinco clases HTTP/seguridad completas); todos los JUnit son candidatos. Sin campaña hasta revisión y fuentes finales integradas.

@@ -21,6 +21,78 @@ class ImportReceiptDecoderTest {
           .findAndRegisterModules()
           .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
+  @Test
+  void s9_ultrafineFractionCannotBecomeAnIntegerThroughRounding() throws Exception {
+    var receipt = sessionReceipt("EXTEND");
+    var exported = exportSession(receipt);
+    ((ObjectNode) exported.path("extension"))
+        .put("additionalMinutes", new java.math.BigDecimal("15.0000000000000000001"));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                new ImportReceiptDecoder(json)
+                    .session(
+                        exported,
+                        receipt.id(),
+                        receipt.before().session(),
+                        receipt.action(),
+                        receipt.before().revision(),
+                        receipt.occurredAt()))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+    assertThat(exported.at("/extension/additionalMinutes").decimalValue())
+        .isEqualByComparingTo("15.0000000000000000001");
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"leadingZero", "overflow", "number", "session"})
+  void s9_receiptBigintsRequireCanonicalTextWithinLongRange(String defect) throws Exception {
+    if (defect.equals("session")) {
+      var receipt = sessionReceipt("PAUSE");
+      var exported = exportSession(receipt);
+      ((ObjectNode) exported.path("before")).put("revision", "0" + receipt.before().revision());
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+              () ->
+                  new ImportReceiptDecoder(json)
+                      .session(
+                          exported,
+                          receipt.id(),
+                          receipt.before().session(),
+                          receipt.action(),
+                          receipt.before().revision(),
+                          receipt.occurredAt()))
+          .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+    } else {
+      var id = UUID.randomUUID();
+      var project = UUID.randomUUID();
+      var task = UUID.randomUUID();
+      var receipt =
+          new BlockChangeReceipt(
+              UUID.randomUUID(),
+              id,
+              "CANCELLED",
+              1,
+              Instant.parse("2026-09-08T01:02:03.123456Z"),
+              block(id, project, task, 10),
+              null);
+      var exported = exportBlock(receipt);
+      if (defect.equals("number")) exported.put("version", 1);
+      else exported.put("version", defect.equals("overflow") ? "9223372036854775808" : "01");
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+              () ->
+                  new ImportReceiptDecoder(json)
+                      .block(
+                          exported,
+                          receipt.id(),
+                          id,
+                          project,
+                          task,
+                          receipt.kind(),
+                          receipt.version(),
+                          receipt.occurredAt()))
+          .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+    }
+  }
+
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
   void s9_boundedNumbersAcceptExactIntegerDecimalSpellings(boolean session) throws Exception {

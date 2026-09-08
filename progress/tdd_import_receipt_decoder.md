@@ -18,3 +18,9 @@ El escritor de exportación valida invariantes y produce una representación v1 
 Checkpoint:20/20, cero fallos/errores/omitidas, Spotless Java verde, EXIT0 5b0c01. Cuatro huellas en import_receipt_checkpoint_freeze.json. Los logs import_receipt_NN_red/green.log y .exit se preservan; no campaña ni prueba PostgreSQL por C. A integrará los contextos desde el staging del archivo y comparará recibos existentes por su representación v1, no por igualdad textual ciega de JSONB histórico.
 
 Pendientes al checkpoint: oráculos adicionales de BIGINT canónico y fracción ultrafina; no defecto funcional reconocido. No atribuir todavía aplicación integral14/14 ni aceptación.
+
+## Refuerzos finales
+
+Ciclo09: cuatro variantes de BIGINT canónico/tipo/rango inicialmente GREENc8486e. Ciclo10: fracción15.0000000000000000001 inicialmente GREEN361b1d, sin redondeo ni mutación del input. No se cambió producción: SHA493FCAD7AD7CB5BEFCF63C6078A68CD6E305AF7A26ED884416B31C1A09CF2895 intacto.
+
+Gate final25/25, cero fallos/errores/omitidas, Spotless Java EXIT0 efb220 y diffcheck limpio. XML/log nuevos import_receipt_final_xml.xml e import_receipt_final.log, sin sobreescribir checkpoint20. Ya no quedan oráculos C pendientes reconocidos; integración14/14, concurrencia y mutación conservan gates propios de A/root.

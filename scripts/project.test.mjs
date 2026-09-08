@@ -60,14 +60,14 @@ test("customization Stryker includes new modules without weakening inherited gat
   assert.deepEqual(config.vitest, prior.vitest);
   assert.deepEqual(config.ignorePatterns, prior.ignorePatterns);
   assert.deepEqual(config.plugins, prior.plugins);
-  assert.equal(config.tempDirName, ".stryker-tmp-custom-views-fields");
+  assert.equal(config.tempDirName, ".stryker-tmp-custom-views-fields-refined");
   assert.equal(
     config.jsonReporter.fileName,
-    "reports/mutation-custom-views-fields/mutation.json",
+    "reports/mutation-custom-views-fields-refined/mutation.json",
   );
   assert.equal(
     config.htmlReporter.fileName,
-    "reports/mutation-custom-views-fields/mutation.html",
+    "reports/mutation-custom-views-fields-refined/mutation.html",
   );
 });
 test("customization frontend invokes only its fixed Stryker configuration", () => {

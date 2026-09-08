@@ -458,10 +458,11 @@ a {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
   font-size: 17px;
   font-weight: 650;
   letter-spacing: -0.65px;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .brand-mark {
   display: grid;
@@ -476,6 +477,7 @@ a {
   padding-bottom: 5px;
 }
 .brand-light {
+  display: inline-block;
   font-weight: 400;
 }
 .sidebar-label {

@@ -34,3 +34,23 @@ El hallazgo de recursos abiertos al rechazar cabeceras se corrigió mediante
 RED 2b83cd y GREEN 44ccde. La prueba comprueba cancelación sin solicitar payload;
 Response no200 se conserva para el flujo existente. Aprobado este corte del
 cliente. Quedan UI, Blob/ObjectURL, integración real, UX, gates y mutación.
+
+## Adaptador HTTP
+
+Lectura completa de controlador, filtro, dos suites y bitácora (36e9db,
+dffd5d). Cinco huellas coinciden y los XML conservados acreditan 25 pruebas MVC
+y dos del filtro, sin fallos, errores ni skips (8be6d1). Aprobado el corte HTTP
+7fbb347 e integrado como b8906a7. No acredita todavía socket, PostgreSQL o proxy.
+
+La autenticación conserva sus códigos y precede a la consulta; los rechazos no
+invocan prepare. El filtro se limita a la ruta exacta y mantiene cabeceras tras
+reset del filtro real de sesión. HEAD no prepara datos; los métodos restantes
+conservan primero CSRF/Origin. Negociación, respuestas 413/503, bytes completos
+y ausencia de 304 están comprobados. No se añadieron dependencias ni cambios
+a la configuración global de seguridad.
+
+Root retiró su sospecha sobre charset en Accept JSON al consultar
+[RFC8259, sección 11](https://www.rfc-editor.org/rfc/rfc8259.html#section-11).
+Ese parámetro no define otra codificación de JSON; no se presenta el ensayo
+retirado como un defecto confirmado. Los intentos previos de Tomcat y OPTIONS
+se conservan con sus resultados reales en la bitácora de C.

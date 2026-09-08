@@ -1,0 +1,1 @@
+Revisión funcional root aprobada. Segunda revisión independiente C: 23/23 hashes coinciden, lectura completa de 15 casos y log 83/83; APPROVED sin hallazgos. Autorizada una campaña correctiva oficial del mismo universo/configuración, sin atribución anticipada de muertes.

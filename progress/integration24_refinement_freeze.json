@@ -1,0 +1,117 @@
+[
+  {
+    "path": "frontend/src/integration-api-client.mutation.test.ts",
+    "sha256": "9AC1918A365EB1F0EE032F52928B94A51ACD95423CF93BA4C9DECC4114963A58",
+    "bytes": 1567
+  },
+  {
+    "path": "frontend/src/integration-api.mutation.test.tsx",
+    "sha256": "8471C4716461EA2C3B0AD538631301636901E1CA18FD0FF28CD13C33AE549E74",
+    "bytes": 6529
+  },
+  {
+    "path": "frontend/stryker.integration-api.config.json",
+    "sha256": "963CB33EA43916D7523B5C014C7DCE41855C350FC428CB8F42BBF21CCF7514BB",
+    "bytes": 1053
+  },
+  {
+    "path": "progress/integration24_refinement_001_initial.exit",
+    "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9",
+    "bytes": 1
+  },
+  {
+    "path": "progress/integration24_refinement_001_initial.log",
+    "sha256": "89B91209CC11933D0D25C56F9DC58D8B55B5F7ED0A1497EA1C9A7A79C9AB298D",
+    "bytes": 312
+  },
+  {
+    "path": "progress/integration24_refinement_002_initial.exit",
+    "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9",
+    "bytes": 1
+  },
+  {
+    "path": "progress/integration24_refinement_002_initial.log",
+    "sha256": "E0DD25AEDEE26742A49E328B41C891D37A5BD49EBF9D64B1A5CA36B2AE02B702",
+    "bytes": 324
+  },
+  {
+    "path": "progress/integration24_refinement_003_initial.exit",
+    "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9",
+    "bytes": 1
+  },
+  {
+    "path": "progress/integration24_refinement_003_initial.log",
+    "sha256": "42447B9CEA76A4E2CB2818599206A4DE9CDFCCABAA64E211704E4B8DE5631BA8",
+    "bytes": 308
+  },
+  {
+    "path": "progress/integration24_refinement_004_initial.exit",
+    "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9",
+    "bytes": 1
+  },
+  {
+    "path": "progress/integration24_refinement_004_initial.log",
+    "sha256": "6E274765F8179582452C8E6B6E07F7211DA2098EFBF95A8B50A5CF1543A8A0B8",
+    "bytes": 320
+  },
+  {
+    "path": "progress/integration24_refinement_005_initial.exit",
+    "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9",
+    "bytes": 1
+  },
+  {
+    "path": "progress/integration24_refinement_005_initial.log",
+    "sha256": "D40F0CC8B12D2F624B4A0DE11CC1EBC2FF1FFDA7CA63ECC86EB0F945CF6F266F",
+    "bytes": 320
+  },
+  {
+    "path": "progress/integration24_refinement_006_initial.exit",
+    "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9",
+    "bytes": 1
+  },
+  {
+    "path": "progress/integration24_refinement_006_initial.log",
+    "sha256": "354B11C83C77957A8A17B4744F8ACFDB76F29B0E65B01725917EEDBEE1B2FCAD",
+    "bytes": 324
+  },
+  {
+    "path": "progress/integration24_refinement_007_initial.exit",
+    "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9",
+    "bytes": 1
+  },
+  {
+    "path": "progress/integration24_refinement_007_initial.log",
+    "sha256": "0F3FE90219B86A08EE44477660877B863A2063C687144FC1490BB6E45B111EBC",
+    "bytes": 324
+  },
+  {
+    "path": "progress/integration24_refinement_focal.exit",
+    "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9",
+    "bytes": 1
+  },
+  {
+    "path": "progress/integration24_refinement_focal.log",
+    "sha256": "D30EA713DD06724F2A4DE5B51BBAA995AB8F85885EEBAE0D037604BC6636ABFF",
+    "bytes": 317
+  },
+  {
+    "path": "progress/integration24_refinement_format.log",
+    "sha256": "8F9ACF43F33269D7DA484F2101161D17B6D218764BE1BB4695EBBE7A096398BC",
+    "bytes": 94
+  },
+  {
+    "path": "progress/integration24_refinement_lint.log",
+    "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "bytes": 0
+  },
+  {
+    "path": "progress/integration24_refinement_types.log",
+    "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "bytes": 0
+  },
+  {
+    "path": "progress/review_integration24_refinements.md",
+    "sha256": "B466A3A0225A794C3753F7A71079356072A6339117678EF8991ECB8AD582D98A",
+    "bytes": 1687
+  }
+]

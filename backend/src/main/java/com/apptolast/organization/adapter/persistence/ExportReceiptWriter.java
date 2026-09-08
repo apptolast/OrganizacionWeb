@@ -214,7 +214,12 @@ public final class ExportReceiptWriter {
     context(value.path("before"), blockId, projectId, taskId);
     if (!value.path("after").isNull()) context(value.path("after"), blockId, projectId, taskId);
     blockTypes(value.path("before"));
-    if (!value.path("after").isNull()) blockTypes(value.path("after"));
+    if (!value.path("after").isNull()) {
+      blockTypes(value.path("after"));
+      require(
+          checkedInstant(value.path("before"), "createdAt")
+              .equals(checkedInstant(value.path("after"), "createdAt")));
+    }
     out.writeStartObject();
     fields(out, value, "id", "blockId", "kind");
     out.writeStringField("version", value.path("version").asText());

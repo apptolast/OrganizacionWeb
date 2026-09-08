@@ -55,3 +55,10 @@ HTTP permanece congelado, verificado contra sus cinco hashes. No se ejecutó
 PIT, regresión global, SQL, navegador ni despliegue. Aún requiere revisión root
 y la integración de las dos colecciones de recibos por A; el presente corte no
 acredita exportación de cuenta completa.
+# Refuerzo posterior: identidad de creación del bloque
+
+Tras el corte revisado 19e8ece, se contrastó `MoveBlock`: el nuevo `PlannedBlock` conserva literalmente `prior.createdAt()`. Por ello, un recibo RESCHEDULED con instantes de creación distintos es incoherente. No se impone `occurredAt >= createdAt`: `BlockState.cancel` no exige un reloj monótono y esa restricción podría rechazar historia válida.
+
+Un único test cambia el `createdAt` de `after` un segundo y exige rechazo antes de escribir bytes. RED real e05de3 (EXIT 1, «Expecting code to raise a throwable»), preservado en `export_receipt_created_at_red.log` y `.xml`. El guard mínimo compara ambos instantes sólo cuando existe `after`. Regresión de la clase y spotlessCheck: EXIT 0 b735d3, 56/56 sin fallos, XML y log `export_receipt_created_at_green.*`. Los cinco archivos HTTP permanecen sin cambios.
+
+La primera tentativa PIT (`export_http_receipt_pit_original.log`, EXIT 1, 3m23s) falló durante los tests sin mutación: los contextos Spring del checkout nominal carecían del bean real `ExportDataUseCase`. Root y A confirmaron la misma causa mediante XML del ciclo 29 en primaria; no se repite un diagnóstico equivalente. No existe puntuación ni universo de resultados PIT válido. Las 443 entradas originales permanecieron idénticas en `export_http_receipt_pit_before.json` y `export_http_receipt_pit_after.json`, capturadas antes de este refuerzo. No se excluyen suites ni se añade un bean ficticio; la campaña espera la integración revisada del wiring real.

@@ -16,6 +16,32 @@ class ExportReceiptWriterTest {
           .findAndRegisterModules()
           .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
+  @Test
+  void s5_rescheduledReceiptCannotChangeTheBlockCreationInstant() throws Exception {
+    var receipt = receipt();
+    var tree = (com.fasterxml.jackson.databind.node.ObjectNode) json.valueToTree(receipt);
+    ((com.fasterxml.jackson.databind.node.ObjectNode) tree.path("after"))
+        .put("createdAt", receipt.before().createdAt().plusSeconds(1).toString());
+    var output = new ByteArrayOutputStream();
+    try (var generator = json.getFactory().createGenerator(output)) {
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+              () ->
+                  new ExportReceiptWriter(json)
+                      .block(
+                          generator,
+                          tree.toString(),
+                          receipt.id(),
+                          receipt.blockId(),
+                          receipt.before().projectId(),
+                          receipt.before().taskId(),
+                          receipt.kind(),
+                          receipt.version(),
+                          receipt.occurredAt()))
+          .isInstanceOf(IllegalArgumentException.class);
+    }
+    assertThat(output.size()).isZero();
+  }
+
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
   void s5_invalidReceiptTimestampUsesTheStorageFailureBoundary(boolean session) throws Exception {

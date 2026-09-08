@@ -30,6 +30,21 @@ class ApiCredentialWiringTest {
   @Autowired CreateApiCredentialUseCase create;
   @Autowired JdbcTemplate jdbc;
 
+  @Autowired com.apptolast.organization.application.ReadApiCredentialsUseCase read;
+  @Autowired com.apptolast.organization.application.RevokeApiCredentialUseCase revoke;
+
+  @Test
+  void s12_s13_s15_realBeansReadListAndRevoke() {
+    var owner = "management-wiring-" + UUID.randomUUID();
+    var created =
+        create.create(owner, UUID.randomUUID(), "Management", List.of("projects:read"), 7);
+    assertEquals(Optional.of(created.credential()), read.find(owner, created.credential().id()));
+    assertEquals(List.of(created.credential()), read.list(owner, null).items());
+    var revoked = revoke.revoke(owner, created.credential().id()).orElseThrow();
+    assertNotNull(revoked.revokedAt());
+    assertEquals(Optional.of(revoked), read.find(owner, revoked.id()));
+  }
+
   @Test
   void s1_realBeanCreatesDurableCredential() {
     var owner = "wiring-" + UUID.randomUUID();

@@ -25,11 +25,12 @@ class ApiCredentialPersistenceTest {
     var first =
         new CreateApiCredential(
                 store,
-                Clock.fixed(Instant.parse("2026-09-08T12:00:00Z"), ZoneOffset.UTC),
+                Clock.fixed(
+                    Instant.parse(
+                        state.equals("expired") ? "2026-01-01T12:00:00Z" : "2026-09-08T12:00:00Z"),
+                    ZoneOffset.UTC),
                 new SecureRandom())
             .create(owner, id, "Same", List.of("projects:read"), 7);
-    if (state.equals("expired"))
-      jdbc.update("UPDATE api_credentials SET expires_at='2026-09-09Z' WHERE id=?", id);
     if (state.equals("revoked"))
       jdbc.update("UPDATE api_credentials SET revoked_at='2026-09-09Z' WHERE id=?", id);
     var before =
@@ -174,15 +175,23 @@ class ApiCredentialPersistenceTest {
                             "Same",
                             List.of("projects:read"),
                             7));
+        boolean observedBlocked = false;
         var deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(5);
         while (!second.isDone() && System.nanoTime() < deadline) {
           if (Database.JDBC.queryForObject(
                   "SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND cardinality(pg_blocking_pids(pid))>0",
                   Integer.class)
-              > 0) break;
+              > 0) {
+            observedBlocked = true;
+            break;
+          }
           Thread.sleep(10);
         }
-        release.countDown();
+        try {
+          assertTrue(observedBlocked, "Both database transactions must overlap");
+        } finally {
+          release.countDown();
+        }
         assertNotNull(first.get(5, java.util.concurrent.TimeUnit.SECONDS).secret());
         if (sameId) assertNull(second.get(5, java.util.concurrent.TimeUnit.SECONDS).secret());
         else
@@ -246,6 +255,181 @@ class ApiCredentialPersistenceTest {
       jdbc.execute("DROP TRIGGER IF EXISTS " + name + " ON api_credentials");
       jdbc.execute("DROP FUNCTION " + name + "()");
     }
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {
+        "",
+        "not-base64!",
+        "eA",
+        "2026-09-08T12:00:00Z|1-1-1-1-1",
+        "2026-09-08T12:00:00.0000001Z|00000000-0000-0000-0000-000000000001"
+      })
+  void s14_badCursorHasPublicValidationError(String input) {
+    var cursor =
+        input.contains("|")
+            ? Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(input.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+            : input;
+    var read =
+        new ReadApiCredentials(
+            new PostgresApiCredentialStore(Database.JDBC, Database.TRANSACTIONS));
+    var error =
+        assertThrows(
+            com.apptolast.organization.domain.ApiCredentialInvalidException.class,
+            () -> read.list("owner", cursor));
+    assertEquals("cursor", error.errors().getFirst().field());
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(strings = {"reject", "skip", "commit"})
+  void s17_failedRevocationPreservesCredential(String failure) {
+    var jdbc = Database.JDBC;
+    var owner = "revoke-failure-" + UUID.randomUUID();
+    var id = UUID.randomUUID();
+    var store = new PostgresApiCredentialStore(jdbc, Database.TRANSACTIONS);
+    new CreateApiCredential(store, Clock.systemUTC(), new SecureRandom())
+        .create(owner, id, "Keep", List.of("tasks:read"), 30);
+    var before =
+        jdbc.queryForObject(
+            "SELECT row_to_json(c)::text || xmin::text || ctid::text FROM api_credentials c WHERE id=?",
+            String.class,
+            id);
+    var name = "revocation_fault_" + UUID.randomUUID().toString().replace("-", "");
+    jdbc.execute(
+        "CREATE FUNCTION "
+            + name
+            + "() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN "
+            + (failure.equals("skip") ? "RETURN NULL;" : "RAISE EXCEPTION 'fixture rejection';")
+            + " END $$");
+    try {
+      jdbc.execute(
+          "CREATE "
+              + (failure.equals("commit") ? "CONSTRAINT " : "")
+              + "TRIGGER "
+              + name
+              + " "
+              + (failure.equals("commit") ? "AFTER" : "BEFORE")
+              + " UPDATE ON api_credentials "
+              + (failure.equals("commit") ? "DEFERRABLE INITIALLY DEFERRED " : "")
+              + "FOR EACH ROW WHEN (NEW.owner_id='"
+              + owner
+              + "') EXECUTE FUNCTION "
+              + name
+              + "()");
+      assertThrows(
+          StorageUnavailableException.class,
+          () -> new RevokeApiCredential(store, Clock.systemUTC()).revoke(owner, id));
+      assertEquals(
+          before,
+          jdbc.queryForObject(
+              "SELECT row_to_json(c)::text || xmin::text || ctid::text FROM api_credentials c WHERE id=?",
+              String.class,
+              id));
+    } finally {
+      jdbc.execute("DROP TRIGGER IF EXISTS " + name + " ON api_credentials");
+      jdbc.execute("DROP FUNCTION " + name + "()");
+    }
+  }
+
+  @Test
+  void s15_s16_revocationIsOwnedDurableAndKeepsFirstClockEvenWhenItRegresses() {
+    var owner = "revoke-" + UUID.randomUUID();
+    var store = new PostgresApiCredentialStore(Database.JDBC, Database.TRANSACTIONS);
+    var id = UUID.randomUUID();
+    var created =
+        new CreateApiCredential(
+                store,
+                Clock.fixed(Instant.parse("2026-09-08T12:00:00Z"), ZoneOffset.UTC),
+                new SecureRandom())
+            .create(owner, id, "Revoke", List.of("tasks:read"), 7);
+    var now = Instant.parse("2026-09-08T11:00:00.123456789Z");
+    RevokeApiCredentialUseCase revoke =
+        new RevokeApiCredential(store, Clock.fixed(now, ZoneOffset.UTC));
+    assertTrue(revoke.revoke("other", id).isEmpty());
+    assertTrue(revoke.revoke(owner, UUID.randomUUID()).isEmpty());
+    var first = revoke.revoke(owner, id).orElseThrow();
+    assertEquals(Instant.parse("2026-09-08T11:00:00.123456Z"), first.revokedAt());
+    assertEquals(created.credential().expiresAt(), first.expiresAt());
+    var before =
+        Database.JDBC.queryForObject(
+            "SELECT row_to_json(c)::text || xmin::text || ctid::text FROM api_credentials c WHERE id=?",
+            String.class,
+            id);
+    assertEquals(
+        Optional.of(first),
+        store.revoke(
+            owner,
+            id,
+            () -> {
+              throw new AssertionError("Replay reads clock");
+            }));
+    assertEquals(
+        before,
+        Database.JDBC.queryForObject(
+            "SELECT row_to_json(c)::text || xmin::text || ctid::text FROM api_credentials c WHERE id=?",
+            String.class,
+            id));
+  }
+
+  @Test
+  void s13_pagesFiftyOwnHistoricalCredentialsInStableDescendingOrder() {
+    var jdbc = Database.JDBC;
+    var owner = "pages-" + UUID.randomUUID();
+    var prefix = UUID.randomUUID().getMostSignificantBits();
+    var expected = new java.util.ArrayList<UUID>();
+    for (int i = 1; i <= 52; i++) {
+      var id = new UUID(prefix, i);
+      jdbc.update(
+          "INSERT INTO api_credentials VALUES (?,?,'Old',ARRAY['projects:read'],7,?,'2026-01-01Z','2026-01-08Z',NULL)",
+          id,
+          i == 52 ? "other-" + owner : owner,
+          new byte[32]);
+      if (i < 52) expected.addFirst(id);
+    }
+    var read = new ReadApiCredentials(new PostgresApiCredentialStore(jdbc, Database.TRANSACTIONS));
+    var first = read.list(owner, null);
+    assertEquals(
+        expected.subList(0, 50),
+        first.items().stream().map(com.apptolast.organization.domain.ApiCredential::id).toList());
+    assertNotNull(first.nextCursor());
+    var second = read.list(owner, first.nextCursor());
+    assertEquals(
+        expected.subList(50, 51),
+        second.items().stream().map(com.apptolast.organization.domain.ApiCredential::id).toList());
+    assertNull(second.nextCursor());
+    assertTrue(read.list("unknown-owner", null).items().isEmpty());
+    assertEquals(
+        51,
+        jdbc.queryForObject(
+            "SELECT count(*) FROM api_credentials WHERE owner_id=?", Integer.class, owner));
+  }
+
+  @Test
+  void s12_readsOnlyOwnMetadataWithoutWriting() {
+    var jdbc = Database.JDBC;
+    var owner = "read-" + UUID.randomUUID();
+    var store = new PostgresApiCredentialStore(jdbc, Database.TRANSACTIONS);
+    var created =
+        new CreateApiCredential(store, Clock.systemUTC(), new SecureRandom())
+            .create(owner, UUID.randomUUID(), "Read", List.of("agenda:read"), 30);
+    var before =
+        jdbc.queryForObject(
+            "SELECT row_to_json(c)::text || xmin::text || ctid::text FROM api_credentials c WHERE id=?",
+            String.class,
+            created.credential().id());
+    ReadApiCredentialsUseCase read = new ReadApiCredentials(store);
+    assertEquals(Optional.of(created.credential()), read.find(owner, created.credential().id()));
+    assertTrue(read.find("other-owner", created.credential().id()).isEmpty());
+    assertTrue(read.find(owner, UUID.randomUUID()).isEmpty());
+    assertEquals(
+        before,
+        jdbc.queryForObject(
+            "SELECT row_to_json(c)::text || xmin::text || ctid::text FROM api_credentials c WHERE id=?",
+            String.class,
+            created.credential().id()));
   }
 
   @Test

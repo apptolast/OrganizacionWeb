@@ -8,7 +8,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-public final class PostgresApiCredentialStore implements ApiCredentialCommit {
+public final class PostgresApiCredentialStore
+    implements ApiCredentialCommit, ApiCredentialQueries, ApiCredentialRevocations {
   private final JdbcTemplate jdbc;
   private final TransactionTemplate writing;
 
@@ -91,6 +92,132 @@ public final class PostgresApiCredentialStore implements ApiCredentialCommit {
               throw new StorageUnavailableException(
                   new IllegalStateException("Credential insert was not confirmed"));
             return new ApiCredentialCreation(credential, issued.secret());
+          });
+    } catch (org.springframework.dao.DataAccessException
+        | org.springframework.transaction.TransactionException error) {
+      throw new StorageUnavailableException(error);
+    }
+  }
+
+  @Override
+  public java.util.Optional<com.apptolast.organization.domain.ApiCredential> find(
+      String owner, UUID id) {
+    try {
+      return jdbc
+          .query(
+              "SELECT * FROM api_credentials WHERE owner_id=? AND id=?",
+              (rs, index) ->
+                  new com.apptolast.organization.domain.ApiCredential(
+                      rs.getObject("id", UUID.class),
+                      rs.getString("name"),
+                      java.util.List.of((String[]) rs.getArray("scopes").getArray()),
+                      rs.getTimestamp("created_at").toInstant(),
+                      rs.getTimestamp("expires_at").toInstant(),
+                      rs.getTimestamp("revoked_at") == null
+                          ? null
+                          : rs.getTimestamp("revoked_at").toInstant()),
+              owner,
+              id)
+          .stream()
+          .findFirst();
+    } catch (org.springframework.dao.DataAccessException error) {
+      throw new StorageUnavailableException(error);
+    }
+  }
+
+  @Override
+  public com.apptolast.organization.domain.ApiCredentialPage list(String owner, String cursor) {
+    String sql =
+        "SELECT id,name,scopes,created_at,expires_at,revoked_at FROM api_credentials WHERE owner_id=?";
+    var args = new java.util.ArrayList<Object>();
+    args.add(owner);
+    if (cursor != null) {
+      try {
+        if (cursor.length() > 256) throw new IllegalArgumentException();
+        var decoded = java.util.Base64.getUrlDecoder().decode(cursor);
+        if (!java.util.Base64.getUrlEncoder()
+            .withoutPadding()
+            .encodeToString(decoded)
+            .equals(cursor)) throw new IllegalArgumentException();
+        var parts = new String(decoded, java.nio.charset.StandardCharsets.UTF_8).split("[|]", -1);
+        if (parts.length != 2) throw new IllegalArgumentException();
+        var time = java.time.Instant.parse(parts[0]);
+        var id = UUID.fromString(parts[1]);
+        int year = time.atOffset(java.time.ZoneOffset.UTC).getYear();
+        if (!id.toString().equals(parts[1])
+            || time.getNano() % 1000 != 0
+            || year < 1
+            || year > 9999) throw new IllegalArgumentException();
+        args.add(time.atOffset(java.time.ZoneOffset.UTC));
+        args.add(id);
+      } catch (RuntimeException error) {
+        throw new com.apptolast.organization.domain.ApiCredentialInvalidException("cursor");
+      }
+      sql += " AND (created_at,id)<(?,?)";
+    }
+    sql += " ORDER BY created_at DESC,id DESC LIMIT 51";
+    var rows =
+        jdbc.query(
+            sql,
+            (rs, index) ->
+                new com.apptolast.organization.domain.ApiCredential(
+                    rs.getObject("id", UUID.class),
+                    rs.getString("name"),
+                    java.util.List.of((String[]) rs.getArray("scopes").getArray()),
+                    rs.getTimestamp("created_at").toInstant(),
+                    rs.getTimestamp("expires_at").toInstant(),
+                    rs.getTimestamp("revoked_at") == null
+                        ? null
+                        : rs.getTimestamp("revoked_at").toInstant()),
+            args.toArray());
+    String next = null;
+    if (rows.size() > 50) {
+      var last = rows.get(49);
+      next =
+          java.util.Base64.getUrlEncoder()
+              .withoutPadding()
+              .encodeToString(
+                  (last.createdAt() + "|" + last.id())
+                      .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      rows = rows.subList(0, 50);
+    }
+    return new com.apptolast.organization.domain.ApiCredentialPage(rows, next);
+  }
+
+  @Override
+  public java.util.Optional<com.apptolast.organization.domain.ApiCredential> revoke(
+      String owner, UUID id, Supplier<java.time.Instant> now) {
+    try {
+      return writing.execute(
+          status -> {
+            jdbc.queryForObject(
+                "SELECT pg_advisory_xact_lock(hashtextextended(?,0))",
+                Object.class,
+                "api-credential-owner:" + owner);
+            jdbc.queryForObject(
+                "SELECT pg_advisory_xact_lock(hashtextextended(?,0))",
+                Object.class,
+                "api-credential-id:" + id);
+            var prior = find(owner, id);
+            if (prior.isEmpty() || prior.get().revokedAt() != null) return prior;
+            var value = prior.get();
+            var revoked = now.get();
+            if (jdbc.update(
+                    "UPDATE api_credentials SET revoked_at=?::timestamptz WHERE owner_id=? AND id=?",
+                    revoked.toString(),
+                    owner,
+                    id)
+                != 1)
+              throw new StorageUnavailableException(
+                  new IllegalStateException("Credential revocation was not confirmed"));
+            return java.util.Optional.of(
+                new com.apptolast.organization.domain.ApiCredential(
+                    value.id(),
+                    value.name(),
+                    value.scopes(),
+                    value.createdAt(),
+                    value.expiresAt(),
+                    revoked));
           });
     } catch (org.springframework.dao.DataAccessException
         | org.springframework.transaction.TransactionException error) {

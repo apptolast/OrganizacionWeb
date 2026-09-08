@@ -9,6 +9,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  com.apptolast.organization.application.ReadApiCredentials readApiCredentials(
+      com.apptolast.organization.application.ApiCredentialQueries queries) {
+    return new com.apptolast.organization.application.ReadApiCredentials(queries);
+  }
+
+  @Bean
+  com.apptolast.organization.application.RevokeApiCredential revokeApiCredential(
+      com.apptolast.organization.application.ApiCredentialRevocations store, Clock clock) {
+    return new com.apptolast.organization.application.RevokeApiCredential(store, clock);
+  }
+
+  @Bean
   com.apptolast.organization.adapter.persistence.PostgresApiCredentialStore apiCredentialStore(
       org.springframework.jdbc.core.JdbcTemplate jdbc,
       org.springframework.transaction.PlatformTransactionManager transactions) {

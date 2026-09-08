@@ -9,3 +9,6 @@ Frontera Bearer acordada para siguientes ciclos, aún sin código: authenticate(
 A posee dominio/aplicación/persistencia/V22/wiring; C posee HTTP/seguridad/OpenAPI en aislado. Ningún cambio de build/scopes hasta coordinación root. Fixture PG de integración reutiliza un contenedor y migración por JVM con limpieza de sus datos por test; no arranque por mutante ni omisión de oráculos.
 
 Errores reales: domain.ApiCredentialInvalidException.errors() List<FieldError>; application.ApiCredentialConflictException, ApiCredentialLimitException y StorageUnavailableException. HTTP traduce códigos24 sin duplicar reglas de intención.
+
+
+Corte de gestión: `ReadApiCredentialsUseCase.find(owner, UUID)` devuelve Optional<ApiCredential>; `list(owner, String cursor)` devuelve ApiCredentialPage(items, nextCursor), cursor null inicial. `RevokeApiCredentialUseCase.revoke(owner, UUID)` devuelve Optional<ApiCredential>. Empty equivale a 404 tanto ausente como ajena. Beans reales incluidos. El cursor es opaco y se valida en backend, error ApiCredentialInvalidException con field cursor. Revocación conserva primera fecha incluso anterior a creación por retroceso del Clock; no exigir orden nuevo en DTO HTTP/UI.

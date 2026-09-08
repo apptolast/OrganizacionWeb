@@ -1,0 +1,70 @@
+[
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ExportReceiptWriterTest.java",
+    "sha256": "E392A45891C5A01DF87C85235422CB7C75D9B2C19DF9E54BC12CA2EE4E5E7BF7"
+  },
+  {
+    "path": "progress/mutation_export_http_receipts.md",
+    "sha256": "EC032490C6AA7049C2FAE6F59E28B1879EC20C49F5A9C777C87FF0F7F8F353C1"
+  },
+  {
+    "path": "progress/export_receipt_refined_final.xml",
+    "sha256": "2C87F2E1D5F333C42C513DC5FE7E921BC6CF1EFF8E44AD0EB6306DBFCA284DE1"
+  },
+  {
+    "path": "progress/export_receipt_refined_final_green.log",
+    "sha256": "554EB3D362A10A0912B043C2C990A053C08A7F0E85B1C00765EACE1AAA1B20A9"
+  },
+  {
+    "path": "progress/export_receipt_refined_stream_green.log",
+    "sha256": "5F14A243CFC020B9D169205BFB0B2E82C5CB593ED42BE53B4219827C6D258993"
+  },
+  {
+    "path": "progress/export_receipt_refined_close_green.log",
+    "sha256": "4A68D3FD5E29F83B7F95AC6AB93A712BC66F085913ED856DDE4913881B3F2989"
+  },
+  {
+    "path": "progress/export_receipt_refined_context_green.log",
+    "sha256": "AAAC0FEF6FCACCDE50CAF89FE7BC25753AFF2A0FA11B347EE161690B8E752838"
+  },
+  {
+    "path": "progress/export_http_receipt_pit_wired.init.gradle",
+    "sha256": "5554655754EF4AE6D78F9FBEF175B459A7C6B00B0AFD0137388A9D59FC68EF8A"
+  },
+  {
+    "path": "progress/export_http_receipt_wired_before.json",
+    "sha256": "266D6981CC11361F6C71D4F57AF8DA03B10E16B30D897DE928A43E1984939AA4"
+  },
+  {
+    "path": "progress/export_http_receipt_wired_after.json",
+    "sha256": "266D6981CC11361F6C71D4F57AF8DA03B10E16B30D897DE928A43E1984939AA4"
+  },
+  {
+    "path": "progress/export_http_receipt_pit_wired_inventory.json",
+    "sha256": "3721285219A5E9DD80906472BB0E0DAB7AB1B27013E89CDD9E420D5DE3CED3F0"
+  },
+  {
+    "path": "progress/export_http_receipt_pit_wired_residues.json",
+    "sha256": "EE4C51BF1FAEA545EAAEBD86AD35B70A0EDE8775BD36094EB05C438ACF34A0DA"
+  },
+  {
+    "path": "progress/export_http_receipt_pit_wired_raw/mutations.xml",
+    "sha256": "408647655D7D8131A683A2EFF657610DCF9320D0539ACD314A93DB9930EF0A56"
+  },
+  {
+    "path": "progress/export_http_receipt_pit_wired.log",
+    "sha256": "9D71838CC65028D8B88F7C41DAF506022B725EFDFDA4B4096F46D3E8E8EC9042"
+  },
+  {
+    "path": "progress/export_http_receipt_pit_wired.exit",
+    "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+  },
+  {
+    "path": "progress/export_http_receipt_backend_gate_results.json",
+    "sha256": "B3D9107869CA14534310A77CFBB0B8F55846CCF16167D31ADED9B1F69BFEC2EB"
+  },
+  {
+    "path": "progress/export_http_receipt_backend_gate.log",
+    "sha256": "0E197B9E40FF7DB8F9D5DD471CACB9B5D8A9DE7777265C41AA5A9E4229231486"
+  }
+]

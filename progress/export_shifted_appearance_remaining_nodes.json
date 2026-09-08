@@ -1,0 +1,23 @@
+[
+  {
+    "file": "frontend/src/workspace.tsx",
+    "kind": "JsxElement",
+    "range": "75:10-80:22",
+    "text": "<RouteLink\n            href=\"/apariencia\"\n            aria-current={section === \"Apariencia\" ? \"page\" : undefined}\n          >\n            Apariencia\n          </RouteLink>",
+    "sha256": "c64293c98f665b3c2687614710ee5970d125e6a8a34dda068b93170893d70443"
+  },
+  {
+    "file": "frontend/src/session-gate.tsx",
+    "kind": "IfStatement",
+    "range": "32:2-52:6",
+    "text": "if (session?.authenticated && !closing && !closeError && !failure)\n    return (\n      <AppearanceProvider key={session.username}>\n        <div className=\"access-recovery\" hidden={!csrfExpired}>\n          <p role={csrfExpired ? \"alert\" : undefined}>\n            {recoveryFailed ? \"No hemos podido renovar el acceso. \" : \"\"}La\n            protección de tu sesión necesita renovarse. Recupera el acceso y\n            decide si vuelves a enviar los cambios.\n          </p>\n          <button onClick={() => refresh(true)}>Recuperar acceso</button>\n        </div>\n        <App\n          username={session.username}\n          sessionControls={\n            <button className=\"session-logout\" onClick={logout}>\n              Cerrar sesión\n            </button>\n          }\n        />\n      </AppearanceProvider>\n    );",
+    "sha256": "626cce448fcef04cf976d90b267e8c687164fdb88065a516226de7e56bdadce6"
+  },
+  {
+    "file": "frontend/src/use-session.ts",
+    "kind": "FunctionDeclaration",
+    "range": "177:0-196:1",
+    "text": "function isPrivateRoute(path: string, search: string) {\n  if (path === \"/proyectos\") {\n    const query = new URLSearchParams(search);\n    return (\n      !search ||\n      (query.size === 1 && query.has(\"cursor\") && Boolean(query.get(\"cursor\")))\n    );\n  }\n  return (\n    !search &&\n    (path === \"/\" ||\n      path === \"/disponibilidad\" ||\n      path === \"/apariencia\" ||\n      path === \"/exportacion\" ||\n      path === \"/proyectos/nuevo\" ||\n      /^\\/proyectos\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\\/editar|\\/tareas\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\\/sesiones\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?)?$/i.test(\n        path,\n      ))\n  );\n}",
+    "sha256": "a9efbc388b7f9e352f6b546ca39c5b0084eb43ea5b5c0412d4d97c8c84f33016"
+  }
+]

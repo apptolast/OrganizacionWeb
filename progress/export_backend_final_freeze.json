@@ -1,0 +1,36 @@
+{
+  "scope": "Final backend22 delta; no global/PIT claim",
+  "head": "0184514c99f204bb5e5d9c4bde24dd97d33837db",
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresExportDataQueries.java",
+      "sha256": "F656DC1425F82FBC86E8F0D64833AAEAB409B3F062DDB8208545561EDBFB192D"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ExportPersistenceTest.java",
+      "sha256": "18BA0743C7E28AB1F1568357F1F4AB7865FE6877FC83B06BC97B46DEEF2198DD"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/config/ExportSocketTest.java",
+      "sha256": "677D109CCB030C3E17AE21C7F7F7F3B01CD0AEDA6E1EDD34068C9C19B7DB630E"
+    },
+    {
+      "path": "progress/tdd_export_data_backend.md",
+      "sha256": "8A8FB8EBD434BA39D816DEC7F949B0382D18693054BCD102F6EDAFAD5FCE7887"
+    },
+    {
+      "path": "progress/export_backend_final_results.json",
+      "sha256": "6A72BB6C3FA0267CDB5CE53FBA04D4E4CDF079EE4F76CEEF3A334DB3EBDE54D7"
+    },
+    {
+      "path": "progress/export_backend_final_verified.log",
+      "sha256": "2A314571831C7865CFD407823AE3AAADBBC58797A09BF5A1C8903D5AF1F17226"
+    }
+  ],
+  "xml": "progress/export_backend_final_results.json",
+  "exitCode": 0,
+  "tests": 138,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0
+}

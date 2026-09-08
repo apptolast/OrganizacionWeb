@@ -12,13 +12,21 @@ import { Availability } from "./availability";
 import { History } from "./history";
 import { WeeklyReview } from "./weekly-review";
 import { Appearance } from "./appearance";
-export function App({ sessionControls }: { sessionControls?: ReactNode }) {
+import { ExportData } from "./export-data";
+export function App({
+  sessionControls,
+  username,
+}: {
+  sessionControls?: ReactNode;
+  username?: string | null;
+}) {
   const route = useRoute();
   const customization = useCustomizationSession();
   const weeklyReview = /^\/revision-semanal(?:\?[^#]*)?$/.test(route);
   const history = /^\/historial(?:\?[^#]*)?$/.test(route);
   const availability = route === "/disponibilidad";
   const appearance = route === "/apariencia";
+  const exportData = route === "/exportacion";
   const taskRoute = /^\/proyectos\/([^/]+)\/tareas\/([^/?]+)$/.exec(route);
   const sessionRoute =
     /^\/proyectos\/([^/]+)\/tareas\/([^/]+)\/sesiones\/([^/?]+)$/.exec(route);
@@ -26,22 +34,26 @@ export function App({ sessionControls }: { sessionControls?: ReactNode }) {
     <Workspace
       sessionControls={sessionControls}
       section={
-        appearance
-          ? "Apariencia"
-          : route === "/"
-            ? "Hoy"
-            : weeklyReview
-              ? "Revisión semanal"
-              : history
-                ? "Historial"
-                : availability
-                  ? "Disponibilidad"
-                  : route.startsWith("/proyectos")
-                    ? "Proyectos"
-                    : null
+        exportData
+          ? "Exportación"
+          : appearance
+            ? "Apariencia"
+            : route === "/"
+              ? "Hoy"
+              : weeklyReview
+                ? "Revisión semanal"
+                : history
+                  ? "Historial"
+                  : availability
+                    ? "Disponibilidad"
+                    : route.startsWith("/proyectos")
+                      ? "Proyectos"
+                      : null
       }
     >
-      {appearance ? (
+      {exportData && username ? (
+        <ExportData owner={username} />
+      ) : appearance ? (
         <Appearance />
       ) : route === "/" ? (
         <Today />

@@ -1,0 +1,53 @@
+{
+  "scope": "Test-only waitFor completion of confirmed SYSTEM effect",
+  "files": [
+    {
+      "path": "frontend/src/appearance.test.tsx",
+      "sha256": "B32E9F97D7464A0E5F1577427431536A6C613B90FB8FB31EA374EC804EE12315"
+    },
+    {
+      "path": "progress/fix_appearance_async_confirmation.md",
+      "sha256": "0E12348F06861D59503B5D8C6E95962B9A7BC38C90233472FD94CCAC8D90E7EF"
+    },
+    {
+      "path": "progress/export22_appearance_async_original_focal.log",
+      "sha256": "28C62F15394EBA3C87B13842B92F90A74820ADF47898C9970813B7B0443D5DB8"
+    },
+    {
+      "path": "progress/export22_appearance_async_suite.log",
+      "sha256": "1C5AED1E6C8BA00CA7B7EDBAA4ED24A11485A1ABAF1996AC30E6A874C6467908"
+    },
+    {
+      "path": "progress/export22_appearance_async_global.log",
+      "sha256": "E8F1604249A697F72FD6DB59CA97BAECFC38D7D38619276C8129BEF0A0F5700A"
+    },
+    {
+      "path": "progress/export22_appearance_async_lint.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "progress/export22_appearance_async_format.log",
+      "sha256": "F20510A9DA4717C51C4CFFEE6D0DD88D6C9A723D0A83711D01216F5B48961283"
+    },
+    {
+      "path": "progress/export22_appearance_async_before.json",
+      "sha256": "738A605F8CDE765EE3044A141984A023FC8FAF5D846F5FF1D778D20A4422C501"
+    },
+    {
+      "path": "progress/export22_appearance_async_global_before.json",
+      "sha256": "805AA75261258FEBDE9D88793D1BC58514DCE33A023599E03D68DAF8779C333A"
+    },
+    {
+      "path": "progress/export22_appearance_async_global_after.json",
+      "sha256": "805AA75261258FEBDE9D88793D1BC58514DCE33A023599E03D68DAF8779C333A"
+    }
+  ],
+  "globalTests": 2295,
+  "globalSuites": 56,
+  "globalExitCode": 0,
+  "focalSuiteTests": 50,
+  "inputsCaptured": 129,
+  "duringGlobalDeltas": 0,
+  "productChanged": false,
+  "remoteRedSha256": "C2C4B74FBCAA70E871F97200B3C60B87D89E4D355B8B06E2EFDDB119D6311045"
+}

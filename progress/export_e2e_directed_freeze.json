@@ -1,0 +1,41 @@
+{
+  "files": [
+    {
+      "path": "progress/export_e2e_directed_before.json",
+      "sha256": "0e0e3e3f045414a28a182b5412d84da24154b313a962a6611aebfc4f6451b871"
+    },
+    {
+      "path": "progress/export_e2e_directed_after.json",
+      "sha256": "fcc6ccc4bd1425511b012d7ed37b4d7df3400dd3f6595e494399915c52c1fb32"
+    },
+    {
+      "path": "progress/export_e2e_directed_original.log",
+      "sha256": "95cdeabfde50e30a9153a818f63c2c690745e3065aff92765436accd4482b09d"
+    },
+    {
+      "path": "progress/export_e2e_directed_original_exit.json",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "path": "progress/export_directed_pause_timeout_context.md",
+      "sha256": "de62034815d4d340d49dffb810c818ee303bace8388c85a789bd6b4c21d7745c"
+    },
+    {
+      "path": "progress/export_directed_pause_geometry.json",
+      "sha256": "4bb3378e835d7254fd25d6fbcfb208a53813696c8bd36d9951f33859daf4ea50"
+    },
+    {
+      "path": "progress/export_directed_end_time_geometry.json",
+      "sha256": "38de3fbfa2ecae72109133bd0037d0891ddbdbf9c84ae5225cd9f6f75f34bdd7"
+    }
+  ],
+  "result": {
+    "passed": 1,
+    "failed": 1,
+    "exit": 1
+  },
+  "inputs": 1924,
+  "deltas": 0,
+  "resources": "Authorized after init/build ended with reported35% load and23.5GiB free; one PIT minion remained.",
+  "next": "No repeat before diagnosis/review. Original global remains failed."
+}

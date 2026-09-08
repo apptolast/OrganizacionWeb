@@ -7,12 +7,12 @@
     "src/appearance-api.ts",
     "src/appearance-state.tsx",
     "src/appearance.tsx",
-    "src/App.tsx:21:8-21:44",
-    "src/App.tsx:29:8-41:26",
-    "src/App.tsx:44:7-85:7",
-    "src/workspace.tsx:74:10-79:22",
-    "src/session-gate.tsx:32:2-51:6",
-    "src/use-session.ts:177:0-195:1"
+    "src/App.tsx:28:8-28:44",
+    "src/App.tsx:39:12-51:28",
+    "src/App.tsx:56:10-97:7",
+    "src/workspace.tsx:75:10-80:22",
+    "src/session-gate.tsx:32:2-52:6",
+    "src/use-session.ts:177:0-196:1"
   ],
   "reporters": ["clear-text", "json", "html"],
   "thresholds": {

@@ -1,0 +1,49 @@
+{
+  "commit": "e9350e97d88aebaab499b23aa0bf1917e5b665ee",
+  "files": [
+    {
+      "path": "progress/export_e2e_global_original.log",
+      "sha256": "6e3e90a4b1c52ccbd26ed7b96c968bf31ac1f6ee1c085a95fc5555dffd6b9dd9"
+    },
+    {
+      "path": "progress/export_e2e_global_original_exit.json",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "path": "progress/export_e2e_global_before.json",
+      "sha256": "523650c9eb15023bc21fb933ea15246b78984afceab4b0d56e6971360e10a222"
+    },
+    {
+      "path": "progress/export_e2e_global_after.json",
+      "sha256": "fcc6ccc4bd1425511b012d7ed37b4d7df3400dd3f6595e494399915c52c1fb32"
+    },
+    {
+      "path": "progress/export_global_end_time_timeout_context.md",
+      "sha256": "2f8252dcbdfa15232d3db141d71d4b920e31423ce057bc14252e390c3c8bd24e"
+    },
+    {
+      "path": "progress/export_global_pause_timeout_context.md",
+      "sha256": "19e29f248732817afe524f1994c8f9cb549dd8112051c921ec5129426ce8d96d"
+    },
+    {
+      "path": "progress/export_e2e_global_download.json",
+      "sha256": "607cb4dcd5421c52f9f1202e57198222112b73f21afb4f0b9d9d86515b498069"
+    }
+  ],
+  "total": 157,
+  "passed": 154,
+  "failed": 2,
+  "skipped": 1,
+  "exitCode": 1,
+  "elapsed": "24.2m",
+  "inputs": 1924,
+  "deltas": 0,
+  "failures": [
+    "end-time-notification-ux.spec.mjs:330 timeout180000ms at setViewportSize",
+    "pause-resume-session.spec.mjs:278 timeout180000ms at setViewportSize"
+  ],
+  "skip": "Export native zoom requires named chromium project; separately validated earlier.",
+  "stackRemoved": "organizationweb-e2e-52200",
+  "port18080": "free",
+  "followUp": "Await PIT resource release; same-code directed run only failed tests. Do not relabel original global as GREEN."
+}

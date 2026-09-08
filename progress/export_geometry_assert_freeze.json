@@ -1,0 +1,138 @@
+{
+  "files": [
+    {
+      "path": "e2e/end-time-notification-ux.spec.mjs",
+      "sha256": "d083921321428fe0c885d1f963b1cc5e87e0e6930277aea82a450c495c0a64d7"
+    },
+    {
+      "path": "e2e/pause-resume-session.spec.mjs",
+      "sha256": "20e44f4dd2e4b8168bfee1eaf73719c9383722376f593ff57f713e5b3b940558"
+    },
+    {
+      "path": "progress/export_geometry_assert_runner.log",
+      "sha256": "7cc36cde45069602b9f652707711ca8f2eebfd4248fe7574b9e6a37c09a9321f"
+    },
+    {
+      "path": "progress/export_geometry_assert_exit.json",
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "path": "progress/export_geometry_assert_before.json",
+      "sha256": "6a8b31e76ac87d806e377fb3c7dc59610c658c99329621f5518c053515fb3351"
+    },
+    {
+      "path": "progress/export_geometry_assert_after.json",
+      "sha256": "bb5e3062c0f77b7daa05c4d0abb0529734ffa7f190b2cd4953d799b8917f9b50"
+    },
+    {
+      "path": "progress/export_geometry_assert_equivalence.json",
+      "sha256": "c353c5c0ec86e36ebee78c025e319a7a88c63779e5b99f4d43db6c3b6c61662f"
+    },
+    {
+      "path": "progress/export_geometry_assert_end-time.json",
+      "sha256": "751d411ce8f1ff5126689c82f3a63b9968b79ad9a18a1079760da8138a1be336"
+    },
+    {
+      "path": "progress/export_geometry_assert_pause.json",
+      "sha256": "237d0e640350a1e57fc7913d3af50e8d1d9e599b4f66f6de5592d062a87a7047"
+    }
+  ],
+  "result": "2/2 GREEN, 8.3s each,18.7s total; EXIT0",
+  "geometry": [
+    {
+      "name": "end-time",
+      "measurements": 155,
+      "states": [
+        "task-form",
+        "task-pending",
+        "task-uncertain",
+        "task-confirmed",
+        "reader-form"
+      ],
+      "widths": [
+        320,
+        359,
+        360,
+        361,
+        390,
+        419,
+        420,
+        421,
+        480,
+        599,
+        600,
+        601,
+        699,
+        700,
+        701,
+        768,
+        820,
+        999,
+        1000,
+        1001,
+        1024,
+        1099,
+        1100,
+        1101,
+        1280,
+        1440,
+        1599,
+        1600,
+        1601,
+        1920,
+        2560
+      ],
+      "pairAssertions": 60047,
+      "boxAssertions": 17236
+    },
+    {
+      "name": "pause",
+      "measurements": 155,
+      "states": [
+        "running",
+        "pending",
+        "uncertain",
+        "paused",
+        "query-error"
+      ],
+      "widths": [
+        320,
+        359,
+        360,
+        361,
+        390,
+        419,
+        420,
+        421,
+        480,
+        599,
+        600,
+        601,
+        699,
+        700,
+        701,
+        768,
+        820,
+        999,
+        1000,
+        1001,
+        1024,
+        1099,
+        1100,
+        1101,
+        1280,
+        1440,
+        1599,
+        1600,
+        1601,
+        1920,
+        2560
+      ],
+      "pairAssertions": 56079,
+      "boxAssertions": 16988
+    }
+  ],
+  "inputs": 1924,
+  "deltas": [],
+  "original": "Global154PASS/2FAIL/1SKIP preserved; prior same-code replay1PASS/1FAIL preserved. These results remain separate."
+}

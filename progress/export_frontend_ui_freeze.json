@@ -1,0 +1,65 @@
+{
+  "files": [
+    {
+      "sha256": "19F91F62609E7CBED8CAB00AB79075BA1ACA64FF5A5B1D12643F3B93E1DA1D23",
+      "path": "frontend/src/export-data-api.ts"
+    },
+    {
+      "sha256": "333518AD859E57FB6E802F20FCB923FF40DF95EA22244A1A38803ECE0E91F9C7",
+      "path": "frontend/src/export-data-api.test.ts"
+    },
+    {
+      "sha256": "0A88D811632600024B80F9DCF4BF3D204CAABC43C7A71F816B3886EEDB4D59FD",
+      "path": "frontend/src/export-data.tsx"
+    },
+    {
+      "sha256": "6DB797E6F7821FD305EAE60D3942886F8DAF20A682A3CDADDF07585EA05685B8",
+      "path": "frontend/src/export-data.test.tsx"
+    },
+    {
+      "sha256": "642A945DF8837ABD5DFEDFDC69AEF55BC41EF4DB5F189FE9DEE27E71307BD2DF",
+      "path": "frontend/src/App.tsx"
+    },
+    {
+      "sha256": "C64293C98F665B3C2687614710EE5970D125E6A8A34DDA068B93170893D70443",
+      "path": "frontend/src/workspace.tsx"
+    },
+    {
+      "sha256": "626CCE448FCEF04CF976D90B267E8C687164FDB88065A516226DE7E56BDADCE6",
+      "path": "frontend/src/session-gate.tsx"
+    },
+    {
+      "sha256": "A9EFBC388B7F9E352F6B546CA39C5B0084EB43EA5B5C0412D4D97C8C84F33016",
+      "path": "frontend/src/use-session.ts"
+    },
+    {
+      "sha256": "443BFC617E6DB44F5721DF2CF80F2CDD18E6475EEDF0469B133364A861C7F9F6",
+      "path": "frontend/src/styles.scss"
+    },
+    {
+      "sha256": "5DF6270E834A5CFDC0FC855A7B780CB4A8C571E09DB5CD711A4A1104156864EF",
+      "path": "progress/tdd_export_data_frontend.md"
+    },
+    {
+      "sha256": "08478EC44F00E4360D1036BBB0255416E4F7062229AAF8EA6253CEE5A5C43742",
+      "path": "progress/export_frontend_ui_focal_verified.log"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "progress/export_frontend_ui_types.log"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "progress/export_frontend_ui_lint.log"
+    },
+    {
+      "sha256": "171835EA7844BB1F70FA49044ACC7A7A5B4882D0FE97C2DC549ECA484BC330A5",
+      "path": "progress/export_frontend_ui_format.log"
+    },
+    {
+      "sha256": "C56FEE6D9FF4F06DF4B3357879280FE8B9000B888F5CD59DDBBBD183989D1040",
+      "path": "progress/export_frontend_ui_build.log"
+    }
+  ],
+  "scope": "Corte funcional frontend export_data; 143 focales; tipos/lint/formato/build EXIT0; E2E y UX pendientes"
+}

@@ -1,6 +1,6 @@
 # Usar el MVP para trabajar con un horario
 
-Las funcionalidades 1–19, incluidos Historial y Revisión semanal, están disponibles en [OrganizationWeb](https://organizacion.apptolast.com). El estado de despliegue está en [el plan](mvp-delivery-plan.md). La apariencia persistente está en desarrollo; las funcionalidades 21–30 siguen pendientes.
+Las funcionalidades 1–21, incluidos Historial, Revisión semanal, Apariencia y campos personales, están disponibles en [OrganizationWeb](https://organizacion.apptolast.com). El estado de despliegue está en [el plan](mvp-delivery-plan.md). La exportación está en desarrollo; las funcionalidades 22–30 todavía no están publicadas.
 
 ## Preparar el trabajo
 
@@ -41,8 +41,6 @@ La hora de consulta indica hasta cuándo se ha contado una sesión en curso. Pul
 
 ## Personalizar la apariencia
 
-Esta opción estará disponible cuando se despliegue la funcionalidad 20; todavía no forma parte de la versión publicada indicada al comienzo de esta guía.
-
 Abre **Apariencia** y elige **Claro**, **Oscuro** o **Sistema**. Sistema sigue la preferencia de tu dispositivo. Puedes elegir un color de acento para el tema claro y otro para el oscuro, mediante el selector o escribiendo su código de color. Ambos deben conservar un contraste legible, aunque sólo estés usando uno de los temas.
 
 Las dos muestras permiten revisar enlaces y botones antes de aplicar cambios. Si un color no es válido, el campo conserva lo escrito y explica cómo corregirlo; la muestra mantiene el último color seguro. Editar sólo cambia el borrador. **Guardar apariencia** aplica los valores confirmados a la aplicación y los conserva para tu cuenta, también al volver a entrar.
@@ -50,6 +48,16 @@ Las dos muestras permiten revisar enlaces y botones antes de aplicar cambios. Si
 **Restaurar valores predeterminados** prepara Sistema y los dos colores seguros iniciales; pulsa Guardar si quieres conservarlos. **Cancelar cambios** vuelve a la última apariencia confirmada sin guardar. Al salir de esta pantalla se descarta el borrador sin guardar.
 
 Si no se puede confirmar un guardado, no lo repitas. Usa **Recargar versión guardada** para consultar qué valores conserva tu cuenta: esa acción reemplazará el borrador cuando la consulta termine correctamente. Después podrás decidir si haces otro cambio. Si falla la carga inicial, la aplicación usa temporalmente valores seguros y permite seguir trabajando o reintentar la consulta.
+
+## Personalizar vistas y campos
+
+En las listas de proyectos y tareas, **Personalizar vista** permite elegir qué datos secundarios mostrar y en qué orden. **Guardar vista** conserva esa configuración para tu cuenta. **Restaurar vista** prepara la selección predeterminada; debes guardarla para aplicarla. Ocultar un dato en la lista no lo borra de su proyecto o tarea.
+
+Abre **Gestionar campos personales** para añadir información propia de proyectos o tareas: **Texto**, **Número entero**, **Sí o no** y **Fecha**. Cada ámbito admite hasta 12 campos, incluidos los desactivados. Elige el tipo al crearlo; después puedes cambiar su etiqueta o su estado **Activo**, pero no convertirlo a otro tipo.
+
+En el detalle del proyecto o tarea, rellena sus valores y pulsa **Guardar campos**. Desactivar una definición oculta el campo y conserva los valores existentes; volver a activarla permite recuperarlos. Vaciar un valor y guardarlo es una acción distinta de desactivar el campo.
+
+Si un guardado no puede confirmarse o los campos cambiaron en otra pestaña, utiliza **Recargar guardado** antes de decidir otro envío. Esa consulta reemplaza el borrador al recuperar la versión confirmada. No interpretes una consulta fallida como ausencia de datos.
 
 ## Datos y servidor
 

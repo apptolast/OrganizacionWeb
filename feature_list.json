@@ -233,10 +233,10 @@
       "id": 22,
       "name": "export_data",
       "title": "Exportación",
-      "description": "Exportación: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
-      "acceptance": [],
+      "description": "Exportación privada JSON v1: contrato de 33 escenarios revisado y aprobado bajo autorización global; implementación en curso.",
+      "acceptance": ["Cumplir @s1–@s33 de features/export_data.feature con revisión, pruebas y mutación antes del cierre."],
       "sdd": true,
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "id": 23,

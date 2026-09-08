@@ -1,0 +1,42 @@
+[
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/ExportDataHttpPersistenceTest.java",
+    "sha256": "257C9E39B9084659D56A6635DEF839B6D3CD84367B66E56050D0A412BBB7F0AB"
+  },
+  {
+    "path": "progress/tdd_export_data_socket.md",
+    "sha256": "FF5325BCDA9FE63974B43655817475FC370B39AB5ED5BC0AF95D5AB36200C60A"
+  },
+  {
+    "path": "progress/export_socket_final.xml",
+    "sha256": "9922602920BE68F5C1245B02F217F011293D46527EEFECA45F142C89E1DD2724"
+  },
+  {
+    "path": "progress/export_socket_final_green.log",
+    "sha256": "6322A60DE389098999710846BA292A8321117EE0515EAD455CB06FBBB5167055"
+  },
+  {
+    "path": "progress/export_socket_nominal.log",
+    "sha256": "8958667267FAA5AE74176468579C2E3CE0947CADADD230791839E39399C118D3"
+  },
+  {
+    "path": "progress/export_socket_nominal_initial.xml",
+    "sha256": "8EB244A5E88CFC84FE31CDF760BF50365AE8D698B75685900E0780B3FA66A3A6"
+  },
+  {
+    "path": "progress/export_socket_nominal_green.log",
+    "sha256": "30FDAB993108ADE543F0E0F92DF9591D40C239097BEB400AD138734CFF2C2187"
+  },
+  {
+    "path": "progress/export_socket_auth_green.log",
+    "sha256": "98103D8BA36F2E05C4E0E1B3E32C324C6C39383FB883BA74A86C54F2CC4A8F93"
+  },
+  {
+    "path": "progress/export_socket_partial_green.log",
+    "sha256": "954EB28A6B21C7891A06098B0B4B9C3ED93FADFB69BA1D7BC3BB134BFBCAF144"
+  },
+  {
+    "path": "progress/export_socket_encoding_green.log",
+    "sha256": "46D9FF3305B60775FF7C0C86E31314D61A0046AC9DADDA048DDF32081691DEE6"
+  }
+]

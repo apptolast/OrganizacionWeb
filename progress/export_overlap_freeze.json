@@ -1,0 +1,38 @@
+{
+  "files": [
+    {
+      "path": "frontend/src/export-data.test.tsx",
+      "sha256": "c9d84f84eb1acb43912b7d298198b2274f5006aa2519a3d01158f517073e5303"
+    },
+    {
+      "path": "e2e/export-data.spec.mjs",
+      "sha256": "847bbcba8475ab0d6e24128eafd8ede2b0910e6722037278aa2786769a501d77"
+    },
+    {
+      "path": "progress/export_overlap_initial.log",
+      "sha256": "dbdaf54c73221199a693792664fa4e11e2fce77550f47fc5886f412b4c95efa8"
+    },
+    {
+      "path": "progress/export_overlap_focal_final.log",
+      "sha256": "7d21c3a8086c4298f3290fefd7b0b0610b13cb7c4a2a9d790c9ffdce257797c1"
+    },
+    {
+      "path": "progress/export_overlap_lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "progress/export_overlap_format_check.log",
+      "sha256": "f20510a9da4717c51c4cffee6d0dd88d6c9a723d0a83711d01216f5b48961283"
+    }
+  ],
+  "deltaAfterOriginal": [
+    {
+      "path": "frontend\\src\\export-data.test.tsx",
+      "before": "135B370A8ED0DBBAF89A79B806463774E7CD9B76D0A84C212A5C02B4BC017A88",
+      "after": "c9d84f84eb1acb43912b7d298198b2274f5006aa2519a3d01158f517073e5303"
+    }
+  ],
+  "originalMutation": "Unchanged 261 Killed / 60 Survived / 4 NoCoverage / 1 Timeout. No replay.",
+  "targetOriginalId": "300",
+  "note": "Existing public cancellation test strengthened, initially GREEN. No production change. E2E charset matches case-insensitively; no E2E execution yet."
+}

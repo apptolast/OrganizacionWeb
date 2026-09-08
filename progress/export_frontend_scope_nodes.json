@@ -1,0 +1,72 @@
+[
+  {
+    "path": "frontend/src/App.tsx",
+    "sha256": "642A945DF8837ABD5DFEDFDC69AEF55BC41EF4DB5F189FE9DEE27E71307BD2DF",
+    "scope": "nodes",
+    "nodes": [
+      {
+        "kind": "VariableDeclaration",
+        "range": "29:8-29:45",
+        "text": "exportData = route === \"/exportacion\""
+      },
+      {
+        "kind": "ConditionalExpression",
+        "range": "37:8-51:28",
+        "text": "exportData\n          ? \"Exportación\"\n          : appearance\n            ? \"Apariencia\"\n            : route === \"/\"\n              ? \"Hoy\"\n              : weeklyReview\n                ? \"Revisión semanal\"\n                : history\n                  ? \"Historial\"\n                  : availability\n                    ? \"Disponibilidad\"\n                    : route.startsWith(\"/proyectos\")\n                      ? \"Proyectos\"\n                      : null"
+      },
+      {
+        "kind": "ConditionalExpression",
+        "range": "54:7-97:7",
+        "text": "exportData && username ? (\n        <ExportData owner={username} />\n      ) : appearance ? (\n        <Appearance />\n      ) : route === \"/\" ? (\n        <Today />\n      ) : route === \"/proyectos/nuevo\" ? (\n        <CreateProjectScreen />\n      ) : weeklyReview ? (\n        <WeeklyReview route={route} />\n      ) : history ? (\n        <History route={route} />\n      ) : availability ? (\n        <Availability />\n      ) : sessionRoute ? (\n        <WorkSessionReader\n          key={route}\n          projectId={sessionRoute[1]}\n          taskId={sessionRoute[2]}\n          id={sessionRoute[3]}\n        />\n      ) : taskRoute ? (\n        <TaskReader\n          key={route}\n          projectId={taskRoute[1]}\n          id={taskRoute[2]}\n          customization={customization}\n        />\n      ) : /^\\/proyectos\\/[^/?]+\\/editar$/.test(route) ? (\n        <ProjectEditor key={route} route={route} />\n      ) : /^\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/.test(route) ? (\n        <ProjectReader\n          key={route}\n          route={route}\n          customization={customization}\n        />\n      ) : (\n        <main id=\"proyectos\" tabIndex={-1}>\n          <h1>Página no encontrada</h1>\n          <RouteLink href=\"/\">Hoy</RouteLink>\n          {\" · \"}\n          <RouteLink href=\"/proyectos\">Proyectos</RouteLink>\n        </main>\n      )"
+      }
+    ]
+  },
+  {
+    "path": "frontend/src/workspace.tsx",
+    "sha256": "C64293C98F665B3C2687614710EE5970D125E6A8A34DDA068B93170893D70443",
+    "scope": "nodes",
+    "nodes": [
+      {
+        "kind": "JsxElement",
+        "range": "81:10-86:22",
+        "text": "<RouteLink\n            href=\"/exportacion\"\n            aria-current={section === \"Exportación\" ? \"page\" : undefined}\n          >\n            Exportación\n          </RouteLink>"
+      }
+    ]
+  },
+  {
+    "path": "frontend/src/session-gate.tsx",
+    "sha256": "626CCE448FCEF04CF976D90B267E8C687164FDB88065A516226DE7E56BDADCE6",
+    "scope": "nodes",
+    "nodes": [
+      {
+        "kind": "JsxAttribute",
+        "range": "44:10-44:37",
+        "text": "username={session.username}"
+      }
+    ]
+  },
+  {
+    "path": "frontend/src/use-session.ts",
+    "sha256": "A9EFBC388B7F9E352F6B546CA39C5B0084EB43EA5B5C0412D4D97C8C84F33016",
+    "scope": "nodes",
+    "nodes": [
+      {
+        "kind": "BinaryExpression",
+        "range": "190:6-190:29",
+        "text": "path === \"/exportacion\""
+      }
+    ]
+  },
+  {
+    "path": "frontend/src/export-data-api.ts",
+    "sha256": "19F91F62609E7CBED8CAB00AB79075BA1ACA64FF5A5B1D12643F3B93E1DA1D23",
+    "scope": "full",
+    "nodes": []
+  },
+  {
+    "path": "frontend/src/export-data.tsx",
+    "sha256": "2EBAC6D43F72002A692EECB5B361209954F13D0D0C6FE06F295DD416C8152798",
+    "scope": "full",
+    "nodes": []
+  }
+]

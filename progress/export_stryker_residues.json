@@ -1,0 +1,2400 @@
+[
+  {
+    "file": "src/export-data-api.ts",
+    "id": "64",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"Stryker was here!\"",
+    "status": "NoCoverage",
+    "static": false,
+    "coveredBy": [],
+    "location": {
+      "end": {
+        "column": 51,
+        "line": 18
+      },
+      "start": {
+        "column": 49,
+        "line": 18
+      }
+    },
+    "original": "\"\""
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "81",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"Stryker was here!\"",
+    "status": "NoCoverage",
+    "static": false,
+    "coveredBy": [],
+    "location": {
+      "end": {
+        "column": 74,
+        "line": 25
+      },
+      "start": {
+        "column": 72,
+        "line": 25
+      }
+    },
+    "original": "\"\""
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "174",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"\"",
+    "status": "NoCoverage",
+    "static": false,
+    "coveredBy": [],
+    "location": {
+      "end": {
+        "column": 61,
+        "line": 74
+      },
+      "start": {
+        "column": 23,
+        "line": 74
+      }
+    },
+    "original": "\"Archivo de exportación incompatible.\""
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "56",
+    "mutatorName": "Regex",
+    "replacement": "/application\\/json\\s*;\\s*charset=utf-8$/i",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 36,
+    "coveredBy": [
+      "662",
+      "663",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "877",
+      "878",
+      "879",
+      "880",
+      "881",
+      "882",
+      "883",
+      "884",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "897",
+      "898",
+      "899",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "906",
+      "907",
+      "908"
+    ],
+    "location": {
+      "end": {
+        "column": 50,
+        "line": 17
+      },
+      "start": {
+        "column": 8,
+        "line": 17
+      }
+    },
+    "original": "/^application\\/json\\s*;\\s*charset=utf-8$/i"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "57",
+    "mutatorName": "Regex",
+    "replacement": "/^application\\/json\\s*;\\s*charset=utf-8/i",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 36,
+    "coveredBy": [
+      "662",
+      "663",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "877",
+      "878",
+      "879",
+      "880",
+      "881",
+      "882",
+      "883",
+      "884",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "897",
+      "898",
+      "899",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "906",
+      "907",
+      "908"
+    ],
+    "location": {
+      "end": {
+        "column": 50,
+        "line": 17
+      },
+      "start": {
+        "column": 8,
+        "line": 17
+      }
+    },
+    "original": "/^application\\/json\\s*;\\s*charset=utf-8$/i"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "59",
+    "mutatorName": "Regex",
+    "replacement": "/^application\\/json\\S*;\\s*charset=utf-8$/i",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 36,
+    "coveredBy": [
+      "662",
+      "663",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "877",
+      "878",
+      "879",
+      "880",
+      "881",
+      "882",
+      "883",
+      "884",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "897",
+      "898",
+      "899",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "906",
+      "907",
+      "908"
+    ],
+    "location": {
+      "end": {
+        "column": 50,
+        "line": 17
+      },
+      "start": {
+        "column": 8,
+        "line": 17
+      }
+    },
+    "original": "/^application\\/json\\s*;\\s*charset=utf-8$/i"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "60",
+    "mutatorName": "Regex",
+    "replacement": "/^application\\/json\\s*;\\scharset=utf-8$/i",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 36,
+    "coveredBy": [
+      "662",
+      "663",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "877",
+      "878",
+      "879",
+      "880",
+      "881",
+      "882",
+      "883",
+      "884",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "897",
+      "898",
+      "899",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "906",
+      "907",
+      "908"
+    ],
+    "location": {
+      "end": {
+        "column": 50,
+        "line": 17
+      },
+      "start": {
+        "column": 8,
+        "line": 17
+      }
+    },
+    "original": "/^application\\/json\\s*;\\s*charset=utf-8$/i"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "66",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"\"",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 2,
+    "coveredBy": [
+      "877",
+      "899"
+    ],
+    "location": {
+      "end": {
+        "column": 61,
+        "line": 21
+      },
+      "start": {
+        "column": 23,
+        "line": 21
+      }
+    },
+    "original": "\"Archivo de exportación incompatible.\""
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "73",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "true",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 1,
+    "coveredBy": [
+      "898"
+    ],
+    "location": {
+      "end": {
+        "column": 67,
+        "line": 23
+      },
+      "start": {
+        "column": 30,
+        "line": 23
+      }
+    },
+    "original": "encoding.toLowerCase() !== \"identity\""
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "75",
+    "mutatorName": "MethodExpression",
+    "replacement": "encoding.toUpperCase()",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 1,
+    "coveredBy": [
+      "898"
+    ],
+    "location": {
+      "end": {
+        "column": 52,
+        "line": 23
+      },
+      "start": {
+        "column": 30,
+        "line": 23
+      }
+    },
+    "original": "encoding.toLowerCase()"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "78",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"\"",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 1,
+    "coveredBy": [
+      "898"
+    ],
+    "location": {
+      "end": {
+        "column": 61,
+        "line": 24
+      },
+      "start": {
+        "column": 23,
+        "line": 24
+      }
+    },
+    "original": "\"Archivo de exportación incompatible.\""
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "76",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"\"",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 1,
+    "coveredBy": [
+      "898"
+    ],
+    "location": {
+      "end": {
+        "column": 67,
+        "line": 23
+      },
+      "start": {
+        "column": 57,
+        "line": 23
+      }
+    },
+    "original": "\"identity\""
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "83",
+    "mutatorName": "Regex",
+    "replacement": "/^attachment; filename=\"(organizationweb-export-v1-[0-9]{8}T[0-9]{12}Z\\.json)\"/",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 33,
+    "coveredBy": [
+      "662",
+      "663",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "878",
+      "879",
+      "880",
+      "881",
+      "882",
+      "883",
+      "884",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "897",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "906",
+      "907",
+      "908"
+    ],
+    "location": {
+      "end": {
+        "column": 87,
+        "line": 27
+      },
+      "start": {
+        "column": 7,
+        "line": 27
+      }
+    },
+    "original": "/^attachment; filename=\"(organizationweb-export-v1-[0-9]{8}T[0-9]{12}Z\\.json)\"$/"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "82",
+    "mutatorName": "Regex",
+    "replacement": "/attachment; filename=\"(organizationweb-export-v1-[0-9]{8}T[0-9]{12}Z\\.json)\"$/",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 33,
+    "coveredBy": [
+      "662",
+      "663",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "878",
+      "879",
+      "880",
+      "881",
+      "882",
+      "883",
+      "884",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "897",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "906",
+      "907",
+      "908"
+    ],
+    "location": {
+      "end": {
+        "column": 87,
+        "line": 27
+      },
+      "start": {
+        "column": 7,
+        "line": 27
+      }
+    },
+    "original": "/^attachment; filename=\"(organizationweb-export-v1-[0-9]{8}T[0-9]{12}Z\\.json)\"$/"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "95",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"\"",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 2,
+    "coveredBy": [
+      "882",
+      "897"
+    ],
+    "location": {
+      "end": {
+        "column": 61,
+        "line": 31
+      },
+      "start": {
+        "column": 23,
+        "line": 31
+      }
+    },
+    "original": "\"Archivo de exportación incompatible.\""
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "90",
+    "mutatorName": "LogicalOperator",
+    "replacement": "!name && name[0] !== disposition",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 33,
+    "coveredBy": [
+      "662",
+      "663",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "878",
+      "879",
+      "880",
+      "881",
+      "882",
+      "883",
+      "884",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "897",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "906",
+      "907",
+      "908"
+    ],
+    "location": {
+      "end": {
+        "column": 41,
+        "line": 30
+      },
+      "start": {
+        "column": 9,
+        "line": 30
+      }
+    },
+    "original": "!name || name[0] !== disposition"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "92",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "false",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 31,
+    "coveredBy": [
+      "662",
+      "663",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "878",
+      "879",
+      "880",
+      "881",
+      "883",
+      "884",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "906",
+      "907",
+      "908"
+    ],
+    "location": {
+      "end": {
+        "column": 41,
+        "line": 30
+      },
+      "start": {
+        "column": 18,
+        "line": 30
+      }
+    },
+    "original": "name[0] !== disposition"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "101",
+    "mutatorName": "LogicalOperator",
+    "replacement": "!declared && !/^[1-9][0-9]*$/.test(declared)",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 31,
+    "coveredBy": [
+      "662",
+      "663",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "878",
+      "879",
+      "880",
+      "881",
+      "883",
+      "884",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "906",
+      "907",
+      "908"
+    ],
+    "location": {
+      "end": {
+        "column": 53,
+        "line": 34
+      },
+      "start": {
+        "column": 9,
+        "line": 34
+      }
+    },
+    "original": "!declared || !/^[1-9][0-9]*$/.test(declared)"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "104",
+    "mutatorName": "Regex",
+    "replacement": "/[1-9][0-9]*$/",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 30,
+    "coveredBy": [
+      "662",
+      "663",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "878",
+      "879",
+      "880",
+      "881",
+      "883",
+      "884",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "907",
+      "908"
+    ],
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 34
+      },
+      "start": {
+        "column": 23,
+        "line": 34
+      }
+    },
+    "original": "/^[1-9][0-9]*$/"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "105",
+    "mutatorName": "Regex",
+    "replacement": "/^[1-9][0-9]*/",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 30,
+    "coveredBy": [
+      "662",
+      "663",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "878",
+      "879",
+      "880",
+      "881",
+      "883",
+      "884",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "907",
+      "908"
+    ],
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 34
+      },
+      "start": {
+        "column": 23,
+        "line": 34
+      }
+    },
+    "original": "/^[1-9][0-9]*$/"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "113",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"\"",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 4,
+    "coveredBy": [
+      "663",
+      "883",
+      "906",
+      "908"
+    ],
+    "location": {
+      "end": {
+        "column": 61,
+        "line": 35
+      },
+      "start": {
+        "column": 23,
+        "line": 35
+      }
+    },
+    "original": "\"Archivo de exportación incompatible.\""
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "117",
+    "mutatorName": "ObjectLiteral",
+    "replacement": "{}",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 27,
+    "coveredBy": [
+      "662",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "878",
+      "879",
+      "880",
+      "881",
+      "884",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "907"
+    ],
+    "location": {
+      "end": {
+        "column": 60,
+        "line": 41
+      },
+      "start": {
+        "column": 46,
+        "line": 41
+      }
+    },
+    "original": "{ once: true }"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "118",
+    "mutatorName": "BooleanLiteral",
+    "replacement": "false",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 27,
+    "coveredBy": [
+      "662",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "878",
+      "879",
+      "880",
+      "881",
+      "884",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "907"
+    ],
+    "location": {
+      "end": {
+        "column": 58,
+        "line": 41
+      },
+      "start": {
+        "column": 54,
+        "line": 41
+      }
+    },
+    "original": "true"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "122",
+    "mutatorName": "BlockStatement",
+    "replacement": "{}",
+    "statusReason": "Hit limit reached (5001/5000)",
+    "status": "Timeout",
+    "static": false,
+    "coveredBy": [
+      "662",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "878",
+      "879",
+      "880",
+      "881",
+      "884",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "907"
+    ],
+    "location": {
+      "end": {
+        "column": 8,
+        "line": 52
+      },
+      "start": {
+        "column": 20,
+        "line": 44
+      }
+    },
+    "original": "{\n        const next = await reader.read();\n        signal.throwIfAborted();\n        if (next.done) break;\n        if (offset + next.value.byteLength > length)\n          throw new Error(\"Archivo de exportación incompatible.\");\n        bytes.set(next.value, offset);\n        offset += next.value.byteLength;\n      }"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "132",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"\"",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 1,
+    "coveredBy": [
+      "907"
+    ],
+    "location": {
+      "end": {
+        "column": 65,
+        "line": 49
+      },
+      "start": {
+        "column": 27,
+        "line": 49
+      }
+    },
+    "original": "\"Archivo de exportación incompatible.\""
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "127",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "false",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 24,
+    "coveredBy": [
+      "662",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "878",
+      "880",
+      "881",
+      "884",
+      "886",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "907"
+    ],
+    "location": {
+      "end": {
+        "column": 52,
+        "line": 48
+      },
+      "start": {
+        "column": 13,
+        "line": 48
+      }
+    },
+    "original": "offset + next.value.byteLength > length"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "130",
+    "mutatorName": "ArithmeticOperator",
+    "replacement": "offset - next.value.byteLength",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 24,
+    "coveredBy": [
+      "662",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "878",
+      "880",
+      "881",
+      "884",
+      "886",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "907"
+    ],
+    "location": {
+      "end": {
+        "column": 43,
+        "line": 48
+      },
+      "start": {
+        "column": 13,
+        "line": 48
+      }
+    },
+    "original": "offset + next.value.byteLength"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "144",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"\"",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 1,
+    "coveredBy": [
+      "886"
+    ],
+    "location": {
+      "end": {
+        "column": 61,
+        "line": 61
+      },
+      "start": {
+        "column": 23,
+        "line": 61
+      }
+    },
+    "original": "\"Archivo de exportación incompatible.\""
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "138",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"\"",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 27,
+    "coveredBy": [
+      "662",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "878",
+      "879",
+      "880",
+      "881",
+      "884",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "907"
+    ],
+    "location": {
+      "end": {
+        "column": 41,
+        "line": 57
+      },
+      "start": {
+        "column": 34,
+        "line": 57
+      }
+    },
+    "original": "\"abort\""
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "141",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "false",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 23,
+    "coveredBy": [
+      "662",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "878",
+      "880",
+      "881",
+      "884",
+      "886",
+      "892",
+      "893",
+      "894",
+      "895",
+      "896",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905"
+    ],
+    "location": {
+      "end": {
+        "column": 26,
+        "line": 60
+      },
+      "start": {
+        "column": 9,
+        "line": 60
+      }
+    },
+    "original": "offset !== length"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "169",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"\"",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 5,
+    "coveredBy": [
+      "901",
+      "902",
+      "903",
+      "904",
+      "905"
+    ],
+    "location": {
+      "end": {
+        "column": 61,
+        "line": 72
+      },
+      "start": {
+        "column": 23,
+        "line": 72
+      }
+    },
+    "original": "\"Archivo de exportación incompatible.\""
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "172",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "false",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 14,
+    "coveredBy": [
+      "662",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "880",
+      "881",
+      "884",
+      "894",
+      "895",
+      "896",
+      "900"
+    ],
+    "location": {
+      "end": {
+        "column": 45,
+        "line": 73
+      },
+      "start": {
+        "column": 9,
+        "line": 73
+      }
+    },
+    "original": "!exact(document.counts, collections)"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "191",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"\"",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 2,
+    "coveredBy": [
+      "894",
+      "895"
+    ],
+    "location": {
+      "end": {
+        "column": 61,
+        "line": 81
+      },
+      "start": {
+        "column": 23,
+        "line": 81
+      }
+    },
+    "original": "\"Archivo de exportación incompatible.\""
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "182",
+    "mutatorName": "Regex",
+    "replacement": "/\\.\\d{6}Z/",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 13,
+    "coveredBy": [
+      "662",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681",
+      "880",
+      "881",
+      "884",
+      "895",
+      "896",
+      "900"
+    ],
+    "location": {
+      "end": {
+        "column": 19,
+        "line": 77
+      },
+      "start": {
+        "column": 8,
+        "line": 77
+      }
+    },
+    "original": "/\\.\\d{6}Z$/"
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "201",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"\"",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 3,
+    "coveredBy": [
+      "880",
+      "881",
+      "900"
+    ],
+    "location": {
+      "end": {
+        "column": 63,
+        "line": 85
+      },
+      "start": {
+        "column": 25,
+        "line": 85
+      }
+    },
+    "original": "\"Archivo de exportación incompatible.\""
+  },
+  {
+    "file": "src/export-data-api.ts",
+    "id": "204",
+    "mutatorName": "OptionalChaining",
+    "replacement": "response.body.cancel",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 27,
+    "coveredBy": [
+      "663",
+      "877",
+      "878",
+      "879",
+      "880",
+      "881",
+      "882",
+      "883",
+      "885",
+      "886",
+      "888",
+      "892",
+      "893",
+      "894",
+      "895",
+      "897",
+      "898",
+      "899",
+      "900",
+      "901",
+      "902",
+      "903",
+      "904",
+      "905",
+      "906",
+      "907",
+      "908"
+    ],
+    "location": {
+      "end": {
+        "column": 32,
+        "line": 93
+      },
+      "start": {
+        "column": 11,
+        "line": 93
+      }
+    },
+    "original": "response.body?.cancel"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "235",
+    "mutatorName": "CallExpression",
+    "replacement": ";",
+    "status": "NoCoverage",
+    "static": false,
+    "coveredBy": [],
+    "location": {
+      "end": {
+        "column": 48,
+        "line": 33
+      },
+      "start": {
+        "column": 32,
+        "line": 33
+      }
+    },
+    "original": "control.focus();"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "211",
+    "mutatorName": "ArrayDeclaration",
+    "replacement": "[\"Stryker was here\"]",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 22,
+    "coveredBy": [
+      "661",
+      "662",
+      "663",
+      "664",
+      "665",
+      "666",
+      "667",
+      "668",
+      "669",
+      "670",
+      "671",
+      "672",
+      "673",
+      "674",
+      "675",
+      "676",
+      "677",
+      "678",
+      "679",
+      "680",
+      "681",
+      "682"
+    ],
+    "location": {
+      "end": {
+        "column": 8,
+        "line": 20
+      },
+      "start": {
+        "column": 6,
+        "line": 20
+      }
+    },
+    "original": "[]"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "210",
+    "mutatorName": "OptionalChaining",
+    "replacement": "heading.current.focus",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 22,
+    "coveredBy": [
+      "661",
+      "662",
+      "663",
+      "664",
+      "665",
+      "666",
+      "667",
+      "668",
+      "669",
+      "670",
+      "671",
+      "672",
+      "673",
+      "674",
+      "675",
+      "676",
+      "677",
+      "678",
+      "679",
+      "680",
+      "681",
+      "682"
+    ],
+    "location": {
+      "end": {
+        "column": 27,
+        "line": 19
+      },
+      "start": {
+        "column": 5,
+        "line": 19
+      }
+    },
+    "original": "heading.current?.focus"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "215",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "true",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 18,
+    "coveredBy": [
+      "661",
+      "662",
+      "663",
+      "664",
+      "665",
+      "666",
+      "667",
+      "668",
+      "669",
+      "671",
+      "673",
+      "674",
+      "675",
+      "676",
+      "677",
+      "678",
+      "679",
+      "681"
+    ],
+    "location": {
+      "end": {
+        "column": 45,
+        "line": 23
+      },
+      "start": {
+        "column": 11,
+        "line": 23
+      }
+    },
+    "original": "event.target !== initiator.current"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "220",
+    "mutatorName": "ArrowFunction",
+    "replacement": "() => undefined",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 22,
+    "coveredBy": [
+      "661",
+      "662",
+      "663",
+      "664",
+      "665",
+      "666",
+      "667",
+      "668",
+      "669",
+      "670",
+      "671",
+      "672",
+      "673",
+      "674",
+      "675",
+      "676",
+      "677",
+      "678",
+      "679",
+      "680",
+      "681",
+      "682"
+    ],
+    "location": {
+      "end": {
+        "column": 64,
+        "line": 26
+      },
+      "start": {
+        "column": 12,
+        "line": 26
+      }
+    },
+    "original": "() => document.removeEventListener(\"focusin\", moved)"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "221",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"\"",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 22,
+    "coveredBy": [
+      "661",
+      "662",
+      "663",
+      "664",
+      "665",
+      "666",
+      "667",
+      "668",
+      "669",
+      "670",
+      "671",
+      "672",
+      "673",
+      "674",
+      "675",
+      "676",
+      "677",
+      "678",
+      "679",
+      "680",
+      "681",
+      "682"
+    ],
+    "location": {
+      "end": {
+        "column": 56,
+        "line": 26
+      },
+      "start": {
+        "column": 47,
+        "line": 26
+      }
+    },
+    "original": "\"focusin\""
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "222",
+    "mutatorName": "ArrayDeclaration",
+    "replacement": "[\"Stryker was here\"]",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 22,
+    "coveredBy": [
+      "661",
+      "662",
+      "663",
+      "664",
+      "665",
+      "666",
+      "667",
+      "668",
+      "669",
+      "670",
+      "671",
+      "672",
+      "673",
+      "674",
+      "675",
+      "676",
+      "677",
+      "678",
+      "679",
+      "680",
+      "681",
+      "682"
+    ],
+    "location": {
+      "end": {
+        "column": 8,
+        "line": 27
+      },
+      "start": {
+        "column": 6,
+        "line": 27
+      }
+    },
+    "original": "[]"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "234",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "false",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 5,
+    "coveredBy": [
+      "661",
+      "668",
+      "669",
+      "673",
+      "679"
+    ],
+    "location": {
+      "end": {
+        "column": 30,
+        "line": 33
+      },
+      "start": {
+        "column": 11,
+        "line": 33
+      }
+    },
+    "original": "control.isConnected"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "236",
+    "mutatorName": "OptionalChaining",
+    "replacement": "heading.current.focus",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 5,
+    "coveredBy": [
+      "661",
+      "668",
+      "669",
+      "673",
+      "679"
+    ],
+    "location": {
+      "end": {
+        "column": 34,
+        "line": 34
+      },
+      "start": {
+        "column": 12,
+        "line": 34
+      }
+    },
+    "original": "heading.current?.focus"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "230",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "true",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 14,
+    "coveredBy": [
+      "661",
+      "662",
+      "663",
+      "665",
+      "668",
+      "669",
+      "671",
+      "673",
+      "674",
+      "675",
+      "676",
+      "678",
+      "679",
+      "681"
+    ],
+    "location": {
+      "end": {
+        "column": 60,
+        "line": 32
+      },
+      "start": {
+        "column": 20,
+        "line": 32
+      }
+    },
+    "original": "document.activeElement === document.body"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "242",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "true",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 22,
+    "coveredBy": [
+      "661",
+      "662",
+      "663",
+      "664",
+      "665",
+      "666",
+      "667",
+      "668",
+      "669",
+      "670",
+      "671",
+      "672",
+      "673",
+      "674",
+      "675",
+      "676",
+      "677",
+      "678",
+      "679",
+      "680",
+      "681",
+      "682"
+    ],
+    "location": {
+      "end": {
+        "column": 28,
+        "line": 41
+      },
+      "start": {
+        "column": 11,
+        "line": 41
+      }
+    },
+    "original": "objectUrl.current"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "245",
+    "mutatorName": "ArrayDeclaration",
+    "replacement": "[\"Stryker was here\"]",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 22,
+    "coveredBy": [
+      "661",
+      "662",
+      "663",
+      "664",
+      "665",
+      "666",
+      "667",
+      "668",
+      "669",
+      "670",
+      "671",
+      "672",
+      "673",
+      "674",
+      "675",
+      "676",
+      "677",
+      "678",
+      "679",
+      "680",
+      "681",
+      "682"
+    ],
+    "location": {
+      "end": {
+        "column": 7,
+        "line": 44
+      },
+      "start": {
+        "column": 5,
+        "line": 44
+      }
+    },
+    "original": "[]"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "248",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "false",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 19,
+    "coveredBy": [
+      "661",
+      "662",
+      "663",
+      "664",
+      "665",
+      "666",
+      "667",
+      "668",
+      "669",
+      "671",
+      "673",
+      "674",
+      "675",
+      "676",
+      "677",
+      "678",
+      "679",
+      "680",
+      "681"
+    ],
+    "location": {
+      "end": {
+        "column": 24,
+        "line": 47
+      },
+      "start": {
+        "column": 9,
+        "line": 47
+      }
+    },
+    "original": "pending.current"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "255",
+    "mutatorName": "CallExpression",
+    "replacement": ";",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 19,
+    "coveredBy": [
+      "661",
+      "662",
+      "663",
+      "664",
+      "665",
+      "666",
+      "667",
+      "668",
+      "669",
+      "671",
+      "673",
+      "674",
+      "675",
+      "676",
+      "677",
+      "678",
+      "679",
+      "680",
+      "681"
+    ],
+    "location": {
+      "end": {
+        "column": 22,
+        "line": 54
+      },
+      "start": {
+        "column": 5,
+        "line": 54
+      }
+    },
+    "original": "setFailure(null);"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "258",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "false",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 7,
+    "coveredBy": [
+      "662",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681"
+    ],
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 57
+      },
+      "start": {
+        "column": 11,
+        "line": 57
+      }
+    },
+    "original": "controller.signal.aborted || pending.current !== controller"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "259",
+    "mutatorName": "LogicalOperator",
+    "replacement": "controller.signal.aborted && pending.current !== controller",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 7,
+    "coveredBy": [
+      "662",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681"
+    ],
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 57
+      },
+      "start": {
+        "column": 11,
+        "line": 57
+      }
+    },
+    "original": "controller.signal.aborted || pending.current !== controller"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "260",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "false",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 7,
+    "coveredBy": [
+      "662",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681"
+    ],
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 57
+      },
+      "start": {
+        "column": 40,
+        "line": 57
+      }
+    },
+    "original": "pending.current !== controller"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "269",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "false",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 10,
+    "coveredBy": [
+      "661",
+      "663",
+      "664",
+      "666",
+      "667",
+      "668",
+      "673",
+      "677",
+      "678",
+      "679"
+    ],
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 64
+      },
+      "start": {
+        "column": 11,
+        "line": 64
+      }
+    },
+    "original": "controller.signal.aborted || pending.current !== controller"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "271",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "false",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 7,
+    "coveredBy": [
+      "661",
+      "663",
+      "664",
+      "667",
+      "668",
+      "673",
+      "678"
+    ],
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 64
+      },
+      "start": {
+        "column": 40,
+        "line": 64
+      }
+    },
+    "original": "pending.current !== controller"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "270",
+    "mutatorName": "LogicalOperator",
+    "replacement": "controller.signal.aborted && pending.current !== controller",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 10,
+    "coveredBy": [
+      "661",
+      "663",
+      "664",
+      "666",
+      "667",
+      "668",
+      "673",
+      "677",
+      "678",
+      "679"
+    ],
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 64
+      },
+      "start": {
+        "column": 11,
+        "line": 64
+      }
+    },
+    "original": "controller.signal.aborted || pending.current !== controller"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "275",
+    "mutatorName": "LogicalOperator",
+    "replacement": "error instanceof Response || error.status === 413",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 7,
+    "coveredBy": [
+      "661",
+      "663",
+      "664",
+      "667",
+      "668",
+      "673",
+      "678"
+    ],
+    "location": {
+      "end": {
+        "column": 58,
+        "line": 66
+      },
+      "start": {
+        "column": 9,
+        "line": 66
+      }
+    },
+    "original": "error instanceof Response && error.status === 413"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "276",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "true",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 6,
+    "coveredBy": [
+      "661",
+      "664",
+      "667",
+      "668",
+      "673",
+      "678"
+    ],
+    "location": {
+      "end": {
+        "column": 58,
+        "line": 66
+      },
+      "start": {
+        "column": 38,
+        "line": 66
+      }
+    },
+    "original": "error.status === 413"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "278",
+    "mutatorName": "ArrowFunction",
+    "replacement": "() => undefined",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 4,
+    "coveredBy": [
+      "661",
+      "667",
+      "668",
+      "673"
+    ],
+    "location": {
+      "end": {
+        "column": 48,
+        "line": 67
+      },
+      "start": {
+        "column": 38,
+        "line": 67
+      }
+    },
+    "original": "() => null"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "290",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "true",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 3,
+    "coveredBy": [
+      "667",
+      "668",
+      "673"
+    ],
+    "location": {
+      "end": {
+        "column": 39,
+        "line": 72
+      },
+      "start": {
+        "column": 13,
+        "line": 72
+      }
+    },
+    "original": "typeof detail === \"object\""
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "294",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "true",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 3,
+    "coveredBy": [
+      "667",
+      "668",
+      "673"
+    ],
+    "location": {
+      "end": {
+        "column": 47,
+        "line": 74
+      },
+      "start": {
+        "column": 13,
+        "line": 74
+      }
+    },
+    "original": "detail.code === \"EXPORT_TOO_LARGE\""
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "300",
+    "mutatorName": "ConditionalExpression",
+    "replacement": "true",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 17,
+    "coveredBy": [
+      "661",
+      "662",
+      "663",
+      "664",
+      "665",
+      "666",
+      "667",
+      "668",
+      "671",
+      "673",
+      "674",
+      "675",
+      "676",
+      "677",
+      "678",
+      "679",
+      "681"
+    ],
+    "location": {
+      "end": {
+        "column": 41,
+        "line": 79
+      },
+      "start": {
+        "column": 11,
+        "line": 79
+      }
+    },
+    "original": "pending.current === controller"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "307",
+    "mutatorName": "OptionalChaining",
+    "replacement": "pending.current.abort",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 3,
+    "coveredBy": [
+      "661",
+      "669",
+      "679"
+    ],
+    "location": {
+      "end": {
+        "column": 27,
+        "line": 86
+      },
+      "start": {
+        "column": 5,
+        "line": 86
+      }
+    },
+    "original": "pending.current?.abort"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "310",
+    "mutatorName": "UnaryOperator",
+    "replacement": "+1",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 22,
+    "coveredBy": [
+      "661",
+      "662",
+      "663",
+      "664",
+      "665",
+      "666",
+      "667",
+      "668",
+      "669",
+      "670",
+      "671",
+      "672",
+      "673",
+      "674",
+      "675",
+      "676",
+      "677",
+      "678",
+      "679",
+      "680",
+      "681",
+      "682"
+    ],
+    "location": {
+      "end": {
+        "column": 37,
+        "line": 92
+      },
+      "start": {
+        "column": 35,
+        "line": 92
+      }
+    },
+    "original": "-1"
+  },
+  {
+    "file": "src/export-data.tsx",
+    "id": "317",
+    "mutatorName": "StringLiteral",
+    "replacement": "\"\"",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 7,
+    "coveredBy": [
+      "662",
+      "665",
+      "671",
+      "674",
+      "675",
+      "676",
+      "681"
+    ],
+    "location": {
+      "end": {
+        "column": 48,
+        "line": 108
+      },
+      "start": {
+        "column": 32,
+        "line": 108
+      }
+    },
+    "original": "\"secondary-link\""
+  }
+]

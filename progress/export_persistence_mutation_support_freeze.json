@@ -1,0 +1,46 @@
+[
+  {
+    "path": "backend/build.gradle.kts",
+    "sha256": "2ECA33FD483815F50A3CE42FCEBBF5C8C58FA92D581DDC336F3BBAAFB2F615DD"
+  },
+  {
+    "path": "scripts/project.mjs",
+    "sha256": "D7D7B11B11488436D0D5F657D26A14828FA7F4A3B21BE28CCAA7DA8D957C72F0"
+  },
+  {
+    "path": "scripts/project.test.mjs",
+    "sha256": "5A747AE5AD35F2C8B13AB62CE70D5606211E195CAEADC87C45C1CA4949B0DA24"
+  },
+  {
+    "path": "progress/tdd_export_persistence_mutation_support.md",
+    "sha256": "C9037466567139657BFBD2A8713F3BA7E3EC03F1BF5E770FCADB84CA37A41FF3"
+  },
+  {
+    "path": "progress/export_persistence_dispatch_red.log",
+    "sha256": "38430854BF251AE85CB18E6BDA9F7E569947CAD1DE7599AD45F12CE23C01DFAF"
+  },
+  {
+    "path": "progress/export_persistence_dispatch_green.log",
+    "sha256": "2890F58788FAB3D0C5C2D003D43D6EAE18F1FBB255B9DF3F07DA10ADD206AF39"
+  },
+  {
+    "path": "progress/export_persistence_scope_red.log",
+    "sha256": "1A146DE9AFEF017044D4B51C5B9A2B665DBFC5791A4F2BDA96EF227B568063D2"
+  },
+  {
+    "path": "progress/export_persistence_scope_green.log",
+    "sha256": "B6B2AEAF1B644DC6F58994C5C6225CC3462F76AF9C448014D5BE7F3E5596A761"
+  },
+  {
+    "path": "progress/export_persistence_reject_green.log",
+    "sha256": "02D6A01AE3DD39481BC5A0B1C098B56C664E3823FF9A606F3F1FD670D3C98AB6"
+  },
+  {
+    "path": "progress/export_persistence_harness_final.log",
+    "sha256": "851055BD975E7A9179B76CAE836DA1D38607EE78C611AECF10A579C16B3C99FD"
+  },
+  {
+    "path": "progress/export_persistence_gradle_config.log",
+    "sha256": "CF6E207E4A2475BA8CC20EB9D8E0F4C15002449203C95B56CCE5C576AF1EC647"
+  }
+]

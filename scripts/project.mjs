@@ -22,6 +22,7 @@ export function createProject(runner = run) {
       target !== "" &&
       (task !== "mutate" ||
         ![
+          "export_data-frontend",
           "custom_views_fields-backend",
           "custom_views_fields-frontend",
           "appearance-backend",
@@ -48,6 +49,7 @@ export function createProject(runner = run) {
           "schedule_block-backend",
           "schedule_block-frontend",
           "schedule_block-frontend-replay",
+          "export_data-persistence-backend",
         ].includes(target))
     ) {
       throw new Error(`Invalid target: ${target}`);
@@ -66,6 +68,17 @@ export function createProject(runner = run) {
         "stryker",
         "run",
         "stryker.appearance.config.json",
+      ]);
+      return;
+    }
+    if (task === "mutate" && target === "export_data-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.export-data.config.json",
       ]);
       return;
     }
@@ -92,6 +105,10 @@ export function createProject(runner = run) {
       mutate: "pitest",
     };
     if (!commands[task]) throw new Error(`Unknown task: ${task}`);
+    if (task === "mutate" && target === "export_data-persistence-backend") {
+      backend("pitest", ["-PmutationScope=export_data_persistence"]);
+      return;
+    }
     if (task === "mutate" && target === "custom_views_fields-backend") {
       backend("pitest", ["-PmutationScope=custom_views_fields"]);
       return;

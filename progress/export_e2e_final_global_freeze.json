@@ -1,0 +1,41 @@
+{
+  "verifiedRuntimeCommit": "38f1229",
+  "baseCommit": "e9350e97d88aebaab499b23aa0bf1917e5b665ee",
+  "runtimeExplanation": "Isolated checkout retained approved two E2E changes; product, E2E, runner and Docker configuration verified identical to38f1229 before run.",
+  "result": {
+    "exitCode": 0,
+    "passed": 156,
+    "failed": 0,
+    "skipped": 1,
+    "total": 157,
+    "elapsed": "18.2m"
+  },
+  "skip": "Native export zoom explicitly requires named chromium project; prior dedicated run and visible compositor capture preserved.",
+  "repairedMatrices": {
+    "endTimeSeconds": 10.3,
+    "pauseResumeSeconds": 10.4
+  },
+  "inputs": 1924,
+  "inputDeltas": 0,
+  "stack": "organizationweb-e2e-17444",
+  "cleanup": "Own containers/network/volume removed;18080 free.",
+  "files": [
+    {
+      "path": "progress/export_e2e_final_global_before.json",
+      "sha256": "4a33bce3a71626b15085b86c5ed73bc8d7d37b17f30bd6d737311bcd10a8a127"
+    },
+    {
+      "path": "progress/export_e2e_final_global_after.json",
+      "sha256": "57862f8114474fecb2a26926dc0d81fc7456132532b43b1f54a5a2813efb5325"
+    },
+    {
+      "path": "progress/export_e2e_final_global.log",
+      "sha256": "180dbafc8fa0f8d69e315949eebb2d5fb34a58f53f34cd7eaeb0321b3fc22e3f"
+    },
+    {
+      "path": "progress/export_e2e_final_global_exit.json",
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    }
+  ],
+  "originals": "Earlier complete failure and directed failure retained without relabeling. This is a new complete final pass."
+}

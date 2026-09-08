@@ -14,6 +14,7 @@ export function Workspace({
     | "Historial"
     | "Revisión semanal"
     | "Apariencia"
+    | "Exportación"
     | null;
 }) {
   return (
@@ -76,6 +77,12 @@ export function Workspace({
             aria-current={section === "Apariencia" ? "page" : undefined}
           >
             Apariencia
+          </RouteLink>
+          <RouteLink
+            href="/exportacion"
+            aria-current={section === "Exportación" ? "page" : undefined}
+          >
+            Exportación
           </RouteLink>
         </nav>
         <div className="sidebar-note">

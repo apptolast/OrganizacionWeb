@@ -785,8 +785,11 @@ it("@s20 opens appearance through the principal navigation at its stable route",
     screen.getByRole("navigation", { name: "Principal" }),
   );
   expect(navigation.getAllByRole("link")[0]).toHaveAccessibleName("Hoy");
-  expect(navigation.getAllByRole("link").at(-1)).toHaveAccessibleName(
+  expect(navigation.getAllByRole("link").at(-2)).toHaveAccessibleName(
     "Apariencia",
+  );
+  expect(navigation.getAllByRole("link").at(-1)).toHaveAccessibleName(
+    "Exportación",
   );
   await userEvent.click(screen.getByRole("link", { name: "Apariencia" }));
   expect(window.location.pathname).toBe("/apariencia");
@@ -1410,10 +1413,10 @@ it("@s36 uses confirmed SYSTEM light accent when matchMedia is unavailable witho
       <Appearance />
     </AppearanceProvider>,
   );
-  await waitFor(() =>
-    expect(screen.getByRole("radio", { name: "Sistema" })).toBeChecked(),
-  );
-  expect(document.documentElement.dataset.theme).toBe("light");
+  await waitFor(() => {
+    expect(screen.getByRole("radio", { name: "Sistema" })).toBeChecked();
+    expect(document.documentElement.dataset.theme).toBe("light");
+  });
   expect(document.documentElement.style.colorScheme).toBe("light");
   expect(document.documentElement.style.getPropertyValue("--accent")).toBe(
     stored.accentLight,

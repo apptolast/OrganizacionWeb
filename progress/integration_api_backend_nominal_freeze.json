@@ -1,0 +1,77 @@
+{
+  "scope": "nominal pure issuance only",
+  "tests": 1,
+  "failures": 0,
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialCommit.java",
+      "sha256": "519a663eeba94662179f93761e80c77a4622764857d92169da5b5a92bbb87d4a"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialCreation.java",
+      "sha256": "8251e59a15323531382b40bfda60b4f02f1ef110d5e9ea07114affd94681e9f9"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ApiCredentialIssuance.java",
+      "sha256": "6867bd93142643f1c27a9c1717f753114c9a11c8e7dfb1009a5c58a262311b78"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/CreateApiCredential.java",
+      "sha256": "c3150684000464f313cc0e555a19832e9100ffbf1f0058f794fe2585ec0e70ec"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/CreateApiCredentialUseCase.java",
+      "sha256": "1c8006bc622494d9f7a8ffc2f91dc32896f1a7019e364a56bccb2122601f7de1"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/ApiCredential.java",
+      "sha256": "0b1dc4fea5d97c0ad795c7be19c5ad907a43c6f14aa45327232f47c168f1cc5e"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/domain/ApiCredentialIntent.java",
+      "sha256": "8a1a8a4953164e68ca9714dbd6957ff255c9c236d94f161b7fd8eebb142dcb31"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/application/CreateApiCredentialTest.java",
+      "sha256": "60de1bdc4439657d329e8854a39de3777417eed6f33df93f1923b589f58151af"
+    },
+    {
+      "path": "progress/tdd_integration_api_backend.md",
+      "sha256": "402c7ab37e46a2791e9e8b49e08b4be4b11ba59b545f925ab29186f96fed4d27"
+    },
+    {
+      "path": "progress/integration_api_backend_handoff.md",
+      "sha256": "76b1edbc04f0834cfbadc4f453931b587aa1f6babdb5c7d752c297c7d189d1aa"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "integration24-01-format.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-01-format.log",
+      "sha256": "459c7d780342385e14fa57a8a6fcdb29a8efd59dfb265e0f1e5179eb8621b600"
+    },
+    {
+      "path": "integration24-01-green.exit",
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "integration24-01-green.log",
+      "sha256": "ad13140e2db4f2adc4802c65d4b5bffd88bb0702a5d0e755e1333320a4877332"
+    },
+    {
+      "path": "integration24-01-original.xml",
+      "sha256": "7179077f8d77d6a59c8a8861c9166cae752af5986655233b1851bb206351498a"
+    },
+    {
+      "path": "integration24-01-red.exit",
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "path": "integration24-01-red.log",
+      "sha256": "b39b36b7ffdcd093e824b05711df9a232fbd136d39ca86f5787ce927d9b42466"
+    }
+  ]
+}

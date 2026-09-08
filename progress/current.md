@@ -31,3 +31,9 @@ Cada carril: tdd_craftsman → judge → mutation_tester → integración en mai
 ## Límites operativos
 
 COMMON/V14 protegido. Puertos 8080/18080/18081 reservados; los E2E paralelos usan `E2E_WEB_PORT` 18090+. Credenciales fuera de Git/logs/chat. No se declara `done` sin juez y mutación sobre el umbral.
+
+## Despliegue: bloqueado por acceso, comprobado el 9 de septiembre de 2026
+
+El despliegue productivo de 24–30 no puede hacerse desde este equipo. La comprobación SSH de solo lectura contra `admin@159.195.156.57` con BatchMode y verificación estricta vuelve a responder `Permission denied (publickey)`; en `~/.ssh/config` solo hay alias de GitHub y GitLab, ninguno del servidor. Los flujos de trabajo de `apptolast/DockerSwarmInfrastrcture` son únicamente `validate.yml` y `guard-sensitive-paths.yml`: validan, no aplican. La aplicación real la ejecuta quien tiene acceso al host.
+
+La PR 40 de infraestructura, `codex/integration-release`, prepara la publicación de la API para integraciones y sigue en borrador con su validación verde. Queda a la espera de que el usuario facilite alias o clave SSH, o de que aplique él mismo. Las features se cierran igualmente por juez y mutación; «desplegado» es una puerta distinta de «done» y no se declarará sin evidencia.

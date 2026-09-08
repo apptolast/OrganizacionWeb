@@ -1307,4 +1307,93 @@ class ExportPersistenceTest {
                 "SELECT end_offset FROM planned_blocks WHERE id=?", String.class, id))
         .isEqualTo("+02:00");
   }
+
+  @Test
+  void s6_exactlyTwelveConfiguredValuesRemainCompleteAndOrdered() throws Exception {
+    var project = java.util.UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) VALUES (?,'twelve-values-owner','P','','idea',0,'2026-09-01Z','2026-09-01Z')",
+        project);
+    var mapper = new ObjectMapper();
+    var definitions = mapper.createArrayNode();
+    var values = mapper.createObjectNode();
+    for (int n = 12; n >= 1; n--) {
+      var id = String.format(java.util.Locale.ROOT, "00000000-0000-0000-0000-%012d", n);
+      definitions
+          .addObject()
+          .put("id", id)
+          .put("label", "Campo " + n)
+          .put("type", "NUMBER")
+          .put("active", n % 2 == 0);
+      values.put(id, 100 + n);
+    }
+    jdbc.update(
+        "INSERT INTO customization_preferences(id,owner_id,scope,visible_fields,custom_fields,version,updated_at) VALUES (?,'twelve-values-owner','PROJECT','[]'::jsonb,?::jsonb,1,'2026-09-01Z')",
+        java.util.UUID.randomUUID(),
+        definitions.toString());
+    jdbc.update(
+        "INSERT INTO project_custom_field_values(id,owner_id,project_id,field_values,version,updated_at) VALUES (?,'twelve-values-owner',?,?::jsonb,3,'2026-09-01Z')",
+        java.util.UUID.randomUUID(),
+        project,
+        values.toString());
+    var file =
+        new PostgresExportDataQueries(jdbc, manager)
+            .prepare("twelve-values-owner", () -> Instant.EPOCH);
+    var output = new ByteArrayOutputStream();
+    file.writeTo(output);
+    var json = mapper.readTree(output.toByteArray());
+    assertThat(json.path("counts").path("customization").intValue()).isEqualTo(1);
+    assertThat(json.path("counts").path("projectCustomFieldValues").intValue()).isEqualTo(1);
+    assertThat(json.path("data").path("customization").get(0).path("customFields"))
+        .isEqualTo(definitions);
+    var exported = json.path("data").path("projectCustomFieldValues").get(0);
+    assertThat(exported.path("projectId").asText()).isEqualTo(project.toString());
+    assertThat(exported.path("version").asText()).isEqualTo("3");
+    assertThat(exported.path("values")).hasSize(12);
+    for (int n = 1; n <= 12; n++) {
+      var row = exported.path("values").get(n - 1);
+      assertThat(row.path("fieldId").asText())
+          .isEqualTo(String.format(java.util.Locale.ROOT, "00000000-0000-0000-0000-%012d", n));
+      assertThat(row.path("value").isIntegralNumber()).isTrue();
+      assertThat(row.path("value").intValue()).isEqualTo(100 + n);
+    }
+  }
+
+  @Test
+  void s8_completeProjectionKeepsNumericDurationAndItsOwnResolvedTimes() throws Exception {
+    var context = task("complete-projection-owner");
+    var blockId = block(context);
+    jdbc.update(
+        "INSERT INTO block_projections(block_id,version,status,updated_at,start_local,end_local,zone_id,start_offset,end_offset,start_at,end_at,duration_minutes) VALUES (?,7,'planned','2026-09-02T12:00:00.123456Z','2026-09-09T18:00:00','2026-09-09T18:45:00','Europe/Madrid','+02:00','+02:00','2026-09-09T16:00:00Z','2026-09-09T16:45:00Z',45)",
+        blockId);
+    var file =
+        new PostgresExportDataQueries(jdbc, manager)
+            .prepare("complete-projection-owner", () -> Instant.EPOCH);
+    var output = new ByteArrayOutputStream();
+    file.writeTo(output);
+    var mapper = new ObjectMapper();
+    var json = mapper.readTree(output.toByteArray());
+    var expected =
+        mapper.readTree(
+            """
+        {"blockId":"%s","version":"7","status":"planned",
+         "updatedAt":"2026-09-02T12:00:00.123456Z",
+         "startLocal":"2026-09-09T18:00:00","endLocal":"2026-09-09T18:45:00",
+         "zoneId":"Europe/Madrid","startOffset":"+02:00","endOffset":"+02:00",
+         "startAt":"2026-09-09T16:00:00.000000Z","endAt":"2026-09-09T16:45:00.000000Z",
+         "durationMinutes":45}
+        """
+                .formatted(blockId));
+    assertThat(json.path("counts").path("blockProjections").intValue()).isEqualTo(1);
+    assertThat(json.path("counts").path("plannedBlocks").intValue()).isEqualTo(1);
+    var projection = json.path("data").path("blockProjections").get(0);
+    assertThat(projection).isEqualTo(expected);
+    assertThat(projection.path("durationMinutes").isIntegralNumber()).isTrue();
+    var original = json.path("data").path("plannedBlocks").get(0);
+    assertThat(original.path("id").asText()).isEqualTo(blockId.toString());
+    assertThat(original.path("startLocal").asText()).isEqualTo("2026-09-08T16:00:00");
+    assertThat(original.path("startAt").asText()).isEqualTo("2026-09-08T14:00:00.000000Z");
+    assertThat(original.path("endAt").asText()).isEqualTo("2026-09-08T14:30:00.000000Z");
+    assertThat(original.path("durationMinutes").intValue()).isEqualTo(30);
+  }
 }

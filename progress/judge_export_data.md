@@ -271,3 +271,14 @@ de línea sin reformatear HTML/logs de terceros. SHA256 del ZIP:
 Root lo extrajo en un directorio nuevo y comprobó las veinte huellas del
 manifiesto incluido (de7a64). El primer intento de staging textual falló
 por espacios del HTML generado; no se reformatearon los originales.
+
+## Refuerzos de los dos oráculos: APPROVED
+
+Diff test-only revisado en 3dc482. El primer caso conserva doce valores
+NUMBER válidos, incluidos campos inactivos, y verifica tipos, orden y
+contenido. El segundo compara la proyección completa con duración numérica
+45 y mantiene separada la reserva original de 30. Ambos fueron inicialmente
+verdes; no se inventa un RED. Root verificó seis huellas y el XML original
+de 39 pruebas correctas, sin errores ni skips, además del SHA productivo
+intacto (41828a). No hay replay, nuevas detecciones atribuidas ni cambios
+de configuración. Los tres resultados originales PIT se conservan.

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" tests="39" skipped="0" failures="0" errors="0" timestamp="2026-09-08T04:57:43.843Z" hostname="PABLOHGDEV87" time="19.307">
+  <properties/>
+  <testcase name="s5_s8_invalidProjectionEndOffsetIsRejectedWithoutChangingItsOriginal()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.185"/>
+  <testcase name="s6_configurationKeepsColumnAndDefinitionOrderIncludingInactiveFields()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.095"/>
+  <testcase name="s5_changeOwnerCannotExposeAnotherOwnersImmutableSession()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.102"/>
+  <testcase name="s7_s11_intervalsSortRevisionNumericallyAndDoNotAccrueTheOpenTail()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.1"/>
+  <testcase name="s8_completeProjectionKeepsNumericDurationAndItsOwnResolvedTimes()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.077"/>
+  <testcase name="s6_exactlyTwelveConfiguredValuesRemainCompleteAndOrdered()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.08"/>
+  <testcase name="s14_clockFailureDoesNotProduceAFileAndReleasesTheTransaction()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.028"/>
+  <testcase name="s5_negativeSessionRevisionCannotBeExportedAsAValidLong()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.086"/>
+  <testcase name="s17_lateSqlFailureDoesNotReturnPreparedBytesOrChangeFacts()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.158"/>
+  <testcase name="s5_negativeIntervalRevisionCannotBeExportedAsAValidLong()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.089"/>
+  <testcase name="s2_projectsAreClosedOwnerFilteredAndOrderedWithoutNormalizingStoredText()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.061"/>
+  <testcase name="s15_recordLimitIncludesSessionsBeforeClockOrPayload()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="3.435"/>
+  <testcase name="s5_invalidStoredAppearanceContrastCannotBecomeASuccessfulExport()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.06"/>
+  <testcase name="s15_recordExcessIsRejectedBeforeReadingPayloadOrClock()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.588"/>
+  <testcase name="s5_ownedTaskValuesCannotExposeTheForeignTasksProject()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.043"/>
+  <testcase name="s2_appearanceKeepsTheSavedPreferenceAndDoesNotExportItsOwnerColumn()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.061"/>
+  <testcase name="s2_availabilityExportsStoredBudgetsWithoutCreatingDefaults()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.062"/>
+  <testcase name="s5_unknownStoredSessionStatusCannotEscapeTheClosedSchema()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.087"/>
+  <testcase name="s16_oversizedUnknownJsonIsUnavailableNotExportTooLarge()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.535"/>
+  <testcase name="s6_projectValuesPreserveInactiveZeroFalseAndExplicitNullButNotAbsentFields()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.079"/>
+  <testcase name="s8_cancelledProjectionRetainsVersionAndExplicitNullTimes()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.088"/>
+  <testcase name="s5_s8_invalidOriginalOffsetCannotBecomeAnExportedOffset()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.075"/>
+  <testcase name="s5_s13_unrepresentableStoredInstantCannotProduceAnInvalidTimestamp()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.038"/>
+  <testcase name="s15_exactRecordAndByteLimitsKeepEveryRowAndRejectOneMoreByte(Path)" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="6.237"/>
+  <testcase name="s16_oversizedChangeActionIsRejectedBeforeClock()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.376"/>
+  <testcase name="s5_ownedProjectValuesMustNotReferenceAnUnexportedForeignProject()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.046"/>
+  <testcase name="s2_s9_blockChangesUseClosedReceiptAndDurableRowMetadata()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.125"/>
+  <testcase name="s4_concurrentCommitCannotMixConfigurationValuesOrCounts()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.152"/>
+  <testcase name="s2_s10_sessionChangesValidateAgainstTheRealImmutableSessionContext()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.108"/>
+  <testcase name="s1_s4_emptyExportUsesAReadOnlyRepeatableSnapshotBeforeClockWithoutWriting()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.098"/>
+  <testcase name="s2_taskStatusHistoryKeepsItsOwnTaskVersionAndTransition()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.093"/>
+  <testcase name="s16_oversizedUnvalidatedZoneIsRejectedBeforeMaterializingTextOrClock()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.381"/>
+  <testcase name="s16_knownUtf8TextExcessIsRejectedBeforePayloadOrClock()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.296"/>
+  <testcase name="s5_ownedSessionCannotExportAReferenceToAnotherOwnersProject()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.055"/>
+  <testcase name="s8_originalBlockKeepsItsIntentionWithoutFabricatingAProjection()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.083"/>
+  <testcase name="s2_tasksIncludeSubtaskLinksAndCompletedFactsWithExactFields()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.069"/>
+  <testcase name="s2_taskValuesIncludeTheProjectDerivedFromTheirTask()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.065"/>
+  <testcase name="s16_oversizedSessionStatusIsRejectedBeforeClock()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.344"/>
+  <testcase name="s11_legacySessionPreservesNullableFactsWithoutLiveAccrual()" classname="com.apptolast.organization.adapter.persistence.ExportPersistenceTest" time="0.066"/>
+  <system-out><![CDATA[06:57:43.871 [Test worker] INFO org.testcontainers.images.PullPolicy -- Image pull policy will be performed by: DefaultPullPolicy()
+06:57:43.877 [Test worker] INFO org.testcontainers.utility.ImageNameSubstitutor -- Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+06:57:43.884 [Test worker] INFO org.testcontainers.DockerClientFactory -- Testcontainers version: 1.21.4
+06:57:44.070 [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+06:57:44.372 [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+06:57:44.373 [Test worker] INFO org.testcontainers.DockerClientFactory -- Docker host IP address is localhost
+06:57:44.391 [Test worker] INFO org.testcontainers.DockerClientFactory -- Connected to docker: 
+  Server Version: 29.7.2
+  API Version: 1.55
+  Operating System: Docker Desktop
+  Total Memory: 31781 MB
+  Labels: 
+    com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+06:57:45.505 [Test worker] INFO tc.testcontainers/ryuk:0.12.0 -- Creating container for image: testcontainers/ryuk:0.12.0
+06:57:45.741 [Test worker] INFO tc.testcontainers/ryuk:0.12.0 -- Container testcontainers/ryuk:0.12.0 is starting: 3878a431a3870f4476d78c2def5b0aa4f2b0318d43cc388d5d30101013714bf5
+06:57:46.131 [Test worker] INFO tc.testcontainers/ryuk:0.12.0 -- Container testcontainers/ryuk:0.12.0 started in PT0.6253601S
+06:57:46.138 [Test worker] INFO org.testcontainers.utility.RyukResourceReaper -- Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+06:57:46.138 [Test worker] INFO org.testcontainers.DockerClientFactory -- Checking the system...
+06:57:46.139 [Test worker] INFO org.testcontainers.DockerClientFactory -- ✔︎ Docker server version should be at least 1.6.0
+06:57:46.140 [Test worker] INFO tc.postgres:17.9-alpine -- Creating container for image: postgres:17.9-alpine
+06:57:46.216 [Test worker] INFO tc.postgres:17.9-alpine -- Container postgres:17.9-alpine is starting: 94678adcee9af7fa51639af806281303451a48511cda2ba9bd66b2a362c46e5c
+06:57:47.345 [Test worker] INFO tc.postgres:17.9-alpine -- Container postgres:17.9-alpine started in PT1.2047767S
+06:57:47.346 [Test worker] INFO tc.postgres:17.9-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:65103/test?loggerLevel=OFF)
+06:57:47.778 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:65103/test?loggerLevel=OFF (PostgreSQL 17.9)
+06:57:47.842 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+06:57:47.845 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 20 migrations (execution time 00:00.035s)
+06:57:47.858 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+06:57:47.894 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+06:57:47.906 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - projects and outbox"
+06:57:47.933 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - outbox publication"
+06:57:47.948 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - project read index"
+06:57:47.963 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - project version"
+06:57:47.978 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - project states"
+06:57:47.995 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - jdbc sessions"
+06:57:48.020 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - tasks"
+06:57:48.036 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - task parent"
+06:57:48.053 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - task status history"
+06:57:48.077 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - availability preferences"
+06:57:48.096 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - planned blocks"
+06:57:48.113 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - block changes"
+06:57:48.132 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - block change integrity"
+06:57:48.158 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - work sessions"
+06:57:48.183 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - work session uniqueness"
+06:57:48.212 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - work session transitions"
+06:57:48.233 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - work session closure"
+06:57:48.247 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - work session end time"
+06:57:48.261 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "19 - appearance preferences"
+06:57:48.277 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - customization"
+06:57:48.301 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 20 migrations to schema "public", now at version v20 (execution time 00:00.163s)
+export-inclusive: records=100000 bytes=33554432 prepareMillis=1591 totalMillis=5692
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

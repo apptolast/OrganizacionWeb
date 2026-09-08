@@ -1,0 +1,43 @@
+{
+  "scope": "Two test-only public behavior refinements; no replay",
+  "head": "38f122916f17c3bc8a605e228af2350dd61f832c",
+  "exitCode": 0,
+  "executionReference": "7b5a77",
+  "tests": 39,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "files": [
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ExportPersistenceTest.java",
+      "sha256": "F2F5E6C59927737DFA227ABD22CF34C805DE86B8B6DAF852A6B3964EA30A0404"
+    },
+    {
+      "path": "progress/tdd_export_data_backend.md",
+      "sha256": "CA77D0713B5A3017D494D48C72226FB7B0987BA323894BE86313C1FC0EEA3462"
+    },
+    {
+      "path": "progress/export_persistence_refinement_1_initial.log",
+      "sha256": "7D013A3925E369FF9237710FC40E7334082F385F3072DE6153AB576985EE87B6"
+    },
+    {
+      "path": "progress/export_persistence_refinement_2_initial.log",
+      "sha256": "FE978AEDC6844CA2C96E4AA82804E9E256A42ADCAD0E3A2FF0AB96A045E58EE1"
+    },
+    {
+      "path": "progress/export_persistence_refinement_final.log",
+      "sha256": "3842FFE3B80DD400CFBD36CD44953F828E6C072BE5EB9FF7CA7B804288F26FA2"
+    },
+    {
+      "path": "progress/export_persistence_refinement_final.xml",
+      "sha256": "20199514B8FDE8C03271AA1B495736BB057DA4FB347D23C58588B37DE21D3ECA"
+    }
+  ],
+  "productionSHA": "F656DC1425F82FBC86E8F0D64833AAEAB409B3F062DDB8208545561EDBFB192D",
+  "originalMutationXmlSHA": "0BA005BAA0F535CB2476A16E57D7335CF95714518D7C478ED5404F61AADDF39F",
+  "targets": [
+    247,
+    134
+  ],
+  "originalStatesPreserved": true
+}

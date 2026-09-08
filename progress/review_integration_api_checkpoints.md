@@ -33,3 +33,12 @@ Se pidió fortalecer la prueba de carrera exigiendo que observe realmente bloque
 ## Creación HTTP y resolver de sesión — aprobado como componente
 
 Diez huellas y tres XML/24pruebas (21MVC, dos filtro de sesión, un wiringPG) verificados; cuatro fuentes/test leídos. Los errores reales de aplicación se traducen sin mensaje interno y con no-store; la query de creación se rechaza. El resolver delega exactamente al CookieSerializer actual sólo en canal humano. SessionRepositoryFilter real con Authorization+cookie y getSession(false) no consulta repositorio ni emite cookie; cookie sola conserva identidad. No acredita todavía cadenaBearer integrada ni ausencia de creación si otro componente solicita getSession(true). C continúa wiringstateless y cubrirá setSessionId/expireSession en sus caminos relevantes antes del gate final.
+
+
+## Lectura y revocación — 17e9b3b
+
+Root revisó los nueve archivos de producto cambiados y las dos pruebas modificadas. Verificó los 25 archivos y 29 evidencias del freeze integration_api_management_freeze.json (SHA256 5a75807a92e0bf2e7a059b2d1e71772ea8edd3cceb8504f551315ba807250525), usando el commit fijo y los originales; tres XML suman 41 pruebas, cero fallos, errores u omisiones. Los dos refuerzos de fixtures de creación están presentes: caducidad coherente y bloqueo concurrente observado antes de liberar la transacción.
+
+La lectura filtra propietario, pagina 50 con una consulta limitada a 51 filas y orden estable; la revocación comparte locks owner/id, conserva la primera fecha y retorna tras confirmar la transacción. Puertos aprobados para integrar HTTP. Hallazgo pendiente del corte: list() no traduce DataAccessException a StorageUnavailableException, aunque find/create/revoke sí. A recibió el hallazgo y comunicó RED/GREEN del ciclo 19; ese arreglo se revisará en su siguiente corte. No se declara cierre de gestión ni de feature 24 por este checkpoint.
+
+HTTP eb3cb38 se integró sin conflictos como ee4f275 durante una pausa explícita de A. No se modificaron archivos de frontend ajenos ni se ejecutó una suite general sobre ciclos activos.

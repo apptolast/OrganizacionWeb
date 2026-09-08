@@ -53,10 +53,13 @@ test("import PIT keeps complete disjoint classes and dedicated tests while exten
       classes: [
         "adapter.persistence.PostgresImportDataStore*",
         "adapter.persistence.ImportRecordValidator*",
+        "adapter.persistence.ImportCustomizationValidator*",
         "application.ImportCounts*",
       ],
       tests: [
         "adapter.persistence.ImportPersistenceTest",
+        "adapter.persistence.ImportCustomizationValidatorTest",
+        "adapter.persistence.ImportConcurrencyTest",
         "adapter.config.ImportWiringTest",
       ],
     },

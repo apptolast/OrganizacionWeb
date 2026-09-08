@@ -1,0 +1,40 @@
+{
+  "entries": [
+    {
+      "path": "backend/build.gradle.kts",
+      "sha256": "199EA024502EBDFD0B3712AE41A10C9B2BC90562C042D26ED22EF7AAFA8AB4A9"
+    },
+    {
+      "path": "scripts/project.test.mjs",
+      "sha256": "109E2AD1801E6FDEEA04B5C00234321734885E64212823E247F3E70F1A9D0EB9"
+    },
+    {
+      "path": "progress/import_pit_final_scope_plan.md",
+      "sha256": "ECAD52D761D10896A907A549FE4D6E4E2F425ABA408B2D11216E1AA953E9F07C"
+    },
+    {
+      "path": "progress/import_pit_final_scope_red.log",
+      "sha256": "327CE2F4D4597E0449DD6349550AB1882CC9A3B6FE6158F9202B0196689F7357"
+    },
+    {
+      "path": "progress/import_pit_final_scope_green.log",
+      "sha256": "7369BAE8ED9A7269E6A34213A7AA3E24A9A73DE6F99665667CBE0E47C1044F0B"
+    },
+    {
+      "path": "progress/import_pit_final_harness.log",
+      "sha256": "399C0D0DFF0D02A2CB80C6F5428C9356C16D5CDEA3F5DD94441067D47E942A74"
+    },
+    {
+      "path": "progress/import_pit_final_harness.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+    },
+    {
+      "path": "progress/import_pit_final_scope_inspect.log",
+      "sha256": "EE639303455563193AD2EB58749B6963114A432EB63D84B71B2F84C03C3D5DD2"
+    },
+    {
+      "path": "progress/import_pit_final_scope_inspect.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+    }
+  ]
+}

@@ -80,10 +80,13 @@ pitest {
     val importPersistenceClasses = setOf(
         "com.apptolast.organization.adapter.persistence.PostgresImportDataStore*",
         "com.apptolast.organization.adapter.persistence.ImportRecordValidator*",
+        "com.apptolast.organization.adapter.persistence.ImportCustomizationValidator*",
         "com.apptolast.organization.application.ImportCounts*"
     )
     val importPersistenceTests = setOf(
         "com.apptolast.organization.adapter.persistence.ImportPersistenceTest",
+        "com.apptolast.organization.adapter.persistence.ImportCustomizationValidatorTest",
+        "com.apptolast.organization.adapter.persistence.ImportConcurrencyTest",
         "com.apptolast.organization.adapter.config.ImportWiringTest"
     )
     val importAdapterTests = setOf(

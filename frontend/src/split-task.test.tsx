@@ -1,3 +1,4 @@
+import { mockLegacyCustomizationFetch } from "../test-fixtures/customization";
 import {
   render,
   screen,
@@ -6,7 +7,7 @@ import {
   within,
   act,
 } from "@testing-library/react";
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, expect, it } from "vitest";
 import { App } from "./App";
 import { StrictMode } from "react";
 import { SessionGate } from "./session-gate";
@@ -43,7 +44,7 @@ const task = {
 };
 const route = `/proyectos/${project.id}/tareas/${task.id}`;
 function detailFetch(...responses: Array<Response | Promise<Response>>) {
-  return vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
+  return mockLegacyCustomizationFetch().mockImplementation(async (url) => {
     const stateResponse = taskStateRead(String(url));
     if (stateResponse) return stateResponse;
     if (url === `/api/v1/projects/${project.id}`)
@@ -61,9 +62,8 @@ function contextFetch(
     options?: RequestInit,
   ) => Response | Promise<Response> | undefined,
 ) {
-  return vi
-    .spyOn(globalThis, "fetch")
-    .mockImplementation(async (input, options) => {
+  return mockLegacyCustomizationFetch().mockImplementation(
+    async (input, options) => {
       const url = String(input);
       const stateResponse = taskStateRead(url);
       if (stateResponse) return stateResponse;
@@ -76,7 +76,8 @@ function contextFetch(
       if (url.endsWith("/subtasks"))
         return Response.json({ items: [], nextCursor: null });
       return Response.json(task);
-    });
+    },
+  );
 }
 afterEach(() => window.history.replaceState(null, "", "/"));
 it.each([`/archivo${route}`, `${route}/extra`])(
@@ -797,7 +798,7 @@ it.each([400, 409, 503, "network"])(
 it("@s26 conserva el borrador cuando falla la recarga del proyecto y permite recuperarlo", async () => {
   window.history.replaceState(null, "", route);
   let reads = 0;
-  vi.spyOn(globalThis, "fetch").mockImplementation(async (url, options) => {
+  mockLegacyCustomizationFetch().mockImplementation(async (url, options) => {
     const stateResponse = taskStateRead(String(url));
     if (stateResponse) return stateResponse;
     if (options?.method === "PUT")
@@ -831,7 +832,7 @@ it("@s26 conserva el borrador cuando falla la recarga del proyecto y permite rec
 it("@s26 conserva el borrador al recargar un conflicto del estado del proyecto", async () => {
   window.history.replaceState(null, "", route);
   let reads = 0;
-  vi.spyOn(globalThis, "fetch").mockImplementation(async (url, options) => {
+  mockLegacyCustomizationFetch().mockImplementation(async (url, options) => {
     const stateResponse = taskStateRead(String(url));
     if (stateResponse) return stateResponse;
     if (options?.method === "PUT")
@@ -862,7 +863,7 @@ it("@s26 conserva el borrador al recargar un conflicto del estado del proyecto",
 it("@s23 conserva la ruta de tarea tras iniciar sesión", async () => {
   window.history.replaceState(null, "", route);
   let logged = false;
-  vi.spyOn(globalThis, "fetch").mockImplementation(async (url, options) => {
+  mockLegacyCustomizationFetch().mockImplementation(async (url, options) => {
     const stateResponse = taskStateRead(String(url));
     if (stateResponse) return stateResponse;
     if (url === "/api/session" && options?.method === "POST") {
@@ -893,7 +894,7 @@ it("@s23 conserva la ruta de tarea tras iniciar sesión", async () => {
 });
 it("@s23 distingue una tarea no disponible sin afirmar una relación raíz", async () => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+  mockLegacyCustomizationFetch().mockResolvedValue(
     new Response(null, { status: 404 }),
   );
   render(<App />);
@@ -918,9 +919,8 @@ it("@s28 @s29 confirma una sola creación aunque falle la recarga de hijos", asy
   };
   let finish!: (response: Response) => void;
   let posted = false;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
-    .mockImplementation(async (url, options) => {
+  const fetcher = mockLegacyCustomizationFetch().mockImplementation(
+    async (url, options) => {
       const stateResponse = taskStateRead(String(url));
       if (stateResponse) return stateResponse;
       if (options?.method === "POST") {
@@ -938,7 +938,8 @@ it("@s28 @s29 confirma una sola creación aunque falle la recarga de hijos", asy
           ? new Response(null, { status: 503 })
           : Response.json({ items: [], nextCursor: null });
       return Response.json(task);
-    });
+    },
+  );
   render(<App />);
   fireEvent.change(await screen.findByLabelText("Título de la tarea"), {
     target: { value: child.title },
@@ -968,7 +969,7 @@ it.each(["success", "failure"])(
     let finish!: (response: Response) => void;
     let reject!: (error: Error) => void;
     let reads = 0;
-    vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
+    mockLegacyCustomizationFetch().mockImplementation(async (url) => {
       const stateResponse = taskStateRead(String(url));
       if (stateResponse) return stateResponse;
       if (url === `/api/v1/projects/${project.id}`)
@@ -1016,7 +1017,7 @@ it.each(["success", "failure"])(
     let finish!: (response: Response) => void;
     let reject!: (error: Error) => void;
     let reads = 0;
-    vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
+    mockLegacyCustomizationFetch().mockImplementation(async (url) => {
       const stateResponse = taskStateRead(String(url));
       if (stateResponse) return stateResponse;
       if (url === `/api/v1/projects/${project.id}`)
@@ -1057,9 +1058,8 @@ it("@s23 pagina hijos y recupera recientes después de un error independiente", 
     id: "7c5dbd10-9ad5-4000-8000-000000000004",
     title: "Paso",
   };
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
-    .mockImplementation(async (url) => {
+  const fetcher = mockLegacyCustomizationFetch().mockImplementation(
+    async (url) => {
       const stateResponse = taskStateRead(String(url));
       if (stateResponse) return stateResponse;
       if (url === `/api/v1/projects/${project.id}`)
@@ -1071,7 +1071,8 @@ it("@s23 pagina hijos y recupera recientes después de un error independiente", 
       if (String(url).endsWith("/subtasks"))
         return Response.json({ items: [child], nextCursor: "next/+=" });
       return Response.json(task);
-    });
+    },
+  );
   render(<App />);
   expect(
     await screen.findByRole("list", { name: "Subtareas guardadas" }),
@@ -1097,9 +1098,8 @@ it("@s23 pagina hijos y recupera recientes después de un error independiente", 
 });
 it("@s36 permite reabrir el proyecto desde el contexto de la tarea", async () => {
   window.history.replaceState(null, "", route);
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
-    .mockImplementation(async (url, options) => {
+  const fetcher = mockLegacyCustomizationFetch().mockImplementation(
+    async (url, options) => {
       const stateResponse = taskStateRead(String(url));
       if (stateResponse) return stateResponse;
       if (options?.method === "PUT")
@@ -1117,7 +1117,8 @@ it("@s36 permite reabrir el proyecto desde el contexto de la tarea", async () =>
       if (String(url).endsWith("/subtasks"))
         return Response.json({ items: [], nextCursor: null });
       return Response.json(task);
-    });
+    },
+  );
   render(<App />);
   fireEvent.click(
     await screen.findByRole("button", { name: "Reabrir en pausa" }),
@@ -1142,9 +1143,8 @@ it("@s25 crea una subtarea sin modificar la estimación del padre", async () => 
     estimatedMinutes: 10,
   };
   let saved = false;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
-    .mockImplementation(async (url, options) => {
+  const fetcher = mockLegacyCustomizationFetch().mockImplementation(
+    async (url, options) => {
       const stateResponse = taskStateRead(String(url));
       if (stateResponse) return stateResponse;
       if (options?.method === "POST") {
@@ -1158,7 +1158,8 @@ it("@s25 crea una subtarea sin modificar la estimación del padre", async () => 
       if (String(url).endsWith("/subtasks"))
         return Response.json({ items: saved ? [child] : [], nextCursor: null });
       return Response.json(task);
-    });
+    },
+  );
   render(<App />);
   fireEvent.change(await screen.findByLabelText("Título de la tarea"), {
     target: { value: child.title },
@@ -1197,9 +1198,8 @@ it("@s23 carga sólo los hijos directos junto al proyecto confirmado", async () 
     id: "7c5dbd10-9ad5-4000-8000-000000000004",
     title: "Redactar titular",
   };
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
-    .mockImplementation(async (url) => {
+  const fetcher = mockLegacyCustomizationFetch().mockImplementation(
+    async (url) => {
       const stateResponse = taskStateRead(String(url));
       if (stateResponse) return stateResponse;
       if (url === `/api/v1/projects/${project.id}`)
@@ -1209,7 +1209,8 @@ it("@s23 carga sólo los hijos directos junto al proyecto confirmado", async () 
       if (String(url).endsWith("/subtasks"))
         return Response.json({ items: [child], nextCursor: null });
       return Response.json(task);
-    });
+    },
+  );
   render(<App />);
   const children = await screen.findByRole("region", { name: "Subtareas" });
   expect(
@@ -1325,7 +1326,7 @@ it("@s23 carga directamente el detalle confirmado y conserva enlace al proyecto"
 });
 it("@s23 permite abrir el detalle desde la lista plana del proyecto", async () => {
   window.history.replaceState(null, "", `/proyectos/${project.id}`);
-  vi.spyOn(globalThis, "fetch")
+  mockLegacyCustomizationFetch()
     .mockResolvedValueOnce(
       Response.json(project, { headers: { ETag: '"version"' } }),
     )

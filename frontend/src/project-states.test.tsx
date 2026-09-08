@@ -1,3 +1,4 @@
+import { mockLegacyCustomizationFetch } from "../test-fixtures/customization";
 vi.mock("./project-tasks", () => ({ ProjectTasks: () => null }));
 import {
   render,
@@ -28,7 +29,7 @@ it.each([
   ["completed", "Terminado"],
 ])("@s14 lista muestra estado real %s", async (status, label) => {
   window.history.replaceState(null, "", "/proyectos");
-  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+  mockLegacyCustomizationFetch().mockResolvedValueOnce(
     Response.json({ items: [{ ...project, status }], nextCursor: null }),
   );
   render(<App />);
@@ -43,8 +44,7 @@ it.each([
   ["completed", "Terminado"],
 ])("@s14 detalle y edición conservan estado %s", async (status, label) => {
   window.history.replaceState(null, "", route);
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockLegacyCustomizationFetch()
     .mockResolvedValueOnce(
       Response.json({ ...project, status }, { headers: { ETag: etag } }),
     )
@@ -84,7 +84,7 @@ it.each([
   "@s15 ofrece únicamente acciones válidas desde %s",
   async (status, actions) => {
     window.history.replaceState(null, "", route);
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+    mockLegacyCustomizationFetch().mockResolvedValueOnce(
       Response.json({ ...project, status }, { headers: { ETag: etag } }),
     );
     render(<App />);
@@ -110,8 +110,7 @@ it.each([
   "@s1 @s15 %s mediante %s confirma %s con ETag del único GET",
   async (from, label, to) => {
     window.history.replaceState(null, "", route);
-    const fetcher = vi
-      .spyOn(globalThis, "fetch")
+    const fetcher = mockLegacyCustomizationFetch()
       .mockResolvedValueOnce(
         Response.json(
           { ...project, status: from },
@@ -153,8 +152,7 @@ it.each([
 it("@s15 anuncia espera y bloquea acciones hasta confirmación sin anticipar estado", async () => {
   window.history.replaceState(null, "", route);
   let finish!: (response: Response) => void;
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockLegacyCustomizationFetch()
     .mockResolvedValueOnce(Response.json(project, { headers: { ETag: etag } }))
     .mockImplementationOnce(
       () =>
@@ -189,11 +187,9 @@ it.each([null, 'W/"weak"', "invalid", '"a", "b"'])(
   "@s15 impide cambiar estado sin precondición fuerte %s",
   async (tag) => {
     window.history.replaceState(null, "", route);
-    const fetcher = vi
-      .spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(
-        Response.json(project, { headers: tag ? { ETag: tag } : {} }),
-      );
+    const fetcher = mockLegacyCustomizationFetch().mockResolvedValueOnce(
+      Response.json(project, { headers: tag ? { ETag: tag } : {} }),
+    );
     render(<App />);
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "No podemos cambiar el estado con esta versión",
@@ -208,8 +204,7 @@ it.each([null, 'W/"weak"', "invalid", '"a", "b"'])(
 
 it("@s9 @s15 conflicto conserva estado hasta recarga deliberada y usa su nuevo ETag", async () => {
   window.history.replaceState(null, "", route);
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockLegacyCustomizationFetch()
     .mockResolvedValueOnce(Response.json(project, { headers: { ETag: etag } }))
     .mockResolvedValueOnce(
       Response.json({ code: "PROJECT_CONFLICT" }, { status: 412 }),
@@ -253,8 +248,7 @@ it.each([
   "@s4 @s8 @s15 límite muestra %i activos y límite %i sin pausar otro proyecto",
   async (activeCount, limit) => {
     window.history.replaceState(null, "", route);
-    const fetcher = vi
-      .spyOn(globalThis, "fetch")
+    const fetcher = mockLegacyCustomizationFetch()
       .mockResolvedValueOnce(
         Response.json(project, { headers: { ETag: etag } }),
       )
@@ -281,11 +275,9 @@ it.each([400, 409, 503, 500, "network"])(
   "@s15 recupera fallo %s sin inventar éxito ni revelar detalles",
   async (status) => {
     window.history.replaceState(null, "", route);
-    const fetcher = vi
-      .spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(
-        Response.json(project, { headers: { ETag: etag } }),
-      );
+    const fetcher = mockLegacyCustomizationFetch().mockResolvedValueOnce(
+      Response.json(project, { headers: { ETag: etag } }),
+    );
     if (status === "network")
       fetcher.mockRejectedValueOnce(new TypeError("private"));
     else
@@ -321,7 +313,7 @@ it.each([401, 404])(
   "@s15 retira datos si cambio pierde acceso %s",
   async (status) => {
     window.history.replaceState(null, "", route);
-    vi.spyOn(globalThis, "fetch")
+    mockLegacyCustomizationFetch()
       .mockResolvedValueOnce(
         Response.json(project, { headers: { ETag: etag } }),
       )
@@ -349,8 +341,7 @@ it.each(["success", "failure"])(
       id: "6c5dbd10-9ad5-4000-8000-000000000002",
       name: "Otro proyecto",
     };
-    const fetcher = vi
-      .spyOn(globalThis, "fetch")
+    const fetcher = mockLegacyCustomizationFetch()
       .mockResolvedValueOnce(
         Response.json(project, { headers: { ETag: etag } }),
       )
@@ -395,7 +386,7 @@ it.each([
 ])("@s16 foco tras respuesta %i con foco movido %s", async (status, moved) => {
   window.history.replaceState(null, "", route);
   let finish!: (response: Response) => void;
-  vi.spyOn(globalThis, "fetch")
+  mockLegacyCustomizationFetch()
     .mockResolvedValueOnce(Response.json(project, { headers: { ETag: etag } }))
     .mockImplementationOnce(
       () =>
@@ -435,7 +426,7 @@ it.each([
 
 it("@s15 no anuncia cambio si HTTP 200 confirma un destino diferente", async () => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockLegacyCustomizationFetch()
     .mockResolvedValueOnce(Response.json(project, { headers: { ETag: etag } }))
     .mockResolvedValueOnce(
       Response.json(
@@ -463,7 +454,7 @@ it.each([
   { code: "OTHER", activeCount: 3, limit: 3 },
 ])("@s15 no inventa capacidad ante problema incompatible %j", async (body) => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockLegacyCustomizationFetch()
     .mockResolvedValueOnce(Response.json(project, { headers: { ETag: etag } }))
     .mockResolvedValueOnce(Response.json(body, { status: 409 }));
   render(<App />);
@@ -479,8 +470,7 @@ it.each([
 it("@s15 el segundo cambio usa ETag confirmado y no persiste proyecto ni credenciales", async () => {
   window.history.replaceState(null, "", route);
   const storage = vi.spyOn(Storage.prototype, "setItem");
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
+  const fetcher = mockLegacyCustomizationFetch()
     .mockResolvedValueOnce(Response.json(project, { headers: { ETag: etag } }))
     .mockResolvedValueOnce(
       Response.json(
@@ -509,7 +499,7 @@ it("@s15 el segundo cambio usa ETag confirmado y no persiste proyecto ni credenc
 
 it("@s14 rechaza un estado que imita una cadena mediante un array", async () => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+  mockLegacyCustomizationFetch().mockResolvedValueOnce(
     Response.json(
       { ...project, status: ["idea"] },
       { headers: { ETag: etag } },
@@ -526,7 +516,7 @@ it("@s14 rechaza un estado que imita una cadena mediante un array", async () => 
 
 it("@s15 un nuevo error sustituye la capacidad de un intento anterior", async () => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockLegacyCustomizationFetch()
     .mockResolvedValueOnce(Response.json(project, { headers: { ETag: etag } }))
     .mockResolvedValueOnce(
       Response.json(
@@ -554,7 +544,7 @@ it("@s15 un nuevo error sustituye la capacidad de un intento anterior", async ()
 it("@s15 la recarga deliberada retira las acciones de la versión antigua mientras espera", async () => {
   window.history.replaceState(null, "", route);
   let finish!: (response: Response) => void;
-  vi.spyOn(globalThis, "fetch")
+  mockLegacyCustomizationFetch()
     .mockResolvedValueOnce(Response.json(project, { headers: { ETag: etag } }))
     .mockResolvedValueOnce(Response.json({}, { status: 412 }))
     .mockImplementationOnce(
@@ -585,7 +575,7 @@ it("@s15 la recarga deliberada retira las acciones de la versión antigua mientr
 
 it("@s15 un cuerpo de capacidad no convierte HTTP 500 en un rechazo de límite", async () => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockLegacyCustomizationFetch()
     .mockResolvedValueOnce(Response.json(project, { headers: { ETag: etag } }))
     .mockResolvedValueOnce(
       Response.json(
@@ -608,7 +598,7 @@ it("@s15 un cuerpo de capacidad no convierte HTTP 500 en un rechazo de límite",
 
 it("@s15 al perder acceso también retira el enlace de edición privado", async () => {
   window.history.replaceState(null, "", route);
-  vi.spyOn(globalThis, "fetch")
+  mockLegacyCustomizationFetch()
     .mockResolvedValueOnce(Response.json(project, { headers: { ETag: etag } }))
     .mockResolvedValueOnce(Response.json({}, { status: 401 }));
   render(<App />);

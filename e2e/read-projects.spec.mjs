@@ -3,7 +3,11 @@ import { test, expect } from "./support/authenticated-test.mjs";
 import { sql, create } from "./support/projects.mjs";
 import AxeBuilder from "@axe-core/playwright";
 
-test.beforeEach(() => sql("TRUNCATE work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, task_status_history, tasks, outbox_events, projects"));
+test.beforeEach(() =>
+  sql(
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, task_status_history, tasks, outbox_events, projects",
+  ),
+);
 
 test("read_projects: real creation survives list/detail navigation and fresh reload @s14 @s20 @s30", async ({
   page,

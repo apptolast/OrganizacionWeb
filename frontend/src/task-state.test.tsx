@@ -1,3 +1,4 @@
+import { mockLegacyCustomizationFetch } from "../test-fixtures/customization";
 import { StrictMode } from "react";
 import { SessionGate } from "./session-gate";
 import {
@@ -8,7 +9,7 @@ import {
   act,
   waitFor,
 } from "@testing-library/react";
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, expect, it } from "vitest";
 import { App } from "./App";
 
 const project = {
@@ -44,9 +45,8 @@ function contextFetch(
     options?: RequestInit,
   ) => Response | Promise<Response> | undefined,
 ) {
-  return vi
-    .spyOn(globalThis, "fetch")
-    .mockImplementation(async (input, options) => {
+  return mockLegacyCustomizationFetch().mockImplementation(
+    async (input, options) => {
       const url = String(input);
       if (url === "/api/v1/work-sessions/active")
         return Response.json({ session: null });
@@ -64,7 +64,8 @@ function contextFetch(
       if (url.endsWith("/status"))
         return Response.json(pending, { headers: { ETag: etag } });
       return Response.json(task);
-    });
+    },
+  );
 }
 afterEach(() => window.history.replaceState(null, "", "/"));
 it("@s1 @s34 consulta revisión antes de habilitar una transición", async () => {

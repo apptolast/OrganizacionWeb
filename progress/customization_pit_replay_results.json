@@ -1,0 +1,56 @@
+{
+  "total": 15,
+  "unmatched": [],
+  "killed": 15,
+  "targets": [
+    {
+      "block": "2",
+      "killingTest": "com.apptolast.organization.domain.CustomFieldValuesTest.[engine:junit-jupiter]/[class:com.apptolast.organization.domain.CustomFieldValuesTest]/[test-template:s12_invalidTextReportsValueErrorWithoutTrimming(java.lang.String)]/[test-template-invocation:#4]",
+      "testsRun": "1",
+      "index": "10",
+      "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+      "class": "com.apptolast.organization.domain.CustomFieldInput",
+      "descriptor": "(I)Z",
+      "method": "lambda$canonical$0",
+      "matches": 1,
+      "status": "KILLED",
+      "line": "26",
+      "originalStatus": "SURVIVED"
+    },
+    {
+      "block": "2",
+      "killingTest": "com.apptolast.organization.application.SaveCustomFieldValuesTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.SaveCustomFieldValuesTest]/[method:s22_valueChangeAdvancesToLaterClockWithMicrosecondPrecision()]",
+      "testsRun": "3",
+      "index": "7",
+      "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+      "class": "com.apptolast.organization.application.SaveCustomFieldValues",
+      "descriptor": "(Ljava/time/Instant;Lcom/apptolast/organization/domain/CustomFieldValuesCollection;)Z",
+      "method": "lambda$save$5",
+      "matches": 1,
+      "status": "KILLED",
+      "line": "83",
+      "originalStatus": "SURVIVED"
+    },
+    {
+      "block": "2",
+      "killingTest": "com.apptolast.organization.application.CustomFieldCommandsTest.[engine:junit-jupiter]/[class:com.apptolast.organization.application.CustomFieldCommandsTest]/[test-template:s4_invalidLabelIsRejectedBeforeReadingConfiguration(java.lang.String)]/[test-template-invocation:#4]",
+      "testsRun": "2",
+      "index": "10",
+      "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+      "class": "com.apptolast.organization.domain.CustomFieldLabel",
+      "descriptor": "(I)Z",
+      "method": "lambda$new$0",
+      "matches": 1,
+      "status": "KILLED",
+      "line": "10",
+      "originalStatus": "SURVIVED"
+    }
+  ],
+  "exitEvidence": "9c02f6",
+  "extras": 12,
+  "logSha256": "0907D298ADAB988C42A6C8CA4C1083089E71D42F3B7744A5EA2E4AE8E5AD0CEA",
+  "xmlSha256": "55BB9C3525C7514DD2CF9A6542A81953036EB648E3833A73ADFCB59C75177478",
+  "inputs": 438,
+  "changedInputs": [],
+  "exitCode": 0
+}

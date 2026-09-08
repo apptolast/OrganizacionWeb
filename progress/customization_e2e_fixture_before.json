@@ -1,0 +1,162 @@
+[
+  {
+    "path": "e2e/weekly-review.spec.mjs",
+    "before": "6E8260E5CADAFAB13D990A7A0AA357CF85BB2194FE11A4F4BBF0D1F303CC26CE",
+    "truncates": 3
+  },
+  {
+    "path": "e2e/weekly-review-ux.spec.mjs",
+    "before": "DFCCAD42CA435C579FEAD3C284D73D0D8DA93A0B34047177009509A233F75048",
+    "truncates": 4
+  },
+  {
+    "path": "e2e/today.spec.mjs",
+    "before": "D4C56C77288AECECEE1C630222740183015EE14B453E8310C9E542CCB2BBAAA8",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/today-native-zoom.spec.mjs",
+    "before": "05709DB0C3197E586A0CDB58737392351740A2EF67D712BAA5B33B4AA5AF2716",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/start-work-session.spec.mjs",
+    "before": "2D092547CB21A14F3E4C0F509131DCBBD13C60708C8E5D0A457A8E35F59C607A",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/start-work-session-ux.spec.mjs",
+    "before": "8D88C57FA621FACE11E28BA50F82A44B2ADFABA0CC9FF1E6BB111FAF86260950",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/start-work-session-text.spec.mjs",
+    "before": "FCFFB6B53E1D8D7E5BB5F664B67FBBFFC1B4DD436E89A920664ABFA7DEB9EF17",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/start-work-session-native-zoom.spec.mjs",
+    "before": "62C85244BAB14FBCD4B4ACD2AEE73E7282CEB407E5B5216E71569BF0CE90860E",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/split-task.spec.mjs",
+    "before": "43D665C649B5B615523E8CDAFECA7E23B52C7D93820EAF46B2A9D694D9F66673",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/schedule-block.spec.mjs",
+    "before": "26940C1DA46A94DA499C1E32A1444B1F6B03A003E4ABD4980C996C0C74BAA862",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/reschedule.spec.mjs",
+    "before": "0CC856BFBBBFEB49709BF16CB5261B9390211CA2C278DF46D158DA6D98F5801C",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/reschedule-ux.spec.mjs",
+    "before": "A5BF0C05FF88374BA3DD76F3D4EEA6593A77BDA4F4B4F02AC783A2F5CAC55DB0",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/reschedule-text.spec.mjs",
+    "before": "6A46323F22C18D30C32446CE74560F1B5D067F3DB1B7CBDE58419121E5125809",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/reschedule-recovery.spec.mjs",
+    "before": "710E6F4BB417B97ECEA13D9973113AF4133853F2E4179441E157FA6A381AAAFD",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/reschedule-native-zoom.spec.mjs",
+    "before": "48C1BAA93143BBF1804633ED0B8328A1F3D5FBFE8B8B787165E9D7D8ED301565",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/reschedule-feedback.spec.mjs",
+    "before": "BD41CEADC10E812357FDB7D49A733DEA9D345A203C7AF052188ABBE26A0C4E3E",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/reschedule-conditional-ux.spec.mjs",
+    "before": "D3EDD696BCA1737988C91792EADCB08D2150A2B901CE0392F9B0A4FE9296985A",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/read-projects.spec.mjs",
+    "before": "9F1D1852198E8B22C126C68EBA043C4100D550C6E584403D89A8A4CCA7D90BF4",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/project-states.spec.mjs",
+    "before": "14AAD9FBDC7D6FA9D975490D5942A67F98E70C5793452BE13E4FB18950E3376F",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/pause-resume-session.spec.mjs",
+    "before": "A2A3E08010E24F18AB87205D70A6795AB83891892A159C3E1C0BB1A6E18627C7",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/history.spec.mjs",
+    "before": "A285CB7DFA4FF208AEC6BB91982A420B207CB58495E5D6194E724F80C8BD4E00",
+    "truncates": 4
+  },
+  {
+    "path": "e2e/history-ux.spec.mjs",
+    "before": "EEE1CE4CBD0ED3271314A8823B56CA948BD88F37CE07821CE0677AF99668FF43",
+    "truncates": 3
+  },
+  {
+    "path": "e2e/end-time-notification.spec.mjs",
+    "before": "B3EE1EA07EB2838DC6F25BC9057125E93043FFE7FB6D5B3ABF81DF1EB28A24F9",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/end-time-notification-ux.spec.mjs",
+    "before": "2A748CAD548EF6CC371CFEED6DB9750DAD8E9E04905F4E7294C8CBD448B6F72A",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/edit-project.spec.mjs",
+    "before": "8EED75B0F0327EF8647D53F115C3B22EAC03F311FDFF56DDD4AEE04842D08DB7",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/create-task.spec.mjs",
+    "before": "3314BD0855BA40C087914F366FD9D737CDAEAC2DED9669DD3100F26A7A080C2F",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/complete-reopen-task.spec.mjs",
+    "before": "E52B4948F23192FDC8241EB3DC4CBC671E542702613E54DCFA82CB0F847DC288",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/close-work-session.spec.mjs",
+    "before": "B2762DC8D988C5635624BF8C4844EED03F9DD3907E51A32B0A07D910A38CA214",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/close-work-session-ux.spec.mjs",
+    "before": "B54EE181A0D5C909F26A225C325930AF233FE74174D1FF5CAD99CE8CDB0FD513",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/availability.spec.mjs",
+    "before": "7F080E5B237D36D51D5C07BCFC5274BAC7598D32141019E70B3D74B22EB36A9E",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/authentication.spec.mjs",
+    "before": "7EE4AC08E6D7C50805E9E29AE730600B6E8B589B99A1068E697B3BA7C1F6AEEB",
+    "truncates": 1
+  },
+  {
+    "path": "e2e/appearance-ux-audit.spec.mjs",
+    "before": "A21FDB76752F787D2E44F6F654A09025175FB3C85FB87C8CE49BF0D7D959F62C",
+    "truncates": 1
+  }
+]

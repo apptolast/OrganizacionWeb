@@ -1,0 +1,42 @@
+[
+  {
+    "path": "frontend/test-fixtures/customization.ts",
+    "sha256": "12A23A7B41C9CBA8A1992F918BFB15AD6820A1D47F07DC5C5B76159052FF57E1"
+  },
+  {
+    "path": "frontend/src/authentication.test.tsx",
+    "sha256": "CAEB3069D913AC4AD5CC8E0A11C74AE8BBF2447AA1A388DE1966BF6F8A9928A0"
+  },
+  {
+    "path": "frontend/src/create-task.test.tsx",
+    "sha256": "115114F93BEC0FA7A213A87F422201A0B29D3E94A5FBAB5CE297FAB7E531A245"
+  },
+  {
+    "path": "frontend/src/work-session-integration.test.tsx",
+    "sha256": "894017590482ACE687ADBFA36138C0D7A67CFBD54A30852288D7DD064484DBA3"
+  },
+  {
+    "path": "frontend/src/read-projects.test.tsx",
+    "sha256": "75BED8AAF6F54F2CD0DAAA9953374B8F20AE007AF42B6740F2EBBD003EC77D3B"
+  },
+  {
+    "path": "frontend/src/edit-project.test.tsx",
+    "sha256": "8B148D115688AB95F569C14E1D5D2E7EFA64E84842B8B3AF1C006CF09E0A4979"
+  },
+  {
+    "path": "frontend/src/task-state.test.tsx",
+    "sha256": "1B16748F6D55905902DD1A8931ED88B5C0653AD31E26D3815B3DA10562DDDE66"
+  },
+  {
+    "path": "frontend/src/split-task.test.tsx",
+    "sha256": "2D4B9A176A92BE80B11A15BC0B836831ABAD875F10C7619FE7CBCAEF7784FB0D"
+  },
+  {
+    "path": "frontend/src/project-states.test.tsx",
+    "sha256": "E4349611CD9F41197E88B7D9F0FB83D4151B3FE21E820647A2F715125A595E77"
+  },
+  {
+    "path": "frontend/src/task-blocks.test.tsx",
+    "sha256": "A028982F07A743A4A1F47DD223C88C47ED5B4425454F5138275E50C6FAB4F334"
+  }
+]

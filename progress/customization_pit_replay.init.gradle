@@ -1,0 +1,15 @@
+// Directed customization21 replay; original report and inherited gates remain intact.
+allprojects {
+    afterEvaluate { project ->
+        def pit = project.extensions.findByName('pitest')
+        if (pit != null) {
+            pit.targetClasses.set([
+                'com.apptolast.organization.domain.CustomFieldInput',
+                'com.apptolast.organization.domain.CustomFieldLabel',
+                'com.apptolast.organization.application.SaveCustomFieldValues'
+            ] as Set)
+            pit.mutators.set(['CONDITIONALS_BOUNDARY', 'TRUE_RETURNS'] as Set)
+            pit.reportDir.set(project.layout.buildDirectory.dir('reports/pitest-customization-replay'))
+        }
+    }
+}

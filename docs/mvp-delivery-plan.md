@@ -1,6 +1,6 @@
 # Plan de entrega
 
-Actualizado el 7 de septiembre de 2026. Las funcionalidades 1–19 están desplegadas y verificadas en https://organizacion.apptolast.com. La apariencia persistente 20 está en desarrollo; 21–30 siguen pendientes. Este recuento de funcionalidades no mide un porcentaje de esfuerzo ni garantiza ausencia de errores.
+Actualizado el 8 de septiembre de 2026. Las funcionalidades 1–20 están desplegadas y verificadas en https://organizacion.apptolast.com. Vistas y campos personales 21 está en validación final; 22–30 siguen pendientes. Este recuento de funcionalidades no mide un porcentaje de esfuerzo ni garantiza ausencia de errores.
 
 ## Estado comprobado
 
@@ -20,12 +20,16 @@ Se creó una copia PostgreSQL real en el servidor y se restauró en una instanci
 
 ## Orden de trabajo
 
-1. Terminar apariencia20: completar SCSS, integración, pruebas de navegador, UX y mutación de la interfaz. Backend, HTTP y recuperación real tras reiniciar la API ya están revisados.
+1. Cerrar vistas y campos21: superar mutación frontend y regresión final, desplegar y verificar por HTTPS. La primera campaña frontend quedó en 76,64%, por debajo de80; se preserva y se refuerzan comportamientos observables. Backend, UX, CI del candidato, copia restaurada, rollback y check del servidor tienen evidencia aprobada.
 2. Conservar la aceptación del MVP y completar las obligaciones operativas de respaldo externo y recuperación que siguen pendientes.
-3. Continuar21–30 con contratos acotados: vistas/campos, exportación/importación, API de integración, webhooks, calendarios, GitHub, otros conectores y automatizaciones.
+3. Continuar22–30 con contratos acotados: exportación22 antes de importación23; credenciales/API24 antes de webhooks25; calendarioICS26; después GitHub27, calendario externo28, otros conectores29 y automatizaciones30. Definir proveedor, dirección de sincronización, permisos y conflictos antes de cada integración. La autorización global del usuario permite continuar sin repetir la aprobación de cada contrato.
 
 La mejora DNS está desplegada con aplicación4d9469a y catálogo770b736. PR22 y PR30 fusionadas con CI verde; check27/2/0 y apply38/5/0, ambos liberados correctamente. API/web terminaron su actualización, PostgreSQL/Rabbit conservaron sus contenedores, los20servicios están1/1 y las ocho rutas anteriores mantienen sus respuestas. La aceptación HTTPS posterior conserva sesión cerrada, tiempo neto, historial y revisión semanal. La sesión privada utilizada para verificarlo se cerró correctamente.
 
 ## Estimaciones y límites
 
-El MVP ya se puede usar. Apariencia tiene el backend integrado, una regresión de 2.384 pruebas Java verde y mutación original153/159 (96,23%). Tres refuerzos posteriores verifican los cuatro cambios observables que faltaban, mediante un replay separado; no se suman campañas. Quedan la integración visual, regresiones finales, UX y mutación de la interfaz. Los trabajos avanzados requieren contratos y proveedores concretos, por lo que no hay una estimación total fiable ni una garantía de terminar con una recarga o cuota determinada. Los plazos anteriores de despliegue quedan sustituidos por este estado comprobado.
+El MVP ya se puede usar, incluida apariencia persistente20 (release ed00ad426842b4a85f2a0f849de014a8615ba76d). Su aceptación y límites están en progress/judge_appearance.md. El candidato21 dfac90e tiene CI verde con151 E2E, pero no se presenta como desplegado ni cerrado mientras falte el umbral de mutación y la aceptación real.
+
+Como referencia de tiempo observado, apariencia20 ocupó unas3h27 desde contrato hasta cierre;21 superaba4h16 al corte de esta revisión y seguía en validación. Incluyen trabajo paralelo y esperas; no son horas de CPU ni una velocidad garantizada. La campaña original de mutación frontend21 duró44min8s. El modo incremental oficial puede reutilizar pruebas intactas, pero su duración y resultado se medirán al ejecutarlo.
+
+Estimación provisional de baja confianza para planificación:22–26 podrían requerir15–30 horas adicionales de ejecución y validación;27,28 y30 otras15–35 horas si proveedores y permisos están disponibles. No incluye29, cuyo inventario sigue abierto, ni esperas externas ni hallazgos nuevos. Es un orden de magnitud de varias jornadas, no un compromiso de completar todo hoy. Con cuota limitada, el siguiente resultado prioritario es cerrar21 y después exportación22. No hay garantía de terminar el alcance completo con una recarga o cuota concreta.

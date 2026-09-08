@@ -1,3 +1,6 @@
+import { CustomFieldsPanel } from "./custom-fields";
+import { CustomizationControls } from "./customization";
+import type { CustomizationSession } from "./customization-state";
 import { ProjectTasks } from "./project-tasks";
 import { useRef, useLayoutEffect } from "react";
 import { RouteLink } from "./navigation";
@@ -5,7 +8,13 @@ import { useReadProjects } from "./use-read-projects";
 import { statusLabels } from "./project-status";
 import { ProjectStatusControl } from "./project-status-control";
 
-export function ProjectReader({ route }: { route: string }) {
+export function ProjectReader({
+  route,
+  customization,
+}: {
+  route: string;
+  customization?: CustomizationSession;
+}) {
   const {
     page,
     project,
@@ -144,6 +153,9 @@ export function ProjectReader({ route }: { route: string }) {
         </section>
       ) : (
         <>
+          {customization && (
+            <CustomizationControls scope="PROJECT" session={customization} />
+          )}
           {page.items.length === 0 ? (
             <section className="collection-empty">
               <div className="empty-symbol" aria-hidden="true">
@@ -183,9 +195,22 @@ export function ProjectReader({ route }: { route: string }) {
                       <span className="idea-badge" data-status={item.status}>
                         {statusLabels[item.status]}
                       </span>
-                      <span>
-                        Creado <ProjectTime value={item.createdAt} />
-                      </span>
+                      {(
+                        customization?.configs.PROJECT?.visibleFields ?? [
+                          "createdAt",
+                        ]
+                      ).map((field) => (
+                        <span key={field}>
+                          {field === "createdAt" ? "Creado" : "Actualizado"}{" "}
+                          <ProjectTime
+                            value={
+                              field === "createdAt"
+                                ? item.createdAt
+                                : item.updatedAt
+                            }
+                          />
+                        </span>
+                      ))}
                     </div>
                   </li>
                 ))}
@@ -211,12 +236,20 @@ export function ProjectReader({ route }: { route: string }) {
           )}
         </>
       )}
+      {project && customization && (
+        <CustomFieldsPanel
+          projectId={project.id}
+          session={customization}
+          onAccessFailure={revokeProject}
+        />
+      )}
       {project && (
         <ProjectTasks
           key={project.id}
           projectId={project.id}
           projectStatus={project.status}
           onProjectConfirmed={confirmProject}
+          customization={customization}
         />
       )}
       <footer className="page-footer">

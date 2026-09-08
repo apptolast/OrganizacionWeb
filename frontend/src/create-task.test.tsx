@@ -1,3 +1,4 @@
+import { customizationFixtureResponse } from "../test-fixtures/customization";
 import {
   render,
   screen,
@@ -1378,6 +1379,9 @@ function stubBusinessFetch(mock: unknown) {
         ),
       );
     }
-    return traffic(input, init);
+    const customization = customizationFixtureResponse(input, init);
+    return customization
+      ? Promise.resolve(customization)
+      : traffic(input, init);
   });
 }

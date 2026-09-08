@@ -1,0 +1,10 @@
+[
+  {
+    "sha256": "38146A9952DF58F702F313A566769576AD0C069087BFBAF69CED1B36BD407817",
+    "path": "backend/src/main/java/com/apptolast/organization/application/CreateCustomFieldUseCase.java"
+  },
+  {
+    "sha256": "2A2C45F02AD821954397CF4566EDF1B0F0FA3BB45D5B08552B5AEB9087755FCE",
+    "path": "backend/src/main/java/com/apptolast/organization/application/UpdateCustomFieldUseCase.java"
+  }
+]

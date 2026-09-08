@@ -1,0 +1,14 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/http/CustomizationController.java",
+    "sha256": "542E0E555588C60A1487E00BB7CD6413090A8D75A8D16151584673196B299111"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/CustomizationApiTest.java",
+    "sha256": "276443CC32AE99C86ED9D174841A2E5E31D018132EAA52931319B6244990725F"
+  },
+  {
+    "path": "progress/tdd_custom_views_fields_http.md",
+    "sha256": "B7E2EDE88D619BB61339A1C69006597C02672EFA1FE7EA2BB6CCB6BF093B1054"
+  }
+]

@@ -1,0 +1,44 @@
+[
+  {
+    "failures": 0,
+    "skipped": 0,
+    "errors": 0,
+    "class": "com.apptolast.organization.adapter.config.CustomizationWiringTest",
+    "tests": 3
+  },
+  {
+    "failures": 0,
+    "skipped": 0,
+    "errors": 0,
+    "class": "com.apptolast.organization.adapter.CustomizationApiTest",
+    "tests": 66
+  },
+  {
+    "failures": 0,
+    "skipped": 0,
+    "errors": 0,
+    "class": "com.apptolast.organization.adapter.persistence.CustomFieldValuesPersistenceTest",
+    "tests": 5
+  },
+  {
+    "failures": 0,
+    "skipped": 0,
+    "errors": 0,
+    "class": "com.apptolast.organization.application.ReadCustomFieldValuesTest",
+    "tests": 1
+  },
+  {
+    "failures": 0,
+    "skipped": 0,
+    "errors": 0,
+    "class": "com.apptolast.organization.application.SaveCustomFieldValuesTest",
+    "tests": 15
+  },
+  {
+    "failures": 0,
+    "skipped": 0,
+    "errors": 0,
+    "class": "com.apptolast.organization.domain.CustomFieldValuesTest",
+    "tests": 30
+  }
+]

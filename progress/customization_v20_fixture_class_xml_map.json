@@ -1,0 +1,242 @@
+[
+  {
+    "errors": 0,
+    "tests": 22,
+    "xml": "TEST-com.apptolast.organization.adapter.AuthenticationHttpTest.xml",
+    "reportDirectory": "customization_v20_fixture_first_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/AuthenticationHttpTest.java",
+    "class": "com.apptolast.organization.adapter.AuthenticationHttpTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 151,
+    "xml": "TEST-com.apptolast.organization.adapter.AvailabilityApiTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/AvailabilityApiTest.java",
+    "class": "com.apptolast.organization.adapter.AvailabilityApiTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 17,
+    "xml": "TEST-com.apptolast.organization.adapter.BlockChangesApiTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/BlockChangesApiTest.java",
+    "class": "com.apptolast.organization.adapter.BlockChangesApiTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 42,
+    "xml": "TEST-com.apptolast.organization.adapter.EditProjectsApiTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/EditProjectsApiTest.java",
+    "class": "com.apptolast.organization.adapter.EditProjectsApiTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 42,
+    "xml": "TEST-com.apptolast.organization.adapter.ProjectApiTest.xml",
+    "reportDirectory": "customization_v20_fixture_first_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/ProjectApiTest.java",
+    "class": "com.apptolast.organization.adapter.ProjectApiTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 43,
+    "xml": "TEST-com.apptolast.organization.adapter.ProjectStatesApiTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/ProjectStatesApiTest.java",
+    "class": "com.apptolast.organization.adapter.ProjectStatesApiTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 36,
+    "xml": "TEST-com.apptolast.organization.adapter.ReadProjectsApiTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/ReadProjectsApiTest.java",
+    "class": "com.apptolast.organization.adapter.ReadProjectsApiTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 70,
+    "xml": "TEST-com.apptolast.organization.adapter.RescheduleApiTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/RescheduleApiTest.java",
+    "class": "com.apptolast.organization.adapter.RescheduleApiTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 9,
+    "xml": "TEST-com.apptolast.organization.adapter.RescheduleErrorsApiTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/RescheduleErrorsApiTest.java",
+    "class": "com.apptolast.organization.adapter.RescheduleErrorsApiTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 173,
+    "xml": "TEST-com.apptolast.organization.adapter.ScheduleBlockApiTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/ScheduleBlockApiTest.java",
+    "class": "com.apptolast.organization.adapter.ScheduleBlockApiTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 105,
+    "xml": "TEST-com.apptolast.organization.adapter.SubtaskApiTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/SubtaskApiTest.java",
+    "class": "com.apptolast.organization.adapter.SubtaskApiTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 65,
+    "xml": "TEST-com.apptolast.organization.adapter.TaskApiTest.xml",
+    "reportDirectory": "customization_v20_fixture_first_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/TaskApiTest.java",
+    "class": "com.apptolast.organization.adapter.TaskApiTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 48,
+    "xml": "TEST-com.apptolast.organization.adapter.TaskHistoryApiTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/TaskHistoryApiTest.java",
+    "class": "com.apptolast.organization.adapter.TaskHistoryApiTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 80,
+    "xml": "TEST-com.apptolast.organization.adapter.TaskStatusApiTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/TaskStatusApiTest.java",
+    "class": "com.apptolast.organization.adapter.TaskStatusApiTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 27,
+    "xml": "TEST-com.apptolast.organization.adapter.TodayApiTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/TodayApiTest.java",
+    "class": "com.apptolast.organization.adapter.TodayApiTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 3,
+    "xml": "TEST-com.apptolast.organization.adapter.WorkSessionIntegrationTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/WorkSessionIntegrationTest.java",
+    "class": "com.apptolast.organization.adapter.WorkSessionIntegrationTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 11,
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.BlockChangeQueriesPersistenceTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/BlockChangeQueriesPersistenceTest.java",
+    "class": "com.apptolast.organization.adapter.persistence.BlockChangeQueriesPersistenceTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 57,
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest.xml",
+    "reportDirectory": "customization_v20_fixture_first_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/HistoryQueriesPersistenceTest.java",
+    "class": "com.apptolast.organization.adapter.persistence.HistoryQueriesPersistenceTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 4,
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.HistoryReadTransactionTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/HistoryReadTransactionTest.java",
+    "class": "com.apptolast.organization.adapter.persistence.HistoryReadTransactionTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 24,
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.OutboxRecoveryTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/OutboxRecoveryTest.java",
+    "class": "com.apptolast.organization.adapter.persistence.OutboxRecoveryTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 15,
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.OutboxWorkTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/OutboxWorkTest.java",
+    "class": "com.apptolast.organization.adapter.persistence.OutboxWorkTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 6,
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.RescheduleCoordinationTest.xml",
+    "reportDirectory": "customization_v20_fixture_first_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/RescheduleCoordinationTest.java",
+    "class": "com.apptolast.organization.adapter.persistence.RescheduleCoordinationTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 38,
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.ScheduleBlockPersistenceTest.xml",
+    "reportDirectory": "customization_v20_fixture_remaining_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ScheduleBlockPersistenceTest.java",
+    "class": "com.apptolast.organization.adapter.persistence.ScheduleBlockPersistenceTest",
+    "skips": 0
+  },
+  {
+    "errors": 0,
+    "tests": 33,
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest.xml",
+    "reportDirectory": "customization_v20_fixture_first_xml",
+    "failures": 0,
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/WeeklyReviewPersistenceTest.java",
+    "class": "com.apptolast.organization.adapter.persistence.WeeklyReviewPersistenceTest",
+    "skips": 0
+  }
+]

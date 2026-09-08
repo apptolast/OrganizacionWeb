@@ -463,7 +463,12 @@ class AppearancePersistenceTest {
         "SELECT table_name||'.'||column_name||':'||data_type AS definition FROM information_schema.columns WHERE table_schema='appearance_upgrade' AND table_name NOT IN ('appearance_preferences','flyway_schema_history') ORDER BY table_name,ordinal_position";
     var schema = old.queryForList(columns, String.class);
     var projects = old.queryForList("SELECT * FROM projects");
-    Flyway.configure().dataSource(source).schemas("appearance_upgrade").load().migrate();
+    Flyway.configure()
+        .dataSource(source)
+        .schemas("appearance_upgrade")
+        .target("19")
+        .load()
+        .migrate();
     assertThat(old.queryForList(columns, String.class)).isEqualTo(schema);
     assertThat(old.queryForList("SELECT * FROM projects")).isEqualTo(projects);
     assertThat(old.queryForObject("SELECT count(*) FROM appearance_preferences", Integer.class))

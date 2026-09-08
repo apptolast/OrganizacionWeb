@@ -1,0 +1,26 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresCustomizationStore.java",
+    "sha256": "B5D1E12AC2B69761D7A1B8DC6EE6602E297D209DBD471D3483C537E608CDDEB2"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/CustomFieldValuesPersistenceTest.java",
+    "sha256": "0C0DAF7FD3AFE4E2B419A5A44AA6557BF426D9655B297EDD1AE1631FF43E0690"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/CustomizationPersistenceTest.java",
+    "sha256": "483148B9CB9FC8D9C77F084FCDB81558028A1C4693CFA919622426EB135994DE"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/CustomFieldCommandsTest.java",
+    "sha256": "3423903C8D830BF46FD91599A1006F4E82BE5EB124DC94CD4439AC53429BD671"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/application/SaveCustomizationTest.java",
+    "sha256": "4B0D394DD25B08519FDA4B606193D8AFC8CD480D5481174BBB71158DBB34EB8A"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/domain/CustomFieldValuesTest.java",
+    "sha256": "85C77B41CD9BF62691FB5CE8AEC7F5CCC60CB89EA2EB70AE2DC926EB85B9BF13"
+  }
+]

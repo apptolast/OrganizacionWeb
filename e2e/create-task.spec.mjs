@@ -13,7 +13,11 @@ const fields = [
   "createdAt",
   "updatedAt",
 ].sort();
-test.beforeEach(() => sql("TRUNCATE work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, task_status_history, tasks,outbox_events,projects"));
+test.beforeEach(() =>
+  sql(
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, task_status_history, tasks,outbox_events,projects",
+  ),
+);
 async function createTask(request, projectId, title, extra = {}) {
   const response = await request.post(`/api/v1/projects/${projectId}/tasks`, {
     headers: await csrfHeaders(request),

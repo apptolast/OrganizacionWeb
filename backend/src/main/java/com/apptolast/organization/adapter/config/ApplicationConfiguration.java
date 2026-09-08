@@ -9,6 +9,51 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  com.apptolast.organization.application.SaveCustomFieldValues saveCustomFieldValues(
+      com.apptolast.organization.application.CustomFieldValuesEditing store, Clock clock) {
+    return new com.apptolast.organization.application.SaveCustomFieldValues(store, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReadCustomFieldValues readCustomFieldValues(
+      com.apptolast.organization.application.CustomFieldValuesQueries queries) {
+    return new com.apptolast.organization.application.ReadCustomFieldValues(queries);
+  }
+
+  @Bean
+  com.apptolast.organization.application.SaveCustomizationView saveCustomizationView(
+      com.apptolast.organization.application.CustomizationEditing store, Clock clock) {
+    return new com.apptolast.organization.application.SaveCustomizationView(store, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.application.CreateCustomField createCustomField(
+      com.apptolast.organization.application.CustomizationEditing store, Clock clock) {
+    return new com.apptolast.organization.application.CreateCustomField(store, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.application.UpdateCustomField updateCustomField(
+      com.apptolast.organization.application.CustomizationEditing store, Clock clock) {
+    return new com.apptolast.organization.application.UpdateCustomField(store, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.adapter.persistence.PostgresCustomizationStore customizationStore(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions,
+      com.fasterxml.jackson.databind.ObjectMapper json) {
+    return new com.apptolast.organization.adapter.persistence.PostgresCustomizationStore(
+        jdbc, transactions, json);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReadCustomization readCustomization(
+      com.apptolast.organization.application.CustomizationQueries queries) {
+    return new com.apptolast.organization.application.ReadCustomization(queries);
+  }
+
+  @Bean
   com.apptolast.organization.adapter.persistence.PostgresWeeklyReviewQueries weeklyReviewQueries(
       org.springframework.jdbc.core.JdbcTemplate jdbc,
       org.springframework.transaction.PlatformTransactionManager transactions) {

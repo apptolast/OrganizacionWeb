@@ -36,6 +36,7 @@ pitest {
     junit5PluginVersion.set("1.2.3")
     val scope = providers.gradleProperty("mutationScope").orNull
     val appearanceOnly = scope == "appearance"
+    val customizationOnly = scope == "custom_views_fields"
     val weeklyReviewOnly = scope == "weekly_review"
     val historyOnly = scope == "history"
     val authenticationOnly = scope == "authentication"
@@ -257,6 +258,28 @@ pitest {
         "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher",
         "com.apptolast.organization.adapter.config.ApplicationConfiguration"
     )
+    val customizationClasses = setOf(
+        "com.apptolast.organization.domain.Customization*",
+        "com.apptolast.organization.domain.CustomField*",
+        "com.apptolast.organization.application.ReadCustomization*",
+        "com.apptolast.organization.application.SaveCustomization*",
+        "com.apptolast.organization.application.CreateCustomField*",
+        "com.apptolast.organization.application.UpdateCustomField*",
+        "com.apptolast.organization.application.ReadCustomFieldValues*",
+        "com.apptolast.organization.application.SaveCustomFieldValues*",
+        "com.apptolast.organization.application.Customization*",
+        "com.apptolast.organization.application.CustomFieldValues*",
+        "com.apptolast.organization.adapter.persistence.PostgresCustomizationStore*",
+        "com.apptolast.organization.adapter.http.CustomizationController*",
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration"
+    )
+    val customizationAdapterTests = setOf(
+        "com.apptolast.organization.adapter.CustomizationApiTest",
+        "com.apptolast.organization.adapter.persistence.Customization*Test",
+        "com.apptolast.organization.adapter.persistence.CustomField*Test",
+        "com.apptolast.organization.adapter.config.CustomizationWiringTest",
+        "com.apptolast.organization.adapter.config.ApplicationWiringTest"
+    )
     val appearanceClasses = setOf(
         "com.apptolast.organization.application.ReadAppearance",
         "com.apptolast.organization.application.ReadAppearanceUseCase",
@@ -308,6 +331,7 @@ pitest {
         "com.apptolast.organization.adapter.persistence.History*Test"
     )
     targetClasses.set(when {
+        customizationOnly -> customizationClasses
         appearanceOnly -> appearanceClasses
         weeklyReviewOnly -> weeklyReviewClasses
         historyOnly -> historyClasses
@@ -324,9 +348,10 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses
     })
     targetTests.set(when {
+        customizationOnly -> setOf("com.apptolast.organization.*")
         appearanceOnly -> setOf("com.apptolast.organization.*")
         weeklyReviewOnly -> setOf("com.apptolast.organization.*")
         historyOnly -> setOf("com.apptolast.organization.*")
@@ -343,8 +368,9 @@ pitest {
         taskStatusOnly -> taskTests + taskStatusAdapterTests
         splitOnly -> taskTests
         taskOnly -> taskTests
-        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests + weeklyReviewAdapterTests + appearanceAdapterTests
+        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests + weeklyReviewAdapterTests + appearanceAdapterTests + customizationAdapterTests
     })
+    if (customizationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-custom-views-fields"))
     if (appearanceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-appearance"))
     if (weeklyReviewOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-weekly-review"))
     if (historyOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-history"))
@@ -378,5 +404,3 @@ pitest {
 }
 
 spotless { java { googleJavaFormat("1.31.0") } }
-
-

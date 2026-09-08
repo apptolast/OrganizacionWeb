@@ -1,0 +1,152 @@
+{
+  "scope": "E2E fixtures only; no runtime execution",
+  "truncates": 42,
+  "testFiles": 32,
+  "validation": "dc925c",
+  "files": [
+    {
+      "path": "e2e/weekly-review.spec.mjs",
+      "sha256": "E53F67165291F0B70882482F62664D666891CC7CCF506D6197AC9B9A52E36D2D"
+    },
+    {
+      "path": "e2e/weekly-review-ux.spec.mjs",
+      "sha256": "0D7CEB5B81F878B2D26AB4A0C0F53A2F0C2532B89BA886CEF80D7D34DB51CFE4"
+    },
+    {
+      "path": "e2e/today.spec.mjs",
+      "sha256": "088E91E3ABCF1B7D28F6213B26E20A0B415B264B3D6B974457172D3DE46B7596"
+    },
+    {
+      "path": "e2e/today-native-zoom.spec.mjs",
+      "sha256": "6F3AFE41372850F94D04F479B4B84042C04382CEA306599B68FAC5CE562B4CF0"
+    },
+    {
+      "path": "e2e/start-work-session.spec.mjs",
+      "sha256": "9872D726FAD52F93DE81CB9089FEE1371441655EC0F270AC96FF23278EF579BA"
+    },
+    {
+      "path": "e2e/start-work-session-ux.spec.mjs",
+      "sha256": "3442523E43D8D115E81599026CF456E6A1EAECB4402D69C95ED0834804666D81"
+    },
+    {
+      "path": "e2e/start-work-session-text.spec.mjs",
+      "sha256": "A1B6197330DF2FB9BA7B4BF1B250807A08A541322B033A4064D43F704DABAE63"
+    },
+    {
+      "path": "e2e/start-work-session-native-zoom.spec.mjs",
+      "sha256": "9D9CC3B784E0EABBF524C980EAF191FAB45B29AF4A2EBDA9E5CEACAC5CA32327"
+    },
+    {
+      "path": "e2e/split-task.spec.mjs",
+      "sha256": "8DAEE06F8AD9A0E519AB76D5FFD188221D749AE663468DF4F50BCC3CE4AC9D78"
+    },
+    {
+      "path": "e2e/schedule-block.spec.mjs",
+      "sha256": "D27D1D1F4BE96D37D7062FA4AFB560F98ADDBA62DFEE08048E5B14C9C2BAB1DD"
+    },
+    {
+      "path": "e2e/reschedule.spec.mjs",
+      "sha256": "F27BDC5547B0858BF72B9975C78BDC219F47A9AE5C9C398ADBC788A2F15E18B5"
+    },
+    {
+      "path": "e2e/reschedule-ux.spec.mjs",
+      "sha256": "8EEBB128DBC28301DD71C56AB43C8CC5695EF76239E8406E5E1B435FE8683E7C"
+    },
+    {
+      "path": "e2e/reschedule-text.spec.mjs",
+      "sha256": "007F2811E8A410F2439D25AB3F7DEA2F2648208B156AF43BB1379DF3F2EDE311"
+    },
+    {
+      "path": "e2e/reschedule-recovery.spec.mjs",
+      "sha256": "A7E26B14F0E9688BCDE8E36F5381E8EDBF0F8CFA139D7B624796001FF07EB121"
+    },
+    {
+      "path": "e2e/reschedule-native-zoom.spec.mjs",
+      "sha256": "ECF17F5BE346F0D0262AF11F3A47A7B7EEF203FE9AA3AB616A51B0689C8D3502"
+    },
+    {
+      "path": "e2e/reschedule-feedback.spec.mjs",
+      "sha256": "343566EE2FFBD96BF3E094E4AD6A4796A4BA1417F207AF8798024A6F759EC185"
+    },
+    {
+      "path": "e2e/reschedule-conditional-ux.spec.mjs",
+      "sha256": "2A0F5EB0C209A3940E38DB21D6165E449EB23A3D0FA85F63C224D0DB259F94AA"
+    },
+    {
+      "path": "e2e/read-projects.spec.mjs",
+      "sha256": "8D75B14FB58A0CD08D5E147DF2C5EEBAAED25656C76CD55875927712CDC8CEAF"
+    },
+    {
+      "path": "e2e/project-states.spec.mjs",
+      "sha256": "DE04B134F51AD2D0290EF3D59F6B31678C21743B25CA55000FDA10A6684465E3"
+    },
+    {
+      "path": "e2e/pause-resume-session.spec.mjs",
+      "sha256": "6B6C0B59FEA82DB015147617CEA3BCAF2C296B9DB7CC18B3E7A6943F537EE7F8"
+    },
+    {
+      "path": "e2e/history.spec.mjs",
+      "sha256": "3D85B5C97ED8318799D5D1B0E1837469E9FE2D74D7FCC2DD494B49E1B6082603"
+    },
+    {
+      "path": "e2e/history-ux.spec.mjs",
+      "sha256": "4F227F532FF94F010DD851C8A2FB75EE15B6C6077157B38B4E5D0C41B4B6A50F"
+    },
+    {
+      "path": "e2e/end-time-notification.spec.mjs",
+      "sha256": "E5E5F707902236F6559142E63611AF8C9FEC9C54590E38F4B2A2701B03E6E0B0"
+    },
+    {
+      "path": "e2e/end-time-notification-ux.spec.mjs",
+      "sha256": "85A690FE72301ECE5B3FC733424ACCC565F0A2F5735CF088944646DE3D1AF35D"
+    },
+    {
+      "path": "e2e/edit-project.spec.mjs",
+      "sha256": "FE3A25B7F64CD77472AC457E3071D5787BB4A994B810B3AC4A5572D89F366BD9"
+    },
+    {
+      "path": "e2e/create-task.spec.mjs",
+      "sha256": "9C7FB133136B826CF07BC9991E5FA403F36025F15741F9F9B056BADC0E71C4CD"
+    },
+    {
+      "path": "e2e/complete-reopen-task.spec.mjs",
+      "sha256": "4C0583FE765CE6C2007A8AD7E0E0D941D8A05E3A9BE024E215DDA419AAF4E813"
+    },
+    {
+      "path": "e2e/close-work-session.spec.mjs",
+      "sha256": "051D3B92266B9E002F1C2A3558B65B1186155105BBE24D76C5565DC004B39BA5"
+    },
+    {
+      "path": "e2e/close-work-session-ux.spec.mjs",
+      "sha256": "F7A841E616F0F27FFF0B704B27A68E42144FC86DB39E37C078B56CC459828A17"
+    },
+    {
+      "path": "e2e/availability.spec.mjs",
+      "sha256": "85C92F744341E76408CF75BDAC17BD1CE4982699CD5EEE709420F0BDBF6CD55C"
+    },
+    {
+      "path": "e2e/authentication.spec.mjs",
+      "sha256": "53C5F3C100F2BECDF622A776C85E629D3CE773002364D0835349E717D0A652F8"
+    },
+    {
+      "path": "e2e/appearance-ux-audit.spec.mjs",
+      "sha256": "4041D06EFBB416DD14CD184B78CAD83B70ACB07B6693FCF6DFE6C033EC25C905"
+    },
+    {
+      "path": "e2e/support/authenticated-test.mjs",
+      "sha256": "F6F243EE7785930B7576AD590FEAFB0EA90F977E974F9D0A8063059F3054B5BC"
+    },
+    {
+      "path": "progress/customization_e2e_fixture_before.json",
+      "sha256": "628F7FA2B7A5BC5BBD9F2CDC9BA47A0D465226A276BC402EB2F6288033EC5279"
+    },
+    {
+      "path": "progress/customization_e2e_fixture_validation.json",
+      "sha256": "83691495AD16839B67D914FCCCFB02DA1D56E92C5B9DAFAFE96EDDCAF9AFDB3F"
+    },
+    {
+      "path": "progress/review_customization_e2e_fixture_repair.md",
+      "sha256": "8F61E2C17B778480C2094BD589D92FA7047BE9DD9A068981D4A26A44AFD6EC9A"
+    }
+  ]
+}

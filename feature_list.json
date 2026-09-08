@@ -215,19 +215,19 @@
       "id": 20,
       "name": "appearance",
       "title": "Apariencia",
-      "description": "Apariencia: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
+      "description": "Preferencias accesibles persistentes, concurrencia y recuperación implementadas, revisadas y desplegadas; evidencia en progress/judge_appearance.md.",
       "acceptance": ["Cumplir @s1–@s37 de features/appearance.feature con revisión, pruebas y mutación antes del cierre."],
       "sdd": true,
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 21,
       "name": "custom_views_fields",
       "title": "Vistas y campos",
-      "description": "Vistas y campos: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
-      "acceptance": [],
+      "description": "Vistas por ámbito y campos personales tipados restaurables; contrato de 42 escenarios aprobado bajo autorización global.",
+      "acceptance": ["Cumplir @s1–@s42 de features/custom_views_fields.feature con revisión, pruebas y mutación antes del cierre."],
       "sdd": true,
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "id": 22,

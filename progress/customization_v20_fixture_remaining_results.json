@@ -1,0 +1,162 @@
+[
+  {
+    "tests": 151,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.AvailabilityApiTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.AvailabilityApiTest.xml"
+  },
+  {
+    "tests": 17,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.BlockChangesApiTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.BlockChangesApiTest.xml"
+  },
+  {
+    "tests": 2,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.config.CustomizationWiringTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.config.CustomizationWiringTest.xml"
+  },
+  {
+    "tests": 43,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.CustomizationApiTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.CustomizationApiTest.xml"
+  },
+  {
+    "tests": 42,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.EditProjectsApiTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.EditProjectsApiTest.xml"
+  },
+  {
+    "tests": 11,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.persistence.BlockChangeQueriesPersistenceTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.BlockChangeQueriesPersistenceTest.xml"
+  },
+  {
+    "tests": 4,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.persistence.HistoryReadTransactionTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.HistoryReadTransactionTest.xml"
+  },
+  {
+    "tests": 24,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.persistence.OutboxRecoveryTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.OutboxRecoveryTest.xml"
+  },
+  {
+    "tests": 15,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.persistence.OutboxWorkTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.OutboxWorkTest.xml"
+  },
+  {
+    "tests": 38,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.persistence.ScheduleBlockPersistenceTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.persistence.ScheduleBlockPersistenceTest.xml"
+  },
+  {
+    "tests": 43,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.ProjectStatesApiTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.ProjectStatesApiTest.xml"
+  },
+  {
+    "tests": 36,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.ReadProjectsApiTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.ReadProjectsApiTest.xml"
+  },
+  {
+    "tests": 70,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.RescheduleApiTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.RescheduleApiTest.xml"
+  },
+  {
+    "tests": 9,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.RescheduleErrorsApiTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.RescheduleErrorsApiTest.xml"
+  },
+  {
+    "tests": 173,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.ScheduleBlockApiTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.ScheduleBlockApiTest.xml"
+  },
+  {
+    "tests": 105,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.SubtaskApiTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.SubtaskApiTest.xml"
+  },
+  {
+    "tests": 48,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.TaskHistoryApiTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.TaskHistoryApiTest.xml"
+  },
+  {
+    "tests": 80,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.TaskStatusApiTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.TaskStatusApiTest.xml"
+  },
+  {
+    "tests": 27,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.TodayApiTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.TodayApiTest.xml"
+  },
+  {
+    "tests": 3,
+    "failures": 0,
+    "skipped": 0,
+    "class": "com.apptolast.organization.adapter.WorkSessionIntegrationTest",
+    "errors": 0,
+    "xml": "TEST-com.apptolast.organization.adapter.WorkSessionIntegrationTest.xml"
+  }
+]

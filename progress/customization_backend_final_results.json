@@ -1,0 +1,103 @@
+{
+  "exitCode": 0,
+  "exitEvidence": "372d3e",
+  "tests": 315.0,
+  "suites": 11,
+  "failures": 0.0,
+  "errors": 0.0,
+  "skipped": 0.0,
+  "inputs": 428,
+  "changedInputs": [],
+  "newInputs": [],
+  "logSha256": "38B85093EA5E7FBC28CEEEF7BD07CD00A24AE1AB8D065229FC2434CE5C60F530",
+  "classes": [
+    {
+      "class": "com.apptolast.organization.adapter.config.CustomizationWiringTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "E25A6F8AE48C093FBAE38356642A42EF291F2990E3F62B4B714C39E0077F08C9"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.CustomizationApiTest",
+      "tests": 134,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "7F2AD52D337DABE7D3775037DFBF1A4EDB61D7E6D359A32F7CA889A28FAB73C2"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.CustomizationHttpPersistenceTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "85FA465BF51791D099718CB1CBFFA3821A7BE5EE58AD7B4C22705EE19818455D"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.persistence.CustomFieldValuesPersistenceTest",
+      "tests": 61,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "B2E25EF9F3AA63AE01E57413C0E95969E970A6D4987E047A7F2FB30919A10881"
+    },
+    {
+      "class": "com.apptolast.organization.adapter.persistence.CustomizationPersistenceTest",
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "7F8113001D1F452600B89EA18E24A901F8175C6C26F000D1675859C8CDBBA2FA"
+    },
+    {
+      "class": "com.apptolast.organization.application.CustomFieldCommandsTest",
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "7559E3F2219E2B0583DBCB97FD848050F0CB3AFD0B885C8753B7FC053F942625"
+    },
+    {
+      "class": "com.apptolast.organization.application.ReadCustomFieldValuesTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "D5D17CF285A579521E604BA10A6DCD3778E525D52B2AD14F29BC80FEDD09D4F4"
+    },
+    {
+      "class": "com.apptolast.organization.application.ReadCustomizationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "59FEE0BA70BDC7A17B6B0C537B3DAB4792D321D8B9F06BFCE4AC77EA99711279"
+    },
+    {
+      "class": "com.apptolast.organization.application.SaveCustomFieldValuesTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "C9E345299BE3B29CE0BF5882F5A4B5704E370D35AA655DAF61CB9E985267ABE5"
+    },
+    {
+      "class": "com.apptolast.organization.application.SaveCustomizationTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "3733B82FB23EA6270993D94BCD277A104AA1285BA8B0B1D72836BFFB922F9002"
+    },
+    {
+      "class": "com.apptolast.organization.domain.CustomFieldValuesTest",
+      "tests": 33,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "8FF75FE7592F228935CA4CC6A183D7ACE7813D87D548C49ED7A8218EC78B9ACF"
+    }
+  ]
+}

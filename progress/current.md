@@ -267,3 +267,320 @@ Checkpoint b430741 publicado en codex/appearance: cliente, Provider por sesión,
 Stryker original comenzó en sesión 79876: siete fuentes, 747 mutantes y ocho workers. No hay resultado anticipado. C termina modalidades, zoom y motores; conserva tres avisos originales de axe en colores forzados y separa su limitación de análisis CSS de la revisión de pintura real. No se modifica el producto durante mutación. Root detectó dependencia de orden entre dos E2E de apariencia; B verifica y corrige únicamente su preparación de estado, coordinado con C.
 
 CI posterior a main DNS 34149187634 terminó SUCCESS. La versión viva sigue siendo el MVP 1–19; apariencia todavía no está desplegada ni marcada done. Las funciones 21–30 permanecen pendientes.
+
+## Cierre de Apariencia en CI y preparación de entrega, 7 de septiembre 21:13
+
+Producto integrado ed00ad4; refuerzos y correcciones de fixtures en 1f36315, publicado en PR23. Stryker original EXIT0 f0a339: 637K/102S/8NC de747 (85,27%), cero timeout/error,119 hashes intactos. Root verificó raw SHA56D3A57C…D60122 y ocho artefactos. Se clasificaron110 residuos, preservando limitaciones; diez ejemplos API y cinco refuerzos UI/auth sólo modifican pruebas. Global final2.058/44 EXIT091f538 y lint066161f; único cambio posterior al global fue formato del testAPI, sin semántica. Replay dirigido autorizado31 firmas/21rangos,79mutantes; sesión78488 activa, cobertura811 pruebas verde. Salida separada, no suma de puntuaciones.
+
+UX cerrada en Chromium/Firefox/WebKit con límites por matriz; root contrastó271hashes. Zoom nativo Chromium2/DPR1.5→3/320CSS y capturas CDP verificados. CI inicial34152171279 falló141/143: captura fullPage Linux incompatible y fixture History sin nueva consulta Appearance. C retiró sólo la captura redundante, conservó CDP/oráculos y ajustó History a dos GET exactos; ambos focales verdes. CI corregida34154520811 en curso sobre1f36315; guardián verde. No repetir global local automáticamente ni publicar checkpoints que cancelen esa ejecución.
+
+Candidato Docker desde checkout limpio OrganizacionWeb-release20 ed00ad4: API índice fae45cecc45c8a3feed715524dd0cbfba6ecfac9eabd1ef50be740f84332ceb6; web3b939af19b1d66b05c8adef5649b9e5ecd3d8778aea0a3905c86e0c206be4d23. Builds y pushes EXIT0; OCIrevision exacta, amd64 y cuatro bases resueltas iguales a4d946. Sólo tests/soporte/evidencia posteriores; producto idéntico. No desplegado20 todavía.
+
+Infraestructura: rama codex/organizationweb-appearance, commit8aec1582776d42945498f6b78dec904d94302224, PR31 borrador. Baseline bootstrap/validate/lint y15focales/lintfinal verdes; root revisó tres campos y tres hashes iguales, ocho ejes operativos documentados fueraGit. CI34154628641 en curso. Checkout remoto limpio cambiado desde770b736 al candidato8aec158 mediante fetch explícito, sin force/reset; todavía no check ni apply. Ambas PR siguen pendientes de sus gates.
+
+Backup nuevo bajo lock oficial: /var/backups/organizationweb/organization-20260907T184034Z-ac3b2c3152e647b8aaeb94cc611ed7a7.dump,49.534bytes,0600,SHA6f1a141d7ed70667ac1f3271ab0ad939aacfcff774ecdc7fb945c9a0884a639e. Transferencia verificada, restore real enPGvacío sinred EXIT0:18migraciones,1proyecto/1tarea/1sesión/9eventos, sin tabla20; entorno retirado y buffer borrado. C ensayó API20→API4d946→API20 sobrePGV19, preferencia y todaFlyway idénticas, EXIT096dba9; recursos locales retirados. Evidencia externa deployment-preparation. No garantiza copias externas ni escrituras posteriores.
+
+La versión productiva permanece4d946 (MVP1–19). Feature20 in_progress,21–30pending; V14 heredada protegida sigue sin tocar. Finalizar replay/CI, hacer check/apply porwrapper y aceptación20 antes de continuar21.
+
+
+## Apariencia desplegada y aceptada, 7 de septiembre 21:41
+
+Feature20 done. CI de aplicación 34154520811 SUCCESS sobre 1f36315; infraestructura 34154628641 SUCCESS. PR23 fusionada en 7c1bf80 y PR31 en f89a014. Producto OCI ed00ad4: API fae45cec…ceb6 y web 3b939af1…4d23. Stryker dirigido final 72K/7S de79 (91,14%), 30 de31 objetivos detectados y120 hashes intactos; original separado 637/747 (85,27%). Dictamen final de código aprobado.
+
+Wrapper oficial sobre infraestructura 8aec158: check EXIT0 27ok/2changed/0failed; apply EXIT0 38ok/5changed/0failed, operación c61292fc8fe07176de35ea96171db825a44b2fff8c4b1b74620afcf973d4c581 liberada. API/web UpdateStatus completed, cuatro servicios saludables y20 réplicas1/1. PG c85f0de047ff y Rabbit10270883bd46 conservados; ocho rutas anteriores mantienen sus respuestas.
+
+Aceptación HTTPS: GET de defaults sin configuración, PUT200 SYSTEM conservando ambos colores, lectura y nueva sesión recuperan DTO/ETag exactos. Navegador publicado en390/768/1280 sin desbordamiento ni errores; capturas revisadas. Proyecto, sesión cerrada de14062085µs, historial y revisión semanal conservados. Cierre HTTP204 y posterior GET anónimo. Un wait de URL del primer cierre UI excedió el timeout de la herramienta; no se cuenta como prueba de logout y se repitió explícitamente por HTTP con éxito. Evidencia externa deployment-preparation/organizationweb-appearance-acceptance.json y logs check/apply.
+
+20 terminada; comienza especificación de21 Vistas/campos.22–30 siguen pendientes. La copia restaurada y el ensayo de retorno a la API anterior mantienen sus límites documentados. V14 heredada protegida intacta.
+
+
+## Feature21: contrato de vistas y campos, 7 de septiembre 21:50
+
+Init21 sesión94704 EXIT0 ce0f1d: Java2387/102 sin fallos/errores/omitidos (recuento XML64dfee), frontend2058/44 y55 pruebas del arnés verdes. Base main7c1bf80 con cierre20 documental47dd4d4; no código21 escrito. A redactó sección21 y root revisó scopes, tipos, restauración y concurrencia. Se corrigió una revisión fuerte que no incluía cambios de etiquetas: ETag compuesto incorpora configuración y valores, eliminando una segunda cabecera. C destila Gherkin como autor distinto; B delimitó integración contextual. No se inicia TDD hasta revisión del contrato destilado, bajo autorización global vigente.
+
+
+## Feature21 aprobada para TDD, 7 de septiembre 22:03
+
+Contrato Gherkin CA252E2A…36DF07 revisado por root:42 escenarios/42 When/174 ejemplos léxicos, no174 pruebas ejecutadas. Se añadieron primera configuración con defaults y cero campos activos; 404 conserva problem+json sin datos ajenos. No pasos después de Examples. Se aplica autorización global previa del usuario sin repetir aprobación. Init21 ya verde. Estado pasa a in_progress antes de código: A dominio/persistencia/aplicación; B cliente/UI; C HTTP aislado tras handoff de puertos.
+
+CI posterior de main7c1bf80,34156177485, terminó SUCCESS. Documentación operativa20 PR32 fusionada01e33a5 tras CI34156833452 SUCCESS. No hay cambios adicionales del servidor.
+
+
+## Feature21: lectura integrada y comandos en curso, 7 de septiembre 22:34
+
+PR24 borrador. Modelos/puerto de lectura9ef8a75 publicados; puertos de vista2797039 revisados por tres hashes. C aislado OrganizacionWeb-customization-http recibió72ff667 y4d0a565; GET nominal7/7 aprobado y committed61fd4b0.
+
+A entregó Store/V20/beanRead y dos tests reales con cinco hashes verificados:7b58da6. Root confirmó14 XML verdes del checkpoint y BUILD SUCCESSFUL del log; la sesión35877 se perdió al compactar A, por lo que no se inventa EXIT recuperado. GET de C integrado enCOMMON b1ed8e6. A confirma arranque combinado GREEN34a4d6 EXIT0 con CustomizationApiTest+CustomizationWiringTest y ciclo16, log customization_16_green.log. No cierre integral de21: validación de filas, comandos/valores/PG/escrituras/UI/mutación/E2E siguen en curso.
+
+C continúa PUT de vista en aislado con puertos reales y mocks de caso de uso, sin beanSave ficticio. Su RED inicial fue500 por el fallback heredado ante método sin ruta, no405; al añadir PUT nominal pasa200. No se modifica ese manejador transversal para simular RED. B mantiene cliente propio y tests nuevos; configuración40 casos verdes tras formato y lint, 400/refactor y valores todavía en curso. Ninguna UI21 terminada. No correr GradleCOMMON en paralelo a A. V14 protegida intacta y producción sigueed00ad4 (funciones 1–20).
+
+## Feature 21: revisión de comandos y clientes, 7 de septiembre 22:50
+
+Helpers de dominio revisados en 36ee10d y puertos Create/Update en bdacad6,
+transferidos al agente HTTP. Cliente de configuración y 43 pruebas focales
+comprometidos en 709021f tras comprobar los dos hashes. Se ha pedido reforzar
+la coherencia entre revisión anterior y confirmación, además de validar el
+contenido; el autor continúa mediante TDD junto al cliente de valores.
+
+GET y PUT de vista HTTP terminados como corte aislado 692c386: 30 XML verdes
+comprobados por root, tres hashes iguales al manifiesto y EXIT 0 del autor
+6140ab. Espera el bean real de escritura para integrarse; no se ha presentado
+un mock como persistencia. El agente HTTP sigue con definiciones. Backend
+completa comandos y escrituras PostgreSQL. La revisión incremental está en
+progress/judge_custom_views_fields.md. PR 24 permanece en borrador, publicada
+hasta 328b505; CI 34160728290 estaba en curso al consultar. Producción sigue
+en ed00ad4, funciones 1–20. No hay despliegue nuevo ni cierre de la feature 21.
+
+## Feature 21: integración y reparación de CI, 7 de septiembre
+
+Escrituras de configuración reales integradas en 4e3a8a8, GET/PUT de vista
+en 6e128b3 y definiciones HTTP en 55e9c46. El fixture de wiring que dependía
+del orden se reprodujo y corrigió antes de integrar. Clientes de configuración
+y valores en 65d4043: 88 pruebas focales verdes, formato/ESLint/tsc y cuatro
+hashes revisados. Estado y formularios UI siguen en desarrollo.
+
+CI 34160728290 sobre 328b505 terminó FAILURE (1122/2398 Java): las nuevas FK
+de V20 exigían incluir sus tablas en las limpiezas antiguas. Se reprodujo
+SQLSTATE 0A000 y se repararon los 24 fixtures JDBC en 641ef4f. Root verificó
+sus 24 hashes y los XML de 1121 pruebas verdes, sin cambios de oráculos.
+HTTP 21 final 43 y wiring 2 también verdes. E2E reparado en 3efa87c: 42 SQL
+en 32 pruebas más limpieza de datos propios de personalización; verificación
+estática y hashes correctos, runtime/CI correctiva pendientes. Se conserva
+el log de CI fallida fuera de Git, con hash en el informe de revisión.
+
+Puertos y modelos de lectura de valores en c47400b, transferidos a C como
+b72e6ad; aún no bean o adaptador completo de valores. C cierra negociación
+Accept previa a los comandos tras reproducir una escritura que llegaba al
+puerto con Accept incompatible. A continúa valores y validación durable;
+B continúa estado/UI. Sólo A usa Gradle COMMON. PR 24 permanece en borrador,
+producción sigue ed00ad4 y funciones 22–30 pendientes.
+
+## Feature 21: negociación integrada y segundo resultado de CI
+
+Integrado `e9e9e54`, seguridad y Accept antes de puertos, 66 MVC verdes
+en aislado y en COMMON (`406744`). El agente HTTP continúa GET de valores
+con el puerto real; backend continúa comandos de valores y frontend sus
+formularios y estado. No hay nuevo despliegue.
+
+CI correctiva `34162746457`: 2469/2470 Java verdes. Único fallo en la prueba
+histórica de migración de apariencia: usa latest y ahora incluye V20.
+Se ha delegado fijar su destino V19 y preservar una prueba propia de V20.
+Log completo conservado fuera de Git; hash en el informe de revisión.
+Build y E2E posteriores siguen pendientes. No se declara cerrada la feature.
+
+## Feature 21: lectura real de valores y contratos de guardado integrados
+
+Reparación de migración histórica en `f46200c`, veinte pruebas verdes;
+CI `34163594795` en curso. No cancelar con un push documental mientras
+aporte verificación correctiva nueva.
+
+Puertos PUT y validación tipada en `1522d39`, transferidos al autor HTTP.
+Lectura PostgreSQL y bean real en `98b53a4`; GET de valores en `a403f5d`
+desde `1267146`. Ocho hashes backend y tres HTTP revisados. Los 83 MVC
+del corte HTTP no acreditan PostgreSQL; cinco PG y tres wiring del corte
+backend aportan evidencia separada. Persistencia nominal integrada,
+integridad completa de filas y comandos todavía en desarrollo.
+
+COPYDONE enviado a backend: puede continuar Gradle tras integrar GET.
+Frontend continúa estado y formularios. Producción sigue en `ed00ad4`;
+no hay cierre ni despliegue de la feature 21, ni cambios de alcance22–30.
+
+## Feature 21: backend nominal completo y verificación ampliada
+
+Caso de uso puro en `8b6f893`, quince pruebas y cinco hashes revisados.
+PG de valores y bean Save real en `ac8b484`; seis hashes, cinco XML y 125
+pruebas verdes revisados. Incluye upgrade 19→20, primera escritura vacía
+competitiva, no-op físico con inactivos/versión MAX y tarea terminada sin
+cambiar hechos de negocio ni valores de subtareas. PUT HTTP en `e617a09`,
+desde `1074c5f`: tres hashes y 134 MVC verdes revisados. A recibió COPYDONE;
+integridad de filas, traducción 503, rollback y coherencia de snapshot siguen
+en desarrollo. No confundir el corte nominal con aprobación final.
+
+Precisión estructural de fieldId duplicado en `b3436fc`, bajo autorización
+global, añade un ejemplo a @s25; hash nuevo en judge. El duplicado se rechaza
+antes del puerto y revisión; conjunto activo sigue después de revisión.
+
+Soporte de mutación aislado `cfd319f`, 61 pruebas de arnés verdes, aún pendiente
+integrar build.gradle en ventana sin Gradle. No campaña lanzada. Stryker
+necesita rangos reales del montaje frontend antes de ejecutar. C continúa
+en worktree nuevo OrganizacionWeb-customization-integration, e617a09, con
+pruebas HTTP/PG reales en archivo nuevo; B continúa formularios/estado.
+
+CI 34163594795 sobre `f46200c` superó init, build, DNS Docker y E2E; publicador
+en curso a las 21:56 UTC. Esa CI no incluye los commits locales posteriores.
+Producción conserva `ed00ad4` y funciones 1–20; funciones 22–30 pendientes.
+
+Nota para aceptación productiva 21: no consumir slots de definiciones
+personales de prueba en la cuenta real. El contrato cuenta también los
+inactivos y no ofrece borrado. Altas, tipos, límites y recuperación se
+verificarán exhaustivamente en la base aislada. En producción, usar lecturas
+y guardados de defaults/conjunto vacío cuando correspondan, con baseline
+fresco; no borrar filas a mano para deshacer pruebas ni presumir que los
+datos del usuario siguen iguales al snapshot de Apariencia20.
+
+CI correctiva `34163594795` sobre `f46200c` terminó SUCCESS: init, build,
+DNS Docker, 143 E2E y publicador completados. Log externo
+organizationweb-customization-ci-34163594795.log, SHA256
+1F2CB731383E27189117F9079B9F9F30E021AE6F57E1D1420B5CA62E35D96E64.
+Se puede subir el siguiente checkpoint sin cancelar esa evidencia.
+Soporte de mutación integrado `d48e773`; backend recibió COPYDONE.
+El foco `a5df48` anterior confirmó HTTP134 y wiring tras integrar PUT.
+
+## Feature 21: regresión nominal y revisión final backend
+
+CI `34165164208` sobre `9835bef` terminó SUCCESS: init, build, DNS Docker,
+143 E2E y publicador. Log completo externo
+organizationweb-customization-ci-34165164208.log, SHA256
+D7057D90CBE8363587EE52F6395D1840B0D597F083E72522BC3F7F730A9D4185.
+No cubre los deltas posteriores sin commit ni el formulario 21.
+
+Integrados `a4ab29d` (ocho HTTP/PG reales) y `6080b95` (un E2E de durabilidad
+con respuesta perdida, texto inactivo exacto y reinicio exclusivo de API).
+Root verificó los 569 hashes del replay; no se atribuye cobertura de la UI
+a ese recorrido HTTP. Los dos contenedores de prueba propios se retiraron.
+
+Backend A congeló seis deltas: 315 pruebas focales en once suites, EXIT0
+`372d3e`, 428 entradas sin cambios. Root ha revisado fuentes y pruebas;
+no quedan defectos productivos identificados en ese corte. La auditoría C
+separa evidencia pura, MVC, PG y E2E. Se refuerzan únicamente dos fixtures:
+conservar hechos históricos y valores de proyecto poblados en @s18, y
+rollback de UPDATE con varios valores previos en @s20. Su primera ejecución
+se registrará sin inventar un RED si el producto ya cumple.
+
+Frontend sigue corrigiendo invalidación del esquema y mensajes de error;
+la revisión independiente y las campañas de mutación siguen pendientes.
+Producción conserva las funciones 1–20. No hay declaración de cierre 21.
+
+Los dos refuerzos ya están aprobados por root: 62 pruebas y formato verdes,
+seis hashes/XML verificados en `880f9f`; producción idéntica al freeze anterior.
+Se autoriza PIT backend con el foco revisado y cuatro workers. La campaña
+conservará entradas y reporte original; no editar Java/build mientras corre.
+
+## Feature 21: backend validado e integración visual final
+
+Backend final `1cd88e7` subido. CI `34167438318` terminó SUCCESS, con init,
+build, DNS Docker, 144 E2E y publicador. Log externo
+organizationweb-customization-ci-34167438318.log, SHA256
+C9D7503B4D3B23DC0932E4FF47EADEE24D90473440B8072F574BDE6594FA9E0B.
+No contiene aún el montaje frontend 21.
+
+PIT original: 378/386 KILLED, 3 SURVIVED y 5 NO_COVERAGE, 97.9274611%;
+sin errores ni timeouts. Root verificó XML y 437 hashes estables (`db7081`).
+Tres refuerzos puros observables pasaron 77 casos sin cambios productivos;
+replay dirigido de quince firmas autorizado, reporte separado. No se suma
+su resultado al original ni se excluyen cinco accesores del denominador.
+
+Frontend alcanzó freeze funcional de catorce archivos y 151 casos focales.
+La revisión de estado cerró recuperación de esquema y respuestas obsoletas.
+La regresión global detectó 125 fallos de nueve fixtures legacy que no
+simulan las nuevas rutas GET; B los adapta localmente sin modificar oráculos
+de negocio. Un recorrido de teclado real de C detectó además recuperación
+de foco incompleta tras respuesta perdida: es un hallazgo productivo abierto,
+separado de los mocks, pendiente de diagnóstico/corrección y nuevo freeze.
+
+C tiene en su aislado los commits `2a4edb6` (UI PROJECT), `e2d5389` (UI TASK)
+y `078155d` (SCSS y geometría), revisados por root, aún sin transferir a COMMON.
+Las pruebas usan HTTP/SQL reales; geometría parcial verifica 31 anchos en dos
+estados, con dos axe limpios. Doce campos/texto ampliado también pasaron allí;
+las modalidades restantes y la aceptación final siguen en curso. CSS sólo
+afecta a personalización y usa los tokens existentes. El skip-link de las
+capturas fullPage se comprobó fuera del viewport en una captura real a scroll0.
+
+## Integración frontend y validación en navegadores
+
+Frontend integrado en 32fdcbb y estilos/E2E de C en 433aced. Root verificó
+los catorce hashes funcionales (d57287). Revisión independiente de fixtures
+finales y foco164 aprobada. Global frontend: 2209/2209 en 49 suites;
+build y lint previos a mutación verdes. El helper recibió después un ajuste
+exacto de rutas y limpieza de imports, documentados por separado.
+
+El fallo físico de foco queda resuelto: mismo recorrido Chromium accb98
+restaura el encabezado tras recuperación manual sin repetir la escritura.
+Firefox pasó cuatro recorridos; WebKit está en curso. Zoom nativo Chromium
+200 % y modalidades accesibles tienen evidencia aislada; falta el dictamen
+UX final y su transferencia. No se acreditan dispositivos físicos.
+
+Stryker frontend original en curso con 1824 mutantes y ocho workers.
+No modificar JS/tests/config durante la campaña. La integración SCSS de root
+se registra expresamente como diferencia respecto al inventario anterior;
+no se presentará una igualdad de todos los archivos que no ha ocurrido.
+
+Init 7f9acc detectó dos tests del arnés que aún exigen rangos literales App
+sustituidos por cobertura del archivo completo. A corrige esos oráculos sin
+reducir cobertura. Lint también encontró el sandbox Stryker activo; no se
+borra ni modifica durante la campaña y se repetirá init al terminar.
+Producción conserva las funciones 1–20; no se ha desplegado la función 21.
+
+## Candidato integrado en CI
+
+Commit dfac90edcabdf04e442b906f0ab6db8894cbc4b2 publicado en PR24, aún borrador.
+CI34171107546 en curso; guardián34171106421 SUCCESS. El arnés quedó reparado
+con 61/61 pruebas y validación focal estricta. Para paralelizar CI, root autorizó
+actualizar sólo configs no seleccionadas default/appearance durante Stryker;
+B conservó originales y delta explícito. JS, Vitest, focalcustom21 y sandbox
+permanecen intactos. No se declara igualdad de todo el inventario anterior.
+
+UX final y trazabilidad42 aprobados con límites documentados. Backup fresco
+restaurado y verificado, según release21_preparation.md. Imágenes provisionales
+0c9fe37 construidas correctamente en checkout limpio, sin desplegar. A prepara
+imágenes candidatas del commit dfac90e para ensayo de rollback. Mutación
+frontend1824 sigue activa; no hay resultado ni ETA observables todavía.
+
+## CI integrada aprobada; mutación frontend todavía bajo umbral
+
+CI aplicación34171107546 SUCCESS sobre dfac90edcabdf04e442b906f0ab6db8894cbc4b2:
+init, build, DNS,151 E2E (13,8min) y publicador. Log externo SHA
+6D67A121AC222CDA5A5C2A4DF498A289F3B892AF86F52E984FB4594B554312DC.
+CI infraestructura34171772641 SUCCESS sobre0bb939b: validación y lint completos,
+101 commits escaneados sin secretos. Log SHA
+59D966ADE3A47841C1F9FA0EA42C7B7EE5EFC134812D3964ADD97720A10F65AF.
+
+Stryker frontend original EXIT1 tras44min8s:1391 Killed,413 Survived,
+11 NoCoverage,9 RuntimeError y0 Timeout,1824 total. Score del motor76,6391%;
+conservador killed/total76,2610%, ambos por debajo de80. Root contrastó JSON
+(SHA3DC6D9B548B532389660A53B9915B620683C552032FEF8E3510A10AFAE997942)
+y160 entradas iguales más3deltas autorizados de163 (118da1). Los errores son
+fallos de serialización del runner, no se reclasifican como detectados.
+
+No aplicar despliegue todavía. A/B/C refuerzan comportamientos observables
+en archivos de pruebas nuevos, conservando originales y producto intactos.
+Se prepara modo incremental oficial con el mismo universo completo y umbral,
+reutilización comprobable por test intacto y resultados propios separados;
+no se sumarán manualmente campañas dirigidas al resultado original.
+
+## Refuerzos y sincronización de pruebas
+
+A/B/C añadieron32 casos en cinco archivos nuevos. Revisiones independientes
+aprobadas: A revisó19 casos UI/estado/metadatos y C los13 de clientes y la
+configuración incremental. Root verificó los14 hashes funcionales anteriores,
+los10 del freeze A,3 del freeze B y3 del freeze C, sin diferencias. La primera
+lectura de los manifiestos A/C asumió erróneamente un objeto en lugar de array;
+la comprobación corregida57133c acredita cero diferencias.
+
+Global frontend original de refuerzo:2240/2241, fallo appearance@s24; focal
+posterior49/50, fallo appearance@s20. Ambos observan colorScheme después de
+findByRole pero antes del efecto que lo aplica. B corrige únicamente la espera
+de esos dos oráculos con waitFor estándar, conservando resultados fallidos.
+No cambia producto ni aumenta timeouts. C revisa y se repetirá global antes
+de la campaña. El test original appearance.test.tsx cambia explícitamente y
+el motor incremental debe considerar su cobertura; no se oculta ese delta.
+
+La configuración incremental conserva universo, mutadores, umbral80 y ocho
+workers. Usa seed copiado idéntico al raw y salidas separadas. Revisión C
+confirma semántica de reutilización y reporter instalado. No aplicar hasta
+que el resultado completo supere el gate, contando errores conservadoramente.
+El plan actualizado en docs/mvp-delivery-plan.md distingue MVP1–20 utilizable
+del alcance pendiente y no promete completar todas las integraciones hoy.
+
+## Gate conjunto verde y campaña incremental activa
+
+Corrección de espera aprobada por C; focal apariencia50/50 y global2241/2241
+en54 suites, lint/formato/tipos verdes. Build del producto idéntico también
+verde. Root contrastó logs c2706c y diff80efe3: contra candidato dfac90e sólo
+cambian seis archivos de pruebas dentro de las fuentes, no producto.
+
+Commit c9f20620411dc07af6c391d8ca2344f2b934d17a publicado; CI34173605033 activa.
+Campaña incremental iniciada02:31:58, sesión63463: mismo target del harness,
+1824 mutantes instrumentados y ocho workers. Entradas/config/seed y run.log en
+progress/customization_stryker_refined. El resultado y la reutilización real
+siguen pendientes; fuentes/tests/config congelados. Producción conserva20.

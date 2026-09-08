@@ -1,0 +1,18 @@
+{
+  "head": "e617a09",
+  "exit": 0,
+  "output": "08b955",
+  "tests": 8,
+  "xml": "progress/customization_http_pg_final.xml",
+  "xmlSha256": "AE3C30D986E0FCFDC60AB1F9C16F9F1CA6A00E80C3B49A12D94BBB51B962AF32",
+  "files": [
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/CustomizationHttpPersistenceTest.java",
+      "sha256": "80EAED47EF5BE94F9D0A3EDA1EA36BBE9EB90993FE00675E3E229A0A6EFC4EE3"
+    },
+    {
+      "path": "progress/tdd_customization_http_persistence.md",
+      "sha256": "E724AF4F15035494136E53E3AE49F3B681AE9EBE0335430FF3DA66F3678F3778"
+    }
+  ]
+}

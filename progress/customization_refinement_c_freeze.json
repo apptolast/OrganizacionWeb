@@ -1,0 +1,14 @@
+[
+  {
+    "path": "frontend/src/custom-fields.mutation.test.tsx",
+    "sha256": "8C6A7116FB5B434F8EA0373EBA5CAFEAB3246400354134494DC0A552B77D0651"
+  },
+  {
+    "path": "frontend/src/customization-metadata.mutation.test.tsx",
+    "sha256": "D1DDBEB657C727BD44B137974689ABD8741D3A5E4D12C53674B06C18E248F399"
+  },
+  {
+    "path": "progress/tdd_customization_mutation_c.md",
+    "sha256": "B20180AC651E2E56992FF2B5D3A96CB6F42958D2E88D3088D23784301209DDE8"
+  }
+]

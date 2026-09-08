@@ -1,0 +1,20 @@
+{
+  "scope": "configuration security and negotiation; local pre-command Accept guard",
+  "exit": 0,
+  "output": "507b84",
+  "tests": 66,
+  "files": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/CustomizationController.java",
+      "sha256": "55B801A0ACFB68B68A4732D446CC478157F1284378F1E8D08A8B3F63F3AE02C6"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/CustomizationApiTest.java",
+      "sha256": "68D99CD55C38BAB8F27EE1A63B3A86DFDF9D9E69DD1AADAAAAD2587C6F82583E"
+    },
+    {
+      "path": "progress/tdd_custom_views_fields_http.md",
+      "sha256": "6545DDEFB6B58E0E72144A03BA6D1CC431E4EE4A252620B509CBC4BB683B6E15"
+    }
+  ]
+}

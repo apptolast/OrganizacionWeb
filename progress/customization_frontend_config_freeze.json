@@ -1,0 +1,10 @@
+[
+  {
+    "sha256": "ED1E31F119ACB6962910A1BC93263FF8387F899E8B34D0F97D9EDF82930D1DD3",
+    "path": "frontend/src/customization-api.ts"
+  },
+  {
+    "sha256": "F4F311851E7B8A23D85A2CB09EFA0F77DB7A681C7D632A38A5A97CFC4BEB5235",
+    "path": "frontend/src/customization-api.test.ts"
+  }
+]

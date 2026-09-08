@@ -1,0 +1,98 @@
+[
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.domain.CustomFieldInput",
+    "method": "lambda$canonical$0",
+    "descriptor": "(I)Z",
+    "line": "26",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": "10",
+    "blocks": "2",
+    "description": "changed conditional boundary",
+    "testsRun": "2"
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.application.SaveCustomFieldValues",
+    "method": "lambda$save$5",
+    "descriptor": "(Ljava/time/Instant;Lcom/apptolast/organization/domain/CustomFieldValuesCollection;)Z",
+    "line": "83",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator",
+    "indexes": "7",
+    "blocks": "2",
+    "description": "replaced boolean return with true for com/apptolast/organization/application/SaveCustomFieldValues::lambda$save$5",
+    "testsRun": "5"
+  },
+  {
+    "status": "SURVIVED",
+    "class": "com.apptolast.organization.domain.CustomFieldLabel",
+    "method": "lambda$new$0",
+    "descriptor": "(I)Z",
+    "line": "10",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator",
+    "indexes": "10",
+    "blocks": "2",
+    "description": "changed conditional boundary",
+    "testsRun": "2"
+  },
+  {
+    "status": "NO_COVERAGE",
+    "class": "com.apptolast.organization.domain.CustomizationView",
+    "method": "scope",
+    "descriptor": "()Lcom/apptolast/organization/domain/CustomizationScope;",
+    "line": "6",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": "5",
+    "blocks": "0",
+    "description": "replaced return value with null for com/apptolast/organization/domain/CustomizationView::scope",
+    "testsRun": "0"
+  },
+  {
+    "status": "NO_COVERAGE",
+    "class": "com.apptolast.organization.domain.CustomFieldValuesRevision",
+    "method": "entityId",
+    "descriptor": "()Ljava/util/UUID;",
+    "line": "5",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": "5",
+    "blocks": "0",
+    "description": "replaced return value with null for com/apptolast/organization/domain/CustomFieldValuesRevision::entityId",
+    "testsRun": "0"
+  },
+  {
+    "status": "NO_COVERAGE",
+    "class": "com.apptolast.organization.domain.CustomFieldValuesRevision",
+    "method": "schema",
+    "descriptor": "()Lcom/apptolast/organization/domain/CustomizationRevision;",
+    "line": "5",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": "5",
+    "blocks": "0",
+    "description": "replaced return value with null for com/apptolast/organization/domain/CustomFieldValuesRevision::schema",
+    "testsRun": "0"
+  },
+  {
+    "status": "NO_COVERAGE",
+    "class": "com.apptolast.organization.domain.CustomFieldValuesRevision",
+    "method": "scope",
+    "descriptor": "()Lcom/apptolast/organization/domain/CustomizationScope;",
+    "line": "5",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": "5",
+    "blocks": "0",
+    "description": "replaced return value with null for com/apptolast/organization/domain/CustomFieldValuesRevision::scope",
+    "testsRun": "0"
+  },
+  {
+    "status": "NO_COVERAGE",
+    "class": "com.apptolast.organization.domain.CustomFieldValuesRevision",
+    "method": "values",
+    "descriptor": "()Lcom/apptolast/organization/domain/CustomizationRevision;",
+    "line": "5",
+    "mutator": "org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator",
+    "indexes": "5",
+    "blocks": "0",
+    "description": "replaced return value with null for com/apptolast/organization/domain/CustomFieldValuesRevision::values",
+    "testsRun": "0"
+  }
+]

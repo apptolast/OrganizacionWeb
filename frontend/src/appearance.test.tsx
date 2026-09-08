@@ -762,7 +762,9 @@ it("@s20 loads appearance once inside the authenticated session", async () => {
   vi.stubGlobal("fetch", fetcher);
   render(<SessionGate />);
   expect(await screen.findByRole("radio", { name: "Oscuro" })).toBeChecked();
-  expect(document.documentElement.style.colorScheme).toBe("dark");
+  await waitFor(() =>
+    expect(document.documentElement.style.colorScheme).toBe("dark"),
+  );
   expect(
     fetcher.mock.calls.filter(([url]) => url === "/api/v1/me/appearance"),
   ).toHaveLength(1);
@@ -1237,7 +1239,9 @@ it("@s24 refreshes the system scheme after suspension without polling or writing
     </AppearanceProvider>,
   );
   await screen.findByRole("radio", { name: "Sistema" });
-  expect(document.documentElement.style.colorScheme).toBe("light");
+  await waitFor(() =>
+    expect(document.documentElement.style.colorScheme).toBe("light"),
+  );
   await act(async () => {
     media.matches = true;
     document.dispatchEvent(new Event("visibilitychange"));

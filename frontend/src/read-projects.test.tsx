@@ -1,3 +1,4 @@
+import { mockLegacyCustomizationFetch } from "../test-fixtures/customization";
 vi.mock("./project-tasks", () => ({ ProjectTasks: () => null }));
 import { render, screen, act, fireEvent } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
@@ -14,7 +15,7 @@ const summary = {
 };
 it("@s15 orienta solo el vacío confirmado y enlaza el formulario existente", async () => {
   window.history.replaceState(null, "", "/proyectos");
-  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+  mockLegacyCustomizationFetch().mockResolvedValue(
     Response.json({ items: [], nextCursor: null }),
   );
   render(<App />);
@@ -23,6 +24,7 @@ it("@s15 orienta solo el vacío confirmado y enlaza el formulario existente", as
     "href",
     "/proyectos/nuevo",
   );
+  await screen.findByRole("button", { name: "Personalizar vista" });
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
 });
 it.each([
@@ -50,7 +52,7 @@ it.each([
   "una respuesta200 incompatible en %s no causa falso vacío, detalle ni excepción",
   async (route, data) => {
     window.history.replaceState(null, "", route);
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json(data));
+    mockLegacyCustomizationFetch().mockResolvedValue(Response.json(data));
     render(<App />);
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "No hemos podido cargar",
@@ -64,7 +66,7 @@ it.each([
 it("@s22 ignora abortos y datos obsoletos durante la repetición de efectos StrictMode", async () => {
   window.history.replaceState(null, "", "/proyectos");
   let complete!: (response: Response) => void;
-  vi.spyOn(globalThis, "fetch")
+  mockLegacyCustomizationFetch()
     .mockImplementationOnce(
       () =>
         new Promise((resolve) => {
@@ -94,8 +96,7 @@ it("@s22 ignora abortos y datos obsoletos durante la repetición de efectos Stri
 it("@s22 cancela lecturas previas y una respuesta tardía no sustituye la ruta actual", async () => {
   window.history.replaceState(null, "", "/proyectos");
   let complete!: (response: Response) => void;
-  const request = vi
-    .spyOn(globalThis, "fetch")
+  const request = mockLegacyCustomizationFetch()
     .mockImplementationOnce(
       () =>
         new Promise((resolve) => {
@@ -131,7 +132,7 @@ it.each(["/proyectos?cursor=older", `/proyectos/${summary.id}`])(
   "@s27 retira datos anteriores ante401 en %s",
   async (route) => {
     window.history.replaceState(null, "", "/proyectos");
-    vi.spyOn(globalThis, "fetch")
+    mockLegacyCustomizationFetch()
       .mockResolvedValueOnce(
         Response.json({ items: [summary], nextCursor: null }),
       )
@@ -155,7 +156,7 @@ it.each(["/proyectos?cursor=older", `/proyectos/${summary.id}`])(
 );
 it("@s21 muestra detalle no encontrado y regreso sin proyecto ficticio", async () => {
   window.history.replaceState(null, "", `/proyectos/${summary.id}`);
-  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+  mockLegacyCustomizationFetch().mockResolvedValue(
     Response.json(
       { code: "PROJECT_NOT_FOUND", title: "Proyecto no encontrado" },
       { status: 404 },
@@ -176,7 +177,7 @@ it.each(["network", 503, 500])(
   "@s31 presenta detalle fallido %s y reintenta su misma URL",
   async (failure) => {
     window.history.replaceState(null, "", `/proyectos/${summary.id}`);
-    const request = vi.spyOn(globalThis, "fetch");
+    const request = mockLegacyCustomizationFetch();
     if (failure === "network")
       request.mockRejectedValueOnce(new Error("private"));
     else
@@ -207,7 +208,9 @@ it.each(["network", 503, 500])(
 );
 it("@s32 anuncia espera de detalle inmediato y ofrece regreso mientras carga", () => {
   window.history.replaceState(null, "", `/proyectos/${summary.id}`);
-  vi.spyOn(globalThis, "fetch").mockImplementation(() => new Promise(() => {}));
+  mockLegacyCustomizationFetch().mockImplementation(
+    () => new Promise(() => {}),
+  );
   render(<App />);
   expect(screen.getByRole("status")).toHaveTextContent(/^Cargando proyecto$/);
   expect(
@@ -222,9 +225,9 @@ it("@s20 @s30 abre detalle directo, conserva texto y fecha semántica con zona",
     name: "<b>Idea 🌿</b>",
     description: "<script>private()</script>\nSegundo paso",
   };
-  const request = vi
-    .spyOn(globalThis, "fetch")
-    .mockResolvedValue(Response.json(detail));
+  const request = mockLegacyCustomizationFetch().mockResolvedValue(
+    Response.json(detail),
+  );
   const { container } = render(<App />);
   expect(
     await screen.findByRole("heading", { level: 1, name: detail.name }),
@@ -248,7 +251,7 @@ it("@s20 @s30 abre detalle directo, conserva texto y fecha semántica con zona",
 });
 it("@s19 conserva regreso al inicio también en una página antigua vacía", async () => {
   window.history.replaceState(null, "", "/proyectos?cursor=last");
-  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+  mockLegacyCustomizationFetch().mockResolvedValue(
     Response.json({ items: [], nextCursor: null }),
   );
   render(<App />);
@@ -264,8 +267,7 @@ it("@s19 conserva regreso al inicio también en una página antigua vacía", asy
 });
 it("@s18 pagina mediante URL opaca, enfoca el título y permite regresar al inicio", async () => {
   window.history.replaceState(null, "", "/proyectos");
-  const request = vi
-    .spyOn(globalThis, "fetch")
+  const request = mockLegacyCustomizationFetch()
     .mockResolvedValueOnce(
       Response.json({ items: [summary], nextCursor: "opaque_cursor-2" }),
     )
@@ -304,7 +306,7 @@ it.each(["network", 503, 500])(
   "@s17 recupera una lista fallida %s sin falso vacío ni detalles internos",
   async (failure) => {
     window.history.replaceState(null, "", "/proyectos");
-    const request = vi.spyOn(globalThis, "fetch");
+    const request = mockLegacyCustomizationFetch();
     if (failure === "network")
       request.mockRejectedValueOnce(new Error("private-network"));
     else
@@ -371,7 +373,7 @@ it.each([
 it("@s22 un rechazo tardío de un efecto cancelado no oculta la respuesta vigente", async () => {
   window.history.replaceState(null, "", "/proyectos");
   let reject!: (reason: unknown) => void;
-  vi.spyOn(globalThis, "fetch")
+  mockLegacyCustomizationFetch()
     .mockImplementationOnce(
       () =>
         new Promise((_resolve, fail) => {
@@ -394,7 +396,7 @@ it("@s22 un rechazo tardío de un efecto cancelado no oculta la respuesta vigent
 it("@s29 la lectura no copia datos a localStorage ni sessionStorage", async () => {
   window.history.replaceState(null, "", "/proyectos");
   const persist = vi.spyOn(Storage.prototype, "setItem");
-  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+  mockLegacyCustomizationFetch().mockResolvedValue(
     Response.json({ items: [summary], nextCursor: null }),
   );
   render(<App />);
@@ -403,9 +405,9 @@ it("@s29 la lectura no copia datos a localStorage ni sessionStorage", async () =
 });
 it("@s14 obtiene proyectos persistentes al abrir su URL y presenta semántica de lista", async () => {
   window.history.replaceState(null, "", "/proyectos");
-  const request = vi
-    .spyOn(globalThis, "fetch")
-    .mockResolvedValue(Response.json({ items: [summary], nextCursor: null }));
+  const request = mockLegacyCustomizationFetch().mockResolvedValue(
+    Response.json({ items: [summary], nextCursor: null }),
+  );
   render(<App />);
   expect(
     await screen.findByRole("link", { name: "Zenit Digital" }),
@@ -421,7 +423,9 @@ it("@s14 obtiene proyectos persistentes al abrir su URL y presenta semántica de
 });
 it("@s16 anuncia espera inmediata sin presentar un vacío ficticio", () => {
   window.history.replaceState(null, "", "/proyectos");
-  vi.spyOn(globalThis, "fetch").mockImplementation(() => new Promise(() => {}));
+  mockLegacyCustomizationFetch().mockImplementation(
+    () => new Promise(() => {}),
+  );
   render(<App />);
   expect(screen.getByRole("status")).toHaveTextContent("Cargando proyectos");
   expect(screen.queryByRole("list")).not.toBeInTheDocument();
@@ -432,7 +436,7 @@ it("@s16 anuncia espera inmediata sin presentar un vacío ficticio", () => {
 
 it("history18 @s28 discovers a completed project's history directly from its detail", async () => {
   window.history.replaceState(null, "", `/proyectos/${summary.id}`);
-  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+  mockLegacyCustomizationFetch().mockResolvedValue(
     Response.json({
       ...summary,
       status: "completed",

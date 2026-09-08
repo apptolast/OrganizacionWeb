@@ -1,0 +1,7 @@
+{
+  "files": 32,
+  "truncates": 42,
+  "expectedAstMatches": true,
+  "newCascade": false,
+  "runnerExecuted": false
+}

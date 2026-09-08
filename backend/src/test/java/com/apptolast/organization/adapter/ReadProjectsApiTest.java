@@ -69,7 +69,7 @@ class ReadProjectsApiTest {
   @BeforeEach
   void clear() {
     jdbc.execute(
-        "TRUNCATE work_session_intervals,work_session_changes,work_sessions,block_changes,block_projections,planned_blocks,"
+        "TRUNCATE project_custom_field_values,task_custom_field_values, work_session_intervals,work_session_changes,work_sessions,block_changes,block_projections,planned_blocks,"
             + " task_status_history, tasks, outbox_events, projects");
   }
 

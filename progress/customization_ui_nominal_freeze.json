@@ -1,0 +1,63 @@
+{
+  "scope": "One nominal UI21 case; partial frontend; backend f41e79d",
+  "initialExit": 1,
+  "finalExit": 0,
+  "finalExitEvidence": "b11ed8",
+  "tests": 1,
+  "inputs": 576,
+  "changedInputs": 0,
+  "files": [
+    {
+      "path": "e2e/customization-ui.spec.mjs",
+      "sha256": "DD046CC43C7A567EC0D4EE1A96D6F0521EDBAFDB2E32EAEF194539944C3B300D"
+    },
+    {
+      "path": "progress/tdd_customization_ui_e2e.md",
+      "sha256": "BCF1EA605A296638DD660C85324E4F1F9E0EF513A7229B9EE349CF34E6C13540"
+    },
+    {
+      "path": "progress/customization_frontend_ui_partial_freeze.json",
+      "sha256": "8A29A26666C06D93CFB011B883DD04D3280A822117410C77BD777BF381A67586"
+    },
+    {
+      "path": "progress/customization_ui_nominal_before.json",
+      "sha256": "859F1D7E711304FE701E2B1E14E25C0EA5B372C7091A627BBAD4223C04E2FEAC"
+    },
+    {
+      "path": "progress/customization_ui_nominal_after.json",
+      "sha256": "859F1D7E711304FE701E2B1E14E25C0EA5B372C7091A627BBAD4223C04E2FEAC"
+    },
+    {
+      "path": "progress/customization_ui_nominal.log",
+      "sha256": "8A4B307434A7EAFFB38DD33B5F205E785E558BEAC460BC43D76D8260F6228318"
+    },
+    {
+      "path": "progress/customization_ui_nominal.exit",
+      "sha256": "F1B2F662800122BED0FF255693DF89C4487FBDCF453D3524A42D4EC20C3D9C04"
+    },
+    {
+      "path": "progress/customization_ui_nominal_initial_spec.mjs",
+      "sha256": "6021A5AF5CAFDA6F444460010353EF152004D9C9FCFCC028FEA9EDD9784E6376"
+    },
+    {
+      "path": "progress/customization_ui_nominal_error_context.md",
+      "sha256": "01C517736E6B4B6E71B740938AECDA7A908F863A56206D7F36C74BAE6D680030"
+    },
+    {
+      "path": "progress/customization_ui_nominal_fixed_before.json",
+      "sha256": "62B63DF20371A48FFF310FE78408FB9FAC9982B5552F9F653907BC555CB52B46"
+    },
+    {
+      "path": "progress/customization_ui_nominal_fixed_after.json",
+      "sha256": "62B63DF20371A48FFF310FE78408FB9FAC9982B5552F9F653907BC555CB52B46"
+    },
+    {
+      "path": "progress/customization_ui_nominal_fixed.log",
+      "sha256": "9CE379F58CC1EAA7AFCECC750AE5E10E1C4C5144B60F2ADD06225504AD999801"
+    },
+    {
+      "path": "progress/customization_ui_nominal_fixed.exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354"
+    }
+  ]
+}

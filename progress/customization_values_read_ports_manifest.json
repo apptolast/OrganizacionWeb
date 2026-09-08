@@ -1,0 +1,26 @@
+[
+  {
+    "sha256": "2075847F8C93DC2EA7E00E05C051834F90B56202F5E1C2AA000427F7853082C6",
+    "path": "backend/src/main/java/com/apptolast/organization/domain/CustomFieldValue.java"
+  },
+  {
+    "sha256": "68C8AFAAAC05816A3BF4F2711C85358F299446F402A049DBB8AADA8B3779577E",
+    "path": "backend/src/main/java/com/apptolast/organization/domain/CustomFieldValues.java"
+  },
+  {
+    "sha256": "9A919EEC4B0F3CD1071083282F6E0531EA5A9C96CEA2662E5F3F08CA7320AB6A",
+    "path": "backend/src/main/java/com/apptolast/organization/application/CustomFieldValuesQueries.java"
+  },
+  {
+    "sha256": "064174A810104806A86528B68F5F0C6B15C5AEF22C5E79A99291F78D66A20EEB",
+    "path": "backend/src/main/java/com/apptolast/organization/application/ReadCustomFieldValuesUseCase.java"
+  },
+  {
+    "sha256": "43FE547AD7BA6CBC1FE73A42C6DC46B5B3C16212F6B662A1AA11E5211E63730A",
+    "path": "backend/src/main/java/com/apptolast/organization/application/ReadCustomFieldValues.java"
+  },
+  {
+    "sha256": "90BF733FBE2B11EDC578341D66BB9FBF29BA5501FE145A7E5C51B8223F31EA82",
+    "path": "backend/src/test/java/com/apptolast/organization/application/ReadCustomFieldValuesTest.java"
+  }
+]

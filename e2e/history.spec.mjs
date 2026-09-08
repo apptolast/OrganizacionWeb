@@ -11,7 +11,7 @@ test("history: workspace opens an empty real history page @s28", async ({
   page,
 }) => {
   sql(
-    "TRUNCATE work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
   );
   await page.goto("/proyectos");
   const link = page
@@ -44,7 +44,7 @@ test("history: five durable sources keep their original details after later chan
   request,
 }) => {
   sql(
-    "TRUNCATE work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
   );
   const project = await create(request, "Hechos durables de trabajo");
   const task = await saveTask(request, project.id, "Conservar lo ocurrido");
@@ -259,7 +259,7 @@ test("history: pagination filters and reload survive API restart without fixture
 }) => {
   test.setTimeout(120000);
   sql(
-    "TRUNCATE work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
   );
   const project = await create(request, "Veintiún hechos verificables");
   const task = await saveTask(request, project.id, "Paginar hechos propios");
@@ -388,7 +388,7 @@ test("history: current errors withdraw private notes and retry only the requeste
   context,
 }) => {
   sql(
-    "TRUNCATE work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
   );
   const project = await create(request, "Contexto privado del historial");
   const task = await saveTask(

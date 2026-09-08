@@ -1,3 +1,4 @@
+import { mockLegacyCustomizationFetch } from "../test-fixtures/customization";
 import userEvent from "@testing-library/user-event";
 import { StrictMode } from "react";
 import {
@@ -109,9 +110,8 @@ function fixture(
     options?: RequestInit,
   ) => Response | Promise<Response> | undefined = () => undefined,
 ) {
-  return vi
-    .spyOn(globalThis, "fetch")
-    .mockImplementation(async (input, options) => {
+  return mockLegacyCustomizationFetch().mockImplementation(
+    async (input, options) => {
       const url = String(input);
       if (url === "/api/v1/work-sessions/active")
         return Response.json({ session: null });
@@ -155,7 +155,8 @@ function fixture(
       )
         return Response.json({ items: [], nextCursor: null });
       return Response.json(task);
-    });
+    },
+  );
 }
 afterEach(() => window.history.replaceState(null, "", "/"));
 

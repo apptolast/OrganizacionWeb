@@ -1,0 +1,30 @@
+{
+  "authorization": "Root permits non-selected config repair during running campaign; sandbox unchanged",
+  "defaultProjectReaderBefore": [
+    "src/project-reader.tsx:61:0-61:70",
+    "src/project-reader.tsx:157:0-157:76",
+    "src/project-reader.tsx:111:10-116:22",
+    "src/project-reader.tsx:156:10-158:12",
+    "src/project-reader.tsx:198:22-213:25",
+    "src/project-reader.tsx:239:6-245:8",
+    "src/project-reader.tsx:247:8-253:10"
+  ],
+  "defaultProjectReaderAfter": "src/project-reader.tsx",
+  "appearanceAppNodes": [
+    {
+      "range": "21:8-21:44",
+      "kind": "VariableDeclaration",
+      "text": "appearance = route === \"/apariencia\""
+    },
+    {
+      "range": "29:8-41:26",
+      "kind": "ConditionalExpression",
+      "text": "appearance\n          ? \"Apariencia\"\n          : route === \"/\"\n            ? \"Hoy\"\n            : weeklyReview\n              ? \"Revisión semanal\"\n              : history\n                ? \"Historial\"\n                : availability\n                  ? \"Disponibilidad\"\n                  : route.startsWith(\"/proyectos\")\n                    ? \"Proyectos\"\n                    : null"
+    },
+    {
+      "range": "44:7-85:7",
+      "kind": "ConditionalExpression",
+      "text": "appearance ? (\n        <Appearance />\n      ) : route === \"/\" ? (\n        <Today />\n      ) : route === \"/proyectos/nuevo\" ? (\n        <CreateProjectScreen />\n      ) : weeklyReview ? (\n        <WeeklyReview route={route} />\n      ) : history ? (\n        <History route={route} />\n      ) : availability ? (\n        <Availability />\n      ) : sessionRoute ? (\n        <WorkSessionReader\n          key={route}\n          projectId={sessionRoute[1]}\n          taskId={sessionRoute[2]}\n          id={sessionRoute[3]}\n        />\n      ) : taskRoute ? (\n        <TaskReader\n          key={route}\n          projectId={taskRoute[1]}\n          id={taskRoute[2]}\n          customization={customization}\n        />\n      ) : /^\\/proyectos\\/[^/?]+\\/editar$/.test(route) ? (\n        <ProjectEditor key={route} route={route} />\n      ) : /^\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/.test(route) ? (\n        <ProjectReader\n          key={route}\n          route={route}\n          customization={customization}\n        />\n      ) : (\n        <main id=\"proyectos\" tabIndex={-1}>\n          <h1>Página no encontrada</h1>\n          <RouteLink href=\"/\">Hoy</RouteLink>\n          {\" · \"}\n          <RouteLink href=\"/proyectos\">Proyectos</RouteLink>\n        </main>\n      )"
+    }
+  ]
+}

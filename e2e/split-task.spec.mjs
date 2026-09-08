@@ -5,7 +5,11 @@ import { csrfHeaders } from "../scripts/session-client.mjs";
 import AxeBuilder from "@axe-core/playwright";
 import { request as anonymousRequest } from "@playwright/test";
 
-test.beforeEach(() => sql("TRUNCATE work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, task_status_history, tasks,outbox_events,projects"));
+test.beforeEach(() =>
+  sql(
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, task_status_history, tasks,outbox_events,projects",
+  ),
+);
 const resource = (projectId, taskId) =>
   `/api/v1/projects/${projectId}/tasks/${taskId}`;
 const screen = (projectId, taskId) =>

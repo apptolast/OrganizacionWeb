@@ -1,3 +1,5 @@
+import { CustomFieldsPanel } from "./custom-fields";
+import type { CustomizationSession } from "./customization-state";
 import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { readTask, type Task } from "./tasks-api";
 import { RouteLink } from "./navigation";
@@ -12,9 +14,11 @@ import { ProjectStatusControl } from "./project-status-control";
 export function TaskReader({
   projectId,
   id,
+  customization,
 }: {
   projectId: string;
   id: string;
+  customization?: CustomizationSession;
 }) {
   const [snapshot, setSnapshot] = useState<ProjectSnapshot>();
   const [task, setTask] = useState<Task>();
@@ -127,6 +131,14 @@ export function TaskReader({
               : `Estimación: ${task.estimatedMinutes} min`}
           </p>
           <TaskParent projectId={task.projectId} id={task.id} />
+          {customization && (
+            <CustomFieldsPanel
+              projectId={task.projectId}
+              taskId={task.id}
+              session={customization}
+              onAccessFailure={setFailure}
+            />
+          )}
           <WorkSession
             projectId={task.projectId}
             taskId={task.id}
@@ -171,6 +183,7 @@ export function TaskReader({
               projectStatus={snapshot.project.status}
               parentTaskId={task.id}
               onProjectConfirmed={setSnapshot}
+              customization={customization}
             />
           )}
         </article>

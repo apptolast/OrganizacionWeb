@@ -1,0 +1,67 @@
+{
+  "scope": "Functional frontend21 including browser focus correction164",
+  "tests": "151/151 in five focal suites; lint/format/types EXIT0",
+  "pending": [
+    "Independent final review",
+    "CSS/physical UX owned by C",
+    "Global gates and mutation coordinated by root"
+  ],
+  "files": [
+    {
+      "path": "frontend/src/customization-api.ts",
+      "sha256": "CF121AF437C95B1D758F9437F7540DAAD5A14BF2E4C201C43E4D88BBC9C0530C"
+    },
+    {
+      "path": "frontend/src/customization-api.test.ts",
+      "sha256": "D62915C50AE6CB65E658D4960940EAFC5A43C491B37AEF6D3C3F18A4114CE1BC"
+    },
+    {
+      "path": "frontend/src/custom-fields-api.ts",
+      "sha256": "5D0EA08122722B22BB445E7FDF1DF506F93F8390337E394785CFB0E367F5AAD1"
+    },
+    {
+      "path": "frontend/src/custom-fields-api.test.ts",
+      "sha256": "1FBC4AA7AA590CB38FE7EA36C6B937ECBB3E1E00909508A292516ABFF6237557"
+    },
+    {
+      "path": "frontend/src/customization-state.ts",
+      "sha256": "55D3DFDB0382F4FB66FF9C68DFC4BF033BDAECC4940959818CBE2C73389C622D"
+    },
+    {
+      "path": "frontend/src/customization.tsx",
+      "sha256": "3734C32B4C1D47C9C4ADD218D68EE46553CB11A59D4C34124D221091D713D5C5"
+    },
+    {
+      "path": "frontend/src/customization.test.tsx",
+      "sha256": "B37DF61E1E2CE2116F4E45AED4F517E19CA6678DEFBCEE3B511505EC03EE3E1E"
+    },
+    {
+      "path": "frontend/src/custom-fields.tsx",
+      "sha256": "40D34D084EE6A5DF8500D845DD48EBC5CD5205163F22DCF9E35E269AC851910A"
+    },
+    {
+      "path": "frontend/src/custom-fields.test.tsx",
+      "sha256": "74402771D9968CFA00DCB21268147FEACC71D466B4C77077EF4C1710B266075A"
+    },
+    {
+      "path": "frontend/src/customization-integration.test.tsx",
+      "sha256": "1B9FA53A6907E26EA997DCF16BD4B4AE10C3EA8530ABD5673361BDDC713E44B3"
+    },
+    {
+      "path": "frontend/src/App.tsx",
+      "sha256": "5518BB7AA1663742C30297D92CE984F83021F118B2D3F784940C7A3CB4E7587C"
+    },
+    {
+      "path": "frontend/src/project-reader.tsx",
+      "sha256": "5E53712172EEC0406A062D25ED343F56ABA5A562854A9C3A451983827F2C4506"
+    },
+    {
+      "path": "frontend/src/project-tasks.tsx",
+      "sha256": "FE9D3C46F59609B8A677FA3505D43C02DEAC3D105494C43FCC51AEC5AE78D161"
+    },
+    {
+      "path": "frontend/src/task-reader.tsx",
+      "sha256": "4B28EC5D74241D9BCCE62C3AEDE69374CD0CFB74347AC5CB9C767A305091D236"
+    }
+  ]
+}

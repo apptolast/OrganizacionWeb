@@ -1,0 +1,44 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "ignorePatterns": [".stryker-tmp-availability-replay"],
+  "mutate": [
+    "src/customization-api.ts",
+    "src/custom-fields-api.ts",
+    "src/customization-state.ts",
+    "src/customization.tsx",
+    "src/custom-fields.tsx",
+    "src/App.tsx:17:24-17:49",
+    "src/App.tsx:64:8-69:10",
+    "src/App.tsx:73:8-77:10",
+    "src/project-reader.tsx:156:10-158:12",
+    "src/project-reader.tsx:198:22-213:25",
+    "src/project-reader.tsx:239:6-245:8",
+    "src/project-reader.tsx:247:8-253:10",
+    "src/project-tasks.tsx:70:6-72:8",
+    "src/project-tasks.tsx:112:14-153:17",
+    "src/task-reader.tsx:134:10-141:12",
+    "src/task-reader.tsx:181:12-187:14"
+  ],
+  "reporters": ["clear-text", "json", "html", "progress-append-only"],
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 80
+  },
+  "concurrency": 8,
+  "coverageAnalysis": "perTest",
+  "vitest": {
+    "configFile": "vite.config.ts"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation-custom-views-fields-refined/mutation.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation-custom-views-fields-refined/mutation.html"
+  },
+  "tempDirName": ".stryker-tmp-custom-views-fields-refined",
+  "incremental": true,
+  "incrementalFile": "reports/mutation-custom-views-fields-refined/incremental.json"
+}

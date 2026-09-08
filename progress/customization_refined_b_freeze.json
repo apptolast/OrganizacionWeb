@@ -1,0 +1,30 @@
+{
+  "files": [
+    {
+      "path": "frontend/src/customization.mutation.test.tsx",
+      "sha256": "BDE5591040C6D1D07108E48DC84B588FE1922E5908DCA4282115F9211607AD9D"
+    },
+    {
+      "path": "frontend/src/customization-state.mutation.test.tsx",
+      "sha256": "04DC4586032BFE1254DB09E4EDD22FEA85ACC469D3122F1EB93608E11547DCA1"
+    },
+    {
+      "path": "frontend/stryker.custom-views-fields.config.json",
+      "sha256": "D5E38935564067252AD2900EB7B9ABBE239269BD3B744B513E6CB8D2F14413B0"
+    }
+  ],
+  "configChangedKeys": [
+    "reporters",
+    "jsonReporter",
+    "htmlReporter",
+    "tempDirName",
+    "incremental",
+    "incrementalFile"
+  ],
+  "originalRawSha256": "3DC6D9B548B532389660A53B9915B620683C552032FEF8E3510A10AFAE997942",
+  "incrementalSeedSha256": "3DC6D9B548B532389660A53B9915B620683C552032FEF8E3510A10AFAE997942",
+  "scopeUnchanged": true,
+  "tests": 6,
+  "productionChanged": false,
+  "campaignStarted": false
+}

@@ -1,0 +1,20 @@
+[
+  "com.apptolast.organization.adapter.AvailabilityApiTest",
+  "com.apptolast.organization.adapter.BlockChangesApiTest",
+  "com.apptolast.organization.adapter.EditProjectsApiTest",
+  "com.apptolast.organization.adapter.ProjectStatesApiTest",
+  "com.apptolast.organization.adapter.ReadProjectsApiTest",
+  "com.apptolast.organization.adapter.RescheduleApiTest",
+  "com.apptolast.organization.adapter.RescheduleErrorsApiTest",
+  "com.apptolast.organization.adapter.ScheduleBlockApiTest",
+  "com.apptolast.organization.adapter.SubtaskApiTest",
+  "com.apptolast.organization.adapter.TaskHistoryApiTest",
+  "com.apptolast.organization.adapter.TaskStatusApiTest",
+  "com.apptolast.organization.adapter.TodayApiTest",
+  "com.apptolast.organization.adapter.WorkSessionIntegrationTest",
+  "com.apptolast.organization.adapter.persistence.BlockChangeQueriesPersistenceTest",
+  "com.apptolast.organization.adapter.persistence.HistoryReadTransactionTest",
+  "com.apptolast.organization.adapter.persistence.OutboxRecoveryTest",
+  "com.apptolast.organization.adapter.persistence.OutboxWorkTest",
+  "com.apptolast.organization.adapter.persistence.ScheduleBlockPersistenceTest"
+]

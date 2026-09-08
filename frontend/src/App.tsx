@@ -1,3 +1,4 @@
+import { useCustomizationSession } from "./customization-state";
 import type { ReactNode } from "react";
 import { useCreateProject } from "./use-create-project";
 import { ProjectReader } from "./project-reader";
@@ -13,6 +14,7 @@ import { WeeklyReview } from "./weekly-review";
 import { Appearance } from "./appearance";
 export function App({ sessionControls }: { sessionControls?: ReactNode }) {
   const route = useRoute();
+  const customization = useCustomizationSession();
   const weeklyReview = /^\/revision-semanal(?:\?[^#]*)?$/.test(route);
   const history = /^\/historial(?:\?[^#]*)?$/.test(route);
   const availability = route === "/disponibilidad";
@@ -59,11 +61,20 @@ export function App({ sessionControls }: { sessionControls?: ReactNode }) {
           id={sessionRoute[3]}
         />
       ) : taskRoute ? (
-        <TaskReader key={route} projectId={taskRoute[1]} id={taskRoute[2]} />
+        <TaskReader
+          key={route}
+          projectId={taskRoute[1]}
+          id={taskRoute[2]}
+          customization={customization}
+        />
       ) : /^\/proyectos\/[^/?]+\/editar$/.test(route) ? (
         <ProjectEditor key={route} route={route} />
       ) : /^\/proyectos(?:\?[^#]*|\/[^/?]+)?$/.test(route) ? (
-        <ProjectReader key={route} route={route} />
+        <ProjectReader
+          key={route}
+          route={route}
+          customization={customization}
+        />
       ) : (
         <main id="proyectos" tabIndex={-1}>
           <h1>Página no encontrada</h1>

@@ -1,3 +1,4 @@
+import { customizationFixtureResponse } from "../test-fixtures/customization";
 vi.mock("./project-tasks", () => ({ ProjectTasks: () => null }));
 import { StrictMode, Profiler } from "react";
 import {
@@ -31,7 +32,10 @@ function mockSessionTraffic() {
         ),
       );
     }
-    return traffic(input, init);
+    const customization = customizationFixtureResponse(input, init);
+    return customization
+      ? Promise.resolve(customization)
+      : traffic(input, init);
   });
   return traffic;
 }

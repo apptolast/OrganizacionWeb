@@ -9,6 +9,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
   @Bean
+  com.apptolast.organization.adapter.persistence.PostgresApiCredentialStore apiCredentialStore(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions) {
+    return new com.apptolast.organization.adapter.persistence.PostgresApiCredentialStore(
+        jdbc, transactions);
+  }
+
+  @Bean
+  com.apptolast.organization.application.CreateApiCredential createApiCredential(
+      com.apptolast.organization.application.ApiCredentialCommit store, Clock clock) {
+    return new com.apptolast.organization.application.CreateApiCredential(
+        store, clock, new java.security.SecureRandom());
+  }
+
+  @Bean
   com.apptolast.organization.application.SaveCustomFieldValues saveCustomFieldValues(
       com.apptolast.organization.application.CustomFieldValuesEditing store, Clock clock) {
     return new com.apptolast.organization.application.SaveCustomFieldValues(store, clock);

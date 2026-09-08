@@ -31,15 +31,17 @@ public final class CreateApiCredential implements CreateApiCredentialUseCase {
         id,
         intent,
         () -> {
-          var now = clock.instant().truncatedTo(ChronoUnit.MICROS);
+          var now = CustomizationTime.capture(clock);
+          java.time.Instant expires;
+          try {
+            expires = now.plus(expiresInDays, ChronoUnit.DAYS);
+            if (expires.atOffset(java.time.ZoneOffset.UTC).getYear() > 9999)
+              throw new IllegalArgumentException("Credential expiration outside public range");
+          } catch (RuntimeException error) {
+            throw new StorageUnavailableException(error);
+          }
           var credential =
-              new ApiCredential(
-                  id,
-                  intent.name(),
-                  intent.scopes(),
-                  now,
-                  now.plus(expiresInDays, ChronoUnit.DAYS),
-                  null);
+              new ApiCredential(id, intent.name(), intent.scopes(), now, expires, null);
           var bytes = new byte[32];
           random.nextBytes(bytes);
           try {

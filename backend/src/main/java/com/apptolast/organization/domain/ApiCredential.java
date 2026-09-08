@@ -10,4 +10,8 @@ public record ApiCredential(
     List<String> scopes,
     Instant createdAt,
     Instant expiresAt,
-    Instant revokedAt) {}
+    Instant revokedAt) {
+  public ApiCredential {
+    scopes = List.copyOf(scopes);
+  }
+}

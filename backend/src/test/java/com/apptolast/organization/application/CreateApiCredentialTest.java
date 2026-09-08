@@ -14,6 +14,101 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class CreateApiCredentialTest {
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.MethodSource("invalidIntentions")
+  void s2_rejectsInvalidIntentBeforeCallingCommit(
+      String name, List<String> scopes, int days, String field) {
+    ApiCredentialCommit commit =
+        (owner, id, intent, issue) -> {
+          throw new AssertionError("Invalid input reached storage");
+        };
+    var useCase = new CreateApiCredential(commit, Clock.systemUTC(), new SecureRandom());
+    var error =
+        assertThrows(
+            com.apptolast.organization.domain.ApiCredentialInvalidException.class,
+            () -> useCase.create("owner", UUID.randomUUID(), name, scopes, days));
+    assertEquals(field, error.errors().getFirst().field());
+  }
+
+  static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments> invalidIntentions() {
+    return java.util.stream.Stream.of(
+        org.junit.jupiter.params.provider.Arguments.of(
+            "\u2003 ", List.of("projects:read"), 30, "name"),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "x".repeat(81), List.of("projects:read"), 30, "name"),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "private\nvalue", List.of("projects:read"), 30, "name"),
+        org.junit.jupiter.params.provider.Arguments.of("name", List.of(), 30, "scopes"),
+        org.junit.jupiter.params.provider.Arguments.of("name", List.of("unknown"), 30, "scopes"),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "name", List.of("projects:read", "projects:read"), 30, "scopes"),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "name", List.of("projects:read"), 31, "expiresInDays"));
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"0000-12-31T23:59:59Z", "9999-12-31T23:59:59Z", "+10000-01-01T00:00:00Z"})
+  void s6_unrepresentableClockNeverIssuesSecret(String instant) {
+    ApiCredentialCommit commit =
+        (owner, id, intent, issue) -> {
+          var ignored = issue.get();
+          throw new AssertionError("Invalid time issued a credential");
+        };
+    var random =
+        new SecureRandom() {
+          @Override
+          public void nextBytes(byte[] bytes) {
+            throw new AssertionError("Invalid time generated secret");
+          }
+        };
+    var useCase =
+        new CreateApiCredential(
+            commit, Clock.fixed(Instant.parse(instant), ZoneOffset.UTC), random);
+    assertThrows(
+        StorageUnavailableException.class,
+        () -> useCase.create("owner", UUID.randomUUID(), "name", List.of("projects:read"), 30));
+  }
+
+  @Test
+  void s1_metadataAndVerifierRetainOwnershipAcrossPort() {
+    var scopes = new java.util.ArrayList<>(List.of("projects:read"));
+    var verifier = new byte[32];
+    verifier[0] = 42;
+    var now = Instant.parse("2026-09-08T12:00:00Z");
+    var metadata =
+        new com.apptolast.organization.domain.ApiCredential(
+            UUID.randomUUID(), "Owned", scopes, now, now.plusSeconds(86400), null);
+    var issued = new ApiCredentialIssuance(metadata, "test-only", verifier);
+    scopes.clear();
+    verifier[0] = 0;
+    var borrowed = issued.verifier();
+    borrowed[0] = 1;
+    assertEquals(List.of("projects:read"), issued.credential().scopes());
+    assertEquals(42, issued.verifier()[0]);
+  }
+
+  @Test
+  void s3_normalizesUnicodeAndOwnsScopesInCanonicalOrder() {
+    var scopes = new java.util.ArrayList<>(List.of("history:read", "projects:read", "tasks:write"));
+    var raw = "\u0085\u00a0\u2003" + "\ud83d\ude00".repeat(80) + "\u2003\u00a0\u0085";
+    ApiCredentialCommit commit =
+        (owner, id, intent, issue) -> {
+          scopes.clear();
+          assertEquals(List.of("projects:read", "tasks:write", "history:read"), intent.scopes());
+          assertEquals("\ud83d\ude00".repeat(80), intent.name());
+          var issued = issue.get();
+          assertThrows(
+              UnsupportedOperationException.class, () -> issued.credential().scopes().clear());
+          return new ApiCredentialCreation(issued.credential(), issued.secret());
+        };
+    var result =
+        new CreateApiCredential(commit, Clock.systemUTC(), new SecureRandom())
+            .create("owner", UUID.randomUUID(), raw, scopes, 7);
+    assertEquals(
+        List.of("projects:read", "tasks:write", "history:read"), result.credential().scopes());
+  }
+
   @Test
   void s1_s5_issuesOneSecretAndOnlyVerifierAcrossCommitBoundary() throws Exception {
     var id = UUID.randomUUID();

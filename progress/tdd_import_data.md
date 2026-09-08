@@ -131,3 +131,20 @@ Los logs originales de estos grupos permanecen en deployment-preparation/import2
 61 @s9/@s10: preferencias inválidas y valores cuyas definiciones faltan sólo en el archivo dieron RED EXIT 1 b35ce2. GREEN EXIT 0 6e20fb junto al integral integra los tres métodos reales de ImportCustomizationValidator de C. El join de definiciones usa exclusivamente customization del staging con el ámbito correspondiente; ausencia equivale a lista vacía, sin defaults ni consulta del esquema del destino.
 
 Trazabilidad precisada: las claves alternativas del ciclo60 corresponden literalmente a @s6 (no @s12); el grupo de integridad histórica del ciclo58 corresponde a @s10, complementando el positivo de recibos @s11. Los nombres de los dos métodos se corrigieron antes de la regresión del corte; los logs originales conservan sus nombres anteriores. No se cambió ningún oráculo por esta corrección documental. Formato focal real y clase completa de persistencia EXIT 0 ea82a1, log import23-integrity-checkpoint.log. Sigue siendo corte parcial: alternativas internas, unión de cuotas/sesiones, recibo durable corrupto, concurrencia y límites/performance se cierran después.
+
+### Ciclos 62–70: unión e integridad durable
+
+Evidencia original en `work/deployment-preparation/import23-cycleNN-*.log`. No se ejecutaron suites globales ni mutación.
+
+- 62: diez claves alternativas duplicadas dentro del archivo, RED dbcf30 → GREEN bfbd54.
+- 63 (@s14): avisos sólo para sesiones RUNNING ausentes, incluidos runningSince null legado; RED fcef72 → GREEN 99eec0.
+- 64–65 (@s15): cuota configurada de proyectos activos y unión con sesión abierta existente; RED 199fe0/7a6044 → GREEN 9d6a30/fe0bba. Wiring real incluido en64.
+- 66 (@s10): cinco restricciones durables de tarea, historial, expansión y proyección parcial; RED8f2919 → GREEN6c0faf. Se conserva el CHECK real completed/non-null/updatedAt y los nulls permitidos de expansión/proyección.
+- 67 (@s10): seis discrepancias entre snapshot y fila actual; RED2bd45e → GREENb03bc2. El intento de edición d145a0 no encontró el patrón: no cambió producción y la ejecución siguiente repitió el RED (a9490a). Su archivo llamado green se conserva como intento fallido, no como evidencia GREEN. La confirmación final está en cycle67-green-final.log.
+- 68 (@s22): siete corrupciones de recibo operativo (counts incompletos, string, fracción, negativo, suma, outcome y fecha fuera del rango); RED314a6a → GREEN2dbb4d. Lectura devuelve503 sin modificar la fila, el nominal integral sigue verde.
+- 69 (@s23): refuerzo inicialmente GREEN28f297. Antes del fallo de INSERT del recibo, el Clock observa las14 colecciones insertadas en la misma transacción. Tras503 se comparan snapshots físicos de todas, outbox y ausencia de recibo. No se atribuye defecto nuevo ni se duplica COMMIT diferido de C.
+- 70: coherencia de intervalo completo de proyección con último recibo, manteniendo la cancelación con intervalo y los offsets resueltos históricos; ciclo en curso.
+
+Ciclo70 confirmado: REDd0f138 → GREEN29f9dd,8 casos incluyendo integral y seis discrepancias anteriores. XML original preservado fuera del build en deployment-preparation/import23-cycle70.xml. Comparación sin TZDB ni normalización: request locales/zona y time offsets/instantes/duración; proyección legada null usa los hechos originales.
+
+Foco completo posterior62�70: EXIT0 32c804, Spotless seleccionado y 131 pruebas PG/wiring, sin fallos/errores/omisiones. XML originales externos import23-integrity-final-*.xml. No acredita escala pendiente.

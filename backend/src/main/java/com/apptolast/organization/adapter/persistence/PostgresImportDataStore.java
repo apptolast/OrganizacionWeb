@@ -19,8 +19,17 @@ public final class PostgresImportDataStore
   private final JdbcTemplate jdbc;
   private final TransactionTemplate reading;
   private final TransactionTemplate writing;
+  private final int maxActiveProjects;
 
   public PostgresImportDataStore(JdbcTemplate jdbc, PlatformTransactionManager transactions) {
+    this(jdbc, transactions, 3);
+  }
+
+  public PostgresImportDataStore(
+      JdbcTemplate jdbc, PlatformTransactionManager transactions, int maxActiveProjects) {
+    if (maxActiveProjects < 1 || maxActiveProjects > 10)
+      throw new IllegalArgumentException("Active project quota must be between 1 and 10");
+    this.maxActiveProjects = maxActiveProjects;
     this.jdbc = jdbc;
     reading = new TransactionTemplate(transactions);
     reading.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
@@ -49,7 +58,7 @@ public final class PostgresImportDataStore
                         header.counts(),
                         header.counts().minus(identical),
                         identical,
-                        List.of());
+                        newRunningSessions());
                   } catch (IOException failure) {
                     throw new StorageUnavailableException(failure);
                   }
@@ -58,6 +67,21 @@ public final class PostgresImportDataStore
 
   private ImportJsonReader.Header stage(InputStream body) throws IOException {
     return stage(body, null);
+  }
+
+  private List<ImportPreview.RunningSession> newRunningSessions() {
+    return jdbc.query(
+        """
+        SELECT (s.payload->>'id')::uuid AS id,(s.payload->>'runningSince')::timestamptz AS running_since
+        FROM import_stage s LEFT JOIN work_sessions r ON r.id::text=s.payload->>'id'
+        WHERE s.collection='workSessions' AND s.payload->>'status'='running' AND r.id IS NULL
+        ORDER BY s.payload->>'id'
+        """,
+        (row, index) -> {
+          var since = row.getObject("running_since", java.time.OffsetDateTime.class);
+          return new ImportPreview.RunningSession(
+              row.getObject("id", java.util.UUID.class), since == null ? null : since.toInstant());
+        });
   }
 
   private ImportJsonReader.Header stage(InputStream body, String expectedSha) throws IOException {
@@ -80,6 +104,27 @@ public final class PostgresImportDataStore
   }
 
   private com.apptolast.organization.application.ImportCounts compare(String owner) {
+    long active =
+        jdbc.queryForObject(
+            """
+        SELECT (SELECT count(*) FROM projects WHERE owner_id=? AND status='active') +
+          (SELECT count(*) FROM import_stage s WHERE s.collection='projects' AND s.payload->>'status'='active'
+            AND NOT EXISTS(SELECT 1 FROM projects p WHERE p.id::text=s.payload->>'id'))
+        """,
+            Long.class,
+            owner);
+    if (active > maxActiveProjects)
+      throw new com.apptolast.organization.application.ImportConflictException();
+    long open =
+        jdbc.queryForObject(
+            """
+        SELECT (SELECT count(*) FROM work_sessions WHERE owner_id=? AND status IN ('running','paused')) +
+          (SELECT count(*) FROM import_stage s WHERE s.collection='workSessions' AND s.payload->>'status' IN ('running','paused')
+            AND NOT EXISTS(SELECT 1 FROM work_sessions w WHERE w.id::text=s.payload->>'id'))
+        """,
+            Long.class,
+            owner);
+    if (open > 1) throw new com.apptolast.organization.application.ImportConflictException();
     if (jdbc.queryForObject(
         """
         SELECT EXISTS(
@@ -503,6 +548,26 @@ public final class PostgresImportDataStore
     jdbc.update("UPDATE import_stage SET payload=raw::jsonb");
     if (jdbc.queryForObject(
         """
+        SELECT EXISTS(SELECT 1 FROM import_stage
+          WHERE collection IN ('availability','appearance','customization','projectCustomFieldValues','taskCustomFieldValues',
+            'plannedBlocks','blockChanges','workSessions','workSessionChanges','taskStatusHistory')
+          GROUP BY collection,CASE
+            WHEN collection IN ('availability','appearance') THEN '[]'::jsonb
+            WHEN collection='customization' THEN jsonb_build_array(payload->'scope')
+            WHEN collection='projectCustomFieldValues' THEN jsonb_build_array(payload->'projectId')
+            WHEN collection='taskCustomFieldValues' THEN jsonb_build_array(payload->'taskId')
+            WHEN collection IN ('plannedBlocks','blockChanges') THEN jsonb_build_array(payload->'taskId',payload->'requestKey')
+            WHEN collection IN ('workSessions','workSessionChanges') THEN jsonb_build_array(payload->'requestKey')
+            WHEN collection='taskStatusHistory' THEN jsonb_build_array(payload->'taskId',payload->'taskVersion')
+          END HAVING count(*)>1)
+        OR EXISTS(SELECT 1 FROM import_stage WHERE collection='blockChanges'
+          GROUP BY payload->'blockId',payload->'version' HAVING count(*)>1)
+        OR EXISTS(SELECT 1 FROM import_stage WHERE collection='workSessionChanges' AND payload->>'action'='CLOSE'
+          GROUP BY payload->'sessionId' HAVING count(*)>1)
+        """,
+        Boolean.class)) throw new ImportInvalidFileException();
+    if (jdbc.queryForObject(
+        """
         SELECT EXISTS(SELECT 1 FROM import_stage GROUP BY collection,
           CASE collection WHEN 'workSessionIntervals' THEN jsonb_build_array(payload->'sessionId',payload->'revision')
             WHEN 'blockProjections' THEN jsonb_build_array(payload->'blockId')
@@ -617,7 +682,52 @@ public final class PostgresImportDataStore
   private void validateHistoricalRelations() {
     if (jdbc.queryForObject(
         """
-        SELECT EXISTS(SELECT 1 FROM import_stage h JOIN import_stage t
+        WITH latest_blocks AS (
+          SELECT DISTINCT ON (payload->>'blockId') payload FROM import_stage
+          WHERE collection='blockChanges' ORDER BY payload->>'blockId',(payload->>'version')::bigint DESC
+        ), latest_sessions AS (
+          SELECT DISTINCT ON (payload->>'sessionId') payload FROM import_stage
+          WHERE collection='workSessionChanges'
+          ORDER BY payload->>'sessionId',(payload->>'expectedRevision')::bigint DESC
+        )
+        SELECT EXISTS(SELECT 1 FROM import_stage c JOIN import_stage b
+          ON b.collection='plannedBlocks' AND b.payload->>'id'=c.payload->>'blockId'
+          CROSS JOIN LATERAL (VALUES(c.payload#>'{receipt,before}'),(c.payload#>'{receipt,after}')) snapshot(value)
+          WHERE c.collection='blockChanges' AND snapshot.value IS NOT NULL AND snapshot.value<>'null'::jsonb AND (
+            snapshot.value#>>'{request,objective}' IS DISTINCT FROM b.payload->>'objective'
+            OR (snapshot.value->>'createdAt')::timestamptz IS DISTINCT FROM (b.payload->>'createdAt')::timestamptz))
+        OR EXISTS(SELECT 1 FROM import_stage p JOIN latest_blocks c ON c.payload->>'blockId'=p.payload->>'blockId'
+          WHERE p.collection='blockProjections' AND (
+            p.payload->>'status' IS DISTINCT FROM CASE c.payload->>'kind' WHEN 'CANCELLED' THEN 'cancelled' ELSE 'planned' END
+            OR (p.payload->>'updatedAt')::timestamptz IS DISTINCT FROM (c.payload->>'occurredAt')::timestamptz))
+        OR EXISTS(SELECT 1 FROM import_stage p JOIN latest_blocks c ON c.payload->>'blockId'=p.payload->>'blockId'
+          JOIN import_stage b ON b.collection='plannedBlocks' AND b.payload->>'id'=p.payload->>'blockId'
+          CROSS JOIN LATERAL (SELECT CASE c.payload->>'kind' WHEN 'CANCELLED'
+            THEN c.payload#>'{receipt,before}' ELSE c.payload#>'{receipt,after}' END AS value) snapshot
+          WHERE p.collection='blockProjections' AND ROW(
+            coalesce(p.payload->>'startLocal',b.payload->>'startLocal')::timestamp,
+            coalesce(p.payload->>'endLocal',b.payload->>'endLocal')::timestamp,
+            coalesce(p.payload->>'zoneId',b.payload->>'zoneId'),
+            coalesce(p.payload->>'startOffset',b.payload->>'startOffset'),
+            coalesce(p.payload->>'endOffset',b.payload->>'endOffset'),
+            coalesce(p.payload->>'startAt',b.payload->>'startAt')::timestamptz,
+            coalesce(p.payload->>'endAt',b.payload->>'endAt')::timestamptz,
+            coalesce(p.payload->>'durationMinutes',b.payload->>'durationMinutes')::numeric)
+            IS DISTINCT FROM ROW(
+            (snapshot.value#>>'{request,startLocal}')::timestamp,(snapshot.value#>>'{request,endLocal}')::timestamp,
+            snapshot.value#>>'{request,zoneId}',snapshot.value#>>'{time,startOffset}',snapshot.value#>>'{time,endOffset}',
+            (snapshot.value#>>'{time,startAt}')::timestamptz,(snapshot.value#>>'{time,endAt}')::timestamptz,
+            (snapshot.value#>>'{time,durationMinutes}')::numeric))
+        OR EXISTS(SELECT 1 FROM import_stage s JOIN latest_sessions c ON c.payload->>'sessionId'=s.payload->>'id'
+          WHERE s.collection='workSessions' AND ROW(
+            s.payload->>'status',(s.payload->>'revision')::bigint,(s.payload->>'changedAt')::timestamptz,
+            (s.payload->>'workedMicroseconds')::bigint,(s.payload->>'runningSince')::timestamptz)
+            IS DISTINCT FROM ROW(
+            c.payload#>>'{receipt,after,status}',(c.payload#>>'{receipt,after,revision}')::bigint,
+            (c.payload#>>'{receipt,after,changedAt}')::timestamptz,
+            (c.payload#>>'{receipt,after,workedMicroseconds}')::bigint,
+            (c.payload#>>'{receipt,after,runningSince}')::timestamptz))
+        OR EXISTS(SELECT 1 FROM import_stage h JOIN import_stage t
           ON t.collection='tasks' AND t.payload->>'id'=h.payload->>'taskId'
           WHERE h.collection='taskStatusHistory' AND (h.payload->>'taskVersion')::bigint>(t.payload->>'version')::bigint)
         OR EXISTS(SELECT 1 FROM import_stage i JOIN import_stage s
@@ -717,6 +827,40 @@ public final class PostgresImportDataStore
             });
   }
 
+  private static long storedCountTotal(com.fasterxml.jackson.databind.JsonNode counts) {
+    var names =
+        java.util.Set.of(
+            "projects",
+            "tasks",
+            "taskStatusHistory",
+            "availability",
+            "plannedBlocks",
+            "blockProjections",
+            "blockChanges",
+            "workSessions",
+            "workSessionIntervals",
+            "workSessionChanges",
+            "appearance",
+            "customization",
+            "projectCustomFieldValues",
+            "taskCustomFieldValues");
+    if (counts == null || !counts.isObject() || counts.size() != names.size())
+      throw new IllegalArgumentException("Invalid stored import counts");
+    long total = 0;
+    for (var name : names) {
+      var count = counts.get(name);
+      if (count == null
+          || !count.isIntegralNumber()
+          || !count.canConvertToLong()
+          || count.longValue() < 0
+          || count.longValue() > 100000)
+        throw new IllegalArgumentException("Invalid stored import count");
+      total += count.longValue();
+    }
+    if (total > 100000) throw new IllegalArgumentException("Invalid stored import total");
+    return total;
+  }
+
   public java.util.Optional<com.apptolast.organization.application.ImportReceipt> find(
       String owner, java.util.UUID key) {
     return stored(
@@ -727,6 +871,19 @@ public final class PostgresImportDataStore
                     (row, index) -> {
                       try {
                         var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        var inserted = mapper.readTree(row.getString("inserted_counts"));
+                        var identical = mapper.readTree(row.getString("identical_counts"));
+                        long insertedTotal = storedCountTotal(inserted);
+                        long identicalTotal = storedCountTotal(identical);
+                        var recorded = row.getObject("recorded_at", java.time.OffsetDateTime.class);
+                        if (insertedTotal + identicalTotal > 100000
+                            || recorded == null
+                            || recorded.getYear() < 1
+                            || recorded.getYear() > 9999
+                            || recorded.getNano() % 1000 != 0
+                            || !row.getString("outcome")
+                                .equals(insertedTotal == 0 ? "NO_CHANGE" : "IMPORTED"))
+                          throw new IllegalArgumentException("Invalid stored import receipt");
                         return new com.apptolast.organization.application.ImportReceipt(
                             row.getObject("request_key", java.util.UUID.class),
                             row.getString("file_sha256"),
@@ -740,7 +897,7 @@ public final class PostgresImportDataStore
                             mapper.readValue(
                                 row.getString("identical_counts"),
                                 com.apptolast.organization.application.ImportCounts.class));
-                      } catch (IOException invalid) {
+                      } catch (IOException | IllegalArgumentException invalid) {
                         throw new StorageUnavailableException(invalid);
                       }
                     },

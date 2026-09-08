@@ -102,7 +102,20 @@ final class ImportRecordValidator {
         }
       }
       if (collection.equals("projects")) project(row, owner);
-      if (collection.equals("tasks")) task(row);
+      if (collection.equals("tasks")) {
+        task(row);
+        boolean completed = text(row, "status").equals("completed");
+        if (completed
+                && (row.get("completedAt").isNull()
+                    || !Instant.parse(text(row, "completedAt"))
+                        .equals(Instant.parse(text(row, "updatedAt"))))
+            || !completed && !row.get("completedAt").isNull())
+          throw new ImportInvalidFileException();
+      }
+      if (collection.equals("taskStatusHistory") && Long.parseLong(text(row, "taskVersion")) == 0)
+        throw new ImportInvalidFileException();
+      if (java.util.Set.of("blockProjections", "blockChanges").contains(collection)
+          && Long.parseLong(text(row, "version")) == 0) throw new ImportInvalidFileException();
       if (collection.equals("availability")) {
         var budgets =
             new java.util.EnumMap<java.time.DayOfWeek, Integer>(java.time.DayOfWeek.class);
@@ -139,7 +152,22 @@ final class ImportRecordValidator {
         var state = text(row, "status");
         if (!java.util.Set.of("planned", "cancelled").contains(state))
           throw new ImportInvalidFileException();
-        if (state.equals("planned")) blockTime(row);
+        int present = 0;
+        for (var field :
+            java.util.List.of(
+                "startLocal",
+                "endLocal",
+                "zoneId",
+                "startOffset",
+                "endOffset",
+                "startAt",
+                "endAt",
+                "durationMinutes")) if (!row.get(field).isNull()) present++;
+        if (present != 0 && present != 8) throw new ImportInvalidFileException();
+        if (present == 8) {
+          if (text(row, "zoneId").isBlank()) throw new ImportInvalidFileException();
+          blockTime(row);
+        }
       }
       if (collection.equals("workSessions")) {
         var state = text(row, "status");
@@ -154,6 +182,10 @@ final class ImportRecordValidator {
                 .equals(Instant.parse(text(row, "plannedEndAt"))))
           throw new ImportInvalidFileException();
         if (!state.equals("running") && !row.get("runningSince").isNull())
+          throw new ImportInvalidFileException();
+        if (!row.get("effectiveEndAt").isNull()
+            && Instant.parse(text(row, "effectiveEndAt"))
+                .isBefore(Instant.parse(text(row, "plannedEndAt"))))
           throw new ImportInvalidFileException();
       }
       if (collection.equals("taskStatusHistory")
@@ -174,6 +206,7 @@ final class ImportRecordValidator {
     var end = Instant.parse(text(row, "endAt"));
     int minutes = row.get("durationMinutes").decimalValue().intValueExact();
     if (minutes <= 0
+        || minutes > 1440
         || !start.plusSeconds(minutes * 60L).equals(end)
         || !java.time.LocalDateTime.parse(text(row, "startLocal"))
             .toInstant(java.time.ZoneOffset.of(text(row, "startOffset")))

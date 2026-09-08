@@ -311,9 +311,11 @@ public class ApplicationConfiguration {
   @Bean
   com.apptolast.organization.adapter.persistence.PostgresImportDataStore importDataStore(
       org.springframework.jdbc.core.JdbcTemplate jdbc,
-      org.springframework.transaction.PlatformTransactionManager transactions) {
+      org.springframework.transaction.PlatformTransactionManager transactions,
+      @org.springframework.beans.factory.annotation.Value("${app.max-active-projects:3}")
+          String configured) {
     return new com.apptolast.organization.adapter.persistence.PostgresImportDataStore(
-        jdbc, transactions);
+        jdbc, transactions, Integer.parseInt(configured));
   }
 
   @Bean

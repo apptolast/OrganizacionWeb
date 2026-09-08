@@ -1,0 +1,44 @@
+{
+  "scope": "Integrity cycles62-70; scaling pending",
+  "exitCode": 0,
+  "inputs": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresImportDataStore.java",
+      "sha256": "dd45a5fc604bdf401061acf9b4f48ed07bb044256a2a62ef2c3785b572ccd0ae"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ImportRecordValidator.java",
+      "sha256": "4cabd89273d117325c13c65740baa960a5d66feb2bf4ae597854ba9e02b2965d"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/config/ApplicationConfiguration.java",
+      "sha256": "0d319ddfa4988cd27a6e5c48a198c9eafa1b59808d614a2ddc7b758195969b0f"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportPersistenceTest.java",
+      "sha256": "e4d104f5f99213f60c588858998549150cf9297a4e77edacacaedb7e69c42298"
+    },
+    {
+      "path": "progress/tdd_import_data.md",
+      "sha256": "309758da889e85b991f94491e4e8d67cd639c12f78b7f93726ca736f091a590e"
+    }
+  ],
+  "xml": [
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\import23-integrity-final-ImportPersistenceTest.xml",
+      "sha256": "e1b088c3c0ed407a8c596ec4b0785e026954026d4071c35e03a134ab09435d21",
+      "tests": 130,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "C:\\Users\\vhurt\\Documents\\Codex\\2026-09-05\\a-ver-necesito-o-me-gustar\\work\\deployment-preparation\\import23-integrity-final-ImportWiringTest.xml",
+      "sha256": "7c68f3c710c65277ed5205ddaeb6cee18bc732f9b116929ad3b54d2ec0a76ecb",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ]
+}

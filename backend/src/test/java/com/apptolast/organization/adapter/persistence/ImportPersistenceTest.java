@@ -21,6 +21,212 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class ImportPersistenceTest {
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"missing", "string", "fraction", "negative", "total", "outcome", "date"})
+  void s22_corruptStoredReceiptNeverBecomesConfirmation(String corruption) throws Exception {
+    var owner = "corrupt-receipt-" + java.util.UUID.randomUUID();
+    var key = java.util.UUID.randomUUID();
+    var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+    var zero = mapper.valueToTree(new ImportCounts(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    var counts = (com.fasterxml.jackson.databind.node.ObjectNode) zero.deepCopy();
+    switch (corruption) {
+      case "missing" -> counts.remove("tasks");
+      case "string" -> counts.put("tasks", "0");
+      case "fraction" -> counts.put("tasks", new java.math.BigDecimal("0.1"));
+      case "negative" -> counts.put("tasks", -1);
+      case "total" -> {
+        counts.put("tasks", 60000);
+        counts.put("projects", 60000);
+      }
+      case "outcome" -> counts.put("tasks", 1);
+      default -> {}
+    }
+    jdbc.update(
+        "INSERT INTO import_receipts VALUES (?,?,?,1,?::timestamptz,'NO_CHANGE',?::jsonb,?::jsonb)",
+        owner,
+        key,
+        "a".repeat(64),
+        corruption.equals("date") ? "10000-01-01Z" : "2026-09-08Z",
+        counts.toString(),
+        zero.toString());
+    var before =
+        jdbc.queryForObject(
+            "SELECT row_to_json(r)::text FROM import_receipts r WHERE owner_id=?",
+            String.class,
+            owner);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> new PostgresImportDataStore(jdbc, manager).find(owner, key))
+        .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT row_to_json(r)::text FROM import_receipts r WHERE owner_id=?",
+                String.class,
+                owner))
+        .isEqualTo(before);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.MethodSource("snapshotMismatches")
+  void s10_currentFactsMustMatchTheirHistoricalSnapshots(
+      String collection, String field, String value) throws Exception {
+    invalidMutation(collection, field, value);
+  }
+
+  static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments> snapshotMismatches() {
+    return java.util.stream.Stream.of(
+        org.junit.jupiter.params.provider.Arguments.of(
+            "blockChanges", "/receipt/before/request/objective", "\"Otra intención\""),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "blockChanges", "/receipt/before/createdAt", "\"2026-09-07T12:00:00.000000Z\""),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "blockProjections", "/updatedAt", "\"2026-09-08T12:00:01.000000Z\""),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "blockProjections", "/status", "\"planned\""),
+        org.junit.jupiter.params.provider.Arguments.of("workSessions", "/status", "\"running\""),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "workSessions", "/changedAt", "\"2026-09-08T12:02:00.000000Z\""));
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.MethodSource("durableChecks")
+  void s10_durableChecksRejectInvalidHistoryBeforeSql(String collection, String field, String value)
+      throws Exception {
+    invalidMutation(collection, field, value);
+  }
+
+  static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments> durableChecks() {
+    return java.util.stream.Stream.of(
+        org.junit.jupiter.params.provider.Arguments.of("taskStatusHistory", "taskVersion", "\"0\""),
+        org.junit.jupiter.params.provider.Arguments.of("tasks", "status", "\"completed\""),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "tasks", "completedAt", "\"2026-09-08T12:02:00.000000Z\""),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "workSessions", "effectiveEndAt", "\"2026-09-08T12:24:00.000000Z\""),
+        org.junit.jupiter.params.provider.Arguments.of(
+            "blockProjections", "durationMinutes", "30"));
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(strings = {"running", "paused"})
+  void s15_unionCannotIntroduceASecondOpenSession(String state) throws Exception {
+    var owner = "open-union-" + java.util.UUID.randomUUID();
+    var ids = seedCompleteAccount(owner);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T15:00:00Z"))
+        .writeTo(bytes);
+    jdbc.update("DELETE FROM work_session_changes WHERE session_id=?", ids[3]);
+    jdbc.update("DELETE FROM work_session_intervals WHERE session_id=?", ids[3]);
+    jdbc.update("DELETE FROM work_sessions WHERE id=?", ids[3]);
+    jdbc.update(
+        """
+        INSERT INTO work_sessions(id,owner_id,project_id,task_id,request_key,started_at,planned_minutes,planned_end_at,zone_id,status,revision,changed_at,worked_microseconds,running_since)
+        VALUES (?,?,?,?,?,'2026-09-08T14:00:00Z',25,'2026-09-08T14:25:00Z','UTC',?,2,'2026-09-08T14:00:00Z',0,
+          CASE WHEN ?='running' THEN '2026-09-08T14:00:00Z'::timestamptz ELSE NULL END)
+        """,
+        java.util.UUID.randomUUID(),
+        owner,
+        ids[0],
+        ids[1],
+        java.util.UUID.randomUUID(),
+        state,
+        state);
+    var input = bytes.toByteArray();
+    var sha =
+        java.util.HexFormat.of()
+            .formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input));
+    var before = businessRows();
+    var store = new PostgresImportDataStore(jdbc, manager);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> store.preview(owner, new ByteArrayInputStream(input)))
+        .isInstanceOf(com.apptolast.organization.application.ImportConflictException.class);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                store.apply(
+                    owner,
+                    java.util.UUID.randomUUID(),
+                    sha,
+                    new ByteArrayInputStream(input),
+                    () -> Instant.EPOCH))
+        .isInstanceOf(com.apptolast.organization.application.ImportConflictException.class);
+    assertThat(businessRows()).isEqualTo(before);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM import_receipts WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+  }
+
+  @Test
+  void s15_unionCannotExceedTheConfiguredActiveProjectQuota() throws Exception {
+    var owner = "quota-" + java.util.UUID.randomUUID();
+    for (int i = 0; i < 3; i++)
+      jdbc.update(
+          "INSERT INTO projects(id,owner_id,name,description,status,version,created_at,updated_at) VALUES (?,?,'Activo','','active',0,'2026-09-01Z','2026-09-01Z')",
+          java.util.UUID.randomUUID(),
+          owner);
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = json.readTree(invalidProjectText(owner, "Otro activo"));
+    var project =
+        (com.fasterxml.jackson.databind.node.ObjectNode) file.path("data").path("projects").get(0);
+    project.put("id", java.util.UUID.randomUUID().toString());
+    project.put("status", "active");
+    var input = json.writeValueAsBytes(file);
+    var sha =
+        java.util.HexFormat.of()
+            .formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input));
+    var before = businessRows();
+    var store = new PostgresImportDataStore(jdbc, manager);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> store.preview(owner, new ByteArrayInputStream(input)))
+        .isInstanceOf(com.apptolast.organization.application.ImportConflictException.class);
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                store.apply(
+                    owner,
+                    java.util.UUID.randomUUID(),
+                    sha,
+                    new ByteArrayInputStream(input),
+                    () -> Instant.EPOCH))
+        .isInstanceOf(com.apptolast.organization.application.ImportConflictException.class);
+    assertThat(businessRows()).isEqualTo(before);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM import_receipts WHERE owner_id=?", Integer.class, owner))
+        .isZero();
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({"false,false", "false,true", "true,false"})
+  void s14_previewWarnsOnlyAboutNewRunningSessionsAndKeepsLegacyNull(
+      boolean existing, boolean legacyNull) throws Exception {
+    var owner = "running-" + java.util.UUID.randomUUID();
+    var ids = seedCompleteAccount(owner);
+    jdbc.update("DELETE FROM work_session_changes WHERE session_id=?", ids[3]);
+    jdbc.update("DELETE FROM work_session_intervals WHERE session_id=?", ids[3]);
+    jdbc.update(
+        "UPDATE work_sessions SET status='running',worked_microseconds=0,changed_at=started_at,running_since=started_at WHERE id=?",
+        ids[3]);
+    if (legacyNull)
+      jdbc.update("UPDATE work_sessions SET changed_at=NULL,running_since=NULL WHERE id=?", ids[3]);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T15:00:00Z"))
+        .writeTo(bytes);
+    if (!existing) jdbc.update("DELETE FROM work_sessions WHERE id=?", ids[3]);
+    var before = businessRows();
+    var preview =
+        new PostgresImportDataStore(jdbc, manager)
+            .preview(owner, new ByteArrayInputStream(bytes.toByteArray()));
+    if (existing) assertThat(preview.runningSessions()).isEmpty();
+    else
+      assertThat(preview.runningSessions())
+          .containsExactly(
+              new com.apptolast.organization.application.ImportPreview.RunningSession(
+                  ids[3], legacyNull ? null : Instant.parse("2026-09-08T12:00:00Z")));
+    assertThat(businessRows()).isEqualTo(before);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
       strings = {
         "appearance",
         "customization",
@@ -128,6 +334,28 @@ class ImportPersistenceTest {
       })
   void s10_duplicateDurableIdentityIsInvalidEvenWhenRowsAreIdentical(String collection)
       throws Exception {
+    duplicateFile(collection, false);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {
+        "taskStatusHistory",
+        "availability",
+        "plannedBlocks",
+        "blockChanges",
+        "workSessions",
+        "workSessionChanges",
+        "appearance",
+        "customization",
+        "projectCustomFieldValues",
+        "taskCustomFieldValues"
+      })
+  void s10_alternativeKeysMustAlsoBeUniqueInsideTheFile(String collection) throws Exception {
+    duplicateFile(collection, true);
+  }
+
+  private void duplicateFile(String collection, boolean newIdentity) throws Exception {
     var owner = "duplicate-" + java.util.UUID.randomUUID();
     seedCompleteAccount(owner);
     var bytes = new ByteArrayOutputStream();
@@ -137,7 +365,21 @@ class ImportPersistenceTest {
     var json = new com.fasterxml.jackson.databind.ObjectMapper();
     var file = json.readTree(bytes.toByteArray());
     var rows = (com.fasterxml.jackson.databind.node.ArrayNode) file.path("data").path(collection);
-    rows.add(rows.get(0).deepCopy());
+    var copy = (com.fasterxml.jackson.databind.node.ObjectNode) rows.get(0).deepCopy();
+    if (newIdentity) {
+      copy =
+          (com.fasterxml.jackson.databind.node.ObjectNode)
+              json.readTree(
+                  json.writeValueAsString(copy)
+                      .replace(copy.path("id").asText(), java.util.UUID.randomUUID().toString()));
+      if (collection.equals("workSessions")) {
+        copy.put("status", "closed");
+        copy.put("workedMicroseconds", "0");
+        copy.putNull("changedAt");
+        copy.putNull("runningSince");
+      }
+    }
+    rows.add(copy);
     ((com.fasterxml.jackson.databind.node.ObjectNode) file.path("counts"))
         .put(collection, rows.size());
     var before = businessRows();
@@ -259,7 +501,12 @@ class ImportPersistenceTest {
       for (var candidate : file.path("data").path("tasks"))
         if (candidate.path("id").asText().equals(originalIds[1].toString())) selected = candidate;
     }
-    ((com.fasterxml.jackson.databind.node.ObjectNode) selected).set(field, json.readTree(value));
+    if (field.startsWith("/")) {
+      int last = field.lastIndexOf('/');
+      ((com.fasterxml.jackson.databind.node.ObjectNode) selected.at(field.substring(0, last)))
+          .set(field.substring(last + 1), json.readTree(value));
+    } else
+      ((com.fasterxml.jackson.databind.node.ObjectNode) selected).set(field, json.readTree(value));
     var before = businessRows();
     org.assertj.core.api.Assertions.assertThatThrownBy(
             () ->
@@ -283,6 +530,164 @@ class ImportPersistenceTest {
             "plannedBlocks", "allowOverBudget", "\"true\""),
         org.junit.jupiter.params.provider.Arguments.of(
             "customization", "updatedAt", "\"2026-09-08T12:00:00\""));
+  }
+
+  @Test
+  void s10_projectionIntervalMustMatchLatestReceiptWithoutRecalculatingZone() throws Exception {
+    var owner = "projection-snapshot-" + java.util.UUID.randomUUID();
+    var ids = seedCompleteAccount(owner);
+    jdbc.update(
+        "UPDATE block_projections p SET (start_local,end_local,zone_id,start_offset,end_offset,start_at,end_at,duration_minutes)=(b.start_local,b.end_local,b.zone_id,b.start_offset,b.end_offset,b.start_at,b.end_at,b.duration_minutes) FROM planned_blocks b WHERE p.block_id=b.id AND b.id=?",
+        ids[2]);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T15:00:00Z"))
+        .writeTo(bytes);
+    var store = new PostgresImportDataStore(jdbc, manager);
+    assertThat(
+            store
+                .preview(owner, new ByteArrayInputStream(bytes.toByteArray()))
+                .identicalCounts()
+                .blockProjections())
+        .isEqualTo(1);
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var file = json.readTree(bytes.toByteArray());
+    var projection =
+        (com.fasterxml.jackson.databind.node.ObjectNode)
+            file.path("data").path("blockProjections").get(0);
+    projection
+        .put("startLocal", "2026-09-08T17:00:00")
+        .put("endLocal", "2026-09-08T17:30:00")
+        .put("startAt", "2026-09-08T15:00:00.000000Z")
+        .put("endAt", "2026-09-08T15:30:00.000000Z");
+    var before = businessRows();
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> store.preview(owner, new ByteArrayInputStream(json.writeValueAsBytes(file))))
+        .isInstanceOf(com.apptolast.organization.application.ImportInvalidFileException.class);
+    assertThat(businessRows()).isEqualTo(before);
+  }
+
+  @Test
+  void s23_receiptFailureRollsBackAllFourteenCollectionsAndKeepsExistingFacts() throws Exception {
+    var owner = "late-rollback-" + java.util.UUID.randomUUID();
+    var ids = seedCompleteAccount(owner);
+    var bytes = new ByteArrayOutputStream();
+    new PostgresExportDataQueries(jdbc, manager)
+        .prepare(owner, () -> Instant.parse("2026-09-08T15:00:00Z"))
+        .writeTo(bytes);
+    for (var table : java.util.List.of("block_changes", "task_status_history", "planned_blocks")) {
+      if (table.equals("planned_blocks"))
+        jdbc.update("DELETE FROM block_projections WHERE block_id=?", ids[2]);
+      jdbc.update("DELETE FROM " + table + " WHERE project_id=?", ids[0]);
+    }
+    jdbc.update("DELETE FROM work_session_changes WHERE owner_id=?", owner);
+    jdbc.update("DELETE FROM work_session_intervals WHERE session_id=?", ids[3]);
+    for (var table :
+        java.util.List.of(
+            "work_sessions",
+            "project_custom_field_values",
+            "task_custom_field_values",
+            "customization_preferences",
+            "availability_preferences",
+            "appearance_preferences"))
+      jdbc.update("DELETE FROM " + table + " WHERE owner_id=?", owner);
+    jdbc.update("DELETE FROM tasks WHERE project_id=?", ids[0]);
+    jdbc.update("DELETE FROM projects WHERE id=?", ids[0]);
+    seedCompleteAccount("untouched-" + java.util.UUID.randomUUID());
+    var before = businessRows();
+    var outbox =
+        jdbc.queryForList(
+            "SELECT xmin::text,ctid::text,row_to_json(o)::text AS contents FROM outbox_events o ORDER BY event_id");
+    var key = java.util.UUID.randomUUID();
+    var sha =
+        java.util.HexFormat.of()
+            .formatHex(
+                java.security.MessageDigest.getInstance("SHA-256").digest(bytes.toByteArray()));
+    jdbc.execute(
+        "CREATE FUNCTION reject_integral_receipt() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'controlled late failure'; END $$");
+    jdbc.execute(
+        "CREATE TRIGGER reject_integral_receipt BEFORE INSERT ON import_receipts FOR EACH ROW EXECUTE FUNCTION reject_integral_receipt()");
+    var reached = new java.util.concurrent.atomic.AtomicBoolean();
+    try {
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+              () ->
+                  new PostgresImportDataStore(jdbc, manager)
+                      .apply(
+                          owner,
+                          key,
+                          sha,
+                          new ByteArrayInputStream(bytes.toByteArray()),
+                          () -> {
+                            for (var table :
+                                java.util.List.of(
+                                    "projects",
+                                    "availability_preferences",
+                                    "appearance_preferences",
+                                    "customization_preferences",
+                                    "project_custom_field_values",
+                                    "task_custom_field_values",
+                                    "work_sessions",
+                                    "work_session_changes"))
+                              assertThat(
+                                      jdbc.queryForObject(
+                                          "SELECT count(*) FROM " + table + " WHERE owner_id=?",
+                                          Integer.class,
+                                          owner))
+                                  .isPositive();
+                            assertThat(
+                                    jdbc.queryForObject(
+                                        "SELECT count(*) FROM tasks WHERE project_id=?",
+                                        Integer.class,
+                                        ids[0]))
+                                .isPositive();
+                            assertThat(
+                                    jdbc.queryForObject(
+                                        "SELECT count(*) FROM task_status_history WHERE project_id=?",
+                                        Integer.class,
+                                        ids[0]))
+                                .isPositive();
+                            assertThat(
+                                    jdbc.queryForObject(
+                                        "SELECT count(*) FROM planned_blocks WHERE project_id=?",
+                                        Integer.class,
+                                        ids[0]))
+                                .isPositive();
+                            assertThat(
+                                    jdbc.queryForObject(
+                                        "SELECT count(*) FROM block_changes WHERE project_id=?",
+                                        Integer.class,
+                                        ids[0]))
+                                .isPositive();
+                            assertThat(
+                                    jdbc.queryForObject(
+                                        "SELECT count(*) FROM block_projections WHERE block_id=?",
+                                        Integer.class,
+                                        ids[2]))
+                                .isPositive();
+                            assertThat(
+                                    jdbc.queryForObject(
+                                        "SELECT count(*) FROM work_session_intervals WHERE session_id=?",
+                                        Integer.class,
+                                        ids[3]))
+                                .isPositive();
+                            reached.set(true);
+                            return Instant.parse("2026-09-08T16:00:00Z");
+                          }))
+          .isInstanceOf(com.apptolast.organization.application.StorageUnavailableException.class);
+      assertThat(reached).isTrue();
+      assertThat(businessRows()).isEqualTo(before);
+      assertThat(
+              jdbc.queryForList(
+                  "SELECT xmin::text,ctid::text,row_to_json(o)::text AS contents FROM outbox_events o ORDER BY event_id"))
+          .isEqualTo(outbox);
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT count(*) FROM import_receipts WHERE owner_id=?", Integer.class, owner))
+          .isZero();
+    } finally {
+      jdbc.execute("DROP TRIGGER reject_integral_receipt ON import_receipts");
+      jdbc.execute("DROP FUNCTION reject_integral_receipt()");
+    }
   }
 
   @Test

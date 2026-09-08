@@ -1,0 +1,33 @@
+{
+  "scope": "Cliente export_data; 32 pruebas; tipos/lint/formato EXIT0; UI pendiente",
+  "files": [
+    {
+      "sha256": "19F91F62609E7CBED8CAB00AB79075BA1ACA64FF5A5B1D12643F3B93E1DA1D23",
+      "path": "frontend/src/export-data-api.ts"
+    },
+    {
+      "sha256": "333518AD859E57FB6E802F20FCB923FF40DF95EA22244A1A38803ECE0E91F9C7",
+      "path": "frontend/src/export-data-api.test.ts"
+    },
+    {
+      "sha256": "772A15EDF9835D674E7404BE3D9CB580C6779D3627E0F49CA4125D3EE10E529E",
+      "path": "progress/tdd_export_data_frontend.md"
+    },
+    {
+      "sha256": "00D3A02BAC5F9E10A5B408377038E624D56C5BCA83308133BFD513C34F5CE393",
+      "path": "progress/export_frontend_client_final_verified.log"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "progress/export_frontend_client_types_final.log"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "progress/export_frontend_client_lint_final.log"
+    },
+    {
+      "sha256": "10AE7A8D92223B5BBBC01DFF88B9D1F37A5B66271E622704496BB656F5471872",
+      "path": "progress/export_frontend_client_format_final.log"
+    }
+  ]
+}

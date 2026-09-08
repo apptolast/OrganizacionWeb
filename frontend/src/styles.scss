@@ -890,7 +890,7 @@ button {
 .empty-divider {
   width: 35px;
   height: 1px;
-  background: #cad9bb;
+  background: var(--line);
   margin: 25px auto 17px;
 }
 .quiet-note {

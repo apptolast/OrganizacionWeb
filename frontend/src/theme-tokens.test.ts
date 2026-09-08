@@ -23,3 +23,12 @@ it("history.scss gives select and date controls the same editable tokens as othe
   ])
     expect(source).toContain(declaration);
 });
+
+const block = (source: string, selector: string) =>
+  source.slice(source.indexOf(`${selector} {`)).split("}")[0];
+
+it("styles.scss draws .empty-divider with the shared --line token (audit #7)", () => {
+  expect(block(read("styles.scss"), ".empty-divider")).toContain(
+    "background: var(--line);",
+  );
+});

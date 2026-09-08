@@ -1,21 +1,19 @@
-# Estado actual
+# Estado actual — API para integraciones24
 
-## Importación 23 cerrada y publicada — 8 de septiembre de 2026
+Las funcionalidades1–23 están desplegadas y aceptadas en https://organizacion.apptolast.com. Importación23 conserva producto4c74e183 y aplicación/infraestructura ya fusionadas. El cierre documental PR28 se fusionó en4c7d558 tras CI34231982918 SUCCESS (26m38,161E2E y2omisiones documentadas). InfraPR39 se fusionó en9dbc08e. No hubo otro despliegue por documentación o corrección del test heredado.
 
-Funciones 1–23 desplegadas y aceptadas en https://organizacion.apptolast.com. Producto 4c74e183; aplicación PR27 fusionada en 3f4c3ef e infraestructura PR38 en 183293b. Fuente aplicada 7712fc8, EXIT 0: 38 correctas, cuatro cambios, cero fallos y cero omisiones. Operación liberada.
+Feature24 está in_progress con42escenarios A155A48E aprobados por root bajo autorización global; propuesta y revisión independientes versionadas. Se precisó en de9b062 que microsegundos admite0–6decimales UTC y que el primer revokedAt válido puede preceder createdAt si retrocede el reloj. No hay nuevas puertas humanas rutinarias. 25–30 no están implementadas; la consulta opcional al usuario sobre proveedores de calendario/tareas sigue pendiente y no bloquea24.
 
-Root aprueba los 42 escenarios con init/build y CI verdes y campañas completas sobre el umbral: lector 135/161, HTTP 56/56, frontend 651/801 y persistencia 316/330 KILLED (95,7576 %). Los timeouts y errores siguen en sus denominadores. La campaña alternativa se retiró incompleta tras verificar la original; sus resultados no se combinan.
+## Trabajo paralelo y revisión
 
-Aceptación live sólo mediante preview de una copia propia en memoria, sin confirmar importación ni crear recibos: 17 tablas conservadas, 20 servicios 1/1, 18 contenedores intactos, ocho rutas anteriores iguales. Chromium a 320/768/1280 sin overflow ni incidencias axe, teclado, cancelación, logout 204 y rechazo anónimo 401. Evidencia y límites en judge_import_data.md, import_live_acceptance.json y paquetes originales import.
+A desarrolla aplicación/dominio/PG/V22 en este checkout. B desarrolla cliente/intención/interfaz en archivos separados aquí. C desarrolla HTTP/seguridad/OpenAPI en work/OrganizacionWeb-integration-http; integra commits de A aprobados. Root coordina/revisa/integra/despliega, sin escribir producto ni tests. Ponytail full/Caveman lite vigentes.
 
-## Siguiente trabajo
+Cortes revisados en review_integration_api_checkpoints.md: emisión nominal f485486 y creación durable c58bad5 (18fuentes+51evidencias,29tests). Incluyen replay/cupo/locks/rollback/wiring; A precisa dos oráculos de carrera/caducidad y continúa lectura/revocación/autenticación/cuotas. Cliente segundo corte32tests (26cliente+4intención+2UI nominal) aprobado tras corregir fechas con RED019/020; vista y su integración siguen en desarrollo. HTTP estructural16tests y corte creación/resolver24tests revisados: fronteraJSON4096, errores reales/no-store, resolver de sesión estándar todavía sin cadenaBearer integrada. No atribuir cierre funcional a esos cortes.
 
-API para integraciones24: propuesta revisada y 42 escenarios preparados en OrganizacionWeb-integration-api. Todavía no se implementa ni se marca done. El baseline de ese checkout detectó una espera heredada de appearance.test.tsx; su reparación de sincronización está revisada, con validación global y CI posteriores todavía pendientes, sin cambios de producto. 25–30 siguen pendientes de contrato/implementación. Autorización global vigente, sin nuevas puertas humanas rutinarias.
+Baseline oficial corregido2bb20674 EXIT0: Node70 y frontend2424 ejecutados; Java UP-TO-DATE reutiliza3215pruebas/135suites ejecutadas originalmente. Root verificó5artefactos y843entradas idénticas. C inició checkout separado con install/init0 nuevos, logs originales preservados; no se atribuye su conteoJava desde XML reemplazado por focales. Git45e1edd une main4c7d558 con árbolidéntico al padre24: sólo ancestry, sin sobrescribir fuentes de agentes.
 
-COMMON/V14 y artefactos ajenos permanecen protegidos. El histórico de esta entrega está preservado en history.md. Este cierre cambia documentación/estado/evidencia e incorpora la sincronización revisada del test heredado de apariencia (16d60f8, foco 50/50); no cambia producto ni repite despliegue por esos archivos. La validación global posterior del arreglo y la CI de cierre se registran por separado.
+## Próximas puertas
 
-## API 24: contrato aprobado e implementación iniciada
+Completar las tres fronteras, revisar/integrar, fijar corte, ejecutar regresión integrada, E2E/UX y mutación sobre todo lo tocado. Verificar rollback aditivo y export/import sin credenciales antes de construir/publicar imágenes24 y hacer aceptación HTTPS. No hay despliegue24 todavía. Plan operativo externo integration24-release-checklist.md. Evitar globales durante ciclosRED ajenos y repeticiones de gates válidos por docs.
 
-Root aprueba A155A48E4AF40CA7A0BBFD2979FD14A89BBE0EDDCD3A587C8E3861EF087C4B95: 42 escenarios, revisión independiente y autorización global vigente. Transición pending → spec_ready → in_progress, después del cierre real de 23. Backend, frontend y frontera HTTP trabajan con propietarios separados; root coordina y revisa.
-
-Baseline corregido sobre 2bb20674, init oficial EXIT 0: 70 pruebas Node y 2424 frontend ejecutadas. Java UP-TO-DATE reutiliza 3215 pruebas de 135 suites ejecutadas en el baseline anterior. Root verificó cinco artefactos y 843 entradas antes/después idénticas. Metadatos externos integration24-corrective-results.json SHA a7ab08f98b16ae17b574a2f28bcf217da815e2a9dbe61fb834284bac52b110f2. El intento fallido original se conserva; no se atribuye una segunda ejecución Java. Este apartado sustituye el pendiente de baseline anterior. PR28 espera CI; infra PR39 fusionada, sin nuevo despliegue por documentación.
+COMMON/V14 protegido: no leer/hash/copiar/restaurar/modificar;8080protegido/18080reservado. No borrar artefactos ajenos, forzarGit ni parar procesos no identificados. Los originales23/PIT y campaña alternativa abortada siguen separados. Credenciales privadas permanecen fueraGit/logs/chat; escrituraQA de24 usa infraestructura efímera. El PC no se mantiene activo mediante automatizaciones ni otra sesión.

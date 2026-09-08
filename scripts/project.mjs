@@ -1,11 +1,23 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { resolve } from "node:path";
+import { isAbsolute, resolve } from "node:path";
 const root = fileURLToPath(new URL("../", import.meta.url));
 export function run(command, args, options = {}) {
   const windowsBatch =
     process.platform === "win32" && /(?:pnpm|gradlew)$/.test(command);
-  const result = spawnSync(windowsBatch ? `${command}.cmd` : command, args, {
+  // cmd.exe no busca .bat en el directorio de trabajo cuando
+  // NoDefaultCurrentDirectoryInExePath está definida: resolver ruta absoluta.
+  const localBatch =
+    process.platform === "win32" &&
+    /\.bat$/.test(command) &&
+    !isAbsolute(command) &&
+    options.cwd !== undefined;
+  const executable = windowsBatch
+    ? `${command}.cmd`
+    : localBatch
+      ? resolve(options.cwd, command)
+      : command;
+  const result = spawnSync(executable, args, {
     cwd: root,
     stdio: "inherit",
     shell: windowsBatch,

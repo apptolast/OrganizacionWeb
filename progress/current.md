@@ -571,3 +571,16 @@ confirma semántica de reutilización y reporter instalado. No aplicar hasta
 que el resultado completo supere el gate, contando errores conservadoramente.
 El plan actualizado en docs/mvp-delivery-plan.md distingue MVP1–20 utilizable
 del alcance pendiente y no promete completar todas las integraciones hoy.
+
+## Gate conjunto verde y campaña incremental activa
+
+Corrección de espera aprobada por C; focal apariencia50/50 y global2241/2241
+en54 suites, lint/formato/tipos verdes. Build del producto idéntico también
+verde. Root contrastó logs c2706c y diff80efe3: contra candidato dfac90e sólo
+cambian seis archivos de pruebas dentro de las fuentes, no producto.
+
+Commit c9f20620411dc07af6c391d8ca2344f2b934d17a publicado; CI34173605033 activa.
+Campaña incremental iniciada02:31:58, sesión63463: mismo target del harness,
+1824 mutantes instrumentados y ocho workers. Entradas/config/seed y run.log en
+progress/customization_stryker_refined. El resultado y la reutilización real
+siguen pendientes; fuentes/tests/config congelados. Producción conserva20.

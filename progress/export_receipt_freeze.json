@@ -1,0 +1,22 @@
+[
+  {
+    "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ExportReceiptWriter.java",
+    "sha256": "F8F56EA683A627FBDC86B7C84A21AD2444BCB195B501BAEF7594BA13889E6F70"
+  },
+  {
+    "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ExportReceiptWriterTest.java",
+    "sha256": "D3336F82DA81EB2F7137BADB7F2A98E51110CB4B610630C9B50E5A49828186A1"
+  },
+  {
+    "path": "progress/tdd_export_receipts.md",
+    "sha256": "1D9D1675AC6FC14B051BFC7705A98D1B0B04F4D4F9621B9A5F46D2E83CAA5EAF"
+  },
+  {
+    "path": "progress/export_receipt_final.xml",
+    "sha256": "8793922BD2BE8BC987B37D975DAFEA7E176ACC9A78FBFCAB9F5F51016055860F"
+  },
+  {
+    "path": "progress/export_receipt_final_confirmed.log",
+    "sha256": "313D2D9D5E7288ED1429DDC94311C299362BEBBDB4B4303205870BB2DDA0B84A"
+  }
+]

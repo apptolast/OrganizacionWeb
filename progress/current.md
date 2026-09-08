@@ -510,3 +510,40 @@ sustituidos por cobertura del archivo completo. A corrige esos oráculos sin
 reducir cobertura. Lint también encontró el sandbox Stryker activo; no se
 borra ni modifica durante la campaña y se repetirá init al terminar.
 Producción conserva las funciones 1–20; no se ha desplegado la función 21.
+
+## Candidato integrado en CI
+
+Commit dfac90edcabdf04e442b906f0ab6db8894cbc4b2 publicado en PR24, aún borrador.
+CI34171107546 en curso; guardián34171106421 SUCCESS. El arnés quedó reparado
+con 61/61 pruebas y validación focal estricta. Para paralelizar CI, root autorizó
+actualizar sólo configs no seleccionadas default/appearance durante Stryker;
+B conservó originales y delta explícito. JS, Vitest, focalcustom21 y sandbox
+permanecen intactos. No se declara igualdad de todo el inventario anterior.
+
+UX final y trazabilidad42 aprobados con límites documentados. Backup fresco
+restaurado y verificado, según release21_preparation.md. Imágenes provisionales
+0c9fe37 construidas correctamente en checkout limpio, sin desplegar. A prepara
+imágenes candidatas del commit dfac90e para ensayo de rollback. Mutación
+frontend1824 sigue activa; no hay resultado ni ETA observables todavía.
+
+## CI integrada aprobada; mutación frontend todavía bajo umbral
+
+CI aplicación34171107546 SUCCESS sobre dfac90edcabdf04e442b906f0ab6db8894cbc4b2:
+init, build, DNS,151 E2E (13,8min) y publicador. Log externo SHA
+6D67A121AC222CDA5A5C2A4DF498A289F3B892AF86F52E984FB4594B554312DC.
+CI infraestructura34171772641 SUCCESS sobre0bb939b: validación y lint completos,
+101 commits escaneados sin secretos. Log SHA
+59D966ADE3A47841C1F9FA0EA42C7B7EE5EFC134812D3964ADD97720A10F65AF.
+
+Stryker frontend original EXIT1 tras44min8s:1391 Killed,413 Survived,
+11 NoCoverage,9 RuntimeError y0 Timeout,1824 total. Score del motor76,6391%;
+conservador killed/total76,2610%, ambos por debajo de80. Root contrastó JSON
+(SHA3DC6D9B548B532389660A53B9915B620683C552032FEF8E3510A10AFAE997942)
+y160 entradas iguales más3deltas autorizados de163 (118da1). Los errores son
+fallos de serialización del runner, no se reclasifican como detectados.
+
+No aplicar despliegue todavía. A/B/C refuerzan comportamientos observables
+en archivos de pruebas nuevos, conservando originales y producto intactos.
+Se prepara modo incremental oficial con el mismo universo completo y umbral,
+reutilización comprobable por test intacto y resultados propios separados;
+no se sumarán manualmente campañas dirigidas al resultado original.

@@ -50,3 +50,38 @@ Preparado para candidato digest/revisión exactos y API20 viva. Ensayo todavía
 no ejecutado: comprobará API21/API20/API21 con ambos ámbitos, valores tipados,
 definiciones inactivas, DTO/ETag y esquema/Flyway preservados. Recursos locales
 propios, puertos efímeros de loopback, sin reparación ni borrado de migraciones.
+
+## Candidato publicado y rollback probado
+
+Candidato dfac90edcabdf04e442b906f0ab6db8894cbc4b2, imágenes publicadas con tagSHA40,
+Linux/amd64 y OCI revision verificados. API digest83e75c196f05054fde4370c9d7f30605acd12995e63fbbc85ca118d3084472fd;
+web digest9fd69f52549c7c764fcc36d9fa8eaa658f50e73f3465d22094352a29e2a79cb9.
+Manifiesto externo release21-dfac90e-publish-results.json; checkout limpio,
+1821 inputs intactos. Publicación no equivale a despliegue ni cierre de gates.
+
+Ensayo operativo aprobado: API21→API20→API21 EXIT0 (9b43ce), revisado por root
+bddbfa y hashes68e6c7. Conserva DTO/ETag de ambos ámbitos, cuatro tipos,
+definiciones inactivas, vistas, apariencia y datos de negocio; snapshots de
+columnas, constraints e historial Flyway idénticos. No repair/ignore/borrado.
+Los cuatro recursos aislados se retiraron, inventario final vacío.
+Resultado externo ow-v20-rollback-f5e857f8-785c-4c22-8975-cf8de24f16d6-result.json,
+SHA276E5FE54899D5B651479EBC7AF6D4A704B21863785A7A11F733F0BFED7ED80D;
+log SHA5C568E6D3EE0B61BFC99B75B88F135E1D835F4172AA35A3EE2905BD027EE262F.
+Script aprobado sin cambios. No acredita Swarm, TLS, RabbitMQ ni interfaz de
+rollback: esos límites permanecen separados de la compatibilidad API/PG.
+
+## Check del servidor
+
+Infra0bb939bc29ab6e78edb4b0e28d3d6fd01859f415 publicada en PR33, borrador.
+Revisión independiente de seguridad sin hallazgos, quince pruebas focales y
+lint local verdes; CI infraestructura34171772641 en curso. Checkout remoto
+propio limpio en ese commit, sin modificar servicios.
+
+Wrapper oficial --local --playbook organizationweb --check EXIT0:
+27 ok,2 changed,11 skipped,0 failed/unreachable. Los dos cambios mostrados
+son metadatos de despliegue; check-mode no aplica stack ni demuestra por sí
+solo convergencia de las imágenes candidatas. Operación
+f0fb9d4c4efd1ff35f8a3df4dd86a4c7b5c27f62a79f5388c27bba1480c14010
+completada y lock liberado. Log externo organizationweb-customization-check.log,
+SHA D1291F0D3BFC4FD424B007C47231901E73C93EC762FE1A694100397BD02F9DEC.
+Apply pendiente de CI y mutación, seguido de aceptación real.

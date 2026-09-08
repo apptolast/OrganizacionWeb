@@ -1,0 +1,27 @@
+{
+  "tests": 3,
+  "failures": 0,
+  "limit": "Empty-file parsing, byte limit and unknown root key only; data rows not validated yet",
+  "entries": [
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ImportTooLargeException.java",
+      "sha256": "5f467c0ba3846ccdc947232a2a60a1d36efff50b49c68b8975f5c5d4a9541b1c"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/application/ImportInvalidFileException.java",
+      "sha256": "cbde89e9235fba7775eb04a0ca753db34df861af8ab5c506addae45320dc29b1"
+    },
+    {
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/persistence/ImportJsonReader.java",
+      "sha256": "e1850d3f4e7f9edb234a81aa90bfc009d4bb89d1f101d476b3cad33e6876ef7a"
+    },
+    {
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/persistence/ImportJsonReaderTest.java",
+      "sha256": "66495391732a325142893d263206cbc1a5e555425cba899890536f6a2402c3d0"
+    },
+    {
+      "path": "../deployment-preparation/import23-cycle04-original.xml",
+      "sha256": "d112f8430e60deeedd26dbe593cf30014e19825346168b2b479cbb3bff148f38"
+    }
+  ]
+}

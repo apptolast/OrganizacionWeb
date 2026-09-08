@@ -7,9 +7,13 @@ const scratchRoot = resolve(root, ".e2e-work");
 mkdirSync(scratchRoot, { recursive: true });
 const scratch = mkdtempSync(join(scratchRoot, "run-"));
 const environmentFile = join(scratch, "test.env");
+// E2E_WEB_PORT permite levantar varias pilas E2E en paralelo (worktrees).
+const webPort = process.env.E2E_WEB_PORT ?? "18080";
+if (!/^\d{2,5}$/.test(webPort)) throw new Error("Invalid E2E_WEB_PORT");
+const baseUrl = `http://127.0.0.1:${webPort}`;
 writeFileSync(
   environmentFile,
-  "DB_USERNAME=e2e_user\nDB_PASSWORD=e2e-only-database\nAPP_AUTH_USERNAME=e2e-user\nAPP_AUTH_PASSWORD=e2e-only-password\nWEB_PORT=18080\n",
+  `DB_USERNAME=e2e_user\nDB_PASSWORD=e2e-only-database\nAPP_AUTH_USERNAME=e2e-user\nAPP_AUTH_PASSWORD=e2e-only-password\nWEB_PORT=${webPort}\n`,
 );
 const project = `organizationweb-e2e-${process.pid}`;
 const composeArgs = [
@@ -27,8 +31,9 @@ const env = {
   DB_PASSWORD: "e2e-only-database",
   APP_AUTH_USERNAME: "e2e-user",
   APP_AUTH_PASSWORD: "e2e-only-password",
-  WEB_PORT: "18080",
-  APP_PUBLIC_ORIGIN: "http://127.0.0.1:18080",
+  WEB_PORT: webPort,
+  APP_PUBLIC_ORIGIN: baseUrl,
+  E2E_BASE_URL: process.env.E2E_BASE_URL ?? baseUrl,
   APP_MAX_ACTIVE_PROJECTS: "3",
   E2E_COMPOSE_PROJECT: project,
   E2E_ENV_FILE: environmentFile,
@@ -42,7 +47,7 @@ try {
   let ready = false;
   for (let attempt = 0; attempt < 90; attempt++) {
     try {
-      const response = await fetch("http://127.0.0.1:18080/api/session", {
+      const response = await fetch(`${baseUrl}/api/session`, {
         signal: AbortSignal.timeout(2000),
       });
       if (response.status === 200) {

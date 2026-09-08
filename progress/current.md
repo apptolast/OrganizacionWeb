@@ -547,3 +547,27 @@ en archivos de pruebas nuevos, conservando originales y producto intactos.
 Se prepara modo incremental oficial con el mismo universo completo y umbral,
 reutilización comprobable por test intacto y resultados propios separados;
 no se sumarán manualmente campañas dirigidas al resultado original.
+
+## Refuerzos y sincronización de pruebas
+
+A/B/C añadieron32 casos en cinco archivos nuevos. Revisiones independientes
+aprobadas: A revisó19 casos UI/estado/metadatos y C los13 de clientes y la
+configuración incremental. Root verificó los14 hashes funcionales anteriores,
+los10 del freeze A,3 del freeze B y3 del freeze C, sin diferencias. La primera
+lectura de los manifiestos A/C asumió erróneamente un objeto en lugar de array;
+la comprobación corregida57133c acredita cero diferencias.
+
+Global frontend original de refuerzo:2240/2241, fallo appearance@s24; focal
+posterior49/50, fallo appearance@s20. Ambos observan colorScheme después de
+findByRole pero antes del efecto que lo aplica. B corrige únicamente la espera
+de esos dos oráculos con waitFor estándar, conservando resultados fallidos.
+No cambia producto ni aumenta timeouts. C revisa y se repetirá global antes
+de la campaña. El test original appearance.test.tsx cambia explícitamente y
+el motor incremental debe considerar su cobertura; no se oculta ese delta.
+
+La configuración incremental conserva universo, mutadores, umbral80 y ocho
+workers. Usa seed copiado idéntico al raw y salidas separadas. Revisión C
+confirma semántica de reutilización y reporter instalado. No aplicar hasta
+que el resultado completo supere el gate, contando errores conservadoramente.
+El plan actualizado en docs/mvp-delivery-plan.md distingue MVP1–20 utilizable
+del alcance pendiente y no promete completar todas las integraciones hoy.

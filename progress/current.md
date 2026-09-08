@@ -1,5 +1,21 @@
 # Estado actual
 
+## Corte vigente de importación 23 — 8 de septiembre, validación final
+
+La función 23 sigue en progreso y todavía no está desplegada. El producto candidato es 4c74e183e49afa6d280115b399dbaffedc7bfe7f; bda0195 añade únicamente la corrección revisada de instrumentación de dos pruebas E2E. PR27 permanece en borrador. Las funciones 1–22 continúan disponibles en el servidor; 24–30 siguen pendientes.
+
+Init y build oficiales del candidato terminaron con EXIT 0: 3215 pruebas Java en 135 suites, 2424 frontend y 70 del arnés. Root contrastó los seis artefactos originales, los XML y las 843 entradas antes/después sin cambios. La primera ejecución fallida por coordenadas antiguas de Stryker se conserva; 4c74e18 corrige sólo esas coordenadas y su expectativa del arnés, sin cambios productivos.
+
+Integridad y escala finales: 137 casos PostgreSQL, uno de wiring y dos de escala, más 22 pruebas independientes de concurrencia. La mutación frontend incremental conserva el universo original y alcanza 651/801 Killed (81,2734 % conservador); lector y HTTP mantienen 135/161 y 56/56. La campaña de persistencia continúa y todavía no tiene dictamen final. No se atribuyen sus timeouts a mutantes detectados ni se declara superado el umbral.
+
+El E2E global original terminó con 159 correctos, dos omisiones documentadas de zoom y dos timeouts de instrumentación. El foco posterior pasa 2/2 en 17,2 segundos, con los mismos 31 anchos, cuatro estados, oráculos y límites de 120 segundos. Esta reparación no convierte el global original en verde: la CI del candidato continúa pendiente. Evidencia y límites en review_import_e2e_geometry_repair.md.
+
+Las imágenes del producto 4c74e18 están publicadas y verificadas por digest y procedencia. El rollback aislado API 23 → 22 → 23 pasa, conservando 19 huellas de datos/metadatos y retirando todos sus recursos propios. El catálogo de infraestructura está en PR38: bootstrap y validate-iac pasan; se corrigen dos falsos positivos del escáner sobre digests públicos antes de completar lint y check. No se ha ejecutado apply. La aceptación prevista en producción es sólo preview de una exportación propia fresca, sin confirmar importaciones ni crear datos de prueba.
+
+Los archivos portátiles import_final_validation_original_evidence.zip e import_e2e_geometry_original_evidence.zip conservan los originales; el segundo distingue el global fallido del foco verde. Quedan mutación de persistencia, CI, gates/check de infraestructura, despliegue y aceptación real antes de marcar 23 done.
+
+## Contexto anterior de esta entrega
+
 Funciones 1–22 desplegadas y aceptadas en https://organizacion.apptolast.com. Exportación22 queda done tras el judge aprobado, mutación conservadora y CI final 34190090017 SUCCESS. Aplicación main 83b027; infraestructura PR35 fba78f4, fuente aplicada 5a2b860. Aceptación live: dos descargas idénticas de 8568 bytes con un GET, datos y servicios preservados, cierre de acceso comprobado. Evidencia y límites en [judge_export_data.md](judge_export_data.md) y [export_live_acceptance.json](export_live_acceptance.json).
 
 Importación 23 entra en implementación: root aprobó los 42 escenarios bajo la autorización global del usuario. Contrato SHA256 5678995ED52A89E969D5ED2E36D74DFD4030E6BD8A9D92C43E14A6E64608211E y especificación 959BE37196F6E07FFAF969C1824BB33C86DCAE3E6DBD4872DF15437BEDF49369. Baseline oficial verificado: 2846 pruebas Java, 2295 frontend y 66 del arnés, sin fallos; dos huellas de logs y 123 XML comprobados en 7b7847. Revisión en review_import_data_gherkin.md. Funciones 24–30 siguen pendientes. COMMON/V14 y artefactos ajenos siguen protegidos.

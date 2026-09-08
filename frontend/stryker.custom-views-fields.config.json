@@ -21,7 +21,7 @@
     "src/task-reader.tsx:134:10-141:12",
     "src/task-reader.tsx:181:12-187:14"
   ],
-  "reporters": ["clear-text", "json", "html"],
+  "reporters": ["clear-text", "json", "html", "progress-append-only"],
   "thresholds": {
     "high": 90,
     "low": 80,
@@ -33,10 +33,12 @@
     "configFile": "vite.config.ts"
   },
   "jsonReporter": {
-    "fileName": "reports/mutation-custom-views-fields/mutation.json"
+    "fileName": "reports/mutation-custom-views-fields-refined/mutation.json"
   },
   "htmlReporter": {
-    "fileName": "reports/mutation-custom-views-fields/mutation.html"
+    "fileName": "reports/mutation-custom-views-fields-refined/mutation.html"
   },
-  "tempDirName": ".stryker-tmp-custom-views-fields"
+  "tempDirName": ".stryker-tmp-custom-views-fields-refined",
+  "incremental": true,
+  "incrementalFile": "reports/mutation-custom-views-fields-refined/incremental.json"
 }

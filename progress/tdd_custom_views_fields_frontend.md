@@ -251,3 +251,35 @@ Fixtures heredados: helper local test-fixtures/customization.ts intercepta sólo
 Precisión de revisión A: helper exige coincidencia completa también frente a LF final (el ancla $ permite LF en JavaScript). Cambio posterior al pase2209 sólo en helper; comprobación ejecutada sobre función transpilada acredita GET válidos, LF y POST delegados, log customization_legacy_exact_routes.log. No se reatribuye el hash del helper posterior al pase anterior. Manifiesto final de diez archivos customization_legacy_freeze_final.json; no repetición global automática por esta precisión y retirada de imports.
 
 Lint final e976a9 EXIT0: la revisión posterior sólo encontró formato de stryker.config.json tras sustituir rangosApp por archivo completo, conforme instrucción root (mismo universo ejecutable). Prettier aplicado sin tocar opciones; resultado final en customization_frontend_lint_closed.log. Config focal21 conserva cinco módulos y once nodos completos; defaultApp completo evita deriva de coordenadas. No campaña iniciada por B.
+
+Campaña original Stryker21 autorizada por root: `node scripts/project.mjs mutate custom_views_fields-frontend`, sesión34629, iniciada01:25. Config focal6F21EC1D…D6F34: cinco módulos completos y once nodos AST; ocho workers,80, perTest, sin nuevas exclusiones. Instrumentó9fuentes/1824mutantes. Dry-run922pruebas GREEN en1m58s; esta selección del runner no equivale a las2209 de la regresión global.
+
+Evidencia original en progress/customization_stryker_original/: before163inputs y config.json capturados antes de iniciar, run.log en curso. Root integró CSS revisado después de crear sandbox; styles.scss pasó a04EC25C3A6718576CDABF06003472D22436A1D959D0F465660400496DF87661E. Esa diferencia autorizada se identificará por separado del alcance JS, sin afirmar163hashesidénticos. No fuentes/tests/config modificados por B durante la ejecución. No replay ni refuerzo autorizado hasta resultado e inventario.
+
+Durante la campaña, root autorizó reparar sólo dos configuraciones NO seleccionadas para desbloquear CI. Copias previas conservadas en original/nonselected_before; delta AST en original/nonselected_config_delta.json. Default usa project-reader completo en lugar de siete rangos desplazados; appearance conserva tres nodos completos actuales de App. Config seleccionada custom21 permanece6F21EC1D…D6F34. Comprobación9ae691: exactamente tres diferencias respecto a163inputs (CSS autorizado, default y appearance), ninguna fuente JS ni prueba Vitest. A verificó arnés61/61 EXIT0 84d5da, conservando comprobaciones focales estrictas. No cambia el universo ni el sandbox de esta campaña original.
+
+
+## Campaña original de mutación 21 finalizada
+
+EXIT 1 (8ad04a), 44 min 8 s: 1391 Killed, 413 Survived, 11 NoCoverage y 9 RuntimeError; cero Timeout. Score Stryker 76,6391%, conservador 76,2610%. Gate pendiente. Inventario completo e integridad en mutation_custom_views_fields_frontend_original.md y customization_stryker_original/. After 163: 160 iguales, sólo CSS y dos configuraciones no seleccionadas con deltas autorizados. JS, Vitest y configuración seleccionada intactos. No replay automático ni cambio de umbral.
+
+
+## Refuerzos B autorizados después del original (165–170)
+
+Sólo dos archivos nuevos: customization.mutation.test.tsx y customization-state.mutation.test.tsx; producción y tests originales intactos. Seis recorridos ejecutados individualmente, después 6/6 en dos suites (fbb645), formato42e067 y ESLint19555b EXIT0.
+
+- 165 Bajar y desmarcar antes de guardar: inicialmente GREEN c1c52e; objetivos 1724/1697 y guardas de orden.
+- 166 editar NUMBER inactivo, cancelar y crear TEXT: inicialmente GREEN90ffda; captura tipo/activo y reinicio del editor sin alterar la definición previa.
+- 167 label de60 puntos Unicode con dos espacios Unicode en cada extremo y espacio interno; renombre propio sin falso duplicado. Primer fallo e14e45 fue selector que convertía indebidamente espacio interno en ASCII; el nombre accesible real lo conserva. Corregido sólo selector, GREEN3405d2. Objetivos1776–1780/1793–1794/1798–1804.
+- 168 dos scopes inciertos, recuperar PROJECT y guardar una intención nueva deja TASK bloqueado sin GET automático. Primer fixture usaba defaults TASK inválidos; decoder los rechazó correctamente (ee6546). Snapshot configurado coherente, GREENcc39da. Objetivos1324/1325 y mapas por scope.
+- 169 recuperar valores de una TASK y guardar de nuevo conserva el borrador visible de otra TASK. Primer intento pretendía inspeccionar un input oculto por incertidumbre (9d54a8); se acotó al borrador visible ajeno y la incertidumbre propia, sin afirmar preservación visual de algo que el contrato oculta. GREENfcd5bf; objetivos1451/1452/1457/1493/1516/1558/1572 y mapas de recursos.
+- 170 llegada de valores con schema UUID ajeno y versión superior tras config aceptada. Dos expectativas textuales de fixture erróneas (2f0ac1/acc4bf) se corrigieron a alerta y Reintentar reales; GREEN8f969f. Rechazo de datos/ausencia de guardado acreditados, objetivo1304.
+
+Ninguno demuestra un nuevo RED productivo; son refuerzos sobre comportamiento existente. Todos los logs iniciales/corregidos se conservan como customization_refined_*.log. No se ejecutó otra campaña.
+
+
+## Gate global de refuerzos: pausa por sincronización heredada
+
+Global 1ca242 EXIT1:2240/2241 en54 suites. Único fallo appearance.test.tsx@s24 línea1240: colorScheme vacío al esperar light tras findByRole Sistema. Lint/formato f3144f y tipos/build3dca8b EXIT0. Manifiesto169 antes/después idéntico e38f86.
+
+Root autorizó una única ejecución focal sin cambios: appearance50 dio49/50 (2c9d07). s24 pasó; s20 línea765 mostró el mismo patrón (colorScheme vacío frente dark tras radio Oscuro). La lectura muestra que el formulario aparece al renderizar snapshot y la pintura de documentElement sucede en useEffect([snapshot]); encontrar el radio no es el oráculo de que ese efecto ya se ejecutó. Logs originales conservados customization_refined_frontend_global.log y customization_refined_appearance_focal.log. No se atribuye a producto21 ni se relanza indefinidamente. Se propuso esperar el efecto observable con waitFor predeterminado en esos dos asserts, sin modificar producción ni quitar oráculos; pendiente coordinación root. Campaña incremental no iniciada.

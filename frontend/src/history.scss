@@ -14,6 +14,11 @@
     min-height: 44px;
     min-width: 44px;
     max-width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--control-border);
+    border-radius: 8px;
+    color: var(--ink);
+    background: var(--editable);
     font: inherit;
   }
   a,

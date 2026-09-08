@@ -13,3 +13,13 @@ const read = (file: string) =>
 it("today.scss paints notice, summary and agenda cards only with theme tokens (audit #1-#4)", () => {
   expect(read("today.scss").match(FIXED_COLOR)).toBeNull();
 });
+
+it("history.scss gives select and date controls the same editable tokens as other forms (audit #6)", () => {
+  const source = read("history.scss");
+  for (const declaration of [
+    "background: var(--editable);",
+    "color: var(--ink);",
+    "border: 1px solid var(--control-border);",
+  ])
+    expect(source).toContain(declaration);
+});

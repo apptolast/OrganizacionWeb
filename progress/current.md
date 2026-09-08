@@ -17,3 +17,10 @@ Baseline oficial corregido2bb20674 EXIT0: Node70 y frontend2424 ejecutados; Java
 Completar las tres fronteras, revisar/integrar, fijar corte, ejecutar regresión integrada, E2E/UX y mutación sobre todo lo tocado. Verificar rollback aditivo y export/import sin credenciales antes de construir/publicar imágenes24 y hacer aceptación HTTPS. No hay despliegue24 todavía. Plan operativo externo integration24-release-checklist.md. Evitar globales durante ciclosRED ajenos y repeticiones de gates válidos por docs.
 
 COMMON/V14 protegido: no leer/hash/copiar/restaurar/modificar;8080protegido/18080reservado. No borrar artefactos ajenos, forzarGit ni parar procesos no identificados. Los originales23/PIT y campaña alternativa abortada siguen separados. Credenciales privadas permanecen fueraGit/logs/chat; escrituraQA de24 usa infraestructura efímera. El PC no se mantiene activo mediante automatizaciones ni otra sesión.
+
+
+## Avance posterior — 16:30 Madrid
+
+Gestión backend 17e9b3b revisada: 41 pruebas y 54 artefactos verificados. HTTP eb3cb38 integrado como ee4f275; rama publicada hasta 36912bf. Autenticación y cuota nominal cefd1c9 revisadas: 67 pruebas, 75 artefactos verificados y puertos liberados para C. El fallo de listado 503 quedó corregido. A completa concurrencia, atomicidad, invariantes y dos fixtures de wiring heredados.
+
+B incorporó la ruta privada y navegación, recuperación por id, revocación incierta por credencial y tolerancia a almacenamiento inaccesible. Sigue cerrando UI/foco/SCSS y navegador; aún no hay freeze final. C integra los puertos reales y termina seguridad/OpenAPI; el mapa independiente de respuestas está en el artefacto externo integration24-openapi-source-map.md. A posee build.gradle.kts, B configuración Stryker y C scripts del arnés para las campañas de integración. No se ha lanzado una campaña ni suite global sobre ciclos activos.

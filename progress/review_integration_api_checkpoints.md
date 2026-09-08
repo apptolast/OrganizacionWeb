@@ -42,3 +42,12 @@ Root revisó los nueve archivos de producto cambiados y las dos pruebas modifica
 La lectura filtra propietario, pagina 50 con una consulta limitada a 51 filas y orden estable; la revocación comparte locks owner/id, conserva la primera fecha y retorna tras confirmar la transacción. Puertos aprobados para integrar HTTP. Hallazgo pendiente del corte: list() no traduce DataAccessException a StorageUnavailableException, aunque find/create/revoke sí. A recibió el hallazgo y comunicó RED/GREEN del ciclo 19; ese arreglo se revisará en su siguiente corte. No se declara cierre de gestión ni de feature 24 por este checkpoint.
 
 HTTP eb3cb38 se integró sin conflictos como ee4f275 durante una pausa explícita de A. No se modificaron archivos de frontend ajenos ni se ejecutó una suite general sobre ciclos activos.
+
+
+## Autenticación y cuotas nominales — cefd1c9
+
+APROBADO para integrar los puertos reales en HTTP. Root leyó parser, SHA-256/comparación constante, predicate de bootstrap, SQL de autenticación, admisión con locks owner/id y pruebas nuevas. Verificó 37 archivos y 38 evidencias del freeze integration_api_bearer_freeze.json (SHA256 76334ddc1ee4cd24928affcc4620ae4711fdda3847fc832776f8a5d87569fc16). Los seis XML originales suman 67 pruebas, cero fallos, errores u omisiones. El hallazgo de listado queda corregido mediante RED/GREEN 19 original, también leído.
+
+La admisión vuelve a comprobar propietario habilitado, revocación, caducidad y scopes dentro de la transacción antes de gastar los contadores. La comparación con límites ocurre antes de ambas escrituras. Quedan las pruebas de concurrencia, cambio de ventana, confirmación de cada UPSERT, fallo parcial/COMMIT, invariantes durables y rollback V22. No se declara cierre de backend ni puntuación de mutación.
+
+Root encontró además dos fixtures heredados con ApplicationContextRunner que importan ApplicationConfiguration sin identidad: ApplicationWiringTest y ProjectStateConfigurationTest. A verifica su adaptación explícita; no se relaja el bean de producción para acomodar esos slices.

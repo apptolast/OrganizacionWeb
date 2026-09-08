@@ -111,3 +111,11 @@ acreditados en DOM; @s30 memoria local por diseño (refs, Blob/objectURL y clean
 sin llamadas a almacenamiento web), pendiente observación E2E. @s31 foco DOM
 acreditado, comportamiento físico de disabled pendiente. @s32 UX real pendiente.
 Todavía no hay E2E/UX ni mutación frontend22 ni gate global de este corte.
+
+## Browser, scope and final regression checkpoint
+
+Physical focus RED 8844ac; same keyboard preparation GREEN c5643f after restoring the connected initiating control only while focus remains on BODY. Voluntary focus movements remain covered in three engines. The prepared native download uses existing primary-link styling; prepare again is secondary, reviewed visually. UX matrix and explicit simulated API limits: ux_export_data.md.
+
+Dispatcher target RED 570e12 / GREEN 79ec59; missing config RED 8b7082 / GREEN df6a20. Full harness 63/63 after AST remapping historical Appearance nodes and retaining exact startsWith assertions. Default Workspace is a reviewed superset. No historical campaign executed.
+
+Global initial 2294/2295 failed only the legacy last-navigation expectation; contract 22 adds Exportación after Apariencia. Authorized fixture correction preserves Hoy first and remaining assertions. Final global 2295/2295 in 56 files (cbb659), 170 inputs unchanged through test/lint/build. Initial lint failed only formatting export-data.test.tsx; Prettier correction changes no oracle and is listed separately in export_frontend_final_freeze.json. Build/tsc EXIT0. No repeated global for formatting alone.

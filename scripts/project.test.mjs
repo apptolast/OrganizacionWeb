@@ -7,6 +7,71 @@ import { createHash } from "node:crypto";
 import * as commands from "./project.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
+test("export Stryker keeps its complete modules and reviewed integration nodes with inherited gates", () => {
+  const config = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.export-data.config.json"),
+      "utf8",
+    ),
+  );
+  const prior = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.custom-views-fields.config.json"),
+      "utf8",
+    ),
+  );
+  const nodes = JSON.parse(
+    readFileSync(
+      resolve(root, "progress/export_frontend_scope_nodes.json"),
+      "utf8",
+    ),
+  );
+  assert.deepEqual(
+    config.mutate,
+    nodes.flatMap((file) =>
+      file.scope === "full"
+        ? [file.path.replace("frontend/", "")]
+        : file.nodes.map(
+            (node) => file.path.replace("frontend/", "") + ":" + node.range,
+          ),
+    ),
+  );
+  assert.equal(config.concurrency, 8);
+  assert.equal(config.coverageAnalysis, "perTest");
+  assert.deepEqual(config.thresholds, prior.thresholds);
+  assert.equal(config.thresholds.break, 80);
+  assert.deepEqual(config.vitest, prior.vitest);
+  assert.deepEqual(config.ignorePatterns, prior.ignorePatterns);
+  assert.deepEqual(config.plugins, prior.plugins);
+  assert.equal(config.mutator, undefined);
+  assert.equal(config.incremental, undefined);
+  assert.equal(config.tempDirName, ".stryker-tmp-export-data");
+  assert.equal(
+    config.jsonReporter.fileName,
+    "reports/mutation-export-data/mutation.json",
+  );
+  assert.equal(
+    config.htmlReporter.fileName,
+    "reports/mutation-export-data/mutation.html",
+  );
+});
+test("export frontend invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "export_data-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.export-data.config.json",
+      ],
+    ],
+  ]);
+});
 test("customization default PIT exposes the real feature wiring test", () => {
   const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
   const tests = build.match(
@@ -1265,7 +1330,8 @@ test("default Stryker retains history modules and full new integration nodes", (
     "src/project-reader.tsx:111:10-116:22",
   ])
     assert.ok(
-      config.mutate.includes(entry) || config.mutate.includes(entry.split(":")[0]),
+      config.mutate.includes(entry) ||
+        config.mutate.includes(entry.split(":")[0]),
       entry,
     );
   assert.ok(config.mutate.includes("src/task-reader.tsx"));
@@ -1450,12 +1516,12 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     "src/appearance-api.ts",
     "src/appearance-state.tsx",
     "src/appearance.tsx",
-    "src/App.tsx:21:8-21:44",
-    "src/App.tsx:29:8-41:26",
-    "src/App.tsx:44:7-85:7",
-    "src/workspace.tsx:74:10-79:22",
-    "src/session-gate.tsx:32:2-51:6",
-    "src/use-session.ts:177:0-195:1",
+    "src/App.tsx:28:8-28:44",
+    "src/App.tsx:39:12-51:28",
+    "src/App.tsx:56:10-97:7",
+    "src/workspace.tsx:75:10-80:22",
+    "src/session-gate.tsx:32:2-52:6",
+    "src/use-session.ts:177:0-196:1",
   ]);
   assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
   assert.equal(config.concurrency, 8);

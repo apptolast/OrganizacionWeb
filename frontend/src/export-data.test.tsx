@@ -553,13 +553,11 @@ it("@s29 aborts the request on leaving the view before an old response can publi
   expect(create).not.toHaveBeenCalled();
 });
 it("@s28 reports temporary failure and retries only after a new deliberate gesture", async () => {
-  const fetcher = vi
-    .fn()
-    .mockResolvedValue(
-      new Response(JSON.stringify({ code: "SESSION_UNAVAILABLE" }), {
-        status: 503,
-      }),
-    );
+  const fetcher = vi.fn().mockResolvedValue(
+    new Response(JSON.stringify({ code: "SESSION_UNAVAILABLE" }), {
+      status: 503,
+    }),
+  );
   vi.stubGlobal("fetch", fetcher);
   render(<ExportData owner="ana" />);
   await userEvent.click(

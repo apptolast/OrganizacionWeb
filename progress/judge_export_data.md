@@ -114,3 +114,26 @@ no un 413 injustificado. El lector reutilizado de personalización participa en
 la transacción exterior. Quedan pendientes guardas de relación/fila, snapshot
 con escritura concurrente, fallo tardío, límite inclusivo combinado y descarga
 por socket/proxy. Estas carencias impiden aprobar la funcionalidad completa.
+
+## Revisión de interfaz antes de mutación
+
+El corte final conserva 170 entradas y ocho evidencias con hashes coincidentes
+(f02540, 91ea8b). Los logs leídos acreditan 2295/2295 en 56 archivos, 63/63 del
+arnés, lint y build verdes (c7c741). Se conserva el fallo previo de la expectativa
+histórica de navegación; el ajuste mantiene Hoy primero, Apariencia penúltima
+y Exportación última. El único cambio después del pase global fue formato de
+la prueba de exportación, sin modificar sus oráculos.
+
+Se aprueban los dos módulos completos y seis nodos AST para Stryker. Los nodos
+incluyen las ramas completas de App, enlace de Workspace, identidad de SessionGate
+y ruta privada; no se excluyen guardas. Los rangos históricos de apariencia se
+remapean a los mismos nodos. Workspace completo en default amplía los rangos
+anteriores. Runner, umbrales y candidatos se conservan (d494e8, 53cc9b, aa373d).
+
+La matriz de treinta principios distingue lo probado y los límites humanos.
+Las pruebas con API simulada documentan 768 medidas, 24 axe y teclado en tres
+motores. Root inspeccionó las capturas de preparado y zoom nativo al 200 %.
+La imagen estándar vacía se conserva; la captura del compositor muestra texto
+legible y acciones completas, con Descargar principal. No acredita dispositivos
+físicos, lector de pantalla humano ni API real. Se autoriza comenzar mutación,
+sin declarar cerrada ni desplegada la función.

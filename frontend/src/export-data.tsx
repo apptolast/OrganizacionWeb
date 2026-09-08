@@ -29,12 +29,10 @@ function ExportPreparation({ owner }: { owner: string }) {
     if (busy) return;
     const control = initiator.current;
     initiator.current = null;
-    if (
-      control &&
-      !control.isConnected &&
-      document.activeElement === document.body
-    )
-      heading.current?.focus();
+    if (control && document.activeElement === document.body) {
+      if (control.isConnected) control.focus();
+      else heading.current?.focus();
+    }
   }, [busy]);
   useLayoutEffect(
     () => () => {
@@ -107,6 +105,7 @@ function ExportPreparation({ owner }: { owner: string }) {
       </p>
       {failure !== "limit" && (
         <button
+          className={archive ? "secondary-link" : undefined}
           disabled={busy}
           onClick={(event) => {
             initiator.current = event.currentTarget;
@@ -143,7 +142,11 @@ function ExportPreparation({ owner }: { owner: string }) {
       {archive && (
         <>
           <p role="status">Archivo preparado</p>
-          <a href={archive.url} download={archive.fileName}>
+          <a
+            className="primary-link"
+            href={archive.url}
+            download={archive.fileName}
+          >
             Descargar archivo JSON
           </a>
         </>

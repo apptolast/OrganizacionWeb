@@ -22,6 +22,7 @@ export function createProject(runner = run) {
       target !== "" &&
       (task !== "mutate" ||
         ![
+          "export_data-frontend",
           "custom_views_fields-backend",
           "custom_views_fields-frontend",
           "appearance-backend",
@@ -66,6 +67,17 @@ export function createProject(runner = run) {
         "stryker",
         "run",
         "stryker.appearance.config.json",
+      ]);
+      return;
+    }
+    if (task === "mutate" && target === "export_data-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.export-data.config.json",
       ]);
       return;
     }

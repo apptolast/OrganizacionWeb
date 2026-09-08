@@ -23,6 +23,9 @@ export function createProject(runner = run) {
       (task !== "mutate" ||
         ![
           "import_data-frontend",
+          "import_data-reader-backend",
+          "import_data-http-backend",
+          "import_data-persistence-backend",
           "export_data-frontend",
           "custom_views_fields-backend",
           "custom_views_fields-frontend",
@@ -117,6 +120,18 @@ export function createProject(runner = run) {
       mutate: "pitest",
     };
     if (!commands[task]) throw new Error(`Unknown task: ${task}`);
+    if (task === "mutate" && target === "import_data-reader-backend") {
+      backend("pitest", ["-PmutationScope=import_data_reader"]);
+      return;
+    }
+    if (task === "mutate" && target === "import_data-http-backend") {
+      backend("pitest", ["-PmutationScope=import_data_http"]);
+      return;
+    }
+    if (task === "mutate" && target === "import_data-persistence-backend") {
+      backend("pitest", ["-PmutationScope=import_data_persistence"]);
+      return;
+    }
     if (task === "mutate" && target === "export_data-persistence-backend") {
       backend("pitest", ["-PmutationScope=export_data_persistence"]);
       return;

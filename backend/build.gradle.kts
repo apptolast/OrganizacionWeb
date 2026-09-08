@@ -35,6 +35,9 @@ pitest {
     pitestVersion.set("1.22.0")
     junit5PluginVersion.set("1.2.3")
     val scope = providers.gradleProperty("mutationScope").orNull
+    val importReaderOnly = scope == "import_data_reader"
+    val importHttpOnly = scope == "import_data_http"
+    val importPersistenceOnly = scope == "import_data_persistence"
     val exportPersistenceOnly = scope == "export_data_persistence"
     val appearanceOnly = scope == "appearance"
     val customizationOnly = scope == "custom_views_fields"
@@ -54,6 +57,40 @@ pitest {
     val startWorkSessionOnly = scope == "start_work_session"
     val startWorkSessionReplayOnly = scope == "start_work_session_replay"
     val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
+    val importReaderClasses = setOf(
+        "com.apptolast.organization.adapter.persistence.ImportJsonReader*",
+        "com.apptolast.organization.adapter.persistence.ImportReceiptDecoder*"
+    )
+    val importReaderTests = setOf(
+        "com.apptolast.organization.adapter.persistence.ImportJsonReaderTest",
+        "com.apptolast.organization.adapter.persistence.ImportReceiptDecoderTest"
+    )
+    val importHttpClasses = setOf(
+        "com.apptolast.organization.adapter.http.ImportDataController*",
+        "com.apptolast.organization.application.PreviewImportData*",
+        "com.apptolast.organization.application.ApplyImportData*",
+        "com.apptolast.organization.application.ReadImportReceipt*"
+    )
+    val importHttpTests = setOf(
+        "com.apptolast.organization.adapter.ImportDataApiTest",
+        "com.apptolast.organization.application.PreviewImportDataTest",
+        "com.apptolast.organization.application.ApplyImportDataTest",
+        "com.apptolast.organization.application.ReadImportReceiptTest"
+    )
+    val importPersistenceClasses = setOf(
+        "com.apptolast.organization.adapter.persistence.PostgresImportDataStore*",
+        "com.apptolast.organization.adapter.persistence.ImportRecordValidator*",
+        "com.apptolast.organization.application.ImportCounts*"
+    )
+    val importPersistenceTests = setOf(
+        "com.apptolast.organization.adapter.persistence.ImportPersistenceTest",
+        "com.apptolast.organization.adapter.config.ImportWiringTest"
+    )
+    val importAdapterTests = setOf(
+        "com.apptolast.organization.adapter.Import*Test",
+        "com.apptolast.organization.adapter.persistence.Import*Test",
+        "com.apptolast.organization.adapter.config.Import*Test"
+    )
     val authenticationClasses = setOf(
         "com.apptolast.organization.adapter.http.SessionController",
         "com.apptolast.organization.adapter.http.SessionAccessDeniedHandler",
@@ -355,6 +392,9 @@ pitest {
         "com.apptolast.organization.adapter.persistence.History*Test"
     )
     targetClasses.set(when {
+        importReaderOnly -> importReaderClasses
+        importHttpOnly -> importHttpClasses
+        importPersistenceOnly -> importPersistenceClasses
         exportPersistenceOnly -> exportPersistenceClasses
         customizationOnly -> customizationClasses
         appearanceOnly -> appearanceClasses
@@ -373,9 +413,12 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses
     })
     targetTests.set(when {
+        importReaderOnly -> importReaderTests
+        importHttpOnly -> importHttpTests
+        importPersistenceOnly -> importPersistenceTests
         exportPersistenceOnly -> setOf("com.apptolast.organization.*")
         customizationOnly -> setOf("com.apptolast.organization.*")
         appearanceOnly -> setOf("com.apptolast.organization.*")
@@ -394,8 +437,11 @@ pitest {
         taskStatusOnly -> taskTests + taskStatusAdapterTests
         splitOnly -> taskTests
         taskOnly -> taskTests
-        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests + weeklyReviewAdapterTests + appearanceAdapterTests + customizationAdapterTests + exportAdapterTests
+        else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests + weeklyReviewAdapterTests + appearanceAdapterTests + customizationAdapterTests + exportAdapterTests + importAdapterTests
     })
+    if (importReaderOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-reader"))
+    if (importHttpOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-http"))
+    if (importPersistenceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-persistence"))
     if (exportPersistenceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-export-data-persistence"))
     if (customizationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-custom-views-fields"))
     if (appearanceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-appearance"))

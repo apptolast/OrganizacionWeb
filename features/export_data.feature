@@ -195,7 +195,7 @@ Feature: Descargar un archivo privado y completo de los datos de organización
     Then recibe <resultado> sin preparar un snapshot de negocio
     Examples:
       | acceso                    | peticion                               | resultado |
-      | ninguna sesión válida     | GET /api/v1/me/export?ownerId=otro      | 401 AUTHENTICATION_REQUIRED |
+      | ninguna sesión válida     | GET /api/v1/me/export?ownerId=otro      | 401 UNAUTHENTICATED |
       | una sesión válida         | GET /api/v1/me/export?ownerId=otro      | 400 INVALID_EXPORT_QUERY |
       | una sesión válida         | GET /api/v1/me/export?format=json       | 400 INVALID_EXPORT_QUERY |
       | una sesión válida         | GET /api/v1/me/export?cursor=           | 400 INVALID_EXPORT_QUERY |

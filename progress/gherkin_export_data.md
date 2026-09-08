@@ -35,3 +35,4 @@ Precisión adicional del reloj: s14 añade nanos 123456789 truncados a 123456,
 reutilizados en envelope y filename sin reinterpretar datos persistidos.
 Se mantienen los 33 escenarios, ahora con 79 ejemplos expandidos por conteo léxico.
 Revisión root aprobada: 33 escenarios y 79 ejemplos declarados. Las precisiones s14/s16/s22 conservan el alcance y resuelven reloj, exceso demostrado y navegación. La autorización global del usuario permite comenzar TDD sin otra confirmación. No equivale a implementación ni a pruebas ejecutadas.
+Revisión de frontera de sesión: el código 401 se alinea con UNAUTHENTICATED ya definido en SecurityConfiguration y feature6. No se introduce un código distinto para exportación ni se modifica el contrato global de autenticación. Los fallos de persistencia de sesión anteriores a la lectura conservan SESSION_UNAVAILABLE.

@@ -1736,7 +1736,9 @@ notas siguen vigentes. Se comprueba el límite de registros y se limita la salid
 durante serialización; exceder cualquiera produce 413 `EXPORT_TOO_LARGE` sin
 JSON parcial. No se recortan registros ni se entrega silenciosamente una página.
 
-Precedencia: autenticación 401 `AUTHENTICATION_REQUIRED` antes de validar consulta;
+Precedencia: autenticación 401 `UNAUTHENTICATED` antes de validar consulta;
+los fallos de persistencia de sesión anteriores al caso de uso conservan
+503 `SESSION_UNAVAILABLE`, conforme al contrato de acceso existente.
 para GET, consulta inválida 400 `INVALID_EXPORT_QUERY`, cuerpo no vacío o Accept
 mal formado 400 `INVALID_EXPORT_REQUEST`, negociación no aceptable 406
 `EXPORT_FORMAT_NOT_ACCEPTABLE`; después tamaño 413 cuando se acredita su exceso,

@@ -67,6 +67,22 @@ Abre **Exportación** y pulsa **Preparar exportación**. Abrir la pantalla no co
 
 El JSON privado reúne catorce colecciones de tu cuenta, incluidos historial y campos desactivados. Guárdalo donde puedas proteger su contenido. La exportación admite hasta 100000 registros y 32 MiB; si supera un límite, no entrega un archivo parcial. Esta función no importa archivos ni sustituye una copia de seguridad del servidor.
 
+## Importar una copia propia
+
+Estas instrucciones estarán disponibles al desplegar la funcionalidad 23; no indican que ya esté publicada.
+
+Abre **Importación** y selecciona un archivo JSON v1 obtenido con **Exportación** de tu misma cuenta. El archivo puede contener información privada: conserva la copia original protegida y sin editar. Se admiten hasta **32 MiB y 100000 registros**. Una copia de otra cuenta o un archivo incompatible no se puede importar.
+
+1. Pulsa **Validar archivo**. Seleccionar el archivo o validarlo no incorpora datos. **Cancelar preparación** permite abandonar esta preparación.
+2. Revisa la **Vista previa**, el propietario, la fecha y los recuentos. **Total** cuenta los registros de la copia; **Nuevos** indica los que se añadirán; **Iguales** son los que ya coinciden y no se duplicarán.
+3. Pulsa **Confirmar importación** sólo cuando quieras incorporar los datos. La importación conserva lo existente: un conflicto impide aplicar toda la copia, sin sobrescribir ni incorporar una parte. La vista previa no reserva el resultado; un cambio posterior en tu cuenta puede producir un conflicto al confirmar.
+
+Si la copia incluye una sesión de trabajo en curso, revisa el aviso: seguirá en curso desde su inicio histórico y el cómputo puede incluir el tiempo transcurrido. Importar no la pausa automáticamente.
+
+Ante un rechazo confirmado, lee el motivo y usa **Elegir otra copia** cuando se ofrezca; después vuelve a validar. Si todos los registros ya coinciden, confirmar no añade duplicados.
+
+Si se pierde la respuesta, usa **Comprobar resultado** antes de intentar otra importación. Que todavía no aparezca un recibo no demuestra que el envío anterior haya terminado. Sólo cuando la pantalla lo permita, selecciona el mismo archivo original sin modificarlo y pulsa **Reenviar la misma importación**. Tras recargar la página puede ser necesario volver a seleccionar ese archivo; la aplicación no conserva su contenido por ti. La consulta y el reenvío requieren tu acción explícita.
+
 ## Datos y servidor
 
 La base de datos conserva proyectos, planificación y recibos de trabajo. El historial puede leerse sin depender de que el publicador RabbitMQ esté disponible. Las copias de seguridad y la restauración del servidor deben configurarse y comprobarse como parte del despliegue; tener un volumen de Docker no sustituye un respaldo.

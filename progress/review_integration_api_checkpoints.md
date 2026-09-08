@@ -51,3 +51,12 @@ APROBADO para integrar los puertos reales en HTTP. Root leyó parser, SHA-256/co
 La admisión vuelve a comprobar propietario habilitado, revocación, caducidad y scopes dentro de la transacción antes de gastar los contadores. La comparación con límites ocurre antes de ambas escrituras. Quedan las pruebas de concurrencia, cambio de ventana, confirmación de cada UPSERT, fallo parcial/COMMIT, invariantes durables y rollback V22. No se declara cierre de backend ni puntuación de mutación.
 
 Root encontró además dos fixtures heredados con ApplicationContextRunner que importan ApplicationConfiguration sin identidad: ApplicationWiringTest y ProjectStateConfigurationTest. A verifica su adaptación explícita; no se relaja el bean de producción para acomodar esos slices.
+
+
+## Primer corte funcional UI — revisión con cambios requeridos
+
+Root verificó las 13 entradas de integration24_frontend_ui_freeze.json (SHA256 8FC173FFC2DFA5F57E040C03DAB28C9F912A189EC33A661865104C8B01990C02), leyó componente, integración, SCSS y los oráculos de recuperación/identidad/foco. El log conjunto acredita 60 pruebas en tres archivos. Los logs vacíos de tipos/lint no acreditan por sí solos EXIT0; B mantiene sus salidas originales. La validación física aún está en marcha, con API simulada.
+
+Cambios requeridos entregados a B: conservar acceso al listado si una confirmación llega antes del GET inicial; evitar ids duplicadas al paginar tras recuperar una credencial histórica; impedir que cerrar el panel permita divulgar el secreto de otra creación ya pendiente; comprobar retiro de contexto también antes de efectos compartidos de UI, especialmente limpiar intención local; asociar el error de Nombre al input; presentar caducidad legible con zona y dateTime original. La posible ventana entre resolución del cliente y accept requiere un oráculo reproducible, no se atribuye un fallo observado sin él.
+
+No se impone snapshot adicional de formulario: @s36 permite borrador reintroducido distinto con la misma id y conflicto explícito. B añadió ayuda que explica esa comparación. Incertidumbre de revocación por id, recuperación inicial inaccesible y cierre simple del secreto sí están ya implementados y cubiertos en el corte. No se aprueba aún UI final ni UX30 por estas pruebas.

@@ -1,0 +1,47 @@
+{
+  "entries": [
+    {
+      "sha256": "A4FAE2C62798589D434A920FDAE4A358C71F6ABF63026A83BF84B255BB1D8D13",
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/ApiCredentialController.java"
+    },
+    {
+      "sha256": "4E537CFCD5D821ADB0FACE462501ECA49676C03E7D00FE49BC17576F3EC15036",
+      "path": "backend/src/main/java/com/apptolast/organization/adapter/http/ApiCredentialSessionIdResolver.java"
+    },
+    {
+      "sha256": "8DC7DA2C21CF64E4D15DB03A05203BF89444501670333B748F1FA8E886C42DDA",
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/ApiCredentialApiTest.java"
+    },
+    {
+      "sha256": "BA74714F0A27A2678C178F0F4481E0A7CBC7C408E91C84287482F047847E8BC4",
+      "path": "backend/src/test/java/com/apptolast/organization/adapter/ApiCredentialSessionIsolationTest.java"
+    },
+    {
+      "sha256": "77FF5D9D03A8FE18AAE6B1C7BAA1F335CB28AC614D2354B2856390A74F4063CB",
+      "path": "progress/tdd_integration_api_http.md"
+    },
+    {
+      "sha256": "FD2BEDBCEA54FC894EC2A6C76FD674800B1D1C095BD69566BCF61BD97BFE2E8E",
+      "path": "progress/integration_http_creation_final.log"
+    },
+    {
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "path": "progress/integration_http_creation_final.exit"
+    },
+    {
+      "sha256": "E7F383DF9868065A059C256734F393EA3AA42556EA3075B1BF90A1278EB18F4A",
+      "path": "progress/integration_creation_TEST-com.apptolast.organization.adapter.ApiCredentialApiTest.xml"
+    },
+    {
+      "sha256": "8AB00ED5018A18D30A06CB15C6DD6EB378038E50962DCA4B83ED0ABAE46322FB",
+      "path": "progress/integration_creation_TEST-com.apptolast.organization.adapter.ApiCredentialSessionIsolationTest.xml"
+    },
+    {
+      "sha256": "DAAE538CE9B459EFCB3AD9A1E462C5FBF9563930E3E28BF280B4D95201479DB4",
+      "path": "progress/integration_creation_TEST-com.apptolast.organization.adapter.persistence.ApiCredentialWiringTest.xml"
+    }
+  ],
+  "tests": 24,
+  "base": "51f4eee",
+  "exit": 0
+}

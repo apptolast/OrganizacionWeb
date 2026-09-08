@@ -16,4 +16,8 @@ Backend de datos e interfaz trabajan en este checkout. HTTP trabaja aislado en O
 
 Root revisó el núcleo nominal: 7 huellas coincidentes y 2 pruebas verdes verificadas en XML. No acredita PostgreSQL ni exportación completa. El puerto PreparedExport mantiene filename/contentLength/writeTo; commit 5a1c534 y formato real verificado en 9c0d038. La primera invocación de formato no seleccionó archivos y su atribución se corrigió en la bitácora. La excepción ExportTooLargeException está fijada en 6b05a4e para integrar HTTP.
 
-El adaptador HTTP nominal de C obtuvo 1 prueba verde con bytes y cabeceras; falta negociación, errores y filtros. B continúa las validaciones del cliente antes de la vista. Exportación sigue in_progress: no hay mutación, E2E ni despliegue de esta función.
+El adaptador HTTP completo de C está revisado e integrado en b8906a7: 25 pruebas MVC y dos del filtro verdes, cinco huellas verificadas. Incluye negociación, rechazo temprano, errores y conservación de cabeceras privadas. No acredita todavía socket ni PostgreSQL integrado.
+
+Cliente y vista revisados en 832331f y b0defa6: 143 pruebas focales, tipos, lint, formato y build verdes. Quince huellas del corte de interfaz verificadas. Cubre bytes originales, descarga nativa, identidad, cancelación, revocación y navegación; el foco físico de controles disabled, UX y E2E siguen pendientes. B continúa esas comprobaciones en navegador.
+
+A implementa lectura de las catorce colecciones y guardas de memoria/coherencia en PostgreSQL. C completa el escritor cerrado de recibos históricos en su checkout aislado; se integrará tras revisión. La incidencia de solapamiento del ciclo 17 de A permanece documentada con logs originales y comprobación serial posterior, sin reconstruir evidencia. Exportación sigue in_progress: no hay resultado de mutación, validación integral ni despliegue de esta función.

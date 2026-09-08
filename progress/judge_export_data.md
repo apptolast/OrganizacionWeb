@@ -245,3 +245,29 @@ Se compararon además 66 combinaciones numéricas y dos booleanas, incluidos
 NaN y bordes, con el mismo resultado. Los originales fallidos se conservan.
 Esto acredita la reparación dirigida del arnés, no convierte el global
 anterior en un éxito ni cambia producto, mutación o límites de aceptación.
+
+## PIT de persistencia: APPROVED sobre el umbral
+
+La campaña oficial terminó EXIT 0 en 48 minutos y 13 segundos sobre la
+fuente congelada. Root verificó veinte huellas originales, las 453
+entradas idénticas antes/después y el XML bruto (4ddc79, 8a4df3).
+Resultado: 356 KILLED, un SURVIVED, un NO_COVERAGE y un MEMORY_ERROR;
+356/359 = 99,164345 % conservador. No se cuenta el error de memoria como
+defecto detectado ni se mezcla esta campaña con HTTP o frontend.
+
+El error procede del mutante que cambia la condición del bucle del buffer
+de length > 0 a >= 0; se conserva su clasificación original. Los otros
+dos residuos señalan oráculos útiles: doce valores personalizados válidos
+y duración numérica de una proyección. A añade dos refuerzos test-only,
+uno por vez, sin cambiar producto ni atribuir detecciones no medidas.
+La evidencia completa y las firmas viven en mutation_export_data_persistence.md
+y export_persistence_pit_original_final_manifest.json. No repetir la
+campaña completa para perseguir 100 %.
+
+Los originales generados se versionan juntos en
+export_persistence_original_evidence.zip para preservar sus bytes y finales
+de línea sin reformatear HTML/logs de terceros. SHA256 del ZIP:
+1841C093DCF829AEC32D21FA2C7F02CC7FEF0F84ECA8EE345A821181A987C74D.
+Root lo extrajo en un directorio nuevo y comprobó las veinte huellas del
+manifiesto incluido (de7a64). El primer intento de staging textual falló
+por espacios del HTML generado; no se reformatearon los originales.

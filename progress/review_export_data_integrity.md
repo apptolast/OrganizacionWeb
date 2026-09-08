@@ -45,3 +45,16 @@ Dos correcciones concretas comunicadas a A/root: incluir bytes de `work_sessions
 Precisión adicional pendiente de contraste con root: los offsets externos de plannedBlocks/blockProjections carecen de CHECK sintáctico y se escriben directamente. `start_offset='bogus'` es alcanzable con restricciones publicadas intactas. Se propuso validar únicamente sintaxis de ZoneOffset sin TZDB, conservando nulls de proyección; no ejecutar ni añadir nuevas reglas hasta su decisión. Es independiente del mapper de recibos, que ya valida esos offsets.
 
 Aprobación parcial de revisiones, guardas y aritmética leídas; pendientes sólo esos campos concretos y su cierre por A. Esta segunda lectura reemplaza el pendiente previo genérico de TEXT por las omisiones identificadas y retira el hallazgo negativo ya resuelto.
+
+## Ratificación del freeze final
+
+Fuente final verificada `F656DC1425F82FBC86E8F0D64833AAEAB409B3F062DDB8208545561EDBFB192D`, leída tras el freeze de A. Los cuatro hallazgos quedan cerrados:
+
+- `status` se suma con `zone_id` tanto en `guardRawSize` previo como en el máximo SQL de `scalarBatch`.
+- `action` se suma a los bytes de `receipt` antes de materializar el recibo de sesión. La suma usa BIGINT.
+- El enum de sesiones admite exactamente running/paused/closed antes de escribir su objeto; no reconstruye estado ni modifica nulls legados.
+- Ambos offsets de reserva y proyección pasan por el mismo helper: si no son null, `ZoneOffset.of`; la salida conserva el String original. No se consulta TZDB ni se completa un null.
+
+Leídos los cinco oráculos correspondientes: status/action de 33554433 bytes rechazan antes de Clock; status `alien` rechaza sin modificar la fila; offsets `bogus` de reserva y proyección rechazan, preservando los datos originales. No se reejecutaron pruebas. El total 138/10 XML y EXIT 0 c13d51 pertenece a la evidencia de A verificada por root, no a una campaña C.
+
+Dictamen: **aprobados los cierres revisados; sin pendientes de esta auditoría**. Puede proceder el gate y PIT de persistencia tras integrar el freeze en el aislado. No se amplía este dictamen a un resultado de mutación aún inexistente ni a aceptación final de producto.

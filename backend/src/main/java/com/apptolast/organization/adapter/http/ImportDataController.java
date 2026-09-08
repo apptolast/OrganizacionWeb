@@ -63,6 +63,15 @@ public final class ImportDataController {
 
   private static final class ReceiptNotFound extends RuntimeException {}
 
+  @ExceptionHandler(com.apptolast.organization.application.ImportConflictException.class)
+  ResponseEntity<?> conflict() {
+    return ResponseEntity.status(409)
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+        .body(
+            ApiErrors.problem(
+                409, "IMPORT_CONFLICT", "El archivo no es compatible con los datos actuales."));
+  }
+
   @ExceptionHandler(com.apptolast.organization.application.ImportKeyReusedException.class)
   ResponseEntity<?> keyReused() {
     return ResponseEntity.status(409)

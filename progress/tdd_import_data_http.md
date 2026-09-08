@@ -116,3 +116,67 @@ Estado actual: confirmación, consulta y tres beans reales disponibles. Pendient
 socket/proxy, datos no vacíos y conflicto integral que desarrolla A. La prueba
 de proxy usa el contexto nominal vacío y puertos dinámicos, sin atribuir cobertura
 de catorce colecciones. Root revisó 11 hashes y 88/7 XML del corte integrado.
+
+## Proxy y cierre del transporte nominal
+
+Ciclo 35: excepción real `ImportConflictException` copiada de `f114af5` con SHA
+verificado, commit `0c16b84`. Handler 409 IMPORT_CONFLICT: RED `e7b17c` → GREEN
+`eacbaf`. Regresión final HTTP **62/62**, cero F/E/S, EXIT 0 `5d60ad`; XML y log
+`import_http_final_xml.xml` / `import_http_final.log`. Esto no prueba la decisión
+de conflicto del store: el slice sólo traduce su excepción real.
+
+`ImportSocketTest` usa Spring RANDOM_PORT, PostgreSQL 17.9 real, login y CSRF
+reales, Nginx 1.30.4 y cache tmpfs de 16 MiB. El único reemplazo de configuración
+en el fixture es el destino backend por el bridge de Testcontainers. El archivo
+vacío se genera con el exportador real y se completa con whitespace JSON hasta
+el tamaño exacto, en un fichero temporal propio; no implica catorce colecciones
+no vacías. Cada prueba elimina su fichero y sus recibos de owner de prueba.
+
+| Ciclo socket | Oráculo | Resultado |
+| --- | --- | --- |
+| 01 | preview 32 MiB, Content-Length | RED `835a52`: 413 Nginx; GREEN `e6a998` tras location exacta preview |
+| 02 | confirmación 32 MiB, Content-Length | RED `9ff908`: 413 Nginx; GREEN `7b94e7` tras location exacta confirmación |
+| 03 | ambas rutas, byte adicional | Inicialmente GREEN `f7a481`: 413 IMPORT_TOO_LARGE de API, sin recibo/proyectos |
+| 04 | ambas fronteras y rutas con HTTP/1.1 chunked | Inicialmente GREEN `a94aba`, publisher de longitud -1; 200/413 exactos |
+| 05 | anónimo sobredimensionado y rutas ajenas/casi iguales | Inicialmente GREEN `258dfd`: exactas 401 sin llamar puertos; otras mantienen 1 MiB/413 |
+| 06 | productor retiene cola hasta entrar al puerto real | Inicialmente GREEN `022923`: spies delegan siempre al bean real, barrera antes de completar el envío; no mock de respuesta ni validación |
+
+Sólo dos locations exactas cambian `client_max_body_size`, buffering y versión
+HTTP. Conservan explícitamente proxy_pass, las tres cabeceras, timeout 15 s y
+no-next-upstream; DNS y otras rutas permanecen intactos. No se afirma ausencia
+de todos los buffers de transporte: el oráculo demuestra inicio del upstream
+antes de completar el upload y aceptación de 32 MiB con cache tmpfs de 16 MiB.
+
+Foco final proxy **15/15**, cero F/E/S, EXIT 0 `699ff1` (39 s), XML/log
+`import_socket_final_xml.xml` / `import_socket_final.log`; Spotless verde.
+Inspección posterior de los 18 IDs propios encontrados en ese XML: **0 restantes**,
+`import_socket_cleanup.json`, tool `241a09`. Sin puertos 8080/18080 del host ni
+operaciones en infraestructura. HTTP y proxy se reportan por separado; no se
+suman campañas ni se afirma cierre de importación integral, rollback o mutación.
+
+Pendiente actual: reader completo y filas/relaciones/concurrencia PG de A,
+posteriores E2E/rollback y gates finales. El transporte nominal está listo para
+revisión independiente en `import_http_proxy_freeze.json`.
+
+### Repetición con perfil readonly
+
+Root señaló correctamente que los 15 casos originales usaban cache tmpfs, pero
+no rootfs readonly. Esos originales no acreditan esa propiedad. Se añadió el
+oráculo HostConfig.ReadonlyRootfs: RED `e75641`. El primer ajuste de fixture
+falló durante setup (`32512d`): Docker no permite copy-to-container sobre un
+rootfs marcado readonly. No fue un fallo de Nginx ni del producto.
+
+El fixture final deriva una imagen efímera de la web 22 publicada por digest
+`sha256:2568a6bf4c2347171df4433f50d5127ac1e4537385ad4b067c595c889eaf8d92`,
+con únicamente COPY de nginx.conf antes de crear el contenedor. Hereda los
+permisos 1777 de /run y /var/cache/nginx del Dockerfile publicado. Se ejecuta con
+user 101:101, rootfs readonly, cap_drop ALL y dos tmpfs de 16 MiB, conforme al
+stack de producción y al smoke de DNS; docker-compose local no contiene ese
+perfil. Inspect confirma rootfs, usuario, capacidades y destinos de tmpfs.
+
+Foco individual GREEN `7a86ad`; repetición completa **15/15**, cero F/E/S,
+EXIT 0 `45ac8e` (45 s), `import_socket_readonly_final.log` y
+`import_socket_readonly_final_xml.xml`. No se cambió producto para adaptar el
+ensayo. Cleanup `99c4c1`: 18 IDs propios retirados y cero imágenes derivadas
+import-proxy restantes; la imagen base compartida permanece disponible.
+Manifiesto actualizado: `import_http_proxy_readonly_freeze.json`.

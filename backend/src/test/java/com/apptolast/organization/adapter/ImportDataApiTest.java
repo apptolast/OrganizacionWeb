@@ -39,6 +39,24 @@ class ImportDataApiTest {
   @MockitoBean com.apptolast.organization.application.ReadImportReceiptUseCase receipts;
 
   @Test
+  void s4_integralConflictIs409WithoutAReceiptOrDestinationDetails() throws Exception {
+    when(applyImports.apply(anyString(), any(), anyString(), any()))
+        .thenThrow(new com.apptolast.organization.application.ImportConflictException());
+    mvc.perform(
+            post("/api/v1/me/import")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("Idempotency-Key", "6322225a-3bf8-42fd-a2b6-756e1a72928c")
+                .header("X-Import-Content-SHA256", "b".repeat(64))
+                .contentType("application/json")
+                .content("{}"))
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.code").value("IMPORT_CONFLICT"))
+        .andExpect(jsonPath("$.recordedAt").doesNotExist())
+        .andExpect(jsonPath("$.conflicts").doesNotExist());
+  }
+
+  @Test
   void s21_reusedKeyReturns409WithoutAnotherOwnersData() throws Exception {
     when(applyImports.apply(anyString(), any(), anyString(), any()))
         .thenThrow(new com.apptolast.organization.application.ImportKeyReusedException());

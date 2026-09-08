@@ -69,3 +69,13 @@ APROBADO para integración el corte 8d7d8b2. Root verificó 87/87 entradas del f
 La guarda Unicode rechaza surrogates aislados antes del puerto, conserva pares válidos y el límite de 80 puntos. No se afirma pérdida física JDBC reproducida. Los scopes Gradle incluyen clases completas y configuración compartida; todos los JUnit siguen como candidatos y no cambia el umbral. PIT pendiente.
 
 Dispatcher a6eb3c0 revisado e integrado como d153fbe: tres targets exactos, sin alterar comandos anteriores ni flags. Sus 72 tests y ciclos originales se conservan. Frontend 82a45c2 ya fijado; scope Stryker nuevo revisado por lectura de los tres módulos completos y siete nodos de integración, pendiente freeze y campaña.
+
+
+## HTTP/Bearer y wiring real — revisión posterior
+
+El revisor independiente A verificó el freeze parcial 30e8336c (19 actuales y 19 originales, 129 tests/5 XML) y aprobó las 18 rutas, prioridades y aislamiento. Root leyó controller/filter/configuración completos. OpenAPI sigue expresamente parcial. El wiring real descubrió que LogoutFilter predeterminado interceptaba POST /logout antes de autenticar Bearer; el RED 302 a 401 se conserva y la corrección desactiva sólo logout en la cadena Bearer. Cookie mantiene su cierre de sesión.
+
+Root verificó el freeze de wiring 6cdccbc1: 12 actuales y 12 originales, 138 tests/6 XML sin fallos/errores/omisiones. Los nueve casos PG prueban creación con sesión real, token real, propietario, escritura sin CSRF, rechazo inválido/revocado/deshabilitado/huérfano, separación STORAGE_UNAVAILABLE, cero interacciones del repositorio de sesiones y snapshot físico de Cookie conservado. Se pidió fijar únicamente el Clock del fixture: la aserción de dos admisiones no debe depender de que dos peticiones no crucen el minuto UTC. No se inventa RED intermitente; se conserva el resultado original.
+
+
+Corrección de estabilidad de wiring aprobada e integrada: 7e3079a como 1466f07, tras HTTP 7eb911c como 5b10287. Root verificó los siete originales del freeze d7442ac4, incluido el XML focal de nueve casos verdes con Clock fijo y PG17.9. No cambió producto adicional. El helper operacional V22 está preparado y revisado; incorpora auditoría privada de logs, aún no ejecutada ni atribuida a aceptación. Se detectaron brechas acotadas s25/s29 en negocio real, s40 en recuperación ya confirmada y s42 en evidencia de logs; sus responsables cierran oráculos sin duplicar la matriz de 18 rutas.

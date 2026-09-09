@@ -400,6 +400,10 @@ Feature: Entregar los eventos propios ya confirmados a URLs https elegidas con f
       | app.webhooks.enabled false                    | ninguna entrega cambia y el receptor no recibe peticiones |
       | app.webhooks.enabled true                     | exactamente 20 entregas quedan succeeded tras el primer ciclo y las 5 restantes tras el segundo |
 
+  # Enmienda del 9 de septiembre de 2026, con la misma lectura ya ratificada por el propietario
+  # para la feature 26 (github_connector.feature:398): una credencial Bearer válida SÍ está
+  # autenticada, así que el canal de máquina recibe 403 API_SCOPE_DENIED —«sé quién eres y esto
+  # no es para ti»— y no 401. Las dos filas Bearer se corrigen en consecuencia.
   @s33
   Scenario Outline: Seguridad de sesión precede a cualquier lectura o escritura de webhooks
     Given <condicion>
@@ -410,8 +414,8 @@ Feature: Entregar los eventos propios ya confirmados a URLs https elegidas con f
       | condicion                                            | peticion                                     | resultado |
       | ninguna sesión                                       | GET /api/v1/me/webhooks                      | 401 UNAUTHENTICATED |
       | ninguna sesión                                       | POST /api/v1/me/webhooks                     | 401 UNAUTHENTICATED |
-      | una credencial Bearer válida de la feature 24        | GET /api/v1/me/webhooks                      | 401 UNAUTHENTICATED |
-      | una credencial Bearer válida de la feature 24        | POST /api/v1/me/webhooks/{id}/ping           | 401 UNAUTHENTICATED |
+      | una credencial Bearer válida de la feature 24        | GET /api/v1/me/webhooks                      | 403 API_SCOPE_DENIED |
+      | una credencial Bearer válida de la feature 24        | POST /api/v1/me/webhooks/{id}/ping           | 403 API_SCOPE_DENIED |
       | sesión válida y token CSRF inválido                  | POST /api/v1/me/webhooks                     | 403 CSRF_INVALID |
       | sesión válida y token CSRF inválido                  | DELETE /api/v1/me/webhooks/{id}              | 403 CSRF_INVALID |
       | sesión válida y Origin no permitido                  | PUT /api/v1/me/webhooks/{id}/status          | 403 UNTRUSTED_ORIGIN |

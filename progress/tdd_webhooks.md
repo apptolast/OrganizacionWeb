@@ -6,7 +6,7 @@ Feature en curso: 25 — webhooks. Escenarios a recorrer: @s1…@s42.
 
 ## Decisiones previas
 
-- @s33 filas Bearer: `ApiCredentialBearerFilter` autentica la credencial y, para rutas fuera de su allowlist, responde `403 API_SCOPE_DENIED` (no 401). Por la decisión 5 del coordinador, esas dos filas se prueban con `403 API_SCOPE_DENIED` y sin tocar webhooks.
+- @s33 filas Bearer: `ApiCredentialBearerFilter` autentica la credencial y, para rutas fuera de su allowlist, responde `403 API_SCOPE_DENIED` (no 401). Por la decisión 5 del coordinador, esas dos filas deben probarse con `403 API_SCOPE_DENIED` y sin tocar webhooks. **Corrección del 9 de septiembre de 2026 (hallazgo 16 del dictamen):** durante la feature 25 esa prueba nunca se escribió —el dictamen lo verificó: `WebhookApiTest` no montaba ni una petición con cabecera `Authorization`—. La cubre ahora `WebhookApiTest.s33_aBearerCredentialOfTheIntegrationChannelReachesNoWebhookRoute`, y las filas 413-414 de `features/webhooks.feature` quedan enmendadas a 403.
 - Firma HMAC y AES-GCM viven en adaptadores (`javax.crypto` no está permitido en dominio/aplicación por ArchUnit). El dominio conserva catálogo, validación, política de direcciones y tabla de reintentos.
 - Errores de aplicación: una sola `WebhookOperationException(Code)` para los códigos 4xx/5xx estables; `WebhookInvalidException(campos)` en dominio para `WEBHOOK_INVALID` con `errors[]`.
 

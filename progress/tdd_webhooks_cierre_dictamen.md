@@ -96,3 +96,42 @@ por defecto de cualquier `IOException` que no case con los catch previos.
 
 Con esto las **ocho filas** del outline @s25 quedan ejercidas contra el adaptador
 real. Hallazgos 1 y 17 CERRADOS.
+
+## Hallazgo 16 — @s33: las dos filas Bearer no tenían oráculo — CERRADO
+
+**Cubre:** `features/webhooks.feature:413-414`.
+
+**Prueba:** `WebhookApiTest.s33_aBearerCredentialOfTheIntegrationChannelReachesNoWebhookRoute`.
+
+**Ciclo.**
+
+1. Test nuevo con `@MockitoBean AuthenticateApiCredentialUseCase`: credencial
+   Bearer válida con scopes de projects/tasks contra `GET /api/v1/me/webhooks` y
+   `POST /api/v1/me/webhooks/{id}/ping`; exige 403, `code=API_SCOPE_DENIED`,
+   `Cache-Control` con `no-store` (la segunda cláusula del Then de @s33) y
+   `verifyNoInteractions(create, manage)`.
+2. Pasó a la primera: la frontera aguantaba hoy por omisión (denegar por defecto).
+   Por eso el rojo se acredita rompiendo la producción.
+3. ROJO ACREDITADO. Añado a `ApiCredentialBearerFilter.PERMISSIONS` una entrada
+   `GET /api/v1/me/webhooks -> projects:read`, que es exactamente la regresión que
+   el hallazgo teme («si alguien amplía PERMISSIONS o el securityMatcher, ninguna
+   prueba se pondrá roja»). Resultado:
+   `s33_aBearerCredentialOfTheIntegrationChannelReachesNoWebhookRoute() FAILED`.
+   Restaurado con `git checkout` y verde otra vez.
+
+**Enmienda del contrato (REGLAS.md §8).** Las filas 413-414 esperaban
+`401 UNAUTHENTICATED` y el producto responde `403 API_SCOPE_DENIED`. Se corrigen
+a 403 con una nota de enmienda encima del `@s33`, calcada de la que el propietario
+ya ratificó en `features/github_connector.feature:398`: una credencial Bearer
+válida **sí** está autenticada, luego la respuesta correcta es «sé quién eres y
+esto no es para ti». Se alinea el contrato con el producto, no al revés, porque
+401 sería aquí una respuesta falsa.
+
+**Corrección documental.** `progress/tdd_webhooks.md:9` afirmaba que esas dos filas
+«se prueban con 403 API_SCOPE_DENIED». Era falso. La línea queda corregida y
+fechada, apuntando a la prueba que sí lo hace.
+
+**Ficheros cambiados.**
+- `backend/src/test/java/com/apptolast/organization/adapter/WebhookApiTest.java`
+- `features/webhooks.feature:409-418`
+- `progress/tdd_webhooks.md:9`

@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.apptolast.organization.adapter.config.SecurityConfiguration;
 import com.apptolast.organization.adapter.http.WebhookController;
+import com.apptolast.organization.application.ApiCredentialAccess;
+import com.apptolast.organization.application.AuthenticateApiCredentialUseCase;
 import com.apptolast.organization.application.CreateWebhookUseCase;
 import com.apptolast.organization.application.ManageWebhookUseCase;
 import com.apptolast.organization.application.WebhookCreation;
@@ -39,6 +41,7 @@ class WebhookApiTest {
   @Autowired MockMvc mvc;
   @MockitoBean CreateWebhookUseCase create;
   @MockitoBean ManageWebhookUseCase manage;
+  @MockitoBean AuthenticateApiCredentialUseCase authenticateCredential;
 
   private static WebhookEndpoint endpoint() {
     return new WebhookEndpoint(
@@ -396,6 +399,35 @@ class WebhookApiTest {
         .andExpect(status().isForbidden())
         .andExpect(jsonPath("$.code").value("UNTRUSTED_ORIGIN"));
     verifyNoInteractions(manage);
+  }
+
+  /**
+   * Las dos filas Bearer de @s33, enmendadas el 9 de septiembre de 2026 con la misma lectura que
+   * ratificó el propietario para la feature 26: una credencial Bearer válida <em>sí</em> está
+   * autenticada, luego la respuesta correcta es 403 API_SCOPE_DENIED —«sé quién eres y esto no es
+   * para ti»— y no 401. El canal de credenciales de máquina no alcanza ninguna ruta de webhooks.
+   */
+  @Test
+  void s33_aBearerCredentialOfTheIntegrationChannelReachesNoWebhookRoute() throws Exception {
+    when(authenticateCredential.authenticate("una-credencial-valida"))
+        .thenReturn(
+            new ApiCredentialAccess(
+                UUID.randomUUID(),
+                "owner",
+                List.of("projects:read", "projects:write", "tasks:read", "tasks:write")));
+
+    for (var request :
+        List.of(
+            get("/api/v1/me/webhooks").header("Authorization", "Bearer una-credencial-valida"),
+            post("/api/v1/me/webhooks/" + W + "/ping")
+                .header("Authorization", "Bearer una-credencial-valida"))) {
+      mvc.perform(request)
+          .andExpect(status().isForbidden())
+          .andExpect(jsonPath("$.code").value("API_SCOPE_DENIED"))
+          .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")));
+    }
+
+    verifyNoInteractions(create, manage);
   }
 
   @Test

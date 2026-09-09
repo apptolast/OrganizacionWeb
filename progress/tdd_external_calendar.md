@@ -98,3 +98,16 @@ Comando: `backend\gradlew.bat test --no-daemon --tests '...domain.IcsCalendarTes
 - VERDE: puerto `application/SecretCipher` (encrypt/decrypt con el propietario
   como dato autenticado) y adaptador `adapter/crypto/AesGcmSecretCipher` con
   su test movido al mismo paquete.
+
+### Ciclo 9 — descarga del feed (@s12, @s13)
+
+- ROJO: `HttpCalendarFeedTest` contra un `com.sun.net.httpserver.HttpServer` en
+  loopback: una sola petición GET con Accept text/calendar y sin cookie ni
+  Authorization; 301/302/303/307/308 sin seguir y sin tocar el destino;
+  cualquier estado distinto de 200; conexión rechazada; cabeceras que no llegan
+  a tiempo; 1 MiB exacto aceptado; 1 MiB + 1 byte rechazado; cuerpo infinito
+  abortado antes de 2 MiB; tipos textuales aceptados y no textuales rechazados.
+- VERDE: `domain/FeedError` (códigos cerrados), puerto `application/CalendarFeed`
+  con el resultado sellado `FeedFetch`, y `adapter/feed/HttpCalendarFeed`.
+- El plazo de 5 s se inyecta para poder probar el vencimiento en 300 ms; un test
+  aparte fija `HttpCalendarFeed.TIMEOUT` en 5 s y el cableado usa esa constante.

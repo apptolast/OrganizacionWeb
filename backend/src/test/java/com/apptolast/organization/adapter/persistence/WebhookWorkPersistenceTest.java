@@ -64,7 +64,7 @@ class WebhookWorkPersistenceTest {
     var endpoint = given(owner, "active");
     var delivery = enqueue(owner, endpoint.id(), "{\"a\":1}");
 
-    var claimed = work().claimNext(T).orElseThrow();
+    var claimed = claimOwn(work(), owner, T);
 
     assertEquals(delivery.id(), claimed.delivery().id());
     assertEquals("{\"a\":1}", claimed.body());
@@ -81,7 +81,7 @@ class WebhookWorkPersistenceTest {
     enqueue(owner, endpoint.id(), "{}");
     var work = work();
 
-    assertTrue(work.claimNext(T).isPresent());
+    assertNotNull(claimOwn(work, owner, T));
     assertTrue(claimedFor(work, owner, T).isEmpty(), "the lease must hide it from the next cycle");
 
     // The worker died before recording: once the lease lapses the same delivery is retried.
@@ -90,15 +90,30 @@ class WebhookWorkPersistenceTest {
     assertEquals(0, recovered.getFirst().delivery().attempt());
   }
 
+  /**
+   * The worker claims across every owner by design, and this container is shared with the sibling
+   * persistence test, so a test may only ever assert about the rows of its own owner.
+   */
   private static List<com.apptolast.organization.application.ClaimedDelivery> claimedFor(
       PostgresWebhookWork work, String owner, Instant now) {
     var claimed = new ArrayList<com.apptolast.organization.application.ClaimedDelivery>();
-    for (var attempt = 0; attempt < 20; attempt++) {
+    for (var attempt = 0; attempt < 200; attempt++) {
       var next = work.claimNext(now);
       if (next.isEmpty()) break;
       if (next.get().ownerId().equals(owner)) claimed.add(next.get());
     }
     return claimed;
+  }
+
+  /** Claims until the owner's own next delivery shows up, ignoring everyone else's. */
+  private static com.apptolast.organization.application.ClaimedDelivery claimOwn(
+      PostgresWebhookWork work, String owner, Instant now) {
+    for (var attempt = 0; attempt < 200; attempt++) {
+      var next = work.claimNext(now);
+      if (next.isEmpty()) break;
+      if (next.get().ownerId().equals(owner)) return next.get();
+    }
+    throw new AssertionError("no delivery of " + owner + " was claimable");
   }
 
   @Test
@@ -136,7 +151,7 @@ class WebhookWorkPersistenceTest {
     var endpoint = given(owner, "active");
     enqueue(owner, endpoint.id(), "{}");
     var work = work();
-    var claimed = work.claimNext(T).orElseThrow();
+    var claimed = claimOwn(work, owner, T);
     var result = claimed.delivery().recorded(WebhookAttempt.http(500, 3), T);
     var exhausted =
         new WebhookDelivery(
@@ -172,7 +187,7 @@ class WebhookWorkPersistenceTest {
     for (var index = 0; index < 55; index++) {
       var delivery = WebhookDelivery.ping(UUID.randomUUID(), T);
       store().enqueuePing(owner, endpoint.id(), delivery, "{}");
-      var claimed = work.claimNext(T.plusSeconds(index)).orElseThrow();
+      var claimed = claimOwn(work, owner, T.plusSeconds(index));
       work.record(
           claimed,
           claimed.delivery().recorded(WebhookAttempt.http(200, 1), T.plusSeconds(index)),

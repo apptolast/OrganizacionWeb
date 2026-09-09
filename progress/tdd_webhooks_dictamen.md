@@ -275,3 +275,40 @@ fichero y con el comando exacto que lo reproduce, para que la cifra sea
 auditable sin ejecutar nada. Los 23 de `webhooks.test.tsx` incluyen las pruebas
 reforzadas en esta sesión: se han endurecido oráculos, no añadido casos, así que
 la cifra no cambia por mi trabajo.
+
+Commit: `ae3a56d`.
+
+---
+
+## Estado final
+
+| Hallazgo | Escenario | Prueba que lo cubre | Rojo demostrado |
+| --- | --- | --- | --- |
+| 14 | `@s38` (cambia la identidad) | `webhooks.test.tsx` → `@s38 shows the secret for one identity and starts clean for another` | 1 mutante (`key` constante) |
+| 22 | `@s37` (no se copia sin activar Copiar) | `webhooks.test.tsx` → `@s37 sends one POST with the twelve types and shows the secret once` | 2 mutantes (botón decorativo; copia sin gesto) |
+| 20 | `@s40` (qué filas tienen Reenviar; efecto del reenvío) | `webhooks.test.tsx` → `@s40 opens the deliveries panel on demand, without polling, and redelivers terminal rows` | 3 mutantes (guarda invertida; fila equivocada; `map` identidad) |
+| 19 | `@s29` (las 50 de mayor `updatedAt`, y su orden) | `WebhookWorkPersistenceTest` → `s29_onlyTheFiftyMostRecentTerminalsSurviveAndPendingOnesAreNeverPruned` | 3 mutantes (prune ASC; prune aleatorio; list ASC) |
+| 23 | matriz UX (cifra) | n/a — defecto documental, corregido con medición | n/a |
+
+Cinco de cinco cerrados; nueve mutantes inyectados y cazados en los cuatro
+huecos de oráculo.
+
+Verificación de cierre:
+
+- `pnpm --dir frontend exec vitest run src/webhooks.test.tsx
+  src/webhooks-route.test.tsx src/webhooks-client.test.ts` → **44/44 verde**.
+- `backend/gradlew.bat test --no-daemon -p backend --tests
+  "…WebhookWorkPersistenceTest"` → **6/6 verde**.
+- `tsc --noEmit`, `eslint`, `prettier --check`, `spotlessApply`: limpios.
+- `git diff c187023 -- frontend/src/webhooks.tsx backend/src/main` **vacío**:
+  no se ha modificado ni una línea de producción. Los cinco hallazgos eran de
+  oráculo y de documentación, y así se han cerrado.
+
+No se ha ejecutado `pitest`, ni E2E, ni la suite completa de ningún lado. No se
+ha marcado nada como `done` ni se ha hecho `push`: eso es del `craftsman_lead`,
+del `judge` y del `mutation_tester`.
+
+Deuda que dejo anotada, fuera del encargo de esta sesión: las cláusulas (b)
+«aborta la petición pendiente al cambiar de identidad» y (c) «un 401 tardío no
+retira una sesión posterior» de `@s38` siguen sin oráculo (hallazgo 14 del
+dictamen, párrafo del verificador).

@@ -385,12 +385,20 @@ Feature: Catálogo de conectores y segundo gestor de issues (GitLab) sobre el pu
     When envía <peticion>
     Then recibe HTTP <http> con código <codigo>
     And no se crea ni modifica conexión, tarea, enlace ni recibo y el servidor falso recibe cero peticiones
+    # Enmienda del 10 de septiembre de 2026. Las dos filas de credencial Bearer esperaban
+    # 401 UNAUTHENTICATED; la línea 5 de esta feature dice que donde 27 fija algo distinto
+    # prevalece 27, y el @s31 de features/github_connector.feature ya se enmendó a
+    # 403 API_SCOPE_DENIED con el propietario delante: una credencial Bearer válida SÍ está
+    # autenticada, y el filtro de 24 la identifica antes de mirar su lista de rutas, que no
+    # incluye ni el catálogo ni el conector. Decir «no sé quién eres» a quien se ha
+    # identificado es falso. La propiedad de seguridad no cambia: no abre nada, no escribe
+    # nada y no contacta con el servidor falso.
     Examples:
-      | credencial                                          | peticion                                          | http | codigo          |
-      | ninguna sesión                                      | GET /api/v1/me/connectors                         | 401  | UNAUTHENTICATED |
-      | ninguna sesión                                      | GET /api/v1/me/connectors/gitlab                  | 401  | UNAUTHENTICATED |
-      | una credencial Bearer válida de 24                  | GET /api/v1/me/connectors                         | 401  | UNAUTHENTICATED |
-      | una credencial Bearer válida de 24                  | POST /api/v1/me/connectors/gitlab/imports         | 401  | UNAUTHENTICATED |
+      | credencial                                          | peticion                                          | http | codigo            |
+      | ninguna sesión                                      | GET /api/v1/me/connectors                         | 401  | UNAUTHENTICATED   |
+      | ninguna sesión                                      | GET /api/v1/me/connectors/gitlab                  | 401  | UNAUTHENTICATED   |
+      | una credencial Bearer válida de 24                  | GET /api/v1/me/connectors                         | 403  | API_SCOPE_DENIED  |
+      | una credencial Bearer válida de 24                  | POST /api/v1/me/connectors/gitlab/imports         | 403  | API_SCOPE_DENIED  |
       | sesión válida sin token CSRF                        | PUT /api/v1/me/connectors/gitlab                  | 403  | CSRF_INVALID     |
       | sesión válida sin token CSRF                        | DELETE /api/v1/me/connectors/gitlab               | 403  | CSRF_INVALID     |
       | sesión válida sin token CSRF                        | POST /api/v1/me/connectors/gitlab/imports         | 403  | CSRF_INVALID     |

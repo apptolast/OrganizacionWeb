@@ -92,6 +92,10 @@ function WebhookPanel() {
   const confirmOpener = useRef<HTMLButtonElement | null>(null);
   const requests = useRef<AbortController[]>([]);
   const urlErrorId = useId();
+  // La etiqueta del secreto se asocia por `htmlFor`, no envolviendo al campo:
+  // React materializa el valor de un `textarea` como texto hijo, así que con la
+  // asociación implícita el nombre accesible sería «Secreto» + el secreto entero.
+  const secretFieldId = useId();
 
   /** Every in-flight request is tracked so leaving the view aborts all of them. */
   const track = useCallback(() => {
@@ -297,14 +301,18 @@ function WebhookPanel() {
             Este secreto no volverá a mostrarse. Guárdalo antes de cerrar este
             panel.
           </p>
-          <label>
-            Secreto
-            <input
-              readOnly
-              value={secret}
-              onFocus={(e) => e.currentTarget.select()}
-            />
-          </label>
+          <label htmlFor={secretFieldId}>Secreto</label>
+          {/* Un campo de una línea no envuelve: a 320 px el secreto quedaba
+              recortado y `overflow-wrap` sobre un input es regla muerta. Un
+              textarea de sólo lectura envuelve el valor entero y sigue siendo
+              seleccionable, desplazable y copiable. */}
+          <textarea
+            id={secretFieldId}
+            readOnly
+            rows={2}
+            value={secret}
+            onFocus={(e) => e.currentTarget.select()}
+          />
           <button
             type="button"
             onClick={() => void navigator.clipboard?.writeText(secret)}

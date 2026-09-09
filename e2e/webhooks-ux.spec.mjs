@@ -189,10 +189,38 @@ function auditor(page, folder, options = {}) {
           .filter((entry) => entry.right > innerWidth + 1 || entry.overflowing)
           .sort((left, right) => right.right - left.right)
           .slice(0, 6);
+        // @s42 exige «ni recorte de la URL, del secreto ni de la tabla de entregas».
+        // Conjunto NOMBRADO, uno por sujeto del contrato, nunca `body *`: el thead a
+        // <900 px es visually-hidden legítimo (width:1px; clip-path: inset(50%)) y
+        // una lista abierta haría fallar código correcto. El campo del secreto se
+        // busca como textarea Y como input: si alguien lo devuelve a un campo de una
+        // línea, el oráculo tiene que seguir mirándolo, no dejar de verlo.
+        // Se miden las DOS dimensiones: un oráculo que sólo mira la horizontal deja
+        // pasar el recorte vertical de las celdas apiladas.
+        const clipped = [
+          ...document.querySelectorAll(
+            "main li span, main .webhook-secret textarea, main .webhook-secret input, main tbody td",
+          ),
+        ]
+          .filter((element) => element.getClientRects().length)
+          .map((element) => ({
+            what: `${element.tagName}.${element.className?.toString?.() ?? ""}`,
+            text: (element.value ?? element.textContent ?? "").slice(0, 40),
+            scrollWidth: element.scrollWidth,
+            clientWidth: element.clientWidth,
+            scrollHeight: element.scrollHeight,
+            clientHeight: element.clientHeight,
+          }))
+          .filter(
+            (entry) =>
+              entry.scrollWidth > entry.clientWidth + 1 ||
+              entry.scrollHeight > entry.clientHeight + 1,
+          );
         return {
           width: innerWidth,
           scroll: document.documentElement.scrollWidth,
           offenders,
+          clipped,
           controls: controls.map((element) => {
             const box = target(element).getBoundingClientRect();
             return {
@@ -219,6 +247,13 @@ function auditor(page, folder, options = {}) {
         measured.scroll,
         `${state}:${width} horizontal page overflow; offenders=${JSON.stringify(measured.offenders)}`,
       ).toBeLessThanOrEqual(width);
+      // Recorte POR ELEMENTO sobre los tres sujetos que el contrato nombra. La
+      // aserción de scroll de arriba NO lo cubre: un elemento que recorta no
+      // ensancha la página, precisamente porque se recorta. Acreditado con tres
+      // rojos independientes (ver progress/tdd_webhooks_cierre_dictamen.md).
+      expect(measured.clipped, `${state}:${width} contenido recortado`).toEqual(
+        [],
+      );
       for (const box of measured.controls) {
         expect(
           box.x,

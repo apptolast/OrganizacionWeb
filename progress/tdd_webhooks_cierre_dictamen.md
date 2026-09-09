@@ -619,6 +619,94 @@ de foco).
 
 ---
 
+# SEGUNDA SESIÓN — noche del 9 al 10 de septiembre de 2026
+
+Rama `claude/webhooks` puesta al día sobre `main` (`0c0724f`) antes de empezar.
+Pila E2E propia levantada **una sola vez** y dejada viva (`E2E_WEB_PORT=18090`,
+proyecto compose `organizationweb-lane25`), para poder iterar con
+`pnpm exec playwright test` sin reconstruir en cada ciclo: `.e2e-work/lane-up.sh`.
+Cada ciclo con cambio de producto cuesta 31 s de reconstrucción del contenedor
+`web`, no los ~2,5 min de levantar y bajar la pila entera.
+
+## Hallazgo 2 — @s42: el recorte por elemento ya se asserta, en los tres sujetos y en las dos dimensiones — CERRADO
+
+**Cubre:** `features/webhooks.feature:521`, «ningún ancho presenta scroll
+horizontal **ni recorte de la URL, del secreto ni de la tabla de entregas**».
+
+**La hipótesis de la sesión anterior era correcta.** Aplicado
+`progress/parche_webhooks_hallazgo_2.patch` y hecho el arreglo que proponía
+—romper la asociación implícita de la etiqueta del secreto y hacerla explícita
+con `htmlFor`/`id` sobre un `useId()`—, los **seis** tests de
+`e2e/webhooks-ux.spec.mjs` pasan (`6 passed (55,2 s)`). Es decir: el fallo de
+`spec:330` (`getByLabel("Secreto", { exact: true })`) era del **nombre
+accesible**, no del CSS ni de un bundle rancio, exactamente como decía el
+diagnóstico. No se tocó la spec para acomodar el producto.
+
+### El rojo: la mutación que proponía el dictamen NO acredita este oráculo
+
+REPARTO_NOCHE §5 en estado puro. El dictamen mandaba acreditar el rojo con
+
+    li span { white-space: nowrap; overflow: hidden; text-overflow: clip; }
+
+y **eso no sirve**. Ejecutado:
+
+- en el recorrido normal (`four widths in light`) la suite quedó **verde**: a
+  320 px con texto normal la URL (194 px) y la descripción (260 px) caben en el
+  `li` (294 px de contenido), así que no hay nada que recortar;
+- con `text200` sí falló, pero por la **aserción vieja**, no por la nueva:
+  `secret:320 horizontal page overflow ... Expected <= 320, Received 560`. El
+  `span` no se recortaba, se **ensanchaba**: `scrollWidth == clientWidth == 519`
+  y el `li`, que es un contenedor flex, crecía con él y empujaba la página.
+
+La razón es de fondo y queda anotada porque vuelve a aparecer: **un elemento que
+recorta no ensancha la página, y uno que ensancha la página no recorta.** Son
+sucesos disjuntos. Una mutación que dispara la aserción de scroll nunca puede
+acreditar la de recorte.
+
+### Los tres rojos que sí acreditan, uno por sujeto del contrato
+
+| Sujeto | Mutación aplicada a la producción | Rojo obtenido |
+|---|---|---|
+| **El secreto** | `frontend/src/webhooks.tsx`: devolver el campo a `<input>` de una línea (el producto ANTERIOR a este carril) | `secret:320 contenido recortado` — `INPUT` con `scrollWidth 498` frente a `clientWidth 185`: se veían 185 de 498 px del secreto |
+| **La URL** | `webhooks.scss`, `li span { white-space: nowrap; overflow: hidden; max-inline-size: 5rem }` | `secret:320 contenido recortado` — `SPAN` «https://example.com/hooks» con `scrollWidth 194` / `clientWidth 80`, y otro para la descripción (`260` / `80`) |
+| **La tabla de entregas** | `webhooks.scss`, `th, td { overflow: hidden; max-block-size: 1rem }` | `deliveries:320 contenido recortado` — 186 celdas con `scrollHeight 27` / `clientHeight 16`: recorte **vertical**, que un oráculo de una sola dimensión no habría visto |
+
+Las tres se restauraron y la suite volvió a verde: **6 passed (1,1 min)**, más
+`e2e/webhooks-native-zoom.spec.mjs` **1 passed** (el zoom nativo del hallazgo 3,
+de otro carril, sigue verde con el campo nuevo) y los 23 unitarios de
+`frontend/src/webhooks.test.tsx`.
+
+El primer rojo es el que más pesa: **es el defecto real de producto** que el
+hallazgo denunciaba, y demuestra a la vez que el cambio de `<input>` a
+`<textarea>` era necesario y que el oráculo nuevo lo sujeta. Por eso el selector
+del oráculo nombra el campo del secreto **como `textarea` y como `input`**: si
+alguien lo devuelve a un campo de una línea, la prueba tiene que seguir
+mirándolo, no dejar de verlo.
+
+### Cambios de producto, y por qué cada uno
+
+- `webhooks.tsx`: el campo del secreto pasa a `<textarea readOnly rows={2}>` con
+  `id`, y su `<label htmlFor>` sale de envolverlo. El comentario del código
+  explica el porqué del `htmlFor`: React materializa el valor de un `textarea`
+  como texto hijo, así que con asociación implícita el nombre accesible sería
+  «Secreto» + el secreto entero.
+- `webhooks.scss`: la regla muerta `overflow-wrap: anywhere` sobre
+  `.webhook-secret input` desaparece (un campo de una línea no envuelve) y en su
+  lugar `.webhook-secret textarea` recibe `width: 100%`, `box-sizing: border-box`
+  —sin él el borde suma sobre el 100 % y desborda el panel—, `resize: none`,
+  `overflow-wrap: anywhere` y `field-sizing: content`, que hace crecer el alto
+  con el contenido y con el texto al 200 %.
+- `webhooks.scss`: la regla de tokens `input { … }` pasa a `input, textarea { … }`.
+  **Esto no es cosmética**: sin ella el campo nuevo se pintaría con los colores
+  del agente de usuario y el contraste se saldría del control de los temas —lo
+  habría cazado axe— y perdería el `min-height: 44px` que exige la cláusula de
+  objetivo de 44 px del propio @s42.
+- `.webhook-secret label { display: block }`, porque al dejar de envolver al
+  campo la etiqueta pasó a ser un elemento en línea.
+
+**Ficheros cambiados.** `e2e/webhooks-ux.spec.mjs`, `frontend/src/webhooks.tsx`,
+`frontend/src/webhooks.scss`. Ninguno compartido.
+
 # ÍNDICE DE LO ABIERTO — leer sólo esto, no hace falta el dictamen entero
 
 Ocho hallazgos abiertos. Una línea cada uno: qué exige, qué fichero se toca, y si

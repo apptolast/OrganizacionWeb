@@ -24,8 +24,7 @@
   }
 
   // A registered URL can be long; it must wrap instead of forcing a page scroll at 320 px.
-  li span,
-  .webhook-secret input {
+  li span {
     overflow-wrap: anywhere;
   }
 
@@ -68,7 +67,11 @@
     }
   }
 
-  input {
+  // El campo del secreto es un `textarea` (envuelve; un input de una línea no),
+  // así que hereda exactamente los mismos tokens: sin esto se pintaría con los
+  // colores del agente de usuario y el contraste dejaría de estar bajo control.
+  input,
+  textarea {
     min-height: 44px;
     color: var(--ink);
     background: var(--editable);
@@ -122,8 +125,22 @@
   border: 1px solid var(--accent);
   border-radius: 0.5rem;
 
-  input {
+  label {
+    display: block;
+  }
+
+  // El secreto entero tiene que verse sin recortar en los cuatro anchos y con el
+  // texto al 200 %. Un campo de una línea no envuelve: a 320 px mostraba 34 de sus
+  // 49 caracteres. `field-sizing: content` hace crecer el alto con el contenido,
+  // así que ni sobra alto ni se recorta cuando el texto se agranda; `box-sizing`
+  // impide que el borde sume sobre el 100 % y desborde el panel.
+  textarea {
+    display: block;
     width: 100%;
+    box-sizing: border-box;
+    resize: none;
+    overflow-wrap: anywhere;
+    field-sizing: content;
   }
 }
 

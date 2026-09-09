@@ -37,6 +37,12 @@ manda la enmienda.
   una vez, se validan todas las direcciones devueltas y se conecta contra la IP
   literal ya validada, conservando el nombre original en la cabecera `Host` y en
   SNI. Deja de ser un límite aceptado. Afecta al entregador y a @s25.
+  **Revocado el 9 de septiembre de 2026 (hallazgo 5 del dictamen).** La segunda
+  mitad —conectar contra la IP literal conservando `Host` y SNI— no se
+  implementó y se decide no implementarla: en el cliente HTTP del JDK exige
+  `jdk.httpclient.allowRestrictedHeaders=host` y rompe la verificación del
+  nombre del certificado. El reenlace vuelve a ser límite aceptado y declarado;
+  ver `project-spec.md` (enmienda B2/B3) y `deploy/EGRESS.md`.
 - **B4 (media) — deduplicación sobre material firmado.** Solo documentación:
   `docs/webhooks.md` debe decir que se verifica la firma primero, que se
   deduplica por el `eventId` que viaja dentro del cuerpo firmado (la cabecera

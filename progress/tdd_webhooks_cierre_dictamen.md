@@ -135,3 +135,43 @@ fechada, apuntando a la prueba que sí lo hace.
 - `backend/src/test/java/com/apptolast/organization/adapter/WebhookApiTest.java`
 - `features/webhooks.feature:409-418`
 - `progress/tdd_webhooks.md:9`
+
+## Hallazgo 5 — el rebinding DNS que el spec exigía no estaba implementado y el código decía que sí — CERRADO
+
+**Sin ciclo rojo-verde, y con razón.** Este hallazgo no pide comportamiento nuevo:
+el verificador lo calibra explícitamente como «bloqueante **por integridad de las
+afirmaciones**, no por el riesgo», y añade que implementarlo tal como lo redacta
+`project-spec.md:2492` **empeoraría el TLS**, porque anclar la conexión a la
+dirección literal en el cliente HTTP del JDK exige
+`jdk.httpclient.allowRestrictedHeaders=host` y rompe la verificación del nombre
+del certificado. Su cierre mínimo aceptable son tres actos documentales y de
+despliegue, y dice literalmente «cualquiera de esas tres formas cierra el
+bloqueante; dejar el javadoc como está, no». Se hacen **las tres**.
+
+1. **Javadoc de `JdkWebhookSender:25-27` reescrito.** Afirmaba «so no name can be
+   re-pointed between the check and the use», que es falso. Ahora afirma sólo lo
+   que el código hace —resolución única, validación de todas las direcciones,
+   abandono antes de conectar— y nombra el reenlace posterior como límite
+   residual, con el porqué de no anclarlo.
+2. **`project-spec.md` (enmienda B2/B3) reconciliado.** Donde decía «Deja de
+   aceptarse como límite el reenlace de nombres» ahora dice que vuelve a ser un
+   límite aceptado y declarado, con las tres cosas que lo acotan y la fecha de la
+   corrección. También `progress/tdd_webhooks.md:36-39` queda revocado en su
+   segunda mitad.
+3. **`deploy/EGRESS.md` (nuevo).** Es la salida de emergencia que el propio B3
+   preveía (`progress/security_review_connectors.md:40`): la política de egreso
+   declarada como requisito de despliegue, con la lista de rangos a bloquear en
+   la red y qué pasa si no se cumple.
+
+**Lo que sí tiene oráculo ahora.** La barrera que de verdad sostiene el residuo
+—que un certificado no confiable se rechaza— pasó de no tener ninguna prueba a
+tenerla: `JdkWebhookSenderTest.s25_aReceiverWithAnUntrustedCertificateIsATlsFailure`
+(hallazgo 1/17, más arriba). Antes de este carril, un `SSLContext` permisivo de
+depuración habría pasado la suite entera en verde. Ése era el riesgo real que el
+verificador señalaba, y está cubierto por una prueba con rojo acreditado.
+
+**Ficheros cambiados.**
+- `backend/src/main/java/com/apptolast/organization/adapter/webhook/JdkWebhookSender.java` (javadoc)
+- `project-spec.md` (COMPARTIDO, REGLAS.md §6 — un solo párrafo, la enmienda B2/B3)
+- `progress/tdd_webhooks.md`
+- `deploy/EGRESS.md` (nuevo)

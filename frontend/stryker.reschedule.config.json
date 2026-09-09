@@ -1,12 +1,8 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "vitest",
-  "plugins": [
-    "@stryker-mutator/vitest-runner"
-  ],
-  "ignorePatterns": [
-    ".stryker-tmp-*"
-  ],
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "ignorePatterns": [".stryker-tmp-*"],
   "mutate": [
     "src/reschedule-api.ts",
     "src/reschedule-block.tsx",
@@ -16,11 +12,7 @@
     "src/block-details.tsx",
     "src/task-blocks.tsx:22:0-223:1"
   ],
-  "reporters": [
-    "clear-text",
-    "json",
-    "html"
-  ],
+  "reporters": ["clear-text", "json", "html"],
   "thresholds": {
     "high": 90,
     "low": 80,

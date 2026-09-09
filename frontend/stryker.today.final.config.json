@@ -1,21 +1,10 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "vitest",
-  "plugins": [
-    "@stryker-mutator/vitest-runner"
-  ],
-  "ignorePatterns": [
-    ".stryker-tmp-*"
-  ],
-  "mutate": [
-    "src/today.tsx:61:8-61:13",
-    "src/today.tsx:111:30-111:34"
-  ],
-  "reporters": [
-    "clear-text",
-    "json",
-    "html"
-  ],
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "ignorePatterns": [".stryker-tmp-*"],
+  "mutate": ["src/today.tsx:61:8-61:13", "src/today.tsx:111:30-111:34"],
+  "reporters": ["clear-text", "json", "html"],
   "thresholds": {
     "high": 90,
     "low": 80,

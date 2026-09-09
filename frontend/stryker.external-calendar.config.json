@@ -1,12 +1,8 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "vitest",
-  "plugins": [
-    "@stryker-mutator/vitest-runner"
-  ],
-  "ignorePatterns": [
-    ".stryker-tmp-*"
-  ],
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "ignorePatterns": [".stryker-tmp-*"],
   "mutate": [
     "src/external-calendar-api.ts",
     "src/external-calendar.tsx",
@@ -16,12 +12,7 @@
     "src/App.tsx:92:10-151:7",
     "src/workspace.tsx:81:10-86:22"
   ],
-  "reporters": [
-    "clear-text",
-    "json",
-    "html",
-    "progress-append-only"
-  ],
+  "reporters": ["clear-text", "json", "html", "progress-append-only"],
   "thresholds": {
     "high": 90,
     "low": 80,

@@ -1,9 +1,7 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "vitest",
-  "plugins": [
-    "@stryker-mutator/vitest-runner"
-  ],
+  "plugins": ["@stryker-mutator/vitest-runner"],
   "mutate": [
     "src/tasks-api.ts",
     "src/task-reader.tsx",
@@ -14,11 +12,7 @@
     "src/App.tsx:10:0-14:200",
     "src/use-session.ts:187:0-189:200"
   ],
-  "reporters": [
-    "clear-text",
-    "json",
-    "html"
-  ],
+  "reporters": ["clear-text", "json", "html"],
   "thresholds": {
     "high": 90,
     "low": 80,
@@ -35,7 +29,5 @@
   "htmlReporter": {
     "fileName": "reports/mutation-split-task/mutation.html"
   },
-  "ignorePatterns": [
-    ".stryker-tmp-*"
-  ]
+  "ignorePatterns": [".stryker-tmp-*"]
 }

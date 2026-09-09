@@ -1,12 +1,8 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "vitest",
-  "plugins": [
-    "@stryker-mutator/vitest-runner"
-  ],
-  "ignorePatterns": [
-    ".stryker-tmp-*"
-  ],
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "ignorePatterns": [".stryker-tmp-*"],
   "mutate": [
     "src/weekly-review.tsx:37:12-37:51",
     "src/weekly-review.tsx:39:2-45:9",
@@ -16,11 +12,7 @@
     "src/weekly-review-api.ts:138:5-142:5",
     "src/weekly-review-api.ts:147:30-147:69"
   ],
-  "reporters": [
-    "clear-text",
-    "json",
-    "html"
-  ],
+  "reporters": ["clear-text", "json", "html"],
   "thresholds": {
     "high": 90,
     "low": 80,

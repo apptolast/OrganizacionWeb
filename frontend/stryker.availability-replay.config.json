@@ -1,9 +1,7 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "vitest",
-  "plugins": [
-    "@stryker-mutator/vitest-runner"
-  ],
+  "plugins": ["@stryker-mutator/vitest-runner"],
   "mutate": [
     "src/availability.tsx:38:0-38:200",
     "src/availability.tsx:51:0-51:200",
@@ -42,11 +40,7 @@
     "src/workspace.tsx:30:0-30:200",
     "src/workspace.tsx:72:0-72:200"
   ],
-  "reporters": [
-    "clear-text",
-    "json",
-    "html"
-  ],
+  "reporters": ["clear-text", "json", "html"],
   "thresholds": {
     "high": 90,
     "low": 80,
@@ -64,7 +58,5 @@
     "fileName": "reports/mutation-availability/replay.html"
   },
   "tempDirName": ".stryker-tmp-availability-replay",
-  "ignorePatterns": [
-    ".stryker-tmp-*"
-  ]
+  "ignorePatterns": [".stryker-tmp-*"]
 }

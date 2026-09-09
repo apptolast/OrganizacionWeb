@@ -406,3 +406,86 @@ Dos avisos para quien la lance, salidos de este carril:
 - `PostgresWebhookOutbox.readyEndpoints()` filtra por `e.status='active'` y ese
   filtro no lo ejerce ninguna prueba; suprimirlo del SQL no rompe nada hoy
   (parte del hallazgo 18).
+
+---
+
+# Hallazgo 2 — INTENTADO Y NO CERRADO. Trabajo guardado en `git stash`
+
+**No está en el árbol.** Lo dejé en `stash@{0}` («WIP hallazgo 2: oraculo de
+recorte por elemento + secreto en textarea (E2E rojo, sin terminar)»), en la
+rama `claude/webhooks`. Se recupera con `git stash pop`. El árbol queda en el
+último estado verde y commiteado; nada a medias.
+
+## Qué escribí
+
+1. **`e2e/webhooks-ux.spec.mjs`** — dentro del bucle de `WIDTHS`, una medida
+   nueva `clipped` y su aserción `expect(measured.clipped, ...).toEqual([])`,
+   en los cuatro anchos, los siete estados y los cinco modos que el auditor ya
+   recorría. Construida como el verificador exigía:
+   - conjunto **NOMBRADO**, nunca `body *` — `main li span` (la URL),
+     `main .webhook-secret textarea` (el secreto) y `main tbody td` (las celdas)
+     —, porque una lista abierta haría fallar código correcto: el `thead` por
+     debajo de 900 px es visually-hidden legítimo (`clip-path: inset(50%)`) y
+     ahí `scrollWidth > clientWidth` es lo correcto;
+   - **las dos dimensiones**, `scrollWidth > clientWidth + 1` **o**
+     `scrollHeight > clientHeight + 1`;
+   - aserción sobre la lista de infractores, no sobre un contador, para que el
+     fallo diga qué elemento y con qué medidas.
+2. **`frontend/src/webhooks.tsx` y `webhooks.scss`** — el cambio de PRODUCTO que
+   el cierre exige y que no es una relajación del oráculo: el secreto pasaba de
+   `<input readOnly>` a `<textarea readOnly rows={2}>` con
+   `field-sizing: content`, y se retiraba la regla muerta
+   `overflow-wrap: anywhere` sobre `.webhook-secret input` (un input de una línea
+   no envuelve; a 320 px se veían ~34 de 49 caracteres).
+
+## Por qué no lo cierro: la ejecución dio ROJO y no quedaba ventana
+
+`E2E_WEB_PORT=18090 pnpm test:e2e -- e2e/webhooks-ux.spec.mjs` → **5 failed,
+1 passed (49,1 s)**. Y el fallo **no es** el oráculo de recorte: es el paso
+previo del recorrido de estados,
+
+    e2e/webhooks-ux.spec.mjs:330
+    await expect(view.getByLabel("Secreto", { exact: true })).toHaveValue(SECRET);
+
+es decir, **el cambio de producto rompió la localización del campo del secreto**
+en los cinco tests que pasan por el estado `secret`. La causa hay que
+diagnosticarla con la pila levantada —candidatos: cómo resuelve Playwright
+`getByLabel` con un `textarea` envuelto en el `<label>`, o que la imagen web
+sirviera un bundle sin reconstruir—, y eso ya no cabía en el plazo.
+
+**Consecuencia honesta:** de este hallazgo no está acreditado ni el rojo del
+oráculo ni el verde del conjunto. Lo único demostrado es que el cambio de
+producto, tal como lo escribí, rompe cinco tests. Por eso va al stash y no al
+árbol: commitear eso sería dejar la rama roja.
+
+## Lo que debe hacer quien lo retome, en este orden
+
+1. `git stash pop` y arreglar primero la localización del campo (línea 330 de la
+   spec): decidir entre un `<textarea>` con `id` + `<label htmlFor>` explícito
+   —lo más probable que lo resuelva— o mantener el envoltorio y ajustar el
+   localizador. Volver a verde los seis tests **antes** de tocar nada más.
+2. Con los seis en verde, acreditar el rojo del oráculo con la mutación que el
+   dictamen nombra, una línea en `frontend/src/webhooks.scss`:
+
+       li span { white-space: nowrap; overflow: hidden; text-overflow: clip; }
+
+   Debe fallar en `${state}:${width} contenido recortado`. Antes de este trabajo
+   la suite quedaba verde con la URL truncada, que es justo el hueco.
+3. Restaurar, verde otra vez, y commitear.
+
+**Aviso de solape:** el zoom nativo (hallazgo 3) lo cerró otro carril en
+`e2e/webhooks-native-zoom.spec.mjs` con `scrollWidth == clientWidth`. Lo que ahí
+no hay es el recorte **por elemento** sobre el conjunto nombrado, que es
+exactamente lo que queda pendiente aquí; no lo dupliques al revés.
+
+## Hallazgo 4 — no empezado
+
+No se tocó `e2e/webhooks-ux.spec.mjs` para el recorrido de teclado. El trabajo
+sigue descrito arriba, en la sección «Por qué queda abierto cada uno». Sin
+cambios respecto a lo ya anotado.
+
+# Recuento final del carril
+
+**Cerrados: 6** — hallazgos 1, 5, 15, 16, 17, 21, todos commiteados y verdes.
+**Intentado y devuelto al stash: 1** — hallazgo 2.
+**Abiertos: 8** — 2, 4, 9, 10, 11, 12(B), 13, 18. El 3 lo cerró otro carril.

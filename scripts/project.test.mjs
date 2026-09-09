@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import * as commands from "./project.mjs";
 
@@ -2167,6 +2167,182 @@ test("automations Stryker configuration mutates only the feature files", () => {
     "src/automations.tsx",
   ]);
   assert.equal(config.thresholds.break, 80);
+});
+
+// Guardas de la puerta de mutacion de la feature 25 (webhooks). La feature se
+// integro en main sin alcance PIT, sin destinos en el arnes y sin configuracion
+// de Stryker: su corte no recibia ni un mutante y nadie podia comprobar si sus
+// pruebas muerden. Estas guardas sujetan las tres piezas.
+test("webhooks targets reject other tasks and injected options before execution", () => {
+  const { calls, project } = capture();
+  for (const target of ["webhooks-backend", "webhooks-frontend"]) {
+    assert.throws(() => project("test", target), /Invalid target/);
+    assert.throws(
+      () => project("mutate", `${target} -PmutationScope=other`),
+      /Invalid target/,
+    );
+    assert.throws(() => project("mutate", `${target}-extra`), /Invalid target/);
+  }
+  assert.deepEqual(calls, []);
+});
+
+test("webhooks backend mutation runs only its PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "webhooks-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=webhooks"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
+test("webhooks frontend mutation invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "webhooks-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.webhooks.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("webhooks PIT scope covers the whole slice and extends the default", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  const selected = build.match(
+    /val webhooksClasses = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(selected);
+  assert.deepEqual(
+    [...selected.matchAll(/"([^"]+)"/g)].map((entry) => entry[1]),
+    [
+      "domain.RetrySchedule*",
+      "domain.WebhookAttempt*",
+      "domain.WebhookCursor*",
+      "domain.WebhookDelivery*",
+      "domain.WebhookEndpoint*",
+      "domain.WebhookIntent*",
+      "domain.WebhookInvalidException*",
+      "domain.WebhookPingPayload*",
+      "application.ClaimedDelivery*",
+      "application.CreateWebhook*",
+      "application.DispatchWebhooks*",
+      "application.EnqueueWebhookDeliveries*",
+      "application.ManageWebhook*",
+      "application.OutboxCandidate*",
+      "application.ReadyEndpoint*",
+      "application.WebhookAudit*",
+      "application.WebhookCreation*",
+      "application.WebhookDeliveries*",
+      "application.WebhookDestinationGuard*",
+      "application.WebhookEndpoints*",
+      "application.WebhookOperationException*",
+      "application.WebhookOutbox*",
+      "application.WebhookSecrets*",
+      "application.WebhookSender*",
+      "application.WebhookWork*",
+      "adapter.webhook.JdkWebhookSender*",
+      "adapter.webhook.AesGcmWebhookSecrets*",
+      "adapter.webhook.WebhookSignature*",
+      "adapter.http.WebhookController*",
+      "adapter.http.WebhookDeliveryView*",
+      "adapter.http.WebhookEndpointView*",
+      "adapter.persistence.PostgresWebhookStore*",
+      "adapter.persistence.PostgresWebhookOutbox*",
+      "adapter.persistence.PostgresWebhookWork*",
+      "adapter.logging.Slf4jWebhookAudit*",
+      "adapter.config.WebhookConfiguration*",
+      "adapter.config.WebhookConnectorStartup*",
+      "adapter.config.WebhookSchedule*",
+    ].map((name) => `com.apptolast.organization.${name}`),
+  );
+  // AddressPolicy y PublicAddressPolicy son compartidas y ya viven en el ambito
+  // del calendario externo: nombrarlas aqui duplicaria la campana.
+  assert.doesNotMatch(selected, /AddressPolicy/);
+  // WebhookEndpointLookup, WebhookEndpointNotFoundException y NotifyWebhookAction
+  // son de la feature 30, no de esta: las cubre automationsClasses.
+  assert.doesNotMatch(selected, /WebhookEndpointLookup|WebhookEndpointNotFound/);
+  assert.doesNotMatch(selected, /NotifyWebhookAction/);
+  assert.match(build, /val webhooksOnly = scope == "webhooks"/);
+  assert.match(build, /webhooksOnly -> webhooksClasses/);
+  assert.match(
+    build,
+    /webhooksOnly -> setOf\("com\.apptolast\.organization\.\*"\)/,
+  );
+  assert.match(
+    build,
+    /if \(webhooksOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-webhooks"\)\)/,
+  );
+  // Sin la union en el perfil por defecto el ambito queda fuera de la campana global.
+  assert.match(build, /else -> core \+ [^\n]*webhooksClasses/);
+});
+
+test("webhooks Stryker configuration mutates only the feature files", () => {
+  const configuration = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.webhooks.config.json"),
+      "utf8",
+    ),
+  );
+  // Ficheros enteros y ningun rango linea:columna: un rango desfasado no falla,
+  // muta el codigo equivocado en silencio.
+  assert.deepEqual(configuration.mutate, [
+    "src/webhooks-client.ts",
+    "src/webhooks.tsx",
+  ]);
+  for (const entry of configuration.mutate) assert.doesNotMatch(entry, /:/);
+  assert.equal(configuration.thresholds.break, 80);
+  assert.equal(configuration.testRunner, "vitest");
+  // Directorio temporal e informe propios: no pisan los de otra feature.
+  assert.equal(configuration.tempDirName, ".stryker-tmp-webhooks");
+  assert.equal(
+    configuration.jsonReporter.fileName,
+    "reports/mutation-webhooks/mutation.json",
+  );
+});
+
+// Un patron que no casa con ninguna clase no aborta PIT: lo descarta en silencio
+// y la campana cierra en verde sobre un corte que nunca recibio un mutante. Le
+// paso al ambito del calendario externo con adapter.crypto.*; aqui no.
+test("every webhooks mutation pattern resolves to a file that exists today", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  const selected = build.match(
+    /val webhooksClasses = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  const unresolved = [...selected.matchAll(/"([^"]+)"/g)]
+    .map((entry) => entry[1])
+    .filter(
+      (pattern) =>
+        !existsSync(
+          resolve(
+            root,
+            "backend/src/main/java",
+            `${pattern.replace(/\*$/, "").replaceAll(".", "/")}.java`,
+          ),
+        ),
+    );
+  assert.deepEqual(unresolved, []);
+  const configuration = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.webhooks.config.json"),
+      "utf8",
+    ),
+  );
+  for (const file of configuration.mutate) {
+    assert.ok(
+      existsSync(resolve(root, "frontend", file)),
+      `${file} no existe: Stryker mutaria la nada`,
+    );
+  }
 });
 
 // Guardas de la feature 30, reinjertadas al fusionar: HEAD y la rama anadian bloques de

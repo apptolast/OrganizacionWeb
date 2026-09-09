@@ -35,6 +35,7 @@ pitest {
     pitestVersion.set("1.22.0")
     junit5PluginVersion.set("1.2.3")
     val scope = providers.gradleProperty("mutationScope").orNull
+    val webhooksOnly = scope == "webhooks"
     val icsCalendarOnly = scope == "ics_calendar"
     val githubConnectorOnly = scope == "github_connector"
     val integrationApiOnly = scope == "integration_api"
@@ -512,7 +513,54 @@ pitest {
         "com.apptolast.organization.adapter.persistence.AutomationActionJson*",
         "com.apptolast.organization.adapter.config.ApplicationConfiguration"
     )
+    // Feature 25. Deliberadamente NO incluye AddressPolicy ni PublicAddressPolicy
+    // (compartidas, ya en externalCalendarClasses), ni WebhookEndpointLookup,
+    // WebhookEndpointNotFoundException y NotifyWebhookAction (feature 30, ya en
+    // automationsClasses), ni ApplicationConfiguration o SecurityConfiguration
+    // (cableado compartido, ya mutado por otros ambitos): la logica de arranque
+    // propia del carril vive en WebhookConnectorStartup, y esa si entra.
+    val webhooksClasses = setOf(
+        "com.apptolast.organization.domain.RetrySchedule*",
+        "com.apptolast.organization.domain.WebhookAttempt*",
+        "com.apptolast.organization.domain.WebhookCursor*",
+        "com.apptolast.organization.domain.WebhookDelivery*",
+        "com.apptolast.organization.domain.WebhookEndpoint*",
+        "com.apptolast.organization.domain.WebhookIntent*",
+        "com.apptolast.organization.domain.WebhookInvalidException*",
+        "com.apptolast.organization.domain.WebhookPingPayload*",
+        "com.apptolast.organization.application.ClaimedDelivery*",
+        "com.apptolast.organization.application.CreateWebhook*",
+        "com.apptolast.organization.application.DispatchWebhooks*",
+        "com.apptolast.organization.application.EnqueueWebhookDeliveries*",
+        "com.apptolast.organization.application.ManageWebhook*",
+        "com.apptolast.organization.application.OutboxCandidate*",
+        "com.apptolast.organization.application.ReadyEndpoint*",
+        "com.apptolast.organization.application.WebhookAudit*",
+        "com.apptolast.organization.application.WebhookCreation*",
+        "com.apptolast.organization.application.WebhookDeliveries*",
+        "com.apptolast.organization.application.WebhookDestinationGuard*",
+        "com.apptolast.organization.application.WebhookEndpoints*",
+        "com.apptolast.organization.application.WebhookOperationException*",
+        "com.apptolast.organization.application.WebhookOutbox*",
+        "com.apptolast.organization.application.WebhookSecrets*",
+        "com.apptolast.organization.application.WebhookSender*",
+        "com.apptolast.organization.application.WebhookWork*",
+        "com.apptolast.organization.adapter.webhook.JdkWebhookSender*",
+        "com.apptolast.organization.adapter.webhook.AesGcmWebhookSecrets*",
+        "com.apptolast.organization.adapter.webhook.WebhookSignature*",
+        "com.apptolast.organization.adapter.http.WebhookController*",
+        "com.apptolast.organization.adapter.http.WebhookDeliveryView*",
+        "com.apptolast.organization.adapter.http.WebhookEndpointView*",
+        "com.apptolast.organization.adapter.persistence.PostgresWebhookStore*",
+        "com.apptolast.organization.adapter.persistence.PostgresWebhookOutbox*",
+        "com.apptolast.organization.adapter.persistence.PostgresWebhookWork*",
+        "com.apptolast.organization.adapter.logging.Slf4jWebhookAudit*",
+        "com.apptolast.organization.adapter.config.WebhookConfiguration*",
+        "com.apptolast.organization.adapter.config.WebhookConnectorStartup*",
+        "com.apptolast.organization.adapter.config.WebhookSchedule*"
+    )
     targetClasses.set(when {
+        webhooksOnly -> webhooksClasses
         automationsOnly -> automationsClasses
         icsCalendarOnly -> icsCalendarClasses
         githubConnectorOnly -> githubConnectorClasses
@@ -540,9 +588,10 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses + integrationApiClasses + integrationApiHttpClasses + icsCalendarClasses + githubConnectorClasses + externalCalendarClasses + automationsClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses + integrationApiClasses + integrationApiHttpClasses + icsCalendarClasses + githubConnectorClasses + externalCalendarClasses + automationsClasses + webhooksClasses
     })
     targetTests.set(when {
+        webhooksOnly -> setOf("com.apptolast.organization.*")
         automationsOnly -> setOf("com.apptolast.organization.*")
         icsCalendarOnly -> setOf("com.apptolast.organization.*")
         githubConnectorOnly -> setOf("com.apptolast.organization.*")
@@ -571,6 +620,7 @@ pitest {
         taskOnly -> taskTests
         else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests + weeklyReviewAdapterTests + appearanceAdapterTests + customizationAdapterTests + exportAdapterTests + importAdapterTests
     })
+    if (webhooksOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-webhooks"))
     if (icsCalendarOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-ics-calendar"))
     if (githubConnectorOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-github-connector"))
     if (integrationApiOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-integration-api"))

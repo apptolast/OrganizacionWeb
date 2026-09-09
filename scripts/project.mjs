@@ -77,6 +77,8 @@ export function createProject(runner = run) {
           "external_calendar-frontend",
           "automations-backend",
           "automations-frontend",
+          "webhooks-backend",
+          "webhooks-frontend",
         ].includes(target))
     ) {
       throw new Error(`Invalid target: ${target}`);
@@ -217,6 +219,21 @@ export function createProject(runner = run) {
     }
     if (task === "mutate" && target === "import_data-persistence-backend") {
       backend("pitest", ["-PmutationScope=import_data_persistence"]);
+      return;
+    }
+    if (task === "mutate" && target === "webhooks-backend") {
+      backend("pitest", ["-PmutationScope=webhooks"]);
+      return;
+    }
+    if (task === "mutate" && target === "webhooks-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.webhooks.config.json",
+      ]);
       return;
     }
     if (task === "mutate" && target === "external_calendar-backend") {

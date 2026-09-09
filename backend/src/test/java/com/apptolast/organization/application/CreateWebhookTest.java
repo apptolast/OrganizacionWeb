@@ -45,7 +45,7 @@ class CreateWebhookTest {
                     };
                 default -> throw new java.net.UnknownHostException(host);
               },
-          com.apptolast.organization.domain.BlockedAddresses::isBlocked);
+          AddressPolicy::isBlocked);
 
   static final class Endpoints implements WebhookEndpoints {
     final List<WebhookEndpoint> stored = new ArrayList<>();

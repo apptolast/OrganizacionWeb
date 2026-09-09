@@ -537,9 +537,10 @@ class GithubConnectorPersistenceTest {
   private void insertReceipt(UUID id, String status, String errorCode, Instant finishedAt) {
     jdbc.update(
         "INSERT INTO issue_import_receipts(id,owner_id,source,project_id,project_path,status,created,skipped,failed,truncated,error_code,started_at,finished_at)"
-            + " VALUES (?,?,?,?,?,0,0,0,false,?,?,?)",
+            + " VALUES (?,?,?,?,?,?,0,0,0,false,?,?,?)",
         id,
         OWNER,
+        "github",
         projectId,
         REPOSITORY,
         status,

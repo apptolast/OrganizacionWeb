@@ -150,8 +150,25 @@ Pero la puerta de mutación **no la pasa**, y este es el dato duro del día:
   hermana tardando 75 s. PIT exige suite verde. Hay que repetirla con la máquina
   libre antes de concluir nada.
 
+**Segunda medición, con la máquina libre y tras atacar cuatro racimos:
+69,44 % → 75,55 %.** Sigue por debajo de 80, pero el movimiento está donde se
+predijo:
+
+| Fichero | Antes | Después | Supervivientes |
+|---|---|---|---|
+| `github-connector-client.ts` | 73,17 % | **85,37 %** | 66 → 36 |
+| `github-connector.tsx` | 66,86 % | 68,62 % | 108 → 107 |
+| `integrations-index.tsx` | 50,00 % | 50,00 % | 1 → 1 |
+| **Total** | **69,44 %** | **75,55 %** | 175 → 144 |
+
+Los **5 mutantes sin cobertura pasan a cero**. La previsión del carril era «74-75 %
+en el total»; la medida da 75,55 %, así que la previsión era honesta. Lo que
+falta para el umbral está concentrado en `github-connector.tsx`: **107
+supervivientes**, sin tocar. Ese es el trabajo exacto que separa a la feature 27
+de poder cerrarse, y ya no hay que buscarlo.
+
 Sobre los supervivientes se atacaron cuatro racimos, con previsión —declarada
-como previsión, no como medida— de 35 a 37 muertos de 175. El mayor racimo eran
+como previsión, no como medida— de 35 a 37 muertos de 175; murieron 31. El mayor racimo eran
 **13 supervivientes de una sola causa**: cinco operaciones que llaman
 `signal.throwIfAborted()` tres veces cada una, y solo la primera llamada de una
 operación tenía oráculo. Y la rama sin cobertura resultó ser el `catch` de

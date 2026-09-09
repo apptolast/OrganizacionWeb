@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import com.apptolast.organization.application.*;
 import com.apptolast.organization.domain.ExternalIssue;
+import com.apptolast.organization.domain.PersonalAccessToken;
 import com.apptolast.organization.domain.Task;
 import com.apptolast.organization.support.TestDatabase;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,6 +41,10 @@ class GithubConnectorPersistenceTest {
   private static final String OTHER = "owner-b";
   private static final String REPOSITORY = "octocat/Hello-World";
   private static final Instant NOW = Instant.parse("2026-09-09T12:00:00Z");
+  // El formato en reposo de AesGcmSecretCipher: nonce delante, etiqueta GCM detrás, sin byte de
+  // versión desde que se unificó el cifrador entre las features 27 y 28.
+  private static final int NONCE_BYTES = 12;
+  private static final int TAG_BYTES = 16;
 
   static JdbcTemplate jdbc;
   static DataSourceTransactionManager manager;
@@ -155,6 +160,50 @@ class GithubConnectorPersistenceTest {
                 Integer.class,
                 OWNER))
         .isEqualTo(43);
+  }
+
+  /**
+   * @s1 el formato en reposo es 12 de nonce + texto + 16 de etiqueta, sin byte de versión. Un token
+   *     de un solo carácter —que el dominio admite, porque {@code PersonalAccessToken} sólo acota el
+   *     máximo— produce 29 octetos, y la fila tiene que entrar. Quien decide si un token de un
+   *     carácter vale es el dominio, con su mensaje; no la base de datos con una violación de
+   *     restricción, que además saldría como 500 en vez de como el error del contrato.
+   */
+  @Test
+  void s1_theShortestTokenTheDomainAcceptsAlsoFitsInTheColumn() {
+    var shortest = new PersonalAccessToken("x");
+    var sealed = new byte[NONCE_BYTES + shortest.value().length() + TAG_BYTES];
+
+    connections.save(OWNER, connection(REPOSITORY, "valid", sealed));
+
+    assertThat(sealed).hasSize(29);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT octet_length(token_ciphertext) FROM connector_connections WHERE owner_id=?",
+                Integer.class,
+                OWNER))
+        .isEqualTo(29);
+  }
+
+  /**
+   * La cota alta, por el otro extremo: el token más largo que el dominio admite son 255 caracteres,
+   * que cifrados son 283 octetos. Las dos pruebas juntas fijan el rango entero, de modo que una cota
+   * calculada para otro formato no puede volver a pasar inadvertida.
+   */
+  @Test
+  void s1_theLongestTokenTheDomainAcceptsAlsoFitsInTheColumn() {
+    var longest = new PersonalAccessToken("t".repeat(255));
+    var sealed = new byte[NONCE_BYTES + longest.value().length() + TAG_BYTES];
+
+    connections.save(OWNER, connection(REPOSITORY, "valid", sealed));
+
+    assertThat(sealed).hasSize(283);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT octet_length(token_ciphertext) FROM connector_connections WHERE owner_id=?",
+                Integer.class,
+                OWNER))
+        .isEqualTo(283);
   }
 
   @Test

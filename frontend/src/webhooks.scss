@@ -2,6 +2,10 @@
 // The real colour oracle is the axe E2E pass, not this sheet.
 .webhooks {
   color: var(--ink);
+  // Inherited by everything inside. At 200 % text on a 320 px screen an unbreakable
+  // token such as "X-OrganizationWeb-Signature", or a long URL, would otherwise push
+  // the page sideways. Breaking mid-word is preferable to a horizontal scroll.
+  overflow-wrap: anywhere;
 
   h2 {
     color: var(--ink);
@@ -64,9 +68,34 @@
     border-radius: 0.375rem;
   }
 
+  // A text input defaults to `size=20`, an intrinsic width that grows with the font.
+  // At 200 % text on a 320 px screen that alone overflows the page, so the fields are
+  // fluid instead: they follow the column, never their own character count.
+  form label {
+    display: block;
+    min-width: 0;
+  }
+
+  form input:not([type="checkbox"]) {
+    inline-size: 100%;
+    box-sizing: border-box;
+  }
+
+  // A bare checkbox is far smaller than 44 px, so the LABEL is the real target:
+  // it wraps the box, is clickable, and carries the comfortable hit area itself.
+  label:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0 0.25rem;
+  }
+
   input[type="checkbox"] {
     min-height: 0;
     min-width: 0;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
   }
 
   fieldset {
@@ -90,15 +119,16 @@
   }
 }
 
-// The delivery table is the widest thing on the page: it scrolls inside its own
-// box so the page itself never scrolls sideways at 320 px.
+// Eight columns with 44 px targets cannot fit 320 px, and @s42 forbids BOTH a
+// horizontal scroll and clipping the table. So the table reflows: wide screens keep
+// real columns, narrow ones stack each delivery into a labelled block. Nothing is
+// hidden at any width; only the layout changes.
 .webhook-deliveries {
   max-width: 100%;
-  overflow-x: auto;
 
   table {
     border-collapse: collapse;
-    min-width: 100%;
+    width: 100%;
   }
 
   th,
@@ -107,9 +137,52 @@
     text-align: left;
     border-bottom: 1px solid var(--line);
     color: var(--ink);
+    overflow-wrap: anywhere;
   }
 
   th {
     color: var(--muted);
+  }
+
+  @media (width < 900px) {
+    thead {
+      // Visually stacked away, still present for assistive technology.
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    tr {
+      display: block;
+      margin-block-end: 0.75rem;
+      border: 1px solid var(--line);
+      border-radius: 0.5rem;
+    }
+
+    td {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+
+      &:last-child {
+        border-bottom: 0;
+      }
+
+      // Each cell states its own column, so stacking loses no meaning.
+      &::before {
+        content: attr(data-label);
+        color: var(--muted);
+        flex: 0 0 auto;
+      }
+
+      &:empty {
+        display: none;
+      }
+    }
   }
 }

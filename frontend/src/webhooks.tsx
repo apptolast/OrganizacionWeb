@@ -29,6 +29,17 @@ const eventLabels = [
   "Cerrar sesión de trabajo",
 ];
 
+const deliveryColumns = [
+  "Tipo",
+  "Intento",
+  "Código HTTP",
+  "Latencia",
+  "Clase de error",
+  "Estado",
+  "Fecha",
+  "Acciones",
+];
+
 const deliveryStatusLabels: Record<string, string> = {
   pending: "Pendiente",
   succeeded: "Entregada",
@@ -76,6 +87,8 @@ function WebhookPanel() {
 
   const listHeading = useRef<HTMLHeadingElement>(null);
   const createButton = useRef<HTMLButtonElement>(null);
+  // Whatever opened the confirmation gets the focus back when it closes.
+  const confirmOpener = useRef<HTMLButtonElement | null>(null);
   const requests = useRef<AbortController[]>([]);
   const urlErrorId = useId();
 
@@ -239,8 +252,14 @@ function WebhookPanel() {
     createButton.current?.focus();
   }
 
+  function closeConfirmation() {
+    setConfirming(null);
+    confirmOpener.current?.focus();
+    confirmOpener.current = null;
+  }
+
   return (
-    <section className="webhooks">
+    <main id="proyectos" tabIndex={-1} className="webhooks">
       <h1>Webhooks</h1>
 
       <div aria-live="polite">{loading && <p>Cargando webhooks…</p>}</div>
@@ -400,7 +419,13 @@ function WebhookPanel() {
             <button type="button" onClick={() => openDeliveries(endpoint)}>
               Ver entregas
             </button>
-            <button type="button" onClick={() => setConfirming(endpoint)}>
+            <button
+              type="button"
+              onClick={(event) => {
+                confirmOpener.current = event.currentTarget;
+                setConfirming(endpoint);
+              }}
+            >
               Eliminar
             </button>
           </li>
@@ -416,7 +441,7 @@ function WebhookPanel() {
           <button type="button" onClick={() => remove(confirming)}>
             Confirmar eliminación
           </button>
-          <button type="button" onClick={() => setConfirming(null)}>
+          <button type="button" onClick={closeConfirmation}>
             Cancelar
           </button>
         </div>
@@ -434,32 +459,47 @@ function WebhookPanel() {
           >
             Actualizar
           </button>
-          <table>
+          {/*
+            Explicit ARIA roles: at narrow widths the stylesheet stacks these elements,
+            and overriding `display` on table elements would otherwise strip the table
+            semantics from the accessibility tree. Each cell also carries its own label
+            so nothing is lost when the header row is visually stacked away.
+          */}
+          <table role="table">
             <thead>
-              <tr>
-                <th>Tipo</th>
-                <th>Intento</th>
-                <th>Código HTTP</th>
-                <th>Latencia</th>
-                <th>Clase de error</th>
-                <th>Estado</th>
-                <th>Fecha</th>
-                <th>Acciones</th>
+              <tr role="row">
+                {deliveryColumns.map((column) => (
+                  <th key={column} role="columnheader" scope="col">
+                    {column}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {deliveries.map((row) => (
-                <tr key={row.id}>
-                  <td>{row.eventType}</td>
-                  <td>{row.attempt}</td>
-                  <td>{row.httpStatus ?? "—"}</td>
-                  <td>
+                <tr key={row.id} role="row">
+                  <td role="cell" data-label="Tipo">
+                    {row.eventType}
+                  </td>
+                  <td role="cell" data-label="Intento">
+                    {row.attempt}
+                  </td>
+                  <td role="cell" data-label="Código HTTP">
+                    {row.httpStatus ?? "—"}
+                  </td>
+                  <td role="cell" data-label="Latencia">
                     {row.latencyMs === null ? "—" : `${row.latencyMs} ms`}
                   </td>
-                  <td>{row.errorClass ?? "—"}</td>
-                  <td>{deliveryStatusLabels[row.status]}</td>
-                  <td>{row.updatedAt.slice(0, 10)}</td>
-                  <td>
+                  <td role="cell" data-label="Clase de error">
+                    {row.errorClass ?? "—"}
+                  </td>
+                  <td role="cell" data-label="Estado">
+                    {deliveryStatusLabels[row.status]}
+                  </td>
+                  <td role="cell" data-label="Fecha">
+                    {row.updatedAt.slice(0, 10)}
+                  </td>
+                  <td role="cell" data-label="Acciones">
                     {row.status !== "pending" && (
                       <button
                         type="button"
@@ -475,6 +515,6 @@ function WebhookPanel() {
           </table>
         </div>
       )}
-    </section>
+    </main>
   );
 }

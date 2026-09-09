@@ -80,6 +80,19 @@ async function shown() {
   );
 }
 
+it("@s42 provides the main landmark the skip link points at", async () => {
+  stubApi([]);
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+
+  const main = screen.getByRole("main");
+  expect(main).toHaveAttribute("id", "proyectos");
+  expect(main).toContainElement(
+    screen.getByRole("heading", { level: 1, name: "Webhooks" }),
+  );
+});
+
 it("@s36 announces the loading state before showing anything else", async () => {
   let reply!: (response: Response) => void;
   vi.stubGlobal(
@@ -568,6 +581,22 @@ it("@s41 offers to refresh the list after a network failure of uncertain result"
     screen.getByRole("button", { name: "Actualizar lista" }),
   ).toBeVisible();
   expect(other).toHaveBeenCalledTimes(1);
+});
+
+it("@s42 cancelling the delete confirmation returns focus to the control that opened it", async () => {
+  stubApi([endpoint()]);
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  const remove = screen.getByRole("button", { name: "Eliminar" });
+  await user.click(remove);
+  expect(screen.getByRole("dialog")).toBeVisible();
+
+  await user.click(screen.getByRole("button", { name: "Cancelar" }));
+
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(remove).toHaveFocus();
 });
 
 it("@s42 gives every control an accessible name and returns focus after closing the secret", async () => {

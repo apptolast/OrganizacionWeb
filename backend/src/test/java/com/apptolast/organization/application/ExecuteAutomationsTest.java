@@ -21,8 +21,11 @@ class ExecuteAutomationsTest {
   private static final Instant T0 = Instant.parse("2026-09-08T10:00:00.000000Z");
   private static final Instant CREATED = T0.minusSeconds(3600);
   private static final Instant OCCURRED = Instant.parse("2026-09-08T10:15:30.123456Z");
+  private static final UUID COMPLETED = UUID.fromString("33333333-3333-4333-8333-333333333333");
+  private static final UUID ENDPOINT = UUID.fromString("44444444-4444-4444-8444-444444444444");
 
   private String projectName = "Marketing";
+  private String taskTitle = "Redactar informe";
 
   private final FakeWork work = new FakeWork();
   private final InMemoryAutomations rules = new InMemoryAutomations();
@@ -47,12 +50,12 @@ class ExecuteAutomationsTest {
 
         @Override
         public Optional<String> taskTitle(String owner, UUID taskId) {
-          return Optional.of("Redactar informe");
+          return Optional.of(taskTitle);
         }
 
         @Override
         public boolean projectCompleted(String owner, UUID projectId) {
-          return false;
+          return projectId.equals(COMPLETED);
         }
       };
   private final AutomationLoopGuard guard = (owner, taskId) -> false;
@@ -203,6 +206,78 @@ class ExecuteAutomationsTest {
     assertThat(work.cursors.get(OWNER)).isEqualTo(new AutomationCursor(T0.plusSeconds(1), E1));
   }
 
+  @ParameterizedTest
+  @CsvSource({
+    "completed project, PROJECT_COMPLETED",
+    "161 code point title, TITLE_TOO_LONG",
+    "2001 code point criterion, CRITERION_TOO_LONG",
+    "deleted endpoint, ENDPOINT_NOT_FOUND",
+    "disabled endpoint, ENDPOINT_NOT_FOUND"
+  })
+  void s21_aDeterministicFailureIsFailedAtTheFirstAttemptAndNeverStopsTheOtherRule(
+      String situation, String code) {
+    var broken = brokenRule(situation);
+    var sound = ruleWith(true, "Fijo de R2");
+    work.owners.add(OWNER);
+    rules.create(OWNER, broken);
+    rules.create(OWNER, sound);
+    work.cursors.put(OWNER, new AutomationCursor(T0, E0));
+    work.outbox.add(taskCreated(E1, T0.plusSeconds(1)));
+
+    execute.runCycle();
+
+    assertThat(runOf(broken))
+        .extracting(
+            AutomationRun::attempt,
+            AutomationRun::status,
+            AutomationRun::errorCode,
+            AutomationRun::createdTaskId,
+            AutomationRun::deliveryId)
+        .containsExactly(1, "failed", code, null, null);
+    assertThat(effectOf(broken)).isEqualTo(new AutomationEffect.None());
+    assertThat(runOf(sound).status()).isEqualTo("succeeded");
+    assertThat(effectOf(sound)).isInstanceOf(AutomationEffect.CreateTask.class);
+    assertThat(work.cursors.get(OWNER)).isEqualTo(new AutomationCursor(T0.plusSeconds(1), E1));
+
+    execute.runCycle();
+
+    assertThat(work.runs()).as("a deterministic failure is never retried").hasSize(2);
+  }
+
+  private AutomationRule brokenRule(String situation) {
+    return switch (situation) {
+      case "completed project" ->
+          ruleFor(new CreateTaskAction(COMPLETED, "Revisar lo cerrado", null, 30));
+      case "161 code point title" -> {
+        taskTitle = "x".repeat(161);
+        yield ruleFor(new CreateTaskAction(P, "{{task.title}}", null, 30));
+      }
+      case "2001 code point criterion" -> {
+        taskTitle = "x".repeat(2001);
+        yield ruleFor(new CreateTaskAction(P, "Titulo corto", "{{task.title}}", 30));
+      }
+      // The port answers the same for a deleted and for a disabled endpoint, and so does the
+      // contract: both rows expect ENDPOINT_NOT_FOUND.
+      default -> ruleFor(new NotifyWebhookAction(ENDPOINT));
+    };
+  }
+
+  private AutomationRun runOf(AutomationRule rule) {
+    return outcomeOf(rule).run();
+  }
+
+  private AutomationEffect effectOf(AutomationRule rule) {
+    return outcomeOf(rule).effect();
+  }
+
+  private AutomationOutcome outcomeOf(AutomationRule rule) {
+    return work.commits.stream()
+        .flatMap(commit -> commit.outcomes().stream())
+        .filter(outcome -> rule.id().equals(outcome.run().ruleId()))
+        .findFirst()
+        .orElseThrow(() -> new AssertionError("no run for rule " + rule.id()));
+  }
+
   private void givenARuleThatCreatesTasks() {
     work.owners.add(OWNER);
     rules.create(OWNER, rule(taskAction()));
@@ -227,6 +302,10 @@ class ExecuteAutomationsTest {
   }
 
   private static AutomationRule rule(AutomationAction action) {
+    return ruleAt(action, CREATED);
+  }
+
+  private static AutomationRule ruleFor(AutomationAction action) {
     return ruleAt(action, CREATED);
   }
 

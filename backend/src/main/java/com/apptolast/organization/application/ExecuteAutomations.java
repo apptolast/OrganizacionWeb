@@ -5,6 +5,7 @@ import com.apptolast.organization.domain.AutomationEvent;
 import com.apptolast.organization.domain.AutomationRule;
 import com.apptolast.organization.domain.AutomationRun;
 import com.apptolast.organization.domain.CreateTaskAction;
+import com.apptolast.organization.domain.NotifyWebhookAction;
 import java.time.Clock;
 import java.util.Comparator;
 import java.util.List;
@@ -14,6 +15,9 @@ import java.util.UUID;
 /** Walks each owner's outbox and turns the events their rules match into runs and effects. */
 public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
   private static final String SUCCEEDED = "succeeded";
+  private static final String FAILED = "failed";
+  private static final String ENDPOINT_NOT_FOUND = "ENDPOINT_NOT_FOUND";
+  private static final int FIRST_ATTEMPT = 1;
 
   private final AutomationWork work;
   private final AutomationRuleStore rules;
@@ -77,10 +81,18 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
   }
 
   private AutomationOutcome outcomeOf(String owner, AutomationRule rule, AutomationEvent event) {
-    var action = (CreateTaskAction) rule.draft().action();
+    return switch (rule.draft().action()) {
+      case CreateTaskAction action -> taskOutcome(owner, rule, event, action);
+      case NotifyWebhookAction action -> notifyOutcome(owner, rule, event, action);
+    };
+  }
+
+  private AutomationOutcome taskOutcome(
+      String owner, AutomationRule rule, AutomationEvent event, CreateTaskAction action) {
     var preview = rendering.preview(owner, action, event);
+    if (preview.wouldFail() != null) return failed(owner, rule, event, preview.wouldFail());
     return new AutomationOutcome(
-        run(owner, rule.id(), event, SUCCEEDED),
+        run(owner, rule.id(), event, SUCCEEDED, null),
         new AutomationEffect.CreateTask(
             preview.projectId(),
             preview.title(),
@@ -88,7 +100,26 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
             preview.estimatedMinutes()));
   }
 
-  private AutomationRun run(String owner, UUID ruleId, AutomationEvent event, String status) {
+  private AutomationOutcome notifyOutcome(
+      String owner, AutomationRule rule, AutomationEvent event, NotifyWebhookAction action) {
+    // A deleted endpoint and a disabled one look the same from here, and the contract gives both
+    // the same code: the rule can no longer reach an active endpoint of this owner.
+    if (!endpoints.isActiveEndpointOf(owner, action.endpointId()))
+      return failed(owner, rule, event, ENDPOINT_NOT_FOUND);
+    return new AutomationOutcome(
+        run(owner, rule.id(), event, SUCCEEDED, null),
+        new AutomationEffect.Notify(action.endpointId(), event));
+  }
+
+  /** A deterministic failure: it is settled at the first attempt and never retried. */
+  private AutomationOutcome failed(
+      String owner, AutomationRule rule, AutomationEvent event, String errorCode) {
+    return new AutomationOutcome(
+        run(owner, rule.id(), event, FAILED, errorCode), new AutomationEffect.None());
+  }
+
+  private AutomationRun run(
+      String owner, UUID ruleId, AutomationEvent event, String status, String errorCode) {
     return new AutomationRun(
         UUID.randomUUID(),
         ruleId,
@@ -96,11 +127,11 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
         event.eventId(),
         event.eventType(),
         event.occurredAt(),
-        1,
+        FIRST_ATTEMPT,
         status,
         null,
         null,
-        null,
+        errorCode,
         CustomizationTime.capture(clock));
   }
 

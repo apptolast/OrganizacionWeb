@@ -195,6 +195,7 @@ Feature: Suscribirse en solo lectura a un calendario iCalendar externo y verlo e
       | 404                                                                        | FEED_HTTP_ERROR       |
       | 500                                                                        | FEED_HTTP_ERROR       |
       | conexión rechazada                                                         | FEED_UNREACHABLE      |
+      | presenta un certificado que no es válido para su nombre                    | FEED_UNREACHABLE      |
       | 200 tras 6 s sin enviar cabeceras                                          | FEED_UNREACHABLE      |
       | 200 text/calendar que envía las cabeceras y luego gotea el cuerpo sin cerrar | FEED_UNREACHABLE      |
       | 200 text/calendar con cuerpo de 1 MiB más 1 byte                           | FEED_TOO_LARGE        |

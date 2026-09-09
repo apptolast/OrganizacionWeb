@@ -202,3 +202,70 @@ defecto de la ruta y el puerto de `authority`. El que puede sobrevivir es
 si la propiedad no venía ya puesta por otra prueba del mismo JVM; la segunda
 prueba, `enablingItDoesNotDropWhatTheDeploymentAlreadyDeclared`, sí lo mata en
 cualquier orden porque fija la propiedad a `connection` antes de llamar.
+
+### Ciclo 3 — @s12/B3: el calendario externo, anclado igual y probado igual
+
+El punto 3 del encargo. `HttpCalendarFeed` **sí** anclaba, pero su TLS no tenía
+oráculo, y `docs/external-calendar.md:41-45` lo decía con todas las letras: «la
+parte de SNI/certificado no tiene prueba propia: el arnés de esta clase habla
+HTTP en claro contra `127.0.0.1`». O sea, la mitad que había decidido bien lo
+había hecho sin red debajo.
+
+**ROJO (no compila, que cuenta como rojo).** Las tres pruebas nuevas piden un
+constructor con la confianza inyectada, que no existía:
+
+```
+HttpCalendarFeedTest.java:442: error: constructor HttpCalendarFeed in class
+  HttpCalendarFeed cannot be applied to given types;
+```
+
+**VERDE.** Dos cosas:
+
+1. `HttpCalendarFeed` gana el mismo constructor de paquete con `SSLContext` que
+   el emisor, por el mismo motivo y con el mismo comentario.
+2. Se queda con **una sola** copia del anclaje: su bloque estático, su `literal`,
+   su `authority` y sus `SSLParameters` se sustituyen por
+   `AnchoredConnection`. Adelgaza 30 líneas y, de paso, hereda la guarda de
+   direcciones literales que le faltaba (un destino IPv6 literal la habría hecho
+   estallar con `IllegalArgumentException`).
+
+**Pruebas nuevas** (`HttpCalendarFeedTest`), hermanas exactas de las del emisor y
+sobre el mismo fixture:
+
+| Prueba | Afirma |
+|---|---|
+| `s12_b3_unCertificadoValidoParaElNombreSeAceptaAunqueSeConecteALaDireccion` | descarga correcta y `Host` con el nombre |
+| `s12_b3_elMismoCertificadoSeRechazaSiElNombrePedidoEsOtro` | `FEED_UNREACHABLE`, sin petición |
+| `s12_b3_unCertificadoQueNadieAvalaSeRechaza` | `FEED_UNREACHABLE`, sin petición |
+
+La tercera no necesita un segundo fixture: es el mismo servidor visto por un
+cliente con la confianza de la plataforma, que no lo avala.
+
+**ROJO acreditado, dos mutantes.**
+
+```
+MUTANTE A (AnchoredConnection sin setServerNames):
+  s12_b3_unCertificadoValidoParaElNombreSeAceptaAunqueSeConecteALaDireccion FAILED
+    el certificado se verificó por nombre pese a conectar por dirección
+      ==> expected: <FeedFetch.Downloaded> but was: <FeedFetch.Failed>
+MUTANTE D (HttpRequest.newBuilder(target), es decir desanclar y volver al nombre):
+  s12_b3_unCertificadoValidoParaElNombreSeAcepta... FAILED
+  s13_connectsToTheValidatedAddressAndKeepsTheNameInHost FAILED
+```
+
+El mutante D confirma que el anclaje del calendario ya tenía su oráculo (la
+prueba `s13_...`) y que ahora además tiene el del TLS.
+
+**Contrato (REGLAS §8).** `features/external_calendar.feature` gana una fila en
+los ejemplos de @s12: `| presenta un certificado que no es válido para su nombre
+| FEED_UNREACHABLE |`. **Por qué:** el conjunto cerrado de códigos de la feature
+(línea 15) no tiene una clase propia para TLS, y el adaptador mapea cualquier
+fallo de entrada/salida a `FEED_UNREACHABLE`; la fila describe el comportamiento
+que ahora está probado, en lugar de dejarlo como un caso que el contrato no
+menciona. Se cubre en `HttpCalendarFeedTest`, que es donde ya viven otras filas
+de ese mismo outline (`s12_anAbsentContentTypeIsUnsupported`,
+`s12_aRefusedConnectionIsUnreachable`).
+
+**Verde de las tres clases tocadas:** `HttpCalendarFeedTest` 37/37,
+`AnchoredConnectionTest` 9/9, `JdkWebhookSenderTest` 19/19, y
+`ExternalCalendarWiringTest` sigue verde con el constructor público intacto.

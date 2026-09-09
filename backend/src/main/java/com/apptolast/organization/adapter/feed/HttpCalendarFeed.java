@@ -1,5 +1,6 @@
 package com.apptolast.organization.adapter.feed;
 
+import com.apptolast.organization.adapter.net.AnchoredConnection;
 import com.apptolast.organization.application.AddressPolicy;
 import com.apptolast.organization.application.CalendarFeed;
 import com.apptolast.organization.application.FeedFetch;
@@ -7,7 +8,6 @@ import com.apptolast.organization.application.HostResolver;
 import com.apptolast.organization.domain.FeedError;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -20,8 +20,7 @@ import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import javax.net.ssl.SNIHostName;
-import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLContext;
 
 /**
  * Descarga de solo lectura: sin redirecciones, sin credenciales, con Accept text/calendar, corte a
@@ -33,10 +32,18 @@ import javax.net.ssl.SSLParameters;
  * literal ya validada, conservando el nombre original en la cabecera Host y en la indicación de
  * servidor de TLS.» Eso es lo que hace {@link #fetch(String)}: resuelve aquí, dentro de la misma
  * clase que abre la conexión, exige que <b>todas</b> las direcciones devueltas pasen la {@link
- * AddressPolicy}, y construye la petición contra la dirección literal. El nombre viaja en la
- * cabecera {@code Host} y en el {@code SNIHostName} de TLS. Como el cliente HTTP recibe ya una
- * dirección, no vuelve a preguntar al DNS: el reenlace de nombres entre la comprobación y el uso
- * deja de ser posible, en vez de aceptarse como riesgo residual.
+ * AddressPolicy}, y construye la petición contra la dirección literal. Como el cliente HTTP recibe
+ * ya una dirección, no vuelve a preguntar al DNS: el reenlace de nombres entre la comprobación y el
+ * uso deja de ser posible, en vez de aceptarse como riesgo residual.
+ *
+ * <p>Las tres piezas del anclaje —dirección literal, cabecera {@code Host} e indicación de servidor
+ * de TLS— viven en {@link AnchoredConnection}, compartidas con el emisor de webhooks de la feature
+ * 25, que ancla igual. Es una sola decisión; tenerla escrita dos veces fue lo que dejó que los dos
+ * carriles decidieran lo contrario sin verse.
+ *
+ * <p>Anclar no cuesta el TLS, y está medido en los dos sentidos: un certificado válido para el
+ * nombre se acepta aunque la conexión vaya a la dirección, y el mismo certificado se rechaza si el
+ * nombre pedido es otro (ver {@code HttpCalendarFeedTest}, sección de la enmienda B3).
  *
  * <p>Límite que sí queda, y conviene no disfrazar: si el nombre resuelve a varias direcciones se
  * conecta a la primera y no se reintenta con las demás. Todas estaban validadas, así que no es un
@@ -62,13 +69,7 @@ public final class HttpCalendarFeed implements CalendarFeed {
   private static final String ACCEPT = "text/calendar";
 
   static {
-    // Enviar «Host» a mano es imprescindible para conectar por dirección literal sin perder el
-    // nombre, y el cliente del JDK lo prohíbe salvo que se le autorice antes de cargar su clase de
-    // utilidades. Se añade sin pisar lo que ya hubiera declarado el despliegue.
-    var allowed = System.getProperty("jdk.httpclient.allowRestrictedHeaders", "");
-    if (!allowed.toLowerCase(Locale.ROOT).contains("host"))
-      System.setProperty(
-          "jdk.httpclient.allowRestrictedHeaders", allowed.isEmpty() ? "host" : allowed + ",host");
+    AnchoredConnection.allow();
   }
 
   /**
@@ -86,11 +87,23 @@ public final class HttpCalendarFeed implements CalendarFeed {
   private final Duration timeout;
   private final HostResolver resolver;
   private final AddressPolicy policy;
+  private final SSLContext tls;
 
   public HttpCalendarFeed(Duration timeout, HostResolver resolver, AddressPolicy policy) {
+    this(timeout, resolver, policy, null);
+  }
+
+  /**
+   * La confianza es inyectable sólo para las pruebas: una prueba no puede añadir una autoridad al
+   * almacén del JDK, y sin eso no se puede demostrar que un certificado válido para el NOMBRE se
+   * acepta mientras la conexión va a la DIRECCIÓN. Null es la confianza de la plataforma, que es la
+   * que usa producción.
+   */
+  HttpCalendarFeed(Duration timeout, HostResolver resolver, AddressPolicy policy, SSLContext tls) {
     this.timeout = timeout;
     this.resolver = resolver;
     this.policy = policy;
+    this.tls = tls;
   }
 
   @Override
@@ -123,10 +136,10 @@ public final class HttpCalendarFeed implements CalendarFeed {
     HttpRequest request;
     try {
       request =
-          HttpRequest.newBuilder(literal(target, pinned))
+          HttpRequest.newBuilder(AnchoredConnection.literal(target, pinned))
               .GET()
               .header("Accept", ACCEPT)
-              .header("Host", authority(target, host))
+              .header("Host", AnchoredConnection.authority(target, host))
               .timeout(timeout)
               .build();
     } catch (IllegalArgumentException rejected) {
@@ -154,30 +167,14 @@ public final class HttpCalendarFeed implements CalendarFeed {
    * podría elegir su certificado.
    */
   private HttpClient client(String host) {
-    var parameters = new SSLParameters();
-    parameters.setServerNames(List.of(new SNIHostName(host)));
-    parameters.setEndpointIdentificationAlgorithm("HTTPS");
-    return HttpClient.newBuilder()
-        .version(HttpClient.Version.HTTP_1_1)
-        .followRedirects(HttpClient.Redirect.NEVER)
-        .connectTimeout(timeout)
-        .sslParameters(parameters)
-        .build();
-  }
-
-  /** La misma URL, pero con la dirección ya validada en lugar del nombre. */
-  private static URI literal(URI target, InetAddress pinned) {
-    var address = pinned.getHostAddress();
-    var written = pinned instanceof Inet6Address ? "[" + address + "]" : address;
-    var port = target.getPort() < 0 ? "" : ":" + target.getPort();
-    var path =
-        target.getRawPath() == null || target.getRawPath().isEmpty() ? "/" : target.getRawPath();
-    var query = target.getRawQuery() == null ? "" : "?" + target.getRawQuery();
-    return URI.create(target.getScheme() + "://" + written + port + path + query);
-  }
-
-  private static String authority(URI target, String host) {
-    return target.getPort() < 0 ? host : host + ":" + target.getPort();
+    var builder =
+        HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .followRedirects(HttpClient.Redirect.NEVER)
+            .connectTimeout(timeout)
+            .sslParameters(AnchoredConnection.sniFor(host));
+    if (tls != null) builder.sslContext(tls);
+    return builder.build();
   }
 
   private static boolean isTextual(HttpResponse<InputStream> response) {

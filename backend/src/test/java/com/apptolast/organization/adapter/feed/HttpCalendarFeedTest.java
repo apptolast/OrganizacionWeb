@@ -10,16 +10,22 @@ import com.apptolast.organization.domain.FeedError;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsServer;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,25 +54,28 @@ class HttpCalendarFeedTest {
   void start() throws IOException {
     server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
     server.setExecutor(Executors.newFixedThreadPool(2));
-    server.createContext(
-        "/",
-        exchange -> {
-          received.add(
-              new Received(
-                  exchange.getRequestMethod(),
-                  exchange.getRequestURI().toString(),
-                  exchange.getRequestHeaders().getFirst("Accept"),
-                  exchange.getRequestHeaders().getFirst("Cookie"),
-                  exchange.getRequestHeaders().getFirst("Authorization"),
-                  exchange.getRequestHeaders().getFirst("Host")));
-          handler.handle(exchange);
-        });
+    server.createContext("/", recording());
     server.start();
   }
 
   @AfterEach
   void stop() {
     server.stop(0);
+  }
+
+  /** Anota lo que llega y delega en el manejador de cada prueba. */
+  HttpHandler recording() {
+    return exchange -> {
+      received.add(
+          new Received(
+              exchange.getRequestMethod(),
+              exchange.getRequestURI().toString(),
+              exchange.getRequestHeaders().getFirst("Accept"),
+              exchange.getRequestHeaders().getFirst("Cookie"),
+              exchange.getRequestHeaders().getFirst("Authorization"),
+              exchange.getRequestHeaders().getFirst("Host")));
+      handler.handle(exchange);
+    };
   }
 
   int port() {
@@ -371,6 +380,128 @@ class HttpCalendarFeedTest {
   @Test
   void s12_anUnparseableUrlIsUnreachableInsteadOfAnException() {
     assertEquals(FeedError.FEED_UNREACHABLE, codeOf(feed().fetch("https://")));
+  }
+
+  // --- @s12, enmienda B3: el apretón de manos del camino anclado ---------------------------------
+  //
+  // El resto de la clase habla HTTP en claro contra 127.0.0.1, así que hasta aquí lo verificado era
+  // el anclaje de dirección y la cabecera Host, no el TLS. Y el TLS es justo lo que puede romper al
+  // anclar: conectarse a una IP suele tirar abajo la verificación del certificado. Estas tres
+  // pruebas miden que no ocurre, y son las hermanas de las de JdkWebhookSenderTest: mismo fixture,
+  // mismo oráculo, misma decisión.
+
+  /**
+   * El único nombre para el que vale el certificado del fixture. No tiene ningún SAN de dirección.
+   */
+  static final String NOMBRE_DEL_CERTIFICADO = "destino.anclado.invalid";
+
+  /** Otro nombre en la misma dirección que ningún certificado de aquí avala. */
+  static final String OTRO_NOMBRE = "impostor.anclado.invalid";
+
+  static final String ALMACEN = "/tls/anchored-receiver.p12";
+  static final String ALIAS = "destino";
+  static final char[] CLAVE_DEL_ALMACEN = "changeit".toCharArray();
+
+  /** El proveedor de prueba sobre TLS, presentando el certificado del fixture. */
+  private HttpsServer servidorTls() throws Exception {
+    var claves = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+    claves.init(almacen(), CLAVE_DEL_ALMACEN);
+    var contexto = SSLContext.getInstance("TLS");
+    contexto.init(claves.getKeyManagers(), null, null);
+    var servidor = HttpsServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    servidor.setHttpsConfigurator(new HttpsConfigurator(contexto));
+    servidor.setExecutor(Executors.newFixedThreadPool(2));
+    servidor.createContext("/", recording());
+    servidor.start();
+    return servidor;
+  }
+
+  private static KeyStore almacen() throws Exception {
+    var almacen = KeyStore.getInstance("PKCS12");
+    try (var flujo = HttpCalendarFeedTest.class.getResourceAsStream(ALMACEN)) {
+      almacen.load(flujo, CLAVE_DEL_ALMACEN);
+    }
+    return almacen;
+  }
+
+  /**
+   * Confía en el certificado del fixture y en nada más. Ojo con lo que NO hace: no desactiva la
+   * verificación, sólo añade un ancla; por eso la tercera prueba sigue rechazando al desconocido.
+   */
+  private static SSLContext confianzaEnElFixture() throws Exception {
+    var confiados = KeyStore.getInstance("PKCS12");
+    confiados.load(null, null);
+    confiados.setCertificateEntry("fixture", almacen().getCertificate(ALIAS));
+    var gestores = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+    gestores.init(confiados);
+    var contexto = SSLContext.getInstance("TLS");
+    contexto.init(null, gestores.getTrustManagers(), null);
+    return contexto;
+  }
+
+  /** Null como confianza significa la del JDK, que es la de producción. */
+  private HttpCalendarFeed feedConfiando(SSLContext confianza) {
+    return new HttpCalendarFeed(
+        HttpCalendarFeed.TIMEOUT,
+        host -> List.of(InetAddress.getLoopbackAddress()),
+        address -> true,
+        confianza);
+  }
+
+  private static String urlTls(HttpsServer servidor, String host) {
+    return "https://" + host + ":" + servidor.getAddress().getPort() + "/cal.ics";
+  }
+
+  @Test
+  void s12_b3_unCertificadoValidoParaElNombreSeAceptaAunqueSeConecteALaDireccion()
+      throws Exception {
+    handler = exchange -> reply(exchange, 200, "text/calendar", VALID_ICS);
+    var servidor = servidorTls();
+    try {
+      var fetch =
+          feedConfiando(confianzaEnElFixture()).fetch(urlTls(servidor, NOMBRE_DEL_CERTIFICADO));
+
+      assertInstanceOf(
+          FeedFetch.Downloaded.class,
+          fetch,
+          "el certificado se verificó por nombre pese a conectar por dirección");
+      assertTrue(textOf(fetch).contains("BEGIN:VCALENDAR"));
+      assertEquals(
+          NOMBRE_DEL_CERTIFICADO + ":" + servidor.getAddress().getPort(),
+          received.getFirst().host());
+    } finally {
+      servidor.stop(0);
+    }
+  }
+
+  /** El control de la anterior: se acepta por coincidir el nombre, no por no mirarlo. */
+  @Test
+  void s12_b3_elMismoCertificadoSeRechazaSiElNombrePedidoEsOtro() throws Exception {
+    handler = exchange -> reply(exchange, 200, "text/calendar", VALID_ICS);
+    var servidor = servidorTls();
+    try {
+      var fetch = feedConfiando(confianzaEnElFixture()).fetch(urlTls(servidor, OTRO_NOMBRE));
+
+      assertEquals(FeedError.FEED_UNREACHABLE, codeOf(fetch));
+      assertTrue(received.isEmpty(), "el apretón de manos falló antes de llegar ninguna petición");
+    } finally {
+      servidor.stop(0);
+    }
+  }
+
+  /** Y el anclaje tampoco ha aflojado la cadena de confianza: sin el ancla, no se acepta. */
+  @Test
+  void s12_b3_unCertificadoQueNadieAvalaSeRechaza() throws Exception {
+    handler = exchange -> reply(exchange, 200, "text/calendar", VALID_ICS);
+    var servidor = servidorTls();
+    try {
+      var fetch = feedConfiando(null).fetch(urlTls(servidor, NOMBRE_DEL_CERTIFICADO));
+
+      assertEquals(FeedError.FEED_UNREACHABLE, codeOf(fetch));
+      assertTrue(received.isEmpty(), "el apretón de manos falló antes de llegar ninguna petición");
+    } finally {
+      servidor.stop(0);
+    }
   }
 
   static byte[] padded(int length) {

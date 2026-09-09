@@ -210,6 +210,37 @@ lista blanca de rutas, que —correctamente— no incluye ninguna ruta del conec
 - Un rojo legítimo y era la prueba: `apiRequest` normaliza las cabeceras a `Headers`, así que
   `options.headers["X-CSRF-TOKEN"]` era `undefined`. Se comprueba con `.get(...)`.
 
+### Ciclo 14 — @s36 @s37 @s38 @s39 @s40 @s41 la pantalla del conector
+
+- ROJO `github-connector.test.tsx`, 25 pruebas (el componente no existía).
+- VERDE `github-connector.tsx`. Un solo estado visible a la vez: deshabilitado, sin conexión,
+  conectada, importando, resultado, error recuperable e inválida.
+  - **@s37** El token es `type="password"` con `autocomplete="off"` y se vacía tras enviar salga
+    bien o mal (está en el `finally`); el repositorio sólo se conserva cuando el envío falló. El
+    mensaje "GitHub rechazó el token" cuelga del campo por `aria-describedby` y el foco va allí.
+  - **@s38** El selector ofrece sólo los proyectos no terminados, cargados con la API de proyectos
+    que ya existe. Durante la petición el botón está deshabilitado y una región `aria-live="polite"`
+    dice "Importando issues…" **sin porcentaje**, porque no hay progreso real que contar.
+  - **@s39** Cada error ofrece la acción que lo resuelve: reintento con segundos para la cuota,
+    "Reconectar", "Consultar estado", el selector otra vez, o los contadores parciales con enlace
+    al proyecto. Ninguna petición se reintenta sola: las pruebas cuentan las llamadas.
+  - **@s40** La confirmación es un grupo con dos botones, no `window.confirm`: cancelar no envía
+    ningún DELETE y devuelve el foco a "Desconectar"; confirmar envía uno solo y lleva el foco al h1.
+  - **@s41** `key={owner}` remonta la pantalla al cambiar de persona, y `mounted`/`AbortController`
+    hacen que una respuesta tardía no toque el estado de la sesión nueva.
+- Comprobación de que las pruebas muerden: cuatro mutaciones (no filtrar los proyectos terminados,
+  no vaciar el token, mostrar siempre el aviso de truncado, no devolver el foco al cancelar) hacen
+  fallar cuatro pruebas distintas. Revertidas.
+
+### Ciclo 15 — @s42 (parte estructural) las rutas
+
+- ROJO `github-connector-routing.test.tsx`.
+- VERDE `App.tsx` gana `/integraciones/github` y `/integraciones`, y aparece `integrations-index.tsx`.
+- **El menú no gana ninguna entrada**: ambas rutas pasan `section = null`, así que `workspace.tsx`
+  no se toca. Era además el fichero más disputado con el carril de la feature 24.
+- El índice `/integraciones` enlaza "Conector de GitHub" y "API para integraciones"; la prueba
+  busca dentro de `main` para no confundirse con el enlace que el menú ya tenía.
+
 ## Enmiendas al contrato aprobadas por el coordinador (9 de septiembre de 2026)
 
 Origen: `progress/security_review_connectors.md` (rama `main`). El coordinador actualiza

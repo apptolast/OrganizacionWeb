@@ -707,6 +707,80 @@ mirándolo, no dejar de verlo.
 **Ficheros cambiados.** `e2e/webhooks-ux.spec.mjs`, `frontend/src/webhooks.tsx`,
 `frontend/src/webhooks.scss`. Ninguno compartido.
 
+## Hallazgos 4, 12B y 13 — @s42: el recorrido de teclado es ahora un recorrido de verdad — CERRADOS
+
+**Cubre:** `features/webhooks.feature:520`, «todos los controles se alcanzan con Tab
+en **orden lógico**, tienen **nombre accesible**, **foco visible** y objetivo de al
+menos 44 px». Son un solo commit porque son un solo test, tal como decía el índice.
+
+**Lo que había.** Un bucle de 60 pulsaciones que acumulaba paradas y cerraba con
+`expect(order.length).toBeGreaterThan(5)` sobre **20 controles reales**, más un
+`visibleFocus` que se volcaba a `tab-order.json` y no se asertaba nunca. Y aunque
+se hubiera asertado, no habría discriminado: se calculaba como
+
+    getComputedStyle(active).outlineStyle !== "none" ||
+    getComputedStyle(active, ":focus-visible").outlineStyle !== "none"
+
+y el segundo término es un **no-op** —la API espera un pseudo-ELEMENTO y recibe una
+pseudo-clase, así que devuelve el estilo del elemento sin más—, unido además por un
+`||` que lo hacía siempre verdadero. El rojo B de abajo lo prueba con números.
+
+**Lo que hay.** Dos tests, uno por afirmación:
+
+1. `webhooks audit: el teclado recorre todos los controles en el orden del DOM, ida
+   y vuelta, con foco visible en cada parada @s42`.
+2. `webhooks audit: al cerrar la confirmación de borrado el foco vuelve al control
+   que la abrió @s42` (lo que ya existía, separado a su propio test: era una segunda
+   afirmación colgada del mismo título).
+
+El primero, en orden:
+
+- **Deriva** los controles del propio documento (`controlsOf`), nunca una lista a
+  mano — REPARTO_NOCHE §2. Hoy salen **20** y el volcado queda en `tab-order.json`:
+  URL, Descripción, «Seleccionar todos», los 12 tipos de evento, «Crear webhook»,
+  «Enviar ping», «Desactivar», «Ver entregas» y «Eliminar».
+- Devuelve **dos** listas, `visible` y `reachable`, y exige que sean iguales. Sin
+  eso quedaba un agujero real: poner `tabindex="-1"` a un botón lo sacaría a la vez
+  de la expectativa y del recorrido, y la prueba seguiría verde con un control
+  inalcanzable. Es el rojo C.
+- Exige que no haya nombres repetidos (comparar por nombre sólo dice la verdad si
+  los nombres distinguen las paradas) y que ninguno esté vacío.
+- Siembra el foco en `main` —que lleva `tabIndex={-1}` justamente para recibir el
+  enlace de salto— y compara `expect(forward.seen).toEqual(expected)`.
+- **Vuelve** con Shift+Tab. Aviso de la sesión, confirmado: al terminar la ida el
+  foco queda aparcado en el último control, así que la vuelta es el inverso
+  **rotado una posición**, y se afirma esa rotación exacta, no un «contiene los
+  mismos». Precedente copiado: `e2e/automations-ux.spec.mjs`.
+- Mide el anillo **en cada parada**, no una vez al final, con
+  `active.matches(":focus-visible")` + `outlineStyle === "solid"` +
+  `outlineWidth >= 2` + color no transparente. Se exige el anillo del **producto** y
+  no el del agente de usuario, que Chromium computa con `outline-style: auto` y que
+  un `outline: none` del producto no apagaría. El 2 es el suelo que declara la propia
+  hoja (`.webhooks button:focus-visible { outline: 2px solid var(--accent) }`); el
+  resto de controles usan el global de 3 px de `styles.scss`.
+- El umbral `toBeGreaterThan(5)` ha desaparecido.
+
+### Los tres rojos acreditados
+
+| # | Mutación aplicada a la producción | Rojo obtenido |
+|---|---|---|
+| **A. Orden** | `webhooks.tsx`: `tabIndex={1}` en el botón «Ver entregas» — cambia la secuencia de tabulación **sin** tocar el orden del DOM, que es exactamente la regresión que el oráculo debe cazar | `expect(forward.seen).toEqual(expected)` falla: «Ver entregas» aparece **después** de «Eliminar» en el recorrido y antes en el DOM |
+| **B. Foco visible** | `webhooks.scss`: `.webhooks button:focus-visible { outline: none }` | `expect(forward.invisible).toEqual([])` falla con las **cinco** paradas de botón. El volcado es la prueba del no-op viejo: `outlineStyle: "none"` con `outlineWidth: 3` y `matchesFocusVisible: true` — el oráculo nuevo mira el estilo, el viejo se conformaba con el `||` |
+| **C. Alcanzabilidad** | `webhooks.tsx`: `tabIndex={-1}` en el botón «Desactivar» | `expect(controls.reachable).toEqual(controls.visible)` falla: «Desactivar» está en el DOM, es visible y no es alcanzable |
+
+Restaurado todo (`git diff frontend/src/` vacío) y verde: **7 passed (1,5 min)** en
+`e2e/webhooks-ux.spec.mjs`.
+
+**Corrección documental que el índice exigía, hecha en el mismo cambio.** La fila
+«Posición en serie» de `progress/ux_webhooks.md` declaraba «el orden de Tab sigue al
+DOM — Verificado en navegador (`tab-order.json`)». Era falsa: el volcado existía pero
+nada comparaba. La fila queda corregida y **fechada**, diciendo qué era falso y qué
+prueba lo sujeta ahora.
+
+**Ficheros cambiados.** `e2e/webhooks-ux.spec.mjs`, `progress/ux_webhooks.md`.
+Ninguno compartido; ningún cambio de producto (los tres de arriba son mutaciones
+revertidas).
+
 # ÍNDICE DE LO ABIERTO — leer sólo esto, no hace falta el dictamen entero
 
 Ocho hallazgos abiertos. Una línea cada uno: qué exige, qué fichero se toca, y si

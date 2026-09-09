@@ -413,3 +413,37 @@ selectores de **los dos** configs afectados y sus espejos en
 
 `node --test scripts/project.test.mjs`: 82 pasan, 0 fallan (los dos fallos
 ajenos de la 24 desaparecen porque su carril ya está en `main`).
+
+## Extremo a extremo ejecutado
+
+Ambas especificaciones se ejecutaron por primera vez, una pila cada vez, con
+`E2E_WEB_PORT=18096`, y las dos pilas se bajaron solas al terminar (no queda
+ningún contenedor `organizationweb-e2e-*`).
+
+- `e2e/external-calendar.spec.mjs` → **3 de 3 en verde** (9,1 s). Comprueba
+  contra PostgreSQL real que la fila guardada tiene `version 0`, más de 12 bytes
+  de cifrado y **cero** apariciones de la ruta secreta; que la respuesta del PUT
+  trae los quince campos con `no-store` y sin el secreto; que la sincronización
+  responde 200 y deja `last_attempt_at`; que la guardia rechaza `https://10.0.0.5`
+  con 400 sin escribir fila; y que Hoy sigue igual sin suscripción.
+- `e2e/external-calendar-ux-audit.spec.mjs` → **4 de 4 en verde** (8,8 s). Matriz
+  de catorce anchos sin scroll horizontal y con controles de 44×44 px, axe sin
+  violaciones en vacío, con suscripción y tras sincronizar, orden de teclado del
+  contrato con foco visible, y texto al 200 % a 320 px.
+
+Ningún defecto destapado. Al contrario que en la feature 26, la pantalla no
+depende de la forma de la URL en el cliente: el navegador solo maneja `urlHost` y
+`urlTail`, y quien valida el esquema es el backend, así que el modo de fallo
+"cliente que exige https" no existe aquí. La ruta pasa por el proxy sin tocar
+`deploy/nginx.conf`.
+
+**Limitación conocida y aceptada**: ninguna prueba de extremo a extremo llega a
+una sincronización con `lastStatus OK`, porque no hay ningún feed ICS alcanzable
+desde el contenedor con la guardia SSRF activada —y activada debe quedarse—. El
+feed público de la feature 26 vive en `127.0.0.1`, que la guardia bloquea con
+razón. Los caminos de éxito, contadores, truncado y ventana están cubiertos por
+las pruebas de unidad, de aplicación y de Testcontainers, y la descarga real
+contra un `HttpServer` en loopback por `HttpCalendarFeedTest`. Cerrar ese hueco
+exigiría un contenedor de feed en la pila de E2E y
+`APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES=true`, que es justo lo que el contrato y
+la enmienda B10 quieren evitar por defecto: queda como decisión del coordinador.

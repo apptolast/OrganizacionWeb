@@ -157,6 +157,23 @@ Feature en curso: 30 — automations. Escenarios a recorrer en fase 1: @s1–@s1
 - Sólo se toca V28. No se ha modificado ninguna migración existente.
 - Focal verde: `AutomationPersistenceTest` 6/6 (un único contenedor para todo el carril).
 
+### Ciclo 10 — @s14, @s18, @s27, @s31, @s34 (historial, cola de eventos y hechos vigentes)
+
+- **Rojo visto fallar**: seis tests nuevos en la **misma** clase
+  `AutomationPersistenceTest` (para no levantar un segundo contenedor), con
+  `cannot find symbol: PostgresAutomationRuns` y `PostgresAutomationEvents`.
+- **Verde mínimo**: `PostgresAutomationRuns` (página por regla, `executed_at, id`
+  descendente, cursor estricto) y `PostgresAutomationEvents`, que implementa de una
+  vez `AutomationEventTail`, `AutomationEventProjects`, `AutomationFacts` y
+  `AutomationLoopGuard`: las cuatro leen la misma parcela de datos del propietario.
+- **@s14 comprobado de verdad**: tras borrar la regla, su historial deja de ser
+  consultable pero la fila sobrevive con `rule_id` nulo y su `created_task_id`, así
+  que la guarda de bucles sigue respondiendo true. Es el `ON DELETE SET NULL` de V28
+  haciendo su trabajo, verificado contando filas en SQL.
+- Todas las consultas van unidas a `projects.owner_id` o a `work_sessions.owner_id`:
+  una tarea o sesión ajena no resuelve, que es lo que pide la última fila de @s27.
+- Focal verde: `AutomationPersistenceTest` 12/12, un solo contenedor.
+
 ## Discrepancia de contrato pendiente de dictamen (@s30 vs @s32)
 
 @s30 dice que cada coincidencia contiene «exactamente eventId, eventType, occurredAt

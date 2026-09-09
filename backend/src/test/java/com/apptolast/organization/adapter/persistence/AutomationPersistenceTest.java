@@ -204,6 +204,188 @@ class AutomationPersistenceTest {
         .isInstanceOf(ResourceNotFoundException.class);
   }
 
+  private final PostgresAutomationRuns runs =
+      new PostgresAutomationRuns(Database.JDBC, Database.TRANSACTIONS);
+  private final PostgresAutomationEvents events =
+      new PostgresAutomationEvents(Database.JDBC, Database.TRANSACTIONS, new ObjectMapper());
+
+  private UUID task(UUID project, String title) {
+    var id = UUID.randomUUID();
+    Database.JDBC.update(
+        "INSERT INTO tasks(id,project_id,title,completion_criterion,estimated_minutes,status,"
+            + "created_at,updated_at) VALUES (?,?,?,'',NULL,'pending',?,?)",
+        id,
+        project,
+        title,
+        java.sql.Timestamp.from(T0),
+        java.sql.Timestamp.from(T0));
+    return id;
+  }
+
+  private UUID run(String owner, UUID ruleId, UUID createdTaskId, int secondsLater) {
+    var id = UUID.randomUUID();
+    Database.JDBC.update(
+        "INSERT INTO automation_runs(id,rule_id,owner_id,event_id,event_type,occurred_at,attempt,"
+            + "status,created_task_id,delivery_id,error_code,executed_at)"
+            + " VALUES (?,?,?,?, 'TaskCreated.v1', ?, 1, 'succeeded', ?, NULL, NULL, ?)",
+        id,
+        ruleId,
+        owner,
+        UUID.randomUUID(),
+        java.sql.Timestamp.from(T0.plusSeconds(secondsLater)),
+        createdTaskId,
+        java.sql.Timestamp.from(T0.plusSeconds(secondsLater)));
+    return id;
+  }
+
+  private UUID outbox(
+      String owner, UUID aggregate, String type, Instant occurredAt, String status, String extra) {
+    var eventId = UUID.randomUUID();
+    var payload =
+        ("{\"eventId\":\"%s\",\"aggregateId\":\"%s\",\"ownerId\":\"%s\",\"occurredAt\":\"%s\","
+                + "\"schemaVersion\":1,\"type\":\"%s\"%s}")
+            .formatted(eventId, aggregate, owner, occurredAt, type, extra);
+    Database.JDBC.update(
+        "INSERT INTO outbox_events(event_id,aggregate_id,owner_id,event_type,schema_version,"
+            + "occurred_at,payload,status) VALUES (?,?,?,?,1,?,?::jsonb,?)",
+        eventId,
+        aggregate,
+        owner,
+        type,
+        java.sql.Timestamp.from(occurredAt),
+        payload,
+        status);
+    return eventId;
+  }
+
+  @Test
+  void s34_pagesTheHistoryNewestFirstAndOnlyForTheAskedRule() {
+    var owner = owner();
+    var project = project(owner);
+    var mine = create(owner, "Mia", project, T0);
+    var sibling = create(owner, "Hermana", project, T0.plusSeconds(1));
+    for (int index = 0; index < 3; index++) run(owner, mine.id(), null, index);
+    run(owner, sibling.id(), null, 9);
+    var page = runs.page(owner, mine.id(), null, 2);
+    assertThat(page).hasSize(2);
+    assertThat(page)
+        .extracting(AutomationRun::executedAt)
+        .containsExactly(T0.plusSeconds(2), T0.plusSeconds(1));
+    assertThat(page).allMatch(entry -> entry.ruleId().equals(mine.id()));
+    var next =
+        runs.page(
+            owner,
+            mine.id(),
+            new AutomationRunCursor(mine.id(), page.getLast().executedAt(), page.getLast().id()),
+            2);
+    assertThat(next).hasSize(1);
+    assertThat(next.getFirst().executedAt()).isEqualTo(T0);
+    assertThat(runs.page(owner(), mine.id(), null, 20)).isEmpty();
+  }
+
+  @Test
+  void s14_deletingARuleHidesItsRunsButKeepsTheLoopGuard() {
+    var owner = owner();
+    var project = project(owner);
+    var rule = create(owner, "Con ejecuciones", project, T0);
+    var created = task(project, "Creada por automatizacion");
+    run(owner, rule.id(), created, 0);
+    assertThat(events.createdByAutomation(owner, created)).isTrue();
+    store.delete(owner, rule.id(), 1);
+    assertThat(runs.page(owner, rule.id(), null, 20)).isEmpty();
+    assertThat(events.createdByAutomation(owner, created)).isTrue();
+    assertThat(events.createdByAutomation(owner(), created)).isFalse();
+    assertThat(events.createdByAutomation(owner, task(project, "Humana"))).isFalse();
+    assertThat(
+            Database.JDBC.queryForObject(
+                "SELECT count(*) FROM automation_runs WHERE created_task_id = ?",
+                Long.class,
+                created))
+        .isEqualTo(1);
+  }
+
+  @Test
+  void s31_readsTheMostRecentUnblockedEventsNewestFirstUpToTheLimit() {
+    var owner = owner();
+    var project = project(owner);
+    var newest =
+        outbox(
+            owner, project, "ProjectUpdated.v1", T0.plusSeconds(9), "pending", ",\"name\":\"M\"");
+    outbox(owner, project, "ProjectUpdated.v1", T0.plusSeconds(8), "pending", ",\"name\":\"M\"");
+    outbox(owner, project, "ProjectUpdated.v1", T0.plusSeconds(7), "blocked", ",\"name\":\"M\"");
+    outbox(owner, project, "ProjectUpdated.v1", T0, "pending", ",\"name\":\"M\"");
+    outbox(owner(), project, "ProjectUpdated.v1", T0.plusSeconds(9), "pending", ",\"name\":\"M\"");
+    var tail = events.recent(owner, 100);
+    assertThat(tail).hasSize(3);
+    assertThat(tail.getFirst().eventId()).isEqualTo(newest);
+    assertThat(tail)
+        .extracting(AutomationEvent::occurredAt)
+        .isSortedAccordingTo(java.util.Comparator.reverseOrder());
+    assertThat(tail.getFirst().ownerId()).isEqualTo(owner);
+    assertThat(events.recent(owner, 2)).hasSize(2);
+    assertThat(events.recent(owner(), 100)).isEmpty();
+  }
+
+  @Test
+  void s18_readsThePayloadSoTemplatesCanBeResolved() {
+    var owner = owner();
+    var project = project(owner);
+    var created = task(project, "Redactar informe");
+    outbox(
+        owner,
+        project,
+        "TaskCreated.v1",
+        T0,
+        "pending",
+        ",\"taskId\":\"" + created + "\",\"title\":\"Redactar informe\"");
+    var event = events.recent(owner, 100).getFirst();
+    assertThat(event.eventType()).isEqualTo("TaskCreated.v1");
+    assertThat(event.aggregateId()).isEqualTo(project);
+    assertThat(event.taskSource()).hasValue(new EventTask.Known(created));
+    assertThat(event.projectSource()).isEqualTo(new EventProject.Known(project));
+  }
+
+  @Test
+  void s27_resolvesTasksAndSessionsOnlyInsideTheOwnersData() {
+    var owner = owner();
+    var project = project(owner);
+    var created = task(project, "Redactar informe");
+    var session = UUID.randomUUID();
+    Database.JDBC.update(
+        "INSERT INTO work_sessions(id,owner_id,project_id,task_id,request_key,started_at,"
+            + "planned_minutes,planned_end_at,zone_id,status) VALUES (?,?,?,?,?,?,25,?,'UTC','running')",
+        session,
+        owner,
+        project,
+        created,
+        UUID.randomUUID(),
+        java.sql.Timestamp.from(T0),
+        java.sql.Timestamp.from(T0.plusSeconds(1500)));
+    assertThat(events.projectOfTask(owner, created)).hasValue(project);
+    assertThat(events.projectOfTask(owner(), created)).isEmpty();
+    assertThat(events.projectOfTask(owner, UUID.randomUUID())).isEmpty();
+    assertThat(events.taskOfWorkSession(owner, session)).hasValue(created);
+    assertThat(events.taskOfWorkSession(owner(), session)).isEmpty();
+    assertThat(events.taskOfWorkSession(owner, UUID.randomUUID())).isEmpty();
+  }
+
+  @Test
+  void s18_s21_readsTheLiveNamesAndWhetherTheProjectIsCompleted() {
+    var owner = owner();
+    var project = project(owner);
+    var created = task(project, "Redactar informe");
+    assertThat(events.projectName(owner, project)).hasValue("Marketing");
+    assertThat(events.taskTitle(owner, created)).hasValue("Redactar informe");
+    assertThat(events.projectCompleted(owner, project)).isFalse();
+    Database.JDBC.update("UPDATE projects SET name = 'Marketing 2027' WHERE id = ?", project);
+    assertThat(events.projectName(owner, project)).hasValue("Marketing 2027");
+    Database.JDBC.update("UPDATE projects SET status = 'completed' WHERE id = ?", project);
+    assertThat(events.projectCompleted(owner, project)).isTrue();
+    assertThat(events.projectCompleted(owner(), project)).isFalse();
+    assertThat(events.projectName(owner(), project)).isEmpty();
+    assertThat(events.taskTitle(owner(), created)).isEmpty();
+  }
+
   static final class Database {
     static final PostgreSQLContainer<?> PG = new PostgreSQLContainer<>("postgres:17.9-alpine");
     static final JdbcTemplate JDBC;

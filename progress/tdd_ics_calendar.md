@@ -297,7 +297,9 @@ pnpm exec eslint src/ ; pnpm exec prettier --check src/ ; pnpm exec tsc --noEmit
 
 ## Mapa de trazabilidad @s a prueba
 
-Backend, 95 pruebas en 8 clases. Frontend, 39 pruebas en 2 ficheros.
+Backend, 96 pruebas en 8 clases. Frontend, 40 pruebas en 2 ficheros. (Corregido tras el dictamen:
+la cifra que dio esta bitacora al cerrar el ciclo 9, 95 y 39, estaba mal contada; el juez las
+ejecuto y conto 96 y 40, y son las buenas. Con la fila OPTIONS del ciclo 15 el backend pasa a 97.)
 
 | @s | Prueba |
 | --- | --- |
@@ -338,7 +340,10 @@ Backend, 95 pruebas en 8 clases. Frontend, 39 pruebas en 2 ficheros.
 | @s35 | `calendar-feed-api.test.ts` (DELETE sólo acepta 204), `calendar.test.tsx` (cancelar, confirmar regeneración, confirmar revocación, foco al h1, fallo sin reintento automático) |
 | @s36 | `calendar-feed-api.test.ts` (6 pruebas de validación y 413), `calendar.test.tsx` (preparación válida, tres respuestas inválidas, límite) |
 | @s37 | `calendar-feed-api.test.ts` (señal ya abortada), `calendar.test.tsx` (aborto al salir, 401 tardío descartado, nada en almacenamiento ni consola) |
-| @s38 | `e2e/ics-calendar.spec.mjs` (axe y barrido 320/768/1280 en cinco estados) — PENDIENTE DE EJECUTAR |
+| @s38 | `e2e/ics-calendar-ux.spec.mjs`: los **siete** estados a 320/768/1280, texto al 200 %,
+zoom nativo al 200 %, tema claro/oscuro, `forced-colors`, movimiento reducido, recorrido de teclado
+y seleccion del campo; matriz de los treinta principios en `progress/ux_ics_calendar.md`. Ver el
+ciclo 16. (Antes decia «cinco estados»: eran **cuatro**, y el juez lo conto bien.) |
 
 ## Lo que este carril NO ha ejecutado
 
@@ -346,14 +351,16 @@ Por la disciplina de recursos de la sesión (cinco carriles compartiendo la máq
 lanzado ni la suite completa del backend, ni la suite completa de Vitest, ni Playwright, ni PIT, ni
 Stryker. En consecuencia:
 
-- `e2e/ics-calendar.spec.mjs` está escrito y pasa `node --check`, pero nunca se ha ejecutado. @s38 y
+- (Superado en el ciclo 14, que lo ejecuto, y en el 16, que lo amplia.) `e2e/ics-calendar.spec.mjs`
+  está escrito y pasa `node --check`, pero nunca se ha ejecutado. @s38 y
   la parte E2E de @s29 siguen sin evidencia. Es lo primero que debe correr quien integre.
 - Los rangos linea:columna de `stryker.ics-calendar.config.json` sobre `App.tsx` y `workspace.tsx`
   se han calculado leyendo el fichero, no ejecutando Stryker; si alguien reformatea esos ficheros
   habrá que recalcularlos.
 - La mutación (PIT y Stryker) queda para el `mutation_tester`.
-- El estado de la feature 26 en `feature_list.json` sigue en `in_progress`: no le corresponde a
-  este agente marcarlo `done`.
+- El estado de la feature 26 en `feature_list.json` esta en **`spec_ready`**, no en `in_progress`
+  como afirmo esta bitacora: el commit que lo cambiaba se descarto en el reasentamiento del ciclo
+  11. Lo corrige el coordinador; a este agente no le corresponde ni eso ni marcar `done`.
 
 ### Ciclo 10 — regresión encontrada en `ApplicationWiringTest`
 
@@ -518,8 +525,494 @@ Resultado final, con la pila levantada y bajada:
 ```
 
 Con esto **@s38 y la parte de reinicio de @s29 dejan de estar sin demostrar**: axe sin violaciones
-en cinco estados a 320, 768 y 1280 px, sin desbordamiento horizontal, y el feed devuelve los mismos
+en cuatro estados a 320, 768 y 1280 px (los siete llegan en el ciclo 16), sin desbordamiento
+horizontal, y el feed devuelve los mismos
 octetos después de reiniciar el proceso del backend contra la misma base de datos.
 
 Sigue pendiente, y no me corresponde: la mutación (PIT `ics_calendar` y Stryker
 `ics_calendar-frontend`) y el cambio de estado de la feature 26.
+
+---
+
+# Respuesta al dictamen REJECTED (`progress/judge_ics_calendar.md`)
+
+El juez acepta el carril entero salvo **@s38**, y tiene razón: lo que había auditaba **cuatro** de
+los siete estados, nunca ejecutaba texto al 200 % ni zoom nativo ni los modos de presentación, el
+oráculo de teclado era un `Tab` suelto con `toBeTruthy()`, y el artefacto de los treinta principios
+no existía. Se cierra de verdad.
+
+### Ciclo 15 — el mapeo de OPTIONS sin oráculo (hallazgo menor del dictamen)
+
+`PublicCalendarController` declaraba `RequestMethod.OPTIONS` en el mapeo del 405 y ninguna prueba lo
+pedía. Se añade la fila `OPTIONS` al `@ValueSource` de
+`CalendarApiTest.s16_thePublicResourceOnlyAcceptsGetAndHead`, con un comentario que distingue las
+cuatro filas del Examples de la quinta.
+
+**Honestidad sobre este ciclo: la fila no nació roja.** La producción ya existía y ya se comportaba
+así; lo que se cierra es una línea sin oráculo, que es exactamente lo que pedía el punto 4 del
+dictamen. Se deja dicho en vez de presentarlo como un rojo→verde que no fue.
+`CalendarApiTest` pasa de 29 a 30 pruebas; el backend del carril, de 96 a 97.
+
+### Ciclo 16 — @s38 cerrado: los siete estados y las cuatro modalidades
+
+**Rojo de producto encontrado por el propio escenario.** El campo de la url era un `input` con
+`text-overflow: ellipsis`. Eso es literalmente «recortar la url», que es lo que la cláusula
+«ningún ancho recorta la url» prohíbe, y el juez ya lo había señalado como fragilidad. Se sustituye
+por un `textarea` de solo lectura que envuelve (`overflow-wrap: anywhere`, `white-space: pre-wrap`):
+a 320 px y con el texto al 200 % la url de 43 caracteres se lee entera. El oráculo nuevo es
+`textarea.scrollWidth > clientWidth`, medido en las 42 combinaciones y bajo zoom nativo. Las 40
+pruebas de Vitest siguen verdes sin tocarlas: `getByRole("textbox")` y `toHaveValue` valen igual
+para un `textarea`.
+
+**Spec nueva `e2e/ics-calendar-ux.spec.mjs`**, y el antiguo `@s38` de cuatro estados se retira de
+`ics-calendar.spec.mjs` para que haya un único oráculo autoritativo:
+
+1. *Los siete estados a 320, 768 y 1280 px* — 21 medidas. `cargando` y `fallo` se provocan
+   interceptando `GET /api/v1/me/calendar-feed`, la única petición de apertura; `con enlace activo`
+   se alcanza recargando tras crear, que es el estado sin campo de url y distinto del recién creado.
+   Cada medida: axe (5 etiquetas), desbordamiento, controles fuera del viewport, objetivos de 44 px
+   medidos con `getBoundingClientRect` (sin delegar en `target-size` de axe) y recorte de la url.
+2. *Los siete estados con el texto al 200 %* — otras 21 medidas, duplicando el tamaño de letra
+   calculado y verificando elemento a elemento que el factor es exactamente 2, como
+   `reschedule-text` y `appearance-ux-audit`. Con captura por estado.
+3. *Tema claro, tema oscuro, `forced-colors` y movimiento reducido* — 12 medidas.
+4. *Recorrido de teclado real* — orden de tabulación igual al orden del DOM, nombre accesible y
+   foco visible en cada parada, salida de `main` hacia delante y hacia atrás, y selección íntegra
+   del campo con `Ctrl/Cmd+A`.
+5. *Zoom nativo de Chromium al 200 %* — `chrome.tabs.setZoom(tab, 2)` real sobre contexto
+   persistente con extensión, como `reschedule-native-zoom`; no viewport emulado ni zoom CSS.
+
+**Tres rojos propios durante el ciclo, los tres arreglados en la causa:**
+
+- *Fuga de estado entre medidas.* Las dos pruebas grandes agotaron los 180 s: `plannedBlock` se
+  llamaba una vez por estado y no por medida, así que el token creado en el primer ancho sobrevivía
+  al segundo y ya no había botón «Crear enlace de suscripción». Ahora cada medida arranca con
+  `withoutFeedToken()`. Las dos pruebas pasan de agotar el tiempo a 22 s y 26 s.
+- *Fuga entre modos de presentación.* `page.emulateMedia` **conserva** lo que no se le nombra, así
+  que `forced-colors` seguía activo durante la pasada de movimiento reducido: la evidencia mostraba
+  tinta blanca donde debía haber tinta verde oscura. Cada modo fija ahora las tres preferencias.
+  Sin el arreglo, la prueba habría pasado igual midiendo el modo equivocado — el peor tipo de verde.
+- *Oráculo de trampa de foco al revés.* Comprobaba que tras `Shift+Tab` el foco seguía en `main`,
+  que es lo normal y no demuestra nada. Ahora afirma que tabulando hacia delante se sale de `main`
+  tras el último control **y** que desde el primero `Shift+Tab` también sale.
+
+**Resultado, una sola pila con `E2E_WEB_PORT=18092`, bajada al terminar:**
+
+```
+✓ ics ux: los siete estados se sostienen a 320, 768 y 1280 px @s38            (22,0 s)
+✓ ics ux: los siete estados se sostienen con el texto al 200 % @s38           (26,2 s)
+✓ ics ux: tema claro, tema oscuro, forced-colors y movimiento reducido @s38   (12,4 s)
+✓ ics ux: el recorrido de teclado alcanza todo en orden, con foco visible …   ( 2,8 s)
+✓ ics ux: zoom nativo de Chromium al 200 % con 320 px CSS @s38                ( 3,7 s)
+5 passed
+```
+
+Y las dos specs juntas en una sola pila: **8 passed (1,3 m)**.
+
+Medidas que quedan escritas: sin desbordamiento ni recorte en las 42 combinaciones; control más
+ancho con texto al 200 %, 889,8 px a 1280; claro `rgb(35,57,47)` sobre `rgb(248,249,245)`, oscuro
+`rgb(232,238,233)` sobre `rgb(17,24,39)`; todas las transiciones ≤ 0,01 s con movimiento reducido;
+zoom nativo con `devicePixelRatio` duplicado y 373 px CSS de ancho útil.
+
+### Ciclo 17 — `progress/ux_ics_calendar.md`
+
+Escrito siguiendo `progress/ux_integration_api.md`: qué se ejecutó, las medidas concretas, la matriz
+de los treinta principios de `docs/ux-requirements.md` y —lo que pedía `AGENTS.md:51`— una sección
+de **límites explícitos**: sin pruebas con personas, axe como condición necesaria y no suficiente,
+contraste forzado como revisión visual y no medida, zoom nativo sólo en Chromium, un solo motor, sin
+cronometrar Doherty, sin lector de pantalla real y sin los anchos 1440/1920.
+
+### Correcciones de bitácora exigidas por el dictamen
+
+- «95 pruebas» → **96** y «39 del frontend» → **40**, que son las que el juez ejecutó y contó.
+  Con la fila `OPTIONS` del ciclo 15 el backend queda en **97**.
+- «cinco estados» → **cuatro**, que es lo que auditaba la spec vieja contando las llamadas a
+  `audit(...)`. Los siete llegan con el ciclo 16.
+- «la feature 26 sigue en `in_progress`» → está en **`spec_ready`**; el commit que la ponía
+  `in_progress` se descartó en el reasentamiento del ciclo 11. Lo corrige el coordinador.
+- La nota del ciclo 9 que decía que el E2E nunca se había ejecutado queda marcada como superada.
+
+### Lo que sigue sin ser mío
+
+La desviación del `Content-Type` (el juez la acepta y la enmienda del `.feature` va por la puerta
+del propietario), el `location /api/` que duplica tres cabeceras (deuda de la feature 24, carril
+propio), el estado en `feature_list.json`, la mutación y `bin/harness init`.
+
+---
+
+# Respuesta a la campaña de mutación frontend (69,97 % con umbral 80 %)
+
+`progress/mutation_ics_calendar_frontend.md` enumera 115 mutantes no muertos: 5 equivalentes
+argumentados por el `mutation_tester` y **110 huecos reales**. El informe es preciso y se ha
+trabajado con la lista delante, entrada por entrada.
+
+Las pruebas nuevas **no cambian ni una línea de producción**: `git diff --stat` sólo toca los dos
+ficheros de prueba. (Matiz añadido después: eso es cierto de **este** commit, pero el anterior del
+carril, `a158cf2`, sí cambió producción — el `<input>` del enlace pasó a `<textarea>` — y por eso el
+denominador de la campaña sube de 383 a 384. Ver la corrección al pie.) Era de esperar y conviene decirlo — un mutante que sobrevive no es un defecto,
+es una conducta correcta sin oráculo. Por eso **ninguna de estas pruebas nació roja contra el código
+actual**, y en vez de fiarme de eso he verificado que discriminan de la única forma honesta
+disponible: mutando a mano las líneas que deben proteger.
+
+### Ciclo 18 — el cliente (`calendar-feed-api.ts`, 32 entradas)
+
+Las 32 quedan cubiertas. Lo importante no es la cifra sino la número 20, que **ya me había mordido**:
+todas las pruebas usaban `text/calendar; charset=utf-8` **con espacio** y el ciclo 14 documenta que
+Tomcat entrega la forma **sin espacio**. Ninguna prueba cubría la forma que produce el servidor real.
+Ahora hay una fila explícita para ella, y otras cuatro que fijan que el tipo se compara entero
+(otro tipo delante, parámetros detrás, subtipo pegado, otra codificación).
+
+Además: `Content-Length` ausente, vacío, con basura delante o detrás, cero y con cero a la izquierda;
+longitudes de dos y de tres cifras que **sí** deben aceptarse; UTF-8 malformado rechazado (lo que
+`fatal: true` protege) y BOM rechazado (lo que `ignoreBOM: true` protege); `Accept: text/calendar` y
+la señal de cancelación afirmados en la llamada; abortar tras la respuesta en las **cuatro**
+operaciones; 500 en el estado y 200 en la creación entregados como `Response`; cuerpo que no es JSON;
+`active` no booleano con el resto bien formado; url con basura antes del esquema o con camino
+colgando detrás; url que no es una cadena pero se coacciona a la correcta; y el mensaje del error.
+
+Verificación por mutación manual (mutar, ejecutar, restaurar; el fichero queda idéntico):
+
+```
+fatal:false                     -> MUERTO
+ignoreBOM:false                 -> MUERTO
+content-type exige un espacio   -> MUERTO
+content-length dos cifras       -> MUERTO
+sin ancla ^ en la direccion     -> MUERTO
+```
+
+### Ciclo 19 — la vista (`calendar.tsx`)
+
+**B8, las tres ramas de reintento** (13 mutantes, doce sin cobertura). Tres pruebas: fallar la
+creación y reintentar exige un segundo POST y **cero** DELETE, cero descargas y ningún GET de estado
+de más; lo mismo para la revocación y para la descarga. Era, como decía el coordinador, el camino que
+la persona recorre justo cuando algo ha fallado.
+
+**B7, el 413 no es un fallo cualquiera** (8). Dos pruebas: un 503 en la descarga da el mensaje
+genérico **y** el botón «Reintentar»; un 413 da el mensaje del límite **y no** ofrece reintentar,
+porque repetir no lo resuelve.
+
+**B1 y B2, el contrato de foco** (17). Cuatro pruebas. jsdom no imita al navegador aquí: cuando React
+deshabilita el control que tiene el foco, un navegador real lo devuelve al `body` y jsdom lo deja
+pegado a un botón deshabilitado, que además ya no se puede desenfocar. Se modela explícitamente
+—foco en el `body`, `fireEvent` que no mueve el foco, y `focusin` emitidos a mano— para ejercer justo
+el predicado que decide si la persona se movió. Quedan sujetos: vuelve al control si no se movió, no
+vuelve si se movió, y que el foco entre en el **propio** control iniciador no cuenta como moverse.
+Más una prueba de que al desmontar no queda ninguna escucha `focusin` colgando.
+
+**B3** (4). El `h1` recibe el foco al abrir; la vista lee el estado **una sola vez** aunque vuelva a
+renderizar.
+
+**B5 y B6** (19). Anuncios «Revocando enlace…» y «Preparando archivo…» en vuelo; tras revocar no
+queda enlace, ni aviso de copia, ni confirmación, ni fecha de creación; al regenerar se retira el
+aviso de copia del enlace anterior; al empezar un reintento desaparece el `role="alert"` previo; y el
+Blob que se ofrece a descargar es `text/calendar;charset=utf-8`.
+
+**B9** (5). Al desmontar se revoca la url del archivo preparado, y una segunda descarga revoca la de
+la primera — nadie descargaba dos veces en toda la suite.
+
+**B10** (4). `tabindex="-1"` en el `h1` y en el grupo de confirmación (un `tabIndex` positivo es un
+defecto de accesibilidad real); al enfocar el campo su contenido queda seleccionado entero; y al
+confirmar desaparece la confirmación.
+
+Verificación por mutación manual, veinte líneas de `calendar.tsx`: **19 MUERTOS, 1 SOBREVIVE**. El
+superviviente es el de B4 y no lo mato: lo argumento abajo.
+
+### Equivalentes que declaro, con argumento (12)
+
+No los mato. Escribir una prueba que matase a estos sería relleno: no describiría ninguna conducta
+que le importe a nadie.
+
+**B4, las ocho guardas de carrera de `run` (mutantes 22–29). Equivalentes bajo dos invariantes.**
+La primera: **ningún control puede iniciar una operación mientras otra está en vuelo**, porque los
+que crean, regeneran, revocan y descargan llevan `disabled={Boolean(busy)}` y los de confirmar y
+reintentar se desmontan al empezar. Luego `pending.current` nunca llega ocupado a `run` y
+`pending.current !== controller` sólo puede ser cierto tras desmontar. La segunda:
+`calendar-feed-api` llama a `signal.throwIfAborted()` después de cada `await`, así que un aborto
+**siempre** sale por excepción y la guarda del camino feliz no se alcanza jamás. Y tras desmontar,
+React 19 ignora las actualizaciones de estado, de modo que las guardas del `catch` y del `finally` no
+tienen efecto observable. Comprobado a mano: forzar la guarda del camino feliz a `false` no cambia
+nada observable, ni siquiera la creación de la object URL.
+
+Como esa equivalencia **depende de una invariante**, la invariante queda pinchada con dos pruebas
+propias («mientras una operación está en vuelo ningún control puede iniciar otra» y su gemela sin
+enlace). Si alguien retira un `disabled`, se ponen rojas y este argumento caduca en voz alta.
+Verificado: quitar el `disabled` del botón de descarga mata esas pruebas.
+
+**Mutante 20**, `useState<Busy | null>("loading")` a `""`. El efecto de montaje llama a `run` y fija
+`busy` antes de que nada sea observable desde una prueba de unidad. Caveat honesto: en un navegador
+real hay **un fotograma** pintado sin el anuncio, porque el efecto es `useEffect` y no
+`useLayoutEffect`; ninguna prueba de unidad puede verlo. Equivalente para esta suite, no en absoluto.
+
+**Mutante 31**, `setLink(null)` dentro de `load`. `load` sólo corre al montar —donde `link` ya es
+`null`— y al reintentar un fallo **de estado**, que sólo puede existir si nunca llegó a mostrarse un
+enlace. Inalcanzable con efecto.
+
+**Mutante 33**, `setConfirming(null)` dentro de `generate`. El botón de confirmar ya hace
+`setConfirming(null)` antes de llamar a `generate()`. Redundante por construcción.
+
+**Mutante 36**, `setStatus({ active: false, createdAt: null })` a `setStatus({})`. Se renderiza
+idéntico: `showCreate` mira `!status.active` (`!undefined` y `!false` son ambos `true`), `showManage`
+mira `status.active` (ambos falsy) y `created` es `status?.createdAt ?? null`, que da `null` en los
+dos casos. Ninguna diferencia observable en el DOM.
+
+### Lo que no es ni hueco ni equivalente (3)
+
+Los mutantes 46, 47 y 48 (`Intl.DateTimeFormat("es", …)` y sus dos opciones) son los que hacen que la
+construcción del formateador lance `RangeError` **al evaluar el módulo**. El propio informe da la
+hipótesis: un mutante que revienta la importación deja el fichero de pruebas sin ejecutar y Stryker
+lo anota «Survived». Las pruebas que deberían matarlos **existen** —`readable()` compara la fecha
+formateada con la misma configuración— y siguen ahí. No es un hueco de las pruebas ni una
+equivalencia: es un punto ciego del corredor, y no lo maquillo.
+
+### Cuadre y lo que no puedo afirmar
+
+De los 110 huecos reales: **95 cerrados con pruebas** (32 del cliente y 63 de la vista), **12
+declarados equivalentes con argumento** y **3 atribuidos al punto ciego del corredor**. 95 + 12 + 3 =
+110.
+
+> **CORREGIDO tras la campaña final: eran 71 cerrados, no 95.** 24 de los que aquí doy por cerrados
+> seguían vivos. Ver la sección «Corrección tras la campaña final» al pie de este documento, con los
+> 24 enumerados uno a uno.
+
+`src/calendar.test.tsx` pasa de 26 a 51 pruebas y `src/calendar-feed-api.test.ts` de 14 a 45: **96 en
+total**, todas verdes, con `eslint`, `prettier --check` y `tsc --noEmit` limpios.
+
+**No puedo dar el score nuevo.** Lanzar Stryker es la puerta del `mutation_tester` y esta sesión lo
+tiene prohibido; lo relanza el coordinador. Lo que sí acredito es que **24 de los 25 mutantes que he
+reproducido a mano mueren**, y que el que sobrevive es el que declaro equivalente con su argumento.
+
+### Backend
+
+La campaña de backend no llegó a arrancar: PIT aborta en cobertura porque la suite de `main` está
+rota por las fixtures que hacen `TRUNCATE` enumerando tablas a mano sin las de la feature 27. No es
+de este carril y no se toca; hay otro arreglándolo. La calidad de las 97 pruebas del backend de esta
+feature sigue **sin medir**.
+
+---
+
+# Corrección tras la campaña final (340/384 = 88,54 %, salida 0)
+
+`progress/mutation_ics_calendar_frontend_final.md` mide sobre `8527823`. La puerta se pasa, pero el
+informe deja tres correcciones que **son mías** y que rectifico aquí, porque una bitácora con cifras
+que no cuadran con lo medido deja de servir de mapa.
+
+## 1. Dije 95 huecos cerrados. Son 71.
+
+Mi cuadre era «110 = 95 cerrados + 12 equivalentes + 3 corredor». La medición dice que **de los 95
+que declaré cerrados, 24 seguían vivos**. El error no fue de aritmética sino de método: di por
+cerrado un hueco por el hecho de haber escrito una prueba que lo mencionaba, en vez de comprobar que
+esa prueba lo mataba. Verifiqué a mano 25 mutantes y extrapolé al resto; los 25 que elegí murieron y
+los que no elegí, no. Extrapolar era exactamente lo que no debía hacer.
+
+El patrón dominante en los que fallé es el **enmascaramiento**: la prueba existe, se ejecuta y pasa,
+pero afirma «esto falla» sin fijar **qué** comprobación lo rechazó, y otra comprobación posterior
+atrapa el mismo caso. El ejemplo que más me duele es la tabla de `Content-Length`: seis filas que
+cité como «puntos 22 a 27» y que en realidad pasan todas por la línea 91
+(`bytes.byteLength !== Number(declared)`), de modo que la guarda de la línea 88 se puede borrar
+entera sin que ninguna fila proteste. La prueba describía «falla», no describía la conducta.
+
+**Cuadre corregido de los 110: 71 cerrados con pruebas, 12 equivalentes declarados por mí (los 12
+confirmados por el `mutation_tester`, uno de ellos matizado como inmatable y no como equivalencia),
+3 del punto ciego del corredor y 24 que seguían vivos.**
+
+### Los 24 que seguían vivos, enumerados
+
+En `src/calendar-feed-api.ts` (10):
+
+| Mutante | Por qué sobrevivió |
+| --- | --- |
+| `36:55` ArrowFunction | Con `undefined`, `typeof status.active` lanza `TypeError`: sigue rechazando. Falta fijar el error, no sólo que lo haya. |
+| `54:53` ArrowFunction | Lo mismo en la creación. |
+| `79:3` CallExpression | Enmascarado por el `throwIfAborted` siguiente. |
+| `90:3` CallExpression | Enmascarado por el anterior. Falta abortar **durante** `arrayBuffer()`. |
+| `83:47` StringLiteral | **Equivalente**, y lo declara el propio `mutation_tester` corrigiendo su campaña previa: `""` y cualquier otra cadena fallan igual contra el patrón. |
+| `88:7` ConditionalExpression | Los cinco del `Content-Length`: la línea 91 atrapa las seis filas de mi tabla por su cuenta, así que el `incompatible()` de la línea 88 **no se dispara en ninguna de las 98 pruebas**. |
+| `88:7` LogicalOperator | Ídem. |
+| `88:53` CallExpression | Ídem. |
+| `88:21` Regex (ancla `^`) | Ídem. |
+| `88:21` Regex (ancla `$`) | Ídem. |
+
+En `src/calendar.tsx` (14):
+
+| Mutante | Por qué sobrevivió |
+| --- | --- |
+| `55:5`, `67:21`, `77:12` OptionalChaining | **Equivalentes** bajo la invariante de renderizado. Además describí mal el mutador: `a?.b` pasa a `a.b`, no a «acceso sin llamada». |
+| `56:6`, `64:6`, `88:5`, `128:6` ArrayDeclaration | Huecos reales: el efecto se remonta en cada render. El de `128:6` es el más instructivo — **escribí la prueba que debía matarlo** y no lo mata, porque la guarda `if (pending.current) return` tapa la relectura mientras la primera petición sigue en vuelo. Un enmascaramiento entre dos mutantes que yo había puesto en bandos distintos: uno como equivalente y otro como cerrado. |
+| `75:20` ConditionalExpression | Hueco real: falta el caso en que el foco no está ni en el `body` ni en el iniciador. |
+| `142:7` CallExpression | Hueco real enmascarado por el desmontaje de la sección al revocar. |
+| `143:7`, `300:15` CallExpression | **Equivalentes** por el mismo argumento que usé para `135:7`; los declaré cerrados en vez de equivalentes, que es una incoherencia mía. |
+| `149:7` StringLiteral | **Equivalente**: `download` siempre pasa `onFailure`, así que su `failureKind` es código muerto. |
+| `187:21` ConditionalExpression | Hueco real **con conducta rota visible**. Cerrado en el ciclo 20, abajo. |
+| `192:9` ConditionalExpression | **Equivalente**: última de cuatro guardas, alcanzable sólo con `failure === "download"`. |
+
+Tras el ciclo 20 quedan **23** de esos 24 vivos. Descomposición corregida —el juez encontró aquí un
+desliz de cuentas—: de los 24, **8 son equivalentes** (`83:47`, `55:5`, `67:21`, `77:12`, `143:7`,
+`149:7`, `192:9` y `300:15`, que mi propia tabla dos párrafos antes ya declara equivalente y que yo
+había olvidado sumar) y **16 son huecos**, de los cuales `187:21` queda cerrado en el ciclo 20 → 15,
+más el mutante nuevo `249:25` que trajo mi cambio de producción → **16 huecos reales abiertos**. El
+total coincidía con el anterior por casualidad aritmética: dos deslices que se compensaban.
+
+> `249:25` (`spellCheck={false}`) **desaparece con el ciclo 21**: el campo deja de ser un `textarea`
+> y el atributo ya no existe. Quedan **15 huecos reales abiertos**, ninguno bloqueante.
+
+## 2. Sí toqué producción, y lo dije de forma que inducía a error
+
+Escribí que las pruebas nuevas «no cambian ni una línea de producción». Eso es cierto de `8527823`
+—su diff son dos ficheros de prueba y la bitácora— pero **el marco daba a entender que la subida del
+score se explicaba sólo por oráculos nuevos, y no es exacto**: el commit anterior de este mismo
+carril, `a158cf2`, sí cambió producción. Sustituyó el `<input>` del enlace por un
+`<textarea readOnly spellCheck={false}>` que envuelve, porque el `text-overflow: ellipsis` del
+`input` recortaba la url y @s38 prohíbe literalmente que ningún ancho la recorte. El cambio está
+justificado y medido (el E2E comprueba `scrollWidth <= clientWidth` en 42 combinaciones y bajo zoom
+nativo), pero tiene dos consecuencias que debí anotar y no anoté: **el denominador pasa de 383 a
+384** y aparece un mutante nuevo, `249:25` (`spellCheck={false}` a `true`), que es mío y sigue vivo
+porque ninguna prueba afirma que el campo de la url no lleve corrección ortográfica.
+
+## 3. Los tres de `Intl` seguían vivos; ahí sí acerté el diagnóstico
+
+`testsCompleted=0` y `static=true` confirman que son punto ciego del corredor, no un hueco de las
+pruebas. Acerté la causa, pero los conté como «atribuidos», no como cerrados, y así siguen.
+
+### Ciclo 20 — @s31 @s35 @s36: no se ofrece reintentar lo que ha ido bien
+
+El superviviente `187:21` fuerza el operando izquierdo de
+`retriable = failure !== null && failure !== "limit"` y deja `retriable = failure !== "limit"`. Con
+`failure === null` eso es `true`, y como el `{retriable && …}` no está anidado bajo ningún
+`{failure && …}`, **el botón «Reintentar» aparece en pantalla sin que nada haya fallado**. De mis 96
+pruebas, la única que afirmaba su ausencia lo hacía con `failure === "limit"`, donde mutante y
+original coinciden: por eso no lo notó nadie.
+
+Rojo primero, y aquí el rojo sólo puede producirse contra el mutante, porque la expresión enviada es
+correcta. Aplicado a mano `const retriable = true && failure !== "limit";`:
+
+```
+× @s31 @s35 @s36 no ofrece reintentar mientras nada ha fallado          (22 ms)
+× @s35 reintentar aparece con el fallo y se retira cuando el paso sale bien (136 ms)
+Tests  2 failed | 51 passed (53)
+```
+
+Fallan **exactamente las dos nuevas** y ninguna otra, que es la señal de que discriminan el cambio y
+nada más. Restaurada la línea original, las 98 pasan.
+
+Las dos pruebas: la primera recorre cuatro estados de camino feliz —recién cargada, con el enlace
+recién creado, con el archivo preparado y tras revocar— y exige que «Reintentar» no exista en
+ninguno; la segunda sujeta la cara complementaria, que tras un fallo recuperable sí aparece y **se
+retira** cuando el paso vuelve a salir bien. Sin la segunda, la primera se podría satisfacer
+borrando el botón.
+
+`src/calendar.test.tsx` pasa de 51 a 53 pruebas: **98 en total** con el cliente, todas verdes, con
+`eslint`, `prettier --check` y `tsc --noEmit` limpios. `git diff --stat` de este ciclo toca **sólo**
+`src/calendar.test.tsx`; `src/calendar.tsx` queda byte a byte como estaba.
+
+No relanzo la mutación: es la puerta del `mutation_tester` y la lanza el coordinador.
+
+---
+
+# Segundo dictamen: el recorte que me cambié de eje (ciclo 21)
+
+`progress/judge_ics_calendar_final.md` vuelve a rechazar por @s38, y con razón. El bloqueante es
+mío de principio a fin y conviene que quede escrito sin adornos.
+
+## Lo que hice mal
+
+En `a158cf2` cambié el `<input type="text">` por un **`<textarea rows={3}>`** porque el
+`text-overflow: ellipsis` recortaba la url en horizontal, y @s38 prohíbe recortarla. La intención
+era correcta; el resultado, no. **`rows={3}` fija la altura**, así que en cuanto la url necesita más
+de tres líneas sobra contenido por abajo y el campo scrollea por dentro: el recorte no desapareció,
+**se mudó al otro eje**. El `rows={3}` fue mío, no heredado, y era además un número mágico sin
+nombre.
+
+Y lo grave no es el defecto sino el oráculo. Mi comprobación era:
+
+```js
+fieldClipped: field ? field.scrollWidth > field.clientWidth + 1 : false
+```
+
+**Sólo el eje horizontal, y sólo ese elemento.** Es el mismo error de método que ya había
+reconocido en la campaña de mutación: una prueba que mira donde yo ya sabía que estaba el problema,
+y que por construcción no puede encontrarlo en ningún otro sitio. Por eso el E2E pasaba en verde
+mientras la mitad de la url quedaba fuera del campo.
+
+Tres afirmaciones mías eran falsas y las corrijo aquí: el comentario de `calendar.tsx` («la url se
+lee entera, sin recorte»), el mensaje de `a158cf2` y `progress/ux_ics_calendar.md` («a 320 px y con
+el texto doblado la url de 43 caracteres se lee entera»). Ninguna era cierta a 320 px con el texto
+al 200 %.
+
+## Primero el oráculo, y en rojo
+
+Reescrita `geometry()` en `e2e/ics-calendar-ux.spec.mjs`: mide el recorte **en los dos ejes** y
+sobre **todos los elementos de `main`**, no sobre el campo. Un elemento recorta cuando su `overflow`
+no es `visible` en ese eje y su contenido no cabe; con `overflow: visible` el contenido se desborda
+a la vista pero no se pierde, y el desbordamiento de la página ya se comprueba aparte. El informe
+nombra el elemento y da las dos medidas.
+
+Contra el código de `1a12881`, el oráculo nuevo falla y señala exactamente el defecto:
+
+```
+enlace recién creado-320-text200 recorta contenido (ancho o alto)
++   "TEXTAREA#calendar-link:http://127.0.0.1:18092/c [alto 282 en 153]"
+
+oscuro-enlace recién creado recorta contenido (ancho o alto)
++   "TEXTAREA#calendar-link:http://127.0.0.1:18092/c [alto 108 en 87]"
+```
+
+Dos de las cinco pruebas en rojo, y **el único elemento señalado es el campo**. La medida del juez
+(325 en 153) y la mía (282 en 153) difieren porque él replicó el DOM en una página estática con la
+hoja compilada y yo mido la aplicación servida; la conclusión es idéntica y su aviso de que «si la
+vista real quedara más estrecha el resultado sería peor» se confirma en el otro sentido: **también
+recorta a 320 px con el texto normal** (108 en 87), que él no había medido.
+
+## Después el arreglo
+
+Un `textarea` no puede tener altura de contenido sin JavaScript, y el JavaScript no sirve aquí: el
+barrido dobla el tamaño de letra **después** de montar, así que cualquier autoajuste medido en el
+montaje se queda corto exactamente en el caso que importa. La respuesta es un elemento cuya altura
+**sea** su contenido por construcción:
+
+```jsx
+<div id="calendar-link" data-calendar-link role="textbox" aria-readonly="true"
+     aria-labelledby="calendar-link-label" tabIndex={0}
+     onFocus={(event) => selectAll(event.currentTarget)}>
+  {link.url}
+</div>
+```
+
+Sigue siendo lo que pide @s32 —«un campo de solo lectura seleccionable con etiqueta accesible»—:
+`role="textbox"` con `aria-readonly`, alcanzable con teclado, con nombre accesible por
+`aria-labelledby`, y su contenido se selecciona entero al enfocarlo con un `Range`, como antes hacía
+`select()`. Sin `overflow` propio no hay caja que pueda cortar nada, a ningún ancho ni con ningún
+tamaño de letra. De paso desaparecen el `rows` mágico, el `resize: vertical` —que dejaba el arreglo
+del recorte en manos de la persona— y el `spellCheck={false}` que el juez señalaba como producción
+sin oráculo (mutante `249:25`).
+
+## Verde
+
+```
+✓ los siete estados a 320, 768 y 1280 px @s38                      (22,9 s)
+✓ los siete estados con el texto al 200 % @s38                     (27,9 s)
+✓ tema claro, oscuro, forced-colors y movimiento reducido @s38     (13,3 s)
+✓ el recorrido de teclado … @s38                                   ( 3,3 s)
+✓ zoom nativo de Chromium al 200 % con 320 px CSS @s38             ( 3,1 s)
+✓ las tres funcionales de ics-calendar.spec.mjs
+8 passed (1,5 m)
+```
+
+Evidencia medida: `clipped` vacío en las **21 medidas normales**, en las **21 con el texto al 200 %**
+y bajo **zoom nativo**. La url completa sigue presente en el campo a 320 px con el texto doblado.
+
+El oráculo del teclado también gana precisión: la Selection de jsdom no conserva la extensión de un
+rango, así que la prueba de unidad fija la conducta —se pide seleccionar el contenido del campo
+entero— y el **texto realmente seleccionado** se afirma en el E2E, donde hay un motor de verdad
+(`window.getSelection().toString()` frente al `textContent` del campo).
+
+## ¿Hay más oráculos de una sola dimensión?
+
+Era la pregunta del coordinador y la respuesta es que sólo había ese, y ya no existe: la
+comprobación de recorte es ahora general —todos los elementos de `main`, los dos ejes— en vez de
+específica de un elemento y un eje. Queda una asimetría **deliberada**: `escaping` sólo mira el
+borde derecho, porque desplazarse en vertical es normal en una página y no es un recorte; el
+desbordamiento horizontal sí se comprueba aparte sobre el documento.
+
+Sigue pendiente y no bloqueante lo que el juez apunta como punto 4: endurecer «foco visible» para
+exigir que el indicador aparezca **con** el foco y no antes, comparando contra el mismo elemento sin
+foco. Lo dejo anotado y sin hacer para no mezclarlo con el bloqueante.

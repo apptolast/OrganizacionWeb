@@ -410,7 +410,11 @@ a:not(.primary-link):not(.skip-link) {
     display: block;
     margin-block: 12px 4px;
   }
-  input[type="text"] {
+  .field-label {
+    display: block;
+    margin-block: 12px 4px;
+  }
+  [data-calendar-link] {
     display: block;
     width: 100%;
     max-width: 100%;
@@ -421,7 +425,10 @@ a:not(.primary-link):not(.skip-link) {
     border: 1px solid var(--control-border);
     border-radius: 8px;
     padding: 12px 14px;
-    text-overflow: ellipsis;
+    // La altura la fija el contenido: la url envuelve y no se recorta en ningún eje ni a ningún
+    // ancho. Sin `overflow` propio no hay caja que pueda cortarla.
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
     &:focus {
       border-color: var(--accent);
     }

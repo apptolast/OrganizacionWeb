@@ -25,6 +25,16 @@ const ANNOUNCEMENTS: Record<Busy, string> = {
   downloading: "Preparando archivo…",
 };
 
+/** Al enfocar el campo, su contenido queda seleccionado entero, como hacía `select()`. */
+function selectAll(field: HTMLElement) {
+  const selection = window.getSelection();
+  if (!selection) return;
+  const range = document.createRange();
+  range.selectNodeContents(field);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
 const CONFIRMATIONS: Record<Confirmation, string> = {
   regenerate: "Confirmar regeneración",
   revoke: "Confirmar revocación",
@@ -239,14 +249,26 @@ function CalendarFeed() {
             Guárdalo ahora: no volverá a mostrarse. Quien lo conozca verá los
             títulos de tareas y objetivos de tus bloques.
           </p>
-          <label htmlFor="calendar-link">Enlace de suscripción</label>
-          <input
+          <span className="field-label" id="calendar-link-label">
+            Enlace de suscripción
+          </span>
+          {/*
+            Campo de solo lectura cuya altura la fija su contenido. Un `textarea` no puede hacerlo
+            sin JavaScript: con `rows` fijas recortaba la url por abajo a 320 px, que es el mismo
+            defecto que tenía el `input` con `text-overflow: ellipsis`, sólo que en el otro eje.
+            Aquí no hay caja que recortar: el texto envuelve y el elemento crece.
+          */}
+          <div
             id="calendar-link"
-            type="text"
-            readOnly
-            value={link.url}
-            onFocus={(event) => event.currentTarget.select()}
-          />
+            data-calendar-link
+            role="textbox"
+            aria-readonly="true"
+            aria-labelledby="calendar-link-label"
+            tabIndex={0}
+            onFocus={(event) => selectAll(event.currentTarget)}
+          >
+            {link.url}
+          </div>
           <button onClick={(event) => (remember(event), void copyLink())}>
             Copiar enlace
           </button>

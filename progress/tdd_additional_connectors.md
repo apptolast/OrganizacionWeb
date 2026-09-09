@@ -80,13 +80,13 @@ Leyenda de la columna **estado**:
 | `@s13` | sustituir token sube `version` y conserva enlaces | cerrado | `GitlabConnectionUseCasesTest:136`; `GitlabConnectorPersistenceTest:177` |
 | `@s14` | desconectar idempotente conservando tareas | cerrado | `GitlabConnectionUseCasesTest:157`; `GitlabConnectorPersistenceTest:192`; `GitlabConnectorApiTest:449` |
 | `@s15` | importar crea tareas enlazadas con recibo | cerrado | `ImportGitlabIssuesTest:71,255`; `HttpGitlabIssueSourceTest:151`; `GitlabConnectorApiTest:392`; `GitlabConnectorPersistenceTest:300`; y la última línea (`lastActivityAt` = `finishedAt`) en `GitlabConnectionUseCasesTest:79,87,95` |
-| `@s16` | paginar por `X-Next-Page` y marcar `truncated` | parcial | el adaptador lee la cabecera y fija la consulta: `HttpGitlabIssueSourceTest:124,143`, `GitlabApiBaseTest:71`. El recuento por filas del Outline (0/37/140/200 y el tope de dos páginas) es heredado: `ImportGithubIssuesTest:138,158` |
+| `@s16` | paginar por `X-Next-Page` y marcar `truncated` | **cerrado en esta sesión** | adaptador: `HttpGitlabIssueSourceTest:124,143`, `GitlabApiBaseTest:71`. Las cuatro filas del Outline con datos de GitLab: `ImportGitlabIssuesTest` (`s16_readsAtMostTwoPages…`) |
 | `@s17` | excluir incidentes, test cases, tasks y movidas | cerrado | `HttpGitlabIssueSourceTest:168`; `ImportGitlabIssuesTest:94` |
 | `@s18` | repetir la importación es idempotente por enlace | cerrado | `ImportGitlabIssuesTest:108` |
 | `@s19` | unicidad de enlaces por origen | cerrado | `ImportGitlabIssuesTest:130`; `GitlabConnectorPersistenceTest:224,264` |
 | `@s20` | un solo caso de uso sirve a los dos gestores | cerrado | `ImportGitlabIssuesTest:144` |
-| `@s21` | el mapeo issue → tarea es el de 27 | heredado | las cinco filas (recorte a 160/159 puntos de código, cuerpo a 2000, título en blanco como `failed`) sólo tienen oráculo con datos de GitHub: `ImportGithubIssuesTest:104,224`. **Deuda declarada**: falta la tabla equivalente con `web_url` de GitLab |
-| `@s22` | precondiciones antes de contactar GitLab | parcial | dos filas cerradas en la frontera: `GitlabConnectorApiTest:327,345`. Las cinco restantes (proyecto inexistente, ajeno, `completed`, conexión en `error`, y el **orden** entre comprobaciones) son heredadas: `ImportGithubIssuesTest:340,351,362,433,441,449,457` |
+| `@s21` | el mapeo issue → tarea es el de 27 | **cerrado en esta sesión** | las cinco reglas viven en `ExternalIssue`, que no sabe de origen, y ya tenían oráculo agnóstico en `ExternalIssueTest` y `ExternalIssueCriterionTest`. Lo que faltaba era atarlas al camino de GitLab: `ImportGitlabIssuesTest` (`s21_…`) |
+| `@s22` | precondiciones antes de contactar GitLab | **cerrado en esta sesión** | frontera: `GitlabConnectorApiTest:327,345`. Las cinco filas restantes más el orden entre comprobaciones, con el doble de GitLab: `ImportGitlabIssuesTest` (`s22_…`, seis pruebas) |
 | `@s23` | token rechazado marca la conexión y deja recibo | cerrado | `ImportGitlabIssuesTest:205`; `GitlabConnectorPersistenceTest:207`; `GitlabConnectorApiTest:359` |
 | `@s24` | cuota con `Retry-After` | cerrado | `HttpGitlabIssueSourceTest:187,198`; `ImportGitlabIssuesTest:241`; `GitlabConnectorApiTest:311` |
 | `@s25` | indisponible, sin seguir redirecciones | cerrado | `HttpGitlabIssueSourceTest:211,223,232`; `ImportGitlabIssuesTest:226` |
@@ -104,10 +104,18 @@ Leyenda de la columna **estado**:
 | `@s37` | cancelación y cierre de sesión | abierto | — (sin producción de frontend) |
 | `@s38` | responsive, texto ampliado, teclado y axe | abierto | — (sin producción de frontend) |
 
-**Recuento: 21 escenarios cerrados de 38** (20 al abrir la sesión más `@s26`). 6 parciales (`@s2`, `@s4`, `@s5`,
-`@s16`, `@s22`, `@s31`), 2 heredados sin oráculo propio (`@s21`, y la parte de
-`@s16`/`@s22` ya contada), 1 parcial de seguridad (`@s32`) y 9 abiertos sin
-producción (`@s1`, `@s3`, `@s6`, `@s7`, `@s33`…`@s38`).
+**Recuento: 24 escenarios cerrados de 38** (20 al abrir la sesión, más `@s26`,
+`@s16`, `@s22` y `@s21`). Quedan 4 parciales, todos bloqueados por
+el catálogo (`@s2`, `@s4`, `@s5`, `@s31`: su mitad de GitLab está cerrada y les
+falta la mitad de `GET /api/v1/me/connectors`), 1 parcial de seguridad (`@s32`,
+falta el barrido único con logs y almacenamiento del navegador) y 9 abiertos
+sin producción (`@s1`, `@s3`, `@s6`, `@s7`, `@s33`…`@s38`).
+
+**Ya no queda nada cerrable sin escribir producción nueva**: los tres que se
+cerraron en la segunda mitad de la sesión eran precisamente los que descansaban
+en código compartido con 27 y sólo necesitaban su oráculo con datos de GitLab.
+Lo que resta es el catálogo (mitad B, bloqueado por 25, 26, 28 y 30) y la
+pantalla entera.
 
 ### Aviso sobre la numeración
 
@@ -121,12 +129,11 @@ que quedarse con la columna de la izquierda, no con el nombre del método.
 
 Por orden de coste creciente:
 
-1. `@s21` con datos de GitLab (aplicación, sin contenedor).
-2. `@s32` como barrido único incluyendo logs (frontera HTTP).
-3. `@s33`…`@s38`: la pantalla entera, que hoy no existe. Es la mitad del
+1. `@s32` como barrido único incluyendo logs (frontera HTTP).
+2. `@s33`…`@s38`: la pantalla entera, que hoy no existe. Es la mitad del
    trabajo que queda.
-4. `@s1`…`@s7` y `@s33`: el catálogo (mitad B), bloqueado hasta que 25, 26, 28
-   y 30 estén integradas.
+3. `@s1`…`@s7` y `@s33`: el catálogo (mitad B), bloqueado hasta que 25, 26, 28
+   y 30 estén integradas. Cerrarlo cierra de paso las cuatro parciales.
 
 ## Bitácora de ciclos
 
@@ -194,6 +201,30 @@ producción, y hubo que afinar la rotura hasta dar con la que distingue:
 Producción restaurada; verdes `ImportGitlabIssuesTest` (11) e
 `ImportGithubIssuesTest`. Commit `1da4d2e`.
 
+### `@s16`, `@s22` y `@s21` — cerrar lo heredado con el doble de GitLab
+
+Los tres descansaban en `ImportIssues` o en `ExternalIssue`, compartidos con la
+feature 27, y por eso los tres pasaron a la primera. En los tres el rojo se
+acreditó rompiendo la producción, y en los tres la mutación se eligió para que
+matara filas distintas de la tabla:
+
+- `@s16`: quitar `if (!listed.full()) break;` mata las filas de 0 y 37 issues
+  (piden una segunda página que nadie anunció); `MAX_PAGES = 1` mata las de
+  100+40 y 100+100 (created 100 en vez de 140 y 200). Ninguna mutación mata las
+  cuatro, que es la señal de que la tabla no es decorativa.
+- `@s22`: comprobar el proyecto antes que la conexión mata las dos pruebas de
+  orden; quitar la guarda `connection.valid()` y la de proyecto completado mata
+  otras tres. Las filas de proyecto inexistente y ajeno las sostiene un
+  `orElseThrow` que no se puede mutar sin dejar de compilar, y así queda dicho.
+- `@s21`: `taskCompletionCriterion` devolviendo sólo la url mata la del cuerpo
+  tras la línea en blanco; `trim` devolviendo el texto crudo mata la del título
+  en blanco. **La del recorte de espacios sobrevive**, porque `Task.create`
+  también recorta: el comportamiento está guardado dos veces y esa prueba sola
+  no distingue quién lo hizo. Anotado aquí para que la campaña de mutación no
+  lo descubra como sorpresa.
+
+Commits `c27a166`, `afb3a6e`, `b09e01a`.
+
 ## Estado al cerrar la sesión del carril
 
 - El árbol **compila** (`compileJava` + `compileTestJava`, sin contenedores).
@@ -201,5 +232,7 @@ Producción restaurada; verdes `ImportGitlabIssuesTest` (11) e
 - No se ha tocado ningún fichero compartido de los que lista `REGLAS.md` §6:
   todo el cambio vive en `backend/src/**` de GitLab, en `ImportIssues`
   (compartido con 27, pero restaurado a su forma original) y en este `progress/`.
-- `feature_list.json` sigue en `spec_ready`, como debe: quedan 17 escenarios
+- `feature_list.json` sigue en `spec_ready`, como debe: quedan 14 escenarios
   sin oráculo propio y la pantalla entera sin escribir.
+- `ImportIssues` y `ExternalIssue` se mutaron para acreditar rojos y se
+  restauraron byte a byte; `git diff` contra ambos queda vacío.

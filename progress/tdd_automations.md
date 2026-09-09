@@ -257,14 +257,81 @@ el juez confirme o pida corregir @s30; no se ha inventado comportamiento nuevo.
 Se ejecutan **sólo pruebas focales con filtro** por la contención de Testcontainers
 en la máquina; la suite completa queda para el cierre, con turno del coordinador.
 
-## Trazabilidad
+## Trazabilidad @s → test (fase 1)
 
-(mapa @s → test al cierre)
+| @s | Tests que lo cubren |
+| --- | --- |
+| @s1 | `CreateAutomationTest.s1_storesVersionOneWithServerIdAndMicrosecondTimestamps`, `AutomationDraftTest.s1_trimsUnicodeWhiteSpaceAroundTheName`, `AutomationsApiTest.s1_createsTheRuleAndAnswersWithTheClosedRepresentation`, `s1_theOwnerNeverComesFromTheBody`, `AutomationPersistenceTest.s1_s11_storesEveryFieldOfBothActionShapesAndReadsThemBack`, `AutomationWiringTest.s1_s11_s12_s14_theRealBeansCreateReadReplaceAndDeleteAgainstPostgres` |
+| @s2 | `AutomationEventTypeTest.s2_acceptsExactlyTheTwelvePublishedTypes`, `AutomationDraftTest.s2_rejectsUnknownEventTypesBeforeTemplates`, `AutomationsApiTest.s2_acceptsEveryPublishedTrigger` (12 filas), `s2_rejectsAnyOtherTriggerWithoutWriting` (4 filas), `s2_theTriggerObjectIsClosedToo` |
+| @s3 | `CreateAutomationTest.s3_s4_rejectsForeignOrMissingProjectsWithoutWriting`, `AutomationRulesTest.s12_s3_replacingValidatesReferencesLikeCreating`, `AutomationsApiTest.s3_acceptsAConditionOverAnOwnProject`, `s3_rejectsAMalformedCondition` (2 filas) |
+| @s4 | `CreateAutomationTest.s3_s4_…`, `AutomationsApiTest.s4_aForeignOrMissingProjectIsUnprocessable`, `AutomationWiringTest.s4_s33_theRealBeansRefuseAForeignProjectAndSimulateWithoutWriting` |
+| @s5 | `CreateAutomationTest.s5_requiresAnActiveOwnEndpointForWebhookActions`, `AutomationsApiTest.s5_aForeignInactiveOrMissingEndpointIsUnprocessable`, `s5_acceptsAWebhookActionAndEchoesItClosed`, `s5_theWebhookActionIsClosedToo`, `AutomationWiringTest.s5_theWebhookExtensionPointRejectsEveryEndpointUntilFeature25Exists` |
+| @s6 | `AutomationTemplateTest.s7_reportsTheFirstTemplateDefect` (filas válidas), `AutomationsApiTest.s6_keepsTemplatesByteForByte`, `AutomationEventTest.s6_s18_theTaskOfAnEventIsNamedDirectlyOrReachedThroughItsSession` |
+| @s7 | `AutomationTemplateTest.s7_…` (14 filas), `AutomationDraftTest.s7_collectsOneTemplateErrorPerField`, `AutomationsApiTest.s7_anInvalidTemplateNamesItsField` (6 filas), `s7_reportsOneDefectPerFieldAtOnce`, `AutomationEventTest.s7_projectEventsHaveNoTaskAtAll` |
+| @s8 | `AutomationDraftTest.s8_rejectsEachInvalidFieldByCodePoints`, `AutomationsApiTest.s8_rejectsAMalformedBodyNamingTheField` (7 filas), `s8_rejectsOutOfRangeActionFields` (4 filas), `s8_aBodyThatIsNotAnObjectIsRejected`, `s8_aTooLongNameIsRejectedByCodePoints` |
+| @s9 | `AutomationRulesTest.s9_s14_theQuotaIsTwentyAndDeletingFreesASlot`, `AutomationPersistenceTest.s9_theQuotaIsTwentyPerOwnerCountingDisabledRules`, `AutomationsApiTest.s9_theTwentyFirstRuleIsAConflict` |
+| @s10 | `AutomationPersistenceTest.s10_twoConcurrentCreationsForTheLastSlotLeaveExactlyTwentyRules` (dos hilos reales) |
+| @s11 | `AutomationRulesTest.s11_listsOnlyOwnRulesOrderedByCreationThenId`, `s11_readingAForeignOrUnknownRuleIsTheSameNotFound`, `AutomationPersistenceTest.s11_ordersByCreationThenIdAndNeverLeaksAnotherOwner`, `AutomationsApiTest.s11_*` (6) |
+| @s12 | `AutomationRulesTest.s12_replacingAlwaysBumpsTheVersionAndKeepsCreatedAt`, `s12_s3_…`, `AutomationPersistenceTest.s12_replacingBumpsTheVersionKeepsCreatedAtAndDemandsTheExpectedOne`, `AutomationsApiTest.s12_replacingBumpsTheVersionAndTheEtag`, `s12_replacingValidatesTheBodyBeforeTouchingTheUseCase` |
+| @s13 | `AutomationRulesTest.s13_staleOrForeignPreconditionsLeaveTheRuleUntouched`, `AutomationPersistenceTest.s13_s14_deletingDemandsTheExpectedVersionAndFreesASlot`, `AutomationsApiTest.s13_aMalformedPreconditionIsAValidationError` (4 filas), `s13_aMissingPreconditionIsRequired` (2 filas), `s13_aStalePreconditionIsAnAutomationConflict`, `s13_aTriggerChangeStillNeedsThePrecondition` |
+| @s14 | `AutomationRulesTest.s9_s14_…`, `AutomationPersistenceTest.s14_deletingARuleHidesItsRunsButKeepsTheLoopGuard`, `AutomationsApiTest.s14_deletingAnswersWithoutABody`, `s14_deletingAnUnknownRuleIsNotFound`, `automations-api.test.ts` «@s14 deletes with the version» |
+| @s18 (render) | `AutomationTemplateTest.s18_rendersPlaceholdersWithTheCurrentValues`, `AutomationEventTest.s6_s18_…`, `AutomationPersistenceTest.s18_readsThePayloadSoTemplatesCanBeResolved`, `s18_s21_readsTheLiveNamesAndWhetherTheProjectIsCompleted`, `SimulateAutomationTest.s30_previewsEveryMatchNewestFirstWithoutTouchingTheRules` |
+| @s21 (anticipación) | `SimulateAutomationTest.s32_anticipatesACompletedProjectWithoutRunningAnything`, `s32_anticipatesATooLongTitleAndResolvesItWithoutTruncating`, `s32_anticipatesATooLongCriterion`, `AutomationPersistenceTest.s18_s21_…` |
+| @s24 (regla desactivada) | `AutomationMatcherTest.s24_aDisabledRuleNeverMatches` |
+| @s27 | `AutomationEventTest.s27_*` (3), `AutomationMatcherTest.s27_*` (3), `AutomationPersistenceTest.s27_resolvesTasksAndSessionsOnlyInsideTheOwnersData` |
+| @s28, @s29 | `AutomationEventTest.s29_onlyTaskCreationEventsConsultTheLoopGuard`, `AutomationMatcherTest.s28_s29_theGuardOnlyBlocksCreationEventsOfAutomatedTasks`, `AutomationPersistenceTest.s14_…` (la guarda sobrevive al borrado) |
+| @s30 | `SimulateAutomationTest.s30_*` (2), `AutomationsApiTest.s30_simulatesWithoutSavingAnything` |
+| @s31 | `SimulateAutomationTest.s31_countsWhatTheTailReturnsAndMayFindNothing`, `AutomationPersistenceTest.s31_readsTheMostRecentUnblockedEventsNewestFirstUpToTheLimit` |
+| @s32 | `SimulateAutomationTest.s32_*` (6) |
+| @s33 | `SimulateAutomationTest.s33_rejectsForeignReferencesWithTheSameErrorsAsCreating`, `s33_simulatingNeverConsumesAQuotaSlot`, `AutomationsApiTest.s33_*` (3), `AutomationWiringTest.s4_s33_…` |
+| @s34 | `ReadAutomationRunsTest.s34_pagesTwentyAtATimeNewestFirstAndClosesWithANullCursor`, `s34_anExhaustedPageEndsWithoutACursor`, `AutomationPersistenceTest.s34_pagesTheHistoryNewestFirstAndOnlyForTheAskedRule`, `AutomationsApiTest.s34_*` (2) |
+| @s35 | `ReadAutomationRunsTest.s35_*` (3), `AutomationsApiTest.s35_*` (3) |
+| @s36 | `AutomationsApiTest.s36_*` (6: 401, 403 CSRF, 403 origen, 415, 405, 503) |
+| @s37 | `automations.test.tsx` @s37 (4), `automations-route.test.tsx` (3), `automations-api.test.ts` @s37 (2) |
+| @s38 | `automations.test.tsx` @s38 (3), `automations-api.test.ts` @s38 (2) |
+| @s39 | `automations.test.tsx` @s39, `automations-api.test.ts` @s39 (2) |
+| @s40 | `automations.test.tsx` @s40 (4), `automations-api.test.ts` @s40 (2) |
+| @s41 | `automations.test.tsx` @s41, `automations-api.test.ts` @s41 (2) |
+| @s42 | `e2e/automations.spec.mjs` — **escrito, no ejecutado. NO cubierto.** |
+| @s43 | `automations.test.tsx` @s43 (2), `automations-api.test.ts` @s43 |
+
+Diferidos a la fase 2 (worker compartido y feature 25), **sin cobertura y sin
+declarar verdes**: @s15, @s16, @s17, @s19, @s20, @s22, @s23, @s25, @s26 y las
+filas NOTIFY_WEBHOOK reales de @s5, @s12, @s21, @s32 y @s33.
 
 ## Comandos y números
 
-(al cierre)
+- Backend, siempre filtrado y por clases:
+  `backend/gradlew.bat test --no-daemon --tests "com.apptolast.organization.<Clase>"`.
+  155 tests propios en verde: `AutomationEventTypeTest` 1, `AutomationTemplateTest` 15,
+  `AutomationDraftTest` 4, `AutomationEventTest` 6, `CreateAutomationTest` 3,
+  `AutomationRulesTest` 6, `AutomationMatcherTest` 5, `SimulateAutomationTest` 11,
+  `ReadAutomationRunsTest` 5, `AutomationsApiTest` 84, `AutomationPersistenceTest` 12,
+  `AutomationWiringTest` 3. `ArchitectureTest` y `ApplicationWiringTest` sin regresión.
+  `spotlessCheck` limpio.
+- Frontend, por fichero: `pnpm vitest run <ruta>`. 30 tests propios en verde
+  (`automations-api.test.ts` 12, `automations.test.tsx` 15,
+  `automations-route.test.tsx` 3), más 3 en `scripts/project.test.mjs`.
+  `tsc --noEmit` y ESLint limpios sobre lo nuevo.
+- Regresión de la navegación comprobada en los 21 ficheros que renderizan `App` o
+  `Workspace`: 793 tests en verde.
+- **Nunca** se lanzó la suite completa, ni `pitest`, ni Stryker, ni E2E.
 
 ## Decisiones y límites
 
-(al cierre)
+- El cupo de veinte se serializa con `pg_advisory_xact_lock(hashtext(owner_id))`;
+  contar filas no se puede bloquear de otro modo. Una colisión de `hashtext` sólo
+  hace que dos propietarios se turnen.
+- `AutomationTargets` acepta el proyecto propio **en cualquier estado**: apuntar a
+  un proyecto completed es válido al guardar y falla al ejecutar (@s4 y @s21).
+- La guarda de bucles se apoya en `automation_runs.created_task_id` con
+  `rule_id ON DELETE SET NULL`: borrar la regla oculta su historial pero conserva
+  la guarda, comprobado contra PostgreSQL real.
+- V28 crea `automation_cursors` porque la feature 25 no ha entregado tabla de
+  cursores por consumidor. Si 25 la introduce, hay que reconciliar.
+- La acción NOTIFY_WEBHOOK queda **detrás del punto de extensión**
+  `WebhookEndpointLookup`, cuyo bean responde false para todo. Sustituirlo por el
+  adaptador real de 25 es el único cambio de la fase 2 en la parte de guardado.
+- **Lo que NO está demostrado**: @s42 (responsive, zoom y axe) y todos los
+  escenarios de ejecución del worker. La fase 1 no ejecuta ninguna regla: sólo las
+  declara, las simula y expone su auditoría.

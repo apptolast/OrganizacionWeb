@@ -106,6 +106,38 @@ la base de la API (`GithubApiBase`, @s35/B11) ya había encontrado su verde ante
 - Comprobación de que las pruebas muerden: al subir `MAX_PAGES` a 3 y cambiar la condición de
   parada a "página vacía", 9 de las 34 fallan. Revertido.
 
+### Ciclo 9 — @s1 @s3 @s5 @s6 @s10 @s11 @s12 @s20 @s23 @s25 @s29 @s30 @s31 @s32 la frontera HTTP
+
+- ROJO `GithubConnectorApiTest`, 43 pruebas (no compilaba: faltaba `GithubConnectorController`).
+- VERDE `adapter/http/GithubConnectorController`: cinco rutas bajo `/api/v1/me/connectors/github`,
+  todas con `Cache-Control: no-store, private`, cuerpo estricto (campo desconocido, tipo, requerido)
+  y problemas RFC 7807 con los códigos del contrato.
+- Cuatro rojos legítimos que corrigieron el código o la prueba:
+  1. `@JsonInclude(NON_NULL)` **fuera**: el contrato pide once campos del recibo y cinco de la
+     conexión *siempre presentes*, con `errorCode`, `finishedAt` y `lastImport` a `null` cuando
+     toca. "Sin importaciones todavía" es información, no un campo ausente. Las pruebas comparan
+     ahora el conjunto exacto de claves serializadas, que es lo que el contrato dice.
+  2. `DELETE` devolvía 200: pasa a `ResponseEntity.noContent()`.
+  3. Mi propio fixture de @s23 era inservible: `11111111-2222-3333-4444-555555555555` en mayúsculas
+     es idéntico a sí mismo. Cambiado por uno con letras hexadecimales, que es lo que la prueba
+     pretendía medir.
+  4. El canal Bearer: ver el desvío de abajo.
+- El recibo parcial (`importId`, `created`, `skipped`, `failed`) viaja dentro del problema para que
+  la interfaz de @s39 no tenga que volver a preguntar.
+
+### Desvío documentado respecto a @s31 (pendiente de decisión del coordinador)
+
+@s31 espera **401 UNAUTHENTICATED** cuando se usa una credencial Bearer del canal de integraciones
+contra el conector. El comportamiento real es **403 `API_SCOPE_DENIED`**: el
+`ApiCredentialBearerFilter` de la feature 24 autentica la credencial y sólo después comprueba su
+lista blanca de rutas, que —correctamente— no incluye ninguna ruta del conector.
+
+- La propiedad de seguridad que @s31 persigue se cumple entera: la credencial no abre el conector,
+  no se escribe nada y no se contacta con el servidor falso. La prueba lo comprueba así.
+- **No he tocado la lista blanca ni el filtro**: son de la feature 24, de otro carril.
+- Hace falta decidir: o el `.feature` acepta 403 `API_SCOPE_DENIED` para esta fila, o el carril de
+  la feature 24 cambia el filtro para responder 401 en rutas fuera de su lista blanca.
+
 ## Enmiendas al contrato aprobadas por el coordinador (9 de septiembre de 2026)
 
 Origen: `progress/security_review_connectors.md` (rama `main`). El coordinador actualiza

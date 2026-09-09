@@ -616,3 +616,37 @@ hallazgo 2: dejar una spec a medias que hay que revertir. El trabajo pendiente
 está descrito arriba, con el precedente concreto a copiar
 (`e2e/github-connector.spec.mjs:261-291` para el orden y `:302-340` para el anillo
 de foco).
+
+---
+
+# ÍNDICE DE LO ABIERTO — leer sólo esto, no hace falta el dictamen entero
+
+Ocho hallazgos abiertos. Una línea cada uno: qué exige, qué fichero se toca, y si
+lo que falta es **oráculo** (la conducta ya es correcta, lo que no hay es prueba
+que la sujete) o **producto** (hay que cambiar el comportamiento).
+
+| # | Qué exige | Fichero a tocar | Tipo |
+|---|---|---|---|
+| **2** | Asertar el recorte POR ELEMENTO sobre el conjunto nombrado —`main li span` (URL), campo del secreto, `main tbody td`— en las dos dimensiones y en los cuatro anchos. Hoy `offenders` se calcula y sólo viaja dentro del mensaje de fallo. | `e2e/webhooks-ux.spec.mjs` + `frontend/src/webhooks.tsx` y `webhooks.scss` | **Oráculo Y producto**: el secreto no cabe a 320 px en un campo de una línea. **Parche listo en `progress/parche_webhooks_hallazgo_2.patch`**, con la hipótesis del fallo y el arreglo propuesto. |
+| **4** | Recorrido de teclado real: derivar `expectedOrder` de los enfocables visibles de `main`, sembrar el foco en el `h1`, deduplicar y cerrar con `expect(reached).toEqual(expectedOrder)`. Fuera el umbral `toBeGreaterThan(5)`. | `e2e/webhooks-ux.spec.mjs:372-420` | **Oráculo.** Precedente a copiar: `e2e/github-connector.spec.mjs:261-291`. |
+| **12B** | Asertar el **foco visible**, que hoy se mide con `getComputedStyle(active, ":focus-visible")` —pseudo-clase donde la API espera pseudo-elemento, es un no-op— y ni siquiera se asserta: sólo se vuelca a `tab-order.json`. | `e2e/webhooks-ux.spec.mjs:396-406` | **Oráculo.** Precedente: `e2e/github-connector.spec.mjs:302-340`. **Va en el mismo commit que el 4**: es el mismo test. |
+| **13** | «Alcanza todos los controles en orden del DOM»: el título lo promete y no se compara ningún orden; 20 controles reales frente a un umbral de 6. | `e2e/webhooks-ux.spec.mjs:372` | **Oráculo. Es el mismo trabajo que el 4**: no son dos commits, es uno. |
+| **9** | @s22: recorrer entera la cadena `claim -> lease vencido -> reclaim -> send -> record` y contar las copias que ve el receptor (1 en una fila, 2 en la otra). | `WebhookRecoveryPersistenceTest.java` | **Oráculo.** ⚠️ **EN CURSO EN OTRO CARRIL.** |
+| **10** | @s23: el test de concurrencia no discrimina el `SKIP LOCKED`; falta el receptor lento de 500 ms y, sobre todo, la cláusula de **no espera**. | `WebhookWorkPersistenceTest.java:128-144` | **Oráculo.** ⚠️ **EN CURSO EN OTRO CARRIL.** Aviso: la mutación a matar vive en un literal SQL (`FOR UPDATE OF d SKIP LOCKED`, `PostgresWebhookWork.java:68`), la campaña de bytecode no la genera. |
+| **11** | @s29: la lectura de `/deliveries` no acota a 50 items, y ni el orden `updatedAt DESC, id DESC` ni la identidad de las 50 supervivientes tienen oráculo. | `PostgresWebhookStore.java:118-128`, `WebhookWorkPersistenceTest.java:180-204` | **Producto Y oráculo, y ADEMÁS necesita decisión del propietario**: `LIMIT 50` contradice la línea 367 del propio contrato (50 terminales + 2 pendientes); la alternativa es enmendar `feature:368` y `project-spec.md:2018`. ⚠️ **EN CURSO EN OTRO CARRIL.** |
+| **18** | @s28: la reactivación no llega a los dos eventos posteriores al cursor; y la compuerta `e.status='active'` de `readyEndpoints()` no la ejerce ninguna prueba (suprimirla del SQL no rompe nada hoy). | `WebhookRecoveryPersistenceTest.java:147-216` y `PostgresWebhookOutbox.java:43-55` | **Oráculo.** Bloqueado por el coordinador para no chocar con el carril del backend. |
+
+**Agrupación real para quien reparta trabajo:** los ocho son **cinco** unidades,
+no ocho — `4+12B+13` son un solo commit sobre un solo test; `9+10+11` son el
+carril de backend ya en marcha; `2` está a medio camino con parche e hipótesis; y
+`18` está a la espera de que se libere el backend.
+
+**Corrección documental pendiente, que no debe perderse:** la fila «Posición en
+serie» de `progress/ux_webhooks.md` declara «el orden de Tab sigue al DOM —
+Verificado en navegador (tab-order.json)». Hoy es **falso**. Quien cierre 4/13
+debe corregirla en el mismo cambio.
+
+**Cerrado por otro carril, no lo repitas:** hallazgo 3, zoom nativo al 200 %, en
+`e2e/webhooks-native-zoom.spec.mjs`, verde, con los cuatro anchos y
+`scrollWidth == clientWidth`. Lo que ese fichero **no** cubre es el recorte por
+elemento, que es el hallazgo 2.

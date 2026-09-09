@@ -398,6 +398,122 @@ test("calendario externo audit: axe no encuentra violaciones en vacío y con sus
   expect(afterSync.testEngine.name).toBe("axe-core");
 });
 
+/**
+ * @s40 remite a la matriz de `docs/ux-requirements.md`, cuya línea 54 exige que «toda variante
+ * personalizable (tema, densidad, tamaño de texto, paneles) pase sus verificaciones». Hasta hoy
+ * esta pantalla sólo se auditaba en el tema por defecto, aunque la aplicación implementa
+ * `prefers-color-scheme: dark` (`frontend/src/styles.scss:53`) y `prefers-reduced-motion`
+ * (`:1293`), y aunque otras nueve specs del repositorio ya usan `emulateMedia`.
+ *
+ * Cada modo fija **las tres** preferencias: `emulateMedia` conserva las que no se nombran, y sin
+ * esto `forced-colors` se cuela en la pasada de movimiento reducido y falsea la medida (lección ya
+ * escrita en `e2e/ics-calendar-ux.spec.mjs:304`).
+ */
+test("calendario externo audit: claro, oscuro, forced-colors y movimiento reducido en los seis estados @s40", async ({
+  page,
+}) => {
+  test.setTimeout(300_000);
+  const base = {
+    colorScheme: "light",
+    forcedColors: "none",
+    reducedMotion: "no-preference",
+  };
+  const modes = [
+    { name: "claro", media: { ...base } },
+    { name: "oscuro", media: { ...base, colorScheme: "dark" } },
+    {
+      name: "forced-colors",
+      media: { ...base, forcedColors: "active" },
+      forced: true,
+    },
+    {
+      name: "movimiento reducido",
+      media: { ...base, reducedMotion: "reduce" },
+    },
+  ];
+  const evidence = [];
+  try {
+    for (const mode of modes) {
+      await page.emulateMedia(mode.media);
+      for (const state of STATES) {
+        const leave = await enter(page, state);
+        try {
+          const analyzer = new AxeBuilder({ page }).withTags(AXE_TAGS);
+          // Chromium pinta colores del sistema mientras axe lee los declarados: bajo colores
+          // forzados la regla de contraste mide una paleta que el usuario no ve. Se omite sólo esa
+          // regla y sólo en esa pasada, como en appearance-ux-audit e ics-calendar-ux.
+          if (mode.forced) analyzer.disableRules(["color-contrast"]);
+          const { violations } = await analyzer.analyze();
+          expect(violations, `axe en ${mode.name} / ${state}`).toEqual([]);
+          await nothingBreaksAt(page, `${mode.name} / ${state}`);
+
+          const painted = await page.evaluate(() => {
+            const main = document.querySelector(".external-calendar");
+            const opaque = (element) => {
+              for (let node = element; node; node = node.parentElement) {
+                const colour = getComputedStyle(node).backgroundColor;
+                if (colour && !/rgba\(0, 0, 0, 0\)|transparent/.test(colour))
+                  return colour;
+              }
+              return getComputedStyle(document.documentElement).backgroundColor;
+            };
+            return {
+              ink: getComputedStyle(main).color,
+              canvas: opaque(main),
+              forcedColors: matchMedia("(forced-colors: active)").matches,
+              dark: matchMedia("(prefers-color-scheme: dark)").matches,
+              reducedMotion: matchMedia("(prefers-reduced-motion: reduce)")
+                .matches,
+              moving: [
+                ...document.querySelectorAll(
+                  ".external-calendar, .external-calendar *",
+                ),
+              ].filter((element) => {
+                const style = getComputedStyle(element);
+                return (
+                  parseFloat(style.transitionDuration) > 0.01 ||
+                  parseFloat(style.animationDuration) > 0.01
+                );
+              }).length,
+            };
+          });
+          // Legibilidad mínima comprobable por máquina: tinta y lienzo no colapsan en el mismo
+          // color. Es la comprobación que en el carril de automatizaciones destapó un contraste de
+          // 1,01 sobre 1 en un control que jamás se había renderizado en una corrida medida.
+          expect(painted.ink, `${mode.name} / ${state}`).not.toBe(
+            painted.canvas,
+          );
+          if (mode.name === "oscuro") expect(painted.dark).toBe(true);
+          if (mode.forced) expect(painted.forcedColors).toBe(true);
+          if (mode.name === "movimiento reducido")
+            expect(painted.reducedMotion).toBe(true);
+          evidence.push({ mode: mode.name, state, moving: painted.moving });
+        } finally {
+          await leave();
+        }
+      }
+    }
+  } finally {
+    await page.emulateMedia({
+      colorScheme: null,
+      forcedColors: null,
+      reducedMotion: null,
+    });
+  }
+  expect(evidence).toHaveLength(modes.length * STATES.length);
+  // Declaración honesta del alcance: la pasada de movimiento reducido es **vacua** en esta
+  // pantalla. No hay ni una transición ni una animación que reducir ni con la preferencia puesta ni
+  // sin ella, así que se ejecuta por conformidad con la matriz, no como evidencia de que algo se
+  // haya atenuado. Si algún día se añade movimiento aquí, esta aserción caerá y habrá que medirlo
+  // de verdad en vez de suponerlo.
+  const moving = (name) =>
+    evidence
+      .filter((row) => row.mode === name)
+      .reduce((a, b) => a + b.moving, 0);
+  expect(moving("claro"), "hay movimiento sin la preferencia puesta").toBe(0);
+  expect(moving("movimiento reducido")).toBe(0);
+});
+
 test("calendario externo audit: el recorrido con teclado sigue el orden del contrato @s40", async ({
   page,
 }) => {

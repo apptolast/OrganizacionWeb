@@ -10,7 +10,7 @@
   "enabledPlugins": {
     "ecc@ecc": true
   },
-  "hooks_disabled_during_parallel_lanes": {
+  "hooks": {
     "Stop": [
       {
         "hooks": [
@@ -22,6 +22,5 @@
         ]
       }
     ]
-  },
-  "$hooks_note": "La puerta Stop (node .harness/harness.mjs init) corre la suite completa de backend, que levanta del orden de 49 contenedores PostgreSQL, en CADA turno del orquestador. Con varios carriles en paralelo eso reproduce el colapso del 9 de septiembre. Se aparca durante la fase paralela y se restaura al integrar, ejecutando la verificacion explicitamente."
+  }
 }

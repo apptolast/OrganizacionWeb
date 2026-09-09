@@ -55,10 +55,10 @@ CI ese paso tarda 14 minutos. Con varios carriles en paralelo es exactamente lo
 que colapsó la máquina el 8 de septiembre, y es hermano del hook `PostToolUse`
 que ya se retiró por lo mismo.
 
-Aparcado en `hooks_disabled_during_parallel_lanes` mientras dura la fase
-paralela, con la nota del porqué dentro del propio fichero. **Hay que
-restaurarlo** cuando se acabe de trabajar en paralelo; la verificación se
-ejecuta explícitamente al integrar.
+Se aparcó mientras duró la fase paralela y **se restauró al integrar**, con la
+verificación ejecutada de forma explícita. Si se vuelve a trabajar con varios
+carriles, hay que volver a aparcarlo: no es opcional, es la diferencia entre
+que la máquina rinda y que no rinda nada.
 
 ## Los cinco carriles
 
@@ -77,6 +77,95 @@ suyo: `progress/carriles/dictamen_f25.md`, `dictamen_f28.md`, `dictamen_f30.md`.
 | C | 30 automatizaciones | 18094 | 10 hallazgos abiertos, 4 bloqueantes |
 | D | 27 conector GitHub | 18096 | revalidar el único bloqueante del juez, ya corregido en `d418a5d` |
 | E | 29 conectores adicionales | 18098 | terminar el ciclo a medias, inventario de oráculos por escenario |
+
+## Resultado de la cosecha (20:45)
+
+Los cinco carriles se integraron en `main` **sin un solo conflicto** —comprobado
+antes con `git merge-tree` sobre los diez pares—. En total, **más de setenta
+commits**.
+
+| Feature | Hallazgos cerrados hoy | Abiertos |
+|---|---|---|
+| 25 webhooks | 6 (1, 5, 15, 16, 17, 21) + 9 y 10 desde otro carril | 6 |
+| 28 calendario externo | 8 (3, 6, 8, 12, 14, 15, 18, 19) | 5 |
+| 30 automatizaciones | 9 (2, 3, 4, 5, 6, 7, 8, 9, 11) | 1 |
+| 29 conectores adicionales | 24 de 38 escenarios con oráculo, más el caso de uso del catálogo | endpoint |
+| Las tres a la vez | zoom nativo al 200 %, en tres ficheros nuevos y verdes | — |
+
+### Tres defectos de producto reales, no deuda de pruebas
+
+1. **Contraste 1,01:1** en el `role="switch"` de cada regla de automatizaciones:
+   texto blanco sobre `--editable`. Violación seria de WCAG 1.4.3. Llevaba
+   escondido exactamente por lo que el dictamen predijo: ese control **nunca se
+   había renderizado en una ejecución medida**.
+2. **Oráculo de recorte ciego** en automatizaciones: medía
+   `documentElement.scrollWidth` y no veía nada. Acreditado con una mutación de
+   control (`li { overflow: hidden; max-height: 96px }`) que hace caer 3 de 4
+   pruebas con `clientHeight` 94 frente a `scrollHeight` de 249 a 800.
+3. **El reenlace DNS del calendario externo**, bloqueante 6: la guardia
+   descartaba la dirección validada y volvía a conectar por nombre, al revés de
+   lo que exige la enmienda B3. Cerrado y demostrado.
+
+Y uno corregido a medias con honestidad: en **webhooks** el reenlace DNS **no**
+se ha implementado; se ha devuelto a límite declarado y se ha corregido el
+javadoc, que afirmaba estar cerrado sin estarlo. El límite residual y su
+contención por política de egreso quedan escritos en `deploy/EGRESS.md`.
+
+### Cuatro veces que un agente refutó lo que se le dijo
+
+Vale la pena registrarlo, porque es lo que separa este trabajo de un teatro:
+
+- El dictamen **se equivocaba en el oráculo que proponía** para el hallazgo 10 de
+  webhooks. Sustituir `SKIP LOCKED` por `FOR UPDATE` a mano dejó la prueba
+  propuesta en verde: con diez filas libres la instancia perdedora no se muere de
+  hambre. El oráculo que sí discrimina pregunta por la **identidad** de lo
+  reclamado mientras otra transacción retiene la primera fila.
+- En automatizaciones el zoom nativo **sí se ejecutaba**; el hueco era que medía
+  un solo ancho de los cuatro del contrato. Y ese contrato **no pide zoom nativo
+  en su tabla**: el spec nuevo mide más estricto que lo firmado, y lo dice.
+- 2560 px al 200 % **no se puede medir**: exigiría una ventana de 5120 px que
+  ninguna pantalla del proyecto tiene, y el gestor recortaría la petición en
+  silencio. Se documenta en vez de fingir.
+- La premisa de que cuatro escenarios de la 29 seguían bloqueados «porque
+  dependen de 25/26/28/30» **había caducado**: esas features ya están en `main`.
+  El bloqueo real es que falta el endpoint del catálogo.
+
+### Feature 27: aprobada por el juez y suspendida por la mutación
+
+El juez levantó el rechazo: **APPROVED**, condicionado a la puerta de mutación.
+La revalidación se ejecutó de verdad —E2E 16 de 16, backend 75 de 75— y de paso
+encontró que una prueba era verde **por suerte de carga**: se concedía 90 s de
+espera interior bajo un presupuesto de 30 s, y en la segunda ejecución tardó
+30,7 s. Habría muerto por siete décimas.
+
+Pero la puerta de mutación **no la pasa**, y este es el dato duro del día:
+
+- **Frontend, Stryker: 69,44 %**, umbral 80. 409 muertos, **175 supervivientes**,
+  5 sin cobertura. Esa campaña **nunca se había ejecutado**: el juez la tenía
+  como condición C7 pendiente. No es una regresión, es un hueco que llevaba ahí
+  desde el principio.
+- **Backend, PIT: no se pudo medir.** Abortó tras 17 minutos porque
+  `ImportScaleTest.s16_exact32MiBAnd100000RecordsPreviewAndApplyThroughRealProxy`
+  falló **sin mutación**, con la máquina cargada por cinco carriles y su prueba
+  hermana tardando 75 s. PIT exige suite verde. Hay que repetirla con la máquina
+  libre antes de concluir nada.
+
+Sobre los supervivientes se atacaron cuatro racimos, con previsión —declarada
+como previsión, no como medida— de 35 a 37 muertos de 175. El mayor racimo eran
+**13 supervivientes de una sola causa**: cinco operaciones que llaman
+`signal.throwIfAborted()` tres veces cada una, y solo la primera llamada de una
+operación tenía oráculo. Y la rama sin cobertura resultó ser el `catch` de
+`disconnect()`, que **nunca se había ejecutado**: el producto era correcto, pero
+todo un camino de fallo estaba sin una sola prueba detrás.
+
+### Una contradicción del contrato que solo puede resolver el propietario
+
+El hallazgo 11 de webhooks no es un defecto de código: `features/webhooks.feature`
+exige en la línea 367 que queden persistidas «50 terminales **y las 2
+pendientes**» —52 filas— y en la 368 que el GET devuelva «items de como máximo
+**50**». Las dos no pueden ser ciertas a la vez. Poner `LIMIT 50` rompe el test
+que hoy afirma 52. **Hace falta que decidas cuál manda** y enmendar
+`project-spec.md:2018` en consecuencia.
 
 ## Lo que NO cabía en el plazo, dicho sin adornos
 

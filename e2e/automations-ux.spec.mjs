@@ -24,10 +24,49 @@ function clearRules() {
 test.beforeEach(() => clearRules());
 test.afterEach(() => clearRules());
 
-async function openEditor(page) {
+// Nombre largo a proposito: a 320 px el riesgo real de esta pantalla es el
+// reflujo del `li` con cinco hijos en flex-wrap, y sin reglas no hay ni un `li`.
+const LONG = "Seguimiento de las tareas creadas en Marketing durante 2027";
+
+async function seedRule(request, project, name, enabled) {
+  const response = await request.post("/api/v1/me/automations", {
+    headers: await csrfHeaders(request),
+    data: {
+      name,
+      enabled,
+      trigger: { eventType: "TaskCreated.v1" },
+      condition: null,
+      action: {
+        type: "CREATE_TASK",
+        projectId: project,
+        titleTemplate: "Revisar {{task.title}} en {{project.name}}",
+        criterionTemplate: "{{event.type}} a las {{occurredAt}}",
+        estimatedMinutes: 30,
+      },
+    },
+  });
+  expect(response.status()).toBe(201);
+}
+
+/**
+ * El Given de @s42 (features/automations.feature:548) exige lista, editor
+ * abierto y resultados de simulacion visibles. Medir tras `Nueva regla` sobre
+ * cero reglas audita el estado vacio, que es lo que hacia esta suite: axe nunca
+ * veia el <ul aria-label="Reglas"> ni el <ul aria-label="Coincidencias">.
+ */
+async function openDenseScreen(page, request, project) {
+  await clearRules();
+  await seedRule(request, project, LONG, true);
+  await seedRule(request, project, "Pausada", false);
   await page.goto("/automatizaciones");
-  await page.getByRole("button", { name: "Nueva regla" }).click();
+  await expect(page.getByRole("list", { name: "Reglas" })).toBeVisible();
+  await expect(page.getByRole("switch", { name: /Pausada/ })).toBeVisible();
+  await page.getByRole("button", { name: `Editar ${LONG}` }).click();
   await expect(page.getByLabel(/nombre/i)).toBeVisible();
+  await page.getByRole("button", { name: "Simular" }).click();
+  await expect(
+    page.getByRole("status", { name: "Resultado de la simulación" }),
+  ).toBeVisible();
 }
 
 async function geometry(page) {
@@ -39,6 +78,36 @@ async function geometry(page) {
     reduced: matchMedia("(prefers-reduced-motion: reduce)").matches,
     dark: matchMedia("(prefers-color-scheme: dark)").matches,
     theme: document.documentElement.dataset.theme ?? null,
+    // Recorte por ELEMENTO y en LOS DOS EJES. El oraculo anterior solo miraba
+    // documentElement.scrollWidth, que no crece cuando el contenido se corta
+    // dentro de una caja: es la regresion que documenta ics-calendar-ux.
+    // Los controles de formulario nativos se exceptuan a proposito: Chromium
+    // les aplica overflow:clip en su hoja de agente y su valor sigue siendo
+    // alcanzable con el cursor e integro en el arbol de accesibilidad. Queda
+    // escrito aqui y en progress/ux_automations.md, no silenciado.
+    clipped: [...document.querySelectorAll("main, main *")]
+      .filter((element) => element.getClientRects().length)
+      .filter(
+        (element) => !["INPUT", "SELECT", "TEXTAREA"].includes(element.tagName),
+      )
+      .filter((element) => {
+        const style = getComputedStyle(element);
+        return (
+          (style.overflowX !== "visible" &&
+            element.scrollWidth > element.clientWidth + 1) ||
+          (style.overflowY !== "visible" &&
+            element.scrollHeight > element.clientHeight + 1)
+        );
+      })
+      .map((element) => ({
+        tag: element.tagName.toLowerCase(),
+        label: element.getAttribute("aria-label") ?? "",
+        text: (element.textContent ?? "").trim().slice(0, 60),
+        scrollWidth: element.scrollWidth,
+        clientWidth: element.clientWidth,
+        scrollHeight: element.scrollHeight,
+        clientHeight: element.clientHeight,
+      })),
     controls: [
       ...document.querySelectorAll("main a,main button,main input,main select"),
     ]
@@ -52,6 +121,10 @@ async function geometry(page) {
 
 function assertUsable(observed) {
   expect(observed.scroll).toBeLessThanOrEqual(observed.client);
+  expect(
+    observed.clipped,
+    "la pantalla recorta contenido (ancho o alto)",
+  ).toEqual([]);
   for (const control of observed.controls) {
     expect(control.width).toBeGreaterThanOrEqual(44);
     expect(control.height).toBeGreaterThanOrEqual(44);
@@ -62,13 +135,13 @@ test("automatizaciones UX: los cuatro anchos en tema claro y oscuro @s42", async
   page,
   request,
 }, info) => {
-  await create(request, "Marketing");
+  const { id: project } = await create(request, "Marketing");
   const observations = [];
   for (const colorScheme of ["light", "dark"]) {
     await page.emulateMedia({ colorScheme });
     for (const width of WIDTHS) {
       await page.setViewportSize({ width, height: width === 768 ? 400 : 900 });
-      await openEditor(page);
+      await openDenseScreen(page, request, project);
       const observed = await geometry(page);
       expect(observed.dark).toBe(colorScheme === "dark");
       assertUsable(observed);
@@ -93,13 +166,13 @@ test("automatizaciones UX: texto al 200 % en los cuatro anchos y los dos temas @
   page,
   request,
 }, info) => {
-  await create(request, "Marketing");
+  const { id: project } = await create(request, "Marketing");
   const observations = [];
   for (const colorScheme of ["light", "dark"]) {
     await page.emulateMedia({ colorScheme });
     for (const width of WIDTHS) {
       await page.setViewportSize({ width, height: width === 768 ? 400 : 900 });
-      await openEditor(page);
+      await openDenseScreen(page, request, project);
       // Zoom de texto, no de disposición: se dobla el tamaño calculado de cada
       // elemento por su atributo style. Una hoja inline la bloquea la CSP.
       const scaled = await page.evaluate(() => {
@@ -146,10 +219,10 @@ test("automatizaciones UX: colores forzados y movimiento reducido @s42", async (
   page,
   request,
 }, info) => {
-  await create(request, "Marketing");
+  const { id: project } = await create(request, "Marketing");
   await page.emulateMedia({ reducedMotion: "reduce", forcedColors: "active" });
   await page.setViewportSize({ width: 320, height: 1000 });
-  await openEditor(page);
+  await openDenseScreen(page, request, project);
   const observed = await geometry(page);
   expect(observed.forced).toBe(true);
   expect(observed.reduced).toBe(true);

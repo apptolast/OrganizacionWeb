@@ -202,7 +202,7 @@ mismo tipo de cobertura falsa que la corrección venía a quitar. La tabla de
 trazabilidad (sección 3) queda alineada: las seis filas que apuntan a ese spec
 dicen @s34.
 
-Sin ciclo rojo: es una etiqueta, no comportamiento. Commit `0aa8c33`.
+Sin ciclo rojo: es una etiqueta, no comportamiento. Commit `a913ea8`.
 
 ### 7.2 Sombras: el ancla `$` dejaba pasar una capa clara (exigida 2, la grave)
 

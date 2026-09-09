@@ -15,7 +15,12 @@ descarga del mismo documento desde la sesión web. Contrato: `features/ics_calen
 | GET | `/api/v1/me/calendar.ics` | sesión | 200 con `Content-Disposition: attachment` |
 
 Cabeceras de todo documento y de todo error del feed: `Cache-Control: private, no-store` y
-`X-Content-Type-Options: nosniff`. El feed público no emite `Content-Disposition`, `Set-Cookie`
+`X-Content-Type-Options: nosniff`. La cadena de seguridad del feed emite también
+`Content-Security-Policy` y `Referrer-Policy: same-origin`, como las otras dos (hallazgo A8).
+
+> Desviación conocida: el controlador fija `text/calendar; charset=utf-8`, pero Tomcat reserializa
+> el tipo y entrega `text/calendar;charset=utf-8`, sin el espacio opcional que RFC 9110 permite.
+> Ninguna capa de la aplicación puede evitarlo. Ver `progress/tdd_ics_calendar.md`. El feed público no emite `Content-Disposition`, `Set-Cookie`
 ni `ETag`. Sólo se admiten GET y HEAD; el resto responde 405 con `Allow: GET, HEAD` **antes** de
 mirar el candidato, para que un token real y uno inventado sean indistinguibles.
 
@@ -59,8 +64,10 @@ bloques salen del mismo snapshot.
 
 ## Despliegue
 
-`deploy/nginx.conf` enruta `location /calendar/` al backend con `access_log off`. Es obligatorio:
-el token viaja en la ruta y no debe aparecer en ningún registro de acceso. Esto resuelve la
+`deploy/nginx.conf` enruta `location /calendar/` al backend con `access_log off` y con
+`proxy_hide_header` de `X-Content-Type-Options`, `Content-Security-Policy` y `Referrer-Policy`: el
+backend ya las emite y el `add_header` del bloque `server` las duplicaría. El `access_log off` es
+obligatorio: el token viaja en la ruta y no debe aparecer en ningún registro de acceso. Esto resuelve la
 pregunta abierta que dejó la propuesta de la feature 26. Cualquier proxy o CDN que se añada por
 delante debe repetir la exclusión o enmascarar la ruta.
 

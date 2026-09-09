@@ -474,8 +474,17 @@ public class ApplicationConfiguration {
       com.apptolast.organization.application.WebhookWork work,
       com.apptolast.organization.application.WebhookSender sender,
       com.apptolast.organization.application.WebhookAudit audit,
+      com.apptolast.organization.application.WebhookSecrets secrets,
       Clock clock) {
-    return new com.apptolast.organization.application.DispatchWebhooks(work, sender, audit, clock);
+    return new com.apptolast.organization.application.DispatchWebhooks(
+        work, sender, audit, secrets, clock);
+  }
+
+  @Bean
+  WebhookConnectorStartup webhookConnectorStartup(
+      com.apptolast.organization.application.WebhookSecrets secrets,
+      com.apptolast.organization.application.WebhookAudit audit) {
+    return new WebhookConnectorStartup(secrets, audit);
   }
 
   @Bean

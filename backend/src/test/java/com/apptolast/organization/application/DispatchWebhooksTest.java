@@ -22,6 +22,25 @@ class DispatchWebhooksTest {
   private static final UUID W = UUID.fromString("22222222-2222-4222-8222-222222222222");
   private static final String OWNER = "owner-a";
 
+  /** A connector key that is present, which is the normal case for every test but @s9. */
+  private static final WebhookSecrets KEYED =
+      new WebhookSecrets() {
+        @Override
+        public boolean available() {
+          return true;
+        }
+
+        @Override
+        public byte[] encrypt(String ownerId, UUID endpointId, String secret) {
+          return secret.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        }
+
+        @Override
+        public String decrypt(String ownerId, UUID endpointId, byte[] ciphertext) {
+          return new String(ciphertext, java.nio.charset.StandardCharsets.UTF_8);
+        }
+      };
+
   private static WebhookEndpoint active() {
     return new WebhookEndpoint(
         W, "https://example.com/h", "", List.of("TaskCreated.v1"), "active", null, null, T, T);
@@ -97,7 +116,7 @@ class DispatchWebhooksTest {
     work.claimable.add(claim(delivery));
     var audit = new FakeAudit();
 
-    new DispatchWebhooks(work, sender, audit, CLOCK).runCycle();
+    new DispatchWebhooks(work, sender, audit, KEYED, CLOCK).runCycle();
 
     assertEquals(
         List.of("attempt " + W + " " + delivery.eventId() + " pending HTTP_ERROR"), audit.lines);
@@ -110,10 +129,25 @@ class DispatchWebhooksTest {
     work.claimable.add(claim(delivery));
     var audit = new FakeAudit();
 
-    new DispatchWebhooks(work, new FakeSender(), audit, CLOCK).runCycle();
+    new DispatchWebhooks(work, new FakeSender(), audit, KEYED, CLOCK).runCycle();
 
     assertEquals(
         List.of("attempt " + W + " " + delivery.eventId() + " succeeded null"), audit.lines);
+  }
+
+  @Test
+  void s9_withoutAConnectorKeyTheWorkerNeitherClaimsNorSends() {
+    var work = new FakeWork();
+    var sender = new FakeSender();
+    work.claimable.add(claim(pending(0)));
+    var audit = new FakeAudit();
+
+    new DispatchWebhooks(work, sender, audit, WebhookSecrets.DISABLED, CLOCK).runCycle();
+
+    assertEquals(0, work.claims, "a disabled connector must not even reach the database");
+    assertTrue(sender.sentEventIds.isEmpty());
+    assertTrue(work.recorded.isEmpty());
+    assertTrue(audit.lines.isEmpty(), "the startup audit already reported it once");
   }
 
   @Test
@@ -125,7 +159,7 @@ class DispatchWebhooksTest {
     work.claimable.add(claim(first));
     work.claimable.add(claim(second));
 
-    new DispatchWebhooks(work, sender, new FakeAudit(), CLOCK).runCycle();
+    new DispatchWebhooks(work, sender, new FakeAudit(), KEYED, CLOCK).runCycle();
 
     assertEquals(
         List.of(first.eventId().toString(), second.eventId().toString()), sender.sentEventIds);
@@ -142,7 +176,7 @@ class DispatchWebhooksTest {
     var sender = new FakeSender();
     for (var index = 0; index < 25; index++) work.claimable.add(claim(pending(0)));
 
-    var dispatch = new DispatchWebhooks(work, sender, new FakeAudit(), CLOCK);
+    var dispatch = new DispatchWebhooks(work, sender, new FakeAudit(), KEYED, CLOCK);
     dispatch.runCycle();
     assertEquals(20, sender.sentEventIds.size());
 
@@ -155,7 +189,7 @@ class DispatchWebhooksTest {
     var work = new FakeWork();
     var sender = new FakeSender();
 
-    new DispatchWebhooks(work, sender, new FakeAudit(), CLOCK).runCycle();
+    new DispatchWebhooks(work, sender, new FakeAudit(), KEYED, CLOCK).runCycle();
 
     assertEquals(1, work.claims);
     assertTrue(sender.sentEventIds.isEmpty());
@@ -169,7 +203,7 @@ class DispatchWebhooksTest {
     sender.outcome = WebhookAttempt.http(500, 9);
     work.claimable.add(claim(pending(5)));
 
-    new DispatchWebhooks(work, sender, new FakeAudit(), CLOCK).runCycle();
+    new DispatchWebhooks(work, sender, new FakeAudit(), KEYED, CLOCK).runCycle();
 
     assertEquals("exhausted", work.recorded.getFirst().status());
     assertEquals(6, work.recorded.getFirst().attempt());
@@ -187,7 +221,7 @@ class DispatchWebhooksTest {
     sender.outcome = WebhookAttempt.http(500, 9);
     work.claimable.add(claim(pending(0)));
 
-    new DispatchWebhooks(work, sender, new FakeAudit(), CLOCK).runCycle();
+    new DispatchWebhooks(work, sender, new FakeAudit(), KEYED, CLOCK).runCycle();
 
     assertEquals("pending", work.recorded.getFirst().status());
     assertTrue(work.disabled.isEmpty());
@@ -207,7 +241,7 @@ class DispatchWebhooksTest {
     var delivery = pending(0);
     work.claimable.add(new ClaimedDelivery(active(), OWNER, delivery, "{\"a\":1}", "whsec_real"));
 
-    new DispatchWebhooks(work, sender, new FakeAudit(), CLOCK).runCycle();
+    new DispatchWebhooks(work, sender, new FakeAudit(), KEYED, CLOCK).runCycle();
 
     assertEquals(List.of("https://example.com/h", "whsec_real", "{\"a\":1}"), seen);
   }

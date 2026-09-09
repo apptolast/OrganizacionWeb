@@ -266,9 +266,21 @@ toca `build/` bajo los pies del proceso. La ejecución del arnés que reportaba 
 tests rotos» **sin nombrar un solo test roto** y dejando 3 informes en vez de
 sesenta y pico encaja con lo mismo.
 
-**Excluye `backend/build/`, `backend/.gradle/` y `frontend/node_modules/` de la
-sincronización de OneDrive**, o mueve el repositorio fuera. Mientras no se haga,
-cualquier verde o rojo de la suite local es sospechoso.
+**CORRECCION del 9 de septiembre, tarde.** Esa atribucion a OneDrive NO esta
+probada. El error se repitio tres veces, pero las tres hubo agentes ejecutando
+`gradlew test` filtrado en el mismo directorio, y dos invocaciones de Gradle sobre
+el mismo proyecto se pisan `build/test-results`. No he conseguido una ejecucion
+limpia de verdad para separar las dos hipotesis.
+
+Lo que si esta establecido: **el problema es LOCAL**. La CI sobre Linux nunca ha
+mostrado este error; sus fallos han sido siempre reales y accionables. Asi que la
+CI es la senal fiable y la suite local, con este sintoma, no lo es.
+
+Antes de tocar OneDrive, prueba lo barato: ejecutar la suite completa con NADA mas
+corriendo —ni agentes, ni otra invocacion de Gradle— y comprobar `docker ps` y los
+procesos java a cero. Si aun asi falla, entonces si: excluye `backend/build/`,
+`backend/.gradle/` y `frontend/node_modules/` de la sincronizacion, o saca el
+repositorio de OneDrive.
 
 ### Una lección sobre los rangos de Stryker, aprendida a golpes
 

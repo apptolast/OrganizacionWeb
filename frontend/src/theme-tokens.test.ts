@@ -1,18 +1,32 @@
 // Guardas estáticas del tema: las hojas SCSS solo pueden pintar con tokens de
 // los mixins de apariencia. El oráculo de color real es el E2E con axe
 // (e2e/today-dark.spec.mjs); esto evita que vuelvan colores fijos.
-import { readdirSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { expect, it } from "vitest";
 
 const FIXED_COLOR = /#[0-9a-fA-F]{3,8}\b/g;
 // import.meta.url apunta a http://localhost en jsdom; se lee desde el cwd (frontend/).
 const read = (file: string) =>
   readFileSync(resolve(process.cwd(), "src", file), "utf8");
-const styleSheets = () =>
-  readdirSync(resolve(process.cwd(), "src")).filter((file) =>
-    file.endsWith(".scss"),
-  );
+// Recursivo a propósito: una hoja escondida en una subcarpeta pintaría con
+// literales sin que la guarda global se enterase. Devuelve rutas relativas a
+// la raíz, con barras normales para que el mensaje de fallo sea legible.
+const styleSheets = (root: string = resolve(process.cwd(), "src")): string[] =>
+  readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.isDirectory())
+      return styleSheets(join(root, entry.name)).map(
+        (nested) => `${entry.name}/${nested}`,
+      );
+    return entry.name.endsWith(".scss") ? [entry.name] : [];
+  });
 
 it("today.scss paints notice, summary and agenda cards only with theme tokens (audit #1-#4)", () => {
   expect(read("today.scss").match(FIXED_COLOR)).toBeNull();
@@ -178,6 +192,22 @@ it("a shadow is neutral only when every one of its layers is (juez #2)", () => {
   expect(isNeutralShadow("0 5px 18px rgb(0 0 0 / 6%), 0 0 8px #ffffff")).toBe(
     false,
   );
+});
+
+// Una hoja en subcarpeta se escapaba del barrido entero: readdirSync no es
+// recursivo. Hoy no existe ninguna, pero la guarda promete cubrirlas.
+it("the stylesheet scan reaches sheets nested in subdirectories (juez #3)", () => {
+  const root = mkdtempSync(join(tmpdir(), "scss-scan-"));
+  mkdirSync(join(root, "partials", "deep"), { recursive: true });
+  writeFileSync(join(root, "top.scss"), "");
+  writeFileSync(join(root, "partials", "mid.scss"), "");
+  writeFileSync(join(root, "partials", "deep", "low.scss"), "");
+  writeFileSync(join(root, "partials", "notes.md"), "");
+  expect(styleSheets(root).sort()).toEqual([
+    "partials/deep/low.scss",
+    "partials/mid.scss",
+    "top.scss",
+  ]);
 });
 
 it("no stylesheet declares a fixed color outside the appearance mixins (audit #1-#8)", () => {

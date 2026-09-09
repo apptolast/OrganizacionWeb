@@ -193,3 +193,14 @@ Comando: `backend\gradlew.bat test --no-daemon --tests '...domain.IcsCalendarTes
 
 Punto de control del backend: los 14 ficheros de test del carril en verde,
 incluidas las 37 pruebas MockMvc y la de Testcontainers.
+
+### Ciclo 15 — cliente HTTP del navegador (@s35, @s36, @s37, @s38, @s39)
+
+- ROJO: `external-calendar-api.test.ts` (42 casos) no encontraba el módulo.
+- VERDE: `external-calendar-api.ts` con validación cerrada de la forma de cada
+  respuesta (quince campos de suscripción, cinco por evento, cuatro en la
+  lectura de eventos), errores tipados `ExternalCalendarValidationError`,
+  `ConnectorsDisabledError` y `ExternalCalendarNotConfiguredError`, y
+  `signal.throwIfAborted()` antes y después de cada petición.
+- Un item sin `allDay` o con fin no posterior al inicio invalida la lectura
+  entera: es lo que @s36 pide para mostrar el aviso de lectura inválida.

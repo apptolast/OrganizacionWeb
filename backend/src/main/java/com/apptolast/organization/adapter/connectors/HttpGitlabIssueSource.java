@@ -1,10 +1,10 @@
 package com.apptolast.organization.adapter.connectors;
 
-import com.apptolast.organization.application.GithubRepositoryDirectory;
+import com.apptolast.organization.application.GitlabProject;
+import com.apptolast.organization.application.GitlabProjectDirectory;
 import com.apptolast.organization.application.IssuePage;
 import com.apptolast.organization.application.IssueSource;
 import com.apptolast.organization.application.IssueSourceException;
-import com.apptolast.organization.application.RepositoryIdentity;
 import com.apptolast.organization.domain.ExternalIssue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,28 +16,30 @@ import java.time.Clock;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Adaptador HTTP de GitHub. La base es configuración del servidor y ya viene validada, así que la
- * única parte que depende del usuario es el nombre del repositorio, que llega comprobado.
+ * Adaptador HTTP de GitLab. La base es configuración del servidor y ya viene validada, así que lo
+ * único que depende del usuario es la ruta del proyecto, que llega comprobada y viaja codificada.
  *
- * <p>No sigue redirecciones: seguir una llevaría el PAT del usuario a un destino que GitHub elige.
- * Los plazos son cortos y explícitos, porque importar es una operación interactiva y quien espera
- * es una persona delante de la pantalla.
+ * <p>No sigue redirecciones: seguir una llevaría el PAT del usuario a un destino que elige GitLab.
+ * El token viaja únicamente en la cabecera {@code PRIVATE-TOKEN}, nunca en la URL ni en el cuerpo.
+ * Los plazos son cortos y explícitos, porque importar es interactivo y quien espera es una persona.
  */
-public final class HttpGithubIssueSource implements IssueSource, GithubRepositoryDirectory {
+public final class HttpGitlabIssueSource implements IssueSource, GitlabProjectDirectory {
   private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(2);
   private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(4);
   private static final int DEFAULT_RETRY_SECONDS = 60;
   private static final int MINIMUM_RETRY_SECONDS = 1;
-  private static final String PULL_REQUEST = "pull_request";
+  private static final String PLAIN_ISSUE = "issue";
+  private static final String TOKEN_HEADER = "PRIVATE-TOKEN";
 
-  private final GithubApiBase base;
+  private final GitlabApiBase base;
   private final ObjectMapper json;
   private final Clock clock;
   private final HttpClient client;
 
-  public HttpGithubIssueSource(GithubApiBase base, ObjectMapper json, Clock clock) {
+  public HttpGitlabIssueSource(GitlabApiBase base, ObjectMapper json, Clock clock) {
     this.base = base;
     this.json = json;
     this.clock = clock;
@@ -49,35 +51,61 @@ public final class HttpGithubIssueSource implements IssueSource, GithubRepositor
   }
 
   @Override
-  public RepositoryIdentity verify(String repository, String token) {
-    var repositoryBody = body(get(base.repository(repository), token));
-    var userBody = body(get(base.user(), token));
-    return new RepositoryIdentity(text(repositoryBody, "full_name"), text(userBody, "login"));
+  public GitlabProject verify(String projectPath, String token) {
+    var body = body(get(base.project(projectPath), token));
+    if (!body.isObject()) throw IssueSourceException.unavailable();
+    return new GitlabProject(integer(body, "id"), text(body, "path_with_namespace"));
   }
 
   @Override
   public IssuePage list(String projectReference, String token, int page) {
     var response = get(base.issues(projectReference, page), token);
+    if (quotaExhausted(response)) throw IssueSourceException.rateLimited(retryAfter(response));
     var array = body(response);
     if (!array.isArray()) throw IssueSourceException.unavailable();
     var issues = new ArrayList<ExternalIssue>();
+    int excluded = 0;
     for (var element : array) {
       if (!element.isObject()) throw IssueSourceException.unavailable();
-      if (element.has(PULL_REQUEST) && !element.get(PULL_REQUEST).isNull()) continue;
-      issues.add(issueOf(element));
+      if (importable(element)) issues.add(issueOf(element));
+      else excluded++;
     }
-    return new IssuePage(List.copyOf(issues), array.size(), announcesNextPage(response));
+    return new IssuePage(List.copyOf(issues), array.size(), excluded, announcesNextPage(response));
   }
 
-  private static ExternalIssue issueOf(JsonNode element) {
-    var id = element.get("id");
-    if (id == null || !id.isIntegralNumber()) throw IssueSourceException.unavailable();
-    var body = element.get("body");
+  /**
+   * Sólo se importa lo que es trabajo planificable: incidentes, casos de prueba y las «tasks» de
+   * GitLab no lo son, y una issue movida a otro proyecto ya vive en su destino.
+   */
+  private static boolean importable(JsonNode element) {
+    var type = element.get("issue_type");
+    var moved = element.get("moved_to_id");
+    return type != null
+        && PLAIN_ISSUE.equals(type.textValue())
+        && (moved == null || moved.isNull());
+  }
+
+  private ExternalIssue issueOf(JsonNode element) {
+    var description = element.get("description");
     return new ExternalIssue(
-        id.asText(),
+        externalId(element),
         text(element, "title"),
-        body == null || body.isNull() ? null : body.asText(),
-        text(element, "html_url"));
+        description == null || description.isNull() ? null : description.asText(),
+        text(element, "web_url"));
+  }
+
+  /**
+   * El identificador global de la issue basta dentro de una instancia; el host delante evita que
+   * cambiar de instancia haga colisionar dos issues distintas bajo el mismo enlace.
+   */
+  private String externalId(JsonNode element) {
+    return URI.create(base.value()).getHost() + ":" + integer(element, "id");
+  }
+
+  private static long integer(JsonNode node, String field) {
+    var value = node.get(field);
+    if (value == null || !value.isIntegralNumber()) throw IssueSourceException.unavailable();
+    return value.asLong();
   }
 
   private static String text(JsonNode node, String field) {
@@ -91,9 +119,8 @@ public final class HttpGithubIssueSource implements IssueSource, GithubRepositor
         HttpRequest.newBuilder(URI.create(url))
             .GET()
             .timeout(REQUEST_TIMEOUT)
-            .header("Authorization", "Bearer " + token)
-            .header("Accept", "application/vnd.github+json")
-            .header("X-GitHub-Api-Version", "2022-11-28")
+            .header(TOKEN_HEADER, token)
+            .header("Accept", "application/json")
             .header("User-Agent", "OrganizationWeb")
             .build();
     HttpResponse<String> response;
@@ -119,32 +146,27 @@ public final class HttpGithubIssueSource implements IssueSource, GithubRepositor
   }
 
   /**
-   * Un 403 es cuota agotada cuando GitHub lo dice —sin peticiones restantes o con un plazo de
-   * reintento—, y en cualquier otro caso significa que el repositorio no está a nuestro alcance.
+   * GitLab responde 401 con un token que no vale y 403 con uno que vale pero no alcanza; para el
+   * producto son lo mismo, una conexión que hay que rehacer. El 404 se distingue porque describe el
+   * proyecto y no la credencial, aunque acabe en el mismo código de la API.
    */
   private IssueSourceException classify(HttpResponse<String> response) {
     int status = response.statusCode();
-    if (status == 401) return IssueSourceException.tokenRejected();
+    if (status == 401 || status == 403) return IssueSourceException.tokenRejected().answeredWith(status);
     if (status == 429) return IssueSourceException.rateLimited(retryAfter(response));
-    if (status == 403)
-      return (exhaustedQuota(response)
-              ? IssueSourceException.rateLimited(retryAfter(response))
-              : IssueSourceException.repositoryUnavailable())
-          .answeredWith(status);
     if (status == 404) return IssueSourceException.repositoryUnavailable();
     return IssueSourceException.unavailable().answeredWith(status);
   }
 
-  private static boolean exhaustedQuota(HttpResponse<String> response) {
-    return header(response, "x-ratelimit-remaining").map("0"::equals).orElse(false)
-        || header(response, "retry-after").isPresent();
+  /** Una respuesta correcta con la cuota a cero es una negativa disfrazada de éxito. */
+  private static boolean quotaExhausted(HttpResponse<String> response) {
+    return header(response, "ratelimit-remaining").map("0"::equals).orElse(false);
   }
 
-  /** Retry-After manda sobre el instante de reinicio; sin ninguno de los dos, un minuto. */
   private int retryAfter(HttpResponse<String> response) {
     var explicit = seconds(response, "retry-after");
     if (explicit.isPresent()) return atLeastOneSecond(explicit.get());
-    var reset = seconds(response, "x-ratelimit-reset");
+    var reset = seconds(response, "ratelimit-reset");
     if (reset.isEmpty()) return DEFAULT_RETRY_SECONDS;
     return atLeastOneSecond(reset.get() - clock.instant().getEpochSecond());
   }
@@ -155,23 +177,24 @@ public final class HttpGithubIssueSource implements IssueSource, GithubRepositor
         : (int) Math.min(seconds, Integer.MAX_VALUE);
   }
 
-  private static java.util.Optional<Long> seconds(HttpResponse<String> response, String name) {
+  private static Optional<Long> seconds(HttpResponse<String> response, String name) {
     return header(response, name)
         .flatMap(
             value -> {
               try {
-                return java.util.Optional.of(Long.parseLong(value.trim()));
+                return Optional.of(Long.parseLong(value.trim()));
               } catch (NumberFormatException error) {
-                return java.util.Optional.<Long>empty();
+                return Optional.<Long>empty();
               }
             });
   }
 
-  private static java.util.Optional<String> header(HttpResponse<String> response, String name) {
+  private static Optional<String> header(HttpResponse<String> response, String name) {
     return response.headers().firstValue(name);
   }
 
+  /** GitLab anuncia la página siguiente en {@code X-Next-Page}, vacía cuando no hay más. */
   private static boolean announcesNextPage(HttpResponse<String> response) {
-    return header(response, "link").map(value -> value.contains("rel=\"next\"")).orElse(false);
+    return header(response, "x-next-page").map(value -> !value.isBlank()).orElse(false);
   }
 }

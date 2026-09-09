@@ -316,7 +316,7 @@ final class ConnectorFakes {
     }
   }
 
-  static final class FakeIssueSource implements IssueSource {
+  static final class FakeIssueSource implements IssueSource, GithubRepositoryDirectory {
     private final List<String> calls = new ArrayList<>();
     private final Map<Integer, IssuePage> pages = new HashMap<>();
     private final Map<Integer, IssueSourceException> pageFailures = new HashMap<>();
@@ -358,8 +358,8 @@ final class ConnectorFakes {
     }
 
     @Override
-    public IssuePage list(String repository, String token, int page) {
-      calls.add("list " + repository + " page=" + page);
+    public IssuePage list(String projectReference, String token, int page) {
+      calls.add("list " + projectReference + " page=" + page);
       lastToken = token;
       if (failure != null) throw failure;
       var pageFailure = pageFailures.get(page);

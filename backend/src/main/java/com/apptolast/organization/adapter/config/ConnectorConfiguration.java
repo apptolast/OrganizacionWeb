@@ -49,7 +49,7 @@ public class ConnectorConfiguration {
   }
 
   @Bean
-  IssueSource githubIssueSource(GithubApiBase base, ObjectMapper json, Clock clock) {
+  HttpGithubIssueSource githubIssueSource(GithubApiBase base, ObjectMapper json, Clock clock) {
     return new HttpGithubIssueSource(base, json, clock);
   }
 
@@ -57,7 +57,7 @@ public class ConnectorConfiguration {
   ConnectGithubUseCase connectGithub(
       ConnectorConnectionStore connections,
       IssueImportReceiptStore receipts,
-      IssueSource source,
+      HttpGithubIssueSource source,
       SecretCipher cipher,
       ConnectorAudit audit,
       Clock clock) {
@@ -86,7 +86,7 @@ public class ConnectorConfiguration {
       ConnectorConnectionStore connections,
       IssueImportReceiptStore receipts,
       ProjectQueries projects,
-      IssueSource source,
+      HttpGithubIssueSource source,
       ImportedTaskCommit commit,
       SecretCipher cipher,
       ConnectorAudit audit,

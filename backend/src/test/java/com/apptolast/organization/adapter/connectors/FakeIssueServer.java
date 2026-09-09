@@ -13,11 +13,15 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Servidor de GitHub falso sobre el HTTP del JDK, en loopback y puerto efímero. Ninguna prueba de
- * este carril habla con api.github.com: la base apunta siempre aquí.
+ * Servidor falso del gestor de issues sobre el HTTP del JDK, en loopback y puerto efímero. Ninguna
+ * prueba de este carril habla con api.github.com ni con gitlab.com: la base apunta siempre aquí.
  */
-final class FakeGithub implements AutoCloseable {
-  /** Lo que el servidor devolvió y lo que la petición traía, para poder auditarlo después. */
+final class FakeIssueServer implements AutoCloseable {
+  /**
+   * Lo que la petición traía, para poder auditarlo después. {@code path} es la ruta tal cual llegó,
+   * sin descodificar, que es la única forma de comprobar que lo que sale codificado llega
+   * codificado.
+   */
   record Received(String method, String path, String query, Map<String, String> headers) {}
 
   private final HttpServer server;
@@ -35,7 +39,7 @@ final class FakeGithub implements AutoCloseable {
     }
   }
 
-  FakeGithub() throws IOException {
+  FakeIssueServer() throws IOException {
     server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
     server.createContext("/", this::handle);
     server.start();
@@ -66,8 +70,8 @@ final class FakeGithub implements AutoCloseable {
             (name, values) ->
                 headers.put(name.toLowerCase(java.util.Locale.ROOT), values.getFirst()));
     received.add(
-        new Received(exchange.getRequestMethod(), uri.getPath(), uri.getRawQuery(), headers));
-    var reply = replies.getOrDefault(uri.getPath(), new Reply(404, "{}", Map.of()));
+        new Received(exchange.getRequestMethod(), uri.getRawPath(), uri.getRawQuery(), headers));
+    var reply = replies.getOrDefault(uri.getRawPath(), new Reply(404, "{}", Map.of()));
     reply.headers().forEach((name, value) -> exchange.getResponseHeaders().add(name, value));
     exchange.getResponseHeaders().add("Content-Type", "application/json");
     var body = reply.body().getBytes(StandardCharsets.UTF_8);
@@ -87,14 +91,14 @@ final class FakeGithub implements AutoCloseable {
     }
   }
 
-  /** Array JSON de issues con identificadores consecutivos. */
-  static String issuesJson(int from, int count) {
+  /** Array JSON de issues de GitHub con identificadores consecutivos. */
+  static String githubIssues(int from, int count) {
     var items = new ArrayList<String>();
-    for (int n = from; n < from + count; n++) items.add(issueJson(n, "Issue " + n, null));
+    for (int n = from; n < from + count; n++) items.add(githubIssue(n, "Issue " + n, null));
     return "[" + String.join(",", items) + "]";
   }
 
-  static String issueJson(int id, String title, String body) {
+  static String githubIssue(int id, String title, String body) {
     return "{\"id\":"
         + id
         + ",\"title\":\""

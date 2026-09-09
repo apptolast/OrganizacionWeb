@@ -1,0 +1,261 @@
+package com.apptolast.organization.adapter.connectors;
+
+import static org.assertj.core.api.Assertions.*;
+
+import com.apptolast.organization.application.IssueSourceException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+/**
+ * @s9 @s11 @s12 @s16 @s17 @s24 @s25 @s32 el adaptador HTTP de GitLab contra un servidor falso en
+ *     bucle local. Ninguna prueba de esta clase habla con gitlab.com.
+ */
+class HttpGitlabIssueSourceTest {
+  private static final String TOKEN = "glpat-SECRETOSECRETO1234";
+  private static final String PROJECT_PATH = "grupo/sub/proyecto";
+  private static final String REFERENCE = "4821";
+  private static final Instant NOW = Instant.parse("2026-09-09T12:00:00Z");
+
+  private FakeIssueServer gitlab;
+  private HttpGitlabIssueSource source;
+
+  @BeforeEach
+  void setUp() throws IOException {
+    gitlab = new FakeIssueServer();
+    source =
+        new HttpGitlabIssueSource(
+            GitlabApiBase.of(gitlab.base() + "/api/v4"),
+            new ObjectMapper(),
+            Clock.fixed(NOW, ZoneOffset.UTC));
+  }
+
+  @AfterEach
+  void tearDown() {
+    gitlab.close();
+  }
+
+  private void projectReplies(FakeIssueServer.Reply reply) {
+    gitlab.reply("/api/v4/projects/grupo%2Fsub%2Fproyecto", reply);
+  }
+
+  private void issuesReply(FakeIssueServer.Reply reply) {
+    gitlab.reply("/api/v4/projects/4821/issues", reply);
+  }
+
+  // ------------------------------------------------------------------ @s9 @s11 verificar
+
+  @Test
+  void s9_verifyingAsksForTheEncodedProjectWithThePrivateTokenHeaderAndNeverInTheUrl() {
+    projectReplies(
+        FakeIssueServer.Reply.ok(
+            "{\"id\":4821,\"path_with_namespace\":\"grupo/sub/proyecto\"}"));
+
+    var project = source.verify(PROJECT_PATH, TOKEN);
+
+    assertThat(project.id()).isEqualTo(4821L);
+    assertThat(project.pathWithNamespace()).isEqualTo("grupo/sub/proyecto");
+    assertThat(gitlab.received()).hasSize(1);
+    var request = gitlab.received().getFirst();
+    assertThat(request.method()).isEqualTo("GET");
+    assertThat(request.path()).isEqualTo("/api/v4/projects/grupo%2Fsub%2Fproyecto");
+    assertThat(request.query()).isNull();
+    assertThat(request.headers()).containsEntry("private-token", TOKEN);
+    assertThat(request.headers()).doesNotContainKey("authorization");
+  }
+
+  @Test
+  void s9_averifiedProjectWithoutTheExpectedShapeIsAnUnavailableProvider() {
+    projectReplies(FakeIssueServer.Reply.ok("{\"id\":\"4821\"}"));
+
+    assertThat(reasonOf(() -> source.verify(PROJECT_PATH, TOKEN)))
+        .isEqualTo(IssueSourceException.Reason.UNAVAILABLE);
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "401, TOKEN_REJECTED",
+    "403, TOKEN_REJECTED",
+    "404, REPOSITORY_UNAVAILABLE",
+    "500, UNAVAILABLE",
+    "302, UNAVAILABLE"
+  })
+  void s12_everyRefusalOfTheProviderIsClassifiedWithoutQuotingItsBody(int status, String reason) {
+    projectReplies(
+        new FakeIssueServer.Reply(
+            status, "{\"message\":\"invalid_token: glpat-abcdef1234\"}", Map.of()));
+
+    var error =
+        catchThrowableOfType(
+            IssueSourceException.class, () -> source.verify(PROJECT_PATH, TOKEN));
+
+    assertThat(error.reason()).isEqualTo(IssueSourceException.Reason.valueOf(reason));
+    assertThat(error.getMessage()).doesNotContain("glpat").doesNotContain("invalid_token");
+  }
+
+  @Test
+  void s12_abodyThatIsNotJsonIsAnUnavailableProvider() {
+    projectReplies(new FakeIssueServer.Reply(200, "<html>mantenimiento</html>", Map.of()));
+
+    assertThat(reasonOf(() -> source.verify(PROJECT_PATH, TOKEN)))
+        .isEqualTo(IssueSourceException.Reason.UNAVAILABLE);
+  }
+
+  @Test
+  void s12_anExhaustedQuotaKeepsTheRetryAfterTheProviderAsked() {
+    projectReplies(FakeIssueServer.Reply.status(429, Map.of("Retry-After", "20")));
+
+    var error =
+        catchThrowableOfType(
+            IssueSourceException.class, () -> source.verify(PROJECT_PATH, TOKEN));
+
+    assertThat(error.reason()).isEqualTo(IssueSourceException.Reason.RATE_LIMITED);
+    assertThat(error.retryAfterSeconds()).isEqualTo(20);
+  }
+
+  // --------------------------------------------------------- @s16 @s17 @s24 @s25 listar
+
+  @Test
+  void s16_listingAsksForOpenIssuesAHundredAtATimeAndReadsTheNextPageHeader() {
+    issuesReply(
+        new FakeIssueServer.Reply(
+            200, "[" + gitlabIssue(9001) + "," + gitlabIssue(9002) + "]",
+            Map.of("X-Next-Page", "2")));
+
+    var page = source.list(REFERENCE, TOKEN, 1);
+
+    assertThat(page.issues()).hasSize(2);
+    assertThat(page.elements()).isEqualTo(2);
+    assertThat(page.more()).isTrue();
+    var request = gitlab.received().getFirst();
+    assertThat(request.path()).isEqualTo("/api/v4/projects/4821/issues");
+    assertThat(request.query()).isEqualTo("state=opened&per_page=100&page=1");
+    assertThat(request.headers()).containsEntry("private-token", TOKEN);
+  }
+
+  @Test
+  void s16_anEmptyNextPageHeaderMeansThereIsNothingMore() {
+    issuesReply(
+        new FakeIssueServer.Reply(200, "[" + gitlabIssue(9001) + "]", Map.of("X-Next-Page", "")));
+
+    assertThat(source.list(REFERENCE, TOKEN, 1).more()).isFalse();
+  }
+
+  @Test
+  void s15_eachIssueBecomesAnExternalIssueIdentifiedByHostAndGlobalId() {
+    issuesReply(FakeIssueServer.Reply.ok("[" + gitlabIssue(9001) + "]"));
+
+    var issue = source.list(REFERENCE, TOKEN, 1).issues().getFirst();
+
+    assertThat(issue.externalId()).isEqualTo("127.0.0.1:9001");
+    assertThat(issue.title()).isEqualTo("Issue 9001");
+    assertThat(issue.url()).isEqualTo("https://gitlab.example.com/grupo/proyecto/-/issues/9001");
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "'\"issue_type\":\"incident\"'",
+    "'\"issue_type\":\"test_case\"'",
+    "'\"issue_type\":\"task\"'",
+    "'\"issue_type\":\"issue\",\"moved_to_id\":555'"
+  })
+  void s17_whatIsNotAPlainOpenIssueIsExcludedAndCounted(String marker) {
+    issuesReply(
+        FakeIssueServer.Reply.ok(
+            "["
+                + gitlabIssue(9001)
+                + ","
+                + gitlabIssue(9002)
+                + ","
+                + gitlabIssueWith(9003, marker)
+                + "]"));
+
+    var page = source.list(REFERENCE, TOKEN, 1);
+
+    assertThat(page.issues()).hasSize(2);
+    assertThat(page.excluded()).isEqualTo(1);
+    assertThat(page.elements()).isEqualTo(3);
+  }
+
+  @Test
+  void s24_aquotaAnnouncedWithoutRetryAfterFallsBackToAMinute() {
+    issuesReply(FakeIssueServer.Reply.status(429, Map.of()));
+
+    var error =
+        catchThrowableOfType(IssueSourceException.class, () -> source.list(REFERENCE, TOKEN, 1));
+
+    assertThat(error.reason()).isEqualTo(IssueSourceException.Reason.RATE_LIMITED);
+    assertThat(error.retryAfterSeconds()).isEqualTo(60);
+  }
+
+  @Test
+  void s24_ahundredOkWithNoQuotaLeftIsAlsoAnExhaustedQuota() {
+    issuesReply(
+        new FakeIssueServer.Reply(
+            200, "[]", Map.of("RateLimit-Remaining", "0", "Retry-After", "5")));
+
+    var error =
+        catchThrowableOfType(IssueSourceException.class, () -> source.list(REFERENCE, TOKEN, 1));
+
+    assertThat(error.reason()).isEqualTo(IssueSourceException.Reason.RATE_LIMITED);
+    assertThat(error.retryAfterSeconds()).isEqualTo(5);
+  }
+
+  @Test
+  void s25_aredirectionIsNeverFollowedSoTheTokenDoesNotTravelWhereGitlabPoints() {
+    gitlab.reply(
+        "/api/v4/projects/4821/issues",
+        FakeIssueServer.Reply.status(301, Map.of("Location", "/api/v4/robado")));
+    gitlab.reply("/api/v4/robado", FakeIssueServer.Reply.ok("[]"));
+
+    assertThat(reasonOf(() -> source.list(REFERENCE, TOKEN, 1)))
+        .isEqualTo(IssueSourceException.Reason.UNAVAILABLE);
+    assertThat(gitlab.received()).hasSize(1);
+  }
+
+  @Test
+  void s25_aprovidearThatNeverFinishesAnsweringIsUnavailable() {
+    issuesReply(FakeIssueServer.Reply.ok("[]"));
+    gitlab.delayBody(6000);
+
+    assertThat(reasonOf(() -> source.list(REFERENCE, TOKEN, 1)))
+        .isEqualTo(IssueSourceException.Reason.UNAVAILABLE);
+  }
+
+  @Test
+  void s25_abodyThatIsNotAnArrayOfIssuesIsUnavailable() {
+    issuesReply(FakeIssueServer.Reply.ok("{\"error\":\"nope\"}"));
+
+    assertThat(reasonOf(() -> source.list(REFERENCE, TOKEN, 1)))
+        .isEqualTo(IssueSourceException.Reason.UNAVAILABLE);
+  }
+
+  private static IssueSourceException.Reason reasonOf(Runnable work) {
+    return catchThrowableOfType(IssueSourceException.class, work::run).reason();
+  }
+
+  private static String gitlabIssue(int id) {
+    return gitlabIssueWith(id, "\"issue_type\":\"issue\"");
+  }
+
+  private static String gitlabIssueWith(int id, String marker) {
+    return "{\"id\":"
+        + id
+        + ",\"title\":\"Issue "
+        + id
+        + "\",\"description\":null,\"web_url\":"
+        + "\"https://gitlab.example.com/grupo/proyecto/-/issues/"
+        + id
+        + "\","
+        + marker
+        + "}";
+  }
+}

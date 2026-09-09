@@ -14,7 +14,7 @@ import java.time.Clock;
 public final class ConnectGithub implements ConnectGithubUseCase {
   private final ConnectorConnectionStore connections;
   private final IssueImportReceiptStore receipts;
-  private final IssueSource source;
+  private final GithubRepositoryDirectory directory;
   private final SecretCipher cipher;
   private final ConnectorAudit audit;
   private final Clock clock;
@@ -22,13 +22,13 @@ public final class ConnectGithub implements ConnectGithubUseCase {
   public ConnectGithub(
       ConnectorConnectionStore connections,
       IssueImportReceiptStore receipts,
-      IssueSource source,
+      GithubRepositoryDirectory directory,
       SecretCipher cipher,
       ConnectorAudit audit,
       Clock clock) {
     this.connections = connections;
     this.receipts = receipts;
-    this.source = source;
+    this.directory = directory;
     this.cipher = cipher;
     this.audit = audit;
     this.clock = clock;
@@ -57,7 +57,7 @@ public final class ConnectGithub implements ConnectGithubUseCase {
   private RepositoryIdentity identify(
       String ownerId, GithubRepository target, PersonalAccessToken secret) {
     try {
-      return source.verify(target.fullName(), secret.value());
+      return directory.verify(target.fullName(), secret.value());
     } catch (IssueSourceException error) {
       audit.connectionRefused(
           GithubIssueConnections.SOURCE,

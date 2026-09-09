@@ -45,3 +45,24 @@ Contrato: `features/external_calendar.feature` (@s1…@s40). Ponytail full / Cav
 Comando: `backend\gradlew.bat test --no-daemon --tests '...domain.IcsCalendarTest'
 --tests '...domain.ExternalCalendar*'` → 77 tests, 0 fallos.
 
+### Ciclo 4 — direcciones prohibidas (@s4, @s11)
+
+- ROJO: `BlockedAddressesTest` con 28 casos, incluidas las fronteras
+  172.15.255.255 / 172.32.0.1 y 100.63.255.255 / 100.128.0.1, y las formas
+  mapeadas `::ffff:10.0.0.1` frente a `::ffff:93.184.216.34`.
+- VERDE: `BlockedAddresses.contains` desmapea IPv4-en-IPv6 y bloquea bucle
+  local, enlace local, sitio local, no especificada, difusión múltiple,
+  única local `fc00::/7` y espacio compartido `100.64.0.0/10`.
+- Nota: `Inet6Address.isSiteLocalAddress` de Java solo cubre `fec0::/10`, por
+  eso `fc00::/7` se comprueba aparte.
+
+### Ciclo 5 — cifrado AES-256-GCM de la dirección (@s2, @s3, @s9, @s29)
+
+- ROJO: `SecretUrlCipherTest`.
+- VERDE: `SecretUrlCipher`: nonce de 12 bytes por escritura, propietario como
+  AAD, formato almacenado `nonce || sellado`. Descifrar con otra clave, otro
+  propietario, un cifrado truncado o con un bit cambiado devuelve vacío
+  (que la aplicación traducirá a `SECRET_UNREADABLE`).
+- La clave mal formada lanza `IllegalStateException` mencionando
+  `APP_CONNECTOR_KEY` y nunca su valor.
+

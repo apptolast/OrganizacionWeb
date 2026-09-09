@@ -24,6 +24,7 @@ class ExecuteAutomationsTest {
   private static final UUID COMPLETED = UUID.fromString("33333333-3333-4333-8333-333333333333");
   private static final UUID ENDPOINT = UUID.fromString("44444444-4444-4444-8444-444444444444");
   private static final UUID RUN = UUID.fromString("55555555-5555-4555-8555-555555555555");
+  private static final UUID AUTOMATED = UUID.fromString("66666666-6666-4666-8666-666666666666");
 
   private String projectName = "Marketing";
   private String taskTitle = "Redactar informe";
@@ -59,7 +60,12 @@ class ExecuteAutomationsTest {
           return projectId.equals(COMPLETED);
         }
       };
-  private final AutomationLoopGuard guard = (owner, taskId) -> false;
+  private final List<UUID> guardConsultations = new ArrayList<>();
+  private final AutomationLoopGuard guard =
+      (owner, taskId) -> {
+        guardConsultations.add(taskId);
+        return AUTOMATED.equals(taskId);
+      };
   private final AutomationMatcher matcher = new AutomationMatcher(projects, guard);
   private final WebhookEndpointLookup endpoints = (owner, endpoint) -> false;
   private final Clock clock = Clock.fixed(T0.plusSeconds(3600), ZoneOffset.UTC);
@@ -385,6 +391,61 @@ class ExecuteAutomationsTest {
     return new AutomationCandidate(taskCreated(eventId, occurredAt).event(), false, List.of(run));
   }
 
+  @ParameterizedTest
+  @CsvSource({"R1 still exists, 2", "R1 deleted before the event is read, 1"})
+  void s28_theTaskCreatedOfAnAutomatedTaskFiresNoRuleAtAll(String state, int surviving) {
+    work.owners.add(OWNER);
+    for (int index = 0; index < surviving; index++) rules.create(OWNER, ruleWith(true, "Encadena"));
+    work.cursors.put(OWNER, new AutomationCursor(T0, E0));
+    work.outbox.add(taskCreatedOf(E1, T0.plusSeconds(1), AUTOMATED));
+
+    execute.runCycle();
+
+    assertThat(work.runs()).as(state).isEmpty();
+    assertThat(work.createdTasks()).isEmpty();
+    assertThat(work.cursors.get(OWNER)).isEqualTo(new AutomationCursor(T0.plusSeconds(1), E1));
+  }
+
+  @Test
+  void s29_aHumanChangeOnTheAutomatedTaskDoesFireAndNeverConsultsTheGuard() {
+    work.owners.add(OWNER);
+    rules.create(OWNER, ruleOn("TaskStatusChanged.v1"));
+    work.cursors.put(OWNER, new AutomationCursor(T0, E0));
+    work.outbox.add(statusChanged(E1, T0.plusSeconds(1), AUTOMATED));
+
+    execute.runCycle();
+
+    assertThat(work.runs())
+        .extracting(AutomationRun::eventId, AutomationRun::status)
+        .containsExactly(tuple(E1, "succeeded"));
+    assertThat(guardConsultations)
+        .as("the guard is only ever asked about TaskCreated.v1 and SubtaskCreated.v1")
+        .isEmpty();
+  }
+
+  private static AutomationRule ruleOn(String eventType) {
+    return new AutomationRule(
+        UUID.randomUUID(),
+        new AutomationDraft(
+            "R", true, eventType, null, new CreateTaskAction(P, "Revisar de nuevo", null, 30)),
+        1,
+        CREATED,
+        CREATED);
+  }
+
+  private static AutomationCandidate statusChanged(UUID eventId, Instant occurredAt, UUID taskId) {
+    return new AutomationCandidate(
+        new AutomationEvent(
+            eventId,
+            OWNER,
+            "TaskStatusChanged.v1",
+            P,
+            occurredAt,
+            Map.of("taskId", taskId.toString(), "status", "completed")),
+        false,
+        List.of());
+  }
+
   private void givenARuleThatCreatesTasks() {
     work.owners.add(OWNER);
     rules.create(OWNER, rule(taskAction()));
@@ -430,6 +491,10 @@ class ExecuteAutomationsTest {
   }
 
   private static AutomationCandidate taskCreated(UUID eventId, Instant occurredAt) {
+    return taskCreatedOf(eventId, occurredAt, TASK);
+  }
+
+  private static AutomationCandidate taskCreatedOf(UUID eventId, Instant occurredAt, UUID taskId) {
     return new AutomationCandidate(
         new AutomationEvent(
             eventId,
@@ -437,7 +502,7 @@ class ExecuteAutomationsTest {
             "TaskCreated.v1",
             P,
             occurredAt,
-            Map.of("taskId", TASK.toString(), "title", "Redactar informe")),
+            Map.of("taskId", taskId.toString(), "title", "Redactar informe")),
         false,
         List.of());
   }

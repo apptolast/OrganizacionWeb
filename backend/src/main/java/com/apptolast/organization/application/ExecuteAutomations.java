@@ -72,8 +72,12 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
   /** False when the confirmation did not land, which strands the walk on this very event. */
   private boolean process(String owner, AutomationCandidate candidate) {
     var event = candidate.event();
-    // A blocked row is a deliberate skip: it produces nothing, but the walk still moves past it.
-    var outcomes = candidate.blocked() ? List.<AutomationOutcome>of() : firedBy(owner, candidate);
+    // A blocked row and a guarded one are deliberate skips: they produce nothing, but the walk
+    // still moves past them. The guard is what keeps the depth of a chain at one.
+    var outcomes =
+        candidate.blocked() || matcher.loopGuarded(owner, event)
+            ? List.<AutomationOutcome>of()
+            : firedBy(owner, candidate);
     try {
       work.commit(new AutomationCommit(owner, reachedBy(event), outcomes));
       return true;

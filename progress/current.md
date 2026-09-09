@@ -37,3 +37,13 @@ COMMON/V14 protegido. Puertos 8080/18080/18081 reservados; los E2E paralelos usa
 El despliegue productivo de 24–30 no puede hacerse desde este equipo. La comprobación SSH de solo lectura contra `admin@159.195.156.57` con BatchMode y verificación estricta vuelve a responder `Permission denied (publickey)`; en `~/.ssh/config` solo hay alias de GitHub y GitLab, ninguno del servidor. Los flujos de trabajo de `apptolast/DockerSwarmInfrastrcture` son únicamente `validate.yml` y `guard-sensitive-paths.yml`: validan, no aplican. La aplicación real la ejecuta quien tiene acceso al host.
 
 La PR 40 de infraestructura, `codex/integration-release`, prepara la publicación de la API para integraciones y sigue en borrador con su validación verde. Queda a la espera de que el usuario facilite alias o clave SSH, o de que aplique él mismo. Las features se cierran igualmente por juez y mutación; «desplegado» es una puerta distinta de «done» y no se declarará sin evidencia.
+
+## Reducción a tres carriles — 9 de septiembre de 2026, 04:05 Madrid
+
+Siete carriles simultáneos dieron rendimiento cero: dos ventanas consecutivas de veinte minutos sin un solo commit entre todos, con la CPU al 95 %, entre 130 y 170 contenedores de Testcontainers vivos y siete sesiones creando más de forma continua. Las instrucciones de filtrar pruebas y suspender el uso de contenedores no bastaron, porque un agente dentro de una ejecución larga no las lee hasta que termina.
+
+Quedan activos tres carriles: el cierre de la feature 24, el modo oscuro y webhooks. Se aparcan cuatro: calendario ICS, conector GitHub, calendario externo y automatizaciones. Al aparcarlos se hizo un commit de resguardo por carril, marcado `wip(...)` y explícitamente no verificado, que preserva 35 archivos: 15 del calendario ICS, 5 del conector GitHub, 9 del calendario externo y 6 de automatizaciones. Quien retome cada carril debe compilar, arreglar lo que falte y rehacer el ciclo antes de seguir; ninguno de esos commits acredita nada.
+
+Estado real de los aparcados en el momento de pararlos: el calendario ICS tenía 42 pruebas en verde sin commitear y estaba a punto de guardarlas; automatizaciones iba por el segundo ciclo de las operaciones de regla como casos de uso puros; el conector GitHub tenía el rojo confirmado de la validación de la base de la API y buscaba el verde; el calendario externo estaba añadiendo propiedades de configuración.
+
+Los contenedores bajaron de 132 a 96 al aparcarlos. El plan es cerrar los tres carriles vivos, integrarlos, y relanzar los cuatro aparcados de uno en uno o de dos en dos, nunca los siete otra vez.

@@ -448,3 +448,94 @@ lleva en `e2e/automations-native-zoom.spec.mjs`.
 **Estado: cerrado** para `e2e/automations.spec.mjs`. Sigue abierto el mismo
 sembrado en `e2e/automations-ux.spec.mjs` (temas, `forced-colors`,
 `reduced-motion`), que es el hallazgo 3.
+
+---
+
+## Hallazgos 3, 7 y 8 — pantalla densa en la auditoría UX y oráculo de recorte
+
+**Contrato:** `features/automations.feature:548` (el Given de @s42) y `:550`
+(«no hay desplazamiento horizontal **ni contenido cortado**»).
+
+### Lo que se cambió
+
+`e2e/automations-ux.spec.mjs`:
+
+- `openEditor(page)` se sustituye por `openDenseScreen(page, request, project)`:
+  limpia, siembra por API dos reglas —una activa con nombre largo, otra
+  inactiva—, espera la lista y el interruptor de la inactiva, abre el editor con
+  «Editar <la larga>», pulsa «Simular» y espera el
+  `role="status"` de «Resultado de la simulación». Las cuatro pruebas de la
+  auditoría miden desde ahí: cuatro anchos × dos temas, texto al 200 % en los
+  mismos, y `forced-colors` + `reduced-motion`.
+- `geometry()` gana el campo **`clipped`**: recorte **por elemento** y en **los
+  dos ejes**, portado de `e2e/ics-calendar-ux.spec.mjs:171-185`. Recorre
+  `main, main *` y marca cuando `overflowX !== "visible" && scrollWidth >
+  clientWidth + 1` o el equivalente vertical, devolviendo etiqueta, `aria-label`,
+  los primeros 60 caracteres de texto y las cuatro medidas, para que el fallo
+  sea diagnosticable.
+- `assertUsable()` afirma `expect(observed.clipped, "la pantalla recorta
+  contenido (ancho o alto)").toEqual([])`. Como es el oráculo compartido de las
+  cuatro pruebas, la cláusula queda cubierta en todas las modalidades de golpe.
+
+### La excepción, decidida por escrito y no en silencio
+
+`INPUT`, `SELECT` y `TEXTAREA` se exceptúan del oráculo de recorte. Razón:
+Chromium aplica `overflow: clip` a los controles de texto en su hoja de agente
+de usuario, de modo que **todo** `<input>` con un valor largo se marcaría; su
+valor sigue siendo alcanzable con el cursor e íntegro en el árbol de
+accesibilidad, así que no es un fallo de WCAG 1.4.4. Queda escrito en el
+comentario del helper y en esta bitácora. Excluirlos sin decirlo volvería a
+vaciar el oráculo, que es justo lo que el dictamen prohíbe.
+
+### Rojo acreditado: la mutación de control que el dictamen exige
+
+Añadido a `frontend/src/styles.scss`, dentro de `.automations`:
+`li { overflow: hidden; max-height: 96px; }`. Resultado con la pila real:
+
+- **3 de las 4 pruebas fallan** con `Error: la pantalla recorta contenido (ancho
+  o alto)` y el detalle `"clientHeight": 94` frente a `"scrollHeight": 327`,
+  `249`, `447` y `800` según el ancho y el tema.
+- El oráculo anterior (`documentElement.scrollWidth <= clientWidth`) **no
+  detectaba nada** de eso: el contenido queda recortado, no desbordado.
+
+Producción restaurada, **4/4 en verde en 42,3 s**.
+
+### Renombrado
+
+`e2e/automations.spec.mjs:97` se titulaba «el texto al 200 % **no corta
+contenido**» y sólo medía desbordamiento: renombrado a «no desborda en
+horizontal» en el commit del hallazgo 4.
+
+**Nota de coordinación:** el zoom nativo al 200 % lo lleva otro carril en
+`e2e/automations-native-zoom.spec.mjs`; no se ha duplicado. La prueba de zoom
+nativo que aún vive en `automations-ux.spec.mjs` no se ha tocado, aunque hereda
+el `clipped` por compartir `assertUsable`.
+
+**Estado: 3, 7 y 8 cerrados.**
+
+---
+
+## Recuento final de la sesión
+
+| Hallazgo | Gravedad | Estado |
+| --- | --- | --- |
+| 1 — no existe el ejecutor de reglas | BLOQUEANTE | **ABIERTO**, con inventario completo de los nueve escenarios y diseño propuesto |
+| 2 — el interruptor no ataba el If-Match vivo ni el instante | BLOQUEANTE | Cerrado |
+| 3 — la auditoría alcanzaba 2 de 7 estados | BLOQUEANTE | Cerrado (lista, editor y simulación en las cuatro pruebas) |
+| 4 — el Given de @s42 no se cumplía | BLOQUEANTE | Cerrado; destapó un defecto real de contraste |
+| 5 — @s12, historial tras el PUT | ALTA | Cerrado (salvo la fila `NOTIFY_WEBHOOK`, que depende del cableado de la 25) |
+| 6 — aislamiento por identidad | ALTA | Cerrado |
+| 7 — recorte de contenido sin oráculo | ALTA | Cerrado, con mutación de control acreditada |
+| 8 — recorte sólo horizontal y a nivel de documento | MEDIA | Cerrado, mismo oráculo de dos ejes |
+| 9 — recorrido de teclado y foco visible | ALTA | **ABIERTO**; la matriz UX ya no lo declara verificado |
+| 10 — `ApiErrors` fuera del ámbito PIT | MEDIA | Ya venía cerrado del brief |
+| 11 — ámbito Stryker sin la integración con el armazón | MEDIA | Cerrado |
+
+**Cerrados: 8 (más el 10 que venía dado). Abiertos: 2 — el 1 y el 9.**
+
+Puerta de mutación **no ejecutada**, por instrucción del coordinador.
+
+Estados de pantalla que siguen sin auditar (resto del 3, ahora acotado): carga
+retenida, error 503 con «Reintentar» e historial abierto. Exigen `page.route`
+para retener y forzar el 503 y sembrar una ejecución; el resto del estado denso
+ya está medido.

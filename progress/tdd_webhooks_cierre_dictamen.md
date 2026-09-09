@@ -269,3 +269,131 @@ lookup de entrega—, sólo deja de prometer lo que no hace.
 **Ficheros cambiados.**
 - `backend/src/test/java/com/apptolast/organization/adapter/persistence/WebhookPersistenceTest.java`
 - `backend/src/test/java/com/apptolast/organization/application/ManageWebhookTest.java`
+
+---
+
+# Estado al cierre de la sesión
+
+**Cerrados en este carril: 6** — hallazgos **1, 5, 15, 16, 17, 21**.
+(Ya venían cerrados de la base y siguen intactos: 6, 7, 8, 14, 19, 20, 22, 23.)
+
+Total del dictamen de la feature 25: 23 hallazgos. **14 cerrados, 9 abiertos.**
+
+| # | Gravedad | Estado | Commit |
+|---|---|---|---|
+| 1 | BLOQUEANTE | **CERRADO** — filas TIMEOUT y TLS de @s25 contra receptor real | `c4fc097`, `0ed7735` |
+| 2 | BLOQUEANTE | abierto (E2E) | — |
+| 3 | BLOQUEANTE | **no me corresponde**: lo hace otro carril en `e2e/webhooks-native-zoom.spec.mjs` | — |
+| 4 | BLOQUEANTE | abierto (E2E) | — |
+| 5 | BLOQUEANTE | **CERRADO** — reenlace DNS devuelto a límite declarado + `deploy/EGRESS.md` | `0a68774` |
+| 9 | ALTA | abierto (persistencia) | — |
+| 10 | ALTA | abierto (persistencia) | — |
+| 11 | ALTA | abierto, **necesita decisión del propietario** | — |
+| 12 | ALTA | su parte (A) es el hallazgo 3; su parte (B) va con 4 y 13 | — |
+| 13 | ALTA | abierto (E2E) | — |
+| 15 | ALTA | **CERRADO** en unitarios; falta la comprobación en E2E | `2aa5258` |
+| 16 | ALTA | **CERRADO** — @s33 filas Bearer | `68e533a` |
+| 17 | ALTA | **CERRADO** — mismo trabajo que el 1 | `c4fc097`, `0ed7735` |
+| 18 | MEDIA | abierto (persistencia) | — |
+| 21 | MEDIA | **CERRADO** — @s30 aislamiento entre webhooks | `b8dcf5d` |
+
+## Por qué queda abierto cada uno, exactamente
+
+**2, 4, 12(B), 13 — todos E2E.** Los cuatro exigen tocar
+`e2e/webhooks-ux.spec.mjs` y ejecutarlo con la pila levantada
+(`E2E_WEB_PORT=18090`). No se entregan porque un cambio de oráculo en E2E que no
+se ha ejecutado es peor que no hacerlo: quedaría una aserción sin acreditar. El
+plazo de la sesión no daba para levantar la pila y recorrer los estados.
+**Nada de esto está a medias en el árbol**: no he tocado ese fichero, así que
+quien lo retome parte de main limpio.
+
+- **2**: convertir `offenders` (calculado en :174-190 y usado sólo dentro del
+  mensaje de fallo de :220) en aserción por elemento sobre un conjunto
+  NOMBRADO —el `span` de la URL, el `input` del secreto, las celdas de la
+  tabla—, en horizontal **y** vertical, en los cuatro anchos, excluyendo con
+  lista blanca justificada el `thead` visually-hidden por `clip-path`. Nunca
+  sobre `body *`: haría fallar código correcto.
+- **4 y 13** (son el mismo trabajo): derivar `expectedOrder` de los enfocables
+  visibles de `main`, sembrar el foco en el `h1`, deduplicar, y cerrar con
+  `expect(reached).toEqual(expectedOrder)`; y asertar el foco visible medido
+  como en `e2e/github-connector.spec.mjs:302-340`, **no** con
+  `getComputedStyle(active, ":focus-visible")`, que es un no-op —pseudo-clase
+  donde la API espera pseudo-elemento—. El umbral `toBeGreaterThan(5)` debe
+  desaparecer. Precedente exacto: `github-connector.spec.mjs:261-291`.
+- Corrección documental pendiente y separada: la fila «Posición en serie» de
+  `progress/ux_webhooks.md` declara «el orden de Tab sigue al DOM — Verificado
+  en navegador». Hoy sigue siendo falso. **No la he corregido** a propósito:
+  quien cierre 4/13 debe corregirla en el mismo cambio, o quedaría descuadrada.
+
+**9, 10, 18 — persistencia con Testcontainers.** Los tres piden componer cadenas
+completas: `claim -> lease vencido -> reclaim -> send -> record` con conteo de
+copias en el receptor (9); concurrencia con receptor lento y oráculo de no
+espera (10); reactivación más recorrido de la outbox con dos eventos posteriores
+al cursor (18). Cada iteración de esas clases cuesta ~1 min de contenedor y
+ninguno se escribe de una pasada. No se empiezan a medias: medio test de
+concurrencia sin rojo acreditado no vale nada.
+
+Aviso para quien tome el **10**: la mutación que hay que matar vive en un
+**literal SQL** (`FOR UPDATE OF d SKIP LOCKED` → `FOR UPDATE`,
+`PostgresWebhookWork.java:68`), así que la campaña de mutación de bytecode no la
+generará nunca. El oráculo de no-espera hay que escribirlo a mano.
+
+**11 — necesita decisión del propietario, y por eso no lo toco.** El hueco 1 es
+un incumplimiento de contrato real: `features/webhooks.feature:368` y
+`project-spec.md:2018` exigen «items de como máximo 50 elementos» y la lectura
+no acota (`PostgresWebhookStore.list`, :118-128, sin `LIMIT`). Las dos salidas
+son excluyentes y ninguna es mía:
+
+- (a) poner `LIMIT 50` en la lectura — pero entonces hay que cambiar
+  `WebhookWorkPersistenceTest:198`, `assertEquals(52, log.size(), "fifty
+  terminals plus the two pending ones")`, que hoy codifica la **línea 367 del
+  contrato** (50 terminales + 2 pendientes). Es decir: (a) contradice otra línea
+  del mismo escenario.
+- (b) enmendar contrato y spec para que la 368 diga «como máximo 50 terminales
+  más las pendientes vivas», tocando también `project-spec.md:2018`.
+
+Elegir por mi cuenta sería inventar comportamiento sobre un contrato aprobado
+por la puerta humana. Los huecos 2 y 3 del mismo hallazgo —orden
+`updatedAt DESC, id DESC` sin oráculo, e identidad de las 50 supervivientes— sí
+son cerrables sin decisión, pero van en el mismo test y el mismo commit que el
+hueco 1.
+
+## Mutación
+
+**No ejecutada, por instrucción expresa del coordinador** («no ejecutes campañas
+de mutación: tardan demasiado; las corre el orquestador después»). La puerta
+existe y está cableada desde la base de este carril (hallazgos 6, 7 y 8 ya
+cerrados): `node scripts/project.mjs mutate webhooks-backend` y
+`webhooks-frontend`, umbral 0,80.
+
+Dos avisos para quien la lance, salidos de este carril:
+
+1. `JdkWebhookSender.classify()` (:83-90) es hoy una red por defecto. Para TLS
+   está **demostrado** que la rama viva es el `catch (SSLException)` directo de
+   :70-71, no la de `classify`. Es probable que sobrevivan mutantes ahí.
+2. Los `ORDER BY` y el `SKIP LOCKED` viven en literales SQL: la campaña de
+   bytecode no los muta. Lo que cubren los hallazgos 10 y 11 hay que juzgarlo
+   por lectura, no por la puntuación.
+
+## Ficheros compartidos tocados (REGLAS.md §6)
+
+- `project-spec.md` — **un solo párrafo**, la enmienda B2/B3 (hallazgo 5).
+- `features/webhooks.feature` — mío, con dos enmiendas de contrato razonadas
+  (filas 327 y 413-414), explicadas arriba.
+- `progress/tdd_webhooks.md` y `progress/ux_webhooks.md` — correcciones de
+  afirmaciones falsas que el dictamen exigía nominalmente.
+- **No** he tocado `frontend/src/App.tsx`, `navigation*`, `scripts/project.mjs`,
+  `harness.config.json`, `feature_list.json`, `docker-compose.yml`,
+  `scripts/e2e.mjs` ni `.github/workflows/*`.
+
+## Fuera de ámbito, anotado y no tocado (REGLAS.md §9)
+
+- Al pulsar «Desactivar», React desmonta el botón enfocado y el foco cae al
+  `body` (el fragmento de dos botones se sustituye por «Activar»). Lo detectó el
+  verificador del hallazgo 15 y lo declaró fuera del bloqueante.
+- `@s25` pide «latencyMs medido con el reloj inyectado» y `JdkWebhookSender` lo
+  mide con `System.nanoTime()` (:58, :117-119); el `Clock` sólo alimenta el `t`
+  de la firma. Observación del verificador del hallazgo 17, hallazgo distinto.
+- `PostgresWebhookOutbox.readyEndpoints()` filtra por `e.status='active'` y ese
+  filtro no lo ejerce ninguna prueba; suprimirlo del SQL no rompe nada hoy
+  (parte del hallazgo 18).

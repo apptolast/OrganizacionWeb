@@ -13,19 +13,19 @@ por clase concreta, nunca la suite entera.
 
 | # | Gravedad | Estado | Ciclo |
 | --- | --- | --- | --- |
-| 1 | bloqueante | pendiente | — |
+| 1 | bloqueante | **CERRADO** | ciclo 10 |
 | 2 | bloqueante | ya cerrado en la base | — |
 | 3 | bloqueante | **CERRADO** | ciclo 5 |
 | 4 | bloqueante | **fuera de alcance**: lo hace otro carril en `e2e/external-calendar-native-zoom.spec.mjs` (instrucción del coordinador) | — |
-| 5 | bloqueante | pendiente | — |
+| 5 | bloqueante | **CERRADO** | ciclo 10 |
 | 6 | bloqueante | **CERRADO** | ciclo 7 |
 | 7 | bloqueante | ya cerrado en la base | — |
 | 8 | alta | **CERRADO** | ciclo 2 |
 | 9 | alta | ya cerrado en la base (es el hallazgo 2) | — |
-| 10 | alta | pendiente | — |
+| 10 | alta | **CERRADO** | ciclo 10 |
 | 11 | alta | **CERRADO** | ciclo 9 |
 | 12 | alta | **CERRADO** | ciclo 8 |
-| 13 | alta | pendiente | — |
+| 13 | alta (media segun el verificador) | **CERRADO** | ciclo 11 |
 | 14 | alta | **CERRADO** (amplía contrato) | ciclo 4 |
 | 15 | media | **CERRADO** | ciclo 3 |
 | 16 | media | ya cerrado en la base | — |
@@ -400,6 +400,12 @@ y el contrato. Queda abierto y anotado, no silenciado.
 
 ---
 
+> **NOTA DEL 10-09-2026.** Esta sección se escribió al cortar la sesión del 9 de
+> septiembre y **ha quedado obsoleta**: los seis que declaraba abiertos (1, 5, 10, 11,
+> 12 y 13) están cerrados en los ciclos 8, 9, 10 y 11, escritos más abajo. Se conserva
+> sin retocar porque su valor es histórico: dice qué se sabía y qué se temía entonces.
+> El estado vigente es la tabla del principio del fichero.
+
 ## Estado al cortar la sesión
 
 **Cerrados por este carril, con rojo demostrado y commit propio:** 18, 8, 15, 14,
@@ -678,3 +684,191 @@ que no es fichero de este carril y habría chocado en la integración.
 —`PostgresTodayQueries` y `PostgresBlockStore` son del carril de Hoy y de bloques—,
 así que **no espero que mueva el marcador de la campaña de la 28**. Su valor es de
 regresión: es la red que ArchUnit no puede tender.
+
+---
+
+## Ciclo 10 — hallazgos 1, 5 y 10: la pantalla se mide en todos sus estados
+
+Son el mismo problema visto tres veces, y se cierran de una vez: la auditoría medía
+el formulario **vacío** y nada más.
+
+**Qué decía el dictamen.** El Given de @s40 nombra cinco estados —vacío, con
+suscripción, con error, con lista larga de resúmenes Unicode y guardando—. La matriz
+de catorce anchos y la de texto al 200 % hacían `goto` + `expect(getByLabel("Etiqueta")).toBeVisible()`
+y medían el formulario de alta vacío. Consecuencia concreta: «Sincronizar ahora» y
+«Eliminar suscripción» viven dentro de `{subscription ? …}` y «Sí, eliminar»/«Cancelar»
+dentro de `{confirming ? …}` (`frontend/src/external-calendar.tsx:327` y `:374`), así
+que los **cuatro** nunca entraban en la medición de 44 × 44 px, en ningún ancho ni en
+ninguna prueba.
+
+**VERDE.** Un helper `enter(page, state)` deja la pantalla en cada estado y devuelve
+la función que lo deshace:
+
+| Estado | Cómo se construye |
+| --- | --- |
+| vacío | `goto`, y se afirma el texto del estado vacío |
+| con suscripción | `INSERT` por SQL de la suscripción y de 3 eventos; se afirman los 3 `listitem` |
+| con error | `INSERT` con `last_status='FAILED'` y `last_error='FEED_HTTP_ERROR'`; se afirma el `role="alert"` |
+| lista larga de resúmenes Unicode | `INSERT` de **60** eventos con 400 puntos de código cada uno: 120 de emoji y acentos más una palabra sin espacios de 280 caracteres |
+| guardando | `page.route` retiene la respuesta del `PUT` hasta que se sale del estado; se afirman «Guardando…» y el botón deshabilitado |
+| confirmando la eliminación | se pulsa «Eliminar suscripción» y se afirma el `alertdialog` |
+
+El sexto estado **no está en el contrato** y se añade a propósito: la línea 546 exige
+44 × 44 px para «los controles», y dos de ellos sólo existen con el diálogo abierto.
+Se declara en el `.mjs` como ampliación del estado «con suscripción», no como
+sustitución de ninguna fila.
+
+Además, la propia prueba de la matriz se defiende de que la preparación de estados
+deje de funcionar: afirma que «con suscripción» tiene más controles que «vacío» y que
+el diálogo aporta exactamente dos más. Si mañana la siembra fallara en silencio, la
+matriz volvería a medir seis veces el formulario vacío… y esa aserción caería.
+
+**La bitácora vieja se equivocaba y así queda dicho.**
+`progress/tdd_external_calendar.md:440-442` daba el estado «con lista larga» por
+estructuralmente inalcanzable «porque no hay ningún feed ICS alcanzable desde el
+contenedor con la guardia SSRF activada». La premisa es cierta; la conclusión, no.
+`e2e/support/projects.mjs` ejecuta SQL contra el postgres de la pila y
+`PostgresExternalCalendarStore` lee los eventos de esa misma tabla: sembrar la lista
+no exige ningún feed ni relajar la guardia. Lo que sí sigue siendo cierto es que
+**ninguna E2E llega a `lastStatus OK` por sincronización real**, y eso se declara en
+el documento UX: lo medido es la pantalla, no el camino que la llena.
+
+**Detalle de higiene con el texto Unicode.** Los resúmenes y la etiqueta se
+construyen en SQL con `chr(128512)`, `chr(233)` y `chr(241)`: el `statement` viaja a
+`psql` como argumento de proceso y en Windows los caracteres fuera de ASCII se pueden
+estropear por el camino. Así lo que llega a la base es exactamente lo que se pretende.
+
+### El defecto que la auditoría destapó al ejecutarse de verdad
+
+El carril de automatizaciones avisó de que al sembrar y medir suele salir algo
+escondido. Aquí salió, y no es de contraste: **la prueba de texto al 200 % nunca
+amplió nada**.
+
+Hacía `addInitScript(() => document.documentElement.style.fontSize = "32px")` y no
+comprobaba el resultado. Al añadirle la comprobación, el navegador devolvió:
+
+```
+Error: el texto no llegó al 200 %
+Expected: 32
+Received: 16
+```
+
+Es decir: desde que nació, esa prueba medía la pantalla a **tamaño normal** con el
+título «texto al 200 %». Y aunque el init script hubiera funcionado tampoco habría
+bastado, porque la hoja declara casi todos sus tamaños en píxeles
+(`styles.scss:658`, `:671`, `:692`…), que no dependen del `font-size` de la raíz.
+
+Se sustituye por el `doubleText` del precedente de `ics-calendar-ux`: se duplica el
+`font-size` **calculado** elemento a elemento y se afirma que cada uno llegó al doble.
+Al hacerlo apareció un segundo detalle, y también en rojo: un elemento se quedaba en
+14 px porque la hoja global declara `.quiet-note { font-size: 14px !important }`
+(`styles.scss:1095`), y una declaración en línea sin prioridad pierde contra ella.
+**No se toca esa regla**: es una hoja compartida, y el `!important` no es un fallo de
+accesibilidad —el zoom real del navegador sí escala esos píxeles, y eso lo mide
+`e2e/external-calendar-native-zoom.spec.mjs`—, sólo impide emular la ampliación desde
+la prueba. Se resuelve con `setProperty(…, "important")` y se explica en el comentario.
+
+### ROJO acreditado con la mutación de control del carril de automatizaciones
+
+Se añadió a `frontend/src/styles.scss`:
+
+```scss
+.external-calendar .external-calendar-events li { overflow: hidden; max-height: 96px; }
+```
+
+Cayeron **3 de 4** pruebas —matriz, modos y texto al 200 %—, nombrando cada elemento
+recortado:
+
+```
+lista larga de resúmenes Unicode a 320 px: contenido recortado (ancho o alto)
++   "LI:...emoji y acentos... [alto 167 en 95]",   (x 60)
+texto al 200 % a 320 px, con suscripción: contenido recortado (ancho o alto)
++   "LI:Reunión de equipo 1 01:35-02 [alto 149 en 95]",
+```
+
+Con el oráculo anterior esa misma regla **no habría movido una sola aserción**: el
+documento no desborda a lo ancho, los botones seguían midiendo 44 px, y sobre todo la
+lista **no se renderizaba nunca** en las dos pruebas responsivas. CSS restaurado
+(`git status` limpio) y verde recuperado.
+
+### Ejecución
+
+```
+E2E_WEB_PORT=18092 pnpm test:e2e -- e2e/external-calendar-ux-audit.spec.mjs
+5 passed (1.6m)
+```
+
+**Previsión de mutación.** Stryker de esta feature no cubre las E2E, así que **no
+espero movimiento en el marcador** por este ciclo. Lo que sí cambia es la red de
+regresión: 84 mediciones geométricas donde antes había 14, y con cinco oráculos por
+medición en vez de uno.
+
+---
+
+## Ciclo 11 — hallazgo 13: los modos que la aplicación implementa y nadie ejecutaba
+
+**Qué decía el dictamen.** `docs/ux-requirements.md:54`, que @s40 incorpora por
+referencia, exige que toda variante personalizable pase sus verificaciones. La
+aplicación implementa `prefers-color-scheme: dark` (`styles.scss:53`) y
+`prefers-reduced-motion` (`:1293`), y otras nueve specs del repositorio ya usan
+`emulateMedia`; sobre `/calendario-externo` no había ni una ocurrencia.
+
+**VERDE.** Una prueba de **cuatro modos × seis estados = 24 pasadas**: claro, oscuro,
+`forced-colors: active` y `prefers-reduced-motion: reduce`. En cada combinación se
+ejecuta axe **y** la geometría completa, y se mide tinta contra lienzo para que dos
+tokens no colapsen en el mismo color. Cada modo fija **las tres** preferencias, porque
+`emulateMedia` conserva las que no se nombran —lección ya escrita en
+`ics-calendar-ux.spec.mjs:304`—. Bajo colores forzados se omite **sólo**
+`color-contrast`, porque Chromium pinta colores del sistema mientras axe lee los
+declarados; el resto de reglas se conserva.
+
+**La pasada de movimiento reducido se declara vacua, en la propia prueba.** El
+verificador pedía que si se ejecutaba no se contase como evidencia. En vez de un
+comentario, hay una aserción: se cuenta cuántos elementos de la pantalla tienen
+`transitionDuration` o `animationDuration` por encima de 0,01 s **sin** la preferencia
+puesta, y se exige que sean cero. Hoy no hay nada que reducir; el día que alguien
+añada movimiento aquí, esa aserción caerá y habrá que medirlo de verdad.
+
+**ROJO acreditado con una mutación de control que sólo existe en un estado sembrado y
+sólo en oscuro:**
+
+```scss
+@media (prefers-color-scheme: dark) {
+  .external-calendar .external-calendar-counters { color: #2b2b2b; }
+}
+```
+
+axe la delató, con impacto `serious`:
+
+```
+Element has insufficient color contrast of 1.03
+(foreground color: #2b2b2b, background color: #1f2937, font size: 9.0pt)
+html: <p class="external-calendar-counters">3 eventos, 1 recurrente no incluido, …</p>
+```
+
+Es exactamente la forma del defecto que el carril de automatizaciones encontró (1,01
+sobre 1 en un interruptor que jamás se había renderizado en una corrida medida): un
+color que sólo se pinta en un estado que la auditoría no construía y en un modo que no
+ejecutaba. Con la auditoría anterior —tema por defecto, estado vacío— habría pasado la
+puerta sin tocar una aserción. CSS restaurado y verde recuperado.
+
+**Resultado honesto: no había defecto de producto.** Las 24 combinaciones dan cero
+violaciones y la geometría aguanta en todas. La pantalla no introduce paleta propia:
+usa `.field-error`, `.failure`, `.save-status`, `.notice`, `button` e `input`
+globales, ya auditados en otras rutas. Se buscó el equivalente del contraste de 1,01
+y **no lo hay aquí**; lo que había escondido era el placebo del texto al 200 %, que
+está en el ciclo 10.
+
+### Ejecución
+
+```
+E2E_WEB_PORT=18092 pnpm test:e2e -- e2e/external-calendar-ux-audit.spec.mjs
+5 passed (1.6m)
+```
+
+`progress/ux_external_calendar.md` queda actualizado: las 30 filas siguen ahí, Fitts
+y Von Restorff pasan de «parcialmente verificado» a «verificado en navegador», la
+sección «Lo que este documento NO afirma» se reescribe para decir lo que ahora sí se
+afirma, y el trabajo pendiente se reduce a la revisión manual con lector de pantalla,
+Firefox/WebKit y la excepción de `INPUT`/`SELECT`/`TEXTAREA`, que queda escrita en la
+lista en vez de silenciada.

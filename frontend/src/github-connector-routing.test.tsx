@@ -90,6 +90,15 @@ it("@s42 the integrations index also links the credentials page of the API", asy
   ).toHaveAttribute("href", "/integraciones/github");
 });
 
+it("@s42 el índice de integraciones es enfocable por programa, como el resto del contenido", () => {
+  go("/integraciones");
+
+  render(<App username="owner" />);
+
+  // El enlace de salto lleva el foco aquí: sin tabindex negativo el navegador no lo aceptaría.
+  expect(screen.getByRole("main")).toHaveAttribute("tabindex", "-1");
+});
+
 it("@s31 the connector page is not rendered without a signed-in person", () => {
   go("/integraciones/github");
 

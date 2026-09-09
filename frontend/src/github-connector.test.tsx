@@ -1,5 +1,11 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { setCsrfToken } from "./api-client";
 import { GithubConnector } from "./github-connector";
@@ -632,4 +638,502 @@ it("@s40 a failure that is not a typed connector error falls back to the generic
     await screen.findByText("No se pudo importar. Inténtalo más tarde"),
   ).toBeVisible();
   expect(screen.queryByText("La conexión ya no existe")).toBeNull();
+});
+
+// ================= oráculos de la puerta de mutación de `github-connector.tsx`
+//
+// Nada de lo que sigue añade conducta: afirma la que ya existe y que ninguna
+// prueba miraba. Cada bloque nombra el racimo de supervivientes que mata, con
+// su línea en producción.
+
+// ------------------- El escuchador de Escape (153-160), que el juez exigió
+
+it("@s42 no escucha Escape mientras no hay ninguna confirmación abierta", async () => {
+  await open();
+  const select = await screen.findByRole("combobox");
+  importButton().focus();
+
+  await userEvent.keyboard("{Escape}");
+  // Un repintado cualquiera delata el movimiento de foco que el manejador
+  // hubiera dejado pedido.
+  await userEvent.selectOptions(select, otherProjectId);
+
+  expect(select).toHaveFocus();
+  expect(screen.getByRole("button", { name: "Desconectar" })).not.toHaveFocus();
+});
+
+it("@s42 retira el escuchador de Escape al cerrarse la confirmación", async () => {
+  await open();
+  const select = await screen.findByRole("combobox");
+  await userEvent.click(screen.getByRole("button", { name: "Desconectar" }));
+  await userEvent.keyboard("{Escape}");
+  expect(screen.getByRole("button", { name: "Desconectar" })).toHaveFocus();
+
+  importButton().focus();
+  await userEvent.keyboard("{Escape}");
+  await userEvent.selectOptions(select, otherProjectId);
+
+  // Si el escuchador siguiera puesto, esta segunda pulsación habría reclamado
+  // el foco para el botón de desconectar.
+  expect(select).toHaveFocus();
+});
+
+it("@s42 sólo Escape cierra la confirmación: otra tecla no la toca", async () => {
+  await open();
+  await screen.findByRole("combobox");
+  await userEvent.click(screen.getByRole("button", { name: "Desconectar" }));
+
+  await userEvent.keyboard("a");
+
+  expect(
+    screen.getByRole("button", { name: "Confirmar desconexión" }),
+  ).toBeInTheDocument();
+});
+
+it("@s42 el Escape que cierra la confirmación queda consumido", async () => {
+  await open();
+  await screen.findByRole("combobox");
+  await userEvent.click(screen.getByRole("button", { name: "Desconectar" }));
+
+  const escape = new KeyboardEvent("keydown", {
+    key: "Escape",
+    bubbles: true,
+    cancelable: true,
+  });
+  fireEvent(document, escape);
+
+  expect(escape.defaultPrevented).toBe(true);
+  expect(
+    screen.queryByRole("button", { name: "Confirmar desconexión" }),
+  ).toBeNull();
+});
+
+// ------- La tabla de mensajes (37-47) y la región de error de importación (416-424)
+
+it.each([
+  ["GITHUB_UNAVAILABLE", 503, "GitHub no responde. Inténtalo más tarde"],
+  [
+    "GITHUB_REPOSITORY_UNAVAILABLE",
+    404,
+    "El repositorio no está disponible con ese token",
+  ],
+  ["CONNECTION_NOT_FOUND", 404, "La conexión ya no existe"],
+  ["RESOURCE_NOT_FOUND", 404, "El proyecto ya no está disponible"],
+  ["VALIDATION_ERROR", 400, "Revisa el repositorio y el token"],
+])("@s39 traduce %s a su mensaje exacto", async (code, status, message) => {
+  serve("/api/v1/me/connectors/github/imports", "POST", () =>
+    problem(status as number, { code }),
+  );
+  await open();
+  await screen.findByRole("combobox");
+
+  await userEvent.click(importButton());
+
+  expect(await screen.findByText(message as string)).toBeVisible();
+});
+
+it("@s39 un token rechazado al importar no se repite en la región de errores", async () => {
+  serve("/api/v1/me/connectors/github/imports", "POST", () =>
+    problem(401, { code: "GITHUB_TOKEN_REJECTED" }),
+  );
+  await open();
+  await screen.findByRole("combobox");
+
+  await userEvent.click(importButton());
+
+  await waitFor(() =>
+    expect(
+      callsTo("/api/v1/me/connectors/github/imports", "POST"),
+    ).toHaveLength(1),
+  );
+  expect(screen.queryByText("GitHub rechazó el token")).toBeNull();
+});
+
+it("@s39 sólo una conexión inválida ofrece Reconectar, y sólo una importación en curso Consultar estado", async () => {
+  serve("/api/v1/me/connectors/github/imports", "POST", () =>
+    problem(503, { code: "GITHUB_UNAVAILABLE" }),
+  );
+  await open();
+  await screen.findByRole("combobox");
+
+  await userEvent.click(importButton());
+
+  await screen.findByText("GitHub no responde. Inténtalo más tarde");
+  expect(screen.queryByRole("button", { name: "Reconectar" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Consultar estado" })).toBeNull();
+});
+
+it("@s39 no vuelve a ofrecer Reconectar cuando el formulario ya está abierto", async () => {
+  serve("/api/v1/me/connectors/github/imports", "POST", () =>
+    problem(409, { code: "CONNECTION_INVALID" }),
+  );
+  await open();
+  await screen.findByRole("combobox");
+  await userEvent.click(importButton());
+
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Reconectar" }),
+  );
+
+  expect(screen.getByLabelText(/token/i)).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Reconectar" })).toBeNull();
+});
+
+// ---- El hueco del mensaje del formulario (405-407) y la región aria-live (456)
+
+it("@s37 el token rechazado se anuncia como alerta en el hueco de su campo", async () => {
+  serve("/api/v1/me/connectors/github", "GET", () =>
+    problem(404, { code: "CONNECTION_NOT_FOUND" }),
+  );
+  serve("/api/v1/me/connectors/github", "PUT", () =>
+    problem(401, { code: "GITHUB_TOKEN_REJECTED" }),
+  );
+  await open();
+  await userEvent.type(
+    await screen.findByLabelText(/repositorio/i),
+    "octocat/Hello-World",
+  );
+  await userEvent.type(screen.getByLabelText(/token/i), "ghp_malo");
+
+  await userEvent.click(screen.getByRole("button", { name: "Conectar" }));
+
+  const alert = await screen.findByRole("alert");
+  expect(alert).toHaveTextContent("GitHub rechazó el token");
+  expect(alert).toHaveAttribute("id", "github-token-error");
+});
+
+it("@s37 sin error, el hueco del mensaje está vacío y no es una alerta", async () => {
+  serve("/api/v1/me/connectors/github", "GET", () =>
+    problem(404, { code: "CONNECTION_NOT_FOUND" }),
+  );
+  await open();
+  await screen.findByLabelText(/token/i);
+
+  const slot = document.getElementById("github-token-error");
+  expect(slot?.textContent).toBe("");
+  expect(slot).not.toHaveAttribute("role");
+});
+
+it("@s42 la región de estado nace callada: no anuncia nada sin importación", async () => {
+  await open();
+  await screen.findByRole("combobox");
+
+  expect(screen.getByRole("status").textContent).toBe("");
+});
+
+// --- El resumen heredado del último recibo (474) y el nombre de su enlace (478)
+
+it("@s36 una importación en curso no adelanta contadores a medias", async () => {
+  serve("/api/v1/me/connectors/github", "GET", () =>
+    Response.json({
+      ...connection,
+      lastImport: {
+        ...receipt,
+        status: "running",
+        errorCode: null,
+        finishedAt: null,
+      },
+    }),
+  );
+  await open();
+
+  expect(await screen.findByText("Hay una importación en curso")).toBeVisible();
+  expect(
+    screen.queryByRole("region", { name: "Resultado de la importación" }),
+  ).toBeNull();
+  expect(screen.queryByText("Creadas 199")).toBeNull();
+});
+
+it("@s36 el enlace del resumen nombra el proyecto del recibo, no el primero de la lista", async () => {
+  serve("/api/v1/me/connectors/github", "GET", () =>
+    Response.json({
+      ...connection,
+      lastImport: { ...receipt, projectId: otherProjectId },
+    }),
+  );
+  await open();
+
+  expect(
+    await screen.findByRole("link", { name: "Ver el proyecto Segundo" }),
+  ).toHaveAttribute("href", `/proyectos/${otherProjectId}`);
+});
+
+it("@s36 un recibo de un proyecto que ya no está en la lista enseña su identificador", async () => {
+  const gone = "44444444-5555-4666-8777-888888888888";
+  serve("/api/v1/me/connectors/github", "GET", () =>
+    Response.json({
+      ...connection,
+      lastImport: { ...receipt, projectId: gone },
+    }),
+  );
+  await open();
+
+  expect(
+    await screen.findByRole("link", { name: `Ver el proyecto ${gone}` }),
+  ).toHaveAttribute("href", `/proyectos/${gone}`);
+});
+
+// ------------- El arranque de la pantalla (60, 66, 80, 132, 284-285)
+
+it("@s42 el contenido principal y su encabezado son enfocables por programa", async () => {
+  await open();
+
+  expect(heading()).toHaveAttribute("tabindex", "-1");
+  expect(document.querySelector("main")).toHaveAttribute("tabindex", "-1");
+});
+
+it("@s42 el foco arranca en el encabezado y ningún botón se lo lleva", async () => {
+  await open();
+  await screen.findByRole("combobox");
+
+  expect(heading()).toHaveFocus();
+});
+
+it("@s36 mientras se consulta la conexión no se enseña el formulario", async () => {
+  serve(
+    "/api/v1/me/connectors/github",
+    "GET",
+    () => new Promise<Response>(() => {}),
+  );
+  render(<GithubConnector owner="owner" />);
+  await screen.findByRole("heading", { level: 1 });
+
+  expect(screen.queryByLabelText(/token/i)).toBeNull();
+  expect(screen.queryByRole("button", { name: "Conectar" })).toBeNull();
+});
+
+it("@s36 sin lista de proyectos el selector no ofrece ninguna opción", async () => {
+  serve("/api/v1/projects", "GET", () =>
+    problem(503, { code: "STORAGE_UNAVAILABLE" }),
+  );
+  await open();
+
+  await screen.findByText("Conectada");
+  expect(
+    within(screen.getByRole("combobox")).queryAllByRole("option"),
+  ).toHaveLength(0);
+});
+
+it("@s36 el conector deshabilitado deja de pedir la lista de proyectos", async () => {
+  serve("/api/v1/me/connectors/github", "GET", () =>
+    problem(503, { code: "CONNECTORS_DISABLED" }),
+  );
+  await open();
+  await screen.findByRole("alert");
+
+  // Una sola petición, la del montaje: al saberse deshabilitado no vuelve a pedirla.
+  await waitFor(() =>
+    expect(callsTo("/api/v1/projects", "GET").length).toBeGreaterThan(0),
+  );
+  expect(callsTo("/api/v1/projects", "GET")).toHaveLength(1);
+});
+
+// ------------ La importación: sus guardas y lo que limpia al empezar (207-236)
+
+it("@s38 sin proyecto que elegir, el botón de importar no lanza ninguna importación", async () => {
+  serve("/api/v1/projects", "GET", () =>
+    Response.json({ items: [], nextCursor: null }),
+  );
+  await open();
+  await screen.findByText("Conectada");
+
+  await userEvent.click(importButton());
+
+  expect(callsTo("/api/v1/me/connectors/github/imports", "POST")).toHaveLength(
+    0,
+  );
+  expect(screen.getByRole("status").textContent).toBe("");
+});
+
+it("@s37 tras un token rechazado el formulario vuelve a estar operativo", async () => {
+  serve("/api/v1/me/connectors/github", "GET", () =>
+    problem(404, { code: "CONNECTION_NOT_FOUND" }),
+  );
+  serve("/api/v1/me/connectors/github", "PUT", () =>
+    problem(401, { code: "GITHUB_TOKEN_REJECTED" }),
+  );
+  await open();
+  await userEvent.type(
+    await screen.findByLabelText(/repositorio/i),
+    "octocat/Hello-World",
+  );
+  await userEvent.type(screen.getByLabelText(/token/i), "ghp_malo");
+
+  await userEvent.click(screen.getByRole("button", { name: "Conectar" }));
+
+  await screen.findByText("GitHub rechazó el token");
+  expect(screen.getByRole("button", { name: "Conectar" })).toBeEnabled();
+  expect(screen.getByLabelText(/repositorio/i)).not.toHaveAttribute("readonly");
+  expect(screen.getByLabelText(/token/i)).not.toHaveAttribute("readonly");
+});
+
+it("@s38 una importación nueva borra el resultado de la anterior antes de fallar", async () => {
+  serve("/api/v1/me/connectors/github/imports", "POST", () =>
+    Response.json(receipt, { status: 201 }),
+  );
+  await open();
+  await screen.findByRole("combobox");
+  await userEvent.click(importButton());
+  await screen.findByText("Creadas 199");
+
+  serve("/api/v1/me/connectors/github/imports", "POST", () =>
+    problem(503, { code: "GITHUB_UNAVAILABLE" }),
+  );
+  await userEvent.click(importButton());
+
+  await screen.findByText("GitHub no responde. Inténtalo más tarde");
+  expect(screen.queryByText("Creadas 199")).toBeNull();
+  // Sólo un fallo de almacenamiento deja contadores parciales; éste no lo es.
+  expect(
+    screen.queryByRole("region", { name: "Resultado de la importación" }),
+  ).toBeNull();
+});
+
+it("@s38 el error de una importación desaparece cuando la siguiente sale bien", async () => {
+  serve("/api/v1/me/connectors/github/imports", "POST", () =>
+    problem(503, { code: "GITHUB_UNAVAILABLE" }),
+  );
+  await open();
+  await screen.findByRole("combobox");
+  await userEvent.click(importButton());
+  await screen.findByText("GitHub no responde. Inténtalo más tarde");
+
+  serve("/api/v1/me/connectors/github/imports", "POST", () =>
+    Response.json(receipt, { status: 201 }),
+  );
+  await userEvent.click(importButton());
+
+  await screen.findByText("Creadas 199");
+  expect(
+    screen.queryByText("GitHub no responde. Inténtalo más tarde"),
+  ).toBeNull();
+});
+
+it("@s39 un fallo de almacenamiento sin contadores los da por cero y no habla de truncamiento", async () => {
+  serve("/api/v1/me/connectors/github/imports", "POST", () =>
+    problem(503, { code: "STORAGE_UNAVAILABLE", importId }),
+  );
+  await open();
+  await screen.findByRole("combobox");
+
+  await userEvent.click(importButton());
+
+  expect(await screen.findByText("Creadas 0")).toBeVisible();
+  expect(screen.getByText("Omitidas 0")).toBeVisible();
+  expect(screen.getByText("Fallidas 0")).toBeVisible();
+  expect(screen.queryByText(/más issues/i)).toBeNull();
+});
+
+// --- La desconexión: lo que limpia (260-261) y a quién obedece (258, 266-271)
+
+it("@s40 desconectar borra el resumen de la importación de esta sesión", async () => {
+  serve("/api/v1/me/connectors/github/imports", "POST", () =>
+    Response.json(receipt, { status: 201 }),
+  );
+  serve(
+    "/api/v1/me/connectors/github",
+    "DELETE",
+    () => new Response(null, { status: 204 }),
+  );
+  await open();
+  await screen.findByRole("combobox");
+  await userEvent.click(importButton());
+  await screen.findByText("Creadas 199");
+
+  await userEvent.click(screen.getByRole("button", { name: "Desconectar" }));
+  await userEvent.click(
+    screen.getByRole("button", { name: "Confirmar desconexión" }),
+  );
+
+  expect(await screen.findByLabelText(/token/i)).toBeInTheDocument();
+  expect(screen.queryByText("Creadas 199")).toBeNull();
+});
+
+it("@s40 desconectar borra el error de la importación anterior", async () => {
+  serve("/api/v1/me/connectors/github/imports", "POST", () =>
+    problem(503, { code: "GITHUB_UNAVAILABLE" }),
+  );
+  serve(
+    "/api/v1/me/connectors/github",
+    "DELETE",
+    () => new Response(null, { status: 204 }),
+  );
+  await open();
+  await screen.findByRole("combobox");
+  await userEvent.click(importButton());
+  await screen.findByText("GitHub no responde. Inténtalo más tarde");
+
+  await userEvent.click(screen.getByRole("button", { name: "Desconectar" }));
+  await userEvent.click(
+    screen.getByRole("button", { name: "Confirmar desconexión" }),
+  );
+
+  expect(await screen.findByLabelText(/token/i)).toBeInTheDocument();
+  expect(
+    screen.queryByText("GitHub no responde. Inténtalo más tarde"),
+  ).toBeNull();
+});
+
+it("@s41 una desconexión relevada que falla tarde no habla ni estorba a la importación viva", async () => {
+  let rejectDelete: (reason: unknown) => void = () => {};
+  let releaseImport: (value: Response) => void = () => {};
+  serve(
+    "/api/v1/me/connectors/github",
+    "DELETE",
+    () => new Promise<Response>((_, reject) => (rejectDelete = reject)),
+  );
+  serve(
+    "/api/v1/me/connectors/github/imports",
+    "POST",
+    () => new Promise<Response>((resolve) => (releaseImport = resolve)),
+  );
+  await open();
+  await screen.findByRole("combobox");
+  await userEvent.click(screen.getByRole("button", { name: "Desconectar" }));
+  await userEvent.click(
+    screen.getByRole("button", { name: "Confirmar desconexión" }),
+  );
+
+  // La importación releva a la desconexión: pending.current deja de ser su controlador.
+  await userEvent.click(importButton());
+  rejectDelete(new Error("el transporte se cayó tarde"));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  releaseImport(Response.json(receipt, { status: 201 }));
+
+  // La operación viva llega entera: la relevada no le ha robado el turno.
+  expect(await screen.findByText("Creadas 199")).toBeVisible();
+  // Y la relevada calla: su fallo ya no le importa a nadie.
+  expect(
+    screen.queryByText("No se pudo importar. Inténtalo más tarde"),
+  ).toBeNull();
+});
+
+it("@s41 una desconexión relevada que termina bien no borra la conexión de la pantalla", async () => {
+  let releaseDelete: (value: Response) => void = () => {};
+  let releaseImport: (value: Response) => void = () => {};
+  serve(
+    "/api/v1/me/connectors/github",
+    "DELETE",
+    () => new Promise<Response>((resolve) => (releaseDelete = resolve)),
+  );
+  serve(
+    "/api/v1/me/connectors/github/imports",
+    "POST",
+    () => new Promise<Response>((resolve) => (releaseImport = resolve)),
+  );
+  await open();
+  await screen.findByRole("combobox");
+  await userEvent.click(screen.getByRole("button", { name: "Desconectar" }));
+  await userEvent.click(
+    screen.getByRole("button", { name: "Confirmar desconexión" }),
+  );
+  await userEvent.click(importButton());
+
+  releaseDelete(new Response(null, { status: 204 }));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  releaseImport(Response.json(receipt, { status: 201 }));
+
+  expect(await screen.findByText("Creadas 199")).toBeVisible();
+  expect(screen.getByText("octocat/Hello-World")).toBeInTheDocument();
+  expect(screen.queryByLabelText(/token/i)).toBeNull();
 });

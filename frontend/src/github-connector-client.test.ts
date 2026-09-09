@@ -299,6 +299,12 @@ it("@s12 rejects a receipt whose shape is not the agreed one", async () => {
     { ...receipt, truncated: "no" },
     { ...receipt, id: "no-es-uuid" },
     { ...receipt, errorCode: "" },
+    // Este cliente sólo habla con el extremo de GitHub: un recibo de otro origen,
+    // o sin ruta de proyecto, no es un recibo suyo.
+    { ...receipt, source: "gitlab" },
+    { ...receipt, source: "" },
+    { ...receipt, projectPath: "" },
+    { ...receipt, projectPath: 7 },
   ]) {
     stub(Response.json(body, { status: 201 }));
     await expect(startGithubImport(projectId, signal())).rejects.toThrow(

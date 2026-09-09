@@ -131,3 +131,158 @@ del zoom nativo.
   quitar `repository` del recibo, sin esta fila el contrato dejaría de decir en
   qué repositorio se importó.
 
+### Verificación final del punto 1
+
+Los **dieciséis** recorridos de E2E de la feature, sobre la pila real en el
+puerto 18096:
+
+| Fichero | Resultado |
+| --- | --- |
+| `e2e/github-connector.spec.mjs` | **15 passed (1,8 min)** |
+| `e2e/github-connector-native-zoom.spec.mjs` | **1 passed (16,2 s)**, con `zoom === 2` |
+
+Commit `a1b0d20`.
+
+---
+
+## 2. La puerta de mutación de frontend
+
+Punto de partida medido por el coordinador, sobre
+`frontend/reports/mutation-github-connector/mutation.json`: **75,55 %** con
+umbral 80. Recuento exacto, releído del informe por mí y no heredado:
+
+| Fichero | Mutantes | Muertos | Supervivientes |
+| --- | ---: | ---: | ---: |
+| `src/github-connector-client.ts` | 246 | 210 | 36 |
+| `src/github-connector.tsx` | 341 | 234 | **107** |
+| `src/integrations-index.tsx` | 2 | 1 | 1 |
+| **Total** | **589** | **445** | **144** |
+
+445 / 589 = 75,55 %. Cuadra.
+
+**Producción intacta.** `git diff` sobre `github-connector.tsx` e
+`integrations-index.tsx` en este ciclo: vacío. Lo único que ha cambiado son
+ficheros de prueba. Ninguna prueba existente se ha relajado ni borrado.
+
+### Una corrección al parte anterior, que se descubrió ejecutando
+
+`progress/mutacion_github_connector_supervivientes.md` dejaba escrita una receta
+para el superviviente de la línea 266: «el `ConditionalExpression -> true` de la
+266 es el ternario `error instanceof ConnectorError ? … : …`, y se mata con
+`vi.mock` del módulo cliente». **Es falso, y lo dice el propio informe.** El
+mutante ocupa las columnas `266:11-266:27`, dieciséis caracteres, que son
+exactamente `live(controller)`: la **guarda de vigencia** del `catch`, no el
+ternario. La receta del `vi.mock` habría añadido una prueba que no mata nada.
+
+Lo que sí lo mata es ejercer la guarda: una desconexión **relevada** por una
+importación posterior, que falla tarde y no debe hablar. Verificado rompiendo
+la producción a mano (`if (live(controller))` → `if (true)`): la prueba nueva
+falla.
+
+Regla del reparto §5 aplicada al pie: gana la ejecución.
+
+### Los racimos atacados, y qué mata cada uno
+
+Los 107 supervivientes se reparten en **82 líneas**: no hay un racimo único
+gigante, hay familias. Se han atacado nueve, con 24 pruebas nuevas en
+`github-connector.test.tsx` y 1 en `github-connector-routing.test.tsx`:
+
+1. **El escuchador de Escape (153-160), que el juez exigió expresamente** — 5
+   mutantes. Cuatro pruebas: que no escucha si no hay confirmación abierta, que
+   se desregistra al cerrarse, que sólo Escape la cierra y que el Escape queda
+   consumido (`defaultPrevented`).
+   El oráculo de las dos primeras es indirecto y hay que explicarlo: llamar a
+   `cancelDisconnect()` de más no se nota en `confirming` —React abandona el
+   repintado al escribir el mismo valor—, pero **sí deja pedido un movimiento de
+   foco** en `focusDisconnect.current`, que el siguiente repintado ejecuta. Las
+   pruebas provocan ese repintado con un `selectOptions` y afirman que el foco
+   no se mueve. Es determinista, a diferencia de mirar `confirming`.
+2. **La tabla de mensajes (37-47)** — 4 mutantes. Una tabla de cinco códigos
+   contra su texto exacto.
+3. **La región de error de importación (416-424)** — 6 mutantes: que un token
+   rechazado no se repite ahí, que sólo una conexión inválida ofrece
+   «Reconectar» —y no dos veces—, y que sólo una importación en curso ofrece
+   «Consultar estado».
+4. **El hueco del mensaje del formulario (405-407)** — 2 mutantes: que es
+   `role="alert"` cuando hay error y que está **vacío y sin papel** cuando no.
+5. **La región `aria-live` (456)** — 1 mutante: nace callada.
+6. **El resumen heredado del último recibo (474) y su enlace (478)** — 4
+   mutantes: una importación en curso no adelanta contadores; el enlace nombra
+   el proyecto **del recibo**, no el primero de la lista; y un proyecto que ya
+   no está en la lista enseña su identificador en vez de reventar.
+7. **El arranque de la pantalla (60, 66, 80, 132, 284-285)** — 6 mutantes: no
+   se enseña el formulario mientras se consulta; sin lista de proyectos el
+   selector no ofrece ninguna opción; el foco arranca en el encabezado; el
+   conector deshabilitado deja de pedir la lista; `main` y `h1` llevan
+   `tabindex="-1"`.
+8. **La importación: guardas y limpieza (207-236)** — 7 mutantes: sin proyecto
+   no se lanza importación; tras un token rechazado el formulario vuelve a estar
+   operativo; una importación nueva borra resultado y error de la anterior; y un
+   fallo de almacenamiento sin contadores los da por cero sin hablar de
+   truncamiento.
+9. **La desconexión: qué limpia (260-261) y a quién obedece (258, 266-271)** — 8
+   mutantes, con las dos pruebas de relevo descritas arriba.
+
+Y 1 mutante más en `integrations-index.tsx:9` (`tabIndex={-1}`), cubierto desde
+`github-connector-routing.test.tsx`, que ya renderiza `/integraciones`.
+
+### Verificación: 44 de 44, rompiendo la producción a mano
+
+No se ha ejecutado Stryker (regla 4 del reparto). En su lugar,
+`scripts/verificar-mutantes-github-connector.mjs` **aplica cada mutante
+superviviente al fichero de producción, ejecuta la suite y restaura**. El
+resultado completo, prueba a prueba, queda en
+`progress/verificacion_mutantes_github_connector.json`.
+
+    TOTAL: 43 mueren de 43
+
+El de `integrations-index.tsx` se comprobó aparte, a mano:
+`tabIndex={-1}` → `tabIndex={+1}` hace caer la prueba nueva y sólo esa.
+
+Los cuatro mutantes **nuevos** que introduce el arreglo del punto 1 en
+`github-connector-client.ts` también se comprobaron uno a uno:
+
+| Mutante | Pruebas que caen |
+| --- | ---: |
+| `value.source !== GITHUB` → `===` | 8 |
+| `const GITHUB = "github"` → `""` | 8 |
+| `value.source !== GITHUB \|\|` → `false \|\|` | 1 |
+| `!nonEmpty(value.projectPath) \|\|` → `false \|\|` | 1 |
+
+Ningún oráculo nuevo es incapaz de fallar.
+
+### Previsión para la campaña del orquestador
+
+Con el denominador prácticamente igual —el arreglo del cliente quita cuatro
+puntos mutables (`typeof value.repository !== "string"` y `!value.repository`) y
+pone otros tantos—:
+
+| | Mutantes | Muertos | Puntuación |
+| --- | ---: | ---: | ---: |
+| Antes | 589 | 445 | 75,55 % |
+| **Previsión** | ≈589 | **≈489** | **≈83,0 %** |
+
+Es decir: **44 muertes nuevas**, 17 por encima de las 27 que hacían falta para
+cruzar el 80. El margen es deliberado, porque una previsión no es una medida.
+
+**Supervivientes que quedan y por qué no se atacan** (para que la campaña no
+sorprenda): unos 63 en `github-connector.tsx` y 36 en el cliente. Entre los que
+quedan hay varios que **creo equivalentes**, y lo dejo escrito para que nadie
+gaste el turno en ellos:
+
+- `90`, `121`, `129`, `147` — `ArrayDeclaration` sobre las listas de
+  dependencias de `useCallback`/`useEffect`. `["Stryker was here"]` se compara
+  igual a sí misma en cada repintado, así que el efecto no se vuelve a ejecutar:
+  se comporta como `[]`.
+- `137` (los cuatro) — la guarda `aborted || !mounted || !("items" in page)`
+  vive dentro de un `try/catch` que se traga cualquier excepción, así que el
+  camino sano (salir) y el mutado (reventar al filtrar) dejan la pantalla
+  idéntica.
+- `262`, `263` — `setRepository("")` y `setToken("")` de la desconexión. Ambos
+  estados ya valen `""` en todo camino que llegue al botón «Desconectar»: la
+  sección con ese botón no se pinta mientras el formulario está abierto.
+- `270`, `271 -> false`, `204`, `239` — no vaciar `pending.current` en el
+  `finally` no se observa: la siguiente operación lo sobrescribe y abortar un
+  controlador ya terminado es inocuo.
+- `77`, `78` — `useRef` inicial que el efecto de montaje reescribe acto seguido.
+

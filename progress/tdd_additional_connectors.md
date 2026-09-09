@@ -104,7 +104,7 @@ Leyenda de la columna **estado**:
 | `@s37` | cancelación y cierre de sesión | abierto | — (sin producción de frontend) |
 | `@s38` | responsive, texto ampliado, teclado y axe | abierto | — (sin producción de frontend) |
 
-**Recuento: 20 escenarios cerrados de 38.** 6 parciales (`@s2`, `@s4`, `@s5`,
+**Recuento: 21 escenarios cerrados de 38** (20 al abrir la sesión más `@s26`). 6 parciales (`@s2`, `@s4`, `@s5`,
 `@s16`, `@s22`, `@s31`), 2 heredados sin oráculo propio (`@s21`, y la parte de
 `@s16`/`@s22` ya contada), 1 parcial de seguridad (`@s32`) y 9 abiertos sin
 producción (`@s1`, `@s3`, `@s6`, `@s7`, `@s33`…`@s38`).
@@ -165,3 +165,41 @@ comparaban el `Optional` contra la cadena desnuda. Fallaban con
 del rebase, no un defecto de producción.
 
 Commit `c513c1b`.
+
+### `@s26` — un fallo en la página 2 conserva lo que confirmó la página 1
+
+Dos pruebas nuevas en `ImportGitlabIssuesTest:266,286`: página 1 llena, página 2
+con proveedor caído. El recibo queda `failed` con `GITLAB_UNAVAILABLE` pero
+declara `created 100`, `truncated false` y `finishedAt` no nulo, con sus 100
+tareas, 100 eventos y 100 enlaces intactos. La segunda prueba cierra la última
+línea del escenario: repetir con las dos páginas sanas omite las 100 ya
+enlazadas y sólo crea lo que faltaba.
+
+**Ambas pasaron a la primera.** Es el caso que el propio inventario llama
+«heredado»: el mecanismo vive en `ImportIssues`, compartido con 27. Un test que
+pasa a la primera no demuestra nada, así que el rojo se acreditó rompiendo la
+producción, y hubo que afinar la rotura hasta dar con la que distingue:
+
+1. Sacar `receipts.progress` del bucle de issues y dejarlo al final de cada
+   página: **sigue verde**, y es correcto que siga. Esa granularidad
+   issue-a-issue la guarda el `@s27` de la feature 27
+   (`ImportGithubIssuesTest:423`), no este escenario. La primera rotura no
+   valía como evidencia y queda anotada para que nadie la repita.
+2. Subir `receipts.progress` fuera del bucle de **páginas**: el fallo de la
+   página 2 se lleva por delante el recuento de la 1 y cae
+   `s26_afailureOnTheSecondPageKeepsTheHundredTasksTheFirstOneConfirmed` con
+   `expected: <100> but was: <0>`. Ésa es exactamente la regresión que `@s26`
+   existe para impedir.
+
+Producción restaurada; verdes `ImportGitlabIssuesTest` (11) e
+`ImportGithubIssuesTest`. Commit `1da4d2e`.
+
+## Estado al cerrar la sesión del carril
+
+- El árbol **compila** (`compileJava` + `compileTestJava`, sin contenedores).
+- Nada queda sin commitear.
+- No se ha tocado ningún fichero compartido de los que lista `REGLAS.md` §6:
+  todo el cambio vive en `backend/src/**` de GitLab, en `ImportIssues`
+  (compartido con 27, pero restaurado a su forma original) y en este `progress/`.
+- `feature_list.json` sigue en `spec_ready`, como debe: quedan 17 escenarios
+  sin oráculo propio y la pantalla entera sin escribir.

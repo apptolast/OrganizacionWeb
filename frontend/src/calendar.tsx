@@ -240,10 +240,13 @@ function CalendarFeed() {
             títulos de tareas y objetivos de tus bloques.
           </p>
           <label htmlFor="calendar-link">Enlace de suscripción</label>
-          <input
+          {/* Un campo que envuelve: a 320 px y con el texto al 200 % la url se lee entera, sin
+              recorte ni desplazamiento horizontal, y sigue seleccionándose de una vez. */}
+          <textarea
             id="calendar-link"
-            type="text"
             readOnly
+            rows={3}
+            spellCheck={false}
             value={link.url}
             onFocus={(event) => event.currentTarget.select()}
           />

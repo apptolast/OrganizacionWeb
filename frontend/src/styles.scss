@@ -410,7 +410,7 @@ a:not(.primary-link):not(.skip-link) {
     display: block;
     margin-block: 12px 4px;
   }
-  input[type="text"] {
+  textarea {
     display: block;
     width: 100%;
     max-width: 100%;
@@ -421,7 +421,10 @@ a:not(.primary-link):not(.skip-link) {
     border: 1px solid var(--control-border);
     border-radius: 8px;
     padding: 12px 14px;
-    text-overflow: ellipsis;
+    // La url se envuelve en vez de recortarse: ningún ancho la corta ni la desplaza.
+    resize: vertical;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
     &:focus {
       border-color: var(--accent);
     }

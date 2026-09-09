@@ -290,8 +290,12 @@ class CalendarApiTest {
     return headersOf(response) + "|" + response.getContentAsString();
   }
 
+  /**
+   * Las cuatro primeras filas son las del Examples; OPTIONS se añade porque el mapeo lo declara y
+   * «solo se admiten GET y HEAD» no admite una excepción sin oráculo.
+   */
   @ParameterizedTest
-  @ValueSource(strings = {"POST", "PUT", "DELETE", "PATCH"})
+  @ValueSource(strings = {"POST", "PUT", "DELETE", "PATCH", "OPTIONS"})
   void s16_thePublicResourceOnlyAcceptsGetAndHead(String method) throws Exception {
     var verb = org.springframework.http.HttpMethod.valueOf(method);
     var known = notAllowed(verb, "/calendar/" + TOKEN + ".ics");

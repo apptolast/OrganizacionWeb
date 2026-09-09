@@ -297,7 +297,9 @@ pnpm exec eslint src/ ; pnpm exec prettier --check src/ ; pnpm exec tsc --noEmit
 
 ## Mapa de trazabilidad @s a prueba
 
-Backend, 95 pruebas en 8 clases. Frontend, 39 pruebas en 2 ficheros.
+Backend, 96 pruebas en 8 clases. Frontend, 40 pruebas en 2 ficheros. (Corregido tras el dictamen:
+la cifra que dio esta bitacora al cerrar el ciclo 9, 95 y 39, estaba mal contada; el juez las
+ejecuto y conto 96 y 40, y son las buenas. Con la fila OPTIONS del ciclo 15 el backend pasa a 97.)
 
 | @s | Prueba |
 | --- | --- |
@@ -338,7 +340,10 @@ Backend, 95 pruebas en 8 clases. Frontend, 39 pruebas en 2 ficheros.
 | @s35 | `calendar-feed-api.test.ts` (DELETE sólo acepta 204), `calendar.test.tsx` (cancelar, confirmar regeneración, confirmar revocación, foco al h1, fallo sin reintento automático) |
 | @s36 | `calendar-feed-api.test.ts` (6 pruebas de validación y 413), `calendar.test.tsx` (preparación válida, tres respuestas inválidas, límite) |
 | @s37 | `calendar-feed-api.test.ts` (señal ya abortada), `calendar.test.tsx` (aborto al salir, 401 tardío descartado, nada en almacenamiento ni consola) |
-| @s38 | `e2e/ics-calendar.spec.mjs` (axe y barrido 320/768/1280 en cinco estados) — PENDIENTE DE EJECUTAR |
+| @s38 | `e2e/ics-calendar-ux.spec.mjs`: los **siete** estados a 320/768/1280, texto al 200 %,
+zoom nativo al 200 %, tema claro/oscuro, `forced-colors`, movimiento reducido, recorrido de teclado
+y seleccion del campo; matriz de los treinta principios en `progress/ux_ics_calendar.md`. Ver el
+ciclo 16. (Antes decia «cinco estados»: eran **cuatro**, y el juez lo conto bien.) |
 
 ## Lo que este carril NO ha ejecutado
 
@@ -346,14 +351,16 @@ Por la disciplina de recursos de la sesión (cinco carriles compartiendo la máq
 lanzado ni la suite completa del backend, ni la suite completa de Vitest, ni Playwright, ni PIT, ni
 Stryker. En consecuencia:
 
-- `e2e/ics-calendar.spec.mjs` está escrito y pasa `node --check`, pero nunca se ha ejecutado. @s38 y
+- (Superado en el ciclo 14, que lo ejecuto, y en el 16, que lo amplia.) `e2e/ics-calendar.spec.mjs`
+  está escrito y pasa `node --check`, pero nunca se ha ejecutado. @s38 y
   la parte E2E de @s29 siguen sin evidencia. Es lo primero que debe correr quien integre.
 - Los rangos linea:columna de `stryker.ics-calendar.config.json` sobre `App.tsx` y `workspace.tsx`
   se han calculado leyendo el fichero, no ejecutando Stryker; si alguien reformatea esos ficheros
   habrá que recalcularlos.
 - La mutación (PIT y Stryker) queda para el `mutation_tester`.
-- El estado de la feature 26 en `feature_list.json` sigue en `in_progress`: no le corresponde a
-  este agente marcarlo `done`.
+- El estado de la feature 26 en `feature_list.json` esta en **`spec_ready`**, no en `in_progress`
+  como afirmo esta bitacora: el commit que lo cambiaba se descarto en el reasentamiento del ciclo
+  11. Lo corrige el coordinador; a este agente no le corresponde ni eso ni marcar `done`.
 
 ### Ciclo 10 — regresión encontrada en `ApplicationWiringTest`
 
@@ -518,8 +525,115 @@ Resultado final, con la pila levantada y bajada:
 ```
 
 Con esto **@s38 y la parte de reinicio de @s29 dejan de estar sin demostrar**: axe sin violaciones
-en cinco estados a 320, 768 y 1280 px, sin desbordamiento horizontal, y el feed devuelve los mismos
+en cuatro estados a 320, 768 y 1280 px (los siete llegan en el ciclo 16), sin desbordamiento
+horizontal, y el feed devuelve los mismos
 octetos después de reiniciar el proceso del backend contra la misma base de datos.
 
 Sigue pendiente, y no me corresponde: la mutación (PIT `ics_calendar` y Stryker
 `ics_calendar-frontend`) y el cambio de estado de la feature 26.
+
+---
+
+# Respuesta al dictamen REJECTED (`progress/judge_ics_calendar.md`)
+
+El juez acepta el carril entero salvo **@s38**, y tiene razón: lo que había auditaba **cuatro** de
+los siete estados, nunca ejecutaba texto al 200 % ni zoom nativo ni los modos de presentación, el
+oráculo de teclado era un `Tab` suelto con `toBeTruthy()`, y el artefacto de los treinta principios
+no existía. Se cierra de verdad.
+
+### Ciclo 15 — el mapeo de OPTIONS sin oráculo (hallazgo menor del dictamen)
+
+`PublicCalendarController` declaraba `RequestMethod.OPTIONS` en el mapeo del 405 y ninguna prueba lo
+pedía. Se añade la fila `OPTIONS` al `@ValueSource` de
+`CalendarApiTest.s16_thePublicResourceOnlyAcceptsGetAndHead`, con un comentario que distingue las
+cuatro filas del Examples de la quinta.
+
+**Honestidad sobre este ciclo: la fila no nació roja.** La producción ya existía y ya se comportaba
+así; lo que se cierra es una línea sin oráculo, que es exactamente lo que pedía el punto 4 del
+dictamen. Se deja dicho en vez de presentarlo como un rojo→verde que no fue.
+`CalendarApiTest` pasa de 29 a 30 pruebas; el backend del carril, de 96 a 97.
+
+### Ciclo 16 — @s38 cerrado: los siete estados y las cuatro modalidades
+
+**Rojo de producto encontrado por el propio escenario.** El campo de la url era un `input` con
+`text-overflow: ellipsis`. Eso es literalmente «recortar la url», que es lo que la cláusula
+«ningún ancho recorta la url» prohíbe, y el juez ya lo había señalado como fragilidad. Se sustituye
+por un `textarea` de solo lectura que envuelve (`overflow-wrap: anywhere`, `white-space: pre-wrap`):
+a 320 px y con el texto al 200 % la url de 43 caracteres se lee entera. El oráculo nuevo es
+`textarea.scrollWidth > clientWidth`, medido en las 42 combinaciones y bajo zoom nativo. Las 40
+pruebas de Vitest siguen verdes sin tocarlas: `getByRole("textbox")` y `toHaveValue` valen igual
+para un `textarea`.
+
+**Spec nueva `e2e/ics-calendar-ux.spec.mjs`**, y el antiguo `@s38` de cuatro estados se retira de
+`ics-calendar.spec.mjs` para que haya un único oráculo autoritativo:
+
+1. *Los siete estados a 320, 768 y 1280 px* — 21 medidas. `cargando` y `fallo` se provocan
+   interceptando `GET /api/v1/me/calendar-feed`, la única petición de apertura; `con enlace activo`
+   se alcanza recargando tras crear, que es el estado sin campo de url y distinto del recién creado.
+   Cada medida: axe (5 etiquetas), desbordamiento, controles fuera del viewport, objetivos de 44 px
+   medidos con `getBoundingClientRect` (sin delegar en `target-size` de axe) y recorte de la url.
+2. *Los siete estados con el texto al 200 %* — otras 21 medidas, duplicando el tamaño de letra
+   calculado y verificando elemento a elemento que el factor es exactamente 2, como
+   `reschedule-text` y `appearance-ux-audit`. Con captura por estado.
+3. *Tema claro, tema oscuro, `forced-colors` y movimiento reducido* — 12 medidas.
+4. *Recorrido de teclado real* — orden de tabulación igual al orden del DOM, nombre accesible y
+   foco visible en cada parada, salida de `main` hacia delante y hacia atrás, y selección íntegra
+   del campo con `Ctrl/Cmd+A`.
+5. *Zoom nativo de Chromium al 200 %* — `chrome.tabs.setZoom(tab, 2)` real sobre contexto
+   persistente con extensión, como `reschedule-native-zoom`; no viewport emulado ni zoom CSS.
+
+**Tres rojos propios durante el ciclo, los tres arreglados en la causa:**
+
+- *Fuga de estado entre medidas.* Las dos pruebas grandes agotaron los 180 s: `plannedBlock` se
+  llamaba una vez por estado y no por medida, así que el token creado en el primer ancho sobrevivía
+  al segundo y ya no había botón «Crear enlace de suscripción». Ahora cada medida arranca con
+  `withoutFeedToken()`. Las dos pruebas pasan de agotar el tiempo a 22 s y 26 s.
+- *Fuga entre modos de presentación.* `page.emulateMedia` **conserva** lo que no se le nombra, así
+  que `forced-colors` seguía activo durante la pasada de movimiento reducido: la evidencia mostraba
+  tinta blanca donde debía haber tinta verde oscura. Cada modo fija ahora las tres preferencias.
+  Sin el arreglo, la prueba habría pasado igual midiendo el modo equivocado — el peor tipo de verde.
+- *Oráculo de trampa de foco al revés.* Comprobaba que tras `Shift+Tab` el foco seguía en `main`,
+  que es lo normal y no demuestra nada. Ahora afirma que tabulando hacia delante se sale de `main`
+  tras el último control **y** que desde el primero `Shift+Tab` también sale.
+
+**Resultado, una sola pila con `E2E_WEB_PORT=18092`, bajada al terminar:**
+
+```
+✓ ics ux: los siete estados se sostienen a 320, 768 y 1280 px @s38            (22,0 s)
+✓ ics ux: los siete estados se sostienen con el texto al 200 % @s38           (26,2 s)
+✓ ics ux: tema claro, tema oscuro, forced-colors y movimiento reducido @s38   (12,4 s)
+✓ ics ux: el recorrido de teclado alcanza todo en orden, con foco visible …   ( 2,8 s)
+✓ ics ux: zoom nativo de Chromium al 200 % con 320 px CSS @s38                ( 3,7 s)
+5 passed
+```
+
+Y las dos specs juntas en una sola pila: **8 passed (1,3 m)**.
+
+Medidas que quedan escritas: sin desbordamiento ni recorte en las 42 combinaciones; control más
+ancho con texto al 200 %, 889,8 px a 1280; claro `rgb(35,57,47)` sobre `rgb(248,249,245)`, oscuro
+`rgb(232,238,233)` sobre `rgb(17,24,39)`; todas las transiciones ≤ 0,01 s con movimiento reducido;
+zoom nativo con `devicePixelRatio` duplicado y 373 px CSS de ancho útil.
+
+### Ciclo 17 — `progress/ux_ics_calendar.md`
+
+Escrito siguiendo `progress/ux_integration_api.md`: qué se ejecutó, las medidas concretas, la matriz
+de los treinta principios de `docs/ux-requirements.md` y —lo que pedía `AGENTS.md:51`— una sección
+de **límites explícitos**: sin pruebas con personas, axe como condición necesaria y no suficiente,
+contraste forzado como revisión visual y no medida, zoom nativo sólo en Chromium, un solo motor, sin
+cronometrar Doherty, sin lector de pantalla real y sin los anchos 1440/1920.
+
+### Correcciones de bitácora exigidas por el dictamen
+
+- «95 pruebas» → **96** y «39 del frontend» → **40**, que son las que el juez ejecutó y contó.
+  Con la fila `OPTIONS` del ciclo 15 el backend queda en **97**.
+- «cinco estados» → **cuatro**, que es lo que auditaba la spec vieja contando las llamadas a
+  `audit(...)`. Los siete llegan con el ciclo 16.
+- «la feature 26 sigue en `in_progress`» → está en **`spec_ready`**; el commit que la ponía
+  `in_progress` se descartó en el reasentamiento del ciclo 11. Lo corrige el coordinador.
+- La nota del ciclo 9 que decía que el E2E nunca se había ejecutado queda marcada como superada.
+
+### Lo que sigue sin ser mío
+
+La desviación del `Content-Type` (el juez la acepta y la enmienda del `.feature` va por la puerta
+del propietario), el `location /api/` que duplica tres cabeceras (deuda de la feature 24, carril
+propio), el estado en `feature_list.json`, la mutación y `bin/harness init`.

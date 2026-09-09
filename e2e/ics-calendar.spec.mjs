@@ -2,7 +2,6 @@ import { test, expect } from "./support/authenticated-test.mjs";
 import { create, sql } from "./support/projects.mjs";
 import { saveTask } from "./support/tasks.mjs";
 import { restartBackend } from "./support/backend.mjs";
-import AxeBuilder from "@axe-core/playwright";
 import { randomUUID } from "node:crypto";
 
 const minute = (offsetDays) => {
@@ -187,63 +186,4 @@ test("ics: the session download offers the same document as an attachment @s17 @
     'attachment; filename="organizationweb-bloques.ics"',
   );
   expect(await direct.text()).toContain(`UID:${block.id}@`);
-});
-
-test("ics: the view is operable and free of axe violations in every state and width @s38", async ({
-  page,
-  request,
-}) => {
-  await plannedBlock(request);
-  await page.goto("/calendario");
-  const audit = async (label) => {
-    for (const width of [320, 768, 1280]) {
-      await page.setViewportSize({
-        width,
-        height: width === 768 ? 400 : 900,
-      });
-      const results = await new AxeBuilder({ page })
-        .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa", "best-practice"])
-        .analyze();
-      expect(results.violations, `${label} a ${width} px`).toEqual([]);
-      const overflow = await page.evaluate(
-        () =>
-          document.documentElement.scrollWidth >
-          document.documentElement.clientWidth,
-      );
-      expect(overflow, `${label} desborda a ${width} px`).toBe(false);
-    }
-  };
-
-  await expect(
-    page.getByRole("button", { name: "Crear enlace de suscripción" }),
-  ).toBeVisible();
-  await audit("sin enlace");
-
-  await page
-    .getByRole("button", { name: "Crear enlace de suscripción" })
-    .click();
-  await expect(
-    page.getByLabel("Enlace de suscripción", { exact: true }),
-  ).toBeVisible();
-  await audit("enlace recién creado");
-
-  await page
-    .getByRole("button", { name: "Regenerar enlace", exact: true })
-    .click();
-  await expect(
-    page.getByRole("group", { name: /dejará de funcionar/ }),
-  ).toBeFocused();
-  await audit("confirmación abierta");
-  await page.getByRole("button", { name: "Cancelar", exact: true }).click();
-
-  await page
-    .getByRole("button", { name: "Descargar archivo .ics", exact: true })
-    .click();
-  await expect(page.getByText("Archivo preparado")).toBeVisible();
-  await audit("descarga preparada");
-
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await page.keyboard.press("Tab");
-  const focused = await page.evaluate(() => document.activeElement?.tagName);
-  expect(focused).toBeTruthy();
 });

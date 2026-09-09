@@ -255,6 +255,70 @@ class ImportGitlabIssuesTest {
 
   // ------------------------------------------- @s26 un fallo en la página 2 no borra la página 1
 
+  // ------------------- @s22 las precondiciones se aplican antes de contactar con GitLab
+
+  /** Nada de lo que se comprueba antes de tiempo puede haber tocado al proveedor ni al recibo. */
+  private void assertNothingHappened() {
+    assertEquals(List.of(), fakes.source.calls());
+    assertEquals(0, fakes.receipts.size());
+    assertEquals(0, fakes.tasks.tasks());
+    assertEquals(0, fakes.tasks.links());
+  }
+
+  @Test
+  void s22_anUnknownOrForeignProjectIsRefusedWithoutAskingGitlabAnything() {
+    var foreign = fakes.projects.seed("owner-2", "idea");
+
+    assertThrows(ResourceNotFoundException.class, () -> importIssues().execute(OWNER, foreign));
+    assertThrows(
+        ResourceNotFoundException.class, () -> importIssues().execute(OWNER, UUID.randomUUID()));
+    assertNothingHappened();
+  }
+
+  @Test
+  void s22_acompletedProjectIsRefusedBeforeAnyReceiptOrRequest() {
+    fakes.projects.status(projectId, "completed");
+
+    assertThrows(ProjectCompletedException.class, () -> importIssues().execute(OWNER, projectId));
+    assertNothingHappened();
+  }
+
+  @Test
+  void s22_withoutAGitlabConnectionThereIsNothingToImportFrom() {
+    gitlab.connections.delete(OWNER);
+
+    assertThrows(ConnectionNotFoundException.class, () -> importIssues().execute(OWNER, projectId));
+    assertNothingHappened();
+  }
+
+  @Test
+  void s22_aconnectionInErrorRefusesToImportWithoutAskingGitlab() {
+    gitlab.connections.put(OWNER, connected().withError("CONNECTION_INVALID", NOW));
+
+    assertThrows(ConnectionInvalidException.class, () -> importIssues().execute(OWNER, projectId));
+    assertNothingHappened();
+  }
+
+  /**
+   * El orden importa: si el proyecto se mirase antes que la conexión, un propietario sin conectar
+   * sabría por el código de error qué proyectos existen y cuáles no.
+   */
+  @Test
+  void s22_theConnectionIsCheckedBeforeTheProject() {
+    gitlab.connections.delete(OWNER);
+    var foreign = fakes.projects.seed("owner-2", "idea");
+
+    assertThrows(ConnectionNotFoundException.class, () -> importIssues().execute(OWNER, foreign));
+  }
+
+  @Test
+  void s22_theConnectionStatusIsCheckedBeforeTheProjectState() {
+    gitlab.connections.put(OWNER, connected().withError("CONNECTION_INVALID", NOW));
+    fakes.projects.status(projectId, "completed");
+
+    assertThrows(ConnectionInvalidException.class, () -> importIssues().execute(OWNER, projectId));
+  }
+
   // -------------------------------------------------- @s16 paginar por X-Next-Page, tope de dos
 
   /** Una página de {@code count} issues; {@code more} es lo que anunciaría X-Next-Page. */

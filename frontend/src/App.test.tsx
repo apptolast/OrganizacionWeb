@@ -16,13 +16,22 @@ it("@s33 import23 adds one private navigation route without starting a request",
   ).toBeVisible();
   expect(link).toHaveAttribute("aria-current", "page");
   expect(fetcher).not.toHaveBeenCalled();
-  const links = screen
-    .getByRole("navigation", { name: "Principal" })
-    .querySelectorAll("a");
+  const links = [
+    ...screen
+      .getByRole("navigation", { name: "Principal" })
+      .querySelectorAll("a"),
+  ];
   expect(links[0]).toHaveAccessibleName("Hoy");
-  expect(links[links.length - 2]).toHaveAccessibleName("Importación");
-  expect(links[links.length - 1]).toHaveAccessibleName(
-    "API para integraciones",
+  // Later features append their own entries, so assert order by name rather than
+  // by position: Importación still precedes API para integraciones. Decorative
+  // markers are aria-hidden, so strip them before comparing.
+  const names = links.map((link) =>
+    link.textContent?.replace(/[^\p{L}\s]/gu, "").trim(),
+  );
+  expect(names).toContain("Importación");
+  expect(names).toContain("API para integraciones");
+  expect(names.indexOf("Importación")).toBeLessThan(
+    names.indexOf("API para integraciones"),
   );
 });
 describe("crear proyecto", () => {

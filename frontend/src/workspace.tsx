@@ -17,6 +17,7 @@ export function Workspace({
     | "Exportación"
     | "Importación"
     | "API para integraciones"
+    | "Webhooks"
     | null;
 }) {
   return (
@@ -102,6 +103,12 @@ export function Workspace({
             }
           >
             API para integraciones
+          </RouteLink>
+          <RouteLink
+            href="/webhooks"
+            aria-current={section === "Webhooks" ? "page" : undefined}
+          >
+            Webhooks
           </RouteLink>
         </nav>
         <div className="sidebar-note">

@@ -15,6 +15,7 @@ import { Appearance } from "./appearance";
 import { ExportData } from "./export-data";
 import { ImportData } from "./import-data";
 import { IntegrationApi } from "./integration-api";
+import { Webhooks } from "./webhooks";
 import { useAppearance } from "./appearance-state";
 export function App({
   sessionControls,
@@ -33,6 +34,7 @@ export function App({
   const exportData = route === "/exportacion";
   const importData = route === "/importacion";
   const integrationApi = route === "/integraciones/api";
+  const webhooks = route === "/webhooks";
   const taskRoute = /^\/proyectos\/([^/]+)\/tareas\/([^/?]+)$/.exec(route);
   const sessionRoute =
     /^\/proyectos\/([^/]+)\/tareas\/([^/]+)\/sesiones\/([^/?]+)$/.exec(route);
@@ -40,28 +42,32 @@ export function App({
     <Workspace
       sessionControls={sessionControls}
       section={
-        integrationApi
-          ? "API para integraciones"
-          : importData
-            ? "Importación"
-            : exportData
-              ? "Exportación"
-              : appearance
-                ? "Apariencia"
-                : route === "/"
-                  ? "Hoy"
-                  : weeklyReview
-                    ? "Revisión semanal"
-                    : history
-                      ? "Historial"
-                      : availability
-                        ? "Disponibilidad"
-                        : route.startsWith("/proyectos")
-                          ? "Proyectos"
-                          : null
+        webhooks
+          ? "Webhooks"
+          : integrationApi
+            ? "API para integraciones"
+            : importData
+              ? "Importación"
+              : exportData
+                ? "Exportación"
+                : appearance
+                  ? "Apariencia"
+                  : route === "/"
+                    ? "Hoy"
+                    : weeklyReview
+                      ? "Revisión semanal"
+                      : history
+                        ? "Historial"
+                        : availability
+                          ? "Disponibilidad"
+                          : route.startsWith("/proyectos")
+                            ? "Proyectos"
+                            : null
       }
     >
-      {integrationApi && username ? (
+      {webhooks && username ? (
+        <Webhooks owner={username} />
+      ) : integrationApi && username ? (
         <IntegrationApi owner={username} />
       ) : importData && username ? (
         <ImportData

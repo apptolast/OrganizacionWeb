@@ -175,3 +175,56 @@ verificador señalaba, y está cubierto por una prueba con rojo acreditado.
 - `project-spec.md` (COMPARTIDO, REGLAS.md §6 — un solo párrafo, la enmienda B2/B3)
 - `progress/tdd_webhooks.md`
 - `deploy/EGRESS.md` (nuevo)
+
+## Hallazgo 15 — @s42:522: los cambios de estado no se anunciaban por aria-live — CERRADO en unitarios
+
+**Cubre:** `features/webhooks.feature:522`, cláusula «los cambios de estado se
+anuncian por aria-live», sobre las acciones de @s39 y @s40.
+
+**Pruebas (cinco aserciones, una por acción):** en `frontend/src/webhooks.test.tsx`,
+sobre los tests existentes de cada acción, con el helper nuevo `announcement()`
+—`screen.getByRole("status").textContent`—:
+- `@s39 pings an active webhook…` → «Ping enviado. La entrega queda pendiente.»
+- `@s39 disables an active webhook…` → «Webhook desactivado.»
+- `@s39 reactivates a manually disabled webhook` → «Webhook activado.»
+- `@s39 asks for confirmation before deleting…` → «Webhook eliminado.»
+- `@s40 opens the deliveries panel…` → «Entrega reenviada. Vuelve a estar pendiente.»
+
+`getByRole("status")` no puede confundirse con el div de carga: ése lleva
+`aria-live` pero no rol, que era justamente la trampa que el hallazgo describía
+(`webhooks.test.tsx:110` afirmaba `closest("[aria-live]")` sobre un texto
+estático y no discriminaba nada).
+
+**Ciclo.**
+
+1. ROJO ACREDITADO (el bueno: la región no existía). Añado las cuatro primeras
+   aserciones y ejecuto `pnpm --dir frontend exec vitest run src/webhooks.test.tsx`:
+   `Tests 4 failed | 19 passed` con
+   `TestingLibraryElementError: Unable to find an accessible element with the role "status"`
+   en las cuatro.
+2. VERDE. En `webhooks.tsx`: estado `announcement`, región
+   `<p role="status" aria-live="polite" aria-atomic="true">` justo bajo la de
+   carga, y `setAnnouncement(...)` en `changeStatus` (con el texto según el
+   destino), `ping`, `remove` y `redeliver`. `Tests 23 passed`.
+3. ROJO ACREDITADO de la quinta. Añado la aserción de @s40 con
+   `setAnnouncement` de `redeliver` retirado a mano:
+   `AssertionError: expected '' to be 'Entrega reenviada. Vuelve a estar pen…'`.
+   Restaurado: `Tests 23 passed`.
+4. REFACTOR en verde: `prettier --write` sobre los dos ficheros.
+
+**Ficheros cambiados.**
+- `frontend/src/webhooks.tsx`
+- `frontend/src/webhooks.test.tsx`
+- `progress/ux_webhooks.md` (fila nueva «Anuncio de resultado», con el hueco declarado)
+
+**Lo que queda de este hallazgo (declarado, no escondido).** El punto (c) del
+cierre mínimo pedía además una comprobación en `e2e/webhooks-ux.spec.mjs` de que
+la región cambia tras «Desactivar». No se entrega en este carril: el E2E exige
+levantar la pila y el plazo de la sesión no da. La fila de `ux_webhooks.md` lo
+dice con esas palabras. La cláusula del contrato sí queda implementada y con
+oráculo en la capa de unitarios, que es donde discrimina.
+
+**Fuera de ámbito, anotado (REGLAS.md §9).** El «aviso adicional» del hallazgo
+—al pulsar «Desactivar», React desmonta el botón enfocado y el foco cae al
+`body`— no se toca: no forma parte del bloqueante y arreglarlo aquí, sin prueba
+de foco en E2E, sería producción sin test rojo que la pida.

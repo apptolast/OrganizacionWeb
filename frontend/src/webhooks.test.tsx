@@ -16,6 +16,15 @@ afterEach(() => {
   window.history.replaceState(null, "", "/");
 });
 
+/**
+ * @s42:522 manda anunciar los cambios de estado por aria-live. La región propia de
+ * la vista es la única con role status; el div de carga sólo lleva aria-live, así
+ * que getByRole("status") no lo confunde con ella.
+ */
+function announcement() {
+  return screen.getByRole("status").textContent;
+}
+
 function endpoint(overrides: Record<string, unknown> = {}) {
   return {
     id,
@@ -383,6 +392,7 @@ it("@s39 pings an active webhook and shows the pending delivery", async () => {
   );
   expect(screen.getAllByText("Pendiente").length).toBeGreaterThan(0);
   expect(optionsOf(other).method).toBe("POST");
+  expect(announcement()).toBe("Ping enviado. La entrega queda pendiente.");
 });
 
 it("@s39 disables an active webhook through the status route", async () => {
@@ -408,6 +418,7 @@ it("@s39 disables an active webhook through the status route", async () => {
   );
   expect(urlOf(other)).toBe(`/api/v1/me/webhooks/${id}/status`);
   expect(bodyOf(other)).toEqual({ status: "disabled" });
+  expect(announcement()).toBe("Webhook desactivado.");
 });
 
 it("@s39 reactivates a manually disabled webhook", async () => {
@@ -429,6 +440,7 @@ it("@s39 reactivates a manually disabled webhook", async () => {
 
   await waitFor(() => expect(screen.getByText("Activo")).toBeVisible());
   expect(bodyOf(other)).toEqual({ status: "active" });
+  expect(announcement()).toBe("Webhook activado.");
 });
 
 it("@s39 asks for confirmation before deleting and only then sends the DELETE", async () => {
@@ -457,6 +469,7 @@ it("@s39 asks for confirmation before deleting and only then sends the DELETE", 
   expect(
     screen.getByRole("heading", { level: 2, name: "Tus webhooks" }),
   ).toHaveFocus();
+  expect(announcement()).toBe("Webhook eliminado.");
 });
 
 it("@s40 opens the deliveries panel on demand, without polling, and redelivers terminal rows", async () => {
@@ -564,6 +577,7 @@ it("@s40 opens the deliveries panel on demand, without polling, and redelivers t
   );
   expect(within(succeededRow).getByRole("cell", { name: "0" })).toBeVisible();
   expect(within(succeededRow).queryByText("Entregada")).toBeNull();
+  expect(announcement()).toBe("Entrega reenviada. Vuelve a estar pendiente.");
   vi.useRealTimers();
 });
 

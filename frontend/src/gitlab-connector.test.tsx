@@ -1,7 +1,9 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { setCsrfToken } from "./api-client";
+import { observeAccess, setCsrfToken } from "./api-client";
+import { ConnectorsCatalog } from "./connectors-catalog";
+import { CONNECTOR_ORDER } from "./connectors-catalog-client";
 import { GitlabConnector } from "./gitlab-connector";
 
 const TOKEN = "glpat-SECRETOSECRETO1234";
@@ -55,6 +57,7 @@ async function fillAndSubmit(user: ReturnType<typeof userEvent.setup>) {
 afterEach(() => {
   vi.unstubAllGlobals();
   setCsrfToken();
+  observeAccess();
 });
 
 // ------------------------------------------------------------- @s34 el formulario
@@ -566,4 +569,129 @@ it("@s36 after a network failure offers «Actualizar estado» and retries nothin
   expect(
     screen.queryByRole("region", { name: "Resultado de la importación" }),
   ).toBeNull();
+});
+
+// ============================== @s37 cancelación, cierre de sesión y respuestas tardías
+
+it("@s37 leaving for the catalogue drops the import: the list loads on its own and shows no receipt", async () => {
+  const user = userEvent.setup();
+  let settle: (value: Response) => void = () => {};
+  const fetcher = vi.fn();
+  fetcher.mockResolvedValueOnce(Response.json(connected));
+  fetcher.mockResolvedValueOnce(Response.json(projects));
+  fetcher.mockReturnValueOnce(
+    new Promise<Response>((resolve) => {
+      settle = resolve;
+    }),
+  );
+  fetcher.mockResolvedValueOnce(
+    Response.json({
+      connectors: CONNECTOR_ORDER.map((id) => ({
+        id,
+        status: "not_connected",
+        lastActivityAt: null,
+        lastError: null,
+      })),
+    }),
+  );
+  vi.stubGlobal("fetch", fetcher);
+
+  const view = render(<GitlabConnector owner="owner" />);
+  await screen.findByRole("button", { name: "Importar issues" });
+  await user.click(screen.getByRole("button", { name: "Importar issues" }));
+  const inFlight = (fetcher.mock.calls[2][1] as RequestInit).signal!;
+  view.unmount();
+
+  // Salir cancela de verdad: la petición deja de estar en vuelo, no se ignora al volver.
+  expect(inFlight.aborted).toBe(true);
+  render(<ConnectorsCatalog />);
+  await waitFor(() => expect(screen.getAllByRole("listitem")).toHaveLength(6));
+  settle(Response.json(receipt(), { status: 201 }));
+  await Promise.resolve();
+
+  expect(
+    screen.queryByRole("region", { name: "Resultado de la importación" }),
+  ).toBeNull();
+  expect(fetcher.mock.calls.at(-1)?.[0]).toBe("/api/v1/me/connectors");
+});
+
+it("@s37 closing the session leaves neither the token nor the path anywhere", async () => {
+  const user = userEvent.setup();
+  let settle: (value: Response) => void = () => {};
+  const fetcher = vi.fn();
+  fetcher.mockResolvedValueOnce(Response.json(notConnected));
+  fetcher.mockResolvedValueOnce(Response.json(projects));
+  fetcher.mockReturnValueOnce(
+    new Promise<Response>((resolve) => {
+      settle = resolve;
+    }),
+  );
+  fetcher.mockResolvedValueOnce(Response.json(notConnected));
+  fetcher.mockResolvedValueOnce(Response.json(projects));
+  vi.stubGlobal("fetch", fetcher);
+
+  const view = render(<GitlabConnector owner="owner" />);
+  await screen.findByLabelText(/Token de acceso personal/);
+  await fillAndSubmit(user);
+  const inFlight = (fetcher.mock.calls[2][1] as RequestInit).signal!;
+
+  // La sesión siguiente entra en la misma raíz: es ahí donde el cambio de propietario decide.
+  view.rerender(<GitlabConnector owner="otra" />);
+  expect(inFlight.aborted).toBe(true);
+  settle(Response.json(connected));
+  await Promise.resolve();
+
+  expect(JSON.stringify(window.localStorage)).not.toContain(TOKEN);
+  expect(JSON.stringify(window.sessionStorage)).not.toContain(TOKEN);
+  expect(document.cookie).not.toContain(TOKEN);
+  expect(document.body.innerHTML).not.toContain(TOKEN);
+
+  await screen.findByLabelText(/Token de acceso personal/);
+  expect((tokenField() as HTMLInputElement).value).toBe("");
+  expect((pathField() as HTMLInputElement).value).toBe("");
+});
+
+it("@s37 an expired session is announced upwards and paints no connector data", async () => {
+  const user = userEvent.setup();
+  const seen: number[] = [];
+  observeAccess((status) => seen.push(status));
+  openConnected(problem(401, { code: "UNAUTHENTICATED" }));
+
+  await renderConnected();
+  await user.click(screen.getByRole("button", { name: "Importar issues" }));
+
+  await waitFor(() => expect(seen).toContain(401));
+  expect(
+    screen.queryByRole("region", { name: "Resultado de la importación" }),
+  ).toBeNull();
+});
+
+it("@s37 a late response after leaving announces nothing through aria-live", async () => {
+  const user = userEvent.setup();
+  let settle: (value: Response) => void = () => {};
+  const fetcher = vi.fn();
+  fetcher.mockResolvedValueOnce(Response.json(connected));
+  fetcher.mockResolvedValueOnce(Response.json(projects));
+  fetcher.mockReturnValueOnce(
+    new Promise<Response>((resolve) => {
+      settle = resolve;
+    }),
+  );
+  vi.stubGlobal("fetch", fetcher);
+  const noise: unknown[] = [];
+  const previous = console.error;
+  console.error = (...args: unknown[]) => noise.push(args);
+
+  const view = render(<GitlabConnector owner="owner" />);
+  await screen.findByRole("button", { name: "Importar issues" });
+  await user.click(screen.getByRole("button", { name: "Importar issues" }));
+  const inFlight = (fetcher.mock.calls[2][1] as RequestInit).signal!;
+  view.unmount();
+  settle(Response.json(receipt(), { status: 201 }));
+  await Promise.resolve();
+
+  console.error = previous;
+  expect(inFlight.aborted).toBe(true);
+  expect(noise).toHaveLength(0);
+  expect(screen.queryByRole("status")).toBeNull();
 });

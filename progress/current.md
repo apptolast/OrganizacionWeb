@@ -117,3 +117,34 @@ en cuanto esté rebasado.
 
 Puertos ocupados: 18099 (pila de auditoría del modo oscuro, del orquestador),
 18095 (pila del carril del flake). El resto de carriles no levanta pilas.
+
+## Deuda identificada, aplazada a propósito — 9 de septiembre de 2026
+
+### La mutación nocturna nunca ha terminado
+
+`.github/workflows/harness-mutation.yml` corre `node .harness/harness.mjs verify`,
+que es `init` más la puerta de mutación. Como `harness.config.json` deja
+`mutation.targets` vacío, esa puerta muta **el repositorio entero** en un único
+job: unas trece horas de trabajo medidas (los alcances rondan los veinte minutos
+cada uno y hay más de cuarenta) dentro de una ventana de cuatro.
+
+Las tres ejecuciones programadas —7, 8 y 9 de septiembre— acabaron `cancelled` a
+los **240 minutos exactos**, que es su `timeout-minutes`. GitHub reporta el
+agotamiento del plazo como cancelación, y por eso parecía un relevo y no un
+fallo. Nunca ha llegado a generar un mutante.
+
+**Arreglo previsto:** matriz de un job por objetivo de mutación con
+`fail-fast: false`, derivando la lista del propio `scripts/project.mjs` en vez de
+copiarla en el YAML —duplicarla ahí la condenaría a pudrirse, que es el mismo
+vicio que hoy rompió la guarda de esquema aditivo y las fixtures—. Eso exige
+extraer a una constante exportada el array que hoy vive dentro de
+`createProject`. Conviene además revisar la cadencia: cuarenta jobs cada noche
+para una red de seguridad cuya puerta real se corre en local antes de cada cierre
+es mucho; semanal parece más proporcionado, pero es decisión del propietario.
+
+**Por qué se aplaza:** `scripts/project.mjs` es uno de los tres ficheros donde ya
+chocan las features 25, 28 y 30, pendientes de fusionar. Tocarlo ahora añadiría
+un cuarto conflicto a tres integraciones en curso. La nocturna no bloquea ninguna
+puerta: `docs/verification.md` y `CHECKPOINTS.md` C7 exigen la mutación por
+alcance ejecutada por el `mutation_tester`, no esta. Se arregla en cuanto las
+tres estén dentro.

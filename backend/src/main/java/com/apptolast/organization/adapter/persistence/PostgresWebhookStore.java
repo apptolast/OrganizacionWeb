@@ -22,6 +22,14 @@ public final class PostgresWebhookStore implements WebhookEndpoints, WebhookDeli
   private static final UUID NIL_EVENT = new UUID(0L, 0L);
   private static final int MAX_ENDPOINTS_PER_OWNER = 5;
 
+  /**
+   * «Recibe 200 con items de como máximo 50 elementos» (features/webhooks.feature:368). Es el tope
+   * de la <b>respuesta</b>, no el de la poda: la tabla puede guardar más —tras la poda de @s29
+   * guarda 52: 50 terminales y las 2 pendientes, que nunca se podan— y esta lectura sirve la
+   * primera página de ese orden. Una cosa es lo que se guarda y otra lo que se sirve.
+   */
+  private static final int MAX_LISTED_DELIVERIES = 50;
+
   private final JdbcTemplate jdbc;
   private final TransactionTemplate writing;
 
@@ -121,10 +129,12 @@ public final class PostgresWebhookStore implements WebhookEndpoints, WebhookDeli
         SELECT * FROM webhook_deliveries
          WHERE owner_id=? AND endpoint_id=?
          ORDER BY updated_at DESC, id DESC
+         LIMIT ?
         """,
         DELIVERY,
         owner,
-        endpointId);
+        endpointId,
+        MAX_LISTED_DELIVERIES);
   }
 
   @Override

@@ -781,6 +781,104 @@ prueba lo sujeta ahora.
 Ninguno compartido; ningún cambio de producto (los tres de arriba son mutaciones
 revertidas).
 
+## Hallazgo 11 — @s29: la lectura ya acota a 50, y la contradicción del contrato NO existía — CERRADO (con una parte devuelta)
+
+### La decisión, que NO es mía: la tomó el propietario
+
+Queda bien visible, como pedía el encargo. La sesión anterior dejó abierto que
+`features/webhooks.feature:367` («quedan persistidas exactamente 50 terminales …
+y las 2 pendientes» → 52 filas) y `:368` («items de como máximo 50 elementos»)
+parecían no ser satisfacibles a la vez. **El propietario lo resolvió el 10 de
+septiembre de 2026** y su lectura es que no había contradicción ninguna:
+
+> Una cosa es lo que **se guarda** y otra lo que **se sirve**.
+
+Es decir: la 367 habla de la **tabla** después de la poda, la 368 de una
+**respuesta**. Se persisten las 52 filas y el GET devuelve 50 como máximo.
+**Ninguna de las dos líneas del contrato se enmienda** — instrucción expresa—, y
+por tanto tampoco `project-spec.md:2018`, que ya decía exactamente eso («hasta 50
+entregas ordenadas `updatedAt DESC, id DESC`»).
+
+Yo no elegí nada aquí; ejecuto la resolución. Si el propietario quiere revocarla,
+lo que hay que tocar es una línea de SQL y dos aserciones, ambas nombradas abajo.
+
+### El ciclo
+
+**Prueba:** `WebhookWorkPersistenceTest.s29_fiftyTwoRowsSurviveThePruneAndTheReadServesAtMostFifty`
+(antes `s29_onlyTheFiftyMostRecentTerminalsSurviveAndPendingOnesAreNeverPruned`).
+
+1. **La prueba se parte en dos afirmaciones sobre dos cosas distintas**, que es
+   justo lo que faltaba:
+   - **línea 367, la tabla.** Se lee por **SQL directo** (`persistedIds`), no por
+     `store().list`. Sin ese atajo la línea 367 sería incomprobable: el propio
+     tope de página la ocultaría. Afirma 52 filas, la identidad y el orden de las
+     50 terminales supervivientes, que las 5 más viejas son las podadas y que
+     **ninguna de las 2 pendientes** se poda.
+   - **línea 368, la respuesta.** `store().list` devuelve exactamente 50, y son
+     `persisted.subList(0, 50)`: las 50 primeras del orden `updatedAt DESC,
+     id DESC`, ni otras ni en otro orden.
+2. **ROJO** (el bueno: la producción no tenía el tope).
+   `gradlew test --tests WebhookWorkPersistenceTest`:
+   `s29_fiftyTwoRowsSurviveThePruneAndTheReadServesAtMostFifty() FAILED —
+   AssertionFailedError at WebhookWorkPersistenceTest.java:377`, con el mensaje
+   `«items de como máximo 50 elementos» ==> expected: <50> but was: <52>`.
+   Las aserciones de la línea 367 pasaron en ese mismo rojo, lo que **demuestra
+   sobre la base de datos** que las dos líneas hablan de cosas distintas.
+3. **VERDE.** `PostgresWebhookStore.list` gana `LIMIT ?` con la constante nueva
+   `MAX_LISTED_DELIVERIES = 50`, con javadoc que cita la línea 368 y explica que
+   no es el tope de la poda (ése es `KEPT_TERMINAL_DELIVERIES` de
+   `PostgresWebhookWork`, y son dos números de dos conceptos, no uno duplicado).
+   `BUILD SUCCESSFUL`. Comprobado además que `WebhookPersistenceTest`,
+   `WebhookRecoveryPersistenceTest` y `ManageWebhookTest` siguen verdes: el tope
+   sólo afecta al camino de lectura (`WebhookDeliveries.list` lo consume
+   únicamente `ManageWebhook.deliveries`, que es el GET), no al worker ni a la
+   poda.
+
+### Un efecto real de la resolución, dicho sin adornos
+
+En el fixture de @s29 las 2 pendientes se encolan con el reloj base `T` y las
+terminales se registran en `T+0s … T+54s`, así que las pendientes son las **más
+antiguas** por `updatedAt` y, con el tope de 50, **caen fuera de la página**. En
+producción no pasa: una entrega recién encolada tiene el `updatedAt` más reciente
+y va la primera. Pero conviene que conste, porque es la consecuencia visible de
+servir 50 de 52 y es lo que el punto siguiente venía a resolver.
+
+### El punto 3 del encargo que NO ejecuto, y por qué
+
+El encargo decía además: «El GET devuelve 50 como máximo, **con su cursor de
+paginación**» y «añade el oráculo del cursor: que la segunda página traiga las que
+faltan y sin repetir». **No lo hago, y no es por falta de tiempo.**
+
+1. **Ese cursor no existe en el producto ni en ningún documento aprobado.**
+   `features/webhooks.feature:368` no lo menciona. `project-spec.md:2018` describe
+   la respuesta como `{items}`: «hasta 50 entregas ordenadas `updatedAt DESC,
+   id DESC`», sin paginación, y para el listado de endpoints dice «sin paginación»
+   con esas palabras. `WebhookController.deliveries` devuelve un `DeliveryList` de
+   un solo campo.
+2. **Añadirlo obliga a enmendar justo lo que el punto 4 prohíbe enmendar.** Un
+   cursor cambia la forma de la respuesta (un `nextCursor` nuevo), la firma del
+   puerto `WebhookDeliveries.list`, la del caso de uso, la del controlador y el
+   cliente del frontend, que valida el DTO como objeto cerrado. Es una API nueva,
+   no un oráculo.
+3. **Sospecha razonable de confusión de nombres, que es lo que hay que aclarar.**
+   En esta feature «cursor» ya significa otra cosa: el **cursor de la outbox**
+   («el cursor inicial es `(now, 000…0)`», «reanuda desde el cursor conservado» de
+   @s28). Es muy probable que la instrucción esté mezclando ese cursor con una
+   paginación que nunca se especificó.
+
+**Qué hace falta para desbloquearlo**, si el propietario lo quiere de verdad: una
+frase suya aprobando (a) añadir `nextCursor` al DTO `delivery list` en
+`project-spec.md:2018` y (b) una línea nueva en `@s29` que lo describa. Con eso
+es media hora de trabajo. Sin eso, escribirlo sería inventar comportamiento sobre
+un contrato aprobado por la puerta humana, que es exactamente lo que la sesión
+anterior se negó a hacer y por lo que este hallazgo llegó hasta aquí.
+
+**Ficheros cambiados.**
+- `backend/src/main/java/com/apptolast/organization/adapter/persistence/PostgresWebhookStore.java`
+- `backend/src/test/java/com/apptolast/organization/adapter/persistence/WebhookWorkPersistenceTest.java`
+
+Ninguno compartido. `features/webhooks.feature` y `project-spec.md` **no** se tocan.
+
 # ÍNDICE DE LO ABIERTO — leer sólo esto, no hace falta el dictamen entero
 
 Ocho hallazgos abiertos. Una línea cada uno: qué exige, qué fichero se toca, y si

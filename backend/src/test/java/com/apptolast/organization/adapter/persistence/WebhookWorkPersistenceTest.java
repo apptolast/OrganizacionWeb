@@ -313,8 +313,30 @@ class WebhookWorkPersistenceTest {
     assertEquals(6, log.getFirst().attempt());
   }
 
+  /**
+   * Lo persistido, leído por SQL directo y por tanto <b>sin</b> el tope de página de la lectura.
+   * Sin este atajo, la línea 367 del contrato («quedan persistidas exactamente 50 terminales y las
+   * 2 pendientes») no tendría forma de comprobarse: el propio tope la ocultaría.
+   */
+  private static List<UUID> persistedIds(UUID endpointId, String predicate) {
+    return WebhookPersistenceTest.Database.JDBC.queryForList(
+        "SELECT id FROM webhook_deliveries WHERE endpoint_id=? AND "
+            + predicate
+            + " ORDER BY updated_at DESC, id DESC",
+        UUID.class,
+        endpointId);
+  }
+
+  /**
+   * @s29, las dos líneas del escenario a la vez y con una aserción para cada una, porque hablan de
+   *     cosas distintas: la 367 de lo que <b>se guarda</b> tras la poda y la 368 de lo que <b>se
+   *     sirve</b> en una respuesta. Leerlas como una contradicción era el error; una cosa es la
+   *     tabla y otra la página.
+   *     <p>Resuelto por el propietario el 10-09-2026: se persisten las 52 filas y el GET devuelve
+   *     50 como máximo. Ninguna de las dos líneas del contrato se enmienda.
+   */
   @Test
-  void s29_onlyTheFiftyMostRecentTerminalsSurviveAndPendingOnesAreNeverPruned() {
+  void s29_fiftyTwoRowsSurviveThePruneAndTheReadServesAtMostFifty() {
     var owner = "prune-" + UUID.randomUUID();
     var endpoint = given(owner, "active");
     var work = work();
@@ -333,13 +355,10 @@ class WebhookWorkPersistenceTest {
     var pendingOne = enqueue(owner, endpoint.id(), "{}");
     var pendingTwo = enqueue(owner, endpoint.id(), "{}");
 
-    var log = store().list(owner, endpoint.id());
-    assertEquals(52, log.size(), "fifty terminals plus the two pending ones");
-    var survivors =
-        log.stream()
-            .filter(delivery -> "succeeded".equals(delivery.status()))
-            .map(WebhookDelivery::id)
-            .toList();
+    // Línea 367: lo que la poda deja en la tabla.
+    var persisted = persistedIds(endpoint.id(), "TRUE");
+    assertEquals(52, persisted.size(), "fifty terminals plus the two pending ones are stored");
+    var survivors = persistedIds(endpoint.id(), "status='succeeded'");
     // Which fifty, and in which order: cardinality alone would let a random prune pass.
     assertEquals(
         recorded.subList(5, 55).reversed(),
@@ -348,8 +367,17 @@ class WebhookWorkPersistenceTest {
     assertTrue(
         java.util.Collections.disjoint(recorded.subList(0, 5), survivors),
         "the five oldest terminals are the ones pruned");
-    var ids = log.stream().map(WebhookDelivery::id).toList();
-    assertTrue(ids.contains(pendingOne.id()));
-    assertTrue(ids.contains(pendingTwo.id()));
+    assertEquals(
+        List.of(pendingTwo.id(), pendingOne.id()).stream().sorted().toList(),
+        persistedIds(endpoint.id(), "status='pending'").stream().sorted().toList(),
+        "neither pending delivery is ever pruned");
+
+    // Línea 368: lo que la lectura sirve. Es una respuesta, no la tabla.
+    var served = store().list(owner, endpoint.id());
+    assertEquals(50, served.size(), "«items de como máximo 50 elementos»");
+    assertEquals(
+        persisted.subList(0, 50),
+        served.stream().map(WebhookDelivery::id).toList(),
+        "the first fifty of updatedAt DESC then id DESC, and no others");
   }
 }

@@ -404,3 +404,104 @@ it("@s41 the two writes with a body declare application/json", async () => {
     vi.unstubAllGlobals();
   }
 });
+
+// ------------------------------------------ @s39 el error tipado y sus contadores, campo a campo
+
+/**
+ * ConnectorError normaliza el problema RFC 7807. Cada rama tenía mutantes vivos:
+ * el código por defecto, el mensaje, y el filtro de contadores, que sólo admite
+ * enteros no negativos y devuelve null para todo lo demás.
+ */
+it("@s39 a problem without a usable code falls back to CONNECTOR_ERROR", async () => {
+  for (const body of [{}, { code: 7 }, { code: null }]) {
+    stub(problem(500, body));
+
+    const error = await startGithubImport(projectId, signal()).catch(
+      (raised) => raised,
+    );
+
+    expect(error).toBeInstanceOf(ConnectorError);
+    expect(error.code).toBe("CONNECTOR_ERROR");
+    expect(error.message).toBe("CONNECTOR_ERROR");
+    vi.unstubAllGlobals();
+  }
+});
+
+it("@s39 a problem with a code keeps it as code and as message", async () => {
+  stub(problem(429, { code: "RATE_LIMITED" }));
+
+  const error = await startGithubImport(projectId, signal()).catch(
+    (raised) => raised,
+  );
+
+  expect(error.code).toBe("RATE_LIMITED");
+  expect(error.message).toBe("RATE_LIMITED");
+});
+
+it("@s39 the counters of a problem only accept non negative integers", async () => {
+  const cases = [
+    { sent: 0, kept: 0 },
+    { sent: 12, kept: 12 },
+    { sent: -1, kept: null },
+    { sent: 1.5, kept: null },
+    { sent: "3", kept: null },
+    { sent: null, kept: null },
+  ];
+  for (const { sent, kept } of cases) {
+    stub(
+      problem(409, {
+        code: "IMPORT_FAILED",
+        retryAfterSeconds: sent,
+        created: sent,
+        skipped: sent,
+        failed: sent,
+      }),
+    );
+
+    const error = await startGithubImport(projectId, signal()).catch(
+      (raised) => raised,
+    );
+
+    expect(error.retryAfterSeconds, `retryAfterSeconds ${sent}`).toBe(kept);
+    expect(error.created, `created ${sent}`).toBe(kept);
+    expect(error.skipped, `skipped ${sent}`).toBe(kept);
+    expect(error.failed, `failed ${sent}`).toBe(kept);
+    vi.unstubAllGlobals();
+  }
+});
+
+it("@s39 the importId of a problem survives only as a canonical uuid", async () => {
+  const cases = [
+    { sent: importId, kept: importId },
+    { sent: importId.toUpperCase(), kept: importId.toUpperCase() },
+    { sent: "no-es-uuid", kept: null },
+    { sent: 7, kept: null },
+  ];
+  for (const { sent, kept } of cases) {
+    stub(problem(409, { code: "IMPORT_FAILED", importId: sent }));
+
+    const error = await startGithubImport(projectId, signal()).catch(
+      (raised) => raised,
+    );
+
+    expect(error.importId, String(sent)).toBe(kept);
+    vi.unstubAllGlobals();
+  }
+});
+
+it("@s39 an unreadable problem body still yields the typed error", async () => {
+  stub(
+    new Response("no es json", {
+      status: 503,
+      headers: { "Content-Type": "application/problem+json" },
+    }),
+  );
+
+  const error = await startGithubImport(projectId, signal()).catch(
+    (raised) => raised,
+  );
+
+  expect(error).toBeInstanceOf(ConnectorError);
+  expect(error.code).toBe("CONNECTOR_ERROR");
+  expect(error.retryAfterSeconds).toBeNull();
+});

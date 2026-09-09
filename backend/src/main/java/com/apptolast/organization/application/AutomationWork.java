@@ -18,10 +18,8 @@ public interface AutomationWork {
 
   void startCursor(String owner, AutomationCursor present);
 
-  /** The rows of this owner that sit after the cursor, in tuple order. */
+  /** The rows of this owner that sit after the cursor, in tuple order, with their runs. */
   List<AutomationCandidate> after(String owner, AutomationCursor from);
-
-  List<AutomationRetry> pendingRetries(String owner);
 
   /** Throws when the storage is unavailable, leaving nothing of the commit behind. */
   void commit(AutomationCommit commit);

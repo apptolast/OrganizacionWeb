@@ -23,6 +23,7 @@ class ExecuteAutomationsTest {
   private static final Instant OCCURRED = Instant.parse("2026-09-08T10:15:30.123456Z");
   private static final UUID COMPLETED = UUID.fromString("33333333-3333-4333-8333-333333333333");
   private static final UUID ENDPOINT = UUID.fromString("44444444-4444-4444-8444-444444444444");
+  private static final UUID RUN = UUID.fromString("55555555-5555-4555-8555-555555555555");
 
   private String projectName = "Marketing";
   private String taskTitle = "Redactar informe";
@@ -303,6 +304,87 @@ class ExecuteAutomationsTest {
         .isEqualTo(new AutomationCursor(T0, E0));
   }
 
+  @Test
+  void s22_theStrandedEventGoesFirstAndItsThirdAttemptSettlesWithoutStoppingTheNewOne() {
+    givenARuleThatCreatesTasks();
+    var rule = rules.list(OWNER).getFirst();
+    work.cursors.put(OWNER, new AutomationCursor(T0, E0));
+    work.outbox.add(withRuns(E1, T0.plusSeconds(1), openRun(rule, 2)));
+    work.outbox.add(taskCreated(E2, T0.plusSeconds(2)));
+    work.failing = commit -> commit.outcomes().stream().anyMatch(fires -> E1.equals(event(fires)));
+
+    execute.runCycle();
+
+    assertThat(work.attempted)
+        .as("the stranded event is tried before the new one")
+        .containsExactly(E1, E2);
+    assertThat(work.recorded)
+        .extracting(
+            AutomationRun::id,
+            AutomationRun::eventId,
+            AutomationRun::attempt,
+            AutomationRun::status,
+            AutomationRun::errorCode)
+        .containsExactly(tuple(RUN, E1, 3, "failed", "STORAGE_UNAVAILABLE"));
+    assertThat(work.runs())
+        .extracting(AutomationRun::eventId, AutomationRun::attempt, AutomationRun::status)
+        .containsExactly(tuple(E2, 1, "succeeded"));
+    assertThat(work.cursors.get(OWNER)).isEqualTo(new AutomationCursor(T0.plusSeconds(2), E2));
+
+    work.failing = commit -> false;
+    execute.runCycle();
+
+    assertThat(work.recorded).as("no fourth attempt, ever").hasSize(1);
+    assertThat(work.runs()).extracting(AutomationRun::eventId).containsExactly(E2);
+  }
+
+  @Test
+  void s22_anEventAlreadySettledIsNeverAttemptedAgainWhenTheCursorRereadsIt() {
+    givenARuleThatCreatesTasks();
+    var rule = rules.list(OWNER).getFirst();
+    work.cursors.put(OWNER, new AutomationCursor(T0, E0));
+    work.outbox.add(withRuns(E1, T0.plusSeconds(1), settledRun(rule)));
+
+    execute.runCycle();
+
+    assertThat(work.runs()).as("a settled row is never attempted again").isEmpty();
+    assertThat(work.recorded).isEmpty();
+    assertThat(work.createdTasks()).isEmpty();
+    assertThat(work.cursors.get(OWNER)).isEqualTo(new AutomationCursor(T0.plusSeconds(1), E1));
+  }
+
+  private static UUID event(AutomationOutcome outcome) {
+    return outcome.run().eventId();
+  }
+
+  private static AutomationRun openRun(AutomationRule rule, int attempt) {
+    return recordedRun(rule, attempt, "retry");
+  }
+
+  private static AutomationRun settledRun(AutomationRule rule) {
+    return recordedRun(rule, 3, "failed");
+  }
+
+  private static AutomationRun recordedRun(AutomationRule rule, int attempt, String status) {
+    return new AutomationRun(
+        RUN,
+        rule.id(),
+        OWNER,
+        E1,
+        "TaskCreated.v1",
+        T0.plusSeconds(1),
+        attempt,
+        status,
+        null,
+        null,
+        "STORAGE_UNAVAILABLE",
+        T0.plusSeconds(1));
+  }
+
+  private static AutomationCandidate withRuns(UUID eventId, Instant occurredAt, AutomationRun run) {
+    return new AutomationCandidate(taskCreated(eventId, occurredAt).event(), false, List.of(run));
+  }
+
   private void givenARuleThatCreatesTasks() {
     work.owners.add(OWNER);
     rules.create(OWNER, rule(taskAction()));
@@ -344,7 +426,7 @@ class ExecuteAutomationsTest {
   }
 
   private static AutomationCandidate blockedTaskCreated(UUID eventId, Instant occurredAt) {
-    return new AutomationCandidate(taskCreated(eventId, occurredAt).event(), true);
+    return new AutomationCandidate(taskCreated(eventId, occurredAt).event(), true, List.of());
   }
 
   private static AutomationCandidate taskCreated(UUID eventId, Instant occurredAt) {
@@ -356,7 +438,8 @@ class ExecuteAutomationsTest {
             P,
             occurredAt,
             Map.of("taskId", TASK.toString(), "title", "Redactar informe")),
-        false);
+        false,
+        List.of());
   }
 
   /** One rule replaced by a PUT between two reads: the race the contract describes. */
@@ -406,6 +489,7 @@ class ExecuteAutomationsTest {
     final List<AutomationCommit> commits = new ArrayList<>();
     final List<AutomationRun> recorded = new ArrayList<>();
     final List<AutomationCursor> started = new ArrayList<>();
+    final List<UUID> attempted = new ArrayList<>();
     java.util.function.Predicate<AutomationCommit> failing = commit -> false;
 
     @Override
@@ -438,12 +522,8 @@ class ExecuteAutomationsTest {
     }
 
     @Override
-    public List<AutomationRetry> pendingRetries(String owner) {
-      return List.of();
-    }
-
-    @Override
     public void commit(AutomationCommit commit) {
+      attempted.add(commit.reached().eventId());
       if (failing.test(commit))
         throw new StorageUnavailableException(new IllegalStateException("induced"));
       commits.add(commit);

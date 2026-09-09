@@ -707,6 +707,12 @@ mirándolo, no dejar de verlo.
 **Ficheros cambiados.** `e2e/webhooks-ux.spec.mjs`, `frontend/src/webhooks.tsx`,
 `frontend/src/webhooks.scss`. Ninguno compartido.
 
+**El parche y el stash se retiran.** `progress/parche_webhooks_hallazgo_2.patch` se
+aplicó y su contenido está en `eca8fa1`, ya con el arreglo del `htmlFor` encima;
+se borra para que nadie lo aplique dos veces. El `stash@{0}` de la sesión anterior
+se descarta por el mismo motivo: contenía la versión con la etiqueta envolviendo al
+campo, es decir, justo la que rompía `getByLabel`.
+
 ## Hallazgos 4, 12B y 13 — @s42: el recorrido de teclado es ahora un recorrido de verdad — CERRADOS
 
 **Cubre:** `features/webhooks.feature:520`, «todos los controles se alcanzan con Tab

@@ -192,9 +192,7 @@ class ExternalCalendarPersistenceTest {
     assertThat(
             store()
                 .events(
-                    A,
-                    Instant.parse("2030-01-08T00:00:00Z"),
-                    Instant.parse("2030-01-09T00:00:00Z"))
+                    A, Instant.parse("2030-01-08T00:00:00Z"), Instant.parse("2030-01-09T00:00:00Z"))
                 .stream()
                 .map(ExternalEvent::uid))
         .containsExactly("w1", "w2");

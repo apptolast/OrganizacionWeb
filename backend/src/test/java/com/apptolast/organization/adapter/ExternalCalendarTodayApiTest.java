@@ -32,20 +32,18 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * @s34 «Mantener idéntica la respuesta de Hoy con y sin suscripción», ejecutado sobre datos reales.
- *
- * <p>Hasta hoy los tres <em>examples</em> del contrato no se ejercían en ninguna parte: {@code
- * ExternalCalendarIsolationTest} cierra el vector de <em>código</em> con dos reglas ArchUnit —nadie
- * puede depender del carril desde Hoy o desde la planificación— y {@code
- * e2e/external-calendar.spec.mjs} sólo mira Hoy <em>sin</em> suscripción. Queda descubierto el
- * vector de <em>datos</em>: unir {@code external_calendar_events} dentro de una consulta SQL de
- * {@code PostgresTodayQueries} o de {@code PostgresBlockStore} no añade ninguna dependencia de
- * clase, así que ArchUnit sigue verde, y ningún test de bloques siembra esas filas, así que tampoco
- * hay rojo por datos.
- *
- * <p>Esta prueba ejecuta el Given que faltaba —«persona-a suscribe un feed con &lt;evento&gt; ya
- * sincronizado»— y los dos Then: el cuerpo de Hoy comparado byte a byte con la respuesta R0 tomada
- * antes de suscribirse, y la planificación del hueco que el evento externo ocupa respondiendo 201
- * sin error de solape.
+ *     <p>Hasta hoy los tres <em>examples</em> del contrato no se ejercían en ninguna parte: {@code
+ *     ExternalCalendarIsolationTest} cierra el vector de <em>código</em> con dos reglas ArchUnit
+ *     —nadie puede depender del carril desde Hoy o desde la planificación— y {@code
+ *     e2e/external-calendar.spec.mjs} sólo mira Hoy <em>sin</em> suscripción. Queda descubierto el
+ *     vector de <em>datos</em>: unir {@code external_calendar_events} dentro de una consulta SQL de
+ *     {@code PostgresTodayQueries} o de {@code PostgresBlockStore} no añade ninguna dependencia de
+ *     clase, así que ArchUnit sigue verde, y ningún test de bloques siembra esas filas, así que
+ *     tampoco hay rojo por datos.
+ *     <p>Esta prueba ejecuta el Given que faltaba —«persona-a suscribe un feed con &lt;evento&gt;
+ *     ya sincronizado»— y los dos Then: el cuerpo de Hoy comparado byte a byte con la respuesta R0
+ *     tomada antes de suscribirse, y la planificación del hueco que el evento externo ocupa
+ *     respondiendo 201 sin error de solape.
  */
 @SpringBootTest(
     properties = {
@@ -68,10 +66,13 @@ class ExternalCalendarTodayApiTest {
     registry.add("spring.datasource.password", postgres::getPassword);
   }
 
-  /** El reloj se para dentro del bloque propio: así {@code currentBlockId} y {@code closingAt} —los
+  /**
+   * El reloj se para dentro del bloque propio: así {@code currentBlockId} y {@code closingAt} —los
    * dos campos que el Then nombra— llevan valor y no {@code null}, que es el valor que cualquier
-   * regresión conservaría por accidente. */
+   * regresión conservaría por accidente.
+   */
   static final Instant NOW = Instant.parse("2030-01-07T10:30:00Z");
+
   static final String OWN_START = "2030-01-07T10:00:00Z";
   static final String OWN_END = "2030-01-07T11:00:00Z";
   static final int BUDGET_MINUTES = 120;

@@ -533,7 +533,11 @@ a:not(.primary-link):not(.skip-link) {
     margin-block: 16px;
     min-width: 0;
   }
+  // El color heredado del boton general es blanco sobre el fondo de accion; aqui
+  // el fondo es --editable, casi blanco, asi que hay que fijar la tinta: sin esta
+  // linea el texto «Activa»/«Inactiva» queda a un contraste de 1,01 sobre 1.
   [role="switch"] {
+    color: var(--ink);
     border: 1px solid var(--control-border);
     border-radius: 999px;
     background: var(--editable);

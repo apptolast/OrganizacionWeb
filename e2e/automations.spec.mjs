@@ -1,6 +1,7 @@
 import { test, expect } from "./support/authenticated-test.mjs";
 import AxeBuilder from "@axe-core/playwright";
 import { create, sql } from "./support/projects.mjs";
+import { csrfHeaders } from "../scripts/session-client.mjs";
 
 // Cubre @s37, @s39, @s40 y la matriz de @s42 sobre la pila real.
 
@@ -14,6 +15,54 @@ function clearRules() {
 
 test.beforeEach(() => clearRules());
 test.afterEach(() => clearRules());
+
+// Nombre largo a propósito: a 320 px es el `li` con cinco hijos en `flex-wrap`
+// el que corre riesgo de reflujo, y sin una regla en la lista no hay ni un `li`.
+const LONG = "Seguimiento de las tareas creadas en Marketing durante 2027";
+
+async function seedRule(request, project, name, enabled) {
+  const response = await request.post("/api/v1/me/automations", {
+    headers: await csrfHeaders(request),
+    data: {
+      name,
+      enabled,
+      trigger: { eventType: "TaskCreated.v1" },
+      condition: null,
+      action: {
+        type: "CREATE_TASK",
+        projectId: project,
+        titleTemplate: "Revisar {{task.title}} en {{project.name}}",
+        criterionTemplate: "{{event.type}} a las {{occurredAt}}",
+        estimatedMinutes: 30,
+      },
+    },
+  });
+  expect(response.status()).toBe(201);
+}
+
+/**
+ * El Given de @s42 (features/automations.feature:548) exige lista, editor
+ * abierto y resultados de simulación visibles. Sin este paso la página se mide
+ * en su estado vacío y ni el `<ul aria-label="Reglas">` ni el bloque de
+ * coincidencias llegan a existir.
+ */
+async function openDenseScreen(page, request) {
+  const project = await create(request, "Marketing");
+  await seedRule(request, project.id, LONG, true);
+  await seedRule(request, project.id, "Pausada", false);
+  await page.goto("/automatizaciones");
+  await expect(page.getByRole("list", { name: "Reglas" })).toBeVisible();
+  await expect(
+    page.getByRole("switch", { name: new RegExp(LONG) }),
+  ).toBeVisible();
+  await expect(page.getByRole("switch", { name: /Pausada/ })).toBeVisible();
+  await page.getByRole("button", { name: `Editar ${LONG}` }).click();
+  await expect(page.getByLabel(/nombre/i)).toBeVisible();
+  await page.getByRole("button", { name: "Simular" }).click();
+  await expect(
+    page.getByRole("status", { name: "Resultado de la simulación" }),
+  ).toBeVisible();
+}
 
 test("automatizaciones: la pagina se abre desde la navegacion @s37", async ({
   page,
@@ -58,11 +107,8 @@ for (const width of widths)
     page,
     request,
   }) => {
-    await create(request, "Marketing");
     await page.setViewportSize({ width, height: width === 768 ? 400 : 900 });
-    await page.goto("/automatizaciones");
-    await page.getByRole("button", { name: "Nueva regla" }).click();
-    await expect(page.getByLabel(/nombre/i)).toBeVisible();
+    await openDenseScreen(page, request);
 
     expect(
       await page.evaluate(
@@ -94,15 +140,16 @@ for (const width of widths)
     ).toEqual([]);
   });
 
-test("automatizaciones: el texto al 200 % no corta contenido a 1440 px @s42", async ({
+// El título dice lo que el oráculo mide: desbordamiento horizontal de página.
+// El recorte de contenido («ni contenido cortado», features/automations.feature:550)
+// sigue sin oráculo aquí; está anotado como hallazgo abierto en
+// progress/tdd_automations_fase2.md.
+test("automatizaciones: el texto al 200 % no desborda en horizontal a 1440 px @s42", async ({
   page,
   request,
 }) => {
-  await create(request, "Marketing");
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/automatizaciones");
-  await page.getByRole("button", { name: "Nueva regla" }).click();
-  await expect(page.getByLabel(/nombre/i)).toBeVisible();
+  await openDenseScreen(page, request);
 
   // Zoom de texto, no de disposición: se dobla el tamaño calculado de cada
   // elemento con su atributo style, como el resto de auditorías del repositorio.

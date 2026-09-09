@@ -391,3 +391,55 @@ máquina). Pendientes, para quien la lance:
    ampliado en esta sesión (hallazgo 11), y `automations-backend`.
 3. Registrar en `progress/mutation_automations_*.md` la **lista de
    supervivientes**, no sólo el porcentaje. Umbral 0,80.
+
+---
+
+## Hallazgo 4 [BLOQUEANTE] — el Given de @s42, cumplido; y un defecto real que escondía
+
+**Contrato:** `features/automations.feature:548`, «Given /automatizaciones con
+lista, editor abierto y resultados de simulación visibles», que rige las cinco
+filas del Examples de @s42.
+
+**Ciclo, sobre la pila real (`E2E_WEB_PORT=18094`).**
+
+1. ROJO medido, no argumentado. Se añadió un test de control temporal que
+   reproduce el Given anterior (`goto` + «Nueva regla», sin sembrar) y afirma lo
+   que el contrato exige. Falla:
+   `CONTROL rojo: el Given anterior de @s42 no tenia lista ni simulacion` —
+   ni `<ul aria-label="Reglas">` ni el `role="status"` de la simulación existen.
+   Queda acreditado que las cinco filas se medían en el estado vacío. El control
+   se borró tras registrarlo.
+2. ROJO ADICIONAL, no previsto y **real**: al sembrar las reglas, los cuatro
+   tests de @s42 pasaron a fallar por axe con una violación `color-contrast` de
+   impacto **serious** (WCAG 1.4.3):
+   `Element has insufficient color contrast of 1.01 (foreground color: #ffffff,
+   background color: #fdfefb, font size: 9.0pt (12px))`, sobre el
+   `role="switch"` de cada regla. No era un falso positivo: `.automations
+   [role="switch"]` fijaba `background: var(--editable)` (casi blanco) pero
+   heredaba el `color` blanco del botón de acción, así que el texto
+   «Activa»/«Inactiva» era **invisible**. Justo el defecto que el dictamen
+   predijo que la auditoría no podía ver, porque ese interruptor nunca se
+   renderizó en ninguna corrida medida.
+3. VERDE: una línea de producción, `color: var(--ink)` en
+   `frontend/src/styles.scss`, `.automations [role="switch"]`. Los **7 tests en
+   verde en 27,6 s**, incluidos los cuatro anchos con axe.
+
+**Cambios.**
+- Producción: `frontend/src/styles.scss`, la tinta del interruptor.
+- `e2e/automations.spec.mjs`: helper `seedRule(...)` que crea reglas por la API
+  real (`POST /api/v1/me/automations` con `csrfHeaders`) y `openDenseScreen(...)`
+  que siembra dos reglas —una activa con nombre largo, una inactiva—, espera la
+  lista y los dos interruptores, abre el editor con «Editar <la larga>», pulsa
+  «Simular» y espera el `role="status"`. Los cuatro tests de anchos y el del
+  texto al 200 % miden desde ahí.
+- Renombrado `«el texto al 200 % no corta contenido a 1440 px»` a **«no desborda
+  en horizontal»**: el título prometía un recorte que el oráculo no medía. Es el
+  hallazgo adicional del verificador dentro del 8; el oráculo de recorte en sí
+  sigue abierto y anotado.
+
+**Nota de coordinación:** no se toca el zoom nativo al 200 %; otro carril lo
+lleva en `e2e/automations-native-zoom.spec.mjs`.
+
+**Estado: cerrado** para `e2e/automations.spec.mjs`. Sigue abierto el mismo
+sembrado en `e2e/automations-ux.spec.mjs` (temas, `forced-colors`,
+`reduced-motion`), que es el hallazgo 3.

@@ -20,8 +20,8 @@ por clase concreta, nunca la suite entera.
 | 5 | bloqueante | pendiente | — |
 | 6 | bloqueante | pendiente | — |
 | 7 | bloqueante | ya cerrado en la base | — |
-| 8 | alta | pendiente | — |
-| 9 | alta | pendiente | — |
+| 8 | alta | **CERRADO** | ciclo 2 |
+| 9 | alta | ya cerrado en la base (es el hallazgo 2) | — |
 | 10 | alta | pendiente | — |
 | 11 | alta | pendiente | — |
 | 12 | alta | pendiente | — |
@@ -98,3 +98,61 @@ sólo se leen desde la prueba.
 **Lo que este ciclo NO cierra.** El dictamen pedía además una prueba de @s37 para
 la tercera entrada, «retorno tras iniciar sesión». Va aparte, con el hallazgo 15,
 que también vive en la transición de sesión.
+
+---
+
+## Ciclo 2 — hallazgo 8: @s38 filas 6, 7 y 8, «Sincronizando» y el bloqueo de controles
+
+**Qué decía el dictamen.** El Then de @s38
+(`features/external_calendar.feature:515`) exige para las tres filas de
+«Sincronizar ahora» que «aparece "Sincronizando" antes de 400 ms, se envía
+exactamente una petición y los controles quedan bloqueados hasta la respuesta».
+Ninguna de las tres pruebas de sincronización retenía la respuesta, así que
+ninguna podía observar el estado intermedio: dos mutantes sobrevivían.
+
+**ROJO (dos mutantes, provocados a mano sobre producción).**
+
+1. Comentar `setAnnouncement("Sincronizando…")` en
+   `frontend/src/external-calendar.tsx:215`:
+   `TestingLibraryElementError: Unable to find an element with the text: Sincronizando…`
+   → `Tests 1 failed | 24 passed`.
+2. Comentar `setBusy("syncing")` en `:214`:
+   `Error: expect(element).toBeDisabled()`
+   → `Tests 1 failed | 24 passed`.
+
+Ambos eran exactamente los dos mutantes que el dictamen señalaba como
+supervivientes. Restaurada la producción: `Tests 25 passed (25)`.
+
+**VERDE.** Prueba nueva
+`@s38 anuncia Sincronizando, envía una sola petición y bloquea los controles`:
+retiene la respuesta del `POST /sync` con una promesa liberada a mano y, con la
+petición en vuelo, afirma
+
+- `findByText("Sincronizando…")`;
+- «Sincronizar ahora», «Eliminar suscripción» y «Guardar» `toBeDisabled()`;
+- «Etiqueta» y «Dirección secreta iCal` con atributo `readonly`;
+- un **segundo** clic sobre «Sincronizar ahora» y
+  `calls.filter(POST)).toHaveLength(1)` — esta es la aserción que mata el mutante
+  de `setBusy`, porque sin él ni el botón se bloquea ni el guardián de reentrada
+  de `:212` guarda nada;
+- tras liberar: «Sincronizado.», botón habilitado y campo sin `readonly`.
+
+Además se añadió el recuento de POST a las otras dos filas del Examples (la de
+`lastStatus FAILED` y la de `404 EXTERNAL_CALENDAR_NOT_CONFIGURED`), que
+inspeccionaban el cuerpo con `find` sin contar nunca las peticiones.
+
+`pnpm --dir frontend exec vitest run src/external-calendar.test.tsx` →
+**26 pruebas, 26 en verde** (25 antes del ciclo… medido: 25 pasadas antes de
+añadir la prueba nueva, 26 después).
+
+**Pendiente asociado, anotado y no silenciado.** La línea 84 de
+`e2e/external-calendar-ux-audit.spec.mjs`
+(`await expect(page.getByRole("status")).not.toHaveText("Sincronizando…")`) es
+una espera negativa que pasa de inmediato si el anuncio no aparece jamás. Se
+sustituye al reescribir la auditoría (hallazgos 1/4/5/10/12/13), no aquí.
+
+**Decisión de contrato registrada.** El formulario declara
+`aria-busy={busy === "saving"}` y no hay equivalente para `syncing`. El Then de
+@s38 exige «los controles quedan bloqueados», que es lo que se ha medido
+(`disabled` y `readonly`); `aria-busy` no lo pide el contrato, así que no se ha
+tocado producción para añadirlo.

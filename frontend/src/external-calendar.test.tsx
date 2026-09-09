@@ -306,6 +306,50 @@ it("@s38 sincroniza, actualiza contadores y refresca la lista", async () => {
   });
 });
 
+// @s38 filas 6, 7 y 8: el Then exige feedback antes de 400 ms, UNA sola petición
+// y los controles bloqueados hasta la respuesta. Sin retener la respuesta no hay
+// forma de observar nada de eso, que es justo lo que faltaba (hallazgo 8).
+it("@s38 anuncia Sincronizando, envía una sola petición y bloquea los controles", async () => {
+  withSubscription(synced, [meeting]);
+  let release: (() => void) | undefined;
+  const pending = new Promise<void>((resolve) => (release = resolve));
+  const original = globalThis.fetch as unknown as typeof fetch;
+  vi.stubGlobal("fetch", async (url: string, options: RequestInit = {}) => {
+    if ((options.method ?? "GET") === "POST") {
+      calls.push({ url, method: "POST", body: options.body as string });
+      await pending;
+      return Response.json({ performed: true, subscription: synced });
+    }
+    return original(url as never, options);
+  });
+  const user = userEvent.setup();
+  render(<ExternalCalendar />);
+  const sync = await screen.findByRole("button", {
+    name: "Sincronizar ahora",
+  });
+  await user.click(sync);
+  expect(await screen.findByText("Sincronizando…")).toBeInTheDocument();
+  expect(sync).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Eliminar suscripción" }),
+  ).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Guardar" })).toBeDisabled();
+  expect(screen.getByLabelText("Etiqueta")).toHaveAttribute("readonly");
+  expect(screen.getByLabelText("Dirección secreta iCal")).toHaveAttribute(
+    "readonly",
+  );
+  // Segundo intento con la primera petición aún en vuelo: ni el bloqueo del
+  // botón ni el guardián de reentrada pueden dejar salir un segundo POST.
+  await user.click(sync);
+  expect(calls.filter((call) => call.method === "POST")).toHaveLength(1);
+  release?.();
+  expect(await screen.findByText("Sincronizado.")).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Sincronizar ahora" }),
+  ).toBeEnabled();
+  expect(screen.getByLabelText("Etiqueta")).not.toHaveAttribute("readonly");
+});
+
 it("@s38 muestra el mensaje del código y conserva la lista cuando la sincronización falla", async () => {
   withSubscription(synced, [meeting]);
   answer(`${ROUTE}/sync`, "POST", {
@@ -324,6 +368,7 @@ it("@s38 muestra el mensaje del código y conserva la lista cuando la sincroniza
     await screen.findByText(/no se ha podido contactar con el proveedor/i),
   ).toBeInTheDocument();
   expect(screen.getByText("Reunión")).toBeInTheDocument();
+  expect(calls.filter((call) => call.method === "POST")).toHaveLength(1);
 });
 
 it("@s38 vuelve al formulario vacío cuando la suscripción ya no existe", async () => {
@@ -342,6 +387,7 @@ it("@s38 vuelve al formulario vacío cuando la suscripción ya no existe", async
     expect(screen.queryByText("calendar.google.com")).not.toBeInTheDocument(),
   );
   expect(screen.getByLabelText("Etiqueta")).toHaveValue("");
+  expect(calls.filter((call) => call.method === "POST")).toHaveLength(1);
 });
 
 it("@s39 no envía DELETE si se cancela la confirmación", async () => {

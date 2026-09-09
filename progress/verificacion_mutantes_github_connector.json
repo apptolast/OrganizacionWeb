@@ -1,0 +1,376 @@
+[
+  {
+    "name": "41 StringLiteral GITHUB_UNAVAILABLE",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 traduce GITHUB_UNAVAILABLE a su mensaje exacto",
+      "@s39 sólo una conexión inválida ofrece Reconectar, y sólo una importación en curso Consultar estado",
+      "@s38 una importación nueva borra el resultado de la anterior antes de fallar",
+      "@s38 el error de una importación desaparece cuando la siguiente sale bien",
+      "@s40 desconectar borra el error de la importación anterior"
+    ]
+  },
+  {
+    "name": "44 StringLiteral GITHUB_REPOSITORY_UNAVAILABLE",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 traduce GITHUB_REPOSITORY_UNAVAILABLE a su mensaje exacto"
+    ]
+  },
+  {
+    "name": "46 StringLiteral RESOURCE_NOT_FOUND",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 traduce RESOURCE_NOT_FOUND a su mensaje exacto"
+    ]
+  },
+  {
+    "name": "47 StringLiteral VALIDATION_ERROR",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 traduce VALIDATION_ERROR a su mensaje exacto"
+    ]
+  },
+  {
+    "name": "60 BooleanLiteral loading inicial",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 mientras se consulta la conexión no se enseña el formulario"
+    ]
+  },
+  {
+    "name": "66 ArrayDeclaration projects inicial",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 sin lista de proyectos el selector no ofrece ninguna opción"
+    ]
+  },
+  {
+    "name": "80 BooleanLiteral focusDisconnect inicial",
+    "verdict": "MUERE",
+    "tests": [
+      "@s42 el foco arranca en el encabezado y ningún botón se lo lleva"
+    ]
+  },
+  {
+    "name": "132 ConditionalExpression disabled -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 el conector deshabilitado deja de pedir la lista de proyectos"
+    ]
+  },
+  {
+    "name": "153 ConditionalExpression !confirming -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s42 no escucha Escape mientras no hay ninguna confirmación abierta",
+      "@s42 retira el escuchador de Escape al cerrarse la confirmación"
+    ]
+  },
+  {
+    "name": "155 ConditionalExpression key !== Escape -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s42 sólo Escape cierra la confirmación: otra tecla no la toca"
+    ]
+  },
+  {
+    "name": "156 CallExpression preventDefault -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s42 el Escape que cierra la confirmación queda consumido"
+    ]
+  },
+  {
+    "name": "160 ArrowFunction cleanup -> undefined",
+    "verdict": "MUERE",
+    "tests": [
+      "@s42 retira el escuchador de Escape al cerrarse la confirmación"
+    ]
+  },
+  {
+    "name": "160 StringLiteral keydown -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s42 retira el escuchador de Escape al cerrarse la confirmación"
+    ]
+  },
+  {
+    "name": "207 BooleanLiteral setConnecting(false) -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 tras un token rechazado el formulario vuelve a estar operativo"
+    ]
+  },
+  {
+    "name": "214 ConditionalExpression guarda import -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s38 sin proyecto que elegir, el botón de importar no lanza ninguna importación"
+    ]
+  },
+  {
+    "name": "214 LogicalOperator || -> &&",
+    "verdict": "MUERE",
+    "tests": [
+      "@s38 sin proyecto que elegir, el botón de importar no lanza ninguna importación"
+    ]
+  },
+  {
+    "name": "218 CallExpression setImportError(null) -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s38 el error de una importación desaparece cuando la siguiente sale bien"
+    ]
+  },
+  {
+    "name": "219 CallExpression setSummary(null) -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s38 una importación nueva borra el resultado de la anterior antes de fallar"
+    ]
+  },
+  {
+    "name": "230 ConditionalExpression STORAGE_UNAVAILABLE -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s38 una importación nueva borra el resultado de la anterior antes de fallar"
+    ]
+  },
+  {
+    "name": "235 LogicalOperator ?? -> &&",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 un fallo de almacenamiento sin contadores los da por cero y no habla de truncamiento"
+    ]
+  },
+  {
+    "name": "236 BooleanLiteral truncated -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 un fallo de almacenamiento sin contadores los da por cero y no habla de truncamiento"
+    ]
+  },
+  {
+    "name": "258 ConditionalExpression !live -> false (desconexión)",
+    "verdict": "MUERE",
+    "tests": [
+      "@s41 una desconexión relevada que termina bien no borra la conexión de la pantalla"
+    ]
+  },
+  {
+    "name": "260 CallExpression setSummary(null) -> ; (desconexión)",
+    "verdict": "MUERE",
+    "tests": [
+      "@s40 desconectar borra el resumen de la importación de esta sesión"
+    ]
+  },
+  {
+    "name": "261 CallExpression setImportError(null) -> ; (desconexión)",
+    "verdict": "MUERE",
+    "tests": [
+      "@s40 desconectar borra el error de la importación anterior"
+    ]
+  },
+  {
+    "name": "266 ConditionalExpression live -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s41 una desconexión relevada que falla tarde no habla ni estorba a la importación viva"
+    ]
+  },
+  {
+    "name": "271 ConditionalExpression -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s41 una desconexión relevada que falla tarde no habla ni estorba a la importación viva",
+      "@s41 una desconexión relevada que termina bien no borra la conexión de la pantalla"
+    ]
+  },
+  {
+    "name": "271 LogicalOperator && -> ||",
+    "verdict": "MUERE",
+    "tests": [
+      "@s41 una desconexión relevada que falla tarde no habla ni estorba a la importación viva",
+      "@s41 una desconexión relevada que termina bien no borra la conexión de la pantalla"
+    ]
+  },
+  {
+    "name": "271 EqualityOperator === -> !==",
+    "verdict": "MUERE",
+    "tests": [
+      "@s41 una desconexión relevada que falla tarde no habla ni estorba a la importación viva",
+      "@s41 una desconexión relevada que termina bien no borra la conexión de la pantalla"
+    ]
+  },
+  {
+    "name": "284 UnaryOperator tabIndex main",
+    "verdict": "MUERE",
+    "tests": [
+      "@s42 el contenido principal y su encabezado son enfocables por programa"
+    ]
+  },
+  {
+    "name": "285 UnaryOperator tabIndex h1",
+    "verdict": "MUERE",
+    "tests": [
+      "@s42 el contenido principal y su encabezado son enfocables por programa"
+    ]
+  },
+  {
+    "name": "405 StringLiteral alert -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 el token rechazado se anuncia como alerta en el hueco de su campo"
+    ]
+  },
+  {
+    "name": "407 StringLiteral '' -> Stryker",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 sin error, el hueco del mensaje está vacío y no es una alerta"
+    ]
+  },
+  {
+    "name": "416 ConditionalExpression -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 un token rechazado al importar no se repite en la región de errores"
+    ]
+  },
+  {
+    "name": "416 StringLiteral -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 un token rechazado al importar no se repite en la región de errores"
+    ]
+  },
+  {
+    "name": "419 ConditionalExpression entera -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 sólo una conexión inválida ofrece Reconectar, y sólo una importación en curso Consultar estado",
+      "@s39 no vuelve a ofrecer Reconectar cuando el formulario ya está abierto"
+    ]
+  },
+  {
+    "name": "419 ConditionalExpression !reconnecting -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 no vuelve a ofrecer Reconectar cuando el formulario ya está abierto"
+    ]
+  },
+  {
+    "name": "419 LogicalOperator && -> ||",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 sólo una conexión inválida ofrece Reconectar, y sólo una importación en curso Consultar estado",
+      "@s39 no vuelve a ofrecer Reconectar cuando el formulario ya está abierto"
+    ]
+  },
+  {
+    "name": "424 ConditionalExpression -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 sólo una conexión inválida ofrece Reconectar, y sólo una importación en curso Consultar estado"
+    ]
+  },
+  {
+    "name": "456 StringLiteral '' -> Stryker",
+    "verdict": "MUERE",
+    "tests": [
+      "@s42 la región de estado nace callada: no anuncia nada sin importación",
+      "@s38 sin proyecto que elegir, el botón de importar no lanza ninguna importación"
+    ]
+  },
+  {
+    "name": "474 ConditionalExpression -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 shows a server-configuration warning and nothing else when the connector is disabled",
+      "@s36 shows the connect form and the permission help when there is no connection",
+      "@s36 shows the connected state without the token form",
+      "@s36 shows the counters and a link to the project of the last import",
+      "@s36 offers Reconectar and no enabled import button when the connection is invalid",
+      "@s36 warns about an import already running and offers to check its state",
+      "@s37 keeps the token field a password that never autocompletes nor survives a send",
+      "@s37 keeps the repository but clears the token and explains a rejected token by the field",
+      "@s38 offers only the projects that are not completed",
+      "@s38 announces honest progress and then a measurable summary",
+      "@s38 imports into the project chosen in the selector",
+      "@s38 does not show the truncation notice when nothing was left behind",
+      "@s39 explains { code: 'RATE_LIMITED', retryAfterSeconds: 90 } and never retries by itself",
+      "@s39 explains { code: 'CONNECTION_INVALID' } and never retries by itself",
+      "@s39 explains { code: 'IMPORT_IN_PROGRESS' } and never retries by itself",
+      "@s39 explains { code: 'PROJECT_COMPLETED' } and never retries by itself",
+      "@s39 offers Reconectar after an invalid connection",
+      "@s39 offers Consultar estado after an import already in progress",
+      "@s39 keeps the selector usable after a completed project",
+      "@s39 shows the partial counters and a link when storage failed",
+      "@s40 asks for confirmation, and cancelling changes nothing",
+      "@s42 Escape closes the confirmation and returns the focus to Desconectar",
+      "@s42 Escape works from any control inside the confirmation",
+      "@s42 Escape outside the confirmation does not disturb the page",
+      "@s40 sends a single DELETE when confirmed and returns to the disconnected state",
+      "@s41 forgets the token but keeps the repository when the screen is remounted",
+      "@s41 starts from scratch when another person signs in",
+      "@s41 ignores the late answer of an import started before unmounting",
+      "@s40 announces a failed disconnection and keeps the connection on screen",
+      "@s40 a failure that is not a typed connector error falls back to the generic message",
+      "@s42 no escucha Escape mientras no hay ninguna confirmación abierta",
+      "@s42 retira el escuchador de Escape al cerrarse la confirmación",
+      "@s42 sólo Escape cierra la confirmación: otra tecla no la toca",
+      "@s42 el Escape que cierra la confirmación queda consumido",
+      "@s39 traduce GITHUB_UNAVAILABLE a su mensaje exacto",
+      "@s39 traduce GITHUB_REPOSITORY_UNAVAILABLE a su mensaje exacto",
+      "@s39 traduce CONNECTION_NOT_FOUND a su mensaje exacto",
+      "@s39 traduce RESOURCE_NOT_FOUND a su mensaje exacto",
+      "@s39 traduce VALIDATION_ERROR a su mensaje exacto",
+      "@s39 un token rechazado al importar no se repite en la región de errores",
+      "@s39 sólo una conexión inválida ofrece Reconectar, y sólo una importación en curso Consultar estado",
+      "@s39 no vuelve a ofrecer Reconectar cuando el formulario ya está abierto",
+      "@s37 el token rechazado se anuncia como alerta en el hueco de su campo",
+      "@s37 sin error, el hueco del mensaje está vacío y no es una alerta",
+      "@s42 la región de estado nace callada: no anuncia nada sin importación",
+      "@s36 una importación en curso no adelanta contadores a medias",
+      "@s36 el enlace del resumen nombra el proyecto del recibo, no el primero de la lista",
+      "@s36 un recibo de un proyecto que ya no está en la lista enseña su identificador",
+      "@s42 el contenido principal y su encabezado son enfocables por programa",
+      "@s42 el foco arranca en el encabezado y ningún botón se lo lleva",
+      "@s36 mientras se consulta la conexión no se enseña el formulario",
+      "@s36 sin lista de proyectos el selector no ofrece ninguna opción",
+      "@s36 el conector deshabilitado deja de pedir la lista de proyectos",
+      "@s38 sin proyecto que elegir, el botón de importar no lanza ninguna importación",
+      "@s37 tras un token rechazado el formulario vuelve a estar operativo",
+      "@s38 una importación nueva borra el resultado de la anterior antes de fallar",
+      "@s38 el error de una importación desaparece cuando la siguiente sale bien",
+      "@s39 un fallo de almacenamiento sin contadores los da por cero y no habla de truncamiento",
+      "@s40 desconectar borra el resumen de la importación de esta sesión",
+      "@s40 desconectar borra el error de la importación anterior",
+      "@s41 una desconexión relevada que falla tarde no habla ni estorba a la importación viva",
+      "@s41 una desconexión relevada que termina bien no borra la conexión de la pantalla"
+    ]
+  },
+  {
+    "name": "474 StringLiteral running -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 una importación en curso no adelanta contadores a medias"
+    ]
+  },
+  {
+    "name": "478 OptionalChaining ?. -> .",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 un recibo de un proyecto que ya no está en la lista enseña su identificador"
+    ]
+  },
+  {
+    "name": "478 ConditionalExpression -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 el enlace del resumen nombra el proyecto del recibo, no el primero de la lista",
+      "@s36 un recibo de un proyecto que ya no está en la lista enseña su identificador"
+    ]
+  }
+]

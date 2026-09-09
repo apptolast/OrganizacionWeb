@@ -215,3 +215,84 @@ antes de rehacer el ciclo de `ManageWebhook` con Write/Edit.
 4. **Programación del worker**: `@s32` con `app.webhooks.enabled`.
 5. **Auditoría** `@s35`.
 6. **UI completa** `@s36`–`@s42`.
+
+### Ciclo 11 — adaptador de envío saliente (commit `f99adaa`)
+
+- ROJO: `JdkWebhookSenderTest` no compila.
+- VERDE: `JdkWebhookSender` con las cabeceras exactas, firma sobre el cuerpo y
+  el instante del envío, `Redirect.NEVER`, 5 s de conexión y 10 s de
+  intercambio (B1), cuerpo de respuesta descartado y comprobación de todas las
+  direcciones resueltas antes de conectar (B3).
+- 11 tests verdes contra un receptor real. Cubre `@s15 @s16 @s25 @s26`.
+
+### Ciclo 12 — reclamación arrendada (commit `994d5eb`)
+
+- ROJO: `WebhookWorkPersistenceTest` no compila.
+- VERDE: `PostgresWebhookWork` con `FOR UPDATE ... SKIP LOCKED` + arrendamiento
+  de 5 min; `record` liquida y, si agota, desactiva el endpoint en la misma
+  transacción, podando a 50 terminales.
+- 6 tests verdes. Cubre `@s22 @s23 @s27`(persistencia) `@s29`(poda).
+
+### Ciclo 13 — encolado desde la outbox (commit `f31aa46`)
+
+- ROJO: no compila; después falla la fila de `@s19` con `occurredAt` igual al
+  instante de creación.
+- **BUG REAL**: `UUID.compareTo` es **con signo**, así que todo id cuyo primer
+  bit está a 1 (la mitad de los uuid v4) quedaba por *debajo* del uuid nulo y
+  no se encolaba nunca en el primer instante del endpoint. PostgreSQL ordena
+  uuid como bytes **sin signo**. `WebhookCursor.compareUnsigned` alinea dominio
+  y base de datos. Este fallo habría perdido eventos en silencio.
+- VERDE: `EnqueueWebhookDeliveries` con ventana de gracia de 5 s, una entrega
+  por endpoint y ciclo, `blocked` sin auditar y `UNSUPPORTED_EVENT` /
+  `INVALID_EVENT` auditados avanzando el cursor.
+- También corrijo dos tests **míos** que reclamaban la primera entrega global y
+  se rompían al compartir contenedor con el test hermano.
+- Cubre `@s18 @s19 @s20 @s21`.
+
+### Ciclo 14 — lectura real de la outbox (commit `04b73b2`)
+
+- ROJO: no compila; después falla la aserción del payload.
+- VERDE: `PostgresWebhookOutbox`. `readyEndpoints` excluye los endpoints con
+  una entrega de outbox en vuelo pero **no** los que solo tienen un ping.
+  La validez del payload reutiliza `OutboxMessage.validationCode`, así que
+  webhooks y publicador coinciden. Ninguna sentencia escribe en `outbox_events`.
+- Dos correcciones en **mis fixtures**: `ProjectCreated.v1` exige un conjunto
+  exacto de claves (sobraba `status`) y `jsonb` normaliza el espaciado, así que
+  «el payload de la fila» es lo que `jsonb` renderiza.
+- Cubre `@s18 @s20 @s21` en persistencia.
+
+### Ciclo 15 — worker programado (commit `f0d378e`)
+
+- ROJO: `WebhookScheduleTest` no compila.
+- VERDE: `WebhookSchedule` (encola y después despacha; ninguna mitad propaga,
+  porque un `@Scheduled` que lanza detiene toda la programación) y
+  `WebhookConfiguration` tras `app.webhooks.enabled=true`.
+- **Además** quedan cableados `PostgresWebhookWork`, `PostgresWebhookOutbox`,
+  `JdkWebhookSender`, `DispatchWebhooks` y `EnqueueWebhookDeliveries`, que
+  existían sin bean: hasta este commit el worker no podía funcionar.
+- Cubre `@s32`(la puerta del flag) y el orden encolar-despachar.
+
+## Estado al cierre de la sesión
+
+**231 tests verdes** en el carril (`*Webhook* *Dispatch* *Enqueue*
+*RetrySchedule* *AddressPolicy*`), ArchUnit verde. Nunca se lanzó la suite
+completa, ni pitest, ni E2E, conforme a la disciplina de recursos.
+
+### Lo que NO está hecho (honesto)
+
+- **UI completa `@s36`–`@s42`**: no se ha escrito ni una línea de frontend.
+  Es el bloque más grande que queda.
+- `@s28` reactivación de extremo a extremo (las piezas existen —
+  `withStatus`, cursor conservado, `readyEndpoints`— pero falta el test que
+  recorre el escenario entero).
+- `@s31` firma nueva sobre el cuerpo original de una entrega reenviada: el
+  `body` no se toca al reencolar y la firma se calcula en el envío, así que
+  debería cumplirse, **pero no hay test que lo demuestre**.
+- `@s35` auditoría: hay redacción en `ClaimedDelivery.toString`,
+  `WebhookCreation.toString` y `WebhookSchedule`, pero falta el test que
+  compruebe que los logs no contienen `?token=`, `whsec_` ni `v1=`.
+- `@s9` el `audit workerError CONFIGURATION_ERROR` al arrancar sin clave.
+- `@s2 @s3` están cubiertos en dominio (`WebhookIntentTest`) pero no hay un
+  test HTTP que recorra las tablas de ejemplos por la ruta real.
+- `@s22` fila «muere después de que el receptor respondiera 200» (2 copias):
+  cubierta la recuperación por arrendamiento, no el conteo de copias.

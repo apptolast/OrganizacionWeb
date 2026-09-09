@@ -2,17 +2,15 @@ package com.apptolast.organization.application;
 
 import com.apptolast.organization.domain.CalendarFeedSecret;
 import com.apptolast.organization.domain.CalendarSnapshot;
+import com.apptolast.organization.domain.CalendarWindow;
 import com.apptolast.organization.domain.IcsCalendar;
 import java.time.Clock;
-import java.time.Duration;
 
 /**
  * Turns a public candidate, or an owner already known by the session, into the iCalendar document.
  * The window and the event ceiling are fixed by the contract and take no parameters.
  */
 public final class RenderCalendar implements RenderCalendarUseCase {
-  private static final Duration WINDOW_BACK = Duration.ofDays(30);
-  private static final Duration WINDOW_FORWARD = Duration.ofDays(365);
   private static final int MAX_EVENTS = 2000;
 
   private final CalendarFeedTokens tokens;
@@ -40,8 +38,8 @@ public final class RenderCalendar implements RenderCalendarUseCase {
 
   @Override
   public String forOwner(String owner) {
-    var now = clock.instant();
-    var snapshot = calendars.read(owner, now.minus(WINDOW_BACK), now.plus(WINDOW_FORWARD));
+    var window = CalendarWindow.around(clock.instant());
+    var snapshot = calendars.read(owner, window.from(), window.to());
     return IcsCalendar.render(publicOrigin, withinCeiling(snapshot));
   }
 

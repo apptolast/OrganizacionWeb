@@ -6,6 +6,33 @@ Worktree `C:/Users/vhurt/ow-worktrees/ics-calendar`, rama `claude/ics-calendar`.
 Nota: `.memoria-cache/patterns/` no existe en este worktree (sin sincronización de memoria
 organizacional); se trabaja con las plantillas del repositorio (feature 24, export_data, today).
 
+## Verificación del commit de resguardo `937c967` (9 de septiembre de 2026, 05:29)
+
+El carril se aparcó con un `wip` no verificado (15 archivos, 591 líneas). Antes de construir
+nada encima se ha compilado y ejecutado ese estado tal cual:
+
+```
+backend\gradlew.bat -p backend compileJava compileTestJava --no-daemon
+BUILD SUCCESSFUL in 11s   (compileJava, compileTestJava ejecutadas; sin errores)
+
+backend\gradlew.bat -p backend test --no-daemon ^
+  --tests "com.apptolast.organization.domain.*Calendar*" ^
+  --tests "com.apptolast.organization.application.CalendarFeed*"
+BUILD SUCCESSFUL in 11s
+  IcsCalendarTest           tests=18 failures=0 errors=0 skipped=0
+  CalendarFeedUseCasesTest  tests=15 failures=0 errors=0 skipped=0
+  CalendarFeedSecretTest    tests=9  failures=0 errors=0 skipped=0
+  Total: 42 pruebas, 0 fallos, 0 errores, 0 omitidas.
+```
+
+Las 42 pruebas que la sesión anterior declaró en verde quedan **confirmadas** sobre el estado
+`937c967`. El `wip` deja de ser una incógnita: compila y su suite de dominio y aplicación pasa.
+(`CustomFieldValuesTest.xml` aparece en `build/test-results` pero es salida rancia de una
+ejecución anterior; no lo selecciona ninguno de los dos filtros y no se cuenta.)
+
+Lo que ese estado sigue **sin** demostrar, y es el trabajo de esta sesión: migración `V24`,
+adaptadores PostgreSQL, capa HTTP, `location /calendar/` en nginx, frontend y E2E.
+
 ## Plan de escenarios
 
 Orden: escritor iCalendar puro (s12, s13, s14, s22, s23, s24, s25) → token y casos de uso
@@ -90,3 +117,50 @@ tenga una implementación PostgreSQL con `ON CONFLICT`, que `token_hash` mida 32
 columna, que la lectura salga de un único snapshot `REPEATABLE_READ` y que el 404 sea
 indistinguible sobre HTTP real. El `FakeTokens` de la prueba imita las reglas de unicidad de
 la tabla, no la tabla.
+
+### Ciclo 3 — @s1 @s4 @s5 @s10 @s14 @s15 @s18 @s19 @s20 @s21 @s27 @s28 @s29 (migración V24 y adaptador PostgreSQL)
+
+Rojo: `CalendarPersistenceTest` no compilaba (`cannot find symbol: PostgresCalendarStore`, 4
+errores). Es el fallo más barato posible (Ley 2).
+
+Verde:
+- `V24__calendar_feed_tokens.sql`: `owner_id TEXT PRIMARY KEY`, `token_hash BYTEA NOT NULL UNIQUE
+  CHECK (octet_length(token_hash)=32)`, `created_at TIMESTAMPTZ NOT NULL`. Ninguna migración
+  anterior se toca.
+- `adapter/persistence/PostgresCalendarStore`: implementa `CalendarFeedTokens` y `CalendarQueries`.
+  `replace` es un único `INSERT … ON CONFLICT (owner_id) DO UPDATE`; `revoke` un `DELETE`;
+  `ownerOf` busca por el hash completo (`WHERE token_hash=?`), sin prefijo ni comparación parcial.
+  `read` abre una transacción `read-only` `REPEATABLE_READ` que cubre la zona de disponibilidad y
+  los bloques, con `LIMIT 2001` para que el techo de 2000 se decida sin cargar la ventana entera.
+  Cualquier `DataAccessException` o `TransactionException` se traduce a `StorageUnavailableException`.
+
+Primer rojo real (no de compilación): `s18_theWindowIsSemiOpenOnBothEnds` reventó con
+`DataIntegrityViolationException` al insertar. Motivo legítimo del esquema, no del código: `V11`
+obliga a `date_trunc('minute',start_local)=start_local`, así que un bloque que empiece en
+`…T11:00:01Z` **no es representable**. Los instantes con segundos de @s18 (y la fila que abarca
+catorce meses, imposible por `duration_minutes BETWEEN 1 AND 1440`) se cubren donde sí son
+representables: el nuevo objeto de dominio `CalendarWindow`.
+
+### Ciclo 4 — @s18 (la ventana como regla de dominio)
+
+Rojo: `CalendarWindowTest` no compilaba (`cannot find symbol: CalendarWindow`). Seis filas
+`@CsvSource` que son literalmente las seis filas del Examples de @s18, con sus segundos exactos.
+
+Verde: `domain/CalendarWindow` — `around(now)` fija `[now − 30 d, now + 365 d)` y
+`covers(startAt, endAt)` devuelve `endAt.isAfter(from) && startAt.isBefore(to)`.
+
+Refactor: `RenderCalendar` deja de calcular la ventana con dos `Duration` sueltas y usa
+`CalendarWindow.around(clock.instant())`; el SQL de `PostgresCalendarStore` es el espejo exacto de
+`covers` (`end_at>? AND start_at<?`) y la prueba de persistencia lo comprueba en las fronteras
+representables (fin justo en `from` fuera, un minuto dentro; inicio justo en `to` fuera, un minuto
+dentro).
+
+Comandos:
+```
+backend\gradlew.bat -p backend test --no-daemon --tests "…adapter.persistence.CalendarPersistenceTest"
+BUILD SUCCESSFUL — 14 pruebas, 0 fallos
+backend\gradlew.bat -p backend test --no-daemon --tests "…domain.CalendarWindowTest" \
+  --tests "…domain.IcsCalendarTest" --tests "…domain.CalendarFeedSecretTest" \
+  --tests "…application.CalendarFeedUseCasesTest"
+BUILD SUCCESSFUL — 49 pruebas, 0 fallos
+```

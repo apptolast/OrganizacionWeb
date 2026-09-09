@@ -129,3 +129,89 @@ antes de rehacer el ciclo de `ManageWebhook` con Write/Edit.
   cableado en `ApplicationConfiguration` + `WebhookWiringTest`.
 - Despachador: worker de encolado y envío (`@s15 @s16 @s18`–`@s28 @s31 @s32`).
 - UI de webhooks (`@s36`–`@s42`).
+
+### Ciclo 6 — persistencia y migración V23 (commit `b825e9b`)
+
+- ROJO: `WebhookPersistenceTest` no compila (no existe `PostgresWebhookStore`).
+- VERDE: `V23__webhooks.sql` (`webhook_endpoints`, `webhook_deliveries` con
+  cascada, `leased_until` de la enmienda B1 y CHECK que ata `status` con
+  `disabled_reason`/`disabled_at`) + `PostgresWebhookStore` con los dos puertos.
+  El cupo de cinco se cuenta bajo `pg_advisory_xact_lock` por propietario.
+- REFACTOR en verde: quito `pruneTerminal` y su constante (ningún test los
+  pedía todavía, Ley 3) y reduzco `save` a privado.
+- 7 tests verdes. Cubre `@s1`(cursor) `@s6 @s7 @s8 @s10 @s11 @s13`.
+
+### Ciclo 7 — cableado (commit `c2757f0`)
+
+- ROJO: `WebhookWiringTest` con `NoSuchBeanDefinitionException`.
+- VERDE: beans en `ApplicationConfiguration`. Clave ausente → `DISABLED`;
+  clave mal formada → fallo al arrancar (enmienda B5).
+- 2 tests verdes. Cubre `@s1 @s5 @s8` sobre el esquema real.
+
+### Ciclo 8 — frontera HTTP (commit `523e72a`)
+
+- ROJO: 4 fallos (413 a 4097 bytes, 415 con `text/plain`, 400 ante query, 405
+  en PATCH que la advice genérica convertía en **500**).
+- VERDE: `consumes=application/json`, corte a 4096 bytes antes de parsear,
+  rechazo de la query y **mapeo de PATCH como ruta**, no como manejador de
+  excepción: el dispatcher lanza el 405 antes de resolver el controlador, así
+  que un `@ExceptionHandler` local nunca lo ve.
+- Nota: las filas de sesión de `@s33` (401, CSRF, Origin) ya pasaban con
+  `SecurityConfiguration`; quedan como red de regresión, no como logro nuevo.
+- 28 tests verdes. Cubre `@s4 @s33 @s34`(frontera).
+
+### Ciclo 9 — clasificación del intento (commit `807ee0a`)
+
+- ROJO: `WebhookAttemptTest` no compila.
+- VERDE: `WebhookAttempt` (2xx éxito, 3xx `REDIRECT`, resto `HTTP_ERROR`,
+  transporte sin código, latencia no negativa) y `WebhookDelivery.recorded`
+  que pliega el intento con `RetrySchedule`.
+- Cubre `@s24` completo y la clasificación de `@s25` y `@s26`.
+
+### Ciclo 10 — despachador (commit `930c896`)
+
+- ROJO: `DispatchWebhooksTest` no compila.
+- VERDE: `WebhookWork` / `WebhookSender` / `ClaimedDelivery` /
+  `DispatchWebhooks`. Reclama arrendando, **envía fuera de la transacción**
+  (B1), liquida en escritura corta, corta el ciclo a 20 entregas y arrastra el
+  endpoint a `DELIVERY_EXHAUSTED` en el mismo `record`.
+- 6 tests verdes. Cubre `@s16`(paso de datos) `@s20 @s24 @s27 @s32`.
+
+## Mapa @s → test (al cierre de la sesión)
+
+| Escenario | Test |
+| --- | --- |
+| @s1 | `WebhookApiTest.s1_creation…`, `WebhookPersistenceTest.s1_insertingSeals…`, `WebhookWiringTest.s1_s8_…` |
+| @s2 @s3 | `WebhookIntentTest` |
+| @s4 | `WebhookApiTest.s4_…` (5 tests) |
+| @s5 | `AddressPolicyTest`, `CreateWebhookTest`, `WebhookWiringTest.s5_…` |
+| @s6 @s7 | `WebhookPersistenceTest.s6_…`, `.s7_…` |
+| @s8 | `AesGcmWebhookSecretsTest`, `WebhookPersistenceTest.s8_…`, `WebhookWiringTest.s1_s8_…` |
+| @s9 | `ManageWebhookTest.s9_…`, `CreateWebhookTest` |
+| @s10 @s11 | `WebhookApiTest.s10_…/s11_…`, `WebhookPersistenceTest.s10_…/s11_…` |
+| @s12 | `WebhookEndpointTest`, `ManageWebhookTest.s12_…`, `WebhookApiTest.s12_…` |
+| @s13 | `ManageWebhookTest.s13_…`, `WebhookApiTest.s13_…`, `WebhookPersistenceTest.s13_…` |
+| @s14 @s17 | `ManageWebhookTest.s14_…`, `WebhookPingPayloadTest`, `WebhookApiTest.s14_…` |
+| @s15 | `WebhookSignatureTest` (vector exacto) |
+| @s16 | `DispatchWebhooksTest.s16_…` (paso de datos; **falta** el adaptador HTTP real) |
+| @s20 @s27 @s32 | `DispatchWebhooksTest` |
+| @s24 @s25 @s26 | `WebhookAttemptTest` (clasificación y tabla) |
+| @s29 @s30 | `ManageWebhookTest.s30_…`, `WebhookApiTest.s29_…/s30_…` |
+| @s33 @s34 | `WebhookApiTest.s33_…/s11_s34_…` |
+
+## Pendiente real al cierre (NO cubierto por ningún test)
+
+1. **Adaptador HTTP saliente** (`WebhookSender` real): cabeceras exactas de
+   `@s16`, firma sobre el cuerpo de `@s15` en el envío, sin seguir
+   redirecciones, plazo total de 10 s y conexión de 5 s (B1), corte del cuerpo
+   de respuesta a 64 KiB, y conexión contra la IP ya validada conservando
+   `Host`/SNI (B3). Falta también la clasificación real de `@s25`
+   (TIMEOUT/CONNECTION/TLS/DNS/BLOCKED_ADDRESS) contra un receptor de prueba.
+2. **Reclamación en Postgres** (`PostgresWebhookWork`): `@s22` (reinicio a
+   media entrega), `@s23` (dos instancias sin bloquearse) y la poda de `@s29`
+   (50 terminales + todas las pendientes).
+3. **Encolado desde la outbox**: `@s18 @s19 @s21 @s28` (cursor, ventana de
+   gracia de 5 s, orden por tupla, eventos bloqueados/inválidos).
+4. **Programación del worker**: `@s32` con `app.webhooks.enabled`.
+5. **Auditoría** `@s35`.
+6. **UI completa** `@s36`–`@s42`.

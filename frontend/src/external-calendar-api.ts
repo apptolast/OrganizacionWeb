@@ -92,7 +92,9 @@ function subscriptionOf(value: unknown): ExternalSubscription {
   if (
     !exact(value, SUBSCRIPTION_FIELDS) ||
     typeof value.id !== "string" ||
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value.id) ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      value.id,
+    ) ||
     typeof value.label !== "string" ||
     value.label.length === 0 ||
     typeof value.urlHost !== "string" ||
@@ -101,9 +103,13 @@ function subscriptionOf(value: unknown): ExternalSubscription {
     value.urlTail.length !== 4 ||
     !optionalInstant(value.lastAttemptAt) ||
     !optionalInstant(value.lastSyncAt) ||
-    !(value.lastStatus === null || STATUSES.includes(value.lastStatus as string)) ||
+    !(
+      value.lastStatus === null || STATUSES.includes(value.lastStatus as string)
+    ) ||
     !(value.lastError === null || ERRORS.includes(value.lastError as string)) ||
-    !(value.snapshotZoneId === null || typeof value.snapshotZoneId === "string") ||
+    !(
+      value.snapshotZoneId === null || typeof value.snapshotZoneId === "string"
+    ) ||
     !counter(value.imported) ||
     !counter(value.skippedRecurring) ||
     !counter(value.skippedCancelled) ||
@@ -129,13 +135,19 @@ function eventOf(value: unknown): ExternalEvent {
   return value as unknown as ExternalEvent;
 }
 function snapshotOf(value: unknown) {
-  if (!exact(value, "configured subscription") || typeof value.configured !== "boolean")
+  if (
+    !exact(value, "configured subscription") ||
+    typeof value.configured !== "boolean"
+  )
     invalid();
   if (!value.configured) {
     if (value.subscription !== null) invalid();
     return { configured: false as const, subscription: null };
   }
-  return { configured: true as const, subscription: subscriptionOf(value.subscription) };
+  return {
+    configured: true as const,
+    subscription: subscriptionOf(value.subscription),
+  };
 }
 async function problem(response: Response) {
   return (await response
@@ -147,7 +159,10 @@ async function refuse(response: Response): Promise<never> {
   const body = await problem(response);
   if (response.status === 503 && body?.code === "CONNECTORS_DISABLED")
     throw new ConnectorsDisabledError();
-  if (response.status === 404 && body?.code === "EXTERNAL_CALENDAR_NOT_CONFIGURED")
+  if (
+    response.status === 404 &&
+    body?.code === "EXTERNAL_CALENDAR_NOT_CONFIGURED"
+  )
     throw new ExternalCalendarNotConfiguredError();
   if (response.status === 400 && body?.code === "VALIDATION_ERROR") {
     const fields: Partial<Record<ExternalCalendarField, string>> = {};
@@ -156,7 +171,9 @@ async function refuse(response: Response): Promise<never> {
       if (
         entry &&
         typeof entry === "object" &&
-        FIELDS.includes((entry as { field?: string }).field as ExternalCalendarField) &&
+        FIELDS.includes(
+          (entry as { field?: string }).field as ExternalCalendarField,
+        ) &&
         typeof (entry as { message?: unknown }).message === "string" &&
         typeof (entry as { code?: unknown }).code === "string"
       ) {
@@ -218,7 +235,10 @@ export async function syncExternalCalendar(
     { ...writing({ onlyIfStale }), method: "POST" },
     signal,
   );
-  if (!exact(body, "performed subscription") || typeof body.performed !== "boolean")
+  if (
+    !exact(body, "performed subscription") ||
+    typeof body.performed !== "boolean"
+  )
     invalid();
   return {
     performed: body.performed,
@@ -237,7 +257,9 @@ export async function readExternalEvents(
     !exact(body, "configured lastSyncAt lastStatus items") ||
     typeof body.configured !== "boolean" ||
     !optionalInstant(body.lastSyncAt) ||
-    !(body.lastStatus === null || STATUSES.includes(body.lastStatus as string)) ||
+    !(
+      body.lastStatus === null || STATUSES.includes(body.lastStatus as string)
+    ) ||
     !Array.isArray(body.items)
   )
     invalid();

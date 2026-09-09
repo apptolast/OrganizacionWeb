@@ -82,11 +82,17 @@ describe("@s37 lectura de la suscripción", () => {
     ["falta un campo", { ...subscription, truncated: undefined }],
     ["sobra un campo", { ...subscription, extra: 1 }],
     ["estado desconocido", { ...subscription, lastStatus: "RARO" }],
-    ["código desconocido", { ...subscription, lastStatus: "FAILED", lastError: "RARO" }],
+    [
+      "código desconocido",
+      { ...subscription, lastStatus: "FAILED", lastError: "RARO" },
+    ],
     ["contador negativo", { ...subscription, imported: -1 }],
     ["contador no entero", { ...subscription, imported: 1.5 }],
     ["host vacío", { ...subscription, urlHost: "" }],
-    ["cola con longitud distinta de cuatro", { ...subscription, urlTail: ".icsx" }],
+    [
+      "cola con longitud distinta de cuatro",
+      { ...subscription, urlTail: ".icsx" },
+    ],
     ["instante inválido", { ...subscription, lastSyncAt: "ayer" }],
     ["identificador que no es uuid", { ...subscription, id: "1" }],
   ])("rechaza una suscripción con %s", async (_name, broken) => {
@@ -154,16 +160,24 @@ describe("@s38 guardado", () => {
       },
       { status: 400 },
     );
-    const error = await saveExternalCalendar("Trabajo", "https://x.test/a.ics").catch(
-      (failure: unknown) => failure,
-    );
+    const error = await saveExternalCalendar(
+      "Trabajo",
+      "https://x.test/a.ics",
+    ).catch((failure: unknown) => failure);
     expect(error).toBeInstanceOf(ExternalCalendarValidationError);
-    expect(error).toMatchObject({ fields: { [field]: "Revisa este campo." }, codes: { [field]: code } });
+    expect(error).toMatchObject({
+      fields: { [field]: "Revisa este campo." },
+      codes: { [field]: code },
+    });
   });
 
   it("no inventa un error de campo si el problema no trae errores reconocibles", async () => {
     const response = Response.json(
-      { status: 400, code: "VALIDATION_ERROR", errors: [{ field: "alien", code: "X", message: "m" }] },
+      {
+        status: 400,
+        code: "VALIDATION_ERROR",
+        errors: [{ field: "alien", code: "X", message: "m" }],
+      },
       { status: 400 },
     );
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
@@ -182,7 +196,9 @@ describe("@s38 guardado", () => {
 
 describe("@s39 borrado", () => {
   it("acepta 204 sin cuerpo", async () => {
-    const fetcher = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+    const fetcher = vi
+      .fn()
+      .mockResolvedValue(new Response(null, { status: 204 }));
     vi.stubGlobal("fetch", fetcher);
     await expect(deleteExternalCalendar()).resolves.toBeUndefined();
     expect(fetcher.mock.calls[0][1].method).toBe("DELETE");
@@ -209,7 +225,10 @@ describe("@s38 sincronización", () => {
   });
 
   it("@s38 traduce el 404 de suscripción ausente", async () => {
-    stub({ status: 404, code: "EXTERNAL_CALENDAR_NOT_CONFIGURED" }, { status: 404 });
+    stub(
+      { status: 404, code: "EXTERNAL_CALENDAR_NOT_CONFIGURED" },
+      { status: 404 },
+    );
     await expect(syncExternalCalendar(false)).rejects.toBeInstanceOf(
       ExternalCalendarNotConfiguredError,
     );
@@ -260,7 +279,12 @@ describe("@s35 lectura de eventos", () => {
     ["con summary que no es texto", { ...item, summary: 3 }],
     ["con instante inválido", { ...item, startAt: "2030-01-07" }],
   ])("@s36 rechaza una lista con un item %s", async (_name, broken) => {
-    stub({ configured: true, lastSyncAt: null, lastStatus: "OK", items: [broken] });
+    stub({
+      configured: true,
+      lastSyncAt: null,
+      lastStatus: "OK",
+      items: [broken],
+    });
     await expect(
       readExternalEvents("2030-01-06T23:00:00Z", "2030-01-07T23:00:00Z"),
     ).rejects.toThrow("Respuesta de calendario externo inválida");

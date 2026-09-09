@@ -204,3 +204,28 @@ incluidas las 37 pruebas MockMvc y la de Testcontainers.
   `signal.throwIfAborted()` antes y después de cada petición.
 - Un item sin `allDay` o con fin no posterior al inicio invalida la lectura
   entera: es lo que @s36 pide para mostrar el aviso de lectura inválida.
+
+### Ciclo 16 — pantalla /calendario-externo (@s37, @s38, @s39, @s40)
+
+- Aquí rompí el orden: escribí `external-calendar.tsx` antes que su test, y las
+  24 pruebas pasaron a la primera. Un test que pasa a la primera no demuestra
+  nada, así que lo comprobé mutando la producción: cambiar el separador del
+  resumen de contadores, quitar el `abort` del desmontaje y refrescar la lista
+  también tras una sincronización fallida hacen caer 3 pruebas. Las pruebas
+  muerden; queda anotado el desliz de disciplina.
+- Cubre: formulario de alta con "Etiqueta" y "Dirección secreta iCal" de tipo
+  url y la ayuda de Google Calendar; host y cola sin dirección completa;
+  contadores en la frase del contrato; aviso de truncado; mensaje accionable por
+  cada código; "Guardando"/"Sincronizando" antes de esperar nada, con una sola
+  petición y controles bloqueados; borrador conservado en 400, 503 y fallo de
+  red; datos privados retirados en 401; confirmación explícita del borrado;
+  cancelación al desmontar; orden de teclado del contrato.
+
+### Ciclo 17 — ruta y navegación (@s37)
+
+- ROJO: `external-calendar-route.test.tsx`, 3 de 4 casos en rojo.
+- VERDE: rama `/calendario-externo` en `App.tsx`, sección "Calendario externo"
+  en `Workspace` y su entrada de navegación.
+- La entrada se inserta antes de "Importación" a propósito: `App.test.tsx` del
+  carril de importación afirma cuáles son los dos últimos enlaces, y así ese
+  test sigue verde sin tocarlo.

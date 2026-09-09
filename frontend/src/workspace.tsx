@@ -16,6 +16,7 @@ export function Workspace({
     | "Apariencia"
     | "Exportación"
     | "Calendario"
+    | "Calendario externo"
     | "Importación"
     | "API para integraciones"
     | null;
@@ -74,6 +75,12 @@ export function Workspace({
             aria-current={section === "Revisión semanal" ? "page" : undefined}
           >
             Revisión semanal
+          </RouteLink>
+          <RouteLink
+            href="/calendario-externo"
+            aria-current={section === "Calendario externo" ? "page" : undefined}
+          >
+            Calendario externo
           </RouteLink>
           <RouteLink
             href="/apariencia"

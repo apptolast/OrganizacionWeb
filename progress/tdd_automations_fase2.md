@@ -50,3 +50,38 @@ existía ningún instante en el que afirmar nada.
   con revert también muere. Añade el `If-Match: "2"` de esa petición.
 
 **Estado: cerrado.**
+
+---
+
+## Hallazgo 6 [ALTA] — el aislamiento por identidad (`key={owner}`) no tenía oráculo
+
+**Contrato:** `features/automations.feature:561-571` (@s43, «no queda ningún
+dato de reglas ni simulaciones en memoria de otra identidad»).
+
+**Qué faltaba.** `frontend/src/automations.tsx:147-149` monta
+`<AutomationsWorkspace key={owner} />`: el prop `owner` no se usa para nada
+más, existe sólo para forzar el remontaje al cambiar de identidad. Ninguno de
+los tests cambiaba nunca de identidad, así que borrar la `key` dejaba la suite
+verde al 100 %. Es la única feature del proyecto sin el patrón
+`view.rerender(<X owner="otro" />)` que ya usan github-connector,
+integration-api, webhooks, import-data y calendar.
+
+**Ciclo.**
+
+1. ROJO por mutación: borrada la `key={owner}` de `automations.tsx:148`.
+   `@s43 keeps no rule nor simulation of the identity that just left` falla con
+   `TestingLibraryElementError: Unable to find role="switch" and name /pausada/i`
+   — sin remontaje no se vuelve a pedir la lista y sigue en pantalla la de Ana.
+   Antes del test, ese mutante sobrevivía entero.
+2. VERDE: producción restaurada, 16/16.
+
+**Cambio (sólo pruebas).** Test nuevo en `frontend/src/automations.test.tsx`:
+monta con `owner="ana"` con la regla «Seguimiento», abre el editor, simula y
+espera el `role="status"` de la simulación; entonces
+`view.rerender(<Automations owner="bruno" />)` con una segunda respuesta de
+`/api/v1/me/automations` que devuelve otra regla; afirma que ni la regla ni el
+título de la coincidencia ni el editor de Ana siguen en pantalla, que la lista
+se ha vuelto a pedir (2 GET) y que no queda nada en `localStorage` ni en
+`sessionStorage`.
+
+**Estado: cerrado.**

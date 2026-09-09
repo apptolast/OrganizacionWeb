@@ -474,6 +474,57 @@ describe("automations page", () => {
     expect(sessionStorage.length).toBe(0);
   });
 
+  it("@s43 keeps no rule nor simulation of the identity that just left", async () => {
+    listed(rule);
+    listed(disabled);
+    route("POST", "/api/v1/me/automations/simulate", 200, {
+      evaluatedEvents: 5,
+      matches: [
+        {
+          eventId: "55555555-5555-4555-8555-555555555555",
+          eventType: "TaskCreated.v1",
+          occurredAt: "2026-09-08T10:15:30.123456Z",
+          preview: {
+            type: "CREATE_TASK",
+            projectId: PROJECT,
+            title: "Revisar lo de Ana",
+            completionCriterion: "",
+            estimatedMinutes: 30,
+            wouldFail: null,
+          },
+          loopGuarded: false,
+        },
+      ],
+    });
+    const view = render(<Automations owner="ana" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Editar Seguimiento" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    await screen.findByRole("status", { name: "Resultado de la simulación" });
+    expect(screen.getByText("Revisar lo de Ana")).toBeInTheDocument();
+
+    view.rerender(<Automations owner="bruno" />);
+
+    await screen.findByRole("switch", { name: /pausada/i });
+    expect(screen.queryByText("Revisar lo de Ana")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("status", { name: "Resultado de la simulación" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("switch", { name: /seguimiento/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/nombre/i)).not.toBeInTheDocument();
+    expect(
+      calls.filter(
+        (call) =>
+          call.method === "GET" && call.url === "/api/v1/me/automations",
+      ),
+    ).toHaveLength(2);
+    expect(localStorage.length).toBe(0);
+    expect(sessionStorage.length).toBe(0);
+  });
+
   it("@s43 drops the history of the rule the owner just left", async () => {
     listed(rule, disabled);
     let release = () => {};

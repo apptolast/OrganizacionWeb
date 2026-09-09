@@ -106,6 +106,51 @@ class GitlabConnectionUseCasesTest {
     assertEquals("Grupo/Proyecto", view.projectPath());
   }
 
+  @Test
+  void s12_aRejectedTokenLeavesThePreviousConnectionExactlyAsItWas() {
+    var previous = connected();
+    fakes.connections.put(OWNER, previous);
+    fakes.projects.reject(IssueSourceException.tokenRejected());
+
+    assertThrows(
+        ConnectionInvalidException.class, () -> connect().execute(OWNER, "glpat-otro9Q2p", "g/p"));
+
+    assertEquals(previous, fakes.connections.find(OWNER).orElseThrow());
+  }
+
+  @Test
+  void s12_anUnknownProjectIsAlsoAnInvalidConnectionAndNothingIsStored() {
+    fakes.projects.reject(IssueSourceException.repositoryUnavailable());
+
+    assertThrows(
+        ConnectionInvalidException.class, () -> connect().execute(OWNER, TOKEN, "grupo/proyecto"));
+
+    assertTrue(fakes.connections.find(OWNER).isEmpty());
+  }
+
+  @Test
+  void s12_anExhaustedQuotaTravelsWithItsRetryAfterAndStoresNothing() {
+    fakes.projects.reject(IssueSourceException.rateLimited(20));
+
+    var error =
+        assertThrows(
+            ConnectorRateLimitedException.class,
+            () -> connect().execute(OWNER, TOKEN, "grupo/proyecto"));
+
+    assertEquals(20, error.retryAfterSeconds());
+    assertTrue(fakes.connections.find(OWNER).isEmpty());
+  }
+
+  @Test
+  void s12_aProviderThatDoesNotAnswerIsUnavailableAndStoresNothing() {
+    fakes.projects.reject(IssueSourceException.unavailable());
+
+    assertThrows(
+        GitlabUnavailableException.class, () -> connect().execute(OWNER, TOKEN, "grupo/proyecto"));
+
+    assertTrue(fakes.connections.find(OWNER).isEmpty());
+  }
+
   private ConnectGitlabUseCase connect() {
     return new ConnectGitlab(
         fakes.connections, fakes.projects, API_BASE, fakes.cipher, Clock.fixed(NOW, ZoneOffset.UTC));

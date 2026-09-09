@@ -40,7 +40,7 @@ public final class ConnectGitlab implements ConnectGitlabUseCase {
   public GitlabConnectionView execute(String ownerId, String token, String projectPath) {
     var path = GitlabProjectPath.parse(projectPath);
     var secret = PersonalAccessToken.upTo(TOKEN_LIMIT, token);
-    var project = directory.verify(path.value(), secret.value());
+    var project = verify(path, secret);
     var row =
         new GitlabConnection(
             project.pathWithNamespace(),
@@ -54,5 +54,13 @@ public final class ConnectGitlab implements ConnectGitlabUseCase {
             FIRST_VERSION);
     connections.save(ownerId, row);
     return GitlabConnectionView.of(row, apiBase);
+  }
+
+  private GitlabProject verify(GitlabProjectPath path, PersonalAccessToken secret) {
+    try {
+      return directory.verify(path.value(), secret.value());
+    } catch (IssueSourceException error) {
+      throw ConnectorFailures.whileConnectingGitlab(error);
+    }
   }
 }

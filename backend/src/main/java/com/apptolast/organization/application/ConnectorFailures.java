@@ -27,6 +27,27 @@ final class ConnectorFailures {
     };
   }
 
+  /**
+   * GitLab no distingue entre «este token no vale» y «este proyecto no existe para este token»: sus
+   * 401, 403 y 404 dicen lo mismo desde fuera, así que las tres se cuentan como conexión inválida.
+   */
+  static RuntimeException whileConnectingGitlab(IssueSourceException error) {
+    return switch (error.reason()) {
+      case TOKEN_REJECTED, REPOSITORY_UNAVAILABLE -> new ConnectionInvalidException();
+      case RATE_LIMITED -> new ConnectorRateLimitedException(error.retryAfterSeconds());
+      case UNAVAILABLE -> new GitlabUnavailableException();
+    };
+  }
+
+  /** Código estable con el que GitLab nombra un fallo, tanto en la bitácora como en el recibo. */
+  static String gitlabErrorCode(IssueSourceException error) {
+    return switch (error.reason()) {
+      case TOKEN_REJECTED, REPOSITORY_UNAVAILABLE -> "CONNECTION_INVALID";
+      case RATE_LIMITED -> "RATE_LIMITED";
+      case UNAVAILABLE -> "GITLAB_UNAVAILABLE";
+    };
+  }
+
   /** Código de recibo con el que se cierra una importación rota por el gestor externo. */
   static String importErrorCode(IssueSourceException error) {
     return switch (error.reason()) {

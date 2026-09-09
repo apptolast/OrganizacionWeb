@@ -90,6 +90,18 @@ class ImportGitlabIssuesTest {
         fakes.tasks.linkKeys());
   }
 
+  @Test
+  void s17_whatTheAdapterExcludedCountsAsSkippedAndLeavesNeitherTaskNorLink() {
+    fakes.source.page(1, new IssuePage(List.of(issue(9001), issue(9002)), 3, 1, false));
+
+    var receipt = importIssues().execute(OWNER, projectId);
+
+    assertEquals(2, receipt.created());
+    assertEquals(1, receipt.skipped());
+    assertEquals(0, receipt.failed());
+    assertEquals(2, fakes.tasks.links());
+  }
+
   // ---------------------------------------------- @s18 @s19 @s20 idempotencia y simetría
 
   @Test

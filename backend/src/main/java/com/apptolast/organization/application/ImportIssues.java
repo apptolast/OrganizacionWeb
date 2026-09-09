@@ -150,6 +150,9 @@ public final class ImportIssues implements ImportIssuesUseCase {
     for (int page = 1; page <= MAX_PAGES; page++) {
       var listed = source.list(connection.reference(), token, page);
       more = listed.more();
+      // Lo que el adaptador descartó por no ser trabajo planificable ya está decidido: se cuenta
+      // como omitido igual que una issue que ya tenía enlace.
+      tally.skipped += listed.excluded();
       for (var issue : listed.issues()) {
         absorb(ownerId, projectId, issue, tally);
         receipts.progress(ownerId, receipt.id(), tally.created, tally.skipped, tally.failed);

@@ -134,22 +134,46 @@ class AutomationWiringTest {
   }
 
   /**
-   * Phase two contract: until feature 25 ships its endpoints, the extension point must answer «not
-   * mine» for every endpoint, so no rule can be saved pointing at something that does not exist.
+   * The lookup now reads the endpoints of feature 25 for real. Only an active endpoint of this very
+   * owner is reachable: an unknown one, a disabled one and one of somebody else are all «not mine».
    */
   @Test
-  void s5_theWebhookExtensionPointRejectsEveryEndpointUntilFeature25Exists() {
+  void s5_onlyAnActiveEndpointOfTheOwnerCanBackARule() {
     var owner = "wiring-automations-" + UUID.randomUUID();
+    var mine = endpoint(owner, "active");
+    var disabled = endpoint(owner, "disabled");
+    var somebodyElse = endpoint("wiring-automations-" + UUID.randomUUID(), "active");
+
+    assertThat(endpoints.isActiveEndpointOf(owner, mine)).isTrue();
+    assertThat(endpoints.isActiveEndpointOf(owner, disabled)).isFalse();
+    assertThat(endpoints.isActiveEndpointOf(owner, somebodyElse)).isFalse();
     assertThat(endpoints.isActiveEndpointOf(owner, UUID.randomUUID())).isFalse();
-    var webhook =
-        new AutomationDraft(
-            "Aviso",
-            true,
-            "ProjectStatusChanged.v1",
-            null,
-            new NotifyWebhookAction(UUID.randomUUID()));
-    assertThatThrownBy(() -> create.create(owner, webhook))
+
+    assertThatThrownBy(() -> create.create(owner, webhookRule(disabled)))
         .isInstanceOf(WebhookEndpointNotFoundException.class);
     assertThat(read.list(owner)).isEmpty();
+    assertThat(create.create(owner, webhookRule(mine)).version()).isEqualTo(1);
+  }
+
+  private static AutomationDraft webhookRule(UUID endpoint) {
+    return new AutomationDraft(
+        "Aviso", true, "ProjectStatusChanged.v1", null, new NotifyWebhookAction(endpoint));
+  }
+
+  private UUID endpoint(String owner, String status) {
+    var id = UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO webhook_endpoints(id,owner_id,url,description,event_types,status,"
+            + "disabled_reason,disabled_at,secret_ciphertext,cursor_occurred_at,cursor_event_id,"
+            + "created_at,updated_at)"
+            + " VALUES (?,?,'https://example.com/h','',ARRAY['TaskCreated.v1']::text[],?,?,?,"
+            + "'\\x01'::bytea,now(),?,now(),now())",
+        id,
+        owner,
+        status,
+        "disabled".equals(status) ? "MANUAL" : null,
+        "disabled".equals(status) ? java.sql.Timestamp.from(java.time.Instant.now()) : null,
+        new UUID(0L, 0L));
+    return id;
   }
 }

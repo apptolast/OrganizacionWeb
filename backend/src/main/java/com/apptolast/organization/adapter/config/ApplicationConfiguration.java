@@ -677,13 +677,21 @@ public class ApplicationConfiguration {
   }
 
   /**
-   * Extension point for phase two. Feature 25 has not shipped webhook endpoints, so this answers
-   * «not mine» for every endpoint and no NOTIFY_WEBHOOK rule can be stored yet. Replacing this
-   * single bean with the real adapter of 25 is the whole change.
+   * The endpoints of feature 25 as the rules see them: only an active endpoint of this very owner
+   * counts. A deleted one and a disabled one are the same answer here, and the contract gives both
+   * the same code.
    */
   @Bean
-  com.apptolast.organization.application.WebhookEndpointLookup webhookEndpointLookup() {
-    return (owner, endpointId) -> false;
+  com.apptolast.organization.application.WebhookEndpointLookup webhookEndpointLookup(
+      org.springframework.jdbc.core.JdbcTemplate jdbc) {
+    return (owner, endpointId) ->
+        !jdbc.queryForList(
+                "SELECT 1 FROM webhook_endpoints WHERE id = ? AND owner_id = ?"
+                    + " AND status = 'active'",
+                Integer.class,
+                endpointId,
+                owner)
+            .isEmpty();
   }
 
   @Bean
@@ -734,6 +742,28 @@ public class ApplicationConfiguration {
       com.apptolast.organization.application.WebhookEndpointLookup endpoints) {
     return new com.apptolast.organization.application.SimulateAutomation(
         events, matcher, facts, targets, endpoints);
+  }
+
+  @Bean
+  com.apptolast.organization.adapter.persistence.PostgresAutomationWork automationWork(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions,
+      com.fasterxml.jackson.databind.ObjectMapper json,
+      com.apptolast.organization.application.CreateTaskUseCase createTask) {
+    return new com.apptolast.organization.adapter.persistence.PostgresAutomationWork(
+        jdbc, transactions, json, createTask);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ExecuteAutomationsUseCase executeAutomations(
+      com.apptolast.organization.application.AutomationWork work,
+      com.apptolast.organization.application.AutomationRuleStore rules,
+      com.apptolast.organization.application.AutomationMatcher matcher,
+      com.apptolast.organization.application.AutomationFacts facts,
+      com.apptolast.organization.application.WebhookEndpointLookup endpoints,
+      Clock clock) {
+    return new com.apptolast.organization.application.ExecuteAutomations(
+        work, rules, matcher, facts, endpoints, clock);
   }
 
   @Bean

@@ -104,7 +104,8 @@ Leyenda de la columna **estado**:
 | `@s37` | cancelación y cierre de sesión | abierto | — (sin producción de frontend) |
 | `@s38` | responsive, texto ampliado, teclado y axe | abierto | — (sin producción de frontend) |
 
-**Recuento: 24 escenarios cerrados de 38** (20 al abrir la sesión, más `@s26`,
+**Recuento: 24 escenarios cerrados de 38** (el catálogo añade oráculo de caso
+de uso a `@s1`, `@s3`, `@s6` y `@s7`, pero sin endpoint no se cuentan) (20 al abrir la sesión, más `@s26`,
 `@s16`, `@s22` y `@s21`). `@s32` queda cerrado por el lado del servidor y
 pendiente sólo de su línea del navegador, así que no se cuenta como cerrado. Quedan 4 parciales, todos bloqueados por
 el catálogo (`@s2`, `@s4`, `@s5`, `@s31`: su mitad de GitLab está cerrada y les
@@ -254,6 +255,53 @@ intentar descifrar) y `@s6` (leer el catálogo no llama a terceros ni escribe)
 encima. Por eso no se ha empezado en los minutos que quedaban: a medias vale
 cero. Quien lo retome tiene arriba la lista de puertos y aquí la lista de lo
 que falta.
+
+### El catálogo: caso de uso hecho, frontera y fuentes pendientes
+
+Commit `8c9ae36`. Cuatro tipos en `application/`, sin infraestructura:
+
+- `ConnectorRow(id, status, lastActivityAt, lastError)` con `notConnected(id)` y
+  `disabled(id)`.
+- `ConnectorStatusSource`: `id()`, `encryptsSecrets()`, `read(ownerId)`. Cada
+  conector deriva su fila de su propia fuente; el catálogo no sabe leer
+  webhooks ni calendarios, sólo pedir en orden.
+- `ConnectorCatalog(List<ConnectorRow>)` con `row(id)`.
+- `ReadConnectorCatalog(List<ConnectorStatusSource>, SecretCipher)`.
+
+Ocho pruebas en `ReadConnectorCatalogTest`, rojo acreditado porque ninguno de
+los cuatro tipos existía y no compilaban. Cubren `@s1` (las seis filas y su
+orden), `@s2` a nivel de caso de uso (cada fila muestra lo que su fuente
+contestó), `@s4` (a toda fuente se le pregunta por el propietario autenticado y
+por nadie más), `@s3` en sus dos mitades, `@s6` (dos lecturas seguidas dan lo
+mismo) y `@s7`.
+
+Dos decisiones que quien siga debe respetar o discutir a conciencia:
+
+1. **Sin clave no se pregunta.** A las fuentes que cifran no se les llama
+   siquiera: se devuelve `disabled`. Evita que un descifrado fallido tumbe el
+   catálogo entero. La prueba lo afirma sobre la lista de a quién se preguntó,
+   no sólo sobre la respuesta, que es lo que la hace capaz de fallar.
+2. **`StorageUnavailableException` se deja propagar.** Envolverla daría el
+   catálogo optimista que `@s7` prohíbe. La traducción a 503
+   `STORAGE_UNAVAILABLE` es cosa de la frontera.
+
+**Lo que falta**, en el orden en que lo haría:
+
+1. Las **seis implementaciones** de `ConnectorStatusSource`, una por conector,
+   con los puertos ya citados arriba. Son las que cierran las doce filas de
+   `@s2` de verdad, y cada una necesita su prueba con la fuente real. Es el
+   grueso: seis adaptadores, no uno.
+2. El **controlador** `GET /api/v1/me/connectors`, con `Cache-Control: no-store`
+   y el objeto de una sola clave `connectors` (`@s1`), la traducción de
+   `StorageUnavailableException` a 503 (`@s7`), y sesión sin `Bearer` (`@s31`).
+3. El **cableado** en `ConnectorConfiguration`, que fija el orden de la lista de
+   fuentes. Ojo: el orden del catálogo lo impone hoy el orden de inyección; si
+   se prefiere que lo imponga el caso de uso, hay que cambiarlo con una prueba
+   que lo exija, no de tapadillo.
+
+Hasta que 1 y 2 estén, `@s1`, `@s3`, `@s6` y `@s7` tienen oráculo de caso de uso
+pero **no endpoint**, así que no se cuentan como cerrados, y `@s2`, `@s4`, `@s5`
+y `@s31` siguen parciales.
 
 ## Estado al cerrar la sesión del carril
 

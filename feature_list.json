@@ -271,9 +271,11 @@
       "name": "integration_api",
       "title": "API para integraciones",
       "description": "Credenciales personales revocables con seis permisos, cuotas compartidas, API existente y OpenAPI: contrato de 42 escenarios aprobado.",
-      "acceptance": ["Cumplir @s1–@s42 de features/integration_api.feature con revisión independiente, pruebas y mutación antes del cierre."],
+      "acceptance": [
+        "Cumplir @s1–@s42 de features/integration_api.feature con revisión independiente, pruebas y mutación antes del cierre."
+      ],
       "sdd": true,
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 25,

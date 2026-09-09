@@ -509,6 +509,10 @@ pitest {
         "com.apptolast.organization.application.SimulateAutomation*",
         "com.apptolast.organization.application.WebhookEndpoint*",
         "com.apptolast.organization.adapter.http.Automation*",
+        // Los seis manejadores de error de la feature viven en ApiErrors, que quedaba fuera del
+        // ambito: sus mutantes no se generaban y la campana daba por cubierto un codigo que nadie
+        // habia tocado. Mismo criterio que taskStatusAdapters y availabilityAdapters.
+        "com.apptolast.organization.adapter.http.ApiErrors",
         "com.apptolast.organization.adapter.persistence.PostgresAutomation*",
         "com.apptolast.organization.adapter.persistence.AutomationActionJson*",
         "com.apptolast.organization.adapter.config.ApplicationConfiguration"

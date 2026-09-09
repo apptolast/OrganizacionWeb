@@ -164,8 +164,8 @@ it("@s32 sends exactly one creation on a double activation and shows the url onc
     name: "Enlace de suscripción",
   });
   expect(countOf("POST", "/api/v1/me/calendar-feed")).toBe(1);
-  expect(field).toHaveValue(URL_ONE);
-  expect(field).toHaveAttribute("readonly");
+  expect(field).toHaveTextContent(URL_ONE);
+  expect(field).toHaveAttribute("aria-readonly", "true");
   expect(screen.getByRole("button", { name: "Copiar enlace" })).toBeVisible();
   expect(screen.getByRole("main")).toHaveTextContent(readable(CREATED_AT));
   expect(screen.getByRole("main")).toHaveTextContent(/no volverá a mostrarse/);
@@ -256,7 +256,7 @@ it("@s33 keeps the url selectable when there is no clipboard at all", async () =
   await userEvent.click(screen.getByRole("button", { name: "Copiar enlace" }));
   await screen.findByText(/selecciona el campo/i);
   expect(screen.queryByText("Enlace copiado")).toBeNull();
-  expect(field).toHaveValue(URL_ONE);
+  expect(field).toHaveTextContent(URL_ONE);
 });
 
 async function active() {
@@ -320,7 +320,7 @@ it("@s35 confirming the regeneration sends one POST and shows the new url once",
   const field = await screen.findByRole("textbox", {
     name: "Enlace de suscripción",
   });
-  expect(field).toHaveValue(URL_TWO);
+  expect(field).toHaveTextContent(URL_TWO);
   expect(countOf("POST", "/api/v1/me/calendar-feed")).toBe(1);
   expect(screen.getByRole("main")).toHaveTextContent(
     readable("2026-09-08T12:05:00.000000Z"),
@@ -485,7 +485,7 @@ it("@s31 @s37 never writes the url or the token to storage", async () => {
   await waitFor(() =>
     expect(
       screen.getByRole("textbox", { name: "Enlace de suscripción" }),
-    ).toHaveValue(URL_ONE),
+    ).toHaveTextContent(URL_ONE),
   );
   const stored = JSON.stringify({
     local: { ...localStorage },
@@ -799,7 +799,7 @@ it("@s35 al regenerar se retira el aviso de copia del enlace anterior", async ()
     screen.getByRole("button", { name: "Confirmar regeneración" }),
   );
 
-  await screen.findByDisplayValue(URL_TWO);
+  await screen.findByText(URL_TWO);
   expect(screen.queryByText("Enlace copiado")).toBeNull();
 });
 
@@ -882,16 +882,21 @@ it("@s38 ni el h1 ni la confirmación fuerzan el orden de tabulación", async ()
 });
 
 it("@s38 al enfocar el campo de url su contenido queda seleccionado entero", async () => {
+  const selectNodeContents = vi.spyOn(Range.prototype, "selectNodeContents");
   await open();
   await userEvent.click(
     await screen.findByRole("button", { name: "Crear enlace de suscripción" }),
   );
-  const field = (await screen.findByRole("textbox", {
+  const field = await screen.findByRole("textbox", {
     name: "Enlace de suscripción",
-  })) as HTMLTextAreaElement;
+  });
   field.focus();
-  expect(field.selectionStart).toBe(0);
-  expect(field.selectionEnd).toBe(URL_ONE.length);
+  // La Selection de jsdom no conserva la extensión del rango, así que aquí se fija la conducta
+  // —seleccionar el contenido del campo entero— y el texto realmente seleccionado se afirma en el
+  // E2E, con un motor de verdad.
+  expect(selectNodeContents).toHaveBeenCalledWith(field);
+  expect(window.getSelection()?.rangeCount).toBe(1);
+  expect(field).toHaveTextContent(URL_ONE);
 });
 
 it("@s35 al confirmar desaparece la confirmación inline", async () => {

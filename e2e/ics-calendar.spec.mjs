@@ -47,7 +47,7 @@ async function createLink(page) {
     .click();
   const field = page.getByLabel("Enlace de suscripción", { exact: true });
   await expect(field).toBeVisible();
-  return await field.inputValue();
+  return (await field.textContent()).trim();
 }
 
 test("ics: an anonymous client reads the feed of a planned block and loses it when it is revoked @s11 @s12 @s15 @s16 @s27 @s32 @s35", async ({
@@ -138,8 +138,8 @@ test("ics: regenerating invalidates the previous address and a restart keeps the
     .click();
   // Aserción web-first: el campo se repuebla cuando llega el 201, no en el clic.
   const field = page.getByLabel("Enlace de suscripción", { exact: true });
-  await expect(field).not.toHaveValue(first);
-  const second = await field.inputValue();
+  await expect(field).not.toHaveText(first);
+  const second = (await field.textContent()).trim();
 
   const anonymous = await browser.newContext();
   try {

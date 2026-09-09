@@ -845,9 +845,15 @@ En `src/calendar.tsx` (14):
 | `187:21` ConditionalExpression | Hueco real **con conducta rota visible**. Cerrado en el ciclo 20, abajo. |
 | `192:9` ConditionalExpression | **Equivalente**: última de cuatro guardas, alcanzable sólo con `failure === "download"`. |
 
-Tras el ciclo 20 quedan **23** de esos 24 vivos, de los cuales el `mutation_tester` declara
-equivalentes 7 (`83:47`, `55:5`, `67:21`, `77:12`, `143:7`, `149:7`, `192:9`): **16 huecos reales
-abiertos**, ninguno bloqueante y todos enumerados arriba para quien los quiera cerrar.
+Tras el ciclo 20 quedan **23** de esos 24 vivos. Descomposición corregida —el juez encontró aquí un
+desliz de cuentas—: de los 24, **8 son equivalentes** (`83:47`, `55:5`, `67:21`, `77:12`, `143:7`,
+`149:7`, `192:9` y `300:15`, que mi propia tabla dos párrafos antes ya declara equivalente y que yo
+había olvidado sumar) y **16 son huecos**, de los cuales `187:21` queda cerrado en el ciclo 20 → 15,
+más el mutante nuevo `249:25` que trajo mi cambio de producción → **16 huecos reales abiertos**. El
+total coincidía con el anterior por casualidad aritmética: dos deslices que se compensaban.
+
+> `249:25` (`spellCheck={false}`) **desaparece con el ciclo 21**: el campo deja de ser un `textarea`
+> y el atributo ya no existe. Quedan **15 huecos reales abiertos**, ninguno bloqueante.
 
 ## 2. Sí toqué producción, y lo dije de forma que inducía a error
 
@@ -899,3 +905,114 @@ borrando el botón.
 `src/calendar.test.tsx`; `src/calendar.tsx` queda byte a byte como estaba.
 
 No relanzo la mutación: es la puerta del `mutation_tester` y la lanza el coordinador.
+
+---
+
+# Segundo dictamen: el recorte que me cambié de eje (ciclo 21)
+
+`progress/judge_ics_calendar_final.md` vuelve a rechazar por @s38, y con razón. El bloqueante es
+mío de principio a fin y conviene que quede escrito sin adornos.
+
+## Lo que hice mal
+
+En `a158cf2` cambié el `<input type="text">` por un **`<textarea rows={3}>`** porque el
+`text-overflow: ellipsis` recortaba la url en horizontal, y @s38 prohíbe recortarla. La intención
+era correcta; el resultado, no. **`rows={3}` fija la altura**, así que en cuanto la url necesita más
+de tres líneas sobra contenido por abajo y el campo scrollea por dentro: el recorte no desapareció,
+**se mudó al otro eje**. El `rows={3}` fue mío, no heredado, y era además un número mágico sin
+nombre.
+
+Y lo grave no es el defecto sino el oráculo. Mi comprobación era:
+
+```js
+fieldClipped: field ? field.scrollWidth > field.clientWidth + 1 : false
+```
+
+**Sólo el eje horizontal, y sólo ese elemento.** Es el mismo error de método que ya había
+reconocido en la campaña de mutación: una prueba que mira donde yo ya sabía que estaba el problema,
+y que por construcción no puede encontrarlo en ningún otro sitio. Por eso el E2E pasaba en verde
+mientras la mitad de la url quedaba fuera del campo.
+
+Tres afirmaciones mías eran falsas y las corrijo aquí: el comentario de `calendar.tsx` («la url se
+lee entera, sin recorte»), el mensaje de `a158cf2` y `progress/ux_ics_calendar.md` («a 320 px y con
+el texto doblado la url de 43 caracteres se lee entera»). Ninguna era cierta a 320 px con el texto
+al 200 %.
+
+## Primero el oráculo, y en rojo
+
+Reescrita `geometry()` en `e2e/ics-calendar-ux.spec.mjs`: mide el recorte **en los dos ejes** y
+sobre **todos los elementos de `main`**, no sobre el campo. Un elemento recorta cuando su `overflow`
+no es `visible` en ese eje y su contenido no cabe; con `overflow: visible` el contenido se desborda
+a la vista pero no se pierde, y el desbordamiento de la página ya se comprueba aparte. El informe
+nombra el elemento y da las dos medidas.
+
+Contra el código de `1a12881`, el oráculo nuevo falla y señala exactamente el defecto:
+
+```
+enlace recién creado-320-text200 recorta contenido (ancho o alto)
++   "TEXTAREA#calendar-link:http://127.0.0.1:18092/c [alto 282 en 153]"
+
+oscuro-enlace recién creado recorta contenido (ancho o alto)
++   "TEXTAREA#calendar-link:http://127.0.0.1:18092/c [alto 108 en 87]"
+```
+
+Dos de las cinco pruebas en rojo, y **el único elemento señalado es el campo**. La medida del juez
+(325 en 153) y la mía (282 en 153) difieren porque él replicó el DOM en una página estática con la
+hoja compilada y yo mido la aplicación servida; la conclusión es idéntica y su aviso de que «si la
+vista real quedara más estrecha el resultado sería peor» se confirma en el otro sentido: **también
+recorta a 320 px con el texto normal** (108 en 87), que él no había medido.
+
+## Después el arreglo
+
+Un `textarea` no puede tener altura de contenido sin JavaScript, y el JavaScript no sirve aquí: el
+barrido dobla el tamaño de letra **después** de montar, así que cualquier autoajuste medido en el
+montaje se queda corto exactamente en el caso que importa. La respuesta es un elemento cuya altura
+**sea** su contenido por construcción:
+
+```jsx
+<div id="calendar-link" data-calendar-link role="textbox" aria-readonly="true"
+     aria-labelledby="calendar-link-label" tabIndex={0}
+     onFocus={(event) => selectAll(event.currentTarget)}>
+  {link.url}
+</div>
+```
+
+Sigue siendo lo que pide @s32 —«un campo de solo lectura seleccionable con etiqueta accesible»—:
+`role="textbox"` con `aria-readonly`, alcanzable con teclado, con nombre accesible por
+`aria-labelledby`, y su contenido se selecciona entero al enfocarlo con un `Range`, como antes hacía
+`select()`. Sin `overflow` propio no hay caja que pueda cortar nada, a ningún ancho ni con ningún
+tamaño de letra. De paso desaparecen el `rows` mágico, el `resize: vertical` —que dejaba el arreglo
+del recorte en manos de la persona— y el `spellCheck={false}` que el juez señalaba como producción
+sin oráculo (mutante `249:25`).
+
+## Verde
+
+```
+✓ los siete estados a 320, 768 y 1280 px @s38                      (22,9 s)
+✓ los siete estados con el texto al 200 % @s38                     (27,9 s)
+✓ tema claro, oscuro, forced-colors y movimiento reducido @s38     (13,3 s)
+✓ el recorrido de teclado … @s38                                   ( 3,3 s)
+✓ zoom nativo de Chromium al 200 % con 320 px CSS @s38             ( 3,1 s)
+✓ las tres funcionales de ics-calendar.spec.mjs
+8 passed (1,5 m)
+```
+
+Evidencia medida: `clipped` vacío en las **21 medidas normales**, en las **21 con el texto al 200 %**
+y bajo **zoom nativo**. La url completa sigue presente en el campo a 320 px con el texto doblado.
+
+El oráculo del teclado también gana precisión: la Selection de jsdom no conserva la extensión de un
+rango, así que la prueba de unidad fija la conducta —se pide seleccionar el contenido del campo
+entero— y el **texto realmente seleccionado** se afirma en el E2E, donde hay un motor de verdad
+(`window.getSelection().toString()` frente al `textContent` del campo).
+
+## ¿Hay más oráculos de una sola dimensión?
+
+Era la pregunta del coordinador y la respuesta es que sólo había ese, y ya no existe: la
+comprobación de recorte es ahora general —todos los elementos de `main`, los dos ejes— en vez de
+específica de un elemento y un eje. Queda una asimetría **deliberada**: `escaping` sólo mira el
+borde derecho, porque desplazarse en vertical es normal en una página y no es un recorte; el
+desbordamiento horizontal sí se comprueba aparte sobre el documento.
+
+Sigue pendiente y no bloqueante lo que el juez apunta como punto 4: endurecer «foco visible» para
+exigir que el indicador aparezca **con** el foco y no antes, comparando contra el mismo elemento sin
+foco. Lo dejo anotado y sin hacer para no mezclarlo con el bloqueante.

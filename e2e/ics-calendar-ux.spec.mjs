@@ -124,30 +124,66 @@ const STATES = [
   "fallo",
 ];
 
-/** Mide lo que el escenario nombra: desbordamiento, objetivos y recorte del campo de url. */
+/**
+ * Mide lo que el escenario nombra: desbordamiento, objetivos y recorte.
+ *
+ * El recorte se mide en **los dos ejes y sobre todo elemento de la vista que pueda llevar texto
+ * largo**, no sólo sobre el campo de la url. La versión anterior sólo miraba `scrollWidth`, y por
+ * eso no vio que al arreglar el recorte horizontal el contenido pasó a recortarse por abajo: una
+ * prueba que mira donde ya sabías que estaba el problema no puede encontrarlo en ningún otro sitio.
+ *
+ * Un elemento recorta cuando su `overflow` **no** es `visible` en ese eje y su contenido no cabe.
+ * Con `overflow: visible` el contenido se desborda a la vista pero no se pierde, y el desbordamiento
+ * de la página ya se comprueba aparte.
+ */
 function geometry(page) {
   return page.evaluate((minimum) => {
     const root = document.documentElement;
     const controls = [
-      ...document.querySelectorAll("main button, main a, main textarea"),
+      ...document.querySelectorAll(
+        "main button, main a, main [data-calendar-link]",
+      ),
     ];
-    const field = document.querySelector("main textarea");
+    const field = document.querySelector(
+      "main [data-calendar-link]",
+    );
+    const describe = (element) =>
+      `${element.tagName}${element.id ? "#" + element.id : ""}:${(
+        element.textContent || ""
+      )
+        .trim()
+        .slice(0, 24)}`;
     return {
       overflow: root.scrollWidth > root.clientWidth,
-      widest: Math.max(0, ...controls.map((c) => c.getBoundingClientRect().width)),
+      widest: Math.max(
+        0,
+        ...controls.map((c) => c.getBoundingClientRect().width),
+      ),
       small: controls
         .filter((c) => {
           const box = c.getBoundingClientRect();
           return box.width < minimum || box.height < minimum;
         })
-        .map((c) => `${c.tagName}:${(c.textContent || "").trim().slice(0, 24)}`),
+        .map(describe),
       escaping: controls
         .filter((c) => c.getBoundingClientRect().right > root.clientWidth + 1)
-        .map((c) => (c.textContent || "").trim().slice(0, 24)),
-      fieldClipped: field
-        ? field.scrollWidth > field.clientWidth + 1
-        : false,
-      fieldValue: field ? field.value : null,
+        .map(describe),
+      clipped: [...document.querySelectorAll("main, main *")]
+        .map((element) => {
+          const style = getComputedStyle(element);
+          const horizontal =
+            style.overflowX !== "visible" &&
+            element.scrollWidth > element.clientWidth + 1;
+          const vertical =
+            style.overflowY !== "visible" &&
+            element.scrollHeight > element.clientHeight + 1;
+          if (!horizontal && !vertical) return null;
+          return `${describe(element)} [${horizontal ? "ancho" : "alto"} ${
+            horizontal ? element.scrollWidth : element.scrollHeight
+          } en ${horizontal ? element.clientWidth : element.clientHeight}]`;
+        })
+        .filter(Boolean),
+      fieldValue: field ? field.textContent : null,
     };
   }, MIN_TARGET);
 }
@@ -168,7 +204,10 @@ async function audit(page, label, folder, options = {}) {
   expect(measured.overflow, `${label} desborda en horizontal`).toBe(false);
   expect(measured.escaping, `${label} saca controles del viewport`).toEqual([]);
   expect(measured.small, `${label} tiene objetivos menores de 44 px`).toEqual([]);
-  expect(measured.fieldClipped, `${label} recorta la url`).toBe(false);
+  expect(
+    measured.clipped,
+    `${label} recorta contenido (ancho o alto)`,
+  ).toEqual([]);
   return measured;
 }
 
@@ -367,7 +406,11 @@ test("ics ux: el recorrido de teclado alcanza todo en orden, con foco visible y 
     await enter(page, state);
 
     const expected = await page.evaluate(() =>
-      [...document.querySelectorAll("main button, main a, main textarea")].map(
+      [
+        ...document.querySelectorAll(
+          "main button, main a, main [data-calendar-link]",
+        ),
+      ].map(
         (el) => el.id || (el.textContent || "").trim().slice(0, 32),
       ),
     );
@@ -424,7 +467,7 @@ test("ics ux: el recorrido de teclado alcanza todo en orden, con foco visible y 
     // Sin trampa de foco: tabulando hacia delante se sale de main tras el último control...
     expect(leftMain, `trampa de foco hacia delante en ${state}`).toBe(true);
     // ...y hacia atrás desde el primero también se sale.
-    await page.locator("main button, main textarea").first().focus();
+    await page.locator("main button, main [data-calendar-link]").first().focus();
     await page.keyboard.press("Shift+Tab");
     const backwards = await page.evaluate(() =>
       Boolean(document.activeElement && document.activeElement.closest("main")),
@@ -433,21 +476,18 @@ test("ics ux: el recorrido de teclado alcanza todo en orden, con foco visible y 
     evidence.push({ state, visited, leftMain, backwardsStillInMain: backwards });
 
     if (state === "enlace recién creado") {
-      // El campo de url se selecciona entero sólo con teclado.
+      // El campo de url se selecciona entero sólo con teclado, y aquí sí hay un motor de verdad
+      // que puede decir qué texto quedó seleccionado.
       const field = page.getByRole("textbox", FIELD);
       await field.focus();
-      await page.keyboard.press("ControlOrMeta+a");
       const selection = await field.evaluate((el) => ({
-        start: el.selectionStart,
-        end: el.selectionEnd,
-        length: el.value.length,
-        value: el.value,
+        selected: (window.getSelection() || "").toString(),
+        text: el.textContent,
       }));
-      expect(selection.start).toBe(0);
-      expect(selection.end).toBe(selection.length);
-      expect(selection.value).toMatch(
+      expect(selection.text).toMatch(
         /^https?:\/\/[^/]+\/calendar\/[A-Za-z0-9_-]{43}\.ics$/,
       );
+      expect(selection.selected).toBe(selection.text);
     }
     await page.unrouteAll({ behavior: "ignoreErrors" });
   }
@@ -534,7 +574,7 @@ test("ics ux: zoom nativo de Chromium al 200 % con 320 px CSS @s38", async ({
     const measured = await geometry(page);
     expect(measured.overflow, "zoom nativo 200 % desborda").toBe(false);
     expect(measured.escaping, "zoom nativo saca controles").toEqual([]);
-    expect(measured.fieldClipped, "zoom nativo recorta la url").toBe(false);
+    expect(measured.clipped, "zoom nativo recorta contenido").toEqual([]);
     expect(measured.small, "zoom nativo encoge objetivos").toEqual([]);
     await expect(
       page.getByRole("button", { name: "Copiar enlace", exact: true }),

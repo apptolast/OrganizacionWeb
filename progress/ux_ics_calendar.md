@@ -29,10 +29,18 @@ vista emite al abrirse.
 
 - **Desbordamiento horizontal**: `documentElement.scrollWidth > clientWidth` es `false` en las 21
   medidas normales y en las 21 con el texto al 200 %.
-- **Recorte de la url**: `textarea.scrollWidth > clientWidth` es `false` en todas. El campo pasó de
-  `input` con `text-overflow: ellipsis` a un `textarea` de solo lectura que envuelve
-  (`overflow-wrap: anywhere`): a 320 px y con el texto doblado la url de 43 caracteres se lee
-  entera, sin recorte ni desplazamiento lateral. Era justo la cláusula que el `ellipsis` incumplía.
+- **Recorte**: medido en **los dos ejes** (`scrollWidth`/`clientWidth` y `scrollHeight`/
+  `clientHeight`) sobre **todos los elementos de `main`** que tengan `overflow` distinto de
+  `visible`; ninguno recorta en las 21 medidas normales, las 21 con el texto al 200 % ni bajo zoom
+  nativo.
+
+  > **Corrección (segundo dictamen del juez).** La primera versión de este documento afirmaba que
+  > con un `textarea` de solo lectura «a 320 px y con el texto doblado la url se lee entera».
+  > **Era falso**: el `rows={3}` fijaba la altura y la url se recortaba por abajo (282 px de
+  > contenido en 153 visibles, y 108 en 87 incluso con el texto normal). El oráculo de entonces
+  > sólo miraba el ancho y por eso no lo veía. El campo es ahora un elemento de solo lectura cuya
+  > altura la fija su contenido, sin `overflow` propio, y la afirmación ya se sostiene sobre una
+  > medida que cubre los dos ejes.
 - **Objetivos de 44 × 44 px**: medidos con `getBoundingClientRect` sobre cada `button`, `a` y
   `textarea` de `main`; ninguno baja de 44 en ninguna combinación. No se delega en la regla
   `target-size` de axe.

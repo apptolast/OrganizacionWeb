@@ -695,3 +695,63 @@ it("@s37 a late response after leaving announces nothing through aria-live", asy
   expect(noise).toHaveLength(0);
   expect(screen.queryByRole("status")).toBeNull();
 });
+
+// ============================ @s38 el foco acompaña a cada cambio de estado
+
+/** El foco tiene que quedarse en el h1 o en el aviso de resultado, nunca perdido en el body. */
+function focusLanded() {
+  const heading = screen.getByRole("heading", { level: 1 });
+  const notices = [
+    ...document.querySelectorAll(
+      '[role="status"], [aria-label="Resultado de la importación"]',
+    ),
+  ];
+  return (
+    document.activeElement === heading ||
+    notices.includes(document.activeElement!)
+  );
+}
+
+it("@s38 keeps the focus on the heading or the result notice when the connection is made", async () => {
+  const user = userEvent.setup();
+  stub(
+    Response.json(notConnected),
+    Response.json(projects),
+    Response.json(connected),
+  );
+
+  render(<GitlabConnector owner="owner" />);
+  await screen.findByLabelText(/Token de acceso personal/);
+  await fillAndSubmit(user);
+
+  await waitFor(() => expect(screen.getByText("Conectado")).toBeTruthy());
+  expect(focusLanded()).toBe(true);
+});
+
+it("@s38 keeps the focus on the result notice when the receipt arrives", async () => {
+  const user = userEvent.setup();
+  openConnected(Response.json(receipt(), { status: 201 }));
+
+  await renderConnected();
+  document.body.focus();
+  await user.click(importButton());
+
+  await screen.findByRole("region", { name: "Resultado de la importación" });
+  expect(focusLanded()).toBe(true);
+});
+
+it("@s38 keeps the focus on the heading when the connection is dropped", async () => {
+  const user = userEvent.setup();
+  openConnected(new Response(null, { status: 204 }));
+
+  await renderConnected();
+  await user.click(screen.getByRole("button", { name: "Desconectar" }));
+  await user.click(
+    screen.getByRole("button", { name: "Confirmar desconexión" }),
+  );
+
+  await screen.findByLabelText(/Token de acceso personal/);
+  expect(document.activeElement).toBe(
+    screen.getByRole("heading", { level: 1 }),
+  );
+});

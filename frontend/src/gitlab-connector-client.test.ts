@@ -271,7 +271,7 @@ it("@s37 does not decode anything once the caller aborted", async () => {
  * separado y falló al juntarlos. Ésta lee la fuente Java y compara las claves, una a una.
  */
 function componentsOf(record: string, source: string): string[] {
-  const body = new RegExp(`record ${record}\(([^)]*)\)`, "s").exec(source);
+  const body = new RegExp(`record ${record}\\(([^)]*)\\)`, "s").exec(source);
   if (!body) throw new Error(`no se encontró el record ${record}`);
   return body[1]
     .split(",")

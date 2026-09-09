@@ -82,7 +82,10 @@ function GitlabConnectorScreen() {
   const heading = useRef<HTMLHeadingElement>(null);
   const tokenField = useRef<HTMLInputElement>(null);
   const replaceButton = useRef<HTMLButtonElement>(null);
+  const receiptBox = useRef<HTMLElement>(null);
   const focusReplace = useRef(false);
+  const focusHeading = useRef(false);
+  const focusReceipt = useRef(false);
   const pending = useRef<AbortController | null>(null);
   const mounted = useRef(true);
 
@@ -124,14 +127,30 @@ function GitlabConnectorScreen() {
   }, []);
 
   useEffect(() => {
-    void loadConnection();
+    void (async () => {
+      await loadConnection();
+    })();
   }, [loadConnection]);
 
-  // El foco viaja a la acción sugerida sólo cuando el servidor dijo que la conexión murió.
+  /**
+   * Cada cambio de estado deja el foco donde el resultado se cuenta: en el encabezado o en el
+   * aviso. Perderlo en el body obliga a quien navega con teclado o lector a buscar qué ha pasado.
+   */
   useEffect(() => {
-    if (!focusReplace.current) return;
-    focusReplace.current = false;
-    replaceButton.current?.focus();
+    if (focusReplace.current) {
+      focusReplace.current = false;
+      replaceButton.current?.focus();
+      return;
+    }
+    if (focusReceipt.current) {
+      focusReceipt.current = false;
+      receiptBox.current?.focus();
+      return;
+    }
+    if (focusHeading.current) {
+      focusHeading.current = false;
+      heading.current?.focus();
+    }
   });
 
   useEffect(() => {
@@ -168,6 +187,7 @@ function GitlabConnectorScreen() {
       setConnection(view);
       // Al ocultarse el formulario, el nodo que tenía el token desaparece con él.
       setReplacing(false);
+      focusHeading.current = true;
     } catch (error) {
       if (!live(controller)) return;
       setConnectError(
@@ -194,6 +214,7 @@ function GitlabConnectorScreen() {
       const started = await startGitlabImport(selected, controller.signal);
       if (!live(controller)) return;
       setReceipt(started);
+      focusReceipt.current = true;
     } catch (error) {
       if (!live(controller)) return;
       const failure =
@@ -238,6 +259,7 @@ function GitlabConnectorScreen() {
       setReceipt(null);
       setProjectPath("");
       setReplacing(false);
+      focusHeading.current = true;
     } catch (error) {
       if (!live(controller)) return;
       setActionError(
@@ -411,7 +433,7 @@ function GitlabConnectorScreen() {
         </div>
       ) : null}
 
-      {receipt ? <Receipt receipt={receipt} /> : null}
+      {receipt ? <Receipt receipt={receipt} boxRef={receiptBox} /> : null}
 
       <p role="status" aria-live="polite" aria-atomic="true">
         {connecting
@@ -425,9 +447,19 @@ function GitlabConnectorScreen() {
 }
 
 /** Cuatro cifras etiquetadas, sin porcentajes ni barras: lo que el recibo dice y nada más. */
-function Receipt({ receipt }: { receipt: GitlabImportReceipt }) {
+function Receipt({
+  receipt,
+  boxRef,
+}: {
+  receipt: GitlabImportReceipt;
+  boxRef: React.RefObject<HTMLElement | null>;
+}) {
   return (
-    <section aria-label="Resultado de la importación">
+    <section
+      aria-label="Resultado de la importación"
+      ref={boxRef}
+      tabIndex={-1}
+    >
       <dl>
         <dt>Creadas</dt>
         <dd>{receipt.created}</dd>

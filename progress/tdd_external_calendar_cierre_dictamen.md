@@ -15,8 +15,8 @@ por clase concreta, nunca la suite entera.
 | --- | --- | --- | --- |
 | 1 | bloqueante | pendiente | — |
 | 2 | bloqueante | ya cerrado en la base | — |
-| 3 | bloqueante | pendiente | — |
-| 4 | bloqueante | pendiente | — |
+| 3 | bloqueante | **CERRADO** | ciclo 5 |
+| 4 | bloqueante | **fuera de alcance**: lo hace otro carril en `e2e/external-calendar-native-zoom.spec.mjs` (instrucción del coordinador) | — |
 | 5 | bloqueante | pendiente | — |
 | 6 | bloqueante | pendiente | — |
 | 7 | bloqueante | ya cerrado en la base | — |
@@ -295,3 +295,55 @@ que no existía y explica el mecanismo (por qué `HttpRequest.timeout` no basta 
 **Alcance no invadido.** `JdkWebhookSender` (feature 25) usa
 `BodyHandlers.discarding()` con `EXCHANGE_TIMEOUT`, así que no comparte este
 defecto y no se ha tocado: es del carril de webhooks.
+
+---
+
+## Ciclo 5 — hallazgo 3: la matriz de los 30 principios no existía
+
+**Qué decía el dictamen.** `AGENTS.md:51` obliga a recorrer las 30 filas de
+`docs/ux-requirements.md` y **prohíbe** inferir cumplimiento desde axe. El
+verificador comprobó, además, que la prueba no es la ausencia del fichero con ese
+nombre exacto sino la búsqueda por contenido: los nombres propios de la matriz
+(Zeigarnik, Tesler, Fitts, Hick, Jakob, Miller, Parkinson, Occam, Von Restorff…)
+aparecían en 30 ficheros del repositorio y en **ninguno** de external_calendar.
+
+**Hecho.** `progress/ux_external_calendar.md`, con la estructura de
+`progress/ux_integration_api.md` y `progress/ux_ics_calendar.md`: sección
+«Evidencia y límites» **antes** de los resultados, y después la tabla con
+exactamente una fila por principio.
+
+Comprobado por script, no a ojo: se extraen los 30 nombres de principio de
+`docs/ux-requirements.md` y los 30 de la tabla nueva, y se cruzan.
+`faltan: []`, `sobran: []`.
+
+**Cifras medidas, no declaradas.** Cada número de la sección de evidencia sale de
+una ejecución real del día y está desglosado fichero a fichero:
+
+| Fichero | Pruebas |
+| --- | --- |
+| `frontend/src/external-calendar.test.tsx` | 25 |
+| `frontend/src/external-calendar-api.test.ts` | 42 |
+| `frontend/src/today-external-calendar.test.tsx` | 11 |
+| `frontend/src/external-calendar-route.test.tsx` | 5 |
+| **los cuatro en una sola invocación** | **83** (`Test Files 4 passed (4)` / `Tests 83 passed (83)`) |
+| `backend …/feed/HttpCalendarFeedTest` | 32 (`32 tests completed`, `BUILD SUCCESSFUL`) |
+
+El desglose suma exactamente el total, de modo que la cifra es reproducible y no
+una afirmación de autoridad.
+
+**Lo que el documento NO afirma, y lo dice antes de la tabla.** Que axe no
+certifica lector de pantalla; que la geometría sólo se ha ejercido sobre el estado
+vacío (hallazgo 5, marcado en las filas Fitts y Von Restorff como «parcialmente
+verificado»); que el zoom nativo al 200 % **no** se ha ejecutado y lo cubre otro
+carril; que no hay pasada de tema oscuro ni forced-colors (hallazgo 13); que todo
+lo de navegador es Chromium; y que no ha habido estudio con usuarios.
+
+Recuento de la tabla: 30 filas — 22 verificadas con prueba que puede fallar, 2
+parcialmente verificadas con su hallazgo abierto citado, 3 heurísticas declaradas
+como tales y 3 no aplicables con motivo escrito.
+
+**Nota de alcance.** Por instrucción del coordinador, el hallazgo 4 (zoom nativo
+al 200 %) lo cierra otro carril en un fichero nuevo,
+`e2e/external-calendar-native-zoom.spec.mjs`. Este carril no lo crea, para no
+duplicar ni chocar en la integración; la matriz UX lo deja escrito como pendiente
+con el nombre del fichero que lo cubrirá.

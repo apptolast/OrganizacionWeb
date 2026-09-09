@@ -1,22 +1,10 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "vitest",
-  "plugins": [
-    "@stryker-mutator/vitest-runner"
-  ],
-  "ignorePatterns": [
-    ".stryker-tmp-availability-replay"
-  ],
-  "mutate": [
-    "src/automations-api.ts",
-    "src/automations.tsx"
-  ],
-  "reporters": [
-    "clear-text",
-    "json",
-    "html",
-    "progress-append-only"
-  ],
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "ignorePatterns": [".stryker-tmp-availability-replay"],
+  "mutate": ["src/automations-api.ts", "src/automations.tsx"],
+  "reporters": ["clear-text", "json", "html", "progress-append-only"],
   "thresholds": {
     "high": 90,
     "low": 80,

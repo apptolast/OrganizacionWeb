@@ -13,7 +13,11 @@
   "concurrency": 8,
   "coverageAnalysis": "perTest",
   "vitest": { "configFile": "vite.config.ts" },
-  "jsonReporter": { "fileName": "reports/mutation-external-calendar/mutation.json" },
-  "htmlReporter": { "fileName": "reports/mutation-external-calendar/mutation.html" },
+  "jsonReporter": {
+    "fileName": "reports/mutation-external-calendar/mutation.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation-external-calendar/mutation.html"
+  },
   "tempDirName": ".stryker-tmp-external-calendar"
 }

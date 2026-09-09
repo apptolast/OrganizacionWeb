@@ -114,3 +114,91 @@ perdiéndolo», que es el modo silencioso de romper esto. Restaurado y verde:
    IPv6 literal la habría hecho estallar (allí es inalcanzable porque la
    validación de URL prohíbe direcciones literales, pero el emisor de webhooks sí
    las ve en las pruebas).
+
+### Ciclo 2 — @s25/B3: el TLS, que es el punto que podía romper
+
+**La pregunta que había que contestar midiendo, no razonando.** Anclar a una IP
+suele romper la verificación del certificado. El carril 25 revocó el anclaje
+precisamente por eso, sin medirlo. **Respuesta: no lo rompe, si se conserva el
+nombre.** Abajo, la evidencia.
+
+**Fixture nuevo, compartido por las dos features:**
+`backend/src/test/resources/tls/anchored-receiver.p12`. PKCS12 autofirmado,
+`keytool` del JDK 25, RSA 2048, validez 36.500 días, contraseña `changeit`,
+`CN=destino.anclado.invalid` y —lo que lo convierte en oráculo— **`SAN =
+dns:destino.anclado.invalid` y ninguna `iPAddress`**:
+
+```
+Owner: CN=destino.anclado.invalid
+SubjectAlternativeName [
+  DNSName: destino.anclado.invalid
+```
+
+Un certificado sin nombre alternativo de tipo dirección **no puede** validarse
+contra `127.0.0.1`. Así que si la conexión anclada lo acepta, es que el nombre
+sobrevivió al anclaje. Ése es todo el truco.
+
+**Confianza.** Una prueba no puede añadir una autoridad al almacén del JDK, así
+que `JdkWebhookSender` gana un constructor de paquete con un `SSLContext`, por el
+mismo motivo por el que ya tenía uno con los plazos. Lo importante: el contexto
+de prueba **confía en un certificado**, no apaga la verificación —por eso la
+tercera prueba de abajo sigue rechazando al desconocido.
+
+**Pruebas nuevas** (`JdkWebhookSenderTest`), las tres por el camino anclado:
+
+| Prueba | Afirma |
+|---|---|
+| `s25_b3_aCertificateValidForTheNameIsAcceptedAlthoughTheConnectionGoesToTheAddress` | certificado válido para el nombre, conexión a la dirección → **200** |
+| `s25_b3_theSameCertificateIsRejectedWhenTheNameAskedForIsAnother` | el mismo certificado, pedido otro nombre → **TLS** |
+| `s25_b3_anUntrustedCertificateIsStillRejectedOnTheAnchoredPath` | receptor que nadie avala, por el camino anclado → **TLS** |
+
+La segunda es el control de la primera: sin ella, «lo acepta» podría significar
+«no comprueba nada». Con ella, lo que compra la aceptación es la coincidencia del
+nombre.
+
+**Resultado: `BUILD SUCCESSFUL`, 19 de 19.** El anclaje conserva el TLS. No hace
+falta volver a la otra opción.
+
+**ROJO acreditado, mutante A: quitar la indicación de servidor.** Comentada la
+línea `if (!isAddressLiteral(host)) parameters.setServerNames(...)`:
+
+```
+s25_b3_aCertificateValidForTheNameIsAcceptedAlthoughTheConnectionGoesToTheAddress FAILED
+  the handshake verified the certificate by name, got errorClass TLS
+    ==> expected: <true> but was: <false>
+```
+
+Es exactamente el fallo que el carril 25 temía y por el que revocó la enmienda:
+anclar **sin** conservar el nombre sí rompe el TLS. Queda demostrado que ocurre,
+y que la prueba lo caza.
+
+**MUTANTE B, que SOBREVIVIÓ, y lo que se ha hecho al respecto.** Quitada la línea
+`parameters.setEndpointIdentificationAlgorithm("HTTPS")`, `JdkWebhookSenderTest`
+siguió **entera verde**. Causa medida: el cliente HTTP del JDK impone por su
+cuenta la verificación del nombre cuando el esquema es https, de modo que esa
+línea es redundante *para este cliente*. No es inútil —la pieza compartida puede
+usarse con un socket o un motor de TLS, donde por omisión no se verifica nada—,
+pero al nivel de la descarga es incontrastable.
+
+Un mutante que ninguna prueba puede matar es exactamente lo que este encargo vino
+a corregir, así que se prueba al nivel en el que sí se puede afirmar: nace
+`AnchoredConnectionTest` (9 pruebas puras, sin contenedor ni servidor) sobre las
+cuatro piezas de `AnchoredConnection`. Con él:
+
+```
+MUTANTE B (sin setEndpointIdentificationAlgorithm):
+  theParametersAskForCertificateVerificationByName FAILED
+    expected: <HTTPS> but was: <null>
+MUTANTE C (sin la guarda isAddressLiteral, ofreciendo la IP como SNI):
+  anAddressIsNeverOfferedAsAServerName FAILED
+    expected: <null> but was: <[type=host_name (0), value=127.0.0.1]>
+```
+
+**Previsión para la campaña de mutación** (la corre el orquestador, REPARTO §4):
+se esperan muertos los mutantes de `setServerNames`, `setEndpointIdentification`,
+la guarda `isAddressLiteral`, el paréntesis de IPv6 de `literal`, la raíz por
+defecto de la ruta y el puerto de `authority`. El que puede sobrevivir es
+`allow()` mutado a no hacer nada: `theRestrictedHostHeaderIsEnabled` lo mata sólo
+si la propiedad no venía ya puesta por otra prueba del mismo JVM; la segunda
+prueba, `enablingItDoesNotDropWhatTheDeploymentAlreadyDeclared`, sí lo mata en
+cualquier orden porque fija la propiedad a `connection` antes de llamar.

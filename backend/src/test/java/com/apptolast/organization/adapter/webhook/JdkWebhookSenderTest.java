@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -56,6 +57,18 @@ class JdkWebhookSenderTest {
 
   private static final char[] KEYSTORE_PASSWORD = "changeit".toCharArray();
 
+  /** Shared with the external calendar of feature 28: one anchoring, one fixture. */
+  private static final String NAMED_KEYSTORE = "/tls/anchored-receiver.p12";
+
+  private static final String NAMED_ALIAS = "destino";
+
+  private static final String UNTRUSTED_KEYSTORE = "/webhooks/untrusted-receiver.p12";
+
+  /**
+   * A handshake plus a round trip on the loopback needs more than the 300 ms of the timeout row.
+   */
+  private static final Duration TLS_EXCHANGE_DEADLINE = Duration.ofSeconds(5);
+
   private static JdkWebhookSender sender(AddressPolicy policy) {
     return new JdkWebhookSender(CLOCK, policy, InetAddress::getAllByName);
   }
@@ -63,6 +76,17 @@ class JdkWebhookSenderTest {
   /** The same sender, but resolving names through the fabricated zone of these tests. */
   private static JdkWebhookSender senderInLoopbackZone() {
     return new JdkWebhookSender(CLOCK, EVERY_ADDRESS_ALLOWED, LOOPBACK_ZONE);
+  }
+
+  /** The sender of the fabricated zone, trusting the fixture certificate and nothing else. */
+  private static JdkWebhookSender senderTrustingTheFixture() throws Exception {
+    return new JdkWebhookSender(
+        CLOCK,
+        EVERY_ADDRESS_ALLOWED,
+        LOOPBACK_ZONE,
+        TEST_CONNECT_DEADLINE,
+        TLS_EXCHANGE_DEADLINE,
+        trustingOnlyTheFixture());
   }
 
   /** The same sender with the two deadlines shortened, so the timeout row is affordable. */
@@ -78,14 +102,19 @@ class JdkWebhookSenderTest {
   /**
    * A name that no real DNS can answer —{@code .invalid} is reserved by RFC 2606— mapped to the
    * loopback by {@link #LOOPBACK_ZONE}. If the sender ever resolved it again through the system
-   * resolver instead of using the address already validated, the send would die with DNS.
+   * resolver instead of using the address already validated, the send would die with DNS. It is
+   * also the only name the fixture certificate is valid for.
    */
-  private static final String PINNED_NAME = "receptor.webhooks.invalid";
+  private static final String PINNED_NAME = "destino.anclado.invalid";
 
-  /** The zone of these tests: the only name it knows answers the loopback. */
+  /** Another name of the same zone, on the same address, that no certificate here vouches for. */
+  private static final String IMPOSTOR_NAME = "impostor.anclado.invalid";
+
+  /** The zone of these tests: the two names it knows answer the loopback, nothing else resolves. */
   private static final WebhookDestinationGuard.HostResolver LOOPBACK_ZONE =
       host -> {
-        if (!PINNED_NAME.equals(host)) throw new UnknownHostException(host);
+        if (!PINNED_NAME.equals(host) && !IMPOSTOR_NAME.equals(host))
+          throw new UnknownHostException(host);
         return new InetAddress[] {InetAddress.getByName("127.0.0.1")};
       };
 
@@ -115,18 +144,54 @@ class JdkWebhookSenderTest {
    * it. The keystore lives in src/test/resources and never leaves the tests.
    */
   private static Receiver startUntrustedTls(Consumer<HttpExchange> handler) throws Exception {
-    var keys = KeyStore.getInstance("PKCS12");
-    try (var stream =
-        JdkWebhookSenderTest.class.getResourceAsStream("/webhooks/untrusted-receiver.p12")) {
-      keys.load(stream, KEYSTORE_PASSWORD);
-    }
+    return listen("https", httpsServerPresenting(UNTRUSTED_KEYSTORE), handler);
+  }
+
+  /**
+   * A receiver over TLS whose certificate is valid for {@link #PINNED_NAME} and <b>for no address
+   * at all</b>: it carries a dNSName alternative name and no iPAddress one. That is what makes it
+   * an oracle. Reached through the anchored path the connection goes to 127.0.0.1, so the
+   * certificate can only be accepted if the name survives the anchoring —in the server name
+   * indication and in the identity check—; if it did not, the JDK would verify against the address,
+   * find nothing to match, and fail the handshake.
+   */
+  private static Receiver startTlsValidForTheName(Consumer<HttpExchange> handler) throws Exception {
+    return listen("https", httpsServerPresenting(NAMED_KEYSTORE), handler);
+  }
+
+  private static HttpsServer httpsServerPresenting(String keystore) throws Exception {
     var managers = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-    managers.init(keys, KEYSTORE_PASSWORD);
+    managers.init(load(keystore), KEYSTORE_PASSWORD);
     var context = SSLContext.getInstance("TLS");
     context.init(managers.getKeyManagers(), null, null);
     var server = HttpsServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
     server.setHttpsConfigurator(new HttpsConfigurator(context));
-    return listen("https", server, handler);
+    return server;
+  }
+
+  /**
+   * The trust of the tests: the certificate of the fixture, and nothing else. A test cannot add an
+   * authority to the JDK's own store, so the sender takes this context through its test-only
+   * constructor. Note what it does NOT do: it trusts one certificate, it does not turn verification
+   * off, so an untrusted receiver keeps being rejected.
+   */
+  private static SSLContext trustingOnlyTheFixture() throws Exception {
+    var trusted = KeyStore.getInstance("PKCS12");
+    trusted.load(null, null);
+    trusted.setCertificateEntry("fixture", load(NAMED_KEYSTORE).getCertificate(NAMED_ALIAS));
+    var managers = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+    managers.init(trusted);
+    var context = SSLContext.getInstance("TLS");
+    context.init(null, managers.getTrustManagers(), null);
+    return context;
+  }
+
+  private static KeyStore load(String resource) throws Exception {
+    var keys = KeyStore.getInstance("PKCS12");
+    try (var stream = JdkWebhookSenderTest.class.getResourceAsStream(resource)) {
+      keys.load(stream, KEYSTORE_PASSWORD);
+    }
+    return keys;
   }
 
   private static Receiver listen(String scheme, HttpServer server, Consumer<HttpExchange> handler) {
@@ -363,6 +428,60 @@ class JdkWebhookSenderTest {
       assertEquals(
           PINNED_NAME + ":" + receiver.server().getAddress().getPort(),
           seen.get().getRequestHeaders().getFirst("Host"));
+    }
+  }
+
+  /**
+   * The point anchoring can break, and the reason it was revoked once: connecting to an address
+   * usually ruins certificate verification. It does not have to. Here the certificate is valid for
+   * the name and for no address, the connection goes to the address, and it is accepted —which can
+   * only happen if the name travelled in the server name indication and the identity check used it.
+   */
+  @Test
+  void s25_b3_aCertificateValidForTheNameIsAcceptedAlthoughTheConnectionGoesToTheAddress()
+      throws Exception {
+    try (var receiver = startTlsValidForTheName(exchange -> respond(exchange, 200, new byte[0]))) {
+      var outcome =
+          senderTrustingTheFixture().send(receiver.urlFor(PINNED_NAME), SECRET, EVENT, BODY);
+
+      assertTrue(
+          outcome.succeeded(),
+          "the handshake verified the certificate by name, got errorClass " + outcome.errorClass());
+      assertEquals(200, outcome.httpStatus());
+      assertEquals(1, receiver.received().size());
+    }
+  }
+
+  /**
+   * The other half of the same proof: verification by name is not merely present, it still says no.
+   * The very certificate the previous test accepts is rejected when the destination is a different
+   * name, so what buys the acceptance is the match, not a check that got turned off.
+   */
+  @Test
+  void s25_b3_theSameCertificateIsRejectedWhenTheNameAskedForIsAnother() throws Exception {
+    try (var receiver = startTlsValidForTheName(exchange -> respond(exchange, 200, new byte[0]))) {
+      var outcome =
+          senderTrustingTheFixture().send(receiver.urlFor(IMPOSTOR_NAME), SECRET, EVENT, BODY);
+
+      assertEquals("TLS", outcome.errorClass());
+      assertNull(outcome.httpStatus());
+      assertTrue(receiver.received().isEmpty(), "the handshake failed before any request arrived");
+    }
+  }
+
+  /**
+   * And the third: anchoring did not weaken the trust chain either. Same anchored path, same
+   * fabricated zone, a receiver nobody vouches for.
+   */
+  @Test
+  void s25_b3_anUntrustedCertificateIsStillRejectedOnTheAnchoredPath() throws Exception {
+    try (var receiver = startUntrustedTls(exchange -> respond(exchange, 200, new byte[0]))) {
+      var outcome =
+          senderTrustingTheFixture().send(receiver.urlFor(PINNED_NAME), SECRET, EVENT, BODY);
+
+      assertEquals("TLS", outcome.errorClass());
+      assertNull(outcome.httpStatus());
+      assertTrue(receiver.received().isEmpty(), "the handshake failed before any request arrived");
     }
   }
 

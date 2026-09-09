@@ -255,6 +255,55 @@ class ImportGitlabIssuesTest {
 
   // ------------------------------------------- @s26 un fallo en la página 2 no borra la página 1
 
+  // ------------------------------------------------- @s21 el mapeo issue → tarea es el de 27
+
+  private static ExternalIssue issue(long id, String title, String body) {
+    return new ExternalIssue(
+        "gitlab.example.com:" + id,
+        title,
+        body,
+        "https://gitlab.example.com/grupo/proyecto/-/issues/" + id);
+  }
+
+  @Test
+  void s21_agitlabIssueLosesItsOuterUnicodeSpacesAndKeepsItsWebUrlAsCriterion() {
+    var bare = issue(9001, "   Preparar demo  ", null);
+    fakes.source.page(1, new IssuePage(List.of(bare), 1, false));
+
+    importIssues().execute(OWNER, projectId);
+
+    var task = fakes.tasks.lastTask();
+    assertEquals("Preparar demo", task.title());
+    assertEquals(bare.url(), task.completionCriterion());
+  }
+
+  @Test
+  void s21_thebodyFollowsTheWebUrlAfterOneBlankLine() {
+    var described = issue(9002, "Revisar despliegue", "una\ndos\ntres");
+    fakes.source.page(1, new IssuePage(List.of(described), 1, false));
+
+    importIssues().execute(OWNER, projectId);
+
+    assertEquals(
+        described.url() + "\n\nuna\ndos\ntres", fakes.tasks.lastTask().completionCriterion());
+  }
+
+  @Test
+  void s21_agitlabIssueWithABlankTitleFailsAloneAndTheReceiptStillCompletes() {
+    fakes.source.page(
+        1, new IssuePage(List.of(issue(9001), issue(9002, "   ", "x"), issue(9003)), 3, false));
+
+    var receipt = importIssues().execute(OWNER, projectId);
+
+    assertEquals("completed", receipt.status());
+    assertEquals(2, receipt.created());
+    assertEquals(0, receipt.skipped());
+    assertEquals(1, receipt.failed());
+    assertEquals(
+        List.of("gitlab|gitlab.example.com:9001", "gitlab|gitlab.example.com:9003"),
+        fakes.tasks.linkKeys());
+  }
+
   // ------------------- @s22 las precondiciones se aplican antes de contactar con GitLab
 
   /** Nada de lo que se comprueba antes de tiempo puede haber tocado al proveedor ni al recibo. */

@@ -261,6 +261,91 @@ Auditoría de trazabilidad @s → prueba: tres escenarios no estaban cubiertos d
      tipo, no una disciplina de quien escribe la línea; una prueba recorre los métodos por
      reflexión para que nadie añada después uno que lo acepte.
 
+### Ciclo 17 — la puerta de mutación y el recorrido accesible
+
+- Alcance de PIT `github_connector` en `backend/build.gradle.kts` (dominio, casos de uso,
+  adaptadores del conector, controlador, persistencia, bitácora y el cableado), añadido también a
+  la unión del perfil por defecto para que CI no pierda las clases nuevas.
+- `frontend/stryker.github-connector.config.json` sobre los tres módulos propios de la pantalla.
+- Objetivos `github_connector-backend` y `github_connector-frontend` en `scripts/project.mjs`, con
+  sus tres pruebas en `scripts/project.test.mjs`.
+- `e2e/github-connector.spec.mjs` para @s42: axe en los estados, recorrido con teclado, anchos 320,
+  768 y 1440, área mínima de 44 × 44 y ausencia del token en `localStorage`, `sessionStorage` y
+  cookies. **Escrito y comprobado sintácticamente, no ejecutado**: el carril tiene prohibido
+  levantar la pila de e2e mientras haya otros carriles compartiendo la máquina.
+
+#### Una regresión propia, encontrada y corregida
+
+Añadir dos rutas a `App.tsx` desplazó sus líneas, y varios `stryker.*.config.json` fijan trozos de
+ese fichero por `línea:columna`. `scripts/project.test.mjs` tiene un guardián que comprueba que
+esos rangos siguen apuntando al código que decían apuntar, y **falló**. Recalculados los tres
+rangos de `stryker.appearance.config.json` (`34:8-34:44`, `53:16-65:32`, `86:10-127:7`) y
+verificados con la misma extracción que usa el guardián.
+
+**Aviso para el coordinador**: otros diez `stryker.*.config.json` fijan rangos de `App.tsx` y
+`workspace.tsx` que ya estaban desincronizados entre sí antes de este carril, y ninguno tiene
+guardián. No los he tocado: cambiarlos invalidaría la evidencia de mutación congelada de otros
+carriles. Es una decisión de coordinación.
+
+**Dos fallos preexistentes en `scripts/project.test.mjs`**, ajenos a este carril y comprobados
+contra el árbol anterior a mis cambios: `integration backend targets invoke only their fixed PIT
+scopes` e `integration frontend invokes only its fixed Stryker configuration`. Las pruebas de la
+feature 24 existen pero sus objetivos no están registrados en `scripts/project.mjs`. Es de su
+carril.
+
+## Trazabilidad @s → prueba
+
+| @s | Dónde se comprueba |
+| --- | --- |
+| @s1 | `ConnectGithubTest`, `GithubConnectorApiTest`, `HttpGithubIssueSourceTest`, `GithubConnectorPersistenceTest`, `GithubConnectorWiringTest` |
+| @s2 | `AesGcmSecretCipherTest` |
+| @s3 | `ConnectGithubTest`, `GithubConnectorQueriesTest`, `ImportGithubIssuesTest`, `GithubConnectorApiTest`, `GithubConnectorWiringTest` |
+| @s4 | `GithubConnectorWiringTest` |
+| @s5 | `GithubRepositoryTest`, `ConnectGithubTest`, `GithubConnectorApiTest` |
+| @s6 | `PersonalAccessTokenTest`, `ConnectGithubTest`, `GithubConnectorApiTest` |
+| @s7 | `ConnectGithubTest`, `HttpGithubIssueSourceTest`, `GithubConnectorApiTest` |
+| @s8 | `ConnectGithubTest`, `ImportGithubIssuesTest`, `HttpGithubIssueSourceTest`, `GithubConnectorApiTest` |
+| @s9 | `ConnectGithubTest`, `GithubConnectorPersistenceTest` |
+| @s10 | `GithubConnectorQueriesTest`, `GithubConnectorApiTest`, `github-connector-client.test.ts` |
+| @s11 | `GithubConnectorQueriesTest`, `GithubConnectorApiTest`, `GithubConnectorPersistenceTest`, `github-connector-client.test.ts` |
+| @s12 | `ImportGithubIssuesTest`, `HttpGithubIssueSourceTest`, `GithubConnectorPersistenceTest`, `GithubConnectorApiTest` |
+| @s13 | `HttpGithubIssueSourceTest`, `GithubConnectorApiTest` |
+| @s14 | `ExternalIssueTest`, `ImportGithubIssuesTest` |
+| @s15 | `ExternalIssueCriterionTest` |
+| @s16 | `ImportGithubIssuesTest` (las seis filas), `HttpGithubIssueSourceTest` |
+| @s17 | `ImportGithubIssuesTest`, `GithubConnectorPersistenceTest` |
+| @s18 | `ImportGithubIssuesTest` |
+| @s19 | `ImportGithubIssuesTest`, `GithubConnectorPersistenceTest`, `GithubConnectorApiTest` |
+| @s20 | `HttpGithubIssueSourceTest` (las seis filas), `ImportGithubIssuesTest`, `GithubConnectorApiTest` |
+| @s21 | `ConnectGithubTest`, `GithubConnectorApiTest`, `github-connector-client.test.ts` |
+| @s22 | `ImportGithubIssuesTest`, `ConnectGithubTest`, `GithubConnectorPersistenceTest` |
+| @s23 | `ImportGithubIssuesTest`, `GithubConnectorApiTest` |
+| @s24 | `ImportGithubIssuesTest`, `GithubConnectorPersistenceTest`, `GithubConnectorApiTest` |
+| @s25 | `GithubConnectorPersistenceTest` (ocho hilos reales), `ImportGithubIssuesTest`, `GithubConnectorApiTest` |
+| @s26 | `ImportGithubIssuesTest`, `GithubConnectorPersistenceTest` |
+| @s27 | `ImportGithubIssuesTest`, `GithubConnectorPersistenceTest` |
+| @s28 | `HttpGithubIssueSourceTest`, `ImportGithubIssuesTest`, `ConnectGithubTest` |
+| @s29 | `ImportGithubIssuesTest`, `GithubConnectorApiTest` |
+| @s30 | `GithubConnectorQueriesTest`, `GithubConnectorApiTest`, `github-connector-client.test.ts` |
+| @s31 | `GithubConnectorApiTest` — **con desvío documentado en la fila Bearer** |
+| @s32 | `GithubConnectorApiTest` |
+| @s33 | `GithubConnectorQueriesTest`, `GithubConnectorPersistenceTest` |
+| @s34 | `ConnectorAuditTest`, `ConnectorExportExposureTest`, `GithubConnectorApiTest`, `HttpGithubIssueSourceTest`, `ConnectGithubTest`, `ImportGithubIssuesTest`, `github-connector.test.tsx`, `e2e/github-connector.spec.mjs` (no ejecutado) |
+| @s35 | `GithubApiBaseTest`, `HttpGithubIssueSourceTest`, `GithubConnectorApiTest`, `GithubConnectorWiringTest` |
+| @s36 | `github-connector.test.tsx` (los seis estados), `github-connector-routing.test.tsx` |
+| @s37 | `github-connector.test.tsx` |
+| @s38 | `github-connector.test.tsx` |
+| @s39 | `github-connector.test.tsx` (las cinco filas) |
+| @s40 | `github-connector.test.tsx` |
+| @s41 | `github-connector.test.tsx`, `github-connector-client.test.ts` |
+| @s42 | `github-connector-routing.test.tsx` (la parte estructural) y `e2e/github-connector.spec.mjs` — **el resto queda pendiente de ejecutar** |
+
+## Lo que falta para cerrar
+
+1. Ejecutar `e2e/github-connector.spec.mjs` (axe, teclado, anchos) cuando la máquina esté libre.
+2. Decidir el desvío de @s31: 403 `API_SCOPE_DENIED` frente a 401 `UNAUTHENTICATED`.
+3. `judge` y `mutation_tester`. **No marco la feature como `done`.**
+
 ## Enmiendas al contrato aprobadas por el coordinador (9 de septiembre de 2026)
 
 Origen: `progress/security_review_connectors.md` (rama `main`). El coordinador actualiza

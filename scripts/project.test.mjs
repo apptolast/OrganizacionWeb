@@ -1834,6 +1834,47 @@ test("appearance PIT includes all new modules and makes their tests available by
   assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
 });
 
+test("github connector frontend invokes only its fixed Stryker configuration", () => {
+  const { project, calls } = capture();
+  project("mutate", "github_connector-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.github-connector.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("github connector backend runs pitest scoped to its own classes", () => {
+  const { project, calls } = capture();
+  project("mutate", "github_connector-backend");
+  assert.equal(calls.length, 1);
+  assert.ok(calls[0][1].includes("-PmutationScope=github_connector"));
+  assert.ok(calls[0][1].includes("pitest"));
+});
+
+test("github connector Stryker mutates its three own modules and nothing else", () => {
+  const config = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.github-connector.config.json"),
+      "utf8",
+    ),
+  );
+  assert.deepEqual(config.mutate, [
+    "src/github-connector-client.ts",
+    "src/github-connector.tsx",
+    "src/integrations-index.tsx",
+  ]);
+  assert.equal(config.thresholds.break, 80);
+});
+
 test("appearance frontend invokes only its fixed Stryker configuration", () => {
   const { project, calls } = capture();
   project("mutate", "appearance-frontend");

@@ -143,7 +143,7 @@ Feature: Importar issues abiertas de GitHub como tareas propias con trazabilidad
       | estado_previo                                         | estado | cuerpo                                                                                     |
       | sin conexión                                          | 404    | código CONNECTION_NOT_FOUND                                                                |
       | conexión valid sin importaciones                      | 200    | exactamente repository, login, status "valid", connectedAt y lastImport null               |
-      | conexión invalid con tres recibos                     | 200    | status "invalid" y lastImport igual al recibo de mayor startedAt, con sus once campos      |
+      | conexión invalid con tres recibos                     | 200    | status "invalid" y lastImport igual al recibo de mayor startedAt, con sus doce campos      |
       | conexión valid y un recibo running                    | 200    | lastImport con status "running", errorCode null y finishedAt null                          |
 
   @s11
@@ -162,8 +162,8 @@ Feature: Importar issues abiertas de GitHub como tareas propias con trazabilidad
     Given una conexión valid y un proyecto propio en idea sin tareas
     And el servidor falso devuelve en page=1 tres issues con id 101, 102 y 103 y un elemento con campo pull_request e id 104, sin Link rel="next"
     When envío POST a "/api/v1/me/connectors/github/imports" con projectId del proyecto
-    Then recibo HTTP 201 con Location "/api/v1/me/connectors/github/imports/{id}" y el recibo contiene exactamente id, projectId, repository, status, created, skipped, failed, truncated, errorCode, startedAt y finishedAt
-    And status es "completed", created 3, skipped 0, failed 0, truncated false, errorCode null y finishedAt no anterior a startedAt
+    Then recibo HTTP 201 con Location "/api/v1/me/connectors/github/imports/{id}" y el recibo contiene exactamente id, source, projectId, projectPath, status, created, skipped, failed, truncated, errorCode, startedAt y finishedAt
+    And source es "github", projectPath es "octocat/Hello-World", status es "completed", created 3, skipped 0, failed 0, truncated false, errorCode null y finishedAt no anterior a startedAt
     And el proyecto tiene exactamente tres tareas pending con estimatedMinutes null y existen exactamente tres eventos TaskCreated.v1 en la outbox, uno por tarea
     And existen exactamente tres enlaces con source "github", external_id "101", "102" y "103" y url igual al html_url de cada issue
     And ninguna tarea, evento ni enlace corresponde al id 104

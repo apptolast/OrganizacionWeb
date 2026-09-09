@@ -13,8 +13,9 @@ const projectId = "11111111-2222-4333-8444-555555555555";
 const importId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
 const receipt = {
   id: importId,
+  source: "github",
   projectId,
-  repository: "octocat/Hello-World",
+  projectPath: "octocat/Hello-World",
   status: "completed",
   created: 3,
   skipped: 1,
@@ -189,6 +190,45 @@ it("@s12 starts an import and returns the receipt", async () => {
   expect(url).toBe("/api/v1/me/connectors/github/imports");
   expect(options.method).toBe("POST");
   expect(JSON.parse(options.body)).toEqual({ projectId });
+});
+
+// El juego de claves que emite de verdad la frontera HTTP, escrito a mano y no derivado del
+// fixture: es el mismo que fija GithubConnectorApiTest.RECEIPT_FIELDS y el que exige
+// additional_connectors.feature:242 (@s20), donde el recibo de GitHub y el de GitLab tienen las
+// mismas claves y se distinguen por `source`. Si el backend vuelve a cambiarlo, esta prueba cae.
+const BOUNDARY_RECEIPT = {
+  id: importId,
+  source: "github",
+  projectId,
+  projectPath: "octocat/Hello-World",
+  status: "completed",
+  created: 1,
+  skipped: 0,
+  failed: 1,
+  truncated: false,
+  errorCode: null,
+  startedAt: "2026-09-09T12:00:00.123456Z",
+  finishedAt: "2026-09-09T12:00:04.123456Z",
+};
+
+it("@s12 decodes the receipt the HTTP boundary really emits, with source and projectPath", async () => {
+  stub(Response.json(BOUNDARY_RECEIPT, { status: 201 }));
+
+  const decoded = await startGithubImport(projectId, signal());
+
+  expect(decoded).toEqual(BOUNDARY_RECEIPT);
+  // Los contadores llegan enteros: son los que la región de resultado pinta.
+  expect([decoded.created, decoded.skipped, decoded.failed]).toEqual([1, 0, 1]);
+});
+
+it("@s12 a receipt still shaped like the old one no longer passes", async () => {
+  const { source, projectPath, ...rest } = BOUNDARY_RECEIPT;
+  stub(Response.json({ ...rest, repository: projectPath }, { status: 201 }));
+
+  await expect(startGithubImport(projectId, signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+  expect(source).toBe("github");
 });
 
 it("@s30 reads a receipt back", async () => {

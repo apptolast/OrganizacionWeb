@@ -11,8 +11,9 @@ const importId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
 
 const receipt = {
   id: importId,
+  source: "github",
   projectId,
-  repository: "octocat/Hello-World",
+  projectPath: "octocat/Hello-World",
   status: "completed",
   created: 199,
   skipped: 0,

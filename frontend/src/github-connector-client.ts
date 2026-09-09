@@ -4,15 +4,21 @@ import { microseconds } from "./work-session-api";
 
 const CONNECTION_URL = "/api/v1/me/connectors/github";
 const IMPORTS_URL = `${CONNECTION_URL}/imports`;
+// Doce campos desde que la feature 29 unificó la importación de GitHub y GitLab: el recibo
+// nombra su origen (`source`) y la ruta del proyecto en él (`projectPath`), donde antes decía
+// `repository`. additional_connectors.feature:242 exige que los dos recibos tengan las mismas
+// claves; este cliente sólo habla con el extremo de GitHub, así que exige `source` "github".
 const RECEIPT_FIELDS =
-  "id projectId repository status created skipped failed truncated errorCode startedAt finishedAt";
+  "id source projectId projectPath status created skipped failed truncated errorCode startedAt finishedAt";
+const GITHUB = "github";
 const CONNECTION_FIELDS = "repository login status connectedAt lastImport";
 const INCOMPATIBLE = "Confirmación incompatible";
 
 export type GithubImportReceipt = {
   id: string;
+  source: string;
   projectId: string;
-  repository: string;
+  projectPath: string;
   status: "running" | "completed" | "failed";
   created: number;
   skipped: number;
@@ -74,8 +80,8 @@ function decodeReceipt(value: unknown): GithubImportReceipt {
     !exact(value, RECEIPT_FIELDS) ||
     !identifier(value.id) ||
     !identifier(value.projectId) ||
-    typeof value.repository !== "string" ||
-    !value.repository ||
+    value.source !== GITHUB ||
+    !nonEmpty(value.projectPath) ||
     !["running", "completed", "failed"].includes(value.status as string) ||
     !isCount(value.created) ||
     !isCount(value.skipped) ||

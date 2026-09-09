@@ -286,3 +286,78 @@ gaste el turno en ellos:
   controlador ya terminado es inocuo.
 - `77`, `78` — `useRef` inicial que el efecto de montaje reescribe acto seguido.
 
+---
+
+## 3. Lo que le faltaba a la feature, según el `.feature` y el dictamen
+
+Revisadas una a una las siete condiciones del veredicto y los cinco hallazgos
+no bloqueantes.
+
+| Condición del juez | Estado |
+| --- | --- |
+| Frontend: puntuación ≥ 80 con recuento al lado | **Trabajo hecho**; la medida es del orquestador. Previsión declarada con recuento: ≈489/589 |
+| Frontend: total de mutantes declarado, ningún módulo a cero | Declarado arriba: 246 / 341 / 2. Ninguno a cero |
+| Frontend: matar los mutantes del escuchador de Escape | **Los 5, verificados muertos a mano** |
+| Backend: PIT ≥ 80 con desglose | Del orquestador; este carril no tocó `backend/src` |
+| Deuda del `CHECK` de `V25`, con dueño y número | **Ya cerrada** antes de mi turno: `V30__github_connector_ciphertext_bounds.sql` baja la cota a 29-283 y explica el formato de hoy, con dos pruebas de persistencia (`s1_theShortestTokenTheDomainAcceptsAlsoFitsInTheColumn` y su gemela para el más largo) |
+| Entrada en `progress/history.md` (C5) | **Hecha** |
+| `bin/harness init` verde (C1/C4) | Del orquestador: la regla 1 del reparto prohíbe la suite completa en un carril |
+
+Y los hallazgos menores:
+
+- **Hallazgo 3 — el `240_000` sin derivar (`spec.mjs:133`): corregido.**
+  `e2e/support/connector.mjs` exporta ahora `COMPOSE_TIMEOUT_MS`,
+  `BACKEND_READY_TIMEOUT_MS` y `RECREATIONS_PER_RUN`, y los usa donde antes
+  tenía los números sueltos. La prueba deriva su presupuesto:
+  `RECREATIONS_PER_RUN * (COMPOSE_TIMEOUT_MS + BACKEND_READY_TIMEOUT_MS)`, que
+  es el peor caso que el propio andamiaje declara. Si alguna cota cambia, el
+  presupuesto la sigue solo (regla 2 del reparto).
+  Y no es cosmético: en esta ejecución la prueba tardó **43,6 s**, o sea que
+  bajo el presupuesto de 30 s del `playwright.config` habría muerto.
+- **Hallazgo 4 — el `forget()` que concatenaba el propietario en SQL: ya no
+  existe.** Hoy es un `TRUNCATE … CASCADE` sin interpolación
+  (`spec.mjs:38-42`), del commit `f16fa43`. Cerrado.
+- **Hallazgo 5 — `<main id="proyectos">` en `github-connector.tsx:264`.** El
+  propio juez lo declara deuda del proyecto y no de este carril. **No se toca**:
+  esa ancla la usa el enlace de salto de toda la aplicación y cambiarla aquí
+  tocaría `App.tsx`, que no es fichero de este carril.
+
+### Ejecuciones de cierre
+
+| Suite | Resultado |
+| --- | --- |
+| `vitest run` de los tres ficheros del conector | **113 passed** |
+| `vitest run` (frontend entero, 85 ficheros) | **2899 passed**, 2 fallos ajenos |
+| `tsc --noEmit` | limpio |
+| `prettier --check` sobre lo tocado | limpio |
+| `e2e/github-connector.spec.mjs` (puerto 18096) | **15 passed (1,7 min)** |
+| `e2e/github-connector-native-zoom.spec.mjs` | **1 passed** |
+
+Los dos fallos del pase completo de vitest son de
+`src/external-calendar-route.test.tsx` (carril 28), y son **de carga, no de
+producto**: `Test timed out in 5000ms` con la máquina corriendo cuatro carriles.
+Ese mismo fichero, ejecutado solo, da **5/5 en verde**. Queda anotado y no se
+toca: es de otro carril (regla 9).
+
+## Ficheros compartidos tocados
+
+Para la integración, con el cambio mínimo:
+
+- `progress/history.md` — entrada de este carril, **añadida al final**
+  (el fichero se declara append-only). Fusiona limpio salvo que otro carril
+  añada también al final.
+- `e2e/support/connector.mjs` — tres constantes exportadas y usadas donde antes
+  había números sueltos. Sólo lo importa `e2e/github-connector.spec.mjs`;
+  `scripts/project.mjs` lo nombra en una lista de rutas que **no** cambia.
+- `scripts/verificar-mutantes-github-connector.mjs` — fichero **nuevo**, con
+  nombre propio del carril: no colisiona con nadie.
+
+## Lo que este carril NO ha hecho, y por qué
+
+- **No ha marcado la 27 como `done`** en `feature_list.json`: faltan la campaña
+  de mutación medida y `bin/harness init`, y el fichero es del orquestador.
+- **No ha ejecutado Stryker ni PIT** (regla 4 del reparto).
+- **No ha ejecutado la suite completa de backend** (regla 1). Del backend sólo
+  se ejecutó `GithubConnectorApiTest`, que es `@WebMvcTest` y no levanta ningún
+  contenedor.
+

@@ -12,6 +12,16 @@ import { loginSession } from "../../scripts/session-client.mjs";
  * recorre el estado de verdad y se restaura la pila, en lugar de simular un 503 desde el cliente.
  */
 
+/**
+ * Las dos cotas del andamiaje, exportadas para que quien use `withConnectorDisabled` derive su
+ * presupuesto de prueba en vez de escribir un número a mano que caduque cuando éstas cambien.
+ */
+export const COMPOSE_TIMEOUT_MS = 180_000;
+export const BACKEND_READY_TIMEOUT_MS = 90_000;
+
+/** Cuántas veces recrea Compose —y espera al backend— un recorrido con el conector apagado. */
+export const RECREATIONS_PER_RUN = 2;
+
 function fixture() {
   const project = process.env.E2E_COMPOSE_PROJECT;
   if (
@@ -44,7 +54,7 @@ function compose(environmentFile, connectorKey, ...args) {
     ],
     {
       encoding: "utf8",
-      timeout: 180_000,
+      timeout: COMPOSE_TIMEOUT_MS,
       env: { ...process.env, APP_CONNECTOR_KEY: connectorKey },
     },
   ).trim();
@@ -62,7 +72,7 @@ async function waitForBackend(request) {
           return 0;
         }
       },
-      { timeout: 90_000, intervals: [500, 1000] },
+      { timeout: BACKEND_READY_TIMEOUT_MS, intervals: [500, 1000] },
     )
     .toBe(200);
   const session = await (await request.get("/api/session")).json();

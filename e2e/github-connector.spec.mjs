@@ -1,7 +1,12 @@
 import { test, expect } from "./support/authenticated-test.mjs";
 import AxeBuilder from "@axe-core/playwright";
 import { create, sql } from "./support/projects.mjs";
-import { withConnectorDisabled } from "./support/connector.mjs";
+import {
+  withConnectorDisabled,
+  BACKEND_READY_TIMEOUT_MS,
+  COMPOSE_TIMEOUT_MS,
+  RECREATIONS_PER_RUN,
+} from "./support/connector.mjs";
 
 /**
  * @s42 el recorrido del conector de GitHub es accesible en sus siete estados y en los tres anchos.
@@ -129,11 +134,17 @@ test("@s42 estado deshabilitado: el servidor sin clave de conectores", async ({
   request,
 }) => {
   // Esta prueba recrea el backend dos veces —sin clave y de vuelta con ella— y espera a que
-  // responda cada vez. `waitForBackend` se da 90 s por espera, así que bajo el presupuesto de 30 s
-  // del `playwright.config` la espera interior no se puede honrar nunca: la prueba muere a los 30 s
-  // aunque el backend fuese a levantar al segundo 31. El presupuesto tiene que cubrir las dos
-  // esperas más las dos recreaciones de Compose.
-  test.setTimeout(240_000);
+  // responda cada vez. Bajo el presupuesto de 30 s del `playwright.config`, la espera interior de
+  // `waitForBackend` no se puede honrar nunca: la prueba moriría a los 30 s aunque el backend fuese
+  // a levantar al segundo 31, y sería verde sólo mientras la máquina fuese rápida.
+  //
+  // El presupuesto se **deriva** del andamiaje en vez de elegirse: es el peor caso que el propio
+  // `withConnectorDisabled` declara, dos recreaciones de Compose más sus dos esperas. Si alguna de
+  // esas dos cotas cambia, este número la sigue solo. Un presupuesto no es un oráculo: lo que hace
+  // morder a esta prueba son las aserciones de abajo, y siguen intactas.
+  test.setTimeout(
+    RECREATIONS_PER_RUN * (COMPOSE_TIMEOUT_MS + BACKEND_READY_TIMEOUT_MS),
+  );
   await withConnectorDisabled(request, async () => {
     await page.goto(PAGE);
     await expect(page.getByRole("alert")).toContainText(

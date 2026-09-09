@@ -111,3 +111,19 @@ Comando: `backend\gradlew.bat test --no-daemon --tests '...domain.IcsCalendarTes
   con el resultado sellado `FeedFetch`, y `adapter/feed/HttpCalendarFeed`.
 - El plazo de 5 s se inyecta para poder probar el vencimiento en 300 ms; un test
   aparte fija `HttpCalendarFeed.TIMEOUT` en 5 s y el cableado usa esa constante.
+
+### Ciclo 10 — persistencia V26 (@s1, @s2, @s6, @s7, @s12, @s16, @s24, @s25, @s26, @s30, @s31, @s33)
+
+- ROJO: `ExternalCalendarPersistenceTest` (Testcontainers) no compilaba: no
+  existían `SyncStatus`, `SyncSummary`, `ExternalCalendarSubscription`,
+  `StoredSubscription`, `ExternalCalendarStore` ni el adaptador.
+- VERDE: migración `V26__external_calendar.sql` con las dos tablas de la
+  propuesta y `PostgresExternalCalendarStore`.
+- Decisiones que fija el test: `create` deja version 0 y todo a null o cero;
+  `relabel` sube versión y conserva instantánea; `rebind` sube versión, borra
+  eventos y reinicia contadores conservando la id; `commitSuccess` y
+  `commitFailure` van condicionadas a la versión leída antes de descargar y
+  devuelven vacío cuando pierden la carrera; el borrado arrastra la instantánea
+  por clave ajena en cascada y es idempotente.
+- El orden de `events` usa `uid COLLATE "C"` para que coincida con el orden de
+  `String.compareTo` que aplica el dominio al truncar a 500.

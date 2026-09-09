@@ -226,9 +226,9 @@ test("ics calendar Stryker selects its own nodes of the shared files", () => {
     ),
   );
   assert.deepEqual(config.mutate, [
-    "src/App.tsx:35:8-35:42",
-    "src/App.tsx:49:14-50:29",
-    "src/App.tsx:80:10-81:37",
+    "src/App.tsx:37:8-37:42",
+    "src/App.tsx:53:14-54:29",
+    "src/App.tsx:88:10-89:37",
     "src/workspace.tsx:90:10-95:22",
     "src/calendar-feed-api.ts",
     "src/calendar.tsx",
@@ -1834,6 +1834,47 @@ test("appearance PIT includes all new modules and makes their tests available by
   assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
 });
 
+test("github connector frontend invokes only its fixed Stryker configuration", () => {
+  const { project, calls } = capture();
+  project("mutate", "github_connector-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.github-connector.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("github connector backend runs pitest scoped to its own classes", () => {
+  const { project, calls } = capture();
+  project("mutate", "github_connector-backend");
+  assert.equal(calls.length, 1);
+  assert.ok(calls[0][1].includes("-PmutationScope=github_connector"));
+  assert.ok(calls[0][1].includes("pitest"));
+});
+
+test("github connector Stryker mutates its three own modules and nothing else", () => {
+  const config = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.github-connector.config.json"),
+      "utf8",
+    ),
+  );
+  assert.deepEqual(config.mutate, [
+    "src/github-connector-client.ts",
+    "src/github-connector.tsx",
+    "src/integrations-index.tsx",
+  ]);
+  assert.equal(config.thresholds.break, 80);
+});
+
 test("appearance frontend invokes only its fixed Stryker configuration", () => {
   const { project, calls } = capture();
   project("mutate", "appearance-frontend");
@@ -1863,9 +1904,9 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     "src/appearance-api.ts",
     "src/appearance-state.tsx",
     "src/appearance.tsx",
-    "src/App.tsx:33:8-33:44",
-    "src/App.tsx:53:18-65:34",
-    "src/App.tsx:84:10-125:7",
+    "src/App.tsx:35:8-35:44",
+    "src/App.tsx:57:18-69:34",
+    "src/App.tsx:92:10-133:7",
     "src/workspace.tsx:78:10-83:22",
     "src/session-gate.tsx:32:2-52:6",
     "src/use-session.ts:208:0-229:1",

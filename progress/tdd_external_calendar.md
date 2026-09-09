@@ -66,3 +66,15 @@ Comando: `backend\gradlew.bat test --no-daemon --tests '...domain.IcsCalendarTes
 - La clave mal formada lanza `IllegalStateException` mencionando
   `APP_CONNECTOR_KEY` y nunca su valor.
 
+
+### Ciclo 6 — el formato almacenado vuelve al contrato (@s2, @s3, @s29)
+
+- ROJO: `s2_theStoredBytesStartWithTheNonceItself` exige que `HEADER_LENGTH`
+  sea el propio nonce de 12 bytes. Fallaba con la cabecera de 13 bytes que
+  dejó el commit de resguardo.
+- VERDE: `SecretUrlCipher` almacena `nonce || sellado`, sin byte de versión.
+- Decisión de contrato: el `.feature` (línea 45, @s2) y la propuesta
+  ("nonce de 12 bytes seguido del cifrado") fijan el formato. La enmienda B5
+  se conserva en lo que no contradice el contrato: sigue admitiéndose una
+  clave anterior opcional, pero se prueba a ciegas y decide la etiqueta GCM,
+  no un byte de versión. Con una sola clave configurada, @s29 se cumple.

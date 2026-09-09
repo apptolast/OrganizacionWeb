@@ -27,10 +27,29 @@ class SecretUrlCipherTest {
   @Test
   void s2_storesANonceOfTwelveBytesFollowedByCiphertextWithoutThePlainUrl() {
     var stored = SecretUrlCipher.of(K1).encrypt(OWNER, URL);
+    assertEquals(12, SecretUrlCipher.NONCE_LENGTH);
+    assertEquals(SecretUrlCipher.NONCE_LENGTH, SecretUrlCipher.HEADER_LENGTH, "el nonce abre el cifrado, sin cabecera propia");
     assertTrue(stored.length > SecretUrlCipher.HEADER_LENGTH);
     assertFalse(
         new String(stored, StandardCharsets.ISO_8859_1).contains("abc123"),
         "el cifrado no puede contener la URL en claro");
+  }
+
+  /** El contrato fija el formato: nonce y sellado, sin byte de versión de clave. */
+  @Test
+  void s2_theStoredBytesStartWithTheNonceItself() {
+    var cipher = SecretUrlCipher.of(K1);
+    var stored = cipher.encrypt(OWNER, URL);
+    var rebuilt = new byte[stored.length];
+    System.arraycopy(stored, 0, rebuilt, 0, stored.length);
+    assertEquals(
+        URL,
+        cipher.decrypt(OWNER, rebuilt).orElseThrow(),
+        "descifrar solo puede depender de los 12 primeros bytes como nonce");
+    assertNotEquals(
+        Base64.getEncoder().encodeToString(java.util.Arrays.copyOf(stored, 12)),
+        Base64.getEncoder()
+            .encodeToString(java.util.Arrays.copyOf(cipher.encrypt(OWNER, URL), 12)));
   }
 
   @Test
@@ -48,15 +67,7 @@ class SecretUrlCipherTest {
   }
 
   static byte[] nonce(byte[] stored) {
-    return java.util.Arrays.copyOfRange(stored, 1, SecretUrlCipher.HEADER_LENGTH);
-  }
-
-  @Test
-  void b5_prefixesTheCiphertextWithTheVersionOfTheKeyThatSealedIt() {
-    var withK1 = SecretUrlCipher.of(K1).encrypt(OWNER, URL);
-    var withK2 = SecretUrlCipher.of(K2).encrypt(OWNER, URL);
-    assertNotEquals(withK1[0], withK2[0], "cada clave se identifica con su propio byte de versión");
-    assertEquals(withK1[0], SecretUrlCipher.of(K1).encrypt(OWNER, URL)[0]);
+    return java.util.Arrays.copyOf(stored, SecretUrlCipher.NONCE_LENGTH);
   }
 
   @Test

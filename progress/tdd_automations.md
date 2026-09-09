@@ -225,10 +225,8 @@ Feature en curso: 30 — automations. Escenarios a recorrer en fase 1: @s1–@s1
   con umbral 80 y los objetivos `automations-backend` y `automations-frontend` en
   `scripts/project.mjs`, con tres tests nuevos en `scripts/project.test.mjs` que
   fijan el ámbito, la configuración y los ficheros mutados. Los tres pasan.
-- **No se ha ejecutado ninguna mutación ni E2E**, por la disciplina de recursos
-  del carril. `e2e/automations.spec.mjs` queda **escrito y con sintaxis
-  verificada** (`node --check`) pero **sin ejecutar**: @s42 no está demostrado y
-  no debe darse por verde hasta que el coordinador le dé turno exclusivo.
+- En este ciclo no se ejecutó E2E; se hizo después con turno del coordinador (ver
+  ciclo 18). **Ninguna mutación se ha lanzado**: esa puerta la abre el coordinador.
 - **Tres fallos preexistentes en `scripts/project.test.mjs`** (targets
   `integration_api-backend` / `integration_api-frontend` ausentes de la lista
   blanca y rangos `línea:columna` de `stryker.appearance.config.json` ya
@@ -306,6 +304,29 @@ trabajo de otros carriles en main, es deriva ajena y sus dueños deben revisarla
 Los replay históricos (`*-replay`, `*.replay`) se dejan intactos a propósito:
 describen un estado pasado del código y re-fijarlos falsearía su evidencia.
 
+### Ciclo 18 — @s42 demostrado de verdad sobre la pila real
+
+`E2E_WEB_PORT=18093 pnpm test:e2e e2e/automations.spec.mjs`, una sola pila,
+retirada al terminar (contenedores, red y volumen comprobados como eliminados).
+
+- **Primera ejecución: 6 de 7.** Falló el caso del texto al 200 % porque usaba
+  `page.addStyleTag`, y la CSP `style-src 'self'` que introdujo la feature 24 la
+  bloquea. **El fallo era de mi guion, no de la página**: la CSP hizo exactamente
+  su trabajo. Corregido con la técnica que ya usan el resto de auditorías del
+  repositorio (`history-ux.spec.mjs`): doblar el tamaño calculado de cada elemento
+  mediante su atributo `style` desde `page.evaluate`, que es zoom de texto y no de
+  disposición.
+- El guion también necesitaba **crear un proyecto** antes de abrir el editor: la
+  fixture autenticada limpia las filas del propietario antes de cada caso, así que
+  sin proyecto la acción `CREATE_TASK` no tenía destino válido.
+- **Segunda ejecución: 7 de 7.** @s37, @s39 y @s40 sobre la pila real; @s42 a 320,
+  768, 1280 y 1440 píxeles CSS y con texto al 200 %: sin desplazamiento
+  horizontal, controles interactivos de 44 × 44 como mínimo y **cero violaciones
+  axe serias o críticas** con `wcag2a`, `wcag2aa`, `wcag21aa`, `wcag22aa` y
+  `best-practice`.
+
+Con esto **@s42 pasa a estar cubierto**; la tabla de trazabilidad se actualiza.
+
 ## Discrepancia de contrato pendiente de dictamen (@s30 vs @s32)
 
 @s30 dice que cada coincidencia contiene «exactamente eventId, eventType, occurredAt
@@ -359,7 +380,7 @@ en la máquina; la suite completa queda para el cierre, con turno del coordinado
 | @s39 | `automations.test.tsx` @s39, `automations-api.test.ts` @s39 (2) |
 | @s40 | `automations.test.tsx` @s40 (4), `automations-api.test.ts` @s40 (2) |
 | @s41 | `automations.test.tsx` @s41, `automations-api.test.ts` @s41 (2) |
-| @s42 | `e2e/automations.spec.mjs` — **escrito, no ejecutado. NO cubierto.** |
+| @s42 | `e2e/automations.spec.mjs` — **ejecutado, 7/7 sobre la pila real**: 320/768/1280/1440 px y texto al 200 %, sin desplazamiento horizontal, 44 × 44 px y cero violaciones axe serias o críticas |
 | @s43 | `automations.test.tsx` @s43 (2), `automations-api.test.ts` @s43 |
 
 Diferidos a la fase 2 (worker compartido y feature 25), **sin cobertura y sin
@@ -399,6 +420,6 @@ filas NOTIFY_WEBHOOK reales de @s5, @s12, @s21, @s32 y @s33.
 - La acción NOTIFY_WEBHOOK queda **detrás del punto de extensión**
   `WebhookEndpointLookup`, cuyo bean responde false para todo. Sustituirlo por el
   adaptador real de 25 es el único cambio de la fase 2 en la parte de guardado.
-- **Lo que NO está demostrado**: @s42 (responsive, zoom y axe) y todos los
-  escenarios de ejecución del worker. La fase 1 no ejecuta ninguna regla: sólo las
-  declara, las simula y expone su auditoría.
+- **Lo que NO está demostrado**: los escenarios de ejecución del worker (fase 2).
+  La fase 1 no ejecuta ninguna regla: sólo las declara, las simula y expone su
+  auditoría. @s42 sí quedó demostrado en el ciclo 18.

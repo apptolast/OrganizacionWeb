@@ -31,7 +31,7 @@ por clase concreta, nunca la suite entera.
 | 16 | media | ya cerrado en la base | — |
 | 17 | media | ya cerrado en la base | — |
 | 18 | media | **CERRADO** | ciclo 1 |
-| 19 | baja | pendiente | — |
+| 19 | baja (media segun el verificador) | **CERRADO** | ciclo 6 |
 
 ---
 
@@ -347,3 +347,111 @@ al 200 %) lo cierra otro carril en un fichero nuevo,
 `e2e/external-calendar-native-zoom.spec.mjs`. Este carril no lo crea, para no
 duplicar ni chocar en la integración; la matriz UX lo deja escrito como pendiente
 con el nombre del fichero que lo cubrirá.
+
+---
+
+## Ciclo 6 — hallazgo 19: @s25, la lectura concurrente durante la sincronización
+
+**Qué decía el dictamen.** @s25 tiene tres Then y el segundo —«una lectura
+concurrente durante la sincronización ve la lista anterior completa o la nueva
+completa, nunca una vacía ni mezclada»— no tenía **ningún** oráculo: los doce
+ficheros de prueba del carril no contenían un solo `Thread`, `ExecutorService`,
+`CountDownLatch` ni conexión secundaria. La garantía existía por construcción
+(`PostgresExternalCalendarStore.commitSuccess` envuelve UPDATE + DELETE + insert
+en `writing(...)`), pero nada la fijaba, y PIT no la detecta porque sus operadores
+no reestructuran transacciones.
+
+**VERDE.** Prueba nueva `s25_aConcurrentReadNeverSeesAnEmptyOrMixedSnapshot` en
+`ExternalCalendarPersistenceTest`, con la técnica que el repositorio ya usa en
+`HistoryReadTransactionTest`: se subclasifica el `JdbcTemplate` del escritor para
+colarse **dentro** de su transacción, justo después del
+`DELETE FROM external_calendar_events` y antes de insertar la lista nueva —el
+único instante en que la instantánea está vacía—, y desde **otro hilo**, y por
+tanto desde otra conexión, se lee con `store().events(...)`. Se afirma que esa
+lectura devuelve exactamente `["u1","u2"]` (la lista anterior completa, ni vacía
+ni mezclada) y que al terminar la escritura queda exactamente `["u3","u4"]`.
+
+`gradlew test --tests "…ExternalCalendarPersistenceTest" --no-daemon` →
+`BUILD SUCCESSFUL`, 19 pruebas.
+
+**ROJO demostrado sobre producción.** Se sacaron el DELETE y el `insert` fuera del
+lambda de `writing(...)` en `commitSuccess` —exactamente el cambio que el dictamen
+describe como indetectable hoy— y quedaron en auto-commit. La prueba cayó por el
+motivo correcto:
+
+```
+ExternalCalendarPersistenceTest > s25_aConcurrentReadNeverSeesAnEmptyOrMixedSnapshot() FAILED
+org.opentest4j.AssertionFailedError:
+Expecting actual:
+  []
+to contain exactly (and in same order):
+  ["u1", "u2"]
+19 tests completed, 1 failed
+```
+
+La lectura concurrente vio **la lista vacía**: justo el estado que el contrato
+prohíbe. Producción restaurada al estado de HEAD (`git status` sólo marcaba el
+fichero de prueba) y verde recuperado.
+
+**Lo que este ciclo NO cierra.** El verificador señalaba además que
+`s25_syncingDoesNotTouchTheOutbox` sólo comprueba `SELECT count(*) FROM
+outbox_events = 0`, y no «ninguna otra tabla ni historial» como promete su título
+y el contrato. Queda abierto y anotado, no silenciado.
+
+---
+
+## Estado al cortar la sesión
+
+**Cerrados por este carril, con rojo demostrado y commit propio:** 18, 8, 15, 14,
+3 y 19. **Ya venían cerrados en la base:** 2, 7, 16 y 17 (el 9 es el mismo defecto
+que el 2 y quedó cubierto por la prueba de señales que ya existía en
+`external-calendar.test.tsx`).
+
+**Abiertos, con lo que hace falta para cada uno:**
+
+- **1, 5, 10, 12** (bloqueantes de la auditoría UX): parametrizar la matriz de 14
+  anchos y la de texto al 200 % por los cinco estados del Given de @s40 —vacío;
+  con suscripción; con error tras sync FAILED; con lista larga de resúmenes
+  Unicode, sembrada por `sql()` con INSERT en `external_calendar_events`; y
+  guardando, congelado con `page.route` sobre el PUT—, incluyendo el diálogo de
+  confirmación abierto para que «Sí, eliminar» y «Cancelar» entren en la medición
+  de 44×44 px; y sustituir `noHorizontalScroll` por el `geometry()` de
+  `e2e/ics-calendar-ux.spec.mjs` (solapes por pares y recorte por elemento en los
+  dos ejes). Requiere levantar la pila con `E2E_WEB_PORT=18092` y ejecutar sólo
+  `e2e/external-calendar-ux-audit.spec.mjs`.
+- **4** (zoom nativo 200 %): **fuera del alcance de este carril** por instrucción
+  del coordinador; lo cubre otro carril en
+  `e2e/external-calendar-native-zoom.spec.mjs`.
+- **6** (enmienda B3, guardia SSRF): no se ha tocado. El diseño que exige el
+  dictamen es que `OutboundGuard` devuelva las direcciones validadas junto al
+  veredicto y que `HttpCalendarFeed` conecte contra la dirección literal ya
+  validada conservando el nombre en `Host` y en SNI. Se decidió **no empezarlo**
+  con el plazo restante: a medias vale cero, y dejar `OutboundGuard` con la
+  interfaz cambiada y la conexión sin fijar habría roto el árbol sin cerrar nada.
+  Aviso para quien lo retome: `OutboundGuard` sólo lo usan `SaveExternalCalendar`
+  y `SyncExternalCalendar` (los webhooks tienen su propio
+  `WebhookDestinationGuard`), así que el cambio de interfaz no sale del carril; el
+  punto caro es el pinning en el `HttpClient` del JDK, que no admite un resolutor
+  por cliente (haría falta `java.net.spi.InetAddressResolverProvider`, que es de
+  ámbito JVM, o reescribir la autoridad de la URI con `Host` restringido y
+  `SSLParameters.setServerNames`). Y sigue en pie la alternativa (b) del dictamen:
+  que el coordinador escriba la resolución sobre B3 con registro en
+  `project-spec.md` y en `progress/current.md` más la política de egreso en
+  `deploy/`.
+- **11** (@s34, cuerpo de Hoy con suscripción): falta la prueba estilo
+  `TodayApiTest` con los tres examples, sembrando suscripción e instantánea por
+  SQL y comparando el cuerpo de `GET /api/v1/today` byte a byte con R0.
+- **13** (tema oscuro y forced-colors): falta la pasada con `emulateMedia`
+  siguiendo `e2e/ics-calendar-ux.spec.mjs:304-327`.
+- Menor, anotado arriba: `s25_syncingDoesNotTouchTheOutbox` promete más de lo que
+  comprueba; y la línea 84 de `e2e/external-calendar-ux-audit.spec.mjs` es una
+  espera negativa placebo que debe morir al reescribir la auditoría.
+
+**Puerta de mutación:** no se ha ejecutado ninguna campaña, por instrucción
+expresa del coordinador (tardan demasiado para el plazo). Antes de correrla,
+comprobar que los patrones PIT de `externalCalendarClasses` resuelven a clases
+existentes —el hallazgo 7 ya corrigió los dos globs muertos hacia
+`adapter.crypto`— y que los cuatro rangos nuevos de
+`stryker.external-calendar.config.json` siguen alineados: la prueba
+`external calendar Stryker ranges still cover the route and the navigation entry (@s37)`
+lo verifica sin necesidad de ejecutar Stryker.

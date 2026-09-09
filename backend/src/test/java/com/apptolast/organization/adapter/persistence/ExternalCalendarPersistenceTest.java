@@ -10,10 +10,14 @@ import com.apptolast.organization.domain.SyncSummary;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -255,6 +259,91 @@ class ExternalCalendarPersistenceTest {
                 A, Instant.parse("2030-01-08T00:00:00Z"), Instant.parse("2030-01-09T00:00:00Z"));
     assertThat(events.stream().map(ExternalEvent::uid)).containsExactly("u2", "u3");
     assertThat(events.getFirst().summary()).isEqualTo("Nuevo");
+  }
+
+  /**
+   * @s25, tercer Then: «una lectura concurrente durante la sincronización ve la lista anterior
+   *     completa o la nueva completa, nunca una vacía ni mezclada».
+   *
+   * <p>La técnica es la de {@code HistoryReadTransactionTest}: se subclasifica el
+   * {@link JdbcTemplate} del escritor para colarse **dentro** de su transacción, justo después del
+   * DELETE y antes de insertar la lista nueva —el único instante en que la instantánea está vacía—,
+   * y desde otro hilo, y por tanto desde otra conexión, se lee. Sin el envoltorio transaccional de
+   * {@code commitSuccess} esa lectura devolvería la lista vacía.
+   */
+  @Test
+  @Timeout(120)
+  void s25_aConcurrentReadNeverSeesAnEmptyOrMixedSnapshot() throws Exception {
+    store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
+    store()
+        .commitSuccess(
+            A,
+            0,
+            summary(2, false),
+            List.of(
+                event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z"),
+                event("u2", "2030-01-08T11:00:00Z", "2030-01-08T12:00:00Z")),
+            EARLIER);
+
+    var readers = Executors.newSingleThreadExecutor();
+    var seenMidWrite = new AtomicReference<List<String>>();
+    var failure = new AtomicReference<Exception>();
+    var interrupting =
+        new JdbcTemplate(jdbc.getDataSource()) {
+          @Override
+          public int update(String sql, Object... args) {
+            int rows = super.update(sql, args);
+            if (sql.startsWith("DELETE FROM external_calendar_events") && seenMidWrite.get() == null)
+              try {
+                seenMidWrite.set(
+                    readers
+                        .submit(
+                            () ->
+                                store()
+                                    .events(
+                                        A,
+                                        Instant.parse("2030-01-08T00:00:00Z"),
+                                        Instant.parse("2030-01-09T00:00:00Z"))
+                                    .stream()
+                                    .map(ExternalEvent::uid)
+                                    .toList())
+                        .get(30, TimeUnit.SECONDS));
+              } catch (Exception unreadable) {
+                failure.set(unreadable);
+              }
+            return rows;
+          }
+        };
+
+    try {
+      new PostgresExternalCalendarStore(interrupting, new TransactionTemplate(manager))
+          .commitSuccess(
+              A,
+              1,
+              summary(2, false),
+              List.of(
+                  event("u3", "2030-01-08T13:00:00Z", "2030-01-08T14:00:00Z"),
+                  event("u4", "2030-01-08T15:00:00Z", "2030-01-08T16:00:00Z")),
+              NOW);
+    } finally {
+      readers.shutdownNow();
+    }
+
+    assertThat(failure.get()).isNull();
+    assertThat(seenMidWrite.get())
+        .as("la lectura concurrente debe haberse ejecutado dentro de la escritura")
+        .isNotNull();
+    // Ni vacía ni mezclada: exactamente la lista anterior completa. La nueva aún no existe para
+    // nadie de fuera, así que ésta es la única respuesta correcta en ese instante.
+    assertThat(seenMidWrite.get()).containsExactly("u1", "u2");
+    // Y al terminar, exactamente la nueva completa.
+    assertThat(
+            store()
+                .events(
+                    A, Instant.parse("2030-01-08T00:00:00Z"), Instant.parse("2030-01-09T00:00:00Z"))
+                .stream()
+                .map(ExternalEvent::uid))
+        .containsExactly("u3", "u4");
   }
 
   @Test

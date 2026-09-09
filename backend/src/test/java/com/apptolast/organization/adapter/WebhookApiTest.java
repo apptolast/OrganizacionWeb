@@ -160,8 +160,7 @@ class WebhookApiTest {
 
   @Test
   void s13_deleteAnswersNoContentWithoutBody() throws Exception {
-    mvc.perform(
-            delete("/api/v1/me/webhooks/" + W).with(user("owner")).with(csrf().asHeader()))
+    mvc.perform(delete("/api/v1/me/webhooks/" + W).with(user("owner")).with(csrf().asHeader()))
         .andExpect(status().isNoContent())
         .andExpect(content().string(""));
     verify(manage).delete("owner", W);
@@ -174,9 +173,7 @@ class WebhookApiTest {
             UUID.fromString("33333333-3333-4333-8333-333333333333"), NOW);
     when(manage.ping("owner", W)).thenReturn(delivery);
     mvc.perform(
-            post("/api/v1/me/webhooks/" + W + "/ping")
-                .with(user("owner"))
-                .with(csrf().asHeader()))
+            post("/api/v1/me/webhooks/" + W + "/ping").with(user("owner")).with(csrf().asHeader()))
         .andExpect(status().isAccepted())
         .andExpect(header().string("Cache-Control", "no-store"))
         .andExpect(jsonPath("$.*", hasSize(1)))
@@ -208,9 +205,7 @@ class WebhookApiTest {
                 com.apptolast.organization.application.WebhookOperationException.Code.valueOf(
                     code)));
     mvc.perform(
-            post("/api/v1/me/webhooks/" + W + "/ping")
-                .with(user("owner"))
-                .with(csrf().asHeader()))
+            post("/api/v1/me/webhooks/" + W + "/ping").with(user("owner")).with(csrf().asHeader()))
         .andExpect(status().is(status))
         .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
         .andExpect(header().string("Cache-Control", "no-store"))
@@ -358,8 +353,7 @@ class WebhookApiTest {
                 .with(user("owner"))
                 .with(csrf().asHeader())
                 .contentType("application/json")
-                .content(
-                    "{\"url\":\"https://example.com/h\",\"eventTypes\":[\"TaskCreated.v1\"]}"))
+                .content("{\"url\":\"https://example.com/h\",\"eventTypes\":[\"TaskCreated.v1\"]}"))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.code").value("WEBHOOK_INVALID"));
     verifyNoInteractions(create);

@@ -120,7 +120,10 @@ class ApplicationWiringTest {
             SubtaskCommit.class,
             SubtaskQueries.class,
             AvailabilityQueries.class,
-            AvailabilityEditing.class)) {
+            AvailabilityEditing.class,
+            // El cifrado de secretos de los conectores lo publica ConnectorConfiguration, que este
+            // contexto delgado no carga; sin él los beans del calendario externo no se construyen.
+            SecretCipher.class)) {
       runner = addPort(runner, port);
     }
     return runner;

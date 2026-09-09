@@ -44,8 +44,7 @@ public final class WebhookController {
             principal.getName(), request.url(), request.description(), request.eventTypes());
     return ResponseEntity.created(URI.create(BASE + "/" + created.endpoint().id()))
         .header("Cache-Control", "no-store")
-        .body(
-            new CreationView(WebhookEndpointView.of(created.endpoint()), created.secret()));
+        .body(new CreationView(WebhookEndpointView.of(created.endpoint()), created.secret()));
   }
 
   /** Any query string on this route is a rejected field, never a silent filter. */
@@ -98,9 +97,9 @@ public final class WebhookController {
 
   @org.springframework.web.bind.annotation.GetMapping(BASE)
   public ResponseEntity<?> list(Principal principal) {
-    return ok(new EndpointList(manage.list(principal.getName()).stream()
-        .map(WebhookEndpointView::of)
-        .toList()));
+    return ok(
+        new EndpointList(
+            manage.list(principal.getName()).stream().map(WebhookEndpointView::of).toList()));
   }
 
   @org.springframework.web.bind.annotation.GetMapping(BASE + "/{id}")
@@ -113,8 +112,7 @@ public final class WebhookController {
       Principal principal, @PathVariable String id, HttpServletRequest http) throws IOException {
     var target = readStatus(http);
     return ok(
-        WebhookEndpointView.of(
-            manage.changeStatus(principal.getName(), identifier(id), target)));
+        WebhookEndpointView.of(manage.changeStatus(principal.getName(), identifier(id), target)));
   }
 
   @org.springframework.web.bind.annotation.DeleteMapping(BASE + "/{id}")
@@ -130,16 +128,17 @@ public final class WebhookController {
 
   @org.springframework.web.bind.annotation.GetMapping(BASE + "/{id}/deliveries")
   public ResponseEntity<?> deliveries(Principal principal, @PathVariable String id) {
-    return ok(new DeliveryList(manage.deliveries(principal.getName(), identifier(id)).stream()
-        .map(WebhookDeliveryView::of)
-        .toList()));
+    return ok(
+        new DeliveryList(
+            manage.deliveries(principal.getName(), identifier(id)).stream()
+                .map(WebhookDeliveryView::of)
+                .toList()));
   }
 
   @PostMapping(BASE + "/{id}/deliveries/{deliveryId}/redeliver")
   public ResponseEntity<?> redeliver(
       Principal principal, @PathVariable String id, @PathVariable String deliveryId) {
-    return accepted(
-        manage.redeliver(principal.getName(), identifier(id), identifier(deliveryId)));
+    return accepted(manage.redeliver(principal.getName(), identifier(id), identifier(deliveryId)));
   }
 
   private static ResponseEntity<?> ok(Object body) {

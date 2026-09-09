@@ -209,7 +209,9 @@ public final class PostgresWebhookStore implements WebhookEndpoints, WebhookDeli
 
   private void lockOwner(String owner) {
     jdbc.queryForObject(
-        "SELECT pg_advisory_xact_lock(hashtextextended(?,0))", Object.class, "webhook-owner:" + owner);
+        "SELECT pg_advisory_xact_lock(hashtextextended(?,0))",
+        Object.class,
+        "webhook-owner:" + owner);
   }
 
   private int countOf(String owner) {

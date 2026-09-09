@@ -22,15 +22,7 @@ class ManageWebhookTest {
 
   private static WebhookEndpoint endpoint(String status) {
     return new WebhookEndpoint(
-        W,
-        "https://example.com/h",
-        "",
-        List.of("TaskCreated.v1"),
-        status,
-        null,
-        null,
-        NOW,
-        NOW);
+        W, "https://example.com/h", "", List.of("TaskCreated.v1"), status, null, null, NOW, NOW);
   }
 
   private static ManageWebhook manage(
@@ -52,7 +44,8 @@ class ManageWebhookTest {
   @Test
   void s14_s17_pingEnqueuesASyntheticDeliveryWhoseEventIdIsItsOwnId() {
     var deliveries = new FakeWebhookDeliveries();
-    var delivery = manage(withActiveEndpoint(), deliveries, FakeWebhookSecrets.KEYED).ping(OWNER, W);
+    var delivery =
+        manage(withActiveEndpoint(), deliveries, FakeWebhookSecrets.KEYED).ping(OWNER, W);
     assertSame(deliveries.enqueued, delivery);
     assertEquals(W, deliveries.enqueuedFor);
     assertEquals(delivery.id(), delivery.eventId());
@@ -86,7 +79,8 @@ class ManageWebhookTest {
     pending.pendingPing = true;
     assertEquals(
         WebhookOperationException.Code.DELIVERY_PENDING,
-        codeOf(() -> manage(withActiveEndpoint(), pending, FakeWebhookSecrets.KEYED).ping(OWNER, W)));
+        codeOf(
+            () -> manage(withActiveEndpoint(), pending, FakeWebhookSecrets.KEYED).ping(OWNER, W)));
     assertNull(deliveries.enqueued);
     assertNull(pending.enqueued);
   }
@@ -95,7 +89,8 @@ class ManageWebhookTest {
   void s14_aPendingOutboxDeliveryDoesNotBlockAPing() {
     var deliveries = new FakeWebhookDeliveries();
     deliveries.give(D, "pending", NOW);
-    var delivery = manage(withActiveEndpoint(), deliveries, FakeWebhookSecrets.KEYED).ping(OWNER, W);
+    var delivery =
+        manage(withActiveEndpoint(), deliveries, FakeWebhookSecrets.KEYED).ping(OWNER, W);
     assertEquals("pending", delivery.status());
     assertNotNull(deliveries.enqueued);
   }
@@ -161,15 +156,18 @@ class ManageWebhookTest {
   void s11_s13_readsStatusDeleteAndRedeliverAllReportNotFoundForAnUnknownId() {
     var manage =
         manage(withActiveEndpoint(), new FakeWebhookDeliveries(), FakeWebhookSecrets.KEYED);
-    assertEquals(WebhookOperationException.Code.NOT_FOUND, codeOf(() -> manage.find(OWNER, UNKNOWN)));
+    assertEquals(
+        WebhookOperationException.Code.NOT_FOUND, codeOf(() -> manage.find(OWNER, UNKNOWN)));
     assertEquals(
         WebhookOperationException.Code.NOT_FOUND, codeOf(() -> manage.deliveries(OWNER, UNKNOWN)));
     assertEquals(
         WebhookOperationException.Code.NOT_FOUND,
         codeOf(() -> manage.changeStatus(OWNER, UNKNOWN, "disabled")));
-    assertEquals(WebhookOperationException.Code.NOT_FOUND, codeOf(() -> manage.delete(OWNER, UNKNOWN)));
     assertEquals(
-        WebhookOperationException.Code.NOT_FOUND, codeOf(() -> manage.redeliver(OWNER, UNKNOWN, D)));
+        WebhookOperationException.Code.NOT_FOUND, codeOf(() -> manage.delete(OWNER, UNKNOWN)));
+    assertEquals(
+        WebhookOperationException.Code.NOT_FOUND,
+        codeOf(() -> manage.redeliver(OWNER, UNKNOWN, D)));
   }
 
   @Test
@@ -187,8 +185,7 @@ class ManageWebhookTest {
       var deliveries = new FakeWebhookDeliveries();
       var original = deliveries.give(D, terminal, Instant.parse("2026-09-01T00:00:00Z"));
       var result =
-          manage(withActiveEndpoint(), deliveries, FakeWebhookSecrets.KEYED)
-              .redeliver(OWNER, W, D);
+          manage(withActiveEndpoint(), deliveries, FakeWebhookSecrets.KEYED).redeliver(OWNER, W, D);
       assertSame(deliveries.requeued, result);
       assertEquals(original.id(), result.id());
       assertEquals(original.eventId(), result.eventId());
@@ -219,8 +216,7 @@ class ManageWebhookTest {
     exhausted.give(D, "exhausted", NOW);
     assertEquals(
         WebhookOperationException.Code.DISABLED,
-        codeOf(
-            () -> manage(disabled, exhausted, FakeWebhookSecrets.KEYED).redeliver(OWNER, W, D)));
+        codeOf(() -> manage(disabled, exhausted, FakeWebhookSecrets.KEYED).redeliver(OWNER, W, D)));
     assertNull(exhausted.requeued);
   }
 

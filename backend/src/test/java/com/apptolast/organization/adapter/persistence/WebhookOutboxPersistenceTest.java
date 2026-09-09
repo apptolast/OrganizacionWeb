@@ -32,15 +32,7 @@ class WebhookOutboxPersistenceTest {
   private static WebhookEndpoint given(String owner, List<String> types) {
     var endpoint =
         new WebhookEndpoint(
-            UUID.randomUUID(),
-            "https://example.com/h",
-            "",
-            types,
-            "active",
-            null,
-            null,
-            T,
-            T);
+            UUID.randomUUID(), "https://example.com/h", "", types, "active", null, null, T, T);
     store().insert(owner, endpoint, "cipher:whsec_x".getBytes(StandardCharsets.UTF_8));
     return endpoint;
   }
@@ -109,9 +101,7 @@ class WebhookOutboxPersistenceTest {
     givenEvent(owner, project, "ProjectCreated.v1", T.plusSeconds(600), "pending", 1);
 
     var candidates =
-        outbox()
-            .after(owner, new WebhookCursor(T, NIL), T.plusSeconds(60))
-            .stream()
+        outbox().after(owner, new WebhookCursor(T, NIL), T.plusSeconds(60)).stream()
             .map(candidate -> candidate.eventId())
             .toList();
 
@@ -218,8 +208,7 @@ class WebhookOutboxPersistenceTest {
     var endpoint = given(owner, List.of("ProjectCreated.v1"));
     assertTrue(isReady(endpoint.id()), "a fresh endpoint is ready");
 
-    store()
-        .enqueuePing(owner, endpoint.id(), WebhookDelivery.ping(UUID.randomUUID(), T), "{}");
+    store().enqueuePing(owner, endpoint.id(), WebhookDelivery.ping(UUID.randomUUID(), T), "{}");
     assertTrue(isReady(endpoint.id()), "a pending ping never blocks the outbox walk");
 
     givenEvent(owner, project, "ProjectCreated.v1", T.plusSeconds(1), "pending", 1);

@@ -1,10 +1,10 @@
 package com.apptolast.organization.adapter.webhook;
 
+import com.apptolast.organization.application.AddressPolicy;
 import com.apptolast.organization.application.WebhookSender;
 import com.apptolast.organization.domain.WebhookAttempt;
 import java.io.IOException;
 import java.net.ConnectException;
-import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.net.http.HttpClient;
@@ -14,7 +14,6 @@ import java.net.http.HttpTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
-import java.util.function.Predicate;
 import javax.net.ssl.SSLException;
 
 /**
@@ -24,7 +23,8 @@ import javax.net.ssl.SSLException;
  * accepts the connection and stalls still times out. The response body is discarded, never stored.
  *
  * <p>Amendment B3: the host is resolved once and every returned address is checked before
- * connecting, so no name can be re-pointed between the check and the use.
+ * connecting, so no name can be re-pointed between the check and the use. The check uses the shared
+ * {@link AddressPolicy}, whose {@code allows} answers PERMITTED: the rejection is its negation.
  */
 public final class JdkWebhookSender implements WebhookSender {
   private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(5);
@@ -34,17 +34,17 @@ public final class JdkWebhookSender implements WebhookSender {
   private static final int MILLIS_PER_NANO = 1_000_000;
 
   private final Clock clock;
-  private final Predicate<InetAddress> blocked;
+  private final AddressPolicy policy;
   private final com.apptolast.organization.application.WebhookDestinationGuard.HostResolver
       resolver;
   private final HttpClient client;
 
   public JdkWebhookSender(
       Clock clock,
-      Predicate<InetAddress> blocked,
+      AddressPolicy policy,
       com.apptolast.organization.application.WebhookDestinationGuard.HostResolver resolver) {
     this.clock = clock;
-    this.blocked = blocked;
+    this.policy = policy;
     this.resolver = resolver;
     this.client =
         HttpClient.newBuilder()
@@ -93,7 +93,7 @@ public final class JdkWebhookSender implements WebhookSender {
     var host = URI.create(url).getHost();
     var addresses = resolver.resolve(host);
     if (addresses == null || addresses.length == 0) throw new UnknownHostException(host);
-    for (var address : addresses) if (blocked.test(address)) throw new BlockedDestination();
+    for (var address : addresses) if (!policy.allows(address)) throw new BlockedDestination();
   }
 
   private HttpRequest request(String url, String secret, String eventId, byte[] payload) {

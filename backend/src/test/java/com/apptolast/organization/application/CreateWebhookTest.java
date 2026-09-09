@@ -16,7 +16,8 @@ class CreateWebhookTest {
   private static final Clock CLOCK =
       Clock.fixed(Instant.parse("2026-09-08T10:00:00.000000Z"), ZoneOffset.UTC);
   static final WebhookDestinationGuard PUBLIC_ONLY =
-      new WebhookDestinationGuard(CreateWebhookTest::resolve, AddressPolicy::isBlocked);
+      new WebhookDestinationGuard(
+          CreateWebhookTest::resolve, AddressPolicy.blockingPrivateAddresses());
 
   private static InetAddress[] resolve(String host) throws UnknownHostException {
     return switch (host) {

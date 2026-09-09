@@ -28,8 +28,7 @@ class WebhookAttemptTest {
   })
   void s24_theFixedTableDrivesEachRetryAndTheSixthFailureExhausts(
       int previous, int attempt, String status, String delay) {
-    var recorded =
-        pendingWith(previous).recorded(WebhookAttempt.http(500, 12), T);
+    var recorded = pendingWith(previous).recorded(WebhookAttempt.http(500, 12), T);
 
     assertEquals(attempt, recorded.attempt());
     assertEquals(status, recorded.status());

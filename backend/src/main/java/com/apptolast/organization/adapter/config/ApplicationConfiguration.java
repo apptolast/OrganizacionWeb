@@ -454,11 +454,18 @@ public class ApplicationConfiguration {
         : secrets;
   }
 
+  /**
+   * La guardia de destino de los webhooks usa la política fija, NO el bean {@code
+   * connectorAddressPolicy} de la feature 28: {@code APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES} está
+   * documentado como válvula del perfil de extremo a extremo del calendario externo, y el envío de
+   * webhooks firmados nunca queda a su merced. Decisión tomada al unificar {@code AddressPolicy};
+   * el E2E de la feature 25 no la necesita porque simula todas las respuestas.
+   */
   @Bean
   com.apptolast.organization.application.WebhookDestinationGuard webhookDestinationGuard() {
     return new com.apptolast.organization.application.WebhookDestinationGuard(
         java.net.InetAddress::getAllByName,
-        com.apptolast.organization.application.AddressPolicy::isBlocked);
+        com.apptolast.organization.application.AddressPolicy.blockingPrivateAddresses());
   }
 
   @Bean
@@ -493,7 +500,7 @@ public class ApplicationConfiguration {
   com.apptolast.organization.application.WebhookSender webhookSender(Clock clock) {
     return new com.apptolast.organization.adapter.webhook.JdkWebhookSender(
         clock,
-        com.apptolast.organization.application.AddressPolicy::isBlocked,
+        com.apptolast.organization.application.AddressPolicy.blockingPrivateAddresses(),
         java.net.InetAddress::getAllByName);
   }
 
@@ -537,5 +544,91 @@ public class ApplicationConfiguration {
       Clock clock) {
     return new com.apptolast.organization.application.ManageWebhook(
         endpoints, deliveries, secrets, clock);
+  }
+
+  // --- Feature 28: calendario externo ---
+
+  @Bean
+  com.apptolast.organization.application.AddressPolicy connectorAddressPolicy(
+      @org.springframework.beans.factory.annotation.Value(
+              "${app.connectors.allow-private-addresses:false}")
+          boolean allowPrivateAddresses) {
+    return allowPrivateAddresses
+        ? com.apptolast.organization.application.AddressPolicy.allowingPrivateAddresses()
+        : com.apptolast.organization.application.AddressPolicy.blockingPrivateAddresses();
+  }
+
+  @Bean
+  com.apptolast.organization.application.HostResolver systemHostResolver() {
+    return new com.apptolast.organization.adapter.net.SystemHostResolver();
+  }
+
+  @Bean
+  com.apptolast.organization.application.OutboundGuard outboundGuard(
+      com.apptolast.organization.application.HostResolver resolver,
+      com.apptolast.organization.application.AddressPolicy policy) {
+    return new com.apptolast.organization.application.OutboundHostGuard(resolver, policy);
+  }
+
+  @Bean
+  com.apptolast.organization.application.CalendarFeed calendarFeed() {
+    return new com.apptolast.organization.adapter.feed.HttpCalendarFeed(
+        com.apptolast.organization.adapter.feed.HttpCalendarFeed.TIMEOUT);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ExternalCalendarAudit externalCalendarAudit() {
+    return new com.apptolast.organization.adapter.logging.Slf4jExternalCalendarAudit();
+  }
+
+  @Bean
+  com.apptolast.organization.application.ExternalCalendarStore externalCalendarStore(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions) {
+    return new com.apptolast.organization.adapter.persistence.PostgresExternalCalendarStore(
+        jdbc, new org.springframework.transaction.support.TransactionTemplate(transactions));
+  }
+
+  @Bean
+  com.apptolast.organization.application.ExternalCalendarUseCases.Read readExternalCalendar(
+      com.apptolast.organization.application.ExternalCalendarStore store) {
+    return new com.apptolast.organization.application.ReadExternalCalendar(store);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ExternalCalendarUseCases.Save saveExternalCalendar(
+      com.apptolast.organization.application.ExternalCalendarStore store,
+      com.apptolast.organization.application.SecretCipher cipher,
+      com.apptolast.organization.application.OutboundGuard guard,
+      Clock clock) {
+    return new com.apptolast.organization.application.SaveExternalCalendar(
+        store, cipher, guard, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ExternalCalendarUseCases.Delete deleteExternalCalendar(
+      com.apptolast.organization.application.ExternalCalendarStore store) {
+    return new com.apptolast.organization.application.DeleteExternalCalendar(store);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ExternalCalendarUseCases.Sync syncExternalCalendar(
+      com.apptolast.organization.application.ExternalCalendarStore store,
+      com.apptolast.organization.application.SecretCipher cipher,
+      com.apptolast.organization.application.OutboundGuard guard,
+      com.apptolast.organization.application.CalendarFeed feed,
+      com.apptolast.organization.application.AvailabilityQueries availability,
+      com.apptolast.organization.application.ZoneCatalog zones,
+      Clock clock,
+      com.apptolast.organization.application.ExternalCalendarAudit audit) {
+    return new com.apptolast.organization.application.SyncExternalCalendar(
+        store, cipher, guard, feed, availability, zones, clock, audit);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ExternalCalendarUseCases.ReadEvents
+      readExternalCalendarEvents(
+          com.apptolast.organization.application.ExternalCalendarStore store) {
+    return new com.apptolast.organization.application.ReadExternalCalendarEvents(store);
   }
 }

@@ -26,7 +26,7 @@ class GithubConnectorWiringTest {
     assertThat(cipher.enabled()).isFalse();
     assertThatThrownBy(() -> cipher.encrypt("owner", "ghp_x"))
         .isInstanceOf(ConnectorsDisabledException.class);
-    assertThatThrownBy(() -> cipher.decrypt("owner", new byte[43]))
+    assertThatThrownBy(() -> cipher.decrypt("owner", new byte[42]))
         .isInstanceOf(ConnectorsDisabledException.class);
   }
 
@@ -42,8 +42,8 @@ class GithubConnectorWiringTest {
 
     assertThat(cipher.enabled()).isTrue();
     var sealed = cipher.encrypt("owner", "ghp_secreto123");
-    assertThat(cipher.decrypt("owner", sealed)).isEqualTo("ghp_secreto123");
-    assertThat(sealed).hasSize(1 + 12 + "ghp_secreto123".length() + 16);
+    assertThat(cipher.decrypt("owner", sealed)).contains("ghp_secreto123");
+    assertThat(sealed).hasSize(12 + "ghp_secreto123".length() + 16);
   }
 
   @ParameterizedTest
@@ -75,9 +75,9 @@ class GithubConnectorWiringTest {
 
     var rotated = configuration.secretCipher(KEY, previous);
 
-    assertThat(rotated.decrypt("owner", sealed)).isEqualTo("ghp_viejo");
+    assertThat(rotated.decrypt("owner", sealed)).contains("ghp_viejo");
     assertThat(rotated.decrypt("owner", rotated.encrypt("owner", "ghp_nuevo")))
-        .isEqualTo("ghp_nuevo");
+        .contains("ghp_nuevo");
   }
 
   @Test

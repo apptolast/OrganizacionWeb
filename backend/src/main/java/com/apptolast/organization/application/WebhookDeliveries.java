@@ -12,8 +12,7 @@ public interface WebhookDeliveries {
   /** A ping still in flight blocks the next one; outbox deliveries do not. */
   boolean hasPendingPing(String owner, UUID endpointId);
 
-  WebhookDelivery enqueuePing(
-      String owner, UUID endpointId, WebhookDelivery delivery, String body);
+  WebhookDelivery enqueuePing(String owner, UUID endpointId, WebhookDelivery delivery, String body);
 
   Optional<WebhookDelivery> find(String owner, UUID endpointId, UUID deliveryId);
 

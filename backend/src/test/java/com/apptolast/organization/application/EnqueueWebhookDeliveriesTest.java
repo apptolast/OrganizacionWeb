@@ -44,8 +44,10 @@ class EnqueueWebhookDeliveriesTest {
     @Override
     public List<OutboxCandidate> after(String owner, WebhookCursor cursor, Instant horizon) {
       return candidates.stream()
-          .filter(candidate -> candidate.occurredAt().isBefore(horizon)
-              || candidate.occurredAt().equals(horizon))
+          .filter(
+              candidate ->
+                  candidate.occurredAt().isBefore(horizon)
+                      || candidate.occurredAt().equals(horizon))
           .filter(candidate -> cursor.precedes(candidate.occurredAt(), candidate.eventId()))
           // Mirrors PostgreSQL: instants first, then uuid as unsigned bytes.
           .sorted(
@@ -55,8 +57,7 @@ class EnqueueWebhookDeliveriesTest {
     }
 
     @Override
-    public void enqueue(
-        UUID endpointId, OutboxCandidate candidate, UUID deliveryId, Instant now) {
+    public void enqueue(UUID endpointId, OutboxCandidate candidate, UUID deliveryId, Instant now) {
       enqueued.add(
           new Enqueued(
               candidate.eventId(),
@@ -105,8 +106,7 @@ class EnqueueWebhookDeliveriesTest {
   void s21_s35_aDiscardedRowIsAuditedWithItsEventAndItsCode() {
     var outbox = new FakeOutbox();
     ready(outbox, endpoint(List.of("ProjectCreated.v1")), new WebhookCursor(CREATED, NIL));
-    outbox.candidates.add(
-        candidate(A, "ProjectCreated.v1", CREATED.plusSeconds(1), "pending", 2));
+    outbox.candidates.add(candidate(A, "ProjectCreated.v1", CREATED.plusSeconds(1), "pending", 2));
 
     enqueuer(outbox, CREATED.plusSeconds(60)).runCycle();
 
@@ -117,8 +117,7 @@ class EnqueueWebhookDeliveriesTest {
   void s21_aBlockedRowIsNotAudited() {
     var outbox = new FakeOutbox();
     ready(outbox, endpoint(List.of("ProjectCreated.v1")), new WebhookCursor(CREATED, NIL));
-    outbox.candidates.add(
-        candidate(A, "ProjectCreated.v1", CREATED.plusSeconds(1), "blocked", 1));
+    outbox.candidates.add(candidate(A, "ProjectCreated.v1", CREATED.plusSeconds(1), "blocked", 1));
 
     enqueuer(outbox, CREATED.plusSeconds(60)).runCycle();
 
@@ -143,8 +142,7 @@ class EnqueueWebhookDeliveriesTest {
     assertEquals(B, outbox.enqueued.getFirst().eventId());
     assertEquals("TaskCreated.v1", outbox.enqueued.getFirst().eventType());
     assertEquals("{\"name\":\"x\"}", outbox.enqueued.getFirst().body());
-    assertEquals(
-        new WebhookCursor(wanted.plusSeconds(1), B), outbox.enqueued.getFirst().cursor());
+    assertEquals(new WebhookCursor(wanted.plusSeconds(1), B), outbox.enqueued.getFirst().cursor());
   }
 
   @ParameterizedTest
@@ -184,8 +182,7 @@ class EnqueueWebhookDeliveriesTest {
   void s21_aBlockedRowIsSkippedWithoutAuditAndTheCursorKeepsMoving() {
     var outbox = new FakeOutbox();
     ready(outbox, endpoint(List.of("ProjectCreated.v1")), new WebhookCursor(CREATED, NIL));
-    outbox.candidates.add(
-        candidate(A, "ProjectCreated.v1", CREATED.plusSeconds(1), "blocked", 1));
+    outbox.candidates.add(candidate(A, "ProjectCreated.v1", CREATED.plusSeconds(1), "blocked", 1));
 
     enqueuer(outbox, CREATED.plusSeconds(60)).runCycle();
 
@@ -198,8 +195,7 @@ class EnqueueWebhookDeliveriesTest {
   void s21_anUnsupportedVersionIsAuditedAndTheCursorAdvancesPastIt() {
     var outbox = new FakeOutbox();
     ready(outbox, endpoint(List.of("ProjectCreated.v1")), new WebhookCursor(CREATED, NIL));
-    outbox.candidates.add(
-        candidate(A, "ProjectCreated.v1", CREATED.plusSeconds(1), "pending", 2));
+    outbox.candidates.add(candidate(A, "ProjectCreated.v1", CREATED.plusSeconds(1), "pending", 2));
 
     enqueuer(outbox, CREATED.plusSeconds(60)).runCycle();
 

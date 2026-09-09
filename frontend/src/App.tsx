@@ -19,6 +19,7 @@ import { IntegrationApi } from "./integration-api";
 import { Webhooks } from "./webhooks";
 import { GithubConnector } from "./github-connector";
 import { IntegrationsIndex } from "./integrations-index";
+import { ExternalCalendar } from "./external-calendar";
 import { useAppearance } from "./appearance-state";
 export function App({
   sessionControls,
@@ -41,6 +42,7 @@ export function App({
   const webhooks = route === "/webhooks";
   const githubConnector = route === "/integraciones/github";
   const integrationsIndex = route === "/integraciones";
+  const externalCalendar = route === "/calendario-externo";
   const taskRoute = /^\/proyectos\/([^/]+)\/tareas\/([^/?]+)$/.exec(route);
   const sessionRoute =
     /^\/proyectos\/([^/]+)\/tareas\/([^/]+)\/sesiones\/([^/?]+)$/.exec(route);
@@ -50,27 +52,29 @@ export function App({
       section={
         webhooks
           ? "Webhooks"
-          : integrationApi
-            ? "API para integraciones"
-            : importData
-              ? "Importación"
-              : calendar
-                ? "Calendario"
-                : exportData
-                  ? "Exportación"
-                  : appearance
-                    ? "Apariencia"
-                    : route === "/"
-                      ? "Hoy"
-                      : weeklyReview
-                        ? "Revisión semanal"
-                        : history
-                          ? "Historial"
-                          : availability
-                            ? "Disponibilidad"
-                            : route.startsWith("/proyectos")
-                              ? "Proyectos"
-                              : null
+          : externalCalendar
+            ? "Calendario externo"
+            : integrationApi
+              ? "API para integraciones"
+              : importData
+                ? "Importación"
+                : calendar
+                  ? "Calendario"
+                  : exportData
+                    ? "Exportación"
+                    : appearance
+                      ? "Apariencia"
+                      : route === "/"
+                        ? "Hoy"
+                        : weeklyReview
+                          ? "Revisión semanal"
+                          : history
+                            ? "Historial"
+                            : availability
+                              ? "Disponibilidad"
+                              : route.startsWith("/proyectos")
+                                ? "Proyectos"
+                                : null
       }
     >
       {webhooks && username ? (
@@ -79,6 +83,8 @@ export function App({
         <GithubConnector owner={username} />
       ) : integrationsIndex && username ? (
         <IntegrationsIndex />
+      ) : externalCalendar && username ? (
+        <ExternalCalendar />
       ) : integrationApi && username ? (
         <IntegrationApi owner={username} />
       ) : importData && username ? (

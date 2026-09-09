@@ -53,8 +53,7 @@ class WebhookPersistenceTest {
         Database.JDBC.queryForMap(
             "SELECT cursor_occurred_at, cursor_event_id FROM webhook_endpoints WHERE id=?",
             endpoint.id());
-    assertEquals(
-        NOW, ((java.sql.Timestamp) cursor.get("cursor_occurred_at")).toInstant());
+    assertEquals(NOW, ((java.sql.Timestamp) cursor.get("cursor_occurred_at")).toInstant());
     assertEquals(NIL, cursor.get("cursor_event_id"));
   }
 
@@ -193,9 +192,9 @@ class WebhookPersistenceTest {
             "SELECT count(*) FROM webhook_deliveries WHERE endpoint_id=?",
             Integer.class,
             doomed.id()));
-    assertEquals(List.of(survivor.id()), store.list(owner, kept.id()).stream()
-        .map(WebhookDelivery::id)
-        .toList());
+    assertEquals(
+        List.of(survivor.id()),
+        store.list(owner, kept.id()).stream().map(WebhookDelivery::id).toList());
     assertFalse(store.delete(owner, doomed.id()));
   }
 

@@ -114,11 +114,11 @@ final class ConnectorFakes {
     }
 
     @Override
-    public String decrypt(String ownerId, byte[] ciphertext) {
+    public java.util.Optional<String> decrypt(String ownerId, byte[] ciphertext) {
       if (!enabled) throw new ConnectorsDisabledException();
       var parts = new String(ciphertext, StandardCharsets.UTF_8).split("\\|", 3);
-      if (parts.length != 3 || !parts[1].equals(ownerId)) throw new SecretUndecipherableException();
-      return reversed(parts[2]);
+      if (parts.length != 3 || !parts[1].equals(ownerId)) return java.util.Optional.empty();
+      return java.util.Optional.of(reversed(parts[2]));
     }
 
     private static String reversed(String text) {

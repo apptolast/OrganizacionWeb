@@ -2,6 +2,7 @@ package com.apptolast.organization.adapter.webhook;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.apptolast.organization.application.AddressPolicy;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
@@ -15,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -28,11 +28,19 @@ class JdkWebhookSenderTest {
   private static final String EVENT = "11111111-1111-4111-8111-111111111111";
   private static final String BODY = "{\"eventId\":\"" + EVENT + "\"}";
 
-  /** Nothing is blocked, so the loopback receiver of these tests is reachable. */
-  private static final Predicate<InetAddress> NOTHING_BLOCKED = address -> false;
+  /**
+   * Nothing is blocked, so the loopback receiver of these tests is reachable. Mind the direction:
+   * the sender now takes an {@link AddressPolicy}, whose {@code allows} answers PERMITTED, the
+   * opposite of the {@code Predicate<InetAddress> blocked} it took before the policies of features
+   * 25 and 28 were unified.
+   */
+  private static final AddressPolicy EVERY_ADDRESS_ALLOWED = address -> true;
 
-  private static JdkWebhookSender sender(Predicate<InetAddress> blocked) {
-    return new JdkWebhookSender(CLOCK, blocked, InetAddress::getAllByName);
+  /** The whole internet is off limits: no destination survives the guard. */
+  private static final AddressPolicy NO_ADDRESS_ALLOWED = address -> false;
+
+  private static JdkWebhookSender sender(AddressPolicy policy) {
+    return new JdkWebhookSender(CLOCK, policy, InetAddress::getAllByName);
   }
 
   private record Receiver(HttpServer server, List<HttpExchange> received) implements AutoCloseable {
@@ -72,11 +80,13 @@ class JdkWebhookSenderTest {
   @Test
   void s16_theRequestCarriesTheAgreedHeadersAndNoCredential() throws Exception {
     var seen = new AtomicReference<HttpExchange>();
-    try (var receiver = start(exchange -> {
-          seen.set(exchange);
-          respond(exchange, 200, new byte[0]);
-        })) {
-      var outcome = sender(NOTHING_BLOCKED).send(receiver.url(), SECRET, EVENT, BODY);
+    try (var receiver =
+        start(
+            exchange -> {
+              seen.set(exchange);
+              respond(exchange, 200, new byte[0]);
+            })) {
+      var outcome = sender(EVERY_ADDRESS_ALLOWED).send(receiver.url(), SECRET, EVENT, BODY);
 
       var headers = seen.get().getRequestHeaders();
       assertEquals("POST", seen.get().getRequestMethod());
@@ -93,16 +103,18 @@ class JdkWebhookSenderTest {
   void s15_theSignatureCoversTheExactBodyAndTheSendingInstant() throws Exception {
     var seen = new AtomicReference<HttpExchange>();
     var body = new AtomicReference<byte[]>();
-    try (var receiver = start(exchange -> {
-          seen.set(exchange);
-          try {
-            body.set(exchange.getRequestBody().readAllBytes());
-          } catch (IOException error) {
-            throw new IllegalStateException(error);
-          }
-          respond(exchange, 200, new byte[0]);
-        })) {
-      sender(NOTHING_BLOCKED).send(receiver.url(), SECRET, EVENT, BODY);
+    try (var receiver =
+        start(
+            exchange -> {
+              seen.set(exchange);
+              try {
+                body.set(exchange.getRequestBody().readAllBytes());
+              } catch (IOException error) {
+                throw new IllegalStateException(error);
+              }
+              respond(exchange, 200, new byte[0]);
+            })) {
+      sender(EVERY_ADDRESS_ALLOWED).send(receiver.url(), SECRET, EVENT, BODY);
 
       assertArrayEquals(BODY.getBytes(StandardCharsets.UTF_8), body.get());
       assertEquals(
@@ -118,7 +130,7 @@ class JdkWebhookSenderTest {
     var payload = "x".repeat(1024).getBytes(StandardCharsets.UTF_8);
     try (var receiver =
         start(exchange -> respond(exchange, code, code == 204 ? new byte[0] : payload))) {
-      var outcome = sender(NOTHING_BLOCKED).send(receiver.url(), SECRET, EVENT, BODY);
+      var outcome = sender(EVERY_ADDRESS_ALLOWED).send(receiver.url(), SECRET, EVENT, BODY);
 
       assertTrue(outcome.succeeded());
       assertEquals(code, outcome.httpStatus());
@@ -132,7 +144,7 @@ class JdkWebhookSenderTest {
   @CsvSource({"404,HTTP_ERROR", "500,HTTP_ERROR"})
   void s25_anErrorResponseIsClassifiedWithItsCode(int code, String expected) throws Exception {
     try (var receiver = start(exchange -> respond(exchange, code, new byte[0]))) {
-      var outcome = sender(NOTHING_BLOCKED).send(receiver.url(), SECRET, EVENT, BODY);
+      var outcome = sender(EVERY_ADDRESS_ALLOWED).send(receiver.url(), SECRET, EVENT, BODY);
 
       assertEquals(expected, outcome.errorClass());
       assertEquals(code, outcome.httpStatus());
@@ -142,16 +154,19 @@ class JdkWebhookSenderTest {
   @Test
   void s25_aRedirectIsNeverFollowedAndTheTargetIsNeverCalled() throws Exception {
     var followed = new ArrayList<HttpExchange>();
-    try (var target = start(exchange -> {
-          followed.add(exchange);
-          respond(exchange, 200, new byte[0]);
-        })) {
+    try (var target =
+        start(
+            exchange -> {
+              followed.add(exchange);
+              respond(exchange, 200, new byte[0]);
+            })) {
       try (var receiver =
-          start(exchange -> {
-            exchange.getResponseHeaders().add("Location", target.url());
-            respond(exchange, 302, new byte[0]);
-          })) {
-        var outcome = sender(NOTHING_BLOCKED).send(receiver.url(), SECRET, EVENT, BODY);
+          start(
+              exchange -> {
+                exchange.getResponseHeaders().add("Location", target.url());
+                respond(exchange, 302, new byte[0]);
+              })) {
+        var outcome = sender(EVERY_ADDRESS_ALLOWED).send(receiver.url(), SECRET, EVENT, BODY);
 
         assertEquals("REDIRECT", outcome.errorClass());
         assertEquals(302, outcome.httpStatus());
@@ -166,7 +181,7 @@ class JdkWebhookSenderTest {
     var url = receiver.url();
     receiver.close();
 
-    var outcome = sender(NOTHING_BLOCKED).send(url, SECRET, EVENT, BODY);
+    var outcome = sender(EVERY_ADDRESS_ALLOWED).send(url, SECRET, EVENT, BODY);
 
     assertEquals("CONNECTION", outcome.errorClass());
     assertNull(outcome.httpStatus());
@@ -175,8 +190,7 @@ class JdkWebhookSenderTest {
   @Test
   void s25_aHostThatDoesNotResolveIsADnsFailure() {
     var outcome =
-        sender(NOTHING_BLOCKED)
-            .send("http://no-existe.invalid/hooks", SECRET, EVENT, BODY);
+        sender(EVERY_ADDRESS_ALLOWED).send("http://no-existe.invalid/hooks", SECRET, EVENT, BODY);
 
     assertEquals("DNS", outcome.errorClass());
     assertNull(outcome.httpStatus());
@@ -185,7 +199,7 @@ class JdkWebhookSenderTest {
   @Test
   void s25_b3_anAddressBlockedAtSendTimeStopsTheRequestBeforeConnecting() throws Exception {
     try (var receiver = start(exchange -> respond(exchange, 200, new byte[0]))) {
-      var outcome = sender(address -> true).send(receiver.url(), SECRET, EVENT, BODY);
+      var outcome = sender(NO_ADDRESS_ALLOWED).send(receiver.url(), SECRET, EVENT, BODY);
 
       assertEquals("BLOCKED_ADDRESS", outcome.errorClass());
       assertNull(outcome.httpStatus());

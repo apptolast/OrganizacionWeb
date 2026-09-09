@@ -163,9 +163,9 @@ class DispatchWebhooksTest {
 
     assertEquals(
         List.of(first.eventId().toString(), second.eventId().toString()), sender.sentEventIds);
-    assertEquals(List.of("succeeded", "succeeded"), work.recorded.stream()
-        .map(WebhookDelivery::status)
-        .toList());
+    assertEquals(
+        List.of("succeeded", "succeeded"),
+        work.recorded.stream().map(WebhookDelivery::status).toList());
     assertEquals(List.of(1, 1), work.recorded.stream().map(WebhookDelivery::attempt).toList());
     assertTrue(work.disabled.isEmpty());
   }

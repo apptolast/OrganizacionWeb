@@ -48,9 +48,7 @@ public final class ManageWebhook implements ManageWebhookUseCase {
   public WebhookEndpoint changeStatus(String owner, UUID id, String status) {
     if (status == null || !SETTABLE_STATUSES.contains(status))
       throw new WebhookInvalidException(List.of("status"));
-    return endpoints
-        .changeStatus(owner, id, status, now())
-        .orElseThrow(ManageWebhook::notFound);
+    return endpoints.changeStatus(owner, id, status, now()).orElseThrow(ManageWebhook::notFound);
   }
 
   @Override
@@ -79,8 +77,7 @@ public final class ManageWebhook implements ManageWebhookUseCase {
   public WebhookDelivery redeliver(String owner, UUID id, UUID deliveryId) {
     requireConnectorKey();
     requireActive(owner, id);
-    var delivery =
-        deliveries.find(owner, id, deliveryId).orElseThrow(ManageWebhook::notFound);
+    var delivery = deliveries.find(owner, id, deliveryId).orElseThrow(ManageWebhook::notFound);
     if (!delivery.isTerminal()) throw operation(Code.DELIVERY_PENDING);
     return deliveries.requeue(owner, id, delivery.requeued(now()));
   }

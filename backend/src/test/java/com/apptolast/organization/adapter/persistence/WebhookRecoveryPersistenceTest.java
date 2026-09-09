@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.apptolast.organization.adapter.webhook.WebhookSignature;
 import com.apptolast.organization.application.ClaimedDelivery;
-import com.apptolast.organization.application.DispatchWebhooks;
-import com.apptolast.organization.application.EnqueueWebhookDeliveries;
 import com.apptolast.organization.application.ManageWebhook;
 import com.apptolast.organization.application.WebhookAudit;
 import com.apptolast.organization.application.WebhookSecrets;
@@ -120,8 +118,12 @@ class WebhookRecoveryPersistenceTest {
     for (var cycle = 0; cycle < 30; cycle++) {
       var claimed = claimOwn(work, owner, now);
       if (claimed == null) return;
-      var outcome = sender.send(claimed.endpoint().url(), claimed.secret(),
-          claimed.delivery().eventId().toString(), claimed.body());
+      var outcome =
+          sender.send(
+              claimed.endpoint().url(),
+              claimed.secret(),
+              claimed.delivery().eventId().toString(),
+              claimed.body());
       var result = claimed.delivery().recorded(outcome, now);
       work.record(
           claimed,
@@ -177,8 +179,7 @@ class WebhookRecoveryPersistenceTest {
 
     // Reactivating through the use case, exactly as the API would.
     var manage =
-        new ManageWebhook(
-            store, store, SECRETS, Clock.fixed(T.plusSeconds(20), ZoneOffset.UTC));
+        new ManageWebhook(store, store, SECRETS, Clock.fixed(T.plusSeconds(20), ZoneOffset.UTC));
     var reactivated = manage.changeStatus(owner, endpoint.id(), "active");
     assertEquals("active", reactivated.status());
     assertNull(reactivated.disabledReason());
@@ -235,8 +236,7 @@ class WebhookRecoveryPersistenceTest {
 
     // The owner asks for a redelivery at 13:00.
     var redeliverAt = Instant.parse("2026-09-08T13:00:00Z");
-    var manage =
-        new ManageWebhook(store, store, SECRETS, Clock.fixed(redeliverAt, ZoneOffset.UTC));
+    var manage = new ManageWebhook(store, store, SECRETS, Clock.fixed(redeliverAt, ZoneOffset.UTC));
     var reopened = manage.redeliver(owner, endpoint.id(), delivery.id());
     assertEquals("pending", reopened.status());
     assertEquals(0, reopened.attempt());

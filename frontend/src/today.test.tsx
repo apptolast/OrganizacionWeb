@@ -1,3 +1,9 @@
+// La sección "Calendario externo" (feature 28) se prueba en today-external-calendar.test.tsx y
+// today-external-section.test.tsx. Aquí se aísla para que estas pruebas sigan contando solo las
+// peticiones de Hoy.
+vi.mock("./today-external-calendar", () => ({
+  TodayExternalCalendar: () => null,
+}));
 import { observeAccess } from "./api-client";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

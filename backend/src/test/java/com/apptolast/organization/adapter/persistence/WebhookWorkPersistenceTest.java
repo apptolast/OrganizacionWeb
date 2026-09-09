@@ -133,9 +133,7 @@ class WebhookWorkPersistenceTest {
 
     Callable<List<UUID>> worker =
         () ->
-            claimedFor(work(), owner, T).stream()
-                .map(claimed -> claimed.delivery().id())
-                .toList();
+            claimedFor(work(), owner, T).stream().map(claimed -> claimed.delivery().id()).toList();
     try (var pool = Executors.newFixedThreadPool(2)) {
       var results = pool.invokeAll(List.of(worker, worker));
       var all = new ArrayList<UUID>();

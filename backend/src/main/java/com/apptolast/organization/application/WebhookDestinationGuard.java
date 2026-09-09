@@ -3,20 +3,24 @@ package com.apptolast.organization.application;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.util.function.Predicate;
 
-/** Resolves the destination host and rejects blocked or unresolvable addresses. */
+/**
+ * Resolves the destination host and rejects blocked or unresolvable addresses.
+ *
+ * <p>The policy is the shared {@link AddressPolicy} of amendment B2, injected rather than reached
+ * for. Note the direction: {@code allows} answers PERMITTED, so the rejection is its negation.
+ */
 public final class WebhookDestinationGuard {
   public interface HostResolver {
     InetAddress[] resolve(String host) throws UnknownHostException;
   }
 
   private final HostResolver resolver;
-  private final Predicate<InetAddress> blocked;
+  private final AddressPolicy policy;
 
-  public WebhookDestinationGuard(HostResolver resolver, Predicate<InetAddress> blocked) {
+  public WebhookDestinationGuard(HostResolver resolver, AddressPolicy policy) {
     this.resolver = resolver;
-    this.blocked = blocked;
+    this.policy = policy;
   }
 
   public void check(String url) {
@@ -31,7 +35,7 @@ public final class WebhookDestinationGuard {
     if (addresses == null || addresses.length == 0)
       throw new WebhookOperationException(WebhookOperationException.Code.URL_UNRESOLVABLE);
     for (var address : addresses)
-      if (blocked.test(address))
+      if (!policy.allows(address))
         throw new WebhookOperationException(WebhookOperationException.Code.URL_BLOCKED);
   }
 

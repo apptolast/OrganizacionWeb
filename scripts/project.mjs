@@ -73,6 +73,8 @@ export function createProject(runner = run) {
           "schedule_block-frontend",
           "schedule_block-frontend-replay",
           "export_data-persistence-backend",
+          "external_calendar-backend",
+          "external_calendar-frontend",
         ].includes(target))
     ) {
       throw new Error(`Invalid target: ${target}`);
@@ -198,6 +200,21 @@ export function createProject(runner = run) {
     }
     if (task === "mutate" && target === "import_data-persistence-backend") {
       backend("pitest", ["-PmutationScope=import_data_persistence"]);
+      return;
+    }
+    if (task === "mutate" && target === "external_calendar-backend") {
+      backend("pitest", ["-PmutationScope=external_calendar"]);
+      return;
+    }
+    if (task === "mutate" && target === "external_calendar-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.external-calendar.config.json",
+      ]);
       return;
     }
     if (task === "mutate" && target === "export_data-persistence-backend") {

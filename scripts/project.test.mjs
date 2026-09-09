@@ -105,7 +105,10 @@ test("import PIT keeps complete disjoint classes and dedicated tests while exten
     /"com\.apptolast\.organization\.adapter\.config\.Import\*Test"/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 test("import backend targets invoke only their fixed PIT scopes", () => {
   for (const part of ["reader", "http", "persistence"]) {
@@ -226,10 +229,10 @@ test("ics calendar Stryker selects its own nodes of the shared files", () => {
     ),
   );
   assert.deepEqual(config.mutate, [
-    "src/App.tsx:37:8-37:42",
-    "src/App.tsx:53:14-54:29",
-    "src/App.tsx:88:10-89:37",
-    "src/workspace.tsx:90:10-95:22",
+    "src/App.tsx:38:8-38:42",
+    "src/App.tsx:57:16-58:30",
+    "src/App.tsx:94:10-95:37",
+    "src/workspace.tsx:97:10-102:22",
     "src/calendar-feed-api.ts",
     "src/calendar.tsx",
   ]);
@@ -404,7 +407,10 @@ test("export persistence PIT preserves complete classes and extends the default"
     /if \(exportPersistenceOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-export-data-persistence"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 
 test("export persistence backend invokes only its fixed PIT scope", () => {
@@ -548,7 +554,10 @@ test("customization PIT includes complete families and exposes their adapter tes
     /if \(customizationOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-custom-views-fields"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 test("customization backend invokes only its fixed PIT scope", () => {
   const { calls, project } = capture();
@@ -644,7 +653,10 @@ test("end time PIT preserves shared guards, all JUnit candidates and threshold",
     /if \(endTimeNotificationOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-end-time-notification"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 test("end time frontend invokes only its fixed Stryker configuration", () => {
   const { calls, project } = capture();
@@ -781,7 +793,10 @@ test("close work PIT scope includes changed core and shared adapters with all JU
     /if \(closeWorkSessionOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-close-work-session"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 
 test("close work frontend invokes only its fixed Stryker configuration", () => {
@@ -877,7 +892,10 @@ test("start work PIT selects the complete feature and shared publication with al
       "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher",
     ],
   );
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
   assert.match(build, /mutationThreshold\.set\(80\)/);
 });
 
@@ -1583,7 +1601,10 @@ test("history PIT includes complete new modules and wiring with all JUnit candid
     /if \(historyOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-history"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 
 test("default PIT exposes history adapter tests for the newly selected classes", () => {
@@ -1746,7 +1767,10 @@ test("weekly review PIT includes complete new modules and wiring with all JUnit 
     /if \(weeklyReviewOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-weekly-review"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 
 test("default PIT exposes weekly review adapter tests for the newly selected classes", () => {
@@ -1831,7 +1855,10 @@ test("appearance PIT includes all new modules and makes their tests available by
     /if \(appearanceOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-appearance"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 
 test("github connector frontend invokes only its fixed Stryker configuration", () => {
@@ -1904,10 +1931,10 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     "src/appearance-api.ts",
     "src/appearance-state.tsx",
     "src/appearance.tsx",
-    "src/App.tsx:35:8-35:44",
-    "src/App.tsx:57:18-69:34",
-    "src/App.tsx:92:10-133:7",
-    "src/workspace.tsx:78:10-83:22",
+    "src/App.tsx:36:8-36:44",
+    "src/App.tsx:61:20-73:36",
+    "src/App.tsx:98:10-139:7",
+    "src/workspace.tsx:85:10-90:22",
     "src/session-gate.tsx:32:2-52:6",
     "src/use-session.ts:208:0-229:1",
   ]);
@@ -1968,4 +1995,132 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
       selector,
     );
   }
+});
+
+test("external calendar targets reject other tasks and injected options before execution", () => {
+  const { calls, project } = capture();
+  for (const target of [
+    "external_calendar-backend",
+    "external_calendar-frontend",
+  ]) {
+    assert.throws(() => project("test", target), /Invalid target/);
+    assert.throws(
+      () => project("mutate", `${target} -PmutationScope=other`),
+      /Invalid target/,
+    );
+    assert.throws(() => project("mutate", `${target}-extra`), /Invalid target/);
+  }
+  assert.deepEqual(calls, []);
+});
+
+test("external calendar backend mutation runs only its PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "external_calendar-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=external_calendar"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
+test("external calendar frontend mutation invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "external_calendar-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.external-calendar.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("external calendar PIT scope covers the whole slice and extends the default", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  const selected = build.match(
+    /val externalCalendarClasses = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(selected);
+  assert.deepEqual(
+    [...selected.matchAll(/"([^"]+)"/g)].map((entry) => entry[1]),
+    [
+      "domain.IcsFeed*",
+      "domain.ExternalCalendarInput*",
+      "domain.ExternalCalendarSnapshot*",
+      "domain.ExternalCalendarSubscription*",
+      "domain.ExternalEvent*",
+      "domain.ExternalEventsRange*",
+      "domain.SyncSummary*",
+      "application.SyncExternalCalendar*",
+      "application.SaveExternalCalendar*",
+      "application.ReadExternalCalendar*",
+      "application.ReadExternalCalendarEvents*",
+      "application.DeleteExternalCalendar*",
+      "application.OutboundHostGuard*",
+      "application.PublicAddressPolicy*",
+      "application.AddressPolicy*",
+      "application.ExternalEventsView*",
+      "adapter.crypto.AesGcmSecretCipher*",
+      "adapter.crypto.ConnectorCipher*",
+      "adapter.feed.HttpCalendarFeed*",
+      "adapter.net.SystemHostResolver*",
+      "adapter.http.ExternalCalendarController*",
+      "adapter.http.ConnectorsGate*",
+      "adapter.persistence.PostgresExternalCalendarStore*",
+      "adapter.logging.Slf4jExternalCalendarAudit*",
+      "adapter.config.ApplicationConfiguration*",
+    ].map((name) => `com.apptolast.organization.${name}`),
+  );
+  assert.match(
+    build,
+    /val externalCalendarOnly = scope == "external_calendar"/,
+  );
+  assert.match(build, /externalCalendarOnly -> externalCalendarClasses/);
+  assert.match(
+    build,
+    /externalCalendarOnly -> setOf\("com\.apptolast\.organization\.\*"\)/,
+  );
+  assert.match(build, /else -> core \+ [^\n]*externalCalendarClasses/);
+});
+
+test("external calendar Stryker configuration mutates only its own files", () => {
+  const configuration = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.external-calendar.config.json"),
+      "utf8",
+    ),
+  );
+  assert.deepEqual(configuration.mutate, [
+    "src/external-calendar-api.ts",
+    "src/external-calendar.tsx",
+    "src/today-external-calendar.tsx",
+  ]);
+  assert.equal(configuration.thresholds.break, 80);
+  assert.equal(configuration.testRunner, "vitest");
+});
+
+test("the end to end stack enables the connectors with an explicit key and keeps the SSRF guard", () => {
+  const compose = readFileSync(resolve(root, "docker-compose.yml"), "utf8");
+  assert.match(compose, /APP_CONNECTOR_KEY: \$\{APP_CONNECTOR_KEY:-\}/);
+  assert.match(
+    compose,
+    /APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES: \$\{APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES:-false\}/,
+  );
+  const harness = readFileSync(resolve(root, "scripts/e2e.mjs"), "utf8");
+  const key = harness.match(/const connectorKey = "([^"]+)";/)?.[1];
+  assert.ok(key, "el arnés de extremo a extremo debe fijar APP_CONNECTOR_KEY");
+  assert.match(harness, /APP_CONNECTOR_KEY: connectorKey,/);
+  assert.equal(Buffer.from(key, "base64").length, 32);
+  assert.doesNotMatch(
+    harness,
+    /APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES: "true"/,
+  );
 });

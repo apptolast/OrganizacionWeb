@@ -45,8 +45,7 @@ class WebhookWiringTest {
     assertEquals("Mi hook", created.endpoint().description());
     assertEquals("active", created.endpoint().status());
     assertEquals(
-        List.of(created.endpoint().id()),
-        manage.list(owner).stream().map(e -> e.id()).toList());
+        List.of(created.endpoint().id()), manage.list(owner).stream().map(e -> e.id()).toList());
     assertFalse(manage.list(owner).toString().contains(created.secret()));
     assertFalse(created.toString().contains(created.secret()));
   }

@@ -40,11 +40,9 @@ public record WebhookDelivery(
    */
   public WebhookDelivery recorded(WebhookAttempt outcome, Instant now) {
     var tried = attempt + 1;
-    if (outcome.succeeded())
-      return settled(SUCCEEDED, tried, outcome, null, now);
+    if (outcome.succeeded()) return settled(SUCCEEDED, tried, outcome, null, now);
     var next = RetrySchedule.nextAttemptAt(tried, now);
-    return settled(
-        next.isPresent() ? PENDING : EXHAUSTED, tried, outcome, next.orElse(null), now);
+    return settled(next.isPresent() ? PENDING : EXHAUSTED, tried, outcome, next.orElse(null), now);
   }
 
   private WebhookDelivery settled(

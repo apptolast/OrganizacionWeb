@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
- * One tick: turn new outbox events into deliveries, then send whatever is due. Enqueuing runs
- * first so an event that has just cleared the grace window can ship in this very tick.
+ * One tick: turn new outbox events into deliveries, then send whatever is due. Enqueuing runs first
+ * so an event that has just cleared the grace window can ship in this very tick.
  *
  * <p>Neither half may throw: a scheduled method that propagates stops the whole schedule.
  */

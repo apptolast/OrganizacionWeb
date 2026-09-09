@@ -67,7 +67,10 @@ class ProjectStateConfigurationTest {
                 TaskHistoryQueries.class, () -> org.mockito.Mockito.mock(TaskHistoryQueries.class))
             .withBean(
                 TaskStatusEditing.class, () -> org.mockito.Mockito.mock(TaskStatusEditing.class))
-            .withBean(ProjectStatusEditing.class, () -> store);
+            .withBean(ProjectStatusEditing.class, () -> store)
+            // El cifrado de secretos de los conectores lo publica ConnectorConfiguration, que este
+            // contexto delgado no carga; sin él los beans del calendario externo no se construyen.
+            .withBean(SecretCipher.class, () -> org.mockito.Mockito.mock(SecretCipher.class));
     if (!value.equals("absent"))
       runner = runner.withPropertyValues("app.max-active-projects=" + value);
     runner.run(

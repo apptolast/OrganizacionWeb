@@ -51,8 +51,7 @@ public final class DispatchWebhooks implements DispatchWebhooksUseCase {
     var now = CustomizationTime.capture(clock);
     var result = claimed.delivery().recorded(outcome, now);
     work.record(claimed, result, exhaustedEndpoint(claimed, result, now));
-    audit.attempt(
-        claimed.endpoint().id(), result.eventId(), result.status(), result.errorClass());
+    audit.attempt(claimed.endpoint().id(), result.eventId(), result.status(), result.errorClass());
   }
 
   /** An exhausted delivery drags its endpoint into DELIVERY_EXHAUSTED in the same transaction. */

@@ -17,6 +17,7 @@ class Slf4jWebhookAuditTest {
 
   /** The exact strings @s35 forbids anywhere in the log. */
   private static final String SECRET = "whsec_AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8";
+
   private static final String QUERY = "?token=abc";
   private static final String SIGNATURE = "v1=47db42f51507bea71512fc26bef335a304b9382b45b590a774";
 
@@ -97,8 +98,7 @@ class Slf4jWebhookAuditTest {
    */
   @Test
   void s35_thePortOnlyAcceptsIdentifiersAndCodes() {
-    var methods =
-        com.apptolast.organization.application.WebhookAudit.class.getDeclaredMethods();
+    var methods = com.apptolast.organization.application.WebhookAudit.class.getDeclaredMethods();
     assertEquals(3, methods.length, "attempt, discarded and workerError");
     for (var method : methods)
       for (var parameter : method.getParameterTypes())

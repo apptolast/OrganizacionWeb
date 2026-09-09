@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.apptolast.organization.application.ConnectorsDisabledException;
 import com.apptolast.organization.application.SecretCipher;
-import com.apptolast.organization.application.SecretUndecipherableException;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -29,63 +28,66 @@ class AesGcmSecretCipherTest {
     return new AesGcmSecretCipher(ConnectorKeyRing.of(current, previous), new SecureRandom());
   }
 
+  /**
+   * El contrato de la 27 (@s1) fija octet_length 12 + 14 + 16 y el de la 28 (@s2) "12 bytes de
+   * nonce más cifrado": ambos describen el mismo formato, sin byte de versión de clave.
+   */
   @Test
-  void s1_ciphertextCarriesKeyVersionNonceAndTagAndHidesTheToken() {
+  void s1_ciphertextIsNonceThenSealedAndHidesTheToken() {
     var sealed = cipher(KEY, null).encrypt(OWNER, TOKEN);
-    assertEquals(1 + 12 + TOKEN.length() + 16, sealed.length);
+    assertEquals(12 + TOKEN.length() + 16, sealed.length);
     assertFalse(
         new String(sealed, StandardCharsets.ISO_8859_1)
             .contains(
                 new String(TOKEN.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1)));
-    assertEquals(TOKEN, cipher(KEY, null).decrypt(OWNER, sealed));
+    assertEquals(TOKEN, cipher(KEY, null).decrypt(OWNER, sealed).orElseThrow());
   }
 
   @Test
-  void s2_everyWriteUsesAFreshNonceAndKeepsTheKeyVersionStable() {
+  void s2_everyWriteUsesAFreshNonce() {
     var cipher = cipher(KEY, null);
     var first = cipher.encrypt(OWNER, TOKEN);
     var second = cipher.encrypt(OWNER, TOKEN);
     assertFalse(Arrays.equals(first, second));
     assertFalse(Arrays.equals(nonce(first), nonce(second)));
-    assertEquals(first[0], second[0]);
   }
 
+  /** Los doce primeros bytes son el nonce: lo exigen @s2 de la 27 y @s2 de la 28. */
   private static byte[] nonce(byte[] sealed) {
-    return Arrays.copyOfRange(sealed, 1, 13);
+    return Arrays.copyOf(sealed, 12);
   }
 
   @Test
   void s2_anotherOwnerCannotReadTheCiphertextBecauseTheOwnerIsAuthenticatedData() {
     var cipher = cipher(KEY, null);
     var sealed = cipher.encrypt(OWNER, TOKEN);
-    assertThrows(SecretUndecipherableException.class, () -> cipher.decrypt("owner-b", sealed));
+    assertTrue(cipher.decrypt("owner-b", sealed).isEmpty());
   }
 
   @Test
   void s2_anotherKeyCannotReadTheCiphertext() {
     var sealed = cipher(KEY, null).encrypt(OWNER, TOKEN);
     var stranger = cipher(OTHER_KEY, null);
-    assertThrows(SecretUndecipherableException.class, () -> stranger.decrypt(OWNER, sealed));
+    assertTrue(stranger.decrypt(OWNER, sealed).isEmpty());
   }
 
   @Test
   void b5_rotatingTheKeyKeepsStoredTokensReadableAndNewWritesUseTheNewKey() {
     var before = cipher(KEY, null).encrypt(OWNER, TOKEN);
     var rotated = cipher(OTHER_KEY, KEY);
-    assertEquals(TOKEN, rotated.decrypt(OWNER, before));
+    assertEquals(TOKEN, rotated.decrypt(OWNER, before).orElseThrow());
     var after = rotated.encrypt(OWNER, TOKEN);
-    assertEquals(TOKEN, rotated.decrypt(OWNER, after));
-    assertEquals(TOKEN, cipher(OTHER_KEY, null).decrypt(OWNER, after));
-    assertThrows(
-        SecretUndecipherableException.class, () -> cipher(OTHER_KEY, null).decrypt(OWNER, before));
+    assertEquals(TOKEN, rotated.decrypt(OWNER, after).orElseThrow());
+    assertEquals(TOKEN, cipher(OTHER_KEY, null).decrypt(OWNER, after).orElseThrow());
+    assertTrue(cipher(OTHER_KEY, null).decrypt(OWNER, before).isEmpty());
   }
 
   @ParameterizedTest
-  @ValueSource(ints = {0, 1, 12, 13, 28, 29})
+  @ValueSource(ints = {0, 1, 12, 13, 27, 28})
   void b5_aTruncatedOrEmptyCiphertextIsRejectedInsteadOfParsedOutOfBounds(int length) {
     var cipher = cipher(KEY, null);
     var truncated = new byte[length];
-    assertThrows(SecretUndecipherableException.class, () -> cipher.decrypt(OWNER, truncated));
+    assertTrue(cipher.decrypt(OWNER, truncated).isEmpty());
   }
 
   @ParameterizedTest
@@ -118,6 +120,6 @@ class AesGcmSecretCipherTest {
   void s3_anAbsentKeyDisablesTheConnectorInsteadOfStoppingTheStartup() {
     var disabled = new AesGcmSecretCipher(ConnectorKeyRing.of(null, null), new SecureRandom());
     assertThrows(ConnectorsDisabledException.class, () -> disabled.encrypt(OWNER, TOKEN));
-    assertThrows(ConnectorsDisabledException.class, () -> disabled.decrypt(OWNER, new byte[43]));
+    assertThrows(ConnectorsDisabledException.class, () -> disabled.decrypt(OWNER, new byte[42]));
   }
 }

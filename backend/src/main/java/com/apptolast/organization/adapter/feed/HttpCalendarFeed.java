@@ -43,16 +43,17 @@ import javax.net.ssl.SSLParameters;
  * agujero de seguridad; es una pérdida de tolerancia a fallos frente al comportamiento por defecto
  * del cliente.
  *
- * <p>El plazo es del <b>intercambio completo</b>: conexión, cabeceras y lectura del cuerpo. No basta
- * con {@code HttpRequest.timeout}, porque con {@code BodyHandlers.ofInputStream()} el temporizador
- * del cliente se cancela en cuanto llegan las cabeceras y las lecturas posteriores quedan fuera de
- * él. Un proveedor que envía las cabeceras al instante y luego gotea un byte cada varios segundos
- * dejaría el hilo de petición bloqueado para siempre, y con él el pool entero de Tomcat: la misma
- * familia de la enmienda B1 de los webhooks (un receptor lento que agota recursos).
+ * <p>El plazo es del <b>intercambio completo</b>: conexión, cabeceras y lectura del cuerpo. No
+ * basta con {@code HttpRequest.timeout}, porque con {@code BodyHandlers.ofInputStream()} el
+ * temporizador del cliente se cancela en cuanto llegan las cabeceras y las lecturas posteriores
+ * quedan fuera de él. Un proveedor que envía las cabeceras al instante y luego gotea un byte cada
+ * varios segundos dejaría el hilo de petición bloqueado para siempre, y con él el pool entero de
+ * Tomcat: la misma familia de la enmienda B1 de los webhooks (un receptor lento que agota
+ * recursos).
  *
  * <p>Se cierra por los dos lados: el bucle de lectura comprueba el instante límite en cada trozo, y
- * además se programa el cierre del cuerpo en ese instante, porque un proveedor que se calla del todo
- * dejaría el {@code read} bloqueado sin llegar nunca a la comprobación.
+ * además se programa el cierre del cuerpo en ese instante, porque un proveedor que se calla del
+ * todo dejaría el {@code read} bloqueado sin llegar nunca a la comprobación.
  */
 public final class HttpCalendarFeed implements CalendarFeed {
   public static final Duration TIMEOUT = Duration.ofSeconds(5);
@@ -169,7 +170,8 @@ public final class HttpCalendarFeed implements CalendarFeed {
     var address = pinned.getHostAddress();
     var written = pinned instanceof Inet6Address ? "[" + address + "]" : address;
     var port = target.getPort() < 0 ? "" : ":" + target.getPort();
-    var path = target.getRawPath() == null || target.getRawPath().isEmpty() ? "/" : target.getRawPath();
+    var path =
+        target.getRawPath() == null || target.getRawPath().isEmpty() ? "/" : target.getRawPath();
     var query = target.getRawQuery() == null ? "" : "?" + target.getRawQuery();
     return URI.create(target.getScheme() + "://" + written + port + path + query);
   }

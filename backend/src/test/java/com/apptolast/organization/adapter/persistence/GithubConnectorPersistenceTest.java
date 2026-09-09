@@ -165,8 +165,8 @@ class GithubConnectorPersistenceTest {
 
   /**
    * @s1 el formato en reposo es 12 de nonce + texto + 16 de etiqueta, sin byte de versión. Un token
-   *     de un solo carácter —que el dominio admite, porque {@code PersonalAccessToken} sólo acota el
-   *     máximo— produce 29 octetos, y la fila tiene que entrar. Quien decide si un token de un
+   *     de un solo carácter —que el dominio admite, porque {@code PersonalAccessToken} sólo acota
+   *     el máximo— produce 29 octetos, y la fila tiene que entrar. Quien decide si un token de un
    *     carácter vale es el dominio, con su mensaje; no la base de datos con una violación de
    *     restricción, que además saldría como 500 en vez de como el error del contrato.
    */
@@ -188,8 +188,8 @@ class GithubConnectorPersistenceTest {
 
   /**
    * La cota alta, por el otro extremo: el token más largo que el dominio admite son 255 caracteres,
-   * que cifrados son 283 octetos. Las dos pruebas juntas fijan el rango entero, de modo que una cota
-   * calculada para otro formato no puede volver a pasar inadvertida.
+   * que cifrados son 283 octetos. Las dos pruebas juntas fijan el rango entero, de modo que una
+   * cota calculada para otro formato no puede volver a pasar inadvertida.
    */
   @Test
   void s1_theLongestTokenTheDomainAcceptsAlsoFitsInTheColumn() {

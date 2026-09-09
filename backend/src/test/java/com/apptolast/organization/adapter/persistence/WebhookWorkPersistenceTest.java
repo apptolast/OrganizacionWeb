@@ -132,20 +132,19 @@ class WebhookWorkPersistenceTest {
    * @s23 el Given nombra un receptor que tarda en responder 200, y el Then pide tres cosas: «el
    *     receptor recibe exactamente 10 peticiones, una por eventId», «ninguna instancia espera al
    *     bloqueo de fila de la otra» y «las 10 entregas quedan succeeded con attempt 1».
-   *
-   * <p>La versión anterior de esta prueba sólo reclamaba: sin receptor, sin {@code record} y sin
-   * ninguna aserción sobre la espera. Eso la dejaba ciega al único defecto que este escenario existe
-   * para cazar. Si en {@code PostgresWebhookWork} se cambia {@code FOR UPDATE OF d SKIP LOCKED} por
-   * un {@code FOR UPDATE} a secas, las diez filas comparten {@code next_attempt_at} y las dos
-   * instancias eligen la misma primera fila; la perdedora se bloquea, al desbloquearse reevalúa el
-   * predicado en READ COMMITTED, ya no lo cumple, recibe {@code Optional.empty} y abandona. La
-   * ganadora drena las diez sin contención y las dos aserciones de cardinalidad seguían saliendo
-   * verdes.
-   *
-   * <p>El oráculo del no bloqueo es <b>que las dos instancias reclamen algo</b>, no un tiempo de
-   * pared: con cinco carriles compitiendo por esta máquina, un umbral temporal daría falsos rojos, y
-   * una prueba que falla por la carga ajena deja de creerse. El retardo del receptor es lo que hace
-   * discriminante a esa aserción: sin él las dos instancias podrían turnarse sin solaparse nunca.
+   *     <p>La versión anterior de esta prueba sólo reclamaba: sin receptor, sin {@code record} y
+   *     sin ninguna aserción sobre la espera. Eso la dejaba ciega al único defecto que este
+   *     escenario existe para cazar. Si en {@code PostgresWebhookWork} se cambia {@code FOR UPDATE
+   *     OF d SKIP LOCKED} por un {@code FOR UPDATE} a secas, las diez filas comparten {@code
+   *     next_attempt_at} y las dos instancias eligen la misma primera fila; la perdedora se
+   *     bloquea, al desbloquearse reevalúa el predicado en READ COMMITTED, ya no lo cumple, recibe
+   *     {@code Optional.empty} y abandona. La ganadora drena las diez sin contención y las dos
+   *     aserciones de cardinalidad seguían saliendo verdes.
+   *     <p>El oráculo del no bloqueo es <b>que las dos instancias reclamen algo</b>, no un tiempo
+   *     de pared: con cinco carriles compitiendo por esta máquina, un umbral temporal daría falsos
+   *     rojos, y una prueba que falla por la carga ajena deja de creerse. El retardo del receptor
+   *     es lo que hace discriminante a esa aserción: sin él las dos instancias podrían turnarse sin
+   *     solaparse nunca.
    */
   @Test
   void s23_twoWorkersNeverClaimTheSameDeliveryAndNeitherWaitsForTheOther() throws Exception {
@@ -188,20 +187,18 @@ class WebhookWorkPersistenceTest {
   /**
    * @s23 «ninguna instancia espera al bloqueo de fila de la otra», con un oráculo que <b>sí</b>
    *     distingue.
-   *
-   * <p>Conviene dejar escrito lo que se intentó antes y por qué no valía, para que nadie lo repita:
-   * el oráculo natural parecía ser «las dos instancias reclaman algo», pero <b>no discrimina</b>.
-   * Sustituí a mano {@code SKIP LOCKED} por {@code FOR UPDATE} en producción y la prueba de arriba
-   * <b>siguió verde</b>: con diez filas libres, la instancia que pierde el bloqueo no se queda sin
-   * trabajo, sólo espera un instante y reevalúa quedándose con otra de las nueve. La espera existe,
-   * pero es invisible para cualquier aserción de cardinalidad. La teoría de que la perdedora acaba
-   * con cero reclamaciones no se sostiene cuando hay cola.
-   *
-   * <p>Lo que sí distingue es preguntar por la <b>identidad</b> de lo reclamado mientras otra
-   * transacción retiene la primera fila del orden de reclamación: con {@code SKIP LOCKED} la
-   * consulta la salta y devuelve la siguiente <b>sin esperar</b>; con {@code FOR UPDATE} se queda
-   * bloqueada hasta que el tenedor confirme, y entonces devuelve justo la que estaba retenida. Dos
-   * conductas incompatibles, sin cronómetro de por medio.
+   *     <p>Conviene dejar escrito lo que se intentó antes y por qué no valía, para que nadie lo
+   *     repita: el oráculo natural parecía ser «las dos instancias reclaman algo», pero <b>no
+   *     discrimina</b>. Sustituí a mano {@code SKIP LOCKED} por {@code FOR UPDATE} en producción y
+   *     la prueba de arriba <b>siguió verde</b>: con diez filas libres, la instancia que pierde el
+   *     bloqueo no se queda sin trabajo, sólo espera un instante y reevalúa quedándose con otra de
+   *     las nueve. La espera existe, pero es invisible para cualquier aserción de cardinalidad. La
+   *     teoría de que la perdedora acaba con cero reclamaciones no se sostiene cuando hay cola.
+   *     <p>Lo que sí distingue es preguntar por la <b>identidad</b> de lo reclamado mientras otra
+   *     transacción retiene la primera fila del orden de reclamación: con {@code SKIP LOCKED} la
+   *     consulta la salta y devuelve la siguiente <b>sin esperar</b>; con {@code FOR UPDATE} se
+   *     queda bloqueada hasta que el tenedor confirme, y entonces devuelve justo la que estaba
+   *     retenida. Dos conductas incompatibles, sin cronómetro de por medio.
    */
   @Test
   void s23_aRowHeldByAnotherTransactionIsSkippedInsteadOfWaitedFor() throws Exception {
@@ -238,7 +235,8 @@ class WebhookWorkPersistenceTest {
                             }
                             return null;
                           }));
-      assertTrue(holding.await(10, java.util.concurrent.TimeUnit.SECONDS), "the row was never held");
+      assertTrue(
+          holding.await(10, java.util.concurrent.TimeUnit.SECONDS), "the row was never held");
 
       var claim = pool.submit(() -> claimOwn(work(), owner, T));
       try {
@@ -261,8 +259,8 @@ class WebhookWorkPersistenceTest {
   }
 
   /**
-   * Reclama, «envía» al receptor lento y liquida, hasta que no queda nada que reclamar. Devuelve los
-   * identificadores de lo que esta instancia entregó, para poder afirmar que ambas avanzaron.
+   * Reclama, «envía» al receptor lento y liquida, hasta que no queda nada que reclamar. Devuelve
+   * los identificadores de lo que esta instancia entregó, para poder afirmar que ambas avanzaron.
    */
   private static List<UUID> deliverAll(String owner, List<UUID> sent) throws InterruptedException {
     var work = work();

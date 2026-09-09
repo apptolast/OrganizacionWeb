@@ -7,10 +7,10 @@ package com.apptolast.organization.application;
  *
  * <p>Esta guardia decide si una suscripción puede guardarse o sincronizarse; <b>no</b> es la que
  * abre la conexión. La segunda mitad de la enmienda B3 —conectar contra la dirección literal ya
- * validada, conservando el nombre en Host y en SNI— vive en
- * {@code adapter.feed.HttpCalendarFeed}, que resuelve una vez y conecta él mismo. Por eso ya no
- * queda aquí ningún «riesgo residual de rebinding aceptado»: no hay ventana entre la resolución y
- * la conexión, porque quien conecta es quien resolvió.
+ * validada, conservando el nombre en Host y en SNI— vive en {@code adapter.feed.HttpCalendarFeed},
+ * que resuelve una vez y conecta él mismo. Por eso ya no queda aquí ningún «riesgo residual de
+ * rebinding aceptado»: no hay ventana entre la resolución y la conexión, porque quien conecta es
+ * quien resolvió.
  */
 public final class OutboundHostGuard implements OutboundGuard {
   private final HostResolver resolver;

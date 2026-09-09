@@ -270,17 +270,15 @@ class WebhookRecoveryPersistenceTest {
 
   /**
    * @s22 fila «el proceso muere antes de abrir la conexión | el receptor recibe 1 petición».
-   *
-   * <p>Hasta ahora ninguna de las dos filas del outline se recorría entera: el único test de
-   * recuperación reclamaba, comprobaba que el arrendamiento ocultaba la entrega y que al vencer
-   * volvía a ser reclamable, pero no había receptor —así que no se contaba ninguna petición— ni se
-   * liquidaba nada —así que el «Then» común, «el registro final es succeeded con attempt 1», no se
-   * observaba tras un reinicio—. La cadena reclamar → vencer → volver a reclamar → enviar →
-   * liquidar no se recorría en ningún sitio.
-   *
-   * <p>La muerte se simula del modo más fiel que permite la prueba: se reclama y <b>no se llama a
-   * {@code record}</b>, que es exactamente lo que deja tras de sí un proceso que cae con el
-   * arrendamiento tomado.
+   *     <p>Hasta ahora ninguna de las dos filas del outline se recorría entera: el único test de
+   *     recuperación reclamaba, comprobaba que el arrendamiento ocultaba la entrega y que al vencer
+   *     volvía a ser reclamable, pero no había receptor —así que no se contaba ninguna petición— ni
+   *     se liquidaba nada —así que el «Then» común, «el registro final es succeeded con attempt 1»,
+   *     no se observaba tras un reinicio—. La cadena reclamar → vencer → volver a reclamar → enviar
+   *     → liquidar no se recorría en ningún sitio.
+   *     <p>La muerte se simula del modo más fiel que permite la prueba: se reclama y <b>no se llama
+   *     a {@code record}</b>, que es exactamente lo que deja tras de sí un proceso que cae con el
+   *     arrendamiento tomado.
    */
   @Test
   void s22_aDeliveryClaimedByADeadProcessIsSentOnceAfterTheLeaseExpires() {
@@ -313,12 +311,12 @@ class WebhookRecoveryPersistenceTest {
   /**
    * @s22 fila «el proceso muere después de que el receptor respondiera 200 y antes de confirmar la
    *     transacción | el receptor recibe 2 peticiones».
-   *
-   * <p>Es la fila que no existía en ningún fichero del repositorio, y la que de verdad duele: el
-   * receptor ve la entrega <b>dos veces</b> porque la primera respuesta se perdió con el proceso.
-   * Que sean dos y no una es la propiedad que hay que fijar —el contrato la acepta explícitamente:
-   * la entrega es al-menos-una-vez—, y que las dos lleven el <b>mismo eventId</b> es lo que permite
-   * al receptor deduplicar. Y pese a las dos peticiones, el registro es uno solo.
+   *     <p>Es la fila que no existía en ningún fichero del repositorio, y la que de verdad duele:
+   *     el receptor ve la entrega <b>dos veces</b> porque la primera respuesta se perdió con el
+   *     proceso. Que sean dos y no una es la propiedad que hay que fijar —el contrato la acepta
+   *     explícitamente: la entrega es al-menos-una-vez—, y que las dos lleven el <b>mismo
+   *     eventId</b> es lo que permite al receptor deduplicar. Y pese a las dos peticiones, el
+   *     registro es uno solo.
    */
   @Test
   void s22_aDeliveryWhoseAcknowledgementDiedIsSentTwiceWithTheSameEventId() {

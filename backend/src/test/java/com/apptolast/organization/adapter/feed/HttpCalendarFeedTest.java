@@ -38,12 +38,7 @@ class HttpCalendarFeedTest {
           + "END:VEVENT\r\nEND:VCALENDAR\r\n";
 
   record Received(
-      String method,
-      String uri,
-      String accept,
-      String cookie,
-      String authorization,
-      String host) {}
+      String method, String uri, String accept, String cookie, String authorization, String host) {}
 
   HttpServer server;
   final List<Received> received = new CopyOnWriteArrayList<>();
@@ -255,8 +250,7 @@ class HttpCalendarFeedTest {
             HttpCalendarFeed.TIMEOUT,
             host -> List.of(InetAddress.getLoopbackAddress()),
             address -> false);
-    assertEquals(
-        FeedError.FEED_REJECTED, codeOf(rejecting.fetch(url("/cal.ics"))));
+    assertEquals(FeedError.FEED_REJECTED, codeOf(rejecting.fetch(url("/cal.ics"))));
     assertTrue(received.isEmpty(), "no puede haber llegado ninguna petición al servidor");
   }
 

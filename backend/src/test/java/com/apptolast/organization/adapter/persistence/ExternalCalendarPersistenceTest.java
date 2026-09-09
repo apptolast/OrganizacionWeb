@@ -264,12 +264,11 @@ class ExternalCalendarPersistenceTest {
   /**
    * @s25, tercer Then: «una lectura concurrente durante la sincronización ve la lista anterior
    *     completa o la nueva completa, nunca una vacía ni mezclada».
-   *
-   * <p>La técnica es la de {@code HistoryReadTransactionTest}: se subclasifica el
-   * {@link JdbcTemplate} del escritor para colarse **dentro** de su transacción, justo después del
-   * DELETE y antes de insertar la lista nueva —el único instante en que la instantánea está vacía—,
-   * y desde otro hilo, y por tanto desde otra conexión, se lee. Sin el envoltorio transaccional de
-   * {@code commitSuccess} esa lectura devolvería la lista vacía.
+   *     <p>La técnica es la de {@code HistoryReadTransactionTest}: se subclasifica el {@link
+   *     JdbcTemplate} del escritor para colarse **dentro** de su transacción, justo después del
+   *     DELETE y antes de insertar la lista nueva —el único instante en que la instantánea está
+   *     vacía—, y desde otro hilo, y por tanto desde otra conexión, se lee. Sin el envoltorio
+   *     transaccional de {@code commitSuccess} esa lectura devolvería la lista vacía.
    */
   @Test
   @Timeout(120)
@@ -293,7 +292,8 @@ class ExternalCalendarPersistenceTest {
           @Override
           public int update(String sql, Object... args) {
             int rows = super.update(sql, args);
-            if (sql.startsWith("DELETE FROM external_calendar_events") && seenMidWrite.get() == null)
+            if (sql.startsWith("DELETE FROM external_calendar_events")
+                && seenMidWrite.get() == null)
               try {
                 seenMidWrite.set(
                     readers

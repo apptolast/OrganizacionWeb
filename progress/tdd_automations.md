@@ -37,6 +37,19 @@ Feature en curso: 30 — automations. Escenarios a recorrer en fase 1: @s1–@s1
   `AutomationDraftTest` 4, `AutomationEventTypeTest` 1, `AutomationTemplateTest` 15),
   0 fallos.
 
+### Ciclo 3 — @s27, @s28, @s29 (de qué proyecto habla un evento y cuándo se consulta la guarda)
+
+- **Rojo visto fallar**: `AutomationEventTest` (4 tests) no compilaba;
+  `compileTestJava FAILED` con `cannot find symbol: class AutomationEvent` y
+  `package EventProject does not exist`.
+- **Verde mínimo**: `AutomationEvent` (eventId, ownerId, eventType, aggregateId,
+  occurredAt, payload) con `projectSource()` y `loopGuardTaskId()`, y el sellado
+  `EventProject` con `Known`, `OfTask` y `OfWorkSession`. La *decisión* de dónde
+  buscar el proyecto es regla de negocio y vive en dominio; la *búsqueda* será un
+  puerto, para que la tabla de @s27 se pruebe sin base de datos.
+- **Refactor**: ninguno; el `switch` sobre el tipo ya es la tabla del contrato.
+- Focal verde: `AutomationEventTest` 4/4.
+
 ## Estado en curso (nota para el coordinador)
 
 Se ejecutan **sólo pruebas focales con filtro** por la contención de Testcontainers

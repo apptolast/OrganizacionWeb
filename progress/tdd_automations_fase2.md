@@ -360,6 +360,137 @@ primero, porque allí el cuarto intento era inalcanzable por otra razón.
 el ejecutor anterior E1 habría salido con `attempt 1` y E2 no se habría
 procesado nunca.
 
+### @s28 y @s29 — `a164f2e`
+
+El ejecutor ignoraba `matcher.loopGuarded`: el `TaskCreated.v1` de una tarea
+creada por automatización encadenaba. Ahora es una omisión deliberada, igual que
+la fila bloqueada: no produce nada y el cursor avanza. Las dos filas de @s28 (R1
+viva y R1 borrada) y el @s29 completo, que además cuenta las consultas al puerto
+para afirmar que la guarda **no** se consulta para `TaskStatusChanged.v1`.
+
+**Rojo:** las dos filas de @s28 fallaban contra el ejecutor anterior, que creaba
+una tarea por cada regla activa sobre el evento de la tarea automatizada.
+
+Nota: @s28 y @s29 no estaban en la lista de nueve del inventario, pero el
+agujero era real y lo abría el propio ejecutor nuevo.
+
+### @s19 (bitácora) — `e0765da`
+
+La única cláusula de @s19 medible sin contenedor: el log lleva `ruleId`,
+`eventId`, `outcome`, `attempt` y `code`, y **no** lleva el título renderizado ni
+el nombre del proyecto. **Rojo:** el ejecutor no escribía ninguna línea.
+
+### @s19, @s23 y @s25 contra Postgres — `9a1d1a0`
+
+`PostgresAutomationWork`, el adaptador del puerto único, y los dos beans en
+`ApplicationConfiguration`. `CreateTask` se une a la transacción de la
+confirmación por `PROPAGATION_REQUIRED`, así que la tarea y su `TaskCreated.v1`
+caen con todo lo demás; sólo `record()` escribe aparte (`REQUIRES_NEW`), que es
+precisamente la fila que debe sobrevivir al rollback.
+
+El reclamo de `(regla, evento)` se apoya en el `UNIQUE` de `V28`: primer intento
+con `ON CONFLICT DO NOTHING`, reintento con `UPDATE ... WHERE status='retry'`.
+Cero filas significa que otro worker ya la tiene: se abandona la confirmación
+entera con `AutomationClaimedException` y el recorrido sigue, sin error no
+controlado — que es la tercera cláusula de @s23.
+
+**Rojo en dos pasos y dos mutantes:**
+
+- Los tres tests fallaban antes del adaptador (no había bean de `AutomationWork`
+  ni de `ExecuteAutomationsUseCase`).
+- **E**: la confirmación deja de ser transacción
+  (`PROPAGATION_NOT_SUPPORTED`). Caen @s25 —la tarea sobrevive a la caída— y
+  @s23.
+- **F**: el reclamo pasa a gana-el-último (`ON CONFLICT DO UPDATE`). Cae @s23
+  con **dos tareas y dos `TaskCreated.v1` para un solo evento**. Acredita además
+  que la carrera del test es real y no una serialización afortunada, que es el
+  riesgo clásico de una prueba de concurrencia.
+
+Modelo de la caída de @s25: la confirmación crea la tarea y su evento y luego
+escribe una fila de ejecución con un `status` que el `CHECK` de `automation_runs`
+rechaza. El rollback llega con la tarea y la fila de outbox ya escritas, que es
+exactamente «cae después de crear la tarea y antes de confirmar».
+
+### @s26 — `9951147`
+
+Se retira el stub `(owner, endpointId) -> false` de `WebhookEndpointLookup` —la
+feature 25 lleva en `main` desde hace tiempo— por una consulta real sobre
+`webhook_endpoints`: sólo un endpoint **activo** del **propio** propietario
+cuenta. Con eso, la rama `Notify` del adaptador inserta una entrega pendiente de
+la feature 25 en la misma confirmación que la ejecución y el cursor.
+
+El cuerpo lo copia la propia base desde `outbox_events` (`o.payload::text` en el
+`SELECT` del `INSERT`), de modo que **ninguna re-serialización puede alterar un
+byte**. La suscripción del endpoint no se consulta a propósito: la regla es la
+suscripción, y por eso el test usa un endpoint suscrito sólo a `TaskCreated.v1`
+para un evento `ProjectStatusChanged.v1`.
+
+**Rojo:** el test no podía ni sembrar la regla —`create.create` lanzaba
+`WebhookEndpointNotFoundException` con el stub— y después fallaba por ausencia
+de entrega.
+
+De paso, `s5` de `AutomationWiringTest` dejaba de decir la verdad («hasta que
+exista la feature 25…»). Pasa a medir lo que ahora hay: endpoint activo propio,
+desactivado propio, activo ajeno y desconocido, y una regla que **sí** se
+guarda.
+
+**Consecuencia:** quedan alcanzables las filas `NOTIFY_WEBHOOK` de @s5, @s12,
+@s21, @s32 y @s33 que el inventario daba por bloqueadas. Sus oráculos concretos
+no se han escrito en esta sesión: es trabajo de otro carril o de otra pasada, y
+queda anotado aquí como lo único que la retirada del stub deja abierto.
+
+### Ámbito de mutación — `60a3a4e`
+
+`automationsClasses` de `backend/build.gradle.kts` sólo tenía comodines que
+empiezan por `Automation`, así que **`ExecuteAutomations`, `AutomationSchedule` y
+`AutomationConfiguration` —el motor entero— quedaban fuera**: la campaña habría
+dado por cubierto código que nadie mutaba. Mismo criterio que el hallazgo 10 con
+`ApiErrors`. Añadidos los tres patrones.
+
+## Recuento del ejecutor
+
+| Escenario | Dónde se prueba | Estado |
+| --- | --- | --- |
+| @s15 | `ExecuteAutomationsTest` + `AutomationScheduleTest` | **Cerrado** |
+| @s16 | `ExecuteAutomationsTest` | **Cerrado** |
+| @s17 | `ExecuteAutomationsTest` | **Cerrado** |
+| @s19 | `AutomationExecutionTest` (Postgres) + bitácora en `ExecuteAutomationsTest` | **Cerrado** |
+| @s20 | `ExecuteAutomationsTest` | **Cerrado** |
+| @s22 | `ExecuteAutomationsTest`, dos tests | **Cerrado** |
+| @s23 | `AutomationExecutionTest` (dos hilos reales) | **Cerrado** |
+| @s25 | `AutomationExecutionTest` | **Cerrado** |
+| @s26 | `AutomationExecutionTest` | **Cerrado** |
+| @s18 (medio cubierto) | `ExecuteAutomationsTest`, las dos filas | **Cerrado** |
+| @s21 (medio cubierto) | `ExecuteAutomationsTest`, las cinco filas | **Cerrado** |
+| @s24 (medio cubierto) | `ExecuteAutomationsTest`, dos tests | **Cerrado** |
+| @s28, @s29 (agujero abierto por el ejecutor) | `ExecuteAutomationsTest` | **Cerrado** |
+
+**Los nueve del inventario: nueve cerrados.** Más los tres medio cubiertos y los
+dos de la guarda contra bucles.
+
+## Lo que sigue abierto, y no se silencia
+
+1. **Las filas `NOTIFY_WEBHOOK` de @s5, @s12, @s21, @s32 y @s33.** Ya son
+   alcanzables —el stub cayó en `9951147`— pero sus oráculos no están escritos.
+2. **La puerta de mutación**, no ejecutada por instrucción del coordinador. El
+   ámbito ya está corregido (`60a3a4e` en backend, hallazgo 11 en frontend).
+   Umbral 0,80, y hay que registrar la **lista de supervivientes**.
+3. **`app.automations.enabled` no se declara en `application.properties`**, igual
+   que `app.webhooks.enabled`: el worker es opt-in por entorno. Si se quiere que
+   el motor corra en la pila de E2E o en despliegue, hay que ponerlo allí — es
+   fichero compartido y no se ha tocado.
+4. **Hallazgo 9** (recorrido de teclado y foco visible) lo cerró otro carril en
+   `e2e/automations-ux.spec.mjs`. No se ha tocado.
+
+## Ficheros compartidos tocados en esta sesión (REGLAS.md §6)
+
+- `backend/src/main/java/.../adapter/config/ApplicationConfiguration.java`: dos
+  beans nuevos (`automationWork`, `executeAutomations`) y el
+  `webhookEndpointLookup` que pasa de stub a consulta real.
+- `backend/build.gradle.kts`: tres patrones dentro de `automationsClasses`.
+
+Ambos son puntos de conflicto probables en la integración.
+
 ---
 
 # Hallazgo 1 [BLOQUEANTE] — inventario original (mapa escenario a escenario)
@@ -703,7 +834,7 @@ el `clipped` por compartir `assertUsable`.
 
 | Hallazgo | Gravedad | Estado |
 | --- | --- | --- |
-| 1 — no existe el ejecutor de reglas | BLOQUEANTE | **ABIERTO**, con inventario completo de los nueve escenarios y diseño propuesto |
+| 1 — no existe el ejecutor de reglas | BLOQUEANTE | **CERRADO el 10 de septiembre**: los nueve escenarios del inventario, más @s18, @s21, @s24, @s28 y @s29. Ver la sección del ejecutor arriba |
 | 2 — el interruptor no ataba el If-Match vivo ni el instante | BLOQUEANTE | Cerrado |
 | 3 — la auditoría alcanzaba 2 de 7 estados | BLOQUEANTE | Cerrado (lista, editor y simulación en las cuatro pruebas) |
 | 4 — el Given de @s42 no se cumplía | BLOQUEANTE | Cerrado; destapó un defecto real de contraste |
@@ -716,6 +847,10 @@ el `clipped` por compartir `assertUsable`.
 | 11 — ámbito Stryker sin la integración con el armazón | MEDIA | Cerrado |
 
 **Cerrados: 8 (más el 10 que venía dado). Abiertos: 2 — el 1 y el 9.**
+
+> ACTUALIZACIÓN 10 de septiembre: el **1 quedó cerrado** (el ejecutor, arriba) y
+> el **9 lo cerró otro carril** en `e2e/automations-ux.spec.mjs`. No queda
+> ninguno de los once abierto.
 
 Puerta de mutación **no ejecutada**, por instrucción del coordinador.
 

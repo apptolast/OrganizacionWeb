@@ -13,6 +13,26 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfiguration {
+  private static final String CONTENT_SECURITY_POLICY =
+      "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:;"
+          + " connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'";
+
+  /**
+   * La postura de cabeceras no depende del ingress: `deploy/nginx.conf` las añade para el frontend,
+   * pero un despliegue que exponga el backend sin ese proxy debe seguir emitiéndolas.
+   */
+  private static void securityHeaders(
+      org.springframework.security.config.annotation.web.configurers.HeadersConfigurer<HttpSecurity>
+          headers) {
+    headers
+        .contentSecurityPolicy(csp -> csp.policyDirectives(CONTENT_SECURITY_POLICY))
+        .referrerPolicy(
+            referrer ->
+                referrer.policy(
+                    org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter
+                        .ReferrerPolicy.SAME_ORIGIN));
+  }
+
   @Bean
   UserDetailsService users(
       @Value("${app.auth.username}") String username,
@@ -40,6 +60,7 @@ public class SecurityConfiguration {
           quota)
       throws Exception {
     return http.securityMatcher(request -> request.getHeader("Authorization") != null)
+        .headers(SecurityConfiguration::securityHeaders)
         .logout(logout -> logout.disable())
         .csrf(csrf -> csrf.disable())
         .requestCache(cache -> cache.disable())
@@ -70,7 +91,8 @@ public class SecurityConfiguration {
                   401, "UNAUTHENTICATED", "Identifícate para continuar."));
         };
     // Browser writes retain their trusted Origin requirement; no CORS is enabled.
-    return http.csrf(org.springframework.security.config.Customizer.withDefaults())
+    return http.headers(SecurityConfiguration::securityHeaders)
+        .csrf(org.springframework.security.config.Customizer.withDefaults())
         .addFilterBefore(
             new com.apptolast.organization.adapter.http.OriginGuard(publicOrigin, json),
             org.springframework.security.web.csrf.CsrfFilter.class)

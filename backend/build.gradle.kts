@@ -507,6 +507,11 @@ pitest {
         "com.apptolast.organization.application.ReplaceAutomation*",
         "com.apptolast.organization.application.DeleteAutomation*",
         "com.apptolast.organization.application.SimulateAutomation*",
+        // El ejecutor de reglas y su planificador: no empiezan por Automation, asi que ninguno de
+        // los comodines anteriores los alcanzaba y la campana habria dado por cubierto el motor.
+        "com.apptolast.organization.application.ExecuteAutomations*",
+        "com.apptolast.organization.adapter.config.AutomationSchedule*",
+        "com.apptolast.organization.adapter.config.AutomationConfiguration*",
         "com.apptolast.organization.application.WebhookEndpoint*",
         "com.apptolast.organization.adapter.http.Automation*",
         // Los seis manejadores de error de la feature viven en ApiErrors, que quedaba fuera del

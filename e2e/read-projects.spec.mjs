@@ -353,9 +353,19 @@ test("read_projects: long text reflows across twelve widths with accessible keyb
     name: project.name,
     exact: true,
   });
+  await expect(projectLink).toBeVisible();
+  // Presupuesto derivado, no literal: cada feature nueva mete controles por
+  // delante y un numero fijo caduca en silencio el dia que entra una ruta mas.
+  const budget =
+    (await page.evaluate(
+      () =>
+        document.querySelectorAll(
+          "a[href], button, input, select, textarea, [tabindex]:not([tabindex='-1'])",
+        ).length,
+    )) + 2;
   for (
     let index = 0;
-    index < 12 &&
+    index < budget &&
     !(await projectLink.evaluate(
       (element) => element === document.activeElement,
     ));

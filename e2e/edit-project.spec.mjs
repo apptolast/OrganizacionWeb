@@ -407,9 +407,19 @@ test("edit_project: accessible form reflows across widths and breakpoint edges a
   await page.goto(`/proyectos/${project.id}/editar`);
   const name = page.getByLabel(/Nombre del proyecto/);
   await expect(name).toHaveValue(project.name);
+  await expect(name).toBeVisible();
+  // Presupuesto derivado, no literal: cada feature nueva mete controles por
+  // delante y un numero fijo caduca en silencio el dia que entra una ruta mas.
+  const budget =
+    (await page.evaluate(
+      () =>
+        document.querySelectorAll(
+          "a[href], button, input, select, textarea, [tabindex]:not([tabindex='-1'])",
+        ).length,
+    )) + 2;
   for (
     let index = 0;
-    index < 12 &&
+    index < budget &&
     !(await name.evaluate((element) => element === document.activeElement));
     index++
   )

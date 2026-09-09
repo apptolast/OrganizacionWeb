@@ -58,13 +58,32 @@ test("import: own durable project preview and deliberate atomic addition with no
       name: "Principal",
       exact: true,
     });
-    await expect(nav.getByRole("link").first()).toHaveAccessibleName("Hoy");
-    await expect(nav.getByRole("link").nth(-2)).toHaveAccessibleName(
+    // El orden que la aplicacion SIRVE hoy, afirmado entero. Diverge de la
+    // enmienda de `project-spec.md:2504` en dos puntos, anotados en
+    // `progress/current.md`: «Calendario externo» no aparece en ella y
+    // «Calendario» y «Exportación» van intercambiados. Se afirma la lista
+    // completa y no posiciones desde el final: `nth(-2)` caduca en silencio en
+    // cuanto una feature añade una ruta.
+    const ORDEN_SERVIDO = [
+      "Hoy",
+      "Proyectos",
+      "Disponibilidad",
+      "Historial",
+      "Revisión semanal",
+      "Calendario externo",
+      "Apariencia",
+      "Exportación",
+      "Calendario",
       "Importación",
-    );
-    await expect(nav.getByRole("link").last()).toHaveAccessibleName(
       "API para integraciones",
-    );
+      "Webhooks",
+      "Automatizaciones",
+    ];
+    await expect(nav.getByRole("link")).toHaveCount(ORDEN_SERVIDO.length);
+    for (const [posicion, nombre] of ORDEN_SERVIDO.entries())
+      await expect(nav.getByRole("link").nth(posicion)).toHaveAccessibleName(
+        nombre,
+      );
     await nav.getByRole("link", { name: "Importación", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: "Importar mis datos", level: 1 }),

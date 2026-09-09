@@ -179,3 +179,17 @@ Comando: `backend\gradlew.bat test --no-daemon --tests '...domain.IcsCalendarTes
   clave mal formada detiene el arranque sin revelar su valor (@s9), la política
   de direcciones solo se relaja a propósito y el feed usa los 5 s y 1 MiB del
   contrato.
+
+### Ciclo 14 — Hoy no cambia y nadie sincroniza al arrancar (@s30, @s34)
+
+- ROJO: `ExternalCalendarIsolationTest` no compilaba.
+- VERDE: reglas ArchUnit que impiden que `ReadToday`, `PlanBlock`,
+  `TodayController` y `BlockController` dependan de nada del carril, y que nada
+  ajeno al carril dependa de su almacén ni de su sincronización. Así la
+  respuesta de Hoy y el cálculo de solapes no pueden cambiar por tener una
+  suscripción: no hay ningún camino de código que los una.
+- También: el único planificador del backend no menciona el calendario externo y
+  ninguna clase del carril es `ApplicationRunner` ni `CommandLineRunner`.
+
+Punto de control del backend: los 14 ficheros de test del carril en verde,
+incluidas las 37 pruebas MockMvc y la de Testcontainers.

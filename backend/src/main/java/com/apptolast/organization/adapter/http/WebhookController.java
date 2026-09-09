@@ -35,8 +35,9 @@ public final class WebhookController {
     this.json = json;
   }
 
-  @PostMapping(BASE)
+  @PostMapping(value = BASE, consumes = "application/json")
   public ResponseEntity<?> create(Principal principal, HttpServletRequest http) throws IOException {
+    noQuery(http);
     var request = readCreation(http);
     var created =
         create.create(
@@ -47,11 +48,18 @@ public final class WebhookController {
             new CreationView(WebhookEndpointView.of(created.endpoint()), created.secret()));
   }
 
+  /** Any query string on this route is a rejected field, never a silent filter. */
+  private static void noQuery(HttpServletRequest request) {
+    if (request.getQueryString() != null && !request.getQueryString().isEmpty())
+      throw new com.apptolast.organization.domain.WebhookInvalidException(List.of("query"));
+  }
+
   private CreationRequest readCreation(HttpServletRequest http) throws IOException {
     byte[] body;
     try (var input = http.getInputStream()) {
       body = input.readNBytes(MAX_BODY_BYTES + 1);
     }
+    if (body.length > MAX_BODY_BYTES) throw new BodyTooLarge();
     JsonNode node;
     try {
       node =
@@ -195,6 +203,39 @@ public final class WebhookController {
   }
 
   static final class MalformedBody extends RuntimeException {}
+
+  static final class BodyTooLarge extends RuntimeException {}
+
+  @org.springframework.web.bind.annotation.ExceptionHandler(BodyTooLarge.class)
+  ResponseEntity<?> tooLarge() {
+    return ResponseEntity.status(413)
+        .header("Cache-Control", "no-store")
+        .contentType(org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON)
+        .body(
+            ApiErrors.problem(
+                413, "WEBHOOK_TOO_LARGE", "El cuerpo supera los 4096 bytes permitidos."));
+  }
+
+  /**
+   * The dispatcher raises its own 405 before resolving a handler, where a controller-local handler
+   * never runs and the generic advice would turn it into a 500. Mapping the unsupported methods
+   * explicitly keeps the answer inside the webhook contract.
+   */
+  @org.springframework.web.bind.annotation.RequestMapping(
+      value = {BASE, BASE + "/{id}", BASE + "/{id}/status"},
+      method = org.springframework.web.bind.annotation.RequestMethod.PATCH)
+  ResponseEntity<?> methodNotAllowed(HttpServletRequest request) {
+    return ResponseEntity.status(405)
+        .header("Cache-Control", "no-store")
+        .header("Allow", allowedOn(request.getRequestURI()))
+        .contentType(org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON)
+        .body(ApiErrors.problem(405, "METHOD_NOT_ALLOWED", "El método no está permitido."));
+  }
+
+  private static String allowedOn(String path) {
+    if (path.endsWith("/status")) return "PUT";
+    return path.endsWith("/webhooks") ? "GET, POST" : "GET, DELETE";
+  }
 
   @org.springframework.web.bind.annotation.ExceptionHandler(MalformedBody.class)
   ResponseEntity<?> malformed() {

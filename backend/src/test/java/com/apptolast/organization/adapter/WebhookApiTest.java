@@ -1,5 +1,6 @@
 package com.apptolast.organization.adapter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
@@ -276,6 +277,143 @@ class WebhookApiTest {
         .andExpect(jsonPath("$.delivery.status").value("pending"))
         .andExpect(jsonPath("$.delivery.attempt").value(0))
         .andExpect(jsonPath("$.delivery.id").value(deliveryId.toString()));
+  }
+
+  private static String bodyOfExactly(int bytes) {
+    var envelope =
+        "{\"url\":\"https://example.com/hooks\",\"eventTypes\":[\"TaskCreated.v1\"],"
+            + "\"description\":\"\"}";
+    var padding = bytes - envelope.length();
+    return "{\"url\":\"https://example.com/hooks\",\"eventTypes\":[\"TaskCreated.v1\"],"
+        + "\"description\":\""
+        + "a".repeat(padding)
+        + "\"}";
+  }
+
+  @Test
+  void s4_aBodyOfExactlyFourKibibytesIsStillAccepted() throws Exception {
+    var body = bodyOfExactly(4096);
+    assertEquals(4096, body.getBytes(java.nio.charset.StandardCharsets.UTF_8).length);
+    when(create.create(eq("owner"), any(), any(), any()))
+        .thenReturn(new WebhookCreation(endpoint(), SECRET));
+    mvc.perform(
+            post("/api/v1/me/webhooks")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .contentType("application/json")
+                .content(body))
+        .andExpect(status().isCreated());
+  }
+
+  @Test
+  void s4_aBodyOverTheLimitIsRefusedAsTooLargeWithoutParsingTheJson() throws Exception {
+    mvc.perform(
+            post("/api/v1/me/webhooks")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .contentType("application/json")
+                .content(bodyOfExactly(4097)))
+        .andExpect(status().isPayloadTooLarge())
+        .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+        .andExpect(jsonPath("$.code").value("WEBHOOK_TOO_LARGE"));
+    verifyNoInteractions(create);
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {
+        "{\"url\":\"https://example.com/h\",\"eventTypes\":[\"TaskCreated.v1\"],\"otra\":1}",
+        "{\"url\":\"https://example.com/h\",\"url\":\"https://example.com/i\","
+            + "\"eventTypes\":[\"TaskCreated.v1\"]}",
+        "{\"url\":\"https://example.com/h\",\"eventTypes\":[\"TaskCreated.v1\"]} 1"
+      })
+  void s4_structuralDefectsAreMalformedJsonAndNeverReachTheUseCase(String body) throws Exception {
+    mvc.perform(
+            post("/api/v1/me/webhooks")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .contentType("application/json")
+                .content(body))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("MALFORMED_JSON"));
+    verifyNoInteractions(create);
+  }
+
+  @Test
+  void s4_aNonJsonContentTypeIsUnsupportedMedia() throws Exception {
+    mvc.perform(
+            post("/api/v1/me/webhooks")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .contentType("text/plain")
+                .content("hola"))
+        .andExpect(status().isUnsupportedMediaType());
+    verifyNoInteractions(create);
+  }
+
+  @Test
+  void s4_anyQueryStringOnCreationIsAFieldError() throws Exception {
+    mvc.perform(
+            post("/api/v1/me/webhooks?owner=otro")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .contentType("application/json")
+                .content(
+                    "{\"url\":\"https://example.com/h\",\"eventTypes\":[\"TaskCreated.v1\"]}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("WEBHOOK_INVALID"));
+    verifyNoInteractions(create);
+  }
+
+  @Test
+  void s33_withoutASessionEveryRouteIsUnauthenticatedAndTouchesNothing() throws Exception {
+    mvc.perform(get("/api/v1/me/webhooks")).andExpect(status().isUnauthorized());
+    mvc.perform(
+            post("/api/v1/me/webhooks")
+                .with(csrf().asHeader())
+                .contentType("application/json")
+                .content("{\"url\":\"https://example.com/h\"}"))
+        .andExpect(status().isUnauthorized());
+    verifyNoInteractions(create, manage);
+  }
+
+  @Test
+  void s33_anInvalidCsrfTokenForbidsTheWriteWithoutTouchingWebhooks() throws Exception {
+    mvc.perform(
+            post("/api/v1/me/webhooks")
+                .with(user("owner"))
+                .contentType("application/json")
+                .content("{\"url\":\"https://example.com/h\"}"))
+        .andExpect(status().isForbidden());
+    mvc.perform(delete("/api/v1/me/webhooks/" + W).with(user("owner")))
+        .andExpect(status().isForbidden());
+    verifyNoInteractions(create, manage);
+  }
+
+  @Test
+  void s33_anUntrustedOriginForbidsTheStatusChange() throws Exception {
+    mvc.perform(
+            put("/api/v1/me/webhooks/" + W + "/status")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("Origin", "https://evil.example")
+                .contentType("application/json")
+                .content("{\"status\":\"disabled\"}"))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("UNTRUSTED_ORIGIN"));
+    verifyNoInteractions(manage);
+  }
+
+  @Test
+  void s33_patchOnAWebhookIsMethodNotAllowed() throws Exception {
+    mvc.perform(
+            patch("/api/v1/me/webhooks/" + W)
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .contentType("application/json")
+                .content("{}"))
+        .andExpect(status().isMethodNotAllowed());
+    verifyNoInteractions(manage);
   }
 
   private static org.hamcrest.Matcher<java.util.Collection<?>> hasSize(int size) {

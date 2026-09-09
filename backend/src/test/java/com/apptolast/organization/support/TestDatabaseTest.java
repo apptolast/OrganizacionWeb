@@ -45,7 +45,9 @@ class TestDatabaseTest {
   void emptiesATableThatArrivedAfterTheFixturesWereWritten() {
     var task = seedProjectAndTask();
     jdbc.execute(
-        "CREATE TABLE " + LATE_ARRIVAL + "(id UUID PRIMARY KEY, task_id UUID REFERENCES tasks(id))");
+        "CREATE TABLE "
+            + LATE_ARRIVAL
+            + "(id UUID PRIMARY KEY, task_id UUID REFERENCES tasks(id))");
     jdbc.update("INSERT INTO " + LATE_ARRIVAL + " VALUES (?,?)", UUID.randomUUID(), task);
 
     TestDatabase.empty(jdbc);

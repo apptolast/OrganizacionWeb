@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.*;
 import com.apptolast.organization.application.*;
 import com.apptolast.organization.domain.ExternalIssue;
 import com.apptolast.organization.domain.Task;
+import com.apptolast.organization.support.TestDatabase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -60,12 +61,9 @@ class GithubConnectorPersistenceTest {
 
   @BeforeEach
   void setUp() {
-    jdbc.update("DELETE FROM task_external_links");
-    jdbc.update("DELETE FROM issue_import_receipts");
-    jdbc.update("DELETE FROM connector_connections");
-    jdbc.update("DELETE FROM outbox_events");
-    jdbc.update("DELETE FROM tasks");
-    jdbc.update("DELETE FROM projects");
+    // Se vacía descubriendo las tablas, no enumerándolas: fue la V25 de este carril, con su
+    // task_external_links apuntando a tasks, la que tumbó las listas escritas a mano.
+    TestDatabase.empty(jdbc);
     var transaction = new TransactionTemplate(manager);
     connections = new PostgresConnectorConnectionStore(jdbc, transaction);
     receipts = new PostgresIssueImportReceiptStore(jdbc, transaction);

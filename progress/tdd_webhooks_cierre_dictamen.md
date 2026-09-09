@@ -57,3 +57,42 @@ Gherkin. Se alinea contrato con código sin silenciar nada.
 (`TEST_EXCHANGE_DEADLINE = 300 ms`), no se esperan los 10 s de producción.
 
 **Queda abierto de este hallazgo:** la fila TLS (certificado no confiable). Ver abajo.
+
+## Hallazgo 1 y 17 — @s25: la fila TLS no tenía oráculo (parte b) — CERRADO
+
+**Cubre:** `features/webhooks.feature:329` (fila «presenta un certificado no confiable»).
+
+**Prueba:** `JdkWebhookSenderTest.s25_aReceiverWithAnUntrustedCertificateIsATlsFailure`.
+
+**Ciclo.**
+
+1. Fixture nuevo: `backend/src/test/resources/webhooks/untrusted-receiver.p12`,
+   PKCS12 autofirmado generado con keytool (CN=127.0.0.1, SAN ip:127.0.0.1,
+   validez 36500 días, clave RSA 2048, contraseña `changeit`). No es una
+   credencial: sólo lo usa el receptor de prueba y ninguna cadena de confianza
+   del JDK lo avala, que es justamente la condición del contrato.
+2. El helper `start` se parte en `listen(scheme, server, handler)` y aparece
+   `startUntrustedTls`, que monta un `HttpsServer` con ese keystore. El record
+   `Receiver` gana el esquema para poder emitir `https://…`.
+3. El test PASÓ A LA PRIMERA: la rama de producción ya existía, lo que faltaba
+   era el oráculo. Por eso el rojo se acredita rompiendo la producción.
+4. ROJO ACREDITADO. Cambio `catch (SSLException tls) -> transport("TLS", …)` por
+   `transport("MUTANT_DIRECT_CATCH", …)`. Resultado:
+   `s25_aReceiverWithAnUntrustedCertificateIsATlsFailure() FAILED`. Restaurado y
+   verde otra vez (`BUILD SUCCESSFUL`).
+
+**Dato que el dictamen pedía averiguar (hallazgo 1, punto 3).** Con el catch
+directo mutado la prueba se pone roja, luego **la rama viva es el `catch
+(SSLException)` de `JdkWebhookSender:70-71`**, no la rama `"TLS"` de
+`classify()` (:86). El fallo TLS llega desnudo, no envuelto en `IOException`.
+La rama de `classify()` para TLS es, por tanto, código no alcanzado por este
+camino; queda anotado como observación fuera de ámbito (REGLAS.md §9) para que
+la campaña de mutación no sorprenda a nadie: `classify()` sigue siendo la red
+por defecto de cualquier `IOException` que no case con los catch previos.
+
+**Ficheros cambiados.**
+- `backend/src/test/java/com/apptolast/organization/adapter/webhook/JdkWebhookSenderTest.java`
+- `backend/src/test/resources/webhooks/untrusted-receiver.p12` (nuevo)
+
+Con esto las **ocho filas** del outline @s25 quedan ejercidas contra el adaptador
+real. Hallazgos 1 y 17 CERRADOS.

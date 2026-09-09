@@ -5,7 +5,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.apptolast.organization.application.AddressPolicy;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsServer;
 import java.io.IOException;
+import java.security.KeyStore;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -19,6 +22,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -47,6 +52,8 @@ class JdkWebhookSenderTest {
 
   private static final Duration TEST_EXCHANGE_DEADLINE = Duration.ofMillis(300);
 
+  private static final char[] KEYSTORE_PASSWORD = "changeit".toCharArray();
+
   private static JdkWebhookSender sender(AddressPolicy policy) {
     return new JdkWebhookSender(CLOCK, policy, InetAddress::getAllByName);
   }
@@ -61,9 +68,10 @@ class JdkWebhookSenderTest {
         TEST_EXCHANGE_DEADLINE);
   }
 
-  private record Receiver(HttpServer server, List<HttpExchange> received) implements AutoCloseable {
+  private record Receiver(String scheme, HttpServer server, List<HttpExchange> received)
+      implements AutoCloseable {
     String url() {
-      return "http://127.0.0.1:" + server.getAddress().getPort() + "/hooks";
+      return scheme + "://127.0.0.1:" + server.getAddress().getPort() + "/hooks";
     }
 
     @Override
@@ -73,7 +81,29 @@ class JdkWebhookSenderTest {
   }
 
   private static Receiver start(Consumer<HttpExchange> handler) throws IOException {
-    var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    return listen("http", HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0), handler);
+  }
+
+  /**
+   * A receiver over TLS whose certificate is self-signed, so no default trust anchor vouches for
+   * it. The keystore lives in src/test/resources and never leaves the tests.
+   */
+  private static Receiver startUntrustedTls(Consumer<HttpExchange> handler) throws Exception {
+    var keys = KeyStore.getInstance("PKCS12");
+    try (var stream =
+        JdkWebhookSenderTest.class.getResourceAsStream("/webhooks/untrusted-receiver.p12")) {
+      keys.load(stream, KEYSTORE_PASSWORD);
+    }
+    var managers = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+    managers.init(keys, KEYSTORE_PASSWORD);
+    var context = SSLContext.getInstance("TLS");
+    context.init(managers.getKeyManagers(), null, null);
+    var server = HttpsServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    server.setHttpsConfigurator(new HttpsConfigurator(context));
+    return listen("https", server, handler);
+  }
+
+  private static Receiver listen(String scheme, HttpServer server, Consumer<HttpExchange> handler) {
     var received = new ArrayList<HttpExchange>();
     server.createContext(
         "/hooks",
@@ -82,7 +112,7 @@ class JdkWebhookSenderTest {
           handler.accept(exchange);
         });
     server.start();
-    return new Receiver(server, received);
+    return new Receiver(scheme, server, received);
   }
 
   private static void await(CountDownLatch latch) {
@@ -251,6 +281,18 @@ class JdkWebhookSenderTest {
       assertTrue(
           outcome.latencyMs() >= TEST_EXCHANGE_DEADLINE.toMillis(),
           "the exchange deadline elapsed before giving up, got " + outcome.latencyMs() + " ms");
+    }
+  }
+
+  @Test
+  void s25_aReceiverWithAnUntrustedCertificateIsATlsFailure() throws Exception {
+    try (var receiver = startUntrustedTls(exchange -> respond(exchange, 200, new byte[0]))) {
+      var outcome = sender(EVERY_ADDRESS_ALLOWED).send(receiver.url(), SECRET, EVENT, BODY);
+
+      assertEquals("TLS", outcome.errorClass());
+      assertNull(outcome.httpStatus());
+      assertFalse(outcome.succeeded());
+      assertTrue(receiver.received().isEmpty(), "the handshake failed before any request arrived");
     }
   }
 

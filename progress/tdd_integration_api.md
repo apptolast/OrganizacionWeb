@@ -217,6 +217,25 @@ Recomendación: **no tocar el orden**. Un contador de rechazos separado del cupo
 negocio, o `limit_req` por IP en nginx (A3), cubre el abuso sin contradecir @s23
 ni @s24. Cualquier alternativa exige cambiar el contrato primero.
 
+## Verificación de cierre
+
+`backend\gradlew.bat spotlessApply --no-daemon` → `BUILD SUCCESSFUL`, sin
+reformateos pendientes.
+
+`backend\gradlew.bat test --no-daemon` (suite completa, turno concedido por el
+coordinador para no competir por contenedores) → **`BUILD SUCCESSFUL in 13m 11s`**.
+Agregado de los 150 XML de `build/test-results/test`:
+
+```
+clases 150  tests 3467  skipped 0  failures 0  errors 0
+```
+
+**3467 tests, 0 fallos, 0 errores, 0 omisiones.** Los 82 tests de las dos clases
+del filtro (`ApiCredentialBearerTest` 53, `ApiCredentialBearerAdmissionTest` 29)
+y los 3 de `SecurityHeadersTest` están dentro de ese total.
+
+No se ejecutó ninguna campaña de mutación, por instrucción.
+
 ## Mutación
 
 Las tres campañas siguen siendo la medición vigente. Cifras **recalculadas por el

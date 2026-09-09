@@ -317,3 +317,35 @@ y `@s31` siguen parciales.
   vacío. **Ninguna línea de producción se ha modificado en esta sesión salvo el
   ciclo de `@s15`**: todo lo demás son oráculos nuevos sobre producción que ya
   estaba escrita.
+
+## URGENTE para el carril 27 — la causa de la regresión de `a347936`, localizada
+
+`frontend/src/github-connector-client.ts:9`
+
+```ts
+const RECEIPT_FIELDS =
+  "id projectId repository status created skipped failed truncated errorCode startedAt finishedAt";
+```
+
+Son **once** claves y siguen nombrando `repository`. El recibo que hoy devuelve
+`GithubConnectorController.ImportResponse` (líneas 318-330) tiene **doce**:
+`id source projectId projectPath status created skipped failed truncated
+errorCode startedAt finishedAt`. Es el cambio de la decisión 2 de esta bitácora,
+el que exige `@s20`.
+
+`exact(value, RECEIPT_FIELDS)` (`schedule-block-api.ts:341`) compara
+`Object.keys(value).length === keys.split(" ").length`: 12 ≠ 11, devuelve
+`false`, y `decodeReceipt` lanza `Error("Confirmación incompatible")`. Por eso
+la vista dejó de mostrar contadores: no es que vengan a cero, es que el recibo
+**no se llega a decodificar**.
+
+Y hay un segundo golpe por el mismo sitio: `CONNECTION_FIELDS` incluye
+`lastImport`, que `decodeConnection` pasa por `decodeReceipt`. Así que también
+revienta `GET /api/v1/me/connectors/github` en cuanto el propietario tiene una
+importación previa, no sólo el POST. Eso explica que caigan cuatro pruebas de
+E2E y no una.
+
+Arreglo (lo hace 27, que es el dueño del fichero; este carril no lo toca):
+poner las doce claves en `RECEIPT_FIELDS` y sustituir la comprobación
+`typeof value.repository !== "string"` por `value.source === "github"` y
+`projectPath` como cadena no vacía.

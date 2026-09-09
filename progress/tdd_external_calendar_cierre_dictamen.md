@@ -24,7 +24,7 @@ por clase concreta, nunca la suite entera.
 | 9 | alta | ya cerrado en la base (es el hallazgo 2) | — |
 | 10 | alta | pendiente | — |
 | 11 | alta | pendiente | — |
-| 12 | alta | pendiente | — |
+| 12 | alta | **CERRADO** | ciclo 8 |
 | 13 | alta | pendiente | — |
 | 14 | alta | **CERRADO** (amplía contrato) | ciclo 4 |
 | 15 | media | **CERRADO** | ciclo 3 |
@@ -543,3 +543,67 @@ aceptado**», con el mecanismo explicado.
   `JdkWebhookSender.guardDestination`, y el dictamen pedía cubrir 25 y 28 a la vez.
   No se ha tocado: es de otro carril y REGLAS.md §9 lo prohíbe. Queda anotado aquí
   para que el coordinador lo enrute.
+
+---
+
+## Ciclo 8 — hallazgo 12: el oráculo medía el ancho de la página y el título prometía solapes
+
+**Qué decía el dictamen.** El título de la prueba decía «sin solapes ni scroll
+horizontal en toda la matriz», pero el cuerpo llamaba a `noHorizontalScroll()`, que
+entero era comparar `document.documentElement.scrollWidth` con `clientWidth`. Ni
+`scrollHeight`, ni recorte por elemento, ni una sola comparación de rectángulos.
+Agravante: la línea que fuerza `height: 400` a 768 px pone justo el caso donde el
+recorte vertical es más probable, y no se medía nada vertical.
+
+**VERDE.** `noHorizontalScroll` y `controlsAreLargeEnough` se sustituyen por un
+`geometry(page)` calcado del de `e2e/ics-calendar-ux.spec.mjs`, que devuelve
+desbordamiento de página, objetivos menores de 44 px, controles fuera del viewport,
+**recorte por elemento en los dos ejes** y **solapes por pares de rectángulos**; y
+un `nothingBreaksAt(page, label)` que afirma las cinco cosas con un mensaje propio
+por medida. El título pasa a «sin solapes, recortes ni scroll horizontal», que es lo
+que el cuerpo ahora sí asegura.
+
+**Excepción documentada, no lista blanca silenciosa.** `INPUT`, `SELECT` y
+`TEXTAREA` se excluyen **del recorte** porque su `scrollWidth > clientWidth` con un
+valor largo es su comportamiento correcto: el usuario recorre el valor con el cursor
+y no pierde texto. Contarlo sería falso positivo garantizado en una pantalla cuyo
+dato principal es una dirección iCal larga. Siguen entrando en objetivos, en solapes
+y en escape del viewport: la excepción es de una medida, no de todas.
+
+**Ejecutado de verdad**, con `E2E_WEB_PORT=18092` y sólo mi spec:
+
+```
+E2E_WEB_PORT=18092 pnpm test:e2e -- e2e/external-calendar-ux-audit.spec.mjs
+4 passed (15.8s)
+```
+
+**ROJO acreditado con mutación de control** (la técnica que el carril de
+automatizaciones usó hoy). Se añadió a `frontend/src/styles.scss` la regla
+`.external-calendar .field { overflow: hidden; max-height: 40px; }` y cayeron **2 de
+las 4** pruebas, nombrando el recorte vertical elemento a elemento:
+
+```
++   "DIV:Etiqueta [alto 81 en 40]",
++   "DIV:Dirección secreta iCalEn Goo [alto 145 en 40]",
+2 failed / 2 passed
+```
+
+Con el oráculo anterior ese mismo CSS no habría movido una sola aserción: el
+documento no desborda a lo ancho y los botones seguían midiendo 44 px. CSS
+restaurado y verde recuperado.
+
+**De paso, la espera placebo que anoté en el ciclo 2.** La línea
+`expect(page.getByRole("status")).not.toHaveText("Sincronizando…")` era una espera
+negativa que en Playwright pasa de inmediato si el anuncio no aparece jamás. Se
+sustituye por dos esperas positivas: primero que el anuncio **aparezca**, después
+que ceda al resultado, con plazo de 20 s porque el contrato admite hasta 5 s de
+descarga. No es cosmética: al ejecutar por primera vez la auditoría, esa línea
+**falló de verdad** con `Received: "Sincronizando…"`, porque el plazo total del
+cuerpo que introdujo el ciclo 4 hace que sincronizar contra un feed inalcanzable
+tarde ahora los cinco segundos completos. Es decir: la auditoría, ejecutada por fin,
+encontró algo.
+
+**Nota de higiene.** Una invocación de shell mal citada dejó un fichero vacío
+llamado `clientWidth` en la raíz del worktree y relanzó una vez la pila de E2E. El
+fichero se ha borrado antes de commitear y la pila se bajó sola; ninguna de las dos
+cosas tocó código.

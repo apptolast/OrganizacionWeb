@@ -637,3 +637,147 @@ cronometrar Doherty, sin lector de pantalla real y sin los anchos 1440/1920.
 La desviación del `Content-Type` (el juez la acepta y la enmienda del `.feature` va por la puerta
 del propietario), el `location /api/` que duplica tres cabeceras (deuda de la feature 24, carril
 propio), el estado en `feature_list.json`, la mutación y `bin/harness init`.
+
+---
+
+# Respuesta a la campaña de mutación frontend (69,97 % con umbral 80 %)
+
+`progress/mutation_ics_calendar_frontend.md` enumera 115 mutantes no muertos: 5 equivalentes
+argumentados por el `mutation_tester` y **110 huecos reales**. El informe es preciso y se ha
+trabajado con la lista delante, entrada por entrada.
+
+Las pruebas nuevas **no cambian ni una línea de producción**: `git diff --stat` sólo toca los dos
+ficheros de prueba. Era de esperar y conviene decirlo — un mutante que sobrevive no es un defecto,
+es una conducta correcta sin oráculo. Por eso **ninguna de estas pruebas nació roja contra el código
+actual**, y en vez de fiarme de eso he verificado que discriminan de la única forma honesta
+disponible: mutando a mano las líneas que deben proteger.
+
+### Ciclo 18 — el cliente (`calendar-feed-api.ts`, 32 entradas)
+
+Las 32 quedan cubiertas. Lo importante no es la cifra sino la número 20, que **ya me había mordido**:
+todas las pruebas usaban `text/calendar; charset=utf-8` **con espacio** y el ciclo 14 documenta que
+Tomcat entrega la forma **sin espacio**. Ninguna prueba cubría la forma que produce el servidor real.
+Ahora hay una fila explícita para ella, y otras cuatro que fijan que el tipo se compara entero
+(otro tipo delante, parámetros detrás, subtipo pegado, otra codificación).
+
+Además: `Content-Length` ausente, vacío, con basura delante o detrás, cero y con cero a la izquierda;
+longitudes de dos y de tres cifras que **sí** deben aceptarse; UTF-8 malformado rechazado (lo que
+`fatal: true` protege) y BOM rechazado (lo que `ignoreBOM: true` protege); `Accept: text/calendar` y
+la señal de cancelación afirmados en la llamada; abortar tras la respuesta en las **cuatro**
+operaciones; 500 en el estado y 200 en la creación entregados como `Response`; cuerpo que no es JSON;
+`active` no booleano con el resto bien formado; url con basura antes del esquema o con camino
+colgando detrás; url que no es una cadena pero se coacciona a la correcta; y el mensaje del error.
+
+Verificación por mutación manual (mutar, ejecutar, restaurar; el fichero queda idéntico):
+
+```
+fatal:false                     -> MUERTO
+ignoreBOM:false                 -> MUERTO
+content-type exige un espacio   -> MUERTO
+content-length dos cifras       -> MUERTO
+sin ancla ^ en la direccion     -> MUERTO
+```
+
+### Ciclo 19 — la vista (`calendar.tsx`)
+
+**B8, las tres ramas de reintento** (13 mutantes, doce sin cobertura). Tres pruebas: fallar la
+creación y reintentar exige un segundo POST y **cero** DELETE, cero descargas y ningún GET de estado
+de más; lo mismo para la revocación y para la descarga. Era, como decía el coordinador, el camino que
+la persona recorre justo cuando algo ha fallado.
+
+**B7, el 413 no es un fallo cualquiera** (8). Dos pruebas: un 503 en la descarga da el mensaje
+genérico **y** el botón «Reintentar»; un 413 da el mensaje del límite **y no** ofrece reintentar,
+porque repetir no lo resuelve.
+
+**B1 y B2, el contrato de foco** (17). Cuatro pruebas. jsdom no imita al navegador aquí: cuando React
+deshabilita el control que tiene el foco, un navegador real lo devuelve al `body` y jsdom lo deja
+pegado a un botón deshabilitado, que además ya no se puede desenfocar. Se modela explícitamente
+—foco en el `body`, `fireEvent` que no mueve el foco, y `focusin` emitidos a mano— para ejercer justo
+el predicado que decide si la persona se movió. Quedan sujetos: vuelve al control si no se movió, no
+vuelve si se movió, y que el foco entre en el **propio** control iniciador no cuenta como moverse.
+Más una prueba de que al desmontar no queda ninguna escucha `focusin` colgando.
+
+**B3** (4). El `h1` recibe el foco al abrir; la vista lee el estado **una sola vez** aunque vuelva a
+renderizar.
+
+**B5 y B6** (19). Anuncios «Revocando enlace…» y «Preparando archivo…» en vuelo; tras revocar no
+queda enlace, ni aviso de copia, ni confirmación, ni fecha de creación; al regenerar se retira el
+aviso de copia del enlace anterior; al empezar un reintento desaparece el `role="alert"` previo; y el
+Blob que se ofrece a descargar es `text/calendar;charset=utf-8`.
+
+**B9** (5). Al desmontar se revoca la url del archivo preparado, y una segunda descarga revoca la de
+la primera — nadie descargaba dos veces en toda la suite.
+
+**B10** (4). `tabindex="-1"` en el `h1` y en el grupo de confirmación (un `tabIndex` positivo es un
+defecto de accesibilidad real); al enfocar el campo su contenido queda seleccionado entero; y al
+confirmar desaparece la confirmación.
+
+Verificación por mutación manual, veinte líneas de `calendar.tsx`: **19 MUERTOS, 1 SOBREVIVE**. El
+superviviente es el de B4 y no lo mato: lo argumento abajo.
+
+### Equivalentes que declaro, con argumento (12)
+
+No los mato. Escribir una prueba que matase a estos sería relleno: no describiría ninguna conducta
+que le importe a nadie.
+
+**B4, las ocho guardas de carrera de `run` (mutantes 22–29). Equivalentes bajo dos invariantes.**
+La primera: **ningún control puede iniciar una operación mientras otra está en vuelo**, porque los
+que crean, regeneran, revocan y descargan llevan `disabled={Boolean(busy)}` y los de confirmar y
+reintentar se desmontan al empezar. Luego `pending.current` nunca llega ocupado a `run` y
+`pending.current !== controller` sólo puede ser cierto tras desmontar. La segunda:
+`calendar-feed-api` llama a `signal.throwIfAborted()` después de cada `await`, así que un aborto
+**siempre** sale por excepción y la guarda del camino feliz no se alcanza jamás. Y tras desmontar,
+React 19 ignora las actualizaciones de estado, de modo que las guardas del `catch` y del `finally` no
+tienen efecto observable. Comprobado a mano: forzar la guarda del camino feliz a `false` no cambia
+nada observable, ni siquiera la creación de la object URL.
+
+Como esa equivalencia **depende de una invariante**, la invariante queda pinchada con dos pruebas
+propias («mientras una operación está en vuelo ningún control puede iniciar otra» y su gemela sin
+enlace). Si alguien retira un `disabled`, se ponen rojas y este argumento caduca en voz alta.
+Verificado: quitar el `disabled` del botón de descarga mata esas pruebas.
+
+**Mutante 20**, `useState<Busy | null>("loading")` a `""`. El efecto de montaje llama a `run` y fija
+`busy` antes de que nada sea observable desde una prueba de unidad. Caveat honesto: en un navegador
+real hay **un fotograma** pintado sin el anuncio, porque el efecto es `useEffect` y no
+`useLayoutEffect`; ninguna prueba de unidad puede verlo. Equivalente para esta suite, no en absoluto.
+
+**Mutante 31**, `setLink(null)` dentro de `load`. `load` sólo corre al montar —donde `link` ya es
+`null`— y al reintentar un fallo **de estado**, que sólo puede existir si nunca llegó a mostrarse un
+enlace. Inalcanzable con efecto.
+
+**Mutante 33**, `setConfirming(null)` dentro de `generate`. El botón de confirmar ya hace
+`setConfirming(null)` antes de llamar a `generate()`. Redundante por construcción.
+
+**Mutante 36**, `setStatus({ active: false, createdAt: null })` a `setStatus({})`. Se renderiza
+idéntico: `showCreate` mira `!status.active` (`!undefined` y `!false` son ambos `true`), `showManage`
+mira `status.active` (ambos falsy) y `created` es `status?.createdAt ?? null`, que da `null` en los
+dos casos. Ninguna diferencia observable en el DOM.
+
+### Lo que no es ni hueco ni equivalente (3)
+
+Los mutantes 46, 47 y 48 (`Intl.DateTimeFormat("es", …)` y sus dos opciones) son los que hacen que la
+construcción del formateador lance `RangeError` **al evaluar el módulo**. El propio informe da la
+hipótesis: un mutante que revienta la importación deja el fichero de pruebas sin ejecutar y Stryker
+lo anota «Survived». Las pruebas que deberían matarlos **existen** —`readable()` compara la fecha
+formateada con la misma configuración— y siguen ahí. No es un hueco de las pruebas ni una
+equivalencia: es un punto ciego del corredor, y no lo maquillo.
+
+### Cuadre y lo que no puedo afirmar
+
+De los 110 huecos reales: **95 cerrados con pruebas** (32 del cliente y 63 de la vista), **12
+declarados equivalentes con argumento** y **3 atribuidos al punto ciego del corredor**. 95 + 12 + 3 =
+110.
+
+`src/calendar.test.tsx` pasa de 26 a 51 pruebas y `src/calendar-feed-api.test.ts` de 14 a 45: **96 en
+total**, todas verdes, con `eslint`, `prettier --check` y `tsc --noEmit` limpios.
+
+**No puedo dar el score nuevo.** Lanzar Stryker es la puerta del `mutation_tester` y esta sesión lo
+tiene prohibido; lo relanza el coordinador. Lo que sí acredito es que **24 de los 25 mutantes que he
+reproducido a mano mueren**, y que el que sobrevive es el que declaro equivalente con su argumento.
+
+### Backend
+
+La campaña de backend no llegó a arrancar: PIT aborta en cobertura porque la suite de `main` está
+rota por las fixtures que hacen `TRUNCATE` enumerando tablas a mano sin las de la feature 27. No es
+de este carril y no se toca; hay otro arreglándolo. La calidad de las 97 pruebas del backend de esta
+feature sigue **sin medir**.

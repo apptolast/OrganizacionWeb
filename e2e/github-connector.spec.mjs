@@ -26,16 +26,19 @@ const REPOSITORY = {
   rejected: "octocat/rechazado",
 };
 
-/** Limpia lo del propietario de pruebas respetando el orden de las claves ajenas. */
+/**
+ * Vacía en cascada, no por lista ordenada a mano. La versión anterior enumeraba
+ * las tablas «respetando el orden de las claves ajenas», y ese orden caducó en
+ * cuanto `work_sessions` pasó a referenciar `tasks`: en CI, con otras specs
+ * habiendo dejado sesiones de trabajo del mismo propietario, el DELETE sobre
+ * `tasks` moría con `violates foreign key constraint work_sessions_task_id_fkey`
+ * y se llevaba por delante el fichero entero. `CASCADE` expresa la intención
+ * real —vaciar lo que cuelgue— y no se queda corto con la próxima migración.
+ */
 function forget() {
-  sql(`DELETE FROM task_external_links WHERE owner_id='${OWNER}'`);
-  sql(`DELETE FROM issue_import_receipts WHERE owner_id='${OWNER}'`);
   sql(
-    `DELETE FROM tasks WHERE project_id IN (SELECT id FROM projects WHERE owner_id='${OWNER}')`,
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, task_status_history, tasks, outbox_events, projects, connector_connections CASCADE",
   );
-  sql(`DELETE FROM outbox_events WHERE owner_id='${OWNER}'`);
-  sql(`DELETE FROM projects WHERE owner_id='${OWNER}'`);
-  sql(`DELETE FROM connector_connections WHERE owner_id='${OWNER}'`);
 }
 
 test.beforeEach(() => forget());

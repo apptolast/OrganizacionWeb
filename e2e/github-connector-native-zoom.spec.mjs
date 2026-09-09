@@ -21,15 +21,15 @@ const TOKEN = "ghp_token_de_pruebas";
 const REPOSITORY = "octocat/hello-world";
 const WIDTHS = [320, 768, 1440];
 
+/**
+ * Vacía en cascada, no por lista ordenada a mano: el orden enumerado caducó en
+ * cuanto `work_sessions` pasó a referenciar `tasks`. Mismo criterio y mismo
+ * motivo que en `e2e/github-connector.spec.mjs`.
+ */
 function forget() {
-  sql(`DELETE FROM task_external_links WHERE owner_id='${OWNER}'`);
-  sql(`DELETE FROM issue_import_receipts WHERE owner_id='${OWNER}'`);
   sql(
-    `DELETE FROM tasks WHERE project_id IN (SELECT id FROM projects WHERE owner_id='${OWNER}')`,
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, task_status_history, tasks, outbox_events, projects, connector_connections CASCADE",
   );
-  sql(`DELETE FROM outbox_events WHERE owner_id='${OWNER}'`);
-  sql(`DELETE FROM projects WHERE owner_id='${OWNER}'`);
-  sql(`DELETE FROM connector_connections WHERE owner_id='${OWNER}'`);
 }
 
 test.afterEach(() => forget());

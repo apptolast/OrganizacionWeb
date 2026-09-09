@@ -174,6 +174,23 @@ Feature en curso: 30 — automations. Escenarios a recorrer en fase 1: @s1–@s1
   una tarea o sesión ajena no resuelve, que es lo que pide la última fila de @s27.
 - Focal verde: `AutomationPersistenceTest` 12/12, un solo contenedor.
 
+### Ciclo 11 — wiring real y punto de extensión de la fase 2 (@s1, @s4, @s5, @s11–@s14, @s33)
+
+- **Rojo visto fallar**: `AutomationWiringTest` (3 tests) con
+  `NoSuchBeanDefinitionException`: ningún caso de uso estaba publicado.
+- **Verde mínimo**: doce beans en `ApplicationConfiguration` (tres adaptadores,
+  `AutomationTargets`, `WebhookEndpointLookup`, el evaluador y los seis casos de uso).
+  `AutomationTargets` acepta un proyecto propio **sea cual sea su estado**, porque
+  @s4 guarda una regla hacia un proyecto completed y es la ejecución la que falla
+  con `PROJECT_COMPLETED` (@s21), no el guardado.
+- **Punto de extensión de la fase 2 con su test de contrato**: el bean
+  `webhookEndpointLookup` responde false para todo endpoint mientras la feature 25
+  no exista, y el test comprueba que por eso ninguna regla NOTIFY_WEBHOOK puede
+  guardarse. Sustituir ese único bean por el adaptador real de 25 es todo el cambio
+  de la fase 2; ningún escenario de webhook se declara verde por vacuidad.
+- `ApplicationWiringTest` sigue en verde tras tocar la configuración compartida.
+- Focal verde: `AutomationWiringTest` 3/3, `ApplicationWiringTest` sin regresión.
+
 ## Discrepancia de contrato pendiente de dictamen (@s30 vs @s32)
 
 @s30 dice que cada coincidencia contiene «exactamente eventId, eventType, occurredAt

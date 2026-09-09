@@ -429,4 +429,113 @@ public class ApplicationConfiguration {
       com.apptolast.organization.application.ImportReceiptQueries queries) {
     return new com.apptolast.organization.application.ReadImportReceipt(queries);
   }
+
+  @Bean
+  com.apptolast.organization.adapter.persistence.PostgresAutomationStore automationStore(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions,
+      com.fasterxml.jackson.databind.ObjectMapper json) {
+    return new com.apptolast.organization.adapter.persistence.PostgresAutomationStore(
+        jdbc, transactions, json);
+  }
+
+  @Bean
+  com.apptolast.organization.adapter.persistence.PostgresAutomationRuns automationRuns(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions) {
+    return new com.apptolast.organization.adapter.persistence.PostgresAutomationRuns(
+        jdbc, transactions);
+  }
+
+  @Bean
+  com.apptolast.organization.adapter.persistence.PostgresAutomationEvents automationEvents(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions,
+      com.fasterxml.jackson.databind.ObjectMapper json) {
+    return new com.apptolast.organization.adapter.persistence.PostgresAutomationEvents(
+        jdbc, transactions, json);
+  }
+
+  /**
+   * Whether a project belongs to the owner, whatever its status: a rule may target a completed
+   * project and fail at run time with PROJECT_COMPLETED, which is not a save-time error.
+   */
+  @Bean
+  com.apptolast.organization.application.AutomationTargets automationTargets(
+      org.springframework.jdbc.core.JdbcTemplate jdbc) {
+    return (owner, projectId) ->
+        !jdbc.queryForList(
+                "SELECT 1 FROM projects WHERE id = ? AND owner_id = ?",
+                Integer.class,
+                projectId,
+                owner)
+            .isEmpty();
+  }
+
+  /**
+   * Extension point for phase two. Feature 25 has not shipped webhook endpoints, so this answers
+   * «not mine» for every endpoint and no NOTIFY_WEBHOOK rule can be stored yet. Replacing this
+   * single bean with the real adapter of 25 is the whole change.
+   */
+  @Bean
+  com.apptolast.organization.application.WebhookEndpointLookup webhookEndpointLookup() {
+    return (owner, endpointId) -> false;
+  }
+
+  @Bean
+  com.apptolast.organization.application.AutomationMatcher automationMatcher(
+      com.apptolast.organization.application.AutomationEventProjects projects,
+      com.apptolast.organization.application.AutomationLoopGuard guard) {
+    return new com.apptolast.organization.application.AutomationMatcher(projects, guard);
+  }
+
+  @Bean
+  com.apptolast.organization.application.CreateAutomationUseCase createAutomation(
+      com.apptolast.organization.application.AutomationRuleStore rules,
+      com.apptolast.organization.application.AutomationTargets targets,
+      com.apptolast.organization.application.WebhookEndpointLookup endpoints,
+      Clock clock) {
+    return new com.apptolast.organization.application.CreateAutomation(
+        rules, targets, endpoints, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReadAutomationsUseCase readAutomations(
+      com.apptolast.organization.application.AutomationRuleStore rules) {
+    return new com.apptolast.organization.application.ReadAutomations(rules);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReplaceAutomationUseCase replaceAutomation(
+      com.apptolast.organization.application.AutomationRuleStore rules,
+      com.apptolast.organization.application.AutomationTargets targets,
+      com.apptolast.organization.application.WebhookEndpointLookup endpoints,
+      Clock clock) {
+    return new com.apptolast.organization.application.ReplaceAutomation(
+        rules, targets, endpoints, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.application.DeleteAutomationUseCase deleteAutomation(
+      com.apptolast.organization.application.AutomationRuleStore rules) {
+    return new com.apptolast.organization.application.DeleteAutomation(rules);
+  }
+
+  @Bean
+  com.apptolast.organization.application.SimulateAutomationUseCase simulateAutomation(
+      com.apptolast.organization.application.AutomationEventTail events,
+      com.apptolast.organization.application.AutomationMatcher matcher,
+      com.apptolast.organization.application.AutomationFacts facts,
+      com.apptolast.organization.application.AutomationTargets targets,
+      com.apptolast.organization.application.WebhookEndpointLookup endpoints) {
+    return new com.apptolast.organization.application.SimulateAutomation(
+        events, matcher, facts, targets, endpoints);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ReadAutomationRunsUseCase readAutomationRuns(
+      com.apptolast.organization.application.AutomationRuleStore rules,
+      com.apptolast.organization.application.AutomationRunStore runs) {
+    return new com.apptolast.organization.application.ReadAutomationRuns(rules, runs);
+  }
 }

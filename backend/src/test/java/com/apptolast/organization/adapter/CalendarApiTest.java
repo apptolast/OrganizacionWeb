@@ -220,6 +220,29 @@ class CalendarApiTest {
   }
 
   @Test
+  void s11_s15_theRequestLeavesNoTokenAndNoCalendarPathInTheLogs() throws Exception {
+    var root =
+        (ch.qos.logback.classic.Logger)
+            org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+    var captured =
+        new ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>();
+    captured.start();
+    root.addAppender(captured);
+    try {
+      mvc.perform(get("/calendar/" + TOKEN + ".ics")).andExpect(status().isOk());
+      mvc.perform(get("/calendar/" + "z".repeat(43) + ".ics")).andExpect(status().isNotFound());
+    } finally {
+      root.detachAppender(captured);
+    }
+    var lines =
+        captured.list.stream()
+            .map(ch.qos.logback.classic.spi.ILoggingEvent::getFormattedMessage)
+            .toList()
+            .toString();
+    assertThat(lines).doesNotContain(TOKEN).doesNotContain("/calendar/");
+  }
+
+  @Test
   void s15_everyUnresolvableAddressAnswersTheSameNotFound() throws Exception {
     var expected = notFound(get("/calendar/" + TOKEN.substring(0, 42) + ".ics"));
     assertThat(notFound(get("/calendar/" + TOKEN + "A.ics"))).isEqualTo(expected);

@@ -215,3 +215,15 @@ Comandos:
 --tests "…adapter.config.CalendarWiringTest"             → BUILD SUCCESSFUL
 --tests "…ArchitectureTest" --tests "…SecurityConfigurationTest" → BUILD SUCCESSFUL
 ```
+
+### Ciclo 7 — @s9 (dos regeneraciones a la vez) y @s11 (silencio en los logs)
+
+Rojo: `s9_twoConcurrentRegenerationsLeaveExactlyOneToken` y
+`s11_s15_theRequestLeavesNoTokenAndNoCalendarPathInTheLogs` antes de existir el comportamiento.
+
+Verde: no hizo falta código nuevo. El `INSERT … ON CONFLICT (owner_id) DO UPDATE` ya deja una sola
+fila cuando dos hilos escriben a la vez y sólo uno de los dos hashes resuelve después; y ninguna
+ruta de calendario registra nada, porque los 404 y 413 se resuelven con manejadores propios que no
+tocan el `logger` de `ApiErrors`. Las dos pruebas confirman propiedades que el diseño ya garantiza
+y las dejan protegidas frente a regresiones (si alguien cambiara `ON CONFLICT` por dos sentencias,
+o devolviera el 404 por el manejador genérico que sí escribe una línea de log, se pondrían rojas).

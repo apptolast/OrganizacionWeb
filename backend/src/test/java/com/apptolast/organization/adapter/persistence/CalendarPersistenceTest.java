@@ -124,6 +124,42 @@ class CalendarPersistenceTest {
   }
 
   @Test
+  void s9_twoConcurrentRegenerationsLeaveExactlyOneToken() throws Exception {
+    var first = CalendarFeedSecret.issue(new java.security.SecureRandom());
+    var second = CalendarFeedSecret.issue(new java.security.SecureRandom());
+    var start = new java.util.concurrent.CountDownLatch(1);
+    var racers =
+        List.of(
+            regeneration(start, first.fingerprint(), CREATED_AT),
+            regeneration(start, second.fingerprint(), CREATED_AT.plusSeconds(1)));
+
+    racers.forEach(Thread::start);
+    start.countDown();
+    for (var racer : racers) racer.join();
+
+    assertThat(jdbc.queryForObject("SELECT count(*) FROM calendar_feed_tokens", Integer.class))
+        .isOne();
+    var resolved =
+        List.of(first, second).stream().filter(s -> store().ownerOf(s.fingerprint()).isPresent());
+    assertThat(resolved).hasSize(1);
+    assertThat(store().createdAt("persona-a")).isPresent();
+  }
+
+  static Thread regeneration(
+      java.util.concurrent.CountDownLatch start, byte[] fingerprint, Instant createdAt) {
+    return new Thread(
+        () -> {
+          try {
+            start.await();
+          } catch (InterruptedException error) {
+            Thread.currentThread().interrupt();
+            return;
+          }
+          store().replace("persona-a", fingerprint, createdAt);
+        });
+  }
+
+  @Test
   void s15_anUnknownFingerprintResolvesToNobodyWithoutWriting() {
     assertThat(store().ownerOf(CalendarFeedSecret.fingerprintOf("nunca-emitido"))).isEmpty();
     assertThat(jdbc.queryForObject("SELECT count(*) FROM calendar_feed_tokens", Integer.class))

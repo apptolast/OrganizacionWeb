@@ -23,6 +23,11 @@ final class GitlabFakes {
       rows.put(ownerId, connection);
     }
 
+    @Override
+    public boolean delete(String ownerId) {
+      return rows.remove(ownerId) != null;
+    }
+
     void put(String ownerId, GitlabConnection connection) {
       rows.put(ownerId, connection);
     }

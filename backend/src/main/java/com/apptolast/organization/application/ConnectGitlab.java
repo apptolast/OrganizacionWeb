@@ -51,9 +51,14 @@ public final class ConnectGitlab implements ConnectGitlabUseCase {
             clock.instant().truncatedTo(MICROS),
             null,
             null,
-            FIRST_VERSION);
+            nextVersion(ownerId));
     connections.save(ownerId, row);
     return GitlabConnectionView.of(row, apiBase);
+  }
+
+  /** Cada sustitución de token sube la versión; se publica sólo para diagnóstico. */
+  private long nextVersion(String ownerId) {
+    return connections.find(ownerId).map(row -> row.version() + 1).orElse(FIRST_VERSION);
   }
 
   private GitlabProject verify(GitlabProjectPath path, PersonalAccessToken secret) {

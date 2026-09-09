@@ -107,6 +107,38 @@ class GitlabConnectionUseCasesTest {
   }
 
   @Test
+  void s13_replacingTheTokenRaisesTheVersionAndClearsTheLastError() {
+    fakes.connections.put(OWNER, connected().withError("CONNECTION_INVALID", FAILED_AT));
+    fakes.projects.accept("grupo/proyecto", 4821L);
+
+    var view = connect().execute(OWNER, "glpat-otro-secreto-largo9Q2p", "grupo/proyecto");
+
+    assertEquals("9Q2p", view.tokenHint());
+    assertEquals("connected", view.status());
+    assertNull(view.lastError());
+    assertEquals(2L, view.version());
+    assertEquals(
+        "glpat-otro-secreto-largo9Q2p",
+        fakes.cipher.decrypt(OWNER, fakes.connections.find(OWNER).orElseThrow().tokenCiphertext()));
+  }
+
+  // ------------------------------------------------------------------------ @s14 desconectar
+
+  @Test
+  void s14_disconnectingTwiceInARowLeavesNoRowAndIsNotAnError() {
+    fakes.connections.put(OWNER, connected());
+
+    disconnect().execute(OWNER);
+    disconnect().execute(OWNER);
+
+    assertTrue(fakes.connections.find(OWNER).isEmpty());
+  }
+
+  private DisconnectGitlabUseCase disconnect() {
+    return new DisconnectGitlab(fakes.connections, fakes.cipher);
+  }
+
+  @Test
   void s12_aRejectedTokenLeavesThePreviousConnectionExactlyAsItWas() {
     var previous = connected();
     fakes.connections.put(OWNER, previous);

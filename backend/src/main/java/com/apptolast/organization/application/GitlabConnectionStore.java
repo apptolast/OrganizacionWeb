@@ -7,4 +7,7 @@ public interface GitlabConnectionStore {
   Optional<GitlabConnection> find(String ownerId);
 
   void save(String ownerId, GitlabConnection connection);
+
+  /** {@code true} si la fila existía; borrar dos veces seguidas no es un error. */
+  boolean delete(String ownerId);
 }

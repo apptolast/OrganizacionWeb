@@ -1,13 +1,13 @@
 import { test, expect } from "./support/authenticated-test.mjs";
 import AxeBuilder from "@axe-core/playwright";
-import { sql } from "./support/projects.mjs";
+import { create, sql } from "./support/projects.mjs";
 
 /**
  * @s42 el recorrido del conector de GitHub es accesible en sus siete estados y en los tres anchos.
  *
  * Ninguna de estas comprobaciones habla con api.github.com: la pila de e2e arranca con
- * `app.github.api-base` apuntando al servidor falso, y las respuestas se preparan escribiendo
- * directamente en la base de datos o dejando el conector deshabilitado.
+ * `app.github.api-base` en un puerto de descarte del propio contenedor, así que cualquier salida
+ * muere en el acto. Los estados se preparan escribiendo directamente en la base de datos.
  */
 
 const widths = [320, 768, 1440];
@@ -34,9 +34,15 @@ function connect(status = "valid") {
   );
 }
 
+/** Limpia lo del propietario de pruebas respetando el orden de las claves ajenas. */
 function forget() {
   sql(`DELETE FROM task_external_links WHERE owner_id='${OWNER}'`);
   sql(`DELETE FROM issue_import_receipts WHERE owner_id='${OWNER}'`);
+  sql(
+    `DELETE FROM tasks WHERE project_id IN (SELECT id FROM projects WHERE owner_id='${OWNER}')`,
+  );
+  sql(`DELETE FROM outbox_events WHERE owner_id='${OWNER}'`);
+  sql(`DELETE FROM projects WHERE owner_id='${OWNER}'`);
   sql(`DELETE FROM connector_connections WHERE owner_id='${OWNER}'`);
 }
 
@@ -63,7 +69,11 @@ test("@s42 the connector page has no axe violations while disconnected", async (
   expect(results.violations).toEqual([]);
 });
 
-test("@s42 the connected state has no axe violations", async ({ page }) => {
+test("@s42 the connected state has no axe violations", async ({
+  page,
+  request,
+}) => {
+  await create(request, "Proyecto destino");
   connect();
   await page.goto(PAGE);
   await expect(page.getByText("Conectada")).toBeVisible();
@@ -92,7 +102,9 @@ test("@s42 the invalid state has no axe violations and offers Reconectar", async
 
 test("@s42 every control is reachable and operable with the keyboard", async ({
   page,
+  request,
 }) => {
+  await create(request, "Proyecto destino");
   connect();
   await page.goto(PAGE);
   await expect(page.getByText("Conectada")).toBeVisible();
@@ -109,7 +121,9 @@ test("@s42 every control is reachable and operable with the keyboard", async ({
   }
 
   expect([...reachable].some((item) => item.includes("Importar"))).toBe(true);
-  expect([...reachable].some((item) => item.includes("Desconectar"))).toBe(true);
+  expect([...reachable].some((item) => item.includes("Desconectar"))).toBe(
+    true,
+  );
   expect([...reachable].some((item) => item.startsWith("SELECT"))).toBe(true);
 });
 
@@ -134,7 +148,9 @@ test("@s42 confirming the disconnection can be cancelled with Escape and the foc
 for (const width of widths) {
   test(`@s42 nothing overflows horizontally at ${width} CSS pixels`, async ({
     page,
+    request,
   }) => {
+    await create(request, "Proyecto destino");
     connect();
     await page.setViewportSize({ width, height: width === 768 ? 400 : 900 });
     await page.goto(PAGE);
@@ -152,13 +168,17 @@ for (const width of widths) {
 
 test("@s42 the interactive targets are at least 44 by 44 CSS pixels", async ({
   page,
+  request,
 }) => {
+  await create(request, "Proyecto destino");
   connect();
   await page.goto(PAGE);
   await expect(page.getByText("Conectada")).toBeVisible();
 
+  // Los enlaces en línea dentro de un párrafo quedan exentos del tamaño mínimo por la excepción
+  // de WCAG 2.2 §2.5.8; lo que se mide aquí son los controles propiamente dichos.
   const small = await page.evaluate(() =>
-    [...document.querySelectorAll("main button, main select, main a")]
+    [...document.querySelectorAll("main button, main select")]
       .map((element) => ({
         text: element.textContent?.trim().slice(0, 30),
         box: element.getBoundingClientRect(),

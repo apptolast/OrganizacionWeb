@@ -261,7 +261,7 @@ function GithubConnectorScreen() {
   const canImport = Boolean(connection) && !invalid && !running;
 
   return (
-    <main id="proyectos" tabIndex={-1}>
+    <main id="proyectos" className="github-connector" tabIndex={-1}>
       <h1 ref={heading} tabIndex={-1}>
         Conector de GitHub
       </h1>

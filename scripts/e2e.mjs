@@ -11,9 +11,15 @@ const environmentFile = join(scratch, "test.env");
 const webPort = process.env.E2E_WEB_PORT ?? "18080";
 if (!/^\d{2,5}$/.test(webPort)) throw new Error("Invalid E2E_WEB_PORT");
 const baseUrl = `http://127.0.0.1:${webPort}`;
+// Clave de conectores sólo para pruebas: 32 bytes en base64. Habilita las rutas del conector para
+// que su E2E recorra los estados reales en lugar del 503 de "sin configurar".
+const connectorKey = "ZTJlLW9ubHktY29ubmVjdG9yLWtleS0zMi1ieXRlcyE=";
+// Puerto de descarte dentro del propio contenedor: cualquier salida hacia GitHub muere en el acto.
+// Ninguna prueba de este repositorio habla con api.github.com.
+const githubApiBase = "http://127.0.0.1:9";
 writeFileSync(
   environmentFile,
-  `DB_USERNAME=e2e_user\nDB_PASSWORD=e2e-only-database\nAPP_AUTH_USERNAME=e2e-user\nAPP_AUTH_PASSWORD=e2e-only-password\nWEB_PORT=${webPort}\n`,
+  `DB_USERNAME=e2e_user\nDB_PASSWORD=e2e-only-database\nAPP_AUTH_USERNAME=e2e-user\nAPP_AUTH_PASSWORD=e2e-only-password\nWEB_PORT=${webPort}\nAPP_CONNECTOR_KEY=${connectorKey}\nAPP_GITHUB_API_BASE=${githubApiBase}\n`,
 );
 const project = `organizationweb-e2e-${process.pid}`;
 const composeArgs = [
@@ -35,6 +41,8 @@ const env = {
   APP_PUBLIC_ORIGIN: baseUrl,
   E2E_BASE_URL: process.env.E2E_BASE_URL ?? baseUrl,
   APP_MAX_ACTIVE_PROJECTS: "3",
+  APP_CONNECTOR_KEY: connectorKey,
+  APP_GITHUB_API_BASE: githubApiBase,
   E2E_COMPOSE_PROJECT: project,
   E2E_ENV_FILE: environmentFile,
 };

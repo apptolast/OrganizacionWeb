@@ -282,7 +282,12 @@ excepciones, condicionado a `app.automations.enabled`.
 
 # Hallazgos que quedan ABIERTOS, y por qué
 
-Los cuatro que faltan (3, 4, 7, 8 y 9) viven todos en la misma auditoría E2E,
+ACTUALIZACIÓN al final de la sesión: el **hallazgo 4 quedó cerrado** para
+`e2e/automations.spec.mjs` (ver la sección siguiente, con un defecto real de
+contraste encontrado y arreglado por el camino). Siguen abiertos 3, 7, 8 y 9, y
+el 4 sólo en lo que toca a `e2e/automations-ux.spec.mjs`.
+
+Los que faltan (3, 7, 8 y 9) viven todos en la misma auditoría E2E,
 `e2e/automations-ux.spec.mjs`, y exigen levantar la pila real
 (`E2E_WEB_PORT=18094`) para acreditar el rojo. No cabían en el plazo de la
 sesión, y REGLAS.md §3 prohíbe cerrar un hallazgo con un oráculo que nunca se

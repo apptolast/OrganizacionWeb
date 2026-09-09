@@ -998,34 +998,161 @@ Restaurado y verde: **8 passed** en `e2e/webhooks-ux.spec.mjs`, **1 passed** en
 **Ficheros cambiados.** `e2e/webhooks-ux.spec.mjs`, `frontend/src/webhooks.scss`,
 `progress/ux_webhooks.md`.
 
-# ÍNDICE DE LO ABIERTO — leer sólo esto, no hace falta el dictamen entero
 
-Ocho hallazgos abiertos. Una línea cada uno: qué exige, qué fichero se toca, y si
-lo que falta es **oráculo** (la conducta ya es correcta, lo que no hay es prueba
-que la sujete) o **producto** (hay que cambiar el comportamiento).
+---
 
-| # | Qué exige | Fichero a tocar | Tipo |
+# ÍNDICE — estado del dictamen de la feature 25 al 10 de septiembre de 2026
+
+**Los 23 hallazgos están cerrados.** No queda ninguno abierto. Lo único que se
+devuelve al propietario es un añadido que él mismo pidió y que no cabe sin
+enmendar el contrato: ver la última fila.
+
+| # | Gravedad | Estado | Commit |
 |---|---|---|---|
-| **2** | Asertar el recorte POR ELEMENTO sobre el conjunto nombrado —`main li span` (URL), campo del secreto, `main tbody td`— en las dos dimensiones y en los cuatro anchos. Hoy `offenders` se calcula y sólo viaja dentro del mensaje de fallo. | `e2e/webhooks-ux.spec.mjs` + `frontend/src/webhooks.tsx` y `webhooks.scss` | **Oráculo Y producto**: el secreto no cabe a 320 px en un campo de una línea. **Parche listo en `progress/parche_webhooks_hallazgo_2.patch`**, con la hipótesis del fallo y el arreglo propuesto. |
-| **4** | Recorrido de teclado real: derivar `expectedOrder` de los enfocables visibles de `main`, sembrar el foco en el `h1`, deduplicar y cerrar con `expect(reached).toEqual(expectedOrder)`. Fuera el umbral `toBeGreaterThan(5)`. | `e2e/webhooks-ux.spec.mjs:372-420` | **Oráculo.** Precedente a copiar: `e2e/github-connector.spec.mjs:261-291`. |
-| **12B** | Asertar el **foco visible**, que hoy se mide con `getComputedStyle(active, ":focus-visible")` —pseudo-clase donde la API espera pseudo-elemento, es un no-op— y ni siquiera se asserta: sólo se vuelca a `tab-order.json`. | `e2e/webhooks-ux.spec.mjs:396-406` | **Oráculo.** Precedente: `e2e/github-connector.spec.mjs:302-340`. **Va en el mismo commit que el 4**: es el mismo test. |
-| **13** | «Alcanza todos los controles en orden del DOM»: el título lo promete y no se compara ningún orden; 20 controles reales frente a un umbral de 6. | `e2e/webhooks-ux.spec.mjs:372` | **Oráculo. Es el mismo trabajo que el 4**: no son dos commits, es uno. |
-| **9** | @s22: recorrer entera la cadena `claim -> lease vencido -> reclaim -> send -> record` y contar las copias que ve el receptor (1 en una fila, 2 en la otra). | `WebhookRecoveryPersistenceTest.java` | **Oráculo.** ⚠️ **EN CURSO EN OTRO CARRIL.** |
-| **10** | @s23: el test de concurrencia no discrimina el `SKIP LOCKED`; falta el receptor lento de 500 ms y, sobre todo, la cláusula de **no espera**. | `WebhookWorkPersistenceTest.java:128-144` | **Oráculo.** ⚠️ **EN CURSO EN OTRO CARRIL.** Aviso: la mutación a matar vive en un literal SQL (`FOR UPDATE OF d SKIP LOCKED`, `PostgresWebhookWork.java:68`), la campaña de bytecode no la genera. |
-| **11** | @s29: la lectura de `/deliveries` no acota a 50 items, y ni el orden `updatedAt DESC, id DESC` ni la identidad de las 50 supervivientes tienen oráculo. | `PostgresWebhookStore.java:118-128`, `WebhookWorkPersistenceTest.java:180-204` | **Producto Y oráculo, y ADEMÁS necesita decisión del propietario**: `LIMIT 50` contradice la línea 367 del propio contrato (50 terminales + 2 pendientes); la alternativa es enmendar `feature:368` y `project-spec.md:2018`. ⚠️ **EN CURSO EN OTRO CARRIL.** |
-| **18** | @s28: la reactivación no llega a los dos eventos posteriores al cursor; y la compuerta `e.status='active'` de `readyEndpoints()` no la ejerce ninguna prueba (suprimirla del SQL no rompe nada hoy). | `WebhookRecoveryPersistenceTest.java:147-216` y `PostgresWebhookOutbox.java:43-55` | **Oráculo.** Bloqueado por el coordinador para no chocar con el carril del backend. |
+| 1 | BLOQUEANTE | **CERRADO** — filas TIMEOUT y TLS de @s25 contra receptor real | `c4fc097`, `0ed7735` |
+| 2 | BLOQUEANTE | **CERRADO** — recorte por elemento en los tres sujetos de @s42, dos dimensiones, cuatro anchos; el secreto pasa a `textarea` | `eca8fa1` |
+| 3 | BLOQUEANTE | **CERRADO por otro carril** — zoom nativo al 200 %, `e2e/webhooks-native-zoom.spec.mjs` | — |
+| 4 | BLOQUEANTE | **CERRADO** — recorrido de teclado contra el orden del DOM, ida y vuelta | `bb12bd0` |
+| 5 | BLOQUEANTE | **CERRADO** — reenlace DNS devuelto a límite declarado + `deploy/EGRESS.md` | `0a68774` |
+| 6, 7, 8 | — | **CERRADOS en la base** — las puertas de mutación existen y están cableadas | — |
+| 9 | ALTA | **CERRADO por otro carril** — `s22_aDeliveryClaimedByADeadProcess…` y `s22_aDeliveryWhoseAcknowledgementDied…` | — |
+| 10 | ALTA | **CERRADO por otro carril** — `s23_aRowHeldByAnotherTransactionIsSkippedInsteadOfWaitedFor` | — |
+| 11 | ALTA | **CERRADO** — `LIMIT 50` en la lectura; la prueba separa las 52 de la tabla de las 50 de la respuesta | `8ce758d` |
+| 12A | ALTA | = hallazgo 3 | — |
+| 12B | ALTA | **CERRADO** — el foco visible se mide con `matches(":focus-visible")` y se asserta en cada parada | `bb12bd0` |
+| 13 | ALTA | **CERRADO** — mismo test que 4 y 12B | `bb12bd0` |
+| 14 | ALTA | **CERRADO en la base** | — |
+| 15 | ALTA | **CERRADO del todo** — unitarios (`2aa5258`) y ahora el punto (c) en E2E, que además destapó que la región no estaba expuesta | `2aa5258`, `cc39ae8` |
+| 16 | ALTA | **CERRADO** — @s33, filas Bearer | `68e533a` |
+| 17 | ALTA | **CERRADO** — mismo trabajo que el 1 | `c4fc097`, `0ed7735` |
+| 18 | MEDIA | **CERRADO** — @s28 entrega D2 y después los dos eventos posteriores; y la compuerta `e.status='active'` tiene test propio | `657cce0` |
+| 19, 20, 22, 23 | MEDIA | **CERRADOS en la base** | — |
+| 21 | MEDIA | **CERRADO** — @s30, aislamiento entre webhooks | `b8dcf5d` |
 
-**Agrupación real para quien reparta trabajo:** los ocho son **cinco** unidades,
-no ocho — `4+12B+13` son un solo commit sobre un solo test; `9+10+11` son el
-carril de backend ya en marcha; `2` está a medio camino con parche e hipótesis; y
-`18` está a la espera de que se libere el backend.
+## Lo único devuelto al propietario
 
-**Corrección documental pendiente, que no debe perderse:** la fila «Posición en
-serie» de `progress/ux_webhooks.md` declara «el orden de Tab sigue al DOM —
-Verificado en navegador (tab-order.json)». Hoy es **falso**. Quien cierre 4/13
-debe corregirla en el mismo cambio.
+El **cursor de paginación** del GET `/deliveries`, que el encargo de esta noche
+pedía como punto 3 del hallazgo 11. No se implementa porque no existe en
+`features/webhooks.feature:368` ni en `project-spec.md:2018` —que describe la
+respuesta como `{items}`, «hasta 50 entregas», y para el listado de endpoints dice
+«sin paginación» con esas palabras— y añadirlo obliga a enmendar justo lo que el
+punto 4 del mismo encargo prohibía enmendar. Razonado en la sección del hallazgo
+11, con lo que haría falta para desbloquearlo. Sospecha anotada: en esta feature
+«cursor» ya significa el **cursor de la outbox** (@s28), y es probable que la
+instrucción mezclara los dos.
 
-**Cerrado por otro carril, no lo repitas:** hallazgo 3, zoom nativo al 200 %, en
-`e2e/webhooks-native-zoom.spec.mjs`, verde, con los cuatro anchos y
-`scrollWidth == clientWidth`. Lo que ese fichero **no** cubre es el recorte por
-elemento, que es el hallazgo 2.
+## Previsión para las campañas de mutación (no ejecutadas aquí, REPARTO_NOCHE §4)
+
+`node scripts/project.mjs mutate webhooks-backend` y `webhooks-frontend`, umbral
+0,80. Lo que este carril espera que pase, para que se pueda contrastar:
+
+**Se espera MATAR ahora y no antes:**
+- Cualquier mutación del `LIMIT` de `PostgresWebhookStore.list` — pero ojo, es un
+  literal SQL, ver abajo.
+- En `webhooks.tsx`, retirar `setAnnouncement(...)` de `changeStatus`: lo matan el
+  unitario y ahora también el E2E.
+
+**Se espera que SOBREVIVAN, y no es culpa de las pruebas:**
+1. **Todo lo que vive en literales SQL.** La campaña de bytecode no muta cadenas:
+   ni `ORDER BY updated_at DESC, id DESC`, ni `LIMIT ?`, ni `FOR UPDATE OF d SKIP
+   LOCKED` (`PostgresWebhookWork:68`), ni `e.status = 'active'`
+   (`PostgresWebhookOutbox:46`). Los cuatro **sí** tienen oráculo —acreditado a
+   mano rompiendo el SQL en este carril y en el anterior—, pero hay que juzgarlos
+   por lectura, no por la puntuación.
+2. **`JdkWebhookSender.classify()` (:83-90).** Está demostrado que para TLS la
+   rama viva es el `catch (SSLException)` directo de :70-71, no la de `classify`.
+   Es probable que sobrevivan mutantes ahí; `classify()` es hoy una red por
+   defecto para cualquier `IOException` que no case con los catch previos.
+3. **Nada de lo de `e2e/`** entra en Stryker: el frontend se muta sobre
+   `frontend/src`, y los oráculos de @s42 viven en las specs de Playwright.
+
+## Ficheros compartidos tocados (REGLAS.md §6 / REPARTO_NOCHE §3)
+
+**Ninguno en esta sesión.** Todo lo tocado es del carril 25: `e2e/webhooks-ux.spec.mjs`,
+`frontend/src/webhooks.tsx`, `frontend/src/webhooks.scss`, el backend de webhooks,
+y `progress/tdd_webhooks_cierre_dictamen.md` y `progress/ux_webhooks.md`.
+`features/webhooks.feature` **no se ha tocado** (el hallazgo 11 se resolvió sin
+enmendarlo). `project-spec.md` tampoco.
+
+## Fuera de ámbito, anotado y no tocado (REGLAS.md §9)
+
+- Al pulsar «Desactivar», React desmonta el botón enfocado y el foco cae al
+  `body` (el fragmento de dos botones se sustituye por «Activar»). Sigue vivo: el
+  recorrido de teclado nuevo no pasa por ahí porque mide el orden en reposo.
+  **Es lo que yo miraría primero si hubiera una sesión más.**
+- `@s25` pide «latencyMs medido con el reloj inyectado» y `JdkWebhookSender` lo
+  mide con `System.nanoTime()` (:58, :117-119); el `Clock` sólo alimenta el `t` de
+  la firma.
+- **Retirada de esta lista:** «el filtro `e.status='active'` de `readyEndpoints()`
+  no lo ejerce ninguna prueba». Ya no es cierto (hallazgo 18).
+
+---
+
+# REPASO DE `features/webhooks.feature`, ESCENARIO A ESCENARIO — qué le falta a la 25 para el 100 %
+
+Hecho después de cerrar los 23 hallazgos, porque el dictamen mira lo que estaba
+mal y no lo que falta. Censo de los 42 escenarios contra las pruebas que los
+citan por etiqueta.
+
+## Lo que sí está
+
+**Los 42 escenarios tienen al menos una prueba que los cita.** Reparto: @s1-@s35
+en la suite JVM (los 24 ficheros `*Webhook*`), @s36-@s42 en
+`frontend/src/webhooks*.test.*` (23 + 18 + 3 = 44 unitarios) y en
+`e2e/webhooks-ux.spec.mjs` (8) más `e2e/webhooks-native-zoom.spec.mjs` (1).
+
+Los tres sitios donde parecía haber hueco, comprobados uno a uno, **no lo son**:
+
+- **@s6**, cuatro filas y un solo test. El test cubre la fila `3 activos + 2
+  desactivados`. La fila `4 + 0 → 201` la cubre en sustancia
+  `s7_concurrentCreationsForTheLastSeatProduceASingleInsert`, que parte de 4 y
+  exige exactamente un 201: un mutante `>= 4` en el cupo la pondría roja. Las
+  otras dos filas ejercen la misma condición ya cubierta (el cupo cuenta sin mirar
+  el estado).
+- **@s34**, seis filas y un solo test de caso de uso. Las cuatro últimas las cubre
+  `s34_errorsResolveInTheFixedOrder…`; las dos de frontera HTTP (413 y
+  MALFORMED_JSON) las cubren `s4_aBodyOverTheLimitIsRefused…` y
+  `s4_structuralDefectsAreMalformedJson…`, y lo hacen **con la afirmación de
+  prioridad incluida**: `verifyNoInteractions(create)`, es decir, la frontera
+  resuelve antes de que la clave, el destino y el cupo tengan ocasión de hablar.
+  Que es exactamente lo que el escenario ordena.
+- **@s29**, cláusulas tercera y cuarta (DTO cerrado y sin cuerpos).
+  `WebhookApiTest.s29_deliveriesAreListedWithTheirClosedDtoAndNoBody` afirma
+  `$.items[0].*` con **exactamente 11 campos** y que `body` y `url` no existen.
+
+## Lo que le falta, por orden de lo que yo arreglaría primero
+
+1. **El foco se pierde al pulsar «Desactivar».** React sustituye el fragmento de
+   dos botones («Enviar ping» + «Desactivar») por uno solo («Activar»), desmonta
+   el botón enfocado y el foco cae al `body`. @s42 pide una vista «operable con
+   teclado»: quien la use sin ratón se queda sin punto de partida después de cada
+   desactivación. Lo mismo pasa al reactivar. Lo detectó el verificador del
+   hallazgo 15 y lo declaró **fuera** de aquel bloqueante, y sigue vivo. El
+   recorrido de teclado nuevo no lo caza porque mide el orden **en reposo**, no
+   después de una acción. Arreglo: un `ref` al contenedor de acciones de la fila y
+   devolver el foco al botón que sustituye al que se fue, con su prueba unitaria.
+   **Es lo único de esta lista que un usuario notaría.**
+2. **`field-sizing: content` sólo lo implementa Chromium.** El campo del secreto
+   crece con su contenido en Chrome y en el navegador de la auditoría; en Firefox
+   y en Safari se queda en las dos filas de `rows={2}`. A 320 px con texto normal
+   bastan (49 caracteres en ~33 por línea), pero **con el texto al 200 % harían
+   falta cuatro**, así que ahí el secreto se recortaría en esos dos navegadores.
+   El oráculo de recorte no lo ve porque Playwright ejecuta Chromium. No lo toco:
+   no hay prueba que lo pida y arreglarlo a ojo sería producción sin rojo. Queda
+   **declarado**, que es la alternativa honesta.
+3. **`latencyMs` no usa el reloj inyectado.** @s25 lo pide y
+   `JdkWebhookSender` lo mide con `System.nanoTime()` (:58, :117-119); el `Clock`
+   sólo alimenta el `t` de la firma. Contrato y código discrepan en una palabra.
+   O se cambia el código, o se enmienda el contrato: no vale dejarlo.
+4. **El cursor de paginación de `/deliveries`**, si el propietario lo quiere. Ver
+   la sección del hallazgo 11: hoy 2 de las 52 filas persistidas no son
+   alcanzables por la API, y eso es una consecuencia deliberada de su propia
+   resolución, no un defecto. Sólo se vuelve un problema si alguien espera poder
+   llegar a ellas.
+5. **Las dos campañas de mutación**, que no son mías (REPARTO_NOCHE §4), con la
+   previsión de arriba para contrastarlas.
+
+Nada de esto es un escenario sin oráculo. Son, por este orden: un defecto de
+usabilidad real (1), un límite de navegador declarado (2), una discrepancia
+contrato-código de una palabra (3), una decisión pendiente del propietario (4) y
+una puerta del coordinador (5).

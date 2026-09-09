@@ -8,6 +8,8 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class ExecuteAutomationsTest {
   private static final String OWNER = "a";
@@ -18,6 +20,9 @@ class ExecuteAutomationsTest {
   private static final UUID E2 = UUID.fromString("00000000-0000-4000-8000-000000000002");
   private static final Instant T0 = Instant.parse("2026-09-08T10:00:00.000000Z");
   private static final Instant CREATED = T0.minusSeconds(3600);
+  private static final Instant OCCURRED = Instant.parse("2026-09-08T10:15:30.123456Z");
+
+  private String projectName = "Marketing";
 
   private final FakeWork work = new FakeWork();
   private final InMemoryAutomations rules = new InMemoryAutomations();
@@ -37,7 +42,7 @@ class ExecuteAutomationsTest {
       new AutomationFacts() {
         @Override
         public Optional<String> projectName(String owner, UUID projectId) {
-          return Optional.of("Marketing");
+          return Optional.of(projectName);
         }
 
         @Override
@@ -53,7 +58,7 @@ class ExecuteAutomationsTest {
   private final AutomationLoopGuard guard = (owner, taskId) -> false;
   private final AutomationMatcher matcher = new AutomationMatcher(projects, guard);
   private final WebhookEndpointLookup endpoints = (owner, endpoint) -> false;
-  private final Clock clock = Clock.fixed(T0.plusSeconds(600), ZoneOffset.UTC);
+  private final Clock clock = Clock.fixed(T0.plusSeconds(3600), ZoneOffset.UTC);
   private final ExecuteAutomations execute =
       new ExecuteAutomations(work, rules, matcher, facts, endpoints, clock);
 
@@ -119,6 +124,34 @@ class ExecuteAutomationsTest {
         .extracting(commit -> commit.reached().eventId(), commit -> commit.outcomes().size())
         .as("the blocked row moves the cursor without producing anything")
         .containsExactly(tuple(e1, 1), tuple(e2, 1), tuple(blocked, 0), tuple(e4, 1));
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "Marketing, Revisar Redactar informe en Marketing",
+    "Marketing 2027, Revisar Redactar informe en Marketing 2027"
+  })
+  void s18_theTemplateResolvesWithTheValuesInForceAtTheInstantOfTheRun(
+      String nameBeforeTheCycle, String title) {
+    work.owners.add(OWNER);
+    rules.create(
+        OWNER,
+        rule(
+            new CreateTaskAction(
+                P,
+                "Revisar {{task.title}} en {{project.name}}",
+                "{{event.type}} a las {{occurredAt}}",
+                30)));
+    work.cursors.put(OWNER, new AutomationCursor(T0, E0));
+    work.outbox.add(taskCreated(E1, OCCURRED));
+    projectName = nameBeforeTheCycle;
+
+    execute.runCycle();
+
+    assertThat(work.createdTasks())
+        .containsExactly(
+            new AutomationEffect.CreateTask(
+                P, title, "TaskCreated.v1 a las 2026-09-08T10:15:30.123456Z", 30));
   }
 
   private void givenARuleThatCreatesTasks() {

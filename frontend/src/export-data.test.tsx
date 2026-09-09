@@ -397,9 +397,15 @@ it("@s22 opens Exportación from the final navigation link without fetching an a
   const links = within(navigation).getAllByRole("link");
   expect(links[0]).toHaveAccessibleName("Hoy");
   const link = within(navigation).getByRole("link", { name: "Exportación" });
-  expect(links.at(-3)).toBe(link);
-  expect(links.at(-2)).toHaveAccessibleName("Importación");
-  expect(links.at(-1)).toHaveAccessibleName("API para integraciones");
+  // Later features append entries, so assert the relative order by name, not by index.
+  const names = links.map(
+    (item) => item.textContent?.replace(/[^\p{L}\s]/gu, "").trim() ?? "",
+  );
+  const order = ["Exportación", "Importación", "API para integraciones"].map(
+    (name) => names.indexOf(name),
+  );
+  expect(order.every((index) => index > 0)).toBe(true);
+  expect(order).toEqual([...order].sort((left, right) => left - right));
   await userEvent.click(link);
   expect(window.location.pathname).toBe("/exportacion");
   expect(

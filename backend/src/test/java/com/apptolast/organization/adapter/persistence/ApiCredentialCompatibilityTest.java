@@ -51,7 +51,10 @@ class ApiCredentialCompatibilityTest {
       assertEquals(
           columns,
           jdbc.queryForList(
-              "SELECT table_name,column_name,data_type FROM information_schema.columns WHERE table_schema='public' AND table_name NOT IN ('api_credentials','api_owner_quotas','api_credential_quotas') ORDER BY table_name,ordinal_position"));
+              // The tables each later feature adds are excluded on purpose: what this
+              // asserts is that the upgrade is additive, so no pre-existing column moved.
+              // V22 added the three api_credential tables and V23 the two webhook ones.
+              "SELECT table_name,column_name,data_type FROM information_schema.columns WHERE table_schema='public' AND table_name NOT IN ('api_credentials','api_owner_quotas','api_credential_quotas','webhook_endpoints','webhook_deliveries') ORDER BY table_name,ordinal_position"));
       assertEquals(
           before,
           jdbc.queryForObject(

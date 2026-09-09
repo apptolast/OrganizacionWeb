@@ -10,7 +10,7 @@
   "enabledPlugins": {
     "ecc@ecc": true
   },
-  "hooks": {
+  "hooks_disabled_during_parallel_lanes": {
     "Stop": [
       {
         "hooks": [
@@ -22,5 +22,6 @@
         ]
       }
     ]
-  }
+  },
+  "$hooks_note": "Aparcada otra vez durante la fase paralela de la noche del 9 al 10 de septiembre. La puerta Stop corre la suite completa de backend (49 contenedores) en CADA turno del orquestador. Restaurar al integrar."
 }

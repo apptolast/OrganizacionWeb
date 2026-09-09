@@ -247,3 +247,55 @@ campaña lo bendice igual.
    no choca con nada, porque las integraciones están hechas.
 7. **`one_feature_at_a_time` está en `false`** en `harness.config.json`.
    Devuélvelo a `true` cuando el proyecto vuelva a un solo carril.
+
+## Punto final de la sesión — 9 de septiembre de 2026
+
+### Dónde queda el proyecto: 25 de 30 en `done`
+
+La feature 26 (calendario ICS) se cerró con sus dos puertas: juez **APPROVED** en
+tercera lectura y mutación **PASS, 345/390 = 88,46 %**. Es la única de las seis
+últimas que ha completado el ciclo entero.
+
+### Un aviso que ahorra horas: el proyecto vive dentro de OneDrive
+
+La suite de backend falló dos veces seguidas con
+`java.nio.file.NoSuchFileException` sobre el fichero de resultados **en curso** de
+Gradle. No es un test roto: es que el fichero desaparece mientras Gradle escribe
+en él. El repositorio está en `C:\Users\vhurt\OneDrive\...`, y el sincronizador
+toca `build/` bajo los pies del proceso. La ejecución del arnés que reportaba «Hay
+tests rotos» **sin nombrar un solo test roto** y dejando 3 informes en vez de
+sesenta y pico encaja con lo mismo.
+
+**Excluye `backend/build/`, `backend/.gradle/` y `frontend/node_modules/` de la
+sincronización de OneDrive**, o mueve el repositorio fuera. Mientras no se haga,
+cualquier verde o rojo de la suite local es sospechoso.
+
+### Una lección sobre los rangos de Stryker, aprendida a golpes
+
+Se intentó validar automáticamente que todos los rangos `línea:columna` anclan en
+fronteras de token. El validador marcó 37 rangos en ocho configuraciones, y al
+«corregir» dos de ellas se rompió una guarda que estaba verde: la referencia
+elegida era demasiado antigua y relocalizó a líneas sin sentido. Se revirtió.
+
+La conclusión honesta: **la convención de columnas que asume ese validador
+probablemente no es la de Stryker**, así que sus 37 avisos no están probados y no
+deben tomarse como defectos. Lo que sí está probado es lo corregido con el oráculo
+de contenido durante la fusión, verificado por las 91 guardas de
+`scripts/project.test.mjs`, que están en verde.
+
+### Lo que falta, por orden de cercanía
+
+1. **Feature 27:** un solo bloqueante del juez, ya corregido en `d418a5d`. Le
+   falta **volver a pasar por el juez** y su campaña de mutación.
+2. **Features 25, 28 y 30:** integradas y verdes, **sin juez y sin mutación**. El
+   workflow `wf_f417b520-44f` estaba produciendo la lista verificada de sus
+   bloqueantes cuando terminó la sesión; si no llegó a registrarse, hay que
+   repetirlo o convocar al juez directamente.
+3. **Feature 29:** prácticamente sin empezar. La rama
+   `claude/additional-connectors` existe, salida de `99d3e64`. Su contrato tiene
+   477 líneas y dos mitades: el conector GitLab, que solo depende de la 27, y el
+   catálogo de los seis conectores, que ya puede hacerse porque 25, 26, 27, 28 y
+   30 están todas en `main`.
+4. **La mutación nocturna** sigue rota y su arreglo ya no choca con nada.
+5. **`one_feature_at_a_time` está en `false`.** Devuélvelo a `true` al volver a un
+   solo carril.

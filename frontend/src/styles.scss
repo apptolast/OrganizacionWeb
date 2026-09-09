@@ -15,6 +15,10 @@
   --brand: #244c3c;
   --accent: #244c3c;
   --on-accent: #ffffff;
+  --seed-stem: #7a9863;
+  --seed-leaf: #a8bb88;
+  --seed-leaf-alt: #7d9b61;
+  --seed-soil: #b3c59e;
   --native-scheme: light;
 }
 @mixin dark-appearance {
@@ -34,6 +38,12 @@
   --brand: #b7e4c7;
   --accent: #b7e4c7;
   --on-accent: #000000;
+  // Los mismos verdes atenuados hasta 3:1-5:1 sobre --panel: el dibujo se ve
+  // sin brillar como hacía el verde claro fijo sobre el panel oscuro.
+  --seed-stem: #647d51;
+  --seed-leaf: #83926a;
+  --seed-leaf-alt: #688151;
+  --seed-soil: #8c9a7b;
   --native-scheme: dark;
 }
 :root,
@@ -645,7 +655,7 @@ h2 {
   border: 1px solid $line;
   border-radius: 15px;
   padding: 30px 30px 13px;
-  box-shadow: 0 5px 18px #2b3f2410;
+  box-shadow: 0 5px 18px rgb(0 0 0 / 6%);
   min-width: 0;
 }
 .card-heading {
@@ -855,7 +865,7 @@ button {
   position: absolute;
   width: 2px;
   height: 65px;
-  background: #7a9863;
+  background: var(--seed-stem);
   top: 45px;
   left: 75px;
   transform: rotate(7deg);
@@ -866,7 +876,7 @@ button {
   width: 40px;
   height: 23px;
   border-radius: 0 75% 0 75%;
-  background: #a8bb88;
+  background: var(--seed-leaf);
   &.left {
     top: 42px;
     left: 39px;
@@ -876,7 +886,7 @@ button {
     top: 29px;
     left: 74px;
     transform: rotate(-65deg);
-    background: #7d9b61;
+    background: var(--seed-leaf-alt);
   }
 }
 .seed-soil {
@@ -885,12 +895,12 @@ button {
   height: 1px;
   top: 111px;
   left: 43px;
-  background: #b3c59e;
+  background: var(--seed-soil);
 }
 .empty-divider {
   width: 35px;
   height: 1px;
-  background: #cad9bb;
+  background: var(--line);
   margin: 25px auto 17px;
 }
 .quiet-note {
@@ -1191,7 +1201,7 @@ button {
   border: 1px solid $line;
   border-radius: 12px;
   padding: 14px 24px 20px;
-  box-shadow: 0 3px 12px #2b3f2407;
+  box-shadow: 0 3px 12px rgb(0 0 0 / 3%);
   h2 {
     font-size: 19px;
     font-weight: 600;
@@ -1481,7 +1491,7 @@ button {
     border: 1px solid $line;
     background: var(--panel);
     border-radius: 18px;
-    box-shadow: 0 12px 40px #23392f08;
+    box-shadow: 0 12px 40px rgb(0 0 0 / 3%);
     h1 {
       margin: 12px 0 18px;
       font-size: clamp(30px, 5vw, 40px);

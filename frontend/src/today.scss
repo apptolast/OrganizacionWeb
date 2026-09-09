@@ -18,18 +18,18 @@
   .today-notice,
   [role="alert"] {
     padding: 16px;
-    border: 1px solid #b8c8b8;
+    border: 1px solid var(--line);
     border-radius: 12px;
-    background: #f0f3eb;
+    background: var(--selection);
   }
   .today-summary {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 12px 20px;
     padding: 20px;
-    border: 1px solid #e0e5dc;
+    border: 1px solid var(--line);
     border-radius: 16px;
-    background: #fff;
+    background: var(--panel);
     line-height: 1.5;
     dd {
       margin: 0;
@@ -44,8 +44,8 @@
     li {
       min-width: 0;
       padding: 20px;
-      background: #fff;
-      border: 1px solid #e0e5dc;
+      background: var(--panel);
+      border: 1px solid var(--line);
       border-radius: 16px;
     }
     h2 {

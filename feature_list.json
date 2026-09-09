@@ -271,11 +271,9 @@
       "name": "integration_api",
       "title": "API para integraciones",
       "description": "Credenciales personales revocables con seis permisos, cuotas compartidas, API existente y OpenAPI: contrato de 42 escenarios aprobado.",
-      "acceptance": [
-        "Cumplir @s1–@s42 de features/integration_api.feature con revisión independiente, pruebas y mutación antes del cierre."
-      ],
+      "acceptance": ["Cumplir @s1–@s42 de features/integration_api.feature con revisión independiente, pruebas y mutación antes del cierre."],
       "sdd": true,
-      "status": "in_progress"
+      "status": "spec_ready"
     },
     {
       "id": 25,
@@ -292,28 +290,34 @@
       "id": 26,
       "name": "ics_calendar",
       "title": "Calendario ICS",
-      "description": "Calendario ICS: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
-      "acceptance": [],
+      "description": "Calendario ICS de bloques propios: token de feed único con hash en reposo, recurso público /calendar/{token}.ics indistinguible en fallo, descarga con sesión y VCALENDAR RFC 5545 en UTC; contrato de 38 escenarios en features/ics_calendar.feature aprobado por autorización global.",
+      "acceptance": [
+        "Cumplir @s1–@s38 de features/ics_calendar.feature con revisión, pruebas y mutación antes del cierre."
+      ],
       "sdd": true,
-      "status": "pending"
+      "status": "spec_ready"
     },
     {
       "id": 27,
       "name": "github_connector",
       "title": "GitHub",
-      "description": "GitHub: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
-      "acceptance": [],
+      "description": "Conector GitHub: PAT cifrado AES-GCM, validación del repositorio, importación idempotente de issues abiertas como tareas con task_external_links y recibos; contrato de 42 escenarios en features/github_connector.feature aprobado por autorización global.",
+      "acceptance": [
+        "Cumplir @s1–@s42 de features/github_connector.feature con revisión, pruebas y mutación antes del cierre."
+      ],
       "sdd": true,
-      "status": "pending"
+      "status": "spec_ready"
     },
     {
       "id": 28,
       "name": "external_calendar",
       "title": "Calendario externo",
-      "description": "Calendario externo: alcance propuesto en project-spec.md; requiere contrato propio antes de implementar.",
-      "acceptance": [],
+      "description": "Suscripción de solo lectura a un feed iCalendar externo (Google Calendar como referencia): URL cifrada, guardia SSRF, parser RFC 5545 acotado, instantánea −1/+14 días y sección de solo lectura en Hoy; contrato de 40 escenarios en features/external_calendar.feature aprobado por autorización global.",
+      "acceptance": [
+        "Cumplir @s1–@s40 de features/external_calendar.feature con revisión, pruebas y mutación antes del cierre."
+      ],
       "sdd": true,
-      "status": "pending"
+      "status": "spec_ready"
     },
     {
       "id": 29,

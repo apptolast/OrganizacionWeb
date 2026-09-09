@@ -40,6 +40,17 @@ const AppearanceContext = createContext<AppearanceState>({
   },
 });
 export const useAppearance = () => useContext(AppearanceContext);
+// La barra del navegador sigue al lienzo real, aunque la preferencia contradiga al OS.
+function paintThemeColor() {
+  const canvas = getComputedStyle(document.documentElement)
+    .getPropertyValue("--canvas")
+    .trim();
+  if (!canvas) return;
+  for (const meta of document.querySelectorAll<HTMLMetaElement>(
+    'meta[name="theme-color"]',
+  ))
+    meta.content = canvas;
+}
 export function AppearanceProvider({ children }: { children: ReactNode }) {
   const [snapshot, setSnapshot] = useState<AppearanceSnapshot>();
   const [failed, setFailed] = useState(false);
@@ -136,6 +147,7 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
           : "light";
       document.documentElement.dataset.theme = theme;
       document.documentElement.style.colorScheme = theme;
+      paintThemeColor();
       document.documentElement.style.setProperty(
         "--accent",
         theme === "dark" ? snapshot.accentDark : snapshot.accentLight,
@@ -150,6 +162,7 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
       delete document.documentElement.dataset.theme;
       document.documentElement.style.removeProperty("color-scheme");
       document.documentElement.style.removeProperty("--accent");
+      paintThemeColor();
     };
   }, [snapshot]);
   useEffect(() => {

@@ -80,6 +80,7 @@ export function createProject(runner = run) {
           "webhooks-backend",
           "webhooks-frontend",
           "additional_connectors-backend",
+          "noche_cinco-backend",
         ].includes(target))
     ) {
       throw new Error(`Invalid target: ${target}`);
@@ -220,6 +221,10 @@ export function createProject(runner = run) {
     }
     if (task === "mutate" && target === "import_data-persistence-backend") {
       backend("pitest", ["-PmutationScope=import_data_persistence"]);
+      return;
+    }
+    if (task === "mutate" && target === "noche_cinco-backend") {
+      backend("pitest", ["-PmutationScope=noche_cinco"]);
       return;
     }
     if (task === "mutate" && target === "additional_connectors-backend") {

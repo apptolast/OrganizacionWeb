@@ -39,6 +39,13 @@ pitest {
     val icsCalendarOnly = scope == "ics_calendar"
     val githubConnectorOnly = scope == "github_connector"
     val additionalConnectorsOnly = scope == "additional_connectors"
+    // Union de los cinco ambitos de la noche del 9 al 10 de septiembre. PIT gasta
+    // ~17 minutos calculando cobertura porque targetTests es la suite entera, y ese
+    // coste es el mismo para un ambito que para cinco. Corriendolos juntos se paga
+    // una vez en vez de cinco. La puntuacion POR FEATURE se obtiene despues del XML,
+    // que trae el resultado por clase: son los mismos mutantes y las mismas pruebas
+    // que en las campanas separadas, no una medida distinta.
+    val nightFiveOnly = scope == "noche_cinco"
     val integrationApiOnly = scope == "integration_api"
     val integrationApiHttpOnly = scope == "integration_api_http"
     val automationsOnly = scope == "automations"
@@ -581,6 +588,7 @@ pitest {
         "com.apptolast.organization.adapter.config.WebhookSchedule*"
     )
     targetClasses.set(when {
+        nightFiveOnly -> webhooksClasses + githubConnectorClasses + externalCalendarClasses + automationsClasses + additionalConnectorsClasses
         webhooksOnly -> webhooksClasses
         automationsOnly -> automationsClasses
         icsCalendarOnly -> icsCalendarClasses
@@ -613,6 +621,7 @@ pitest {
         else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses + integrationApiClasses + integrationApiHttpClasses + icsCalendarClasses + githubConnectorClasses + externalCalendarClasses + automationsClasses + webhooksClasses
     })
     targetTests.set(when {
+        nightFiveOnly -> setOf("com.apptolast.organization.*")
         webhooksOnly -> setOf("com.apptolast.organization.*")
         automationsOnly -> setOf("com.apptolast.organization.*")
         icsCalendarOnly -> setOf("com.apptolast.organization.*")
@@ -643,6 +652,7 @@ pitest {
         taskOnly -> taskTests
         else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests + weeklyReviewAdapterTests + appearanceAdapterTests + customizationAdapterTests + exportAdapterTests + importAdapterTests
     })
+    if (nightFiveOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-noche-cinco"))
     if (webhooksOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-webhooks"))
     if (icsCalendarOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-ics-calendar"))
     if (githubConnectorOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-github-connector"))

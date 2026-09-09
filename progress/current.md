@@ -325,5 +325,53 @@ verde, esperando que el propietario facilite clave o aplique él mismo.
    `bin/harness init` una vez, sin carriles en paralelo.
 2. Leer las bitácoras de los cinco carriles en `progress/` para saber qué
    hallazgo quedó cerrado y cuál no.
-3. Atacar por este orden: el rebinding DNS de 25 y 28 (seguridad), el ejecutor
-   de reglas de 30 (producto), el resto de oráculos, y la feature 29.
+3. Atacar por este orden: el rebinding DNS de 25 (seguridad; el de 28 ya está
+   cerrado), el ejecutor de reglas de 30 (producto), el resto de oráculos, y la
+   feature 29.
+
+## Índice de por dónde seguir, con el trabajo ya localizado
+
+Todo lo que sigue está **identificado con fichero y línea**, así que nadie tiene
+que volver a buscarlo. Ordenado por relación entre valor y coste:
+
+1. **Feature 27, los 107 supervivientes de `github-connector.tsx`.** Es lo único
+   que separa a esa feature de cerrarse: juez APPROVED, revalidación ejecutada,
+   mutación en 75,55 % de 80. El informe con cada mutante, su línea y su
+   reemplazo está en `frontend/reports/mutation-github-connector/mutation.json`.
+   Hay uno con receta escrita en
+   `progress/mutacion_github_connector_supervivientes.md`: el
+   `ConditionalExpression -> true` de la línea 266 se mata haciendo `vi.mock` del
+   módulo cliente para que `disconnectGithub` rechace con
+   `Object.assign(new Error(), { code: "CONNECTION_NOT_FOUND" })`. Diez minutos.
+2. **Feature 27, el PIT de backend.** No se ha llegado a medir nunca sobre este
+   árbol. Con la máquina libre debería correr; el juez exige, además del 80,
+   **≥ 12 mutantes en `AesGcmSecretCipher`, cero `NO_COVERAGE`** y cinco puntos
+   concretos muertos uno a uno.
+3. **Feature 30, el ejecutor de reglas.** El inventario de los nueve escenarios
+   sin oráculo está en `progress/tdd_automations_fase2.md`, uno a uno, con lo
+   que exige cada `Then`, los tres medio cubiertos (`@s18`, `@s21`, `@s24`) y un
+   diseño de puerto único que permite probar ocho de los nueve **sin
+   contenedor**. Es la única feature con un hallazgo bloqueante de producto.
+4. **Feature 29, el endpoint del catálogo.** El caso de uso ya está verde y
+   commiteado; falta la frontera HTTP: seis implementaciones de
+   `ConnectorStatusSource` más controlador y cableado. Desbloquea cuatro
+   escenarios parciales de golpe.
+5. **Feature 25, hallazgo 2.** El intento está salvado y versionado en
+   `progress/parche_webhooks_hallazgo_2.patch`, con la hipótesis del fallo ya
+   escrita: React materializa el valor del `textarea` como texto hijo, el
+   `textContent` de la etiqueta envolvente deja de ser exactamente «Secreto» y
+   `getByLabel(..., exact)` no casa; arreglo propuesto, `label htmlFor` + `id`.
+6. **Los hallazgos abiertos restantes** están indexados feature a feature —qué
+   exige, qué fichero tocar, si es de oráculo o de producto— en
+   `progress/tdd_webhooks_cierre_dictamen.md`,
+   `progress/tdd_external_calendar_cierre_dictamen.md` y
+   `progress/tdd_automations_fase2.md`.
+
+## Dos cosas de higiene que hoy costaron una hora
+
+- **Sacar `build/` de OneDrive.** La sincronización borra los XML de resultados a
+  mitad de ejecución: hoy dejó una suite de 4697 pruebas con un fallo y **sin
+  forma de saber cuál**.
+- **Repartir los números de migración por adelantado.** Dos carriles crearon
+  `V29` a la vez y `git` no lo vio, porque son ficheros con nombres distintos: la
+  colisión vive en el espacio de nombres de Flyway. Costó 965 fallos en cascada.

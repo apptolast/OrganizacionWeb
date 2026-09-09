@@ -131,6 +131,7 @@ public final class PostgresAutomationWork implements AutomationWork {
 
   private void apply(String owner, AutomationOutcome outcome) {
     UUID createdTaskId = null;
+    UUID deliveryId = null;
     switch (outcome.effect()) {
       case AutomationEffect.CreateTask task ->
           createdTaskId =
@@ -142,26 +143,49 @@ public final class PostgresAutomationWork implements AutomationWork {
                       task.completionCriterion(),
                       task.estimatedMinutes())
                   .id();
-      case AutomationEffect.Notify notify ->
-          // Feature 25 ships no write port over its deliveries yet, and no NOTIFY_WEBHOOK rule can
-          // be stored while WebhookEndpointLookup answers false, so this branch is unreachable.
-          throw new UnsupportedOperationException(
-              "Las entregas de webhook aún no tienen puerto de escritura.");
+      case AutomationEffect.Notify notify -> deliveryId = queue(owner, notify);
       case AutomationEffect.None ignored -> {}
     }
-    claim(outcome.run(), createdTaskId);
+    claim(outcome.run(), createdTaskId, deliveryId);
+  }
+
+  /**
+   * One pending delivery of feature 25 carrying the outbox row untransformed. The body is copied
+   * from the outbox by the database itself, so no re-serialisation can alter a single byte, and the
+   * subscription of the endpoint is deliberately not consulted: the rule is the subscription.
+   */
+  private UUID queue(String owner, AutomationEffect.Notify notify) {
+    var deliveryId = UUID.randomUUID();
+    var now = Timestamp.from(notify.event().occurredAt());
+    var affected =
+        jdbc.update(
+            "INSERT INTO webhook_deliveries(id, endpoint_id, owner_id, event_id, event_type, body,"
+                + " status, attempt, next_attempt_at, created_at, updated_at)"
+                + " SELECT ?, e.id, e.owner_id, o.event_id, o.event_type, o.payload::text,"
+                + " 'pending', 0, ?, ?, ?"
+                + " FROM webhook_endpoints e, outbox_events o"
+                + " WHERE e.id = ? AND e.owner_id = ? AND e.status = 'active' AND o.event_id = ?",
+            deliveryId,
+            now,
+            now,
+            now,
+            notify.endpointId(),
+            owner,
+            notify.event().eventId());
+    if (affected == 0) throw new AutomationClaimedException();
+    return deliveryId;
   }
 
   /**
    * A first attempt inserts and a later one renews its own row. Either way, affecting no row means
    * another worker owns this (rule, event): the whole confirmation is abandoned, not retried.
    */
-  private void claim(AutomationRun run, UUID createdTaskId) {
+  private void claim(AutomationRun run, UUID createdTaskId, UUID deliveryId) {
     var affected =
         run.attempt() == 1
             ? jdbc.update(
                 insert() + " ON CONFLICT (rule_id, event_id) DO NOTHING",
-                values(run, createdTaskId))
+                values(run, createdTaskId, deliveryId))
             : jdbc.update(
                 "UPDATE automation_runs SET attempt = ?, status = ?, created_task_id = ?,"
                     + " delivery_id = ?, error_code = ?, executed_at = ?"
@@ -169,7 +193,7 @@ public final class PostgresAutomationWork implements AutomationWork {
                 run.attempt(),
                 run.status(),
                 createdTaskId,
-                run.deliveryId(),
+                deliveryId,
                 run.errorCode(),
                 Timestamp.from(run.executedAt()),
                 run.ruleId(),
@@ -184,7 +208,7 @@ public final class PostgresAutomationWork implements AutomationWork {
             + " status = EXCLUDED.status, created_task_id = EXCLUDED.created_task_id,"
             + " delivery_id = EXCLUDED.delivery_id, error_code = EXCLUDED.error_code,"
             + " executed_at = EXCLUDED.executed_at",
-        values(run, run.createdTaskId()));
+        values(run, run.createdTaskId(), run.deliveryId()));
   }
 
   private void advance(String owner, AutomationCursor reached) {
@@ -201,7 +225,7 @@ public final class PostgresAutomationWork implements AutomationWork {
     return "INSERT INTO automation_runs(" + RUN_COLUMNS + ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
   }
 
-  private static Object[] values(AutomationRun run, UUID createdTaskId) {
+  private static Object[] values(AutomationRun run, UUID createdTaskId, UUID deliveryId) {
     return new Object[] {
       run.id(),
       run.ruleId(),
@@ -212,7 +236,7 @@ public final class PostgresAutomationWork implements AutomationWork {
       run.attempt(),
       run.status(),
       createdTaskId,
-      run.deliveryId(),
+      deliveryId,
       run.errorCode(),
       Timestamp.from(run.executedAt())
     };

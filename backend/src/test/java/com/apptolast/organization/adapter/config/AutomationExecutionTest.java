@@ -129,6 +129,77 @@ class AutomationExecutionTest {
     assertThat(cursorOf(owner)).isEqualTo(event);
   }
 
+  @Test
+  void s26_notifyWebhookQueuesTheOriginalEventForAnEndpointNotEvenSubscribedToIt() {
+    var owner = owner();
+    var project = project(owner, "active");
+    var endpoint = endpoint(owner);
+    notifyRule(owner, endpoint);
+    var event = projectStatusChanged(owner, project);
+
+    execute.runCycle();
+
+    var delivery = jdbc.queryForMap("SELECT * FROM webhook_deliveries WHERE owner_id = ?", owner);
+    assertThat(delivery)
+        .containsEntry("endpoint_id", endpoint)
+        .containsEntry("event_id", event)
+        .containsEntry("event_type", "ProjectStatusChanged.v1")
+        .containsEntry("status", "pending");
+    assertThat(delivery.get("body"))
+        .as("the body is the payload of the outbox, untransformed")
+        .isEqualTo(payloadOf(event));
+    var run = jdbc.queryForMap("SELECT * FROM automation_runs WHERE owner_id = ?", owner);
+    assertThat(run)
+        .containsEntry("status", "succeeded")
+        .containsEntry("delivery_id", delivery.get("id"))
+        .containsEntry("created_task_id", null)
+        .containsEntry("error_code", null);
+    assertThat(count("SELECT count(*) FROM outbox_events WHERE owner_id = ?", owner))
+        .as("no new event is emitted")
+        .isEqualTo(1);
+    assertThat(cursorOf(owner)).isEqualTo(event);
+  }
+
+  /** An endpoint of the owner subscribed only to TaskCreated.v1, which the rule ignores. */
+  private UUID endpoint(String owner) {
+    var id = UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO webhook_endpoints(id,owner_id,url,description,event_types,status,"
+            + "secret_ciphertext,cursor_occurred_at,cursor_event_id,created_at,updated_at)"
+            + " VALUES (?,?,'https://example.com/h','',ARRAY['TaskCreated.v1']::text[],'active',"
+            + "'\\x01'::bytea,now(),?,now(),now())",
+        id,
+        owner,
+        new UUID(0L, 0L));
+    return id;
+  }
+
+  private UUID notifyRule(String owner, UUID endpoint) {
+    return createRule
+        .create(
+            owner,
+            new AutomationDraft(
+                "Aviso", true, "ProjectStatusChanged.v1", null, new NotifyWebhookAction(endpoint)))
+        .id();
+  }
+
+  private UUID projectStatusChanged(String owner, UUID project) {
+    var id = UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO outbox_events(event_id,aggregate_id,owner_id,event_type,schema_version,"
+            + "occurred_at,payload) VALUES (?,?,?,'ProjectStatusChanged.v1',1,now(),?::jsonb)",
+        id,
+        project,
+        owner,
+        "{\"projectId\":\"" + project + "\",\"status\":\"completed\"}");
+    return id;
+  }
+
+  private String payloadOf(UUID event) {
+    return jdbc.queryForObject(
+        "SELECT payload::text FROM outbox_events WHERE event_id = ?", String.class, event);
+  }
+
   private static String automatedTask() {
     return "SELECT * FROM tasks WHERE project_id = ? AND title = 'Revisar de nuevo'";
   }

@@ -677,13 +677,21 @@ public class ApplicationConfiguration {
   }
 
   /**
-   * Extension point for phase two. Feature 25 has not shipped webhook endpoints, so this answers
-   * «not mine» for every endpoint and no NOTIFY_WEBHOOK rule can be stored yet. Replacing this
-   * single bean with the real adapter of 25 is the whole change.
+   * The endpoints of feature 25 as the rules see them: only an active endpoint of this very owner
+   * counts. A deleted one and a disabled one are the same answer here, and the contract gives both
+   * the same code.
    */
   @Bean
-  com.apptolast.organization.application.WebhookEndpointLookup webhookEndpointLookup() {
-    return (owner, endpointId) -> false;
+  com.apptolast.organization.application.WebhookEndpointLookup webhookEndpointLookup(
+      org.springframework.jdbc.core.JdbcTemplate jdbc) {
+    return (owner, endpointId) ->
+        !jdbc.queryForList(
+                "SELECT 1 FROM webhook_endpoints WHERE id = ? AND owner_id = ?"
+                    + " AND status = 'active'",
+                Integer.class,
+                endpointId,
+                owner)
+            .isEmpty();
   }
 
   @Bean

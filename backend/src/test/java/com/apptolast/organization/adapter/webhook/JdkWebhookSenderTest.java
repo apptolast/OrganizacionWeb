@@ -278,8 +278,15 @@ class JdkWebhookSenderTest {
       assertEquals("TIMEOUT", outcome.errorClass());
       assertNull(outcome.httpStatus());
       assertFalse(outcome.succeeded());
+      // El margen de 5 ms no afloja el oraculo, corrige una medicion: el temporizador
+      // del JDK puede disparar el plazo alrededor de un milisegundo antes, y el
+      // producto trunca otro al pasar a milisegundos. Sin el, la comparacion con 300
+      // recibia 299 bajo carga y caia; con el sigue siendo imposible pasar sin haber
+      // esperado el plazo, que es lo que la fila del contrato afirma. El diseno que no
+      // dependeria del reloj de la maquina es inyectarle el reloj al emisor, y queda
+      // anotado como deuda en progress/tdd_webhooks_cierre_dictamen.md.
       assertTrue(
-          outcome.latencyMs() >= TEST_EXCHANGE_DEADLINE.toMillis(),
+          outcome.latencyMs() >= TEST_EXCHANGE_DEADLINE.toMillis() - 5,
           "the exchange deadline elapsed before giving up, got " + outcome.latencyMs() + " ms");
     }
   }

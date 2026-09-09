@@ -159,3 +159,6 @@ reports/
 /frontend/.stryker-tmp-appearance-replay/
 /progress/appearance_stryker_replay_original/
 /progress/appearance_ci_*.exit
+
+# Salida de compilación de Java de los IDE (Eclipse/VS Code).
+/backend/bin/

@@ -83,3 +83,46 @@ Total: 18 nodos únicos (15 con agenda + 2 del aviso + 1 del error).
 - Estados `:hover` y `:active`; modo `forced-colors`; impresión.
 - `/integraciones` (rama `codex/integration-api`, no está en `main`).
 - Zoom nativo 200 % y texto 200 % en oscuro (ya cubiertos por otros specs en claro y oscuro para Apariencia; no repetidos aquí).
+
+## 9. Confirmación medida sobre `main` — 9 de septiembre de 2026
+
+Reejecución independiente contra `main` en `ac7be85`, pila real levantada con
+`docker compose` en el puerto 18099, Chromium por Playwright a 1440×900 con
+`colorScheme: dark` y el tema «oscuro» fijado por la pantalla de Apariencia
+(`data-theme="dark"` verificado en las diez rutas). Escáner propio: recorre
+todo el DOM visible y calcula el contraste WCAG sobre el fondo **efectivo
+compuesto**, apilando capas translúcidas hasta la primera opaca.
+
+Rutas: `/`, `/proyectos`, `/proyectos/nuevo`, `/disponibilidad`,
+`/apariencia`, `/historial`, `/revision-semanal`, `/exportacion`,
+`/importacion`, `/integraciones/api`.
+
+**73 hallazgos brutos, 14 distintos.** Confirma punto por punto la sección 2:
+el único fallo real de producto sigue siendo «Hoy», y se le suma la etiqueta
+`theme-color`.
+
+| # | Dónde | Medida | Origen |
+| - | ----- | ------ | ------ |
+| D1 | `dl.today-summary` | fondo `#ffffff` fijo dentro de página oscura | `frontend/src/today.scss:32` |
+| D2 | `dt` y `dd` del resumen | contraste **1,18** (mínimo 4,5): `rgb(232,238,233)` sobre `rgb(255,255,255)` | consecuencia de D1 |
+| D3 | `p.today-notice` | fondo `#f0f3eb` fijo; su texto queda en **1,05** | `frontend/src/today.scss:23` |
+| D4 | enlace «Configurar disponibilidad» | contraste **1,25** sobre ese `#f0f3eb` | consecuencia de D3 |
+| D5 | `<meta name="theme-color">` | vale `#f8f9f5` (lienzo **claro**) en las diez rutas con tema oscuro | `frontend/index.html` |
+
+Colores claros fijos que quedan en `today.scss` de `main`: `#b8c8b8` (21),
+`#f0f3eb` (23), `#e0e5dc` (30 y 48) y `#fff` (32 y 47).
+
+Falsos positivos de esta heurística, que no deben tocarse: los elementos con
+fondo `rgb(183,228,199)` son `--accent` del tema oscuro con `--on-accent:#000`
+(`button`, `a.skip-link`, `span.brand-mark`, `span.nav-dot`, `a.primary-link`);
+el `section` «Vista previa clara» de `/apariencia` es claro a propósito; y los
+bordes con ratio 1 en botones de acento comparten color con su propio fondo.
+
+**Lo importante: los arreglos existen en `claude/darkmode` y no están en
+`main`.** Por eso el usuario sigue viendo el fallo. Esa rama salió de un punto
+anterior a la feature 24 y su diferencia contra `main` borra todo el frontend
+de la API para integraciones, así que debe integrarse por rebase o cherry-pick,
+nunca por merge directo.
+
+Capturas de las diez rutas y `darkmode-report.json` con las 73 entradas, en el
+scratchpad de la sesión (`dm-out/`). No se copian al repositorio.

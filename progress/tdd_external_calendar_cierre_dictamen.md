@@ -403,11 +403,11 @@ y el contrato. Queda abierto y anotado, no silenciado.
 ## Estado al cortar la sesión
 
 **Cerrados por este carril, con rojo demostrado y commit propio:** 18, 8, 15, 14,
-3 y 19. **Ya venían cerrados en la base:** 2, 7, 16 y 17 (el 9 es el mismo defecto
+3, 19 y **6** (este ultimo en el ciclo 7, escrito mas abajo). **Ya venían cerrados en la base:** 2, 7, 16 y 17 (el 9 es el mismo defecto
 que el 2 y quedó cubierto por la prueba de señales que ya existía en
 `external-calendar.test.tsx`).
 
-**Abiertos, con lo que hace falta para cada uno:**
+**Abiertos al cortar: 1, 5, 10, 11, 12 y 13.** Lo que hace falta para cada uno:
 
 - **1, 5, 10, 12** (bloqueantes de la auditoría UX): parametrizar la matriz de 14
   anchos y la de texto al 200 % por los cinco estados del Given de @s40 —vacío;
@@ -422,7 +422,7 @@ que el 2 y quedó cubierto por la prueba de señales que ya existía en
 - **4** (zoom nativo 200 %): **fuera del alcance de este carril** por instrucción
   del coordinador; lo cubre otro carril en
   `e2e/external-calendar-native-zoom.spec.mjs`.
-- **6** (enmienda B3, guardia SSRF): no se ha tocado. El diseño que exige el
+- ~~**6** (enmienda B3, guardia SSRF)~~: **CERRADO en el ciclo 7**. Lo que sigue es el analisis previo, conservado solo como registro de por que se dudo en empezarlo. El diseño que exige el
   dictamen es que `OutboundGuard` devuelva las direcciones validadas junto al
   veredicto y que `HttpCalendarFeed` conecte contra la dirección literal ya
   validada conservando el nombre en `Host` y en SNI. Se decidió **no empezarlo**

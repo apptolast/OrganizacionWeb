@@ -65,3 +65,57 @@ se aborta al cambiar de identidad» y (c) «un 401 tardío no retira una sesión
 posterior» que el verificador anota en el mismo hallazgo. No estaban en el
 encargo de este ciclo y no son «minutos»; quedan anotadas aquí como deuda
 abierta de `@s38`.
+
+Commit: `e9eab30`.
+
+---
+
+## Hallazgo 22 (MEDIA) — `@s37`: «no se copia sin activar Copiar» sin oráculo
+
+**Fichero:** `frontend/src/webhooks.test.tsx`, prueba `@s37 sends one POST with
+the twelve types and shows the secret once`.
+**Cláusula:** `features/webhooks.feature:461` — «no se escribe whsec_x en
+localStorage, sessionStorage ni en la URL **y no se copia sin activar Copiar**».
+De los cuatro canales, el portapapeles —el único con condición— no se observaba
+en ningún punto del carril (ni en `webhooks-client.test.ts`, ni en
+`webhooks-route.test.tsx`, ni en el E2E). La única aserción sobre el botón era
+que se ve.
+
+**Prueba nueva** (cuatro líneas dentro de la prueba que ya existía, siguiendo el
+patrón vigente en `integration-api.mutation.test.tsx:86-119` y
+`calendar.test.tsx:233-258`):
+
+- `const write = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue();`
+- con el panel del secreto ya visible, `expect(write).not.toHaveBeenCalled()`;
+- `await user.click(copy)`;
+- `expect(write).toHaveBeenCalledExactlyOnceWith(secret)`.
+
+**ROJO 1 — botón decorativo** (`webhooks.tsx:293`,
+`onClick={() => void navigator.clipboard?.writeText(secret)}` →
+`onClick={() => void secret}`). Es el mutante que dejaría al usuario sin el
+secreto irrecuperable:
+
+```
+FAIL @s37 sends one POST with the twelve types and shows the secret once
+AssertionError: expected "writeText" to be called once with arguments: [ Array(1) ]
+Number of calls: 0
+  webhooks.test.tsx:233  expect(write).toHaveBeenCalledExactlyOnceWith(secret);
+Tests  1 failed | 22 passed (23)
+```
+
+**ROJO 2 — copia sin gesto** (añadido a `WebhookPanel`:
+`useEffect(() => { if (secret) void navigator.clipboard?.writeText(secret); }, [secret])`).
+Es la violación de privacidad literal de la cláusula:
+
+```
+FAIL @s37 sends one POST with the twelve types and shows the secret once
+AssertionError: expected "writeText" to not be called at all, but actually been called 1 times
+  1st writeText call: [ "whsec_AAAA…" ]
+  webhooks.test.tsx:229  expect(write).not.toHaveBeenCalled();
+Tests  1 failed | 22 passed (23)
+```
+
+Ambos mutantes dejaban verde la suite antes de este ciclo.
+
+**VERDE.** Retirados los dos mutantes; `git diff frontend/src/webhooks.tsx`
+vacío contra `HEAD` y `webhooks.test.tsx` 23/23 verde.

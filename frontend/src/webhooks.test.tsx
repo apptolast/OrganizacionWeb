@@ -193,6 +193,7 @@ it("@s37 sends one POST with the twelve types and shows the secret once", async 
     () => new Promise<Response>((r) => (reply = r)),
   );
   const user = userEvent.setup();
+  const write = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue();
 
   render(<Webhooks owner="Ana" />);
   await shown();
@@ -215,13 +216,21 @@ it("@s37 sends one POST with the twelve types and shows the secret once", async 
   await waitFor(() => expect(screen.getByDisplayValue(secret)).toBeVisible());
   const field = screen.getByDisplayValue(secret);
   expect(field).toHaveAttribute("readonly");
-  expect(screen.getByRole("button", { name: "Copiar" })).toBeVisible();
+  const copy = screen.getByRole("button", { name: "Copiar" });
+  expect(copy).toBeVisible();
   expect(screen.getByText(/no volverá a mostrarse/i)).toBeVisible();
   expect(screen.getByText("https://example.com/hooks")).toBeVisible();
 
   expect(JSON.stringify(localStorage)).not.toContain(secret);
   expect(JSON.stringify(sessionStorage)).not.toContain(secret);
   expect(window.location.href).not.toContain(secret);
+  // "no se copia sin activar Copiar": showing the secret must not reach the
+  // clipboard, and the gesture must write it exactly once.
+  expect(write).not.toHaveBeenCalled();
+
+  await user.click(copy);
+
+  expect(write).toHaveBeenCalledExactlyOnceWith(secret);
 });
 
 it("@s37 a second submit that bypasses the disabled button still sends nothing", async () => {

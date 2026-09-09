@@ -154,6 +154,55 @@ class ExecuteAutomationsTest {
                 P, title, "TaskCreated.v1 a las 2026-09-08T10:15:30.123456Z", 30));
   }
 
+  @Test
+  void s24_aRuleDisabledBeforeTheEventNeverRunsButTheCursorStillMovesPastIt() {
+    work.owners.add(OWNER);
+    var disabled = ruleWith(false, "Revisar {{task.title}}");
+    rules.create(OWNER, disabled);
+    work.cursors.put(OWNER, new AutomationCursor(T0, E0));
+    work.outbox.add(taskCreated(E1, T0.plusSeconds(1)));
+    var reached = new AutomationCursor(T0.plusSeconds(1), E1);
+
+    execute.runCycle();
+
+    assertThat(work.runs()).isEmpty();
+    assertThat(work.createdTasks()).isEmpty();
+    assertThat(work.cursors.get(OWNER)).isEqualTo(reached);
+
+    rules.replace(
+        OWNER,
+        disabled.id(),
+        1,
+        new AutomationDraft("R", true, "TaskCreated.v1", null, taskAction()),
+        T0.plusSeconds(2));
+    execute.runCycle();
+
+    assertThat(work.runs()).as("reactivating the rule must not resurrect a passed event").isEmpty();
+    assertThat(work.createdTasks()).isEmpty();
+    assertThat(work.cursors.get(OWNER)).isEqualTo(reached);
+  }
+
+  @Test
+  void s24_aPutRacingTheEvaluationLeavesOneWholeVersionAndNeverATaskWithoutARun() {
+    var racing =
+        new RacingRules(
+            ruleWith(true, "Antiguo {{task.title}}"), ruleWith(false, "Nuevo {{task.title}}"));
+    work.owners.add(OWNER);
+    work.cursors.put(OWNER, new AutomationCursor(T0, E0));
+    work.outbox.add(taskCreated(E1, T0.plusSeconds(1)));
+
+    new ExecuteAutomations(work, racing, matcher, facts, endpoints, clock).runCycle();
+
+    assertThat(racing.reads).as("one snapshot of the rules per event, never two").isEqualTo(1);
+    assertThat(work.runs()).extracting(AutomationRun::status).containsExactly("succeeded");
+    assertThat(work.createdTasks())
+        .as("the task uses one version of the template in full, never a mix")
+        .extracting(AutomationEffect.CreateTask::title)
+        .containsExactly("Antiguo Redactar informe");
+    assertThat(work.createdTasks()).hasSameSizeAs(work.runs());
+    assertThat(work.cursors.get(OWNER)).isEqualTo(new AutomationCursor(T0.plusSeconds(1), E1));
+  }
+
   private void givenARuleThatCreatesTasks() {
     work.owners.add(OWNER);
     rules.create(OWNER, rule(taskAction()));
@@ -165,6 +214,16 @@ class ExecuteAutomationsTest {
 
   private static CreateTaskAction taskAction() {
     return new CreateTaskAction(P, "Revisar {{task.title}} en {{project.name}}", null, 30);
+  }
+
+  private static AutomationRule ruleWith(boolean enabled, String titleTemplate) {
+    return new AutomationRule(
+        UUID.randomUUID(),
+        new AutomationDraft(
+            "R", enabled, "TaskCreated.v1", null, new CreateTaskAction(P, titleTemplate, null, 30)),
+        1,
+        CREATED,
+        CREATED);
   }
 
   private static AutomationRule rule(AutomationAction action) {
@@ -194,6 +253,45 @@ class ExecuteAutomationsTest {
             occurredAt,
             Map.of("taskId", TASK.toString(), "title", "Redactar informe")),
         false);
+  }
+
+  /** One rule replaced by a PUT between two reads: the race the contract describes. */
+  private static final class RacingRules implements AutomationRuleStore {
+    private final AutomationRule before;
+    private final AutomationRule after;
+    int reads;
+
+    RacingRules(AutomationRule before, AutomationRule after) {
+      this.before = before;
+      this.after = after;
+    }
+
+    @Override
+    public List<AutomationRule> list(String owner) {
+      reads++;
+      return List.of(reads == 1 ? before : after);
+    }
+
+    @Override
+    public AutomationRule create(String owner, AutomationRule rule) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Optional<AutomationRule> find(String owner, UUID id) {
+      return list(owner).stream().filter(rule -> rule.id().equals(id)).findFirst();
+    }
+
+    @Override
+    public AutomationRule replace(
+        String owner, UUID id, long expectedVersion, AutomationDraft draft, Instant now) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void delete(String owner, UUID id, long expectedVersion) {
+      throw new UnsupportedOperationException();
+    }
   }
 
   /** In-memory stand-in for the transactional port: applies effects and advances the cursor. */

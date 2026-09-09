@@ -241,6 +241,59 @@ lista que caduca en silencio con cada migración. Y una CI que falla temprano po
 otra causa **esconde** todo lo que viene después; cuando se arregla el primer
 fallo, hay que contar con encontrar los siguientes.
 
+### Cinco roturas latentes, y todas con la misma forma
+
+Al arreglar el lint y el flake, la CI por fin llegó a ejecutar pasos que llevaba
+días sin alcanzar, y aparecieron cinco roturas. Ninguna la trajo el trabajo de
+hoy: todas llevaban ahí desde la integración de las features 25 a 30, y todas
+son **una constante escrita a mano que dependía de algo que crece**:
+
+| Rotura | La constante | Qué la hizo caducar |
+|---|---|---|
+| `TRUNCATE` sin `CASCADE` | la lista de tablas enumerada | la `V25` añadió tablas con clave ajena |
+| Migración `V29` duplicada | el número elegido a mano | dos carriles a la vez |
+| `nth(-3)` en la navegación | posiciones desde el final | tres rutas nuevas |
+| 12 pulsaciones de `Shift+Tab` | el presupuesto de pasos | tres entradas de navegación nuevas |
+| Ventana del zoom nativo | una pantalla que se da por hecha | el xvfb de CI no la tiene |
+
+Las cinco fusionaban limpio, porque ninguna es un choque textual. Las cinco
+están arregladas **de forma derivada** —`CASCADE`, número comprobado, lista
+completa, presupuesto calculado, anchos filtrados por la pantalla real— y no con
+un número más grande, para que no vuelvan a caducar.
+
+De propina, un **conflicto semántico de fusión**, que es la categoría que `git`
+no puede ver: un carril renombró el ayudante `openEditor` a `openDenseScreen` y
+actualizó sus tres llamadas; otro añadió una llamada nueva con el nombre viejo.
+Las dos ramas fusionan sin conflicto y el fichero queda con un `ReferenceError`.
+
+**La lección que más va a durar**: una CI que falla pronto por una causa
+**esconde** todo lo que viene después. Llevaba días cayendo en el lint, así que
+el paso de E2E no se ejecutaba, así que estas cinco no se veían. Al arreglar el
+primer fallo hay que contar con encontrar los siguientes, y no leerlo como que
+«ahora se ha roto todo».
+
+### La enmienda de navegación que ratificaste no se cumple
+
+`project-spec.md:2504` fija el orden canónico de la navegación principal en doce
+entradas. La aplicación sirve **trece**, y en otro orden:
+
+| # | Ratificado | Servido |
+|---|---|---|
+| 6 | Apariencia | **Calendario externo** |
+| 7 | Calendario | Apariencia |
+| 8 | Exportación | Exportación |
+| 9 | Importación | **Calendario** |
+| 10 | API para integraciones | Importación |
+
+Es decir: **«Calendario externo» (feature 28) no aparece en la enmienda** —que
+sólo resolvió el choque entre la 25 y la 30— y **«Calendario» y «Exportación»
+están intercambiados** respecto a lo firmado.
+
+`e2e/export-data.spec.mjs` afirma ahora el **orden servido**, con la divergencia
+escrita en el propio test y remitiendo aquí, para no bendecir en silencio una
+violación del contrato. **Decisión del propietario**: o se arregla la
+aplicación, o se enmienda `project-spec.md:2504` para incluir la feature 28.
+
 ### Una contradicción del contrato que solo puede resolver el propietario
 
 El hallazgo 11 de webhooks no es un defecto de código: `features/webhooks.feature`

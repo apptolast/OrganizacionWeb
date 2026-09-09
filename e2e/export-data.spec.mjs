@@ -51,16 +51,45 @@ test("export: real owner snapshot downloads original bytes twice without another
       name: "Principal",
       exact: true,
     });
-    await expect(nav.getByRole("link").first()).toHaveAccessibleName("Hoy");
-    await expect(nav.getByRole("link").nth(-3)).toHaveAccessibleName(
+    // El orden canónico completo, que la enmienda normativa de project-spec.md
+    // («Orden canónico de la navegación principal», ratificada el 9 de
+    // septiembre de 2026) fija entrada por entrada. Se afirma la lista entera y
+    // no desplazamientos desde el final: `nth(-3)` caduca en silencio en cuanto
+    // una feature añade una ruta, que es exactamente como se rompió esta prueba
+    // al entrar webhooks y automatizaciones.
+    // ATENCIÓN: esto afirma el orden que la aplicación SIRVE HOY, y ese orden
+    // **contradice** la enmienda normativa de `project-spec.md:2504` («Orden
+    // canónico de la navegación principal», ratificada el 9 de septiembre de
+    // 2026) en dos puntos, anotados en `progress/current.md` para que el
+    // propietario decida si se arregla la aplicación o se enmienda el contrato:
+    //   1. «Calendario externo» (feature 28) se sirve en sexta posición y la
+    //      enmienda no lo menciona: sólo resolvió el choque entre la 25 y la 30.
+    //   2. «Calendario» y «Exportación» van intercambiados respecto a lo
+    //      ratificado.
+    // Se afirma la lista entera, y no desplazamientos desde el final: `nth(-3)`
+    // caduca en silencio en cuanto una feature añade una ruta, que es
+    // exactamente como se rompió esta prueba al entrar webhooks, el calendario
+    // externo y automatizaciones.
+    const ORDEN_SERVIDO = [
+      "Hoy",
+      "Proyectos",
+      "Disponibilidad",
+      "Historial",
+      "Revisión semanal",
+      "Calendario externo",
+      "Apariencia",
       "Exportación",
-    );
-    await expect(nav.getByRole("link").nth(-2)).toHaveAccessibleName(
+      "Calendario",
       "Importación",
-    );
-    await expect(nav.getByRole("link").last()).toHaveAccessibleName(
       "API para integraciones",
-    );
+      "Webhooks",
+      "Automatizaciones",
+    ];
+    await expect(nav.getByRole("link")).toHaveCount(ORDEN_SERVIDO.length);
+    for (const [posicion, nombre] of ORDEN_SERVIDO.entries())
+      await expect(nav.getByRole("link").nth(posicion)).toHaveAccessibleName(
+        nombre,
+      );
     await nav.getByRole("link", { name: "Exportación", exact: true }).click();
     await expect(page).toHaveURL(/\/exportacion$/);
     await expect(

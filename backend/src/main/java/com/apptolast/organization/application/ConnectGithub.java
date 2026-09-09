@@ -13,14 +13,14 @@ import java.time.Clock;
  */
 public final class ConnectGithub implements ConnectGithubUseCase {
   private final ConnectorConnectionStore connections;
-  private final ImportReceiptStore receipts;
+  private final IssueImportReceiptStore receipts;
   private final IssueSource source;
   private final SecretCipher cipher;
   private final Clock clock;
 
   public ConnectGithub(
       ConnectorConnectionStore connections,
-      ImportReceiptStore receipts,
+      IssueImportReceiptStore receipts,
       IssueSource source,
       SecretCipher cipher,
       Clock clock) {

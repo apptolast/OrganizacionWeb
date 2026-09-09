@@ -1,6 +1,6 @@
 package com.apptolast.organization.application;
 
-import com.apptolast.organization.domain.ImportReceipt;
+import com.apptolast.organization.domain.IssueImportReceipt;
 import java.time.Instant;
 
 /**
@@ -8,8 +8,8 @@ import java.time.Instant;
  * claro, ni siquiera para su longitud.
  */
 public record ConnectionView(
-    String repository, String login, String status, Instant connectedAt, ImportReceipt lastImport) {
-  public static ConnectionView of(StoredConnection connection, ImportReceipt lastImport) {
+    String repository, String login, String status, Instant connectedAt, IssueImportReceipt lastImport) {
+  public static ConnectionView of(StoredConnection connection, IssueImportReceipt lastImport) {
     return new ConnectionView(
         connection.repository(),
         connection.login(),

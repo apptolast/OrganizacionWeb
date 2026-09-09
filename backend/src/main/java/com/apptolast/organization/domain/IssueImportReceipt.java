@@ -9,7 +9,7 @@ import java.util.UUID;
  * importación, con sus once campos siempre presentes: lo que el POST responde es exactamente lo
  * que el GET del recibo vuelve a leer, también tras un reinicio.
  */
-public record ImportReceipt(
+public record IssueImportReceipt(
     UUID id,
     UUID projectId,
     String repository,
@@ -26,7 +26,7 @@ public record ImportReceipt(
   public static final String FAILED = "failed";
   private static final Set<String> STATUSES = Set.of(RUNNING, COMPLETED, FAILED);
 
-  public ImportReceipt {
+  public IssueImportReceipt {
     if (id == null || projectId == null || repository == null || startedAt == null)
       throw new IllegalArgumentException("An import receipt requires identity and a start instant");
     if (!STATUSES.contains(status))
@@ -45,8 +45,8 @@ public record ImportReceipt(
     return RUNNING.equals(status);
   }
 
-  public ImportReceipt withCounters(int created, int skipped, int failed) {
-    return new ImportReceipt(
+  public IssueImportReceipt withCounters(int created, int skipped, int failed) {
+    return new IssueImportReceipt(
         id,
         projectId,
         repository,
@@ -60,9 +60,9 @@ public record ImportReceipt(
         finishedAt);
   }
 
-  public ImportReceipt close(
+  public IssueImportReceipt close(
       String status, String errorCode, boolean truncated, Instant finishedAt) {
-    return new ImportReceipt(
+    return new IssueImportReceipt(
         id,
         projectId,
         repository,

@@ -1,6 +1,6 @@
 package com.apptolast.organization.application;
 
-import com.apptolast.organization.domain.ImportReceipt;
+import com.apptolast.organization.domain.IssueImportReceipt;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -8,15 +8,15 @@ import java.util.UUID;
 /**
  * Puerto de salida de los recibos. {@code begin} es la sección crítica: cierra como
  * {@code INTERRUPTED} el recibo en curso anterior a {@code staleBefore} y garantiza que nunca haya
- * más de un recibo {@code running} por propietario, o lanza {@link ImportInProgressException}.
+ * más de un recibo {@code running} por propietario, o lanza {@link IssueImportInProgressException}.
  */
-public interface ImportReceiptStore {
-  ImportReceipt begin(
+public interface IssueImportReceiptStore {
+  IssueImportReceipt begin(
       String ownerId, UUID projectId, String repository, Instant startedAt, Instant staleBefore);
 
   void progress(String ownerId, UUID importId, int created, int skipped, int failed);
 
-  ImportReceipt finish(
+  IssueImportReceipt finish(
       String ownerId,
       UUID importId,
       String status,
@@ -24,7 +24,7 @@ public interface ImportReceiptStore {
       boolean truncated,
       Instant finishedAt);
 
-  Optional<ImportReceipt> find(String ownerId, UUID importId);
+  Optional<IssueImportReceipt> find(String ownerId, UUID importId);
 
-  Optional<ImportReceipt> latest(String ownerId);
+  Optional<IssueImportReceipt> latest(String ownerId);
 }

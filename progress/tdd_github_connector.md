@@ -71,6 +71,19 @@ la base de la API (`GithubApiBase`, @s35/B11) ya había encontrado su verde ante
 - `StoredConnection.toString` redacta el texto cifrado y `ConnectionView` no tiene hueco para el
   token: la ausencia es estructural, no una omisión al serializar.
 
+### Ciclo 7 — @s10 @s11 @s30 @s33 consultar, desconectar y leer un recibo
+
+- ROJO `GithubConnectorQueriesTest` (no compilaba: faltaban `ReadGithubConnection`,
+  `DisconnectGithub` y `ReadIssueImport`).
+- VERDE los tres casos de uso. `lastImport` es el recibo de mayor `startedAt` **del propietario**;
+  desconectar borra sólo la fila de conexión y es idempotente; un recibo ajeno y un identificador
+  inexistente comparten error para no delatar qué existe fuera de la cuenta.
+- REFACTOR de nombres obligado por una colisión real: la feature de importación de datos ya tenía
+  `application/ImportReceipt`, `ReadImportReceipt` y `ImportReceiptQueries`. Los tipos del conector
+  pasan a `domain/IssueImportReceipt`, `IssueImportReceiptStore`, `ReadIssueImport`,
+  `IssueImportNotFoundException` e `IssueImportInProgressException`. Ninguna clase existente se ha
+  tocado.
+
 ## Enmiendas al contrato aprobadas por el coordinador (9 de septiembre de 2026)
 
 Origen: `progress/security_review_connectors.md` (rama `main`). El coordinador actualiza

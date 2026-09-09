@@ -1,7 +1,7 @@
 package com.apptolast.organization.application;
 
 import com.apptolast.organization.domain.ExternalIssue;
-import com.apptolast.organization.domain.ImportReceipt;
+import com.apptolast.organization.domain.IssueImportReceipt;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -88,17 +88,17 @@ final class ConnectorFakes {
     }
   }
 
-  static final class FakeReceipts implements ImportReceiptStore {
-    private final Map<UUID, ImportReceipt> rows = new LinkedHashMap<>();
+  static final class FakeReceipts implements IssueImportReceiptStore {
+    private final Map<UUID, IssueImportReceipt> rows = new LinkedHashMap<>();
     private final Map<UUID, String> owners = new HashMap<>();
 
     @Override
-    public ImportReceipt begin(
+    public IssueImportReceipt begin(
         String ownerId, UUID projectId, String repository, Instant startedAt, Instant staleBefore) {
       interruptStale(ownerId, staleBefore);
-      if (running(ownerId).isPresent()) throw new ImportInProgressException();
+      if (running(ownerId).isPresent()) throw new IssueImportInProgressException();
       var receipt =
-          new ImportReceipt(
+          new IssueImportReceipt(
               UUID.randomUUID(),
               projectId,
               repository,
@@ -121,7 +121,7 @@ final class ConnectorFakes {
     }
 
     @Override
-    public ImportReceipt finish(
+    public IssueImportReceipt finish(
         String ownerId,
         UUID importId,
         String status,
@@ -134,19 +134,19 @@ final class ConnectorFakes {
     }
 
     @Override
-    public Optional<ImportReceipt> find(String ownerId, UUID importId) {
+    public Optional<IssueImportReceipt> find(String ownerId, UUID importId) {
       return Optional.ofNullable(rows.get(importId))
           .filter(row -> ownerId.equals(owners.get(row.id())));
     }
 
     @Override
-    public Optional<ImportReceipt> latest(String ownerId) {
+    public Optional<IssueImportReceipt> latest(String ownerId) {
       return rows.values().stream()
           .filter(row -> ownerId.equals(owners.get(row.id())))
-          .max(java.util.Comparator.comparing(ImportReceipt::startedAt));
+          .max(java.util.Comparator.comparing(IssueImportReceipt::startedAt));
     }
 
-    private Optional<ImportReceipt> running(String ownerId) {
+    private Optional<IssueImportReceipt> running(String ownerId) {
       return rows.values().stream()
           .filter(row -> ownerId.equals(owners.get(row.id())) && "running".equals(row.status()))
           .findFirst();
@@ -159,9 +159,9 @@ final class ConnectorFakes {
               row -> rows.put(row.id(), row.close("failed", "INTERRUPTED", false, staleBefore)));
     }
 
-    ImportReceipt seedCompleted(String ownerId) {
+    IssueImportReceipt seedCompleted(String ownerId) {
       var receipt =
-          new ImportReceipt(
+          new IssueImportReceipt(
               UUID.randomUUID(),
               UUID.randomUUID(),
               "octocat/Hello-World",
@@ -178,9 +178,9 @@ final class ConnectorFakes {
       return receipt;
     }
 
-    ImportReceipt seedRunning(String ownerId, Instant startedAt) {
+    IssueImportReceipt seedRunning(String ownerId, Instant startedAt) {
       var receipt =
-          new ImportReceipt(
+          new IssueImportReceipt(
               UUID.randomUUID(),
               UUID.randomUUID(),
               "octocat/Hello-World",
@@ -197,7 +197,7 @@ final class ConnectorFakes {
       return receipt;
     }
 
-    ImportReceipt current(UUID importId) {
+    IssueImportReceipt current(UUID importId) {
       return rows.get(importId);
     }
 

@@ -124,8 +124,8 @@ public final class ImportGithubIssues implements ImportGithubIssuesUseCase {
       IssueImportReceipt receipt,
       Tally tally) {
     // El puerto unificado obliga a decidir: la 27 conserva su comportamiento previo, así que un
-    // secreto ilegible sigue siendo SecretUndecipherableException. Hoy nadie la captura y acaba en
-    // 500; queda anotado como defecto latente de la 27, ajeno a este carril.
+    // secreto ilegible sigue siendo SecretUndecipherableException. El adaptador HTTP la traduce a
+    // 503 CONNECTOR_KEY_MISMATCH, así que una clave rotada da un fallo honesto y no un 500.
     var token =
         cipher
             .decrypt(ownerId, connection.tokenCiphertext())

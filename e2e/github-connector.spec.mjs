@@ -161,11 +161,14 @@ test("@s42 estado conectada, alcanzado conectando de verdad", async ({
   // El login lo devuelve el servicio falso, no el formulario: prueba que hubo ida y vuelta.
   await expect(page.getByText("octocat", { exact: true })).toBeVisible();
   // Y la fila guardada lleva texto cifrado de verdad, no ceros.
+  // Formato en reposo: nonce de 12 octetos, cifrado y etiqueta GCM de 16. Sin byte de
+  // versión: al unificar SecretCipher entre las features 27 y 28 se retiró, porque @s1 de
+  // este mismo contrato exige «octet_length 12 + 14 + 16» y el byte lo contradecía.
   expect(
     sql(
       `SELECT octet_length(token_ciphertext) FROM connector_connections WHERE owner_id='${OWNER}'`,
     ),
-  ).toBe(String(1 + 12 + TOKEN.length + 16));
+  ).toBe(String(12 + TOKEN.length + 16));
   await auditAxe(page, "conectada");
   await assertLayout(page, "conectada");
 });

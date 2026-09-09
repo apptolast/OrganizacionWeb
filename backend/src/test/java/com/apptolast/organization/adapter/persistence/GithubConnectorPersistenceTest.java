@@ -61,6 +61,8 @@ class GithubConnectorPersistenceTest {
 
   @BeforeEach
   void setUp() {
+    // Se vacía descubriendo las tablas, no enumerándolas: fue la V25 de este carril, con su
+    // task_external_links apuntando a tasks, la que tumbó las listas escritas a mano.
     TestDatabase.empty(jdbc);
     var transaction = new TransactionTemplate(manager);
     connections = new PostgresConnectorConnectionStore(jdbc, transaction);

@@ -146,6 +146,20 @@ function GithubConnectorScreen() {
     return () => controller.abort();
   }, [disabled]);
 
+  // Escape cancela la confirmación de desconexión desde cualquier sitio, también cuando el foco
+  // se ha quedado en el cuerpo al reemplazarse el botón que la abrió. Sólo escucha mientras la
+  // confirmación está abierta, así que no roba la tecla al resto de la pantalla.
+  useEffect(() => {
+    if (!confirming) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      cancelDisconnect();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [confirming]);
+
   // El foco se mueve después de pintar, nunca durante el manejador del evento.
   useLayoutEffect(() => {
     if (focusHeading.current) {
@@ -227,6 +241,12 @@ function GithubConnectorScreen() {
         if (pending.current === controller) pending.current = null;
       }
     }
+  }
+
+  /** Cierra la confirmación sin borrar nada y devuelve el foco a donde estaba. */
+  function cancelDisconnect() {
+    setConfirming(false);
+    focusDisconnect.current = true;
   }
 
   async function confirmDisconnect() {
@@ -333,13 +353,7 @@ function GithubConnectorScreen() {
               <button type="button" onClick={() => void confirmDisconnect()}>
                 Confirmar desconexión
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setConfirming(false);
-                  focusDisconnect.current = true;
-                }}
-              >
+              <button type="button" onClick={cancelDisconnect}>
                 Cancelar
               </button>
             </div>

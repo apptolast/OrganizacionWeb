@@ -8,7 +8,19 @@ Puerto E2E usado: 18094.
 ## Estado
 
 Feature en curso: 27 — `github_connector`. Escenarios recorridos: @s1…@s42.
-E2E de @s42 ejecutado en el puerto 18094: **12 de 12 en verde**.
+
+**Dictamen REJECTED del juez el 9 de septiembre de 2026** (`progress/judge_github_connector.md`).
+Los cinco bloqueantes están cerrados; el detalle, en el ciclo 21.
+
+Cifras medidas, no estimadas:
+
+| Suite | Pruebas |
+| --- | --- |
+| Backend del carril, 14 clases filtradas | 259 |
+| Frontend del carril, 3 ficheros (`github-connector*.test.*`) | **56** |
+| E2E `github-connector.spec.mjs` | 15 |
+| E2E `github-connector-native-zoom.spec.mjs` | 1 |
+
 No se marca `done`: falta `judge` y `mutation_tester`.
 
 ## Decisión de diseño para la feature 29
@@ -303,7 +315,7 @@ carril.
 | @s1 | `ConnectGithubTest`, `GithubConnectorApiTest`, `HttpGithubIssueSourceTest`, `GithubConnectorPersistenceTest`, `GithubConnectorWiringTest` |
 | @s2 | `AesGcmSecretCipherTest` |
 | @s3 | `ConnectGithubTest`, `GithubConnectorQueriesTest`, `ImportGithubIssuesTest`, `GithubConnectorApiTest`, `GithubConnectorWiringTest` |
-| @s4 | `GithubConnectorWiringTest` |
+| @s4 | `GithubConnectorWiringTest` — **tres de las cuatro filas**; la de «cadena vacía» está deliberadamente contradicha, ver el desvío de abajo |
 | @s5 | `GithubRepositoryTest`, `ConnectGithubTest`, `GithubConnectorApiTest` |
 | @s6 | `PersonalAccessTokenTest`, `ConnectGithubTest`, `GithubConnectorApiTest` |
 | @s7 | `ConnectGithubTest`, `HttpGithubIssueSourceTest`, `GithubConnectorApiTest` |
@@ -341,7 +353,7 @@ carril.
 | @s39 | `github-connector.test.tsx` (las cinco filas) |
 | @s40 | `github-connector.test.tsx` |
 | @s41 | `github-connector.test.tsx`, `github-connector-client.test.ts` |
-| @s42 | `github-connector-routing.test.tsx` (la parte estructural) y `e2e/github-connector.spec.mjs` — **el resto queda pendiente de ejecutar** |
+| @s42 | `github-connector-routing.test.tsx` (estructura), `e2e/github-connector.spec.mjs` (los **siete** estados con axe, teclado con orden, foco visible, `Escape`, 44 × 44 en todos los estados) y `e2e/github-connector-native-zoom.spec.mjs` (320/768/1440 con **zoom nativo al 200 %**, sin desplazamiento ni recorte). Evidencia UX en `progress/ux_github_connector.md` |
 
 ## Lo que falta para cerrar
 
@@ -404,6 +416,91 @@ El propietario ratificó el 403 y el contrato se enmendó en `a6164e4`. La imple
 `GithubConnectorApiTest` afirma ahora las seis filas como las nombra el contrato, comprobando el
 **código** del problema y no sólo el estado: 401 `UNAUTHENTICATED` en las cinco sin credencial y
 403 `API_SCOPE_DENIED` en la del canal Bearer. La bitácora ya no lo lista como desvío.
+
+### Ciclo 21 — los cinco bloqueantes del juez
+
+Dictamen `progress/judge_github_connector.md`, REJECTED. Los cinco, cerrados:
+
+**1. `Escape` no existía, ni en la prueba ni en el producto.** Era el hallazgo más serio y tenía
+razón: la prueba se titulaba «can be cancelled with Escape» y hacía `click()` sobre «Cancelar».
+ROJO en `github-connector.test.tsx` con tres pruebas nuevas que pulsan `{Escape}` de verdad; VERDE
+con un escuchador de `keydown` en `document` **sólo mientras la confirmación está abierta**, que
+cierra y devuelve el foco a «Desconectar». Se eligió el documento y no el `div` porque al abrirse
+la confirmación el botón que la abrió desaparece y el foco cae en el cuerpo: un `onKeyDown` en el
+grupo no habría recibido la tecla. La tercera prueba fija que `Escape` fuera de la confirmación no
+altera la pantalla.
+
+**2. La prueba placebo.** `expect(states).toHaveLength(7)` sobre un literal de siete cadenas.
+Borrada. No la sustituye otra aserción sobre el mismo literal: lo que la reemplaza es que la suite
+recorra los siete estados de verdad, uno por prueba.
+
+**3 y 4. Los siete estados y el servicio falso, que era la causa raíz.** Nuevo servicio
+`e2e/fake-github/` en la pila de compose bajo el **perfil `e2e`**, de modo que un despliegue normal
+no lo levanta. Dos decisiones que merecen quedar escritas:
+
+- `network_mode: "service:backend"`: el falso comparte el espacio de red del backend, así que éste
+  lo alcanza como `http://127.0.0.1:9000`, **un host de loopback**. Así la lista blanca de
+  `GithubApiBase` —que el juez destacó como la defensa contra SSRF— **no se relaja ni un milímetro**
+  para las pruebas. Nada sale hacia api.github.com.
+- **Sin canal de control**: la conducta del falso depende del **nombre del repositorio**
+  (`hello-world`, `con-fallo`, `limitado`, `rechazado`, `muchas`…), que es lo único que la prueba
+  escribe en la interfaz. Cada recorrido es determinista y no hay estado compartido que se filtre
+  de una prueba a otra.
+
+Con eso, los siete estados se alcanzan **por la interfaz**: se conecta, se importa, se reimporta con
+`skipped`, se desconecta. El estado `conectada` ya no se fabrica con 43 bytes de ceros: la prueba
+comprueba que la fila guardada mide `1 + 12 + longitud + 16` bytes, es decir, texto cifrado real. El
+estado `deshabilitado` se alcanza recreando el backend **sin** `APP_CONNECTOR_KEY`
+(`e2e/support/connector.mjs`).
+
+**5. `progress/ux_github_connector.md`**, con la matriz de las 30 filas de `docs/ux-requirements.md`,
+sus límites explícitos por delante de los resultados, y la separación entre lo **medido** —una
+prueba lo comprueba y falla si deja de cumplirse— y lo **heurístico**.
+
+#### Lo que el E2E encontró al ejecutarse de verdad
+
+Primera ejecución tras el rediseño: **5 pasan, 9 fallan**. Cuatro hallazgos, dos de producto y dos
+míos:
+
+1. **Los enlaces medían 21 px de alto.** El juez ya había dicho que mi invocación de la excepción
+   *Inline* de WCAG 2.2 §2.5.8 estaba mal aplicada, y al medirlos se confirmó: los dos enlaces son
+   el único contenido de su bloque. Corregido en `styles.scss` con `inline-flex` y 44 px de mínimo.
+2. **El estado deshabilitado no se alcanzaba.** El entorno del proceso manda sobre `--env-file` en
+   Docker Compose, y el arnés exporta `APP_CONNECTOR_KEY` al lanzar Playwright, así que la variable
+   heredada ganaba. Ahora la clave se pasa explícitamente en el `env` del `execFileSync`.
+3. **Mi oráculo de foco visible daba falsos negativos.** La hoja usa `:focus-visible`, que Chromium
+   no aplica a un `element.focus()` programático. Reescrito para recorrer con **Tab** de verdad y
+   comprobar `:focus-visible` más el grosor y el color del contorno.
+4. **`getByText("Creadas 3")` era ambiguo**: el resumen y la región `aria-live` repiten los
+   contadores. Acotado a la región `Resultado de la importación`.
+
+Segunda ejecución: **15 de 15**. Y el barrido de zoom nativo, **1 de 1**, con evidencia medida:
+`devicePixelRatio` 3 —el triple del 1,5 de arranque, o sea el 200 % aplicado de verdad— y
+`scrollWidth == clientWidth` en 320, 768 y 1440.
+
+#### No bloqueantes cerrados en el mismo ciclo
+
+- **@s32 completo**: las dos filas «Origin de otro sitio» (403 `UNTRUSTED_ORIGIN`) y la fila «token
+  CSRF **inválido**», que es un camino distinto de «ausente». Se añade además un control con el
+  origen propio, para que las tres no pasen por vacuidad.
+- **@s34, fila «respuesta de auditoría de sesión»**: el E2E consulta `GET /api/session` tras
+  conectar y exige que no contenga el token, ni su base64, ni nada del conector.
+- **`SecretUndecipherableException` mapeada** (menor 7 del juez): salía como 500 genérico y ahora es
+  503 `CONNECTOR_KEY_MISMATCH`, que dice que la clave del servidor no abre lo guardado y que se
+  arregla reconectando. ROJO antes que verde.
+
+### Desvío de @s4 que la trazabilidad no registraba (para el coordinador)
+
+El juez tiene razón en que esto era un error de trazabilidad mío: la tabla daba @s4 por cubierto.
+
+@s4 pide que `APP_CONNECTOR_KEY` con **cadena vacía** impida arrancar. `ConnectorConfiguration.configured`
+y `GithubConnectorWiringTest:34` afirman lo contrario **a propósito**: una variable de entorno sin
+definir llega como cadena vacía, y un despliegue que no usa conectores no debe dejar de arrancar por
+eso. Las otras tres filas —16 bytes, 33 bytes y no-base64— sí impiden arrancar.
+
+**No he tocado el código**, siguiendo la instrucción del coordinador: el juez considera que la
+conducta implementada es la correcta y que lo que necesita enmienda es el `.feature`. Queda en su
+puerta, como se hizo con @s31.
 
 ## Enmiendas al contrato aprobadas por el coordinador (9 de septiembre de 2026)
 

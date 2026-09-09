@@ -680,4 +680,89 @@ class GithubConnectorApiTest {
 
     verifyNoInteractions(connect, disconnect, importIssues);
   }
+
+  /**
+   * Un texto cifrado que ninguna clave del llavero abre —por ejemplo tras rotar dos veces— salía
+   * como 500 genérico. Es un fallo de configuración del servidor, no un error de quien llama, y la
+   * respuesta debe decirlo sin revelar nada del token.
+   */
+  @Test
+  void anUndecipherableStoredTokenIsAnExplicitProblemAndNotAGenericFailure() throws Exception {
+    when(importIssues.execute(any(), any())).thenThrow(new SecretUndecipherableException());
+
+    var body =
+        mvc.perform(
+                post(IMPORTS)
+                    .with(user("owner"))
+                    .with(csrf().asHeader())
+                    .contentType("application/json")
+                    .content("{\"projectId\":\"" + PROJECT + "\"}"))
+            .andExpect(status().isServiceUnavailable())
+            .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+            .andExpect(jsonPath("$.code").value("CONNECTOR_KEY_MISMATCH"))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    org.assertj.core.api.Assertions.assertThat(body).doesNotContain(TOKEN);
+  }
+
+  /** Tercera fila de @s32: un token CSRF presente pero equivocado no es lo mismo que ausente. */
+  @Test
+  void s32_writingWithAnInvalidCsrfTokenIsForbidden() throws Exception {
+    mvc.perform(
+            delete(CONNECTION)
+                .with(user("owner"))
+                .header("X-CSRF-TOKEN", "un-token-que-no-es-el-de-la-sesion"))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            put(CONNECTION)
+                .with(user("owner"))
+                .header("X-CSRF-TOKEN", "un-token-que-no-es-el-de-la-sesion")
+                .contentType("application/json")
+                .content(connectBody()))
+        .andExpect(status().isForbidden());
+
+    verifyNoInteractions(connect, disconnect, importIssues);
+  }
+
+  /** Las dos filas «Origin de otro sitio» de @s32, sobre las rutas del conector. */
+  @Test
+  void s32_writingFromAnotherOriginIsForbidden() throws Exception {
+    mvc.perform(
+            put(CONNECTION)
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("Origin", "https://atacante.example")
+                .contentType("application/json")
+                .content(connectBody()))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("UNTRUSTED_ORIGIN"));
+    mvc.perform(
+            post(IMPORTS)
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("Origin", "https://atacante.example")
+                .contentType("application/json")
+                .content("{\"projectId\":\"" + PROJECT + "\"}"))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("UNTRUSTED_ORIGIN"));
+
+    verifyNoInteractions(connect, importIssues);
+  }
+
+  /** El origen propio sí pasa: la guarda no bloquea a la aplicación contra sí misma. */
+  @Test
+  void s32_theOwnOriginIsAccepted() throws Exception {
+    when(connect.execute(any(), any(), any())).thenReturn(view(null));
+
+    mvc.perform(
+            put(CONNECTION)
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("Origin", "https://organization.example")
+                .contentType("application/json")
+                .content(connectBody()))
+        .andExpect(status().isOk());
+  }
 }

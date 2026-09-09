@@ -31,6 +31,16 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+  # Servicio falso de GitHub, sólo bajo el perfil e2e: un despliegue normal no lo levanta.
+  # Comparte el espacio de red del backend, así que éste lo alcanza como http://127.0.0.1:9000,
+  # un host de loopback. La lista blanca de GithubApiBase no se relaja para las pruebas y ninguna
+  # petición sale hacia api.github.com.
+  github-fake:
+    build: ./e2e/fake-github
+    profiles: [e2e]
+    network_mode: "service:backend"
+    depends_on:
+      - backend
   web:
     build:
       context: .

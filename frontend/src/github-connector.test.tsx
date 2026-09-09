@@ -465,6 +465,50 @@ it("@s40 asks for confirmation, and cancelling changes nothing", async () => {
   expect(screen.getByRole("button", { name: "Desconectar" })).toHaveFocus();
 });
 
+it("@s42 Escape closes the confirmation and returns the focus to Desconectar", async () => {
+  await open();
+  await screen.findByRole("combobox");
+  await userEvent.click(screen.getByRole("button", { name: "Desconectar" }));
+  expect(
+    screen.getByRole("button", { name: "Confirmar desconexión" }),
+  ).toBeInTheDocument();
+
+  await userEvent.keyboard("{Escape}");
+
+  expect(
+    screen.queryByRole("button", { name: "Confirmar desconexión" }),
+  ).toBeNull();
+  expect(callsTo("/api/v1/me/connectors/github", "DELETE")).toHaveLength(0);
+  expect(screen.getByRole("button", { name: "Desconectar" })).toHaveFocus();
+});
+
+it("@s42 Escape works from any control inside the confirmation", async () => {
+  await open();
+  await screen.findByRole("combobox");
+  await userEvent.click(screen.getByRole("button", { name: "Desconectar" }));
+  screen.getByRole("button", { name: "Confirmar desconexión" }).focus();
+
+  await userEvent.keyboard("{Escape}");
+
+  expect(
+    screen.queryByRole("button", { name: "Confirmar desconexión" }),
+  ).toBeNull();
+  expect(callsTo("/api/v1/me/connectors/github", "DELETE")).toHaveLength(0);
+  expect(screen.getByRole("button", { name: "Desconectar" })).toHaveFocus();
+});
+
+it("@s42 Escape outside the confirmation does not disturb the page", async () => {
+  await open();
+  await screen.findByRole("combobox");
+
+  await userEvent.keyboard("{Escape}");
+
+  expect(screen.getByText("Conectada")).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Desconectar" }),
+  ).toBeInTheDocument();
+});
+
 it("@s40 sends a single DELETE when confirmed and returns to the disconnected state", async () => {
   serve(
     "/api/v1/me/connectors/github",

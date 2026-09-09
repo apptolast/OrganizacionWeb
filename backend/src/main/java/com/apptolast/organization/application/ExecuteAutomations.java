@@ -7,6 +7,7 @@ import com.apptolast.organization.domain.AutomationRun;
 import com.apptolast.organization.domain.CreateTaskAction;
 import java.time.Clock;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -63,12 +64,16 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
 
   private void process(String owner, AutomationCandidate candidate) {
     var event = candidate.event();
-    var outcomes =
-        rules.list(owner).stream()
-            .filter(rule -> matcher.matches(owner, rule.draft(), event))
-            .map(rule -> outcomeOf(owner, rule, event))
-            .toList();
+    // A blocked row is a deliberate skip: it produces nothing, but the walk still moves past it.
+    var outcomes = candidate.blocked() ? List.<AutomationOutcome>of() : firedBy(owner, event);
     work.commit(new AutomationCommit(owner, reachedBy(event), outcomes));
+  }
+
+  private List<AutomationOutcome> firedBy(String owner, AutomationEvent event) {
+    return rules.list(owner).stream()
+        .filter(rule -> matcher.matches(owner, rule.draft(), event))
+        .map(rule -> outcomeOf(owner, rule, event))
+        .toList();
   }
 
   private AutomationOutcome outcomeOf(String owner, AutomationRule rule, AutomationEvent event) {

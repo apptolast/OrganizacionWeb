@@ -92,6 +92,35 @@ class ExecuteAutomationsTest {
     assertThat(work.cursors.get(OWNER)).isEqualTo(new AutomationCursor(T0.plusSeconds(1), e41));
   }
 
+  @Test
+  void s17_walksInTupleOrderSkippingTheBlockedRowAndTheLateCommitBehindTheCursor() {
+    givenARuleThatCreatesTasks();
+    work.cursors.put(OWNER, new AutomationCursor(T0, E0));
+    var e1 = numbered(1);
+    var e2 = numbered(2);
+    var blocked = numbered(3);
+    var e4 = numbered(4);
+    var late = numbered(9);
+    work.outbox.add(taskCreated(e2, T0.plusSeconds(1)));
+    work.outbox.add(taskCreated(e1, T0.plusSeconds(1)));
+    work.outbox.add(blockedTaskCreated(blocked, T0.plusSeconds(2)));
+    work.outbox.add(taskCreated(e4, T0.plusSeconds(3)));
+    work.outbox.add(taskCreated(late, T0.minusSeconds(1)));
+
+    execute.runCycle();
+
+    assertThat(work.runs()).extracting(AutomationRun::eventId).containsExactly(e1, e2, e4);
+    assertThat(work.runs())
+        .extracting(AutomationRun::executedAt)
+        .as("executedAt never goes backwards along the walk")
+        .isSorted();
+    assertThat(work.createdTasks()).hasSize(3);
+    assertThat(work.commits)
+        .extracting(commit -> commit.reached().eventId(), commit -> commit.outcomes().size())
+        .as("the blocked row moves the cursor without producing anything")
+        .containsExactly(tuple(e1, 1), tuple(e2, 1), tuple(blocked, 0), tuple(e4, 1));
+  }
+
   private void givenARuleThatCreatesTasks() {
     work.owners.add(OWNER);
     rules.create(OWNER, rule(taskAction()));
@@ -116,6 +145,10 @@ class ExecuteAutomationsTest {
         1,
         createdAt,
         createdAt);
+  }
+
+  private static AutomationCandidate blockedTaskCreated(UUID eventId, Instant occurredAt) {
+    return new AutomationCandidate(taskCreated(eventId, occurredAt).event(), true);
   }
 
   private static AutomationCandidate taskCreated(UUID eventId, Instant occurredAt) {

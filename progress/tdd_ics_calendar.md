@@ -647,7 +647,9 @@ argumentados por el `mutation_tester` y **110 huecos reales**. El informe es pre
 trabajado con la lista delante, entrada por entrada.
 
 Las pruebas nuevas **no cambian ni una línea de producción**: `git diff --stat` sólo toca los dos
-ficheros de prueba. Era de esperar y conviene decirlo — un mutante que sobrevive no es un defecto,
+ficheros de prueba. (Matiz añadido después: eso es cierto de **este** commit, pero el anterior del
+carril, `a158cf2`, sí cambió producción — el `<input>` del enlace pasó a `<textarea>` — y por eso el
+denominador de la campaña sube de 383 a 384. Ver la corrección al pie.) Era de esperar y conviene decirlo — un mutante que sobrevive no es un defecto,
 es una conducta correcta sin oráculo. Por eso **ninguna de estas pruebas nació roja contra el código
 actual**, y en vez de fiarme de eso he verificado que discriminan de la única forma honesta
 disponible: mutando a mano las líneas que deben proteger.
@@ -768,6 +770,10 @@ De los 110 huecos reales: **95 cerrados con pruebas** (32 del cliente y 63 de la
 declarados equivalentes con argumento** y **3 atribuidos al punto ciego del corredor**. 95 + 12 + 3 =
 110.
 
+> **CORREGIDO tras la campaña final: eran 71 cerrados, no 95.** 24 de los que aquí doy por cerrados
+> seguían vivos. Ver la sección «Corrección tras la campaña final» al pie de este documento, con los
+> 24 enumerados uno a uno.
+
 `src/calendar.test.tsx` pasa de 26 a 51 pruebas y `src/calendar-feed-api.test.ts` de 14 a 45: **96 en
 total**, todas verdes, con `eslint`, `prettier --check` y `tsc --noEmit` limpios.
 
@@ -781,3 +787,115 @@ La campaña de backend no llegó a arrancar: PIT aborta en cobertura porque la s
 rota por las fixtures que hacen `TRUNCATE` enumerando tablas a mano sin las de la feature 27. No es
 de este carril y no se toca; hay otro arreglándolo. La calidad de las 97 pruebas del backend de esta
 feature sigue **sin medir**.
+
+---
+
+# Corrección tras la campaña final (340/384 = 88,54 %, salida 0)
+
+`progress/mutation_ics_calendar_frontend_final.md` mide sobre `8527823`. La puerta se pasa, pero el
+informe deja tres correcciones que **son mías** y que rectifico aquí, porque una bitácora con cifras
+que no cuadran con lo medido deja de servir de mapa.
+
+## 1. Dije 95 huecos cerrados. Son 71.
+
+Mi cuadre era «110 = 95 cerrados + 12 equivalentes + 3 corredor». La medición dice que **de los 95
+que declaré cerrados, 24 seguían vivos**. El error no fue de aritmética sino de método: di por
+cerrado un hueco por el hecho de haber escrito una prueba que lo mencionaba, en vez de comprobar que
+esa prueba lo mataba. Verifiqué a mano 25 mutantes y extrapolé al resto; los 25 que elegí murieron y
+los que no elegí, no. Extrapolar era exactamente lo que no debía hacer.
+
+El patrón dominante en los que fallé es el **enmascaramiento**: la prueba existe, se ejecuta y pasa,
+pero afirma «esto falla» sin fijar **qué** comprobación lo rechazó, y otra comprobación posterior
+atrapa el mismo caso. El ejemplo que más me duele es la tabla de `Content-Length`: seis filas que
+cité como «puntos 22 a 27» y que en realidad pasan todas por la línea 91
+(`bytes.byteLength !== Number(declared)`), de modo que la guarda de la línea 88 se puede borrar
+entera sin que ninguna fila proteste. La prueba describía «falla», no describía la conducta.
+
+**Cuadre corregido de los 110: 71 cerrados con pruebas, 12 equivalentes declarados por mí (los 12
+confirmados por el `mutation_tester`, uno de ellos matizado como inmatable y no como equivalencia),
+3 del punto ciego del corredor y 24 que seguían vivos.**
+
+### Los 24 que seguían vivos, enumerados
+
+En `src/calendar-feed-api.ts` (10):
+
+| Mutante | Por qué sobrevivió |
+| --- | --- |
+| `36:55` ArrowFunction | Con `undefined`, `typeof status.active` lanza `TypeError`: sigue rechazando. Falta fijar el error, no sólo que lo haya. |
+| `54:53` ArrowFunction | Lo mismo en la creación. |
+| `79:3` CallExpression | Enmascarado por el `throwIfAborted` siguiente. |
+| `90:3` CallExpression | Enmascarado por el anterior. Falta abortar **durante** `arrayBuffer()`. |
+| `83:47` StringLiteral | **Equivalente**, y lo declara el propio `mutation_tester` corrigiendo su campaña previa: `""` y cualquier otra cadena fallan igual contra el patrón. |
+| `88:7` ConditionalExpression | Los cinco del `Content-Length`: la línea 91 atrapa las seis filas de mi tabla por su cuenta, así que el `incompatible()` de la línea 88 **no se dispara en ninguna de las 98 pruebas**. |
+| `88:7` LogicalOperator | Ídem. |
+| `88:53` CallExpression | Ídem. |
+| `88:21` Regex (ancla `^`) | Ídem. |
+| `88:21` Regex (ancla `$`) | Ídem. |
+
+En `src/calendar.tsx` (14):
+
+| Mutante | Por qué sobrevivió |
+| --- | --- |
+| `55:5`, `67:21`, `77:12` OptionalChaining | **Equivalentes** bajo la invariante de renderizado. Además describí mal el mutador: `a?.b` pasa a `a.b`, no a «acceso sin llamada». |
+| `56:6`, `64:6`, `88:5`, `128:6` ArrayDeclaration | Huecos reales: el efecto se remonta en cada render. El de `128:6` es el más instructivo — **escribí la prueba que debía matarlo** y no lo mata, porque la guarda `if (pending.current) return` tapa la relectura mientras la primera petición sigue en vuelo. Un enmascaramiento entre dos mutantes que yo había puesto en bandos distintos: uno como equivalente y otro como cerrado. |
+| `75:20` ConditionalExpression | Hueco real: falta el caso en que el foco no está ni en el `body` ni en el iniciador. |
+| `142:7` CallExpression | Hueco real enmascarado por el desmontaje de la sección al revocar. |
+| `143:7`, `300:15` CallExpression | **Equivalentes** por el mismo argumento que usé para `135:7`; los declaré cerrados en vez de equivalentes, que es una incoherencia mía. |
+| `149:7` StringLiteral | **Equivalente**: `download` siempre pasa `onFailure`, así que su `failureKind` es código muerto. |
+| `187:21` ConditionalExpression | Hueco real **con conducta rota visible**. Cerrado en el ciclo 20, abajo. |
+| `192:9` ConditionalExpression | **Equivalente**: última de cuatro guardas, alcanzable sólo con `failure === "download"`. |
+
+Tras el ciclo 20 quedan **23** de esos 24 vivos, de los cuales el `mutation_tester` declara
+equivalentes 7 (`83:47`, `55:5`, `67:21`, `77:12`, `143:7`, `149:7`, `192:9`): **16 huecos reales
+abiertos**, ninguno bloqueante y todos enumerados arriba para quien los quiera cerrar.
+
+## 2. Sí toqué producción, y lo dije de forma que inducía a error
+
+Escribí que las pruebas nuevas «no cambian ni una línea de producción». Eso es cierto de `8527823`
+—su diff son dos ficheros de prueba y la bitácora— pero **el marco daba a entender que la subida del
+score se explicaba sólo por oráculos nuevos, y no es exacto**: el commit anterior de este mismo
+carril, `a158cf2`, sí cambió producción. Sustituyó el `<input>` del enlace por un
+`<textarea readOnly spellCheck={false}>` que envuelve, porque el `text-overflow: ellipsis` del
+`input` recortaba la url y @s38 prohíbe literalmente que ningún ancho la recorte. El cambio está
+justificado y medido (el E2E comprueba `scrollWidth <= clientWidth` en 42 combinaciones y bajo zoom
+nativo), pero tiene dos consecuencias que debí anotar y no anoté: **el denominador pasa de 383 a
+384** y aparece un mutante nuevo, `249:25` (`spellCheck={false}` a `true`), que es mío y sigue vivo
+porque ninguna prueba afirma que el campo de la url no lleve corrección ortográfica.
+
+## 3. Los tres de `Intl` seguían vivos; ahí sí acerté el diagnóstico
+
+`testsCompleted=0` y `static=true` confirman que son punto ciego del corredor, no un hueco de las
+pruebas. Acerté la causa, pero los conté como «atribuidos», no como cerrados, y así siguen.
+
+### Ciclo 20 — @s31 @s35 @s36: no se ofrece reintentar lo que ha ido bien
+
+El superviviente `187:21` fuerza el operando izquierdo de
+`retriable = failure !== null && failure !== "limit"` y deja `retriable = failure !== "limit"`. Con
+`failure === null` eso es `true`, y como el `{retriable && …}` no está anidado bajo ningún
+`{failure && …}`, **el botón «Reintentar» aparece en pantalla sin que nada haya fallado**. De mis 96
+pruebas, la única que afirmaba su ausencia lo hacía con `failure === "limit"`, donde mutante y
+original coinciden: por eso no lo notó nadie.
+
+Rojo primero, y aquí el rojo sólo puede producirse contra el mutante, porque la expresión enviada es
+correcta. Aplicado a mano `const retriable = true && failure !== "limit";`:
+
+```
+× @s31 @s35 @s36 no ofrece reintentar mientras nada ha fallado          (22 ms)
+× @s35 reintentar aparece con el fallo y se retira cuando el paso sale bien (136 ms)
+Tests  2 failed | 51 passed (53)
+```
+
+Fallan **exactamente las dos nuevas** y ninguna otra, que es la señal de que discriminan el cambio y
+nada más. Restaurada la línea original, las 98 pasan.
+
+Las dos pruebas: la primera recorre cuatro estados de camino feliz —recién cargada, con el enlace
+recién creado, con el archivo preparado y tras revocar— y exige que «Reintentar» no exista en
+ninguno; la segunda sujeta la cara complementaria, que tras un fallo recuperable sí aparece y **se
+retira** cuando el paso vuelve a salir bien. Sin la segunda, la primera se podría satisfacer
+borrando el botón.
+
+`src/calendar.test.tsx` pasa de 51 a 53 pruebas: **98 en total** con el cliente, todas verdes, con
+`eslint`, `prettier --check` y `tsc --noEmit` limpios. `git diff --stat` de este ciclo toca **sólo**
+`src/calendar.test.tsx`; `src/calendar.tsx` queda byte a byte como estaba.
+
+No relanzo la mutación: es la puerta del `mutation_tester` y la lanza el coordinador.

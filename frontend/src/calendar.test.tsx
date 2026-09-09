@@ -961,3 +961,57 @@ it("@s32 sin enlace, crear también queda bloqueado mientras la creación está 
   });
   await screen.findByRole("textbox", { name: "Enlace de suscripción" });
 });
+
+/**
+ * Superviviente 23 de la campaña final (`calendar.tsx:187:21`): forzar el operando izquierdo de
+ * `retriable` deja `failure !== "limit"`, de modo que con `failure === null` el botón «Reintentar»
+ * aparece en pantalla sin que nada haya fallado. De las 96 pruebas anteriores, la única que afirmaba
+ * su ausencia lo hacía con `failure === "limit"`, donde mutante y original coinciden. Reintentar es
+ * una respuesta a un fallo: si no hay fallo, no hay nada que reintentar.
+ */
+it("@s31 @s35 @s36 no ofrece reintentar mientras nada ha fallado", async () => {
+  await open();
+  await screen.findByRole("button", { name: "Crear enlace de suscripción" });
+  expect(screen.queryByRole("button", { name: "Reintentar" })).toBeNull();
+
+  await userEvent.click(
+    screen.getByRole("button", { name: "Crear enlace de suscripción" }),
+  );
+  await screen.findByRole("textbox", { name: "Enlace de suscripción" });
+  expect(screen.queryByRole("button", { name: "Reintentar" })).toBeNull();
+
+  await userEvent.click(
+    screen.getByRole("button", { name: "Descargar archivo .ics" }),
+  );
+  await screen.findByText("Archivo preparado");
+  expect(screen.queryByRole("button", { name: "Reintentar" })).toBeNull();
+
+  await userEvent.click(screen.getByRole("button", { name: "Revocar enlace" }));
+  await userEvent.click(
+    screen.getByRole("button", { name: "Confirmar revocación" }),
+  );
+  await screen.findByRole("button", { name: "Crear enlace de suscripción" });
+  expect(screen.queryByRole("button", { name: "Reintentar" })).toBeNull();
+});
+
+/** Y la cara complementaria: tras un fallo recuperable sí aparece, y desaparece al resolverlo. */
+it("@s35 reintentar aparece con el fallo y se retira cuando el paso sale bien", async () => {
+  await open();
+  routes["POST /api/v1/me/calendar-feed"] = () =>
+    new Response(null, { status: 503 });
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Crear enlace de suscripción" }),
+  );
+  expect(
+    await screen.findByRole("button", { name: "Reintentar" }),
+  ).toBeVisible();
+
+  routes["POST /api/v1/me/calendar-feed"] = () =>
+    new Response(JSON.stringify({ url: URL_ONE, createdAt: CREATED_AT }), {
+      status: 201,
+      headers: { "Content-Type": "application/json" },
+    });
+  await userEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+  await screen.findByRole("textbox", { name: "Enlace de suscripción" });
+  expect(screen.queryByRole("button", { name: "Reintentar" })).toBeNull();
+});

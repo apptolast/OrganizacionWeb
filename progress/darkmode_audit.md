@@ -126,3 +126,18 @@ nunca por merge directo.
 
 Capturas de las diez rutas y `darkmode-report.json` con las 73 entradas, en el
 scratchpad de la sesión (`dm-out/`). No se copian al repositorio.
+
+## 10. Verificación posterior al arreglo — 9 de septiembre de 2026
+
+Mismo método de la sección 9, misma pila y mismo escáner, sobre `main` en
+`aa6ec86` (ya con los ocho commits del carril del modo oscuro integrados).
+
+**Fallos de contraste: 0** (antes 12). `theme-color` pasa de `#f8f9f5` a
+`#111827`, que es el `--canvas` del tema oscuro, en las diez rutas. El total
+baja de 73 a 59 hallazgos brutos, y los 59 que quedan son exactamente la lista
+de falsos positivos declarada en la sección 9: los elementos con fondo
+`rgb(183,228,199)` (`--accent`, con `--on-accent: #000`) y el `section` «Vista
+previa clara» de `/apariencia`, que es claro a propósito.
+
+D1, D2, D3, D4 y D5 quedan cerrados. La puerta del `judge` es aparte y se
+tramita en `progress/judge_darkmode.md`.

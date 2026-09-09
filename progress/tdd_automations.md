@@ -20,6 +20,23 @@ Feature en curso: 30 — automations. Escenarios a recorrer en fase 1: @s1–@s1
   colaborador de paquete, para que la reutilicen reemplazo y simulación.
 - Focal verde: `--tests "…application.CreateAutomationTest" --tests "…domain.Automation*"`.
 
+### Ciclo 2 — @s9, @s11, @s12, @s13, @s14 (leer, reemplazar y borrar como casos de uso puros)
+
+- **Rojo visto fallar**: el commit de resguardo `a6f2125` no compilaba.
+  `./gradlew.bat test --tests "…application.AutomationRulesTest" …` →
+  `Task :compileJava FAILED`, 2 errores: `ReplaceAutomation` implementaba
+  `ReplaceAutomationUseCase`, que no existía, y `AutomationRulesTest` usaba un
+  `DeleteAutomation` inexistente.
+- **Verde mínimo**: los puertos de entrada `ReplaceAutomationUseCase` y
+  `DeleteAutomationUseCase`, y el caso de uso `DeleteAutomation`, que delega el
+  borrado con `If-Match` en el almacén. Nada más: `ReadAutomations` y
+  `ReplaceAutomation` ya estaban escritos por el ciclo anterior.
+- **Refactor**: ninguno necesario; el orden estable ya vivía en la constante
+  `STABLE_ORDER` de `ReadAutomations` y la precondición en el almacén.
+- Focal verde: 29 tests (`AutomationRulesTest` 6, `CreateAutomationTest` 3,
+  `AutomationDraftTest` 4, `AutomationEventTypeTest` 1, `AutomationTemplateTest` 15),
+  0 fallos.
+
 ## Estado en curso (nota para el coordinador)
 
 Se ejecutan **sólo pruebas focales con filtro** por la contención de Testcontainers

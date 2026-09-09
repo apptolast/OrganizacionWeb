@@ -64,6 +64,49 @@ Feature en curso: 30 — automations. Escenarios a recorrer en fase 1: @s1–@s1
   la vista previa; `spotlessApply` sobre todo lo tocado.
 - Focal verde: 38 tests en las 7 clases `Automation*`, 0 fallos.
 
+### Ciclo 5 — @s6, @s18 (de qué tarea habla un evento)
+
+- **Rojo visto fallar**: dos tests nuevos en `AutomationEventTest`;
+  `package EventTask does not exist` y `cannot find symbol: method taskSource()`.
+- **Verde mínimo**: `EventTask` (`Known`, `OfWorkSession`) y `AutomationEvent.taskSource()`.
+  Hace falta porque @s6 admite `{{task.title}}` en disparadores de sesión, y en esos
+  eventos la tarea sólo se alcanza por la sesión.
+- **Refactor**: ninguno.
+- Focal verde: `AutomationEventTest` 6/6.
+
+### Ciclo 6 — @s30, @s31, @s32, @s33 (simulación en seco)
+
+- **Rojo visto fallar**: `SimulateAutomationTest` (11 tests), `compileTestJava FAILED`
+  por `AutomationEventTail`, `AutomationFacts`, `ActionPreview`, `AutomationMatch` y
+  `SimulateAutomation` inexistentes.
+- **Verde mínimo**: los puertos `AutomationEventTail` (los N no bloqueados más
+  recientes) y `AutomationFacts` (nombre de proyecto, título de tarea y si el
+  proyecto está completed, siempre vigentes); los DTO `ActionPreview.Task`,
+  `ActionPreview.Webhook`, `AutomationMatch` y `AutomationSimulation`; y
+  `SimulateAutomation`, que valida referencias con el mismo `AutomationReferences`
+  que crear, pide `WINDOW = 100`, filtra por el evaluador y ordena
+  `occurredAt, eventId` descendente.
+- **Refactor**: `AutomationEventProjects.projectOfWorkSession` pasa a
+  `taskOfWorkSession`, porque la tarea de la sesión hacía falta igualmente para
+  `{{task.title}}` y el proyecto sale de ella; el doble de `AutomationMatcherTest`
+  se reescribió en verde sin cambiar ninguna aserción. `CreateTaskAction.resolvedFailure`
+  lleva el veredicto de longitud resuelta al dominio, junto a los límites.
+  `AutomationRendering` aísla el render para que lo reutilice la ejecución.
+- Focal verde: `SimulateAutomationTest` 11/11, `AutomationMatcherTest` 5/5.
+
+## Discrepancia de contrato pendiente de dictamen (@s30 vs @s32)
+
+@s30 dice que cada coincidencia contiene «exactamente eventId, eventType, occurredAt
+y preview» (cuatro campos), pero @s32 exige leer `loopGuarded true` y `loopGuarded false`,
+y el @s32 de NOTIFY_WEBHOOK fija la preview como «exactamente { type, endpointId, eventId }»,
+sin `loopGuarded` dentro. Los tres enunciados no son satisfacibles a la vez.
+
+Resuelto a favor de **cinco campos en la coincidencia**, con `loopGuarded` al lado de
+`preview`, porque la cabecera del `.feature` declara normativo a
+`progress/proposal_automations.md` para los DTO cerrados y esa propuesta dice
+literalmente «informa `loopGuarded: true` en la coincidencia». Queda anotado para que
+el juez confirme o pida corregir @s30; no se ha inventado comportamiento nuevo.
+
 ## Estado en curso (nota para el coordinador)
 
 Se ejecutan **sólo pruebas focales con filtro** por la contención de Testcontainers

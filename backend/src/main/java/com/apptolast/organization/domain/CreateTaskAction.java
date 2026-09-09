@@ -28,6 +28,16 @@ public record CreateTaskAction(
     return "CREATE_TASK";
   }
 
+  /**
+   * The deterministic failure a run would hit once the templates are resolved. A resolved value
+   * over the limit is never truncated: the run fails and the simulation says so beforehand.
+   */
+  public java.util.Optional<String> resolvedFailure(String title, String criterion) {
+    if (codePoints(title) > TITLE_LIMIT) return java.util.Optional.of("TITLE_TOO_LONG");
+    if (codePoints(criterion) > CRITERION_LIMIT) return java.util.Optional.of("CRITERION_TOO_LONG");
+    return java.util.Optional.empty();
+  }
+
   static int codePoints(String value) {
     return value.codePointCount(0, value.length());
   }

@@ -17,9 +17,23 @@ class AutomationMatcherTest {
   private static final UUID AUTOMATED_TASK = UUID.randomUUID();
   private static final Instant OCCURRED = Instant.parse("2026-09-08T10:15:30.123456Z");
 
+  private static final UUID TASK_OF_SESSION_OF_P = UUID.randomUUID();
+  private static final UUID TASK_OF_SESSION_OF_P2 = UUID.randomUUID();
+
   private final Map<UUID, UUID> projectOfTask =
-      Map.of(TASK_OF_P, P, TASK_OF_P2, P2, AUTOMATED_TASK, P);
-  private final Map<UUID, UUID> projectOfSession = Map.of(SESSION_OF_P, P, SESSION_OF_P2, P2);
+      Map.of(
+          TASK_OF_P,
+          P,
+          TASK_OF_P2,
+          P2,
+          AUTOMATED_TASK,
+          P,
+          TASK_OF_SESSION_OF_P,
+          P,
+          TASK_OF_SESSION_OF_P2,
+          P2);
+  private final Map<UUID, UUID> taskOfSession =
+      Map.of(SESSION_OF_P, TASK_OF_SESSION_OF_P, SESSION_OF_P2, TASK_OF_SESSION_OF_P2);
 
   private final AutomationEventProjects projects =
       new AutomationEventProjects() {
@@ -31,9 +45,9 @@ class AutomationMatcherTest {
         }
 
         @Override
-        public Optional<UUID> projectOfWorkSession(String owner, UUID sessionId) {
+        public Optional<UUID> taskOfWorkSession(String owner, UUID sessionId) {
           return owner.equals("a")
-              ? Optional.ofNullable(projectOfSession.get(sessionId))
+              ? Optional.ofNullable(taskOfSession.get(sessionId))
               : Optional.empty();
         }
       };

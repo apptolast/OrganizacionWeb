@@ -3,9 +3,9 @@ package com.apptolast.organization.application;
 import java.util.Optional;
 import java.util.UUID;
 
-/** Owner-scoped lookups that turn an indirect reference of an event into its project. */
+/** Owner-scoped lookups that turn an indirect reference of an event into a task or a project. */
 public interface AutomationEventProjects {
   Optional<UUID> projectOfTask(String owner, UUID taskId);
 
-  Optional<UUID> projectOfWorkSession(String owner, UUID sessionId);
+  Optional<UUID> taskOfWorkSession(String owner, UUID sessionId);
 }

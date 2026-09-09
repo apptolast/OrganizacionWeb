@@ -3,6 +3,7 @@ package com.apptolast.organization.application;
 import com.apptolast.organization.domain.AutomationDraft;
 import com.apptolast.organization.domain.AutomationEvent;
 import com.apptolast.organization.domain.EventProject;
+import com.apptolast.organization.domain.EventTask;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,7 +37,22 @@ public final class AutomationMatcher {
       case EventProject.Known known -> Optional.of(known.projectId());
       case EventProject.OfTask task -> projects.projectOfTask(owner, task.taskId());
       case EventProject.OfWorkSession session ->
-          projects.projectOfWorkSession(owner, session.sessionId());
+          projects
+              .taskOfWorkSession(owner, session.sessionId())
+              .flatMap(task -> projects.projectOfTask(owner, task));
     };
+  }
+
+  /** Empty for the project events and when the session no longer resolves to a task. */
+  public Optional<UUID> taskOf(String owner, AutomationEvent event) {
+    return event
+        .taskSource()
+        .flatMap(
+            source ->
+                switch (source) {
+                  case EventTask.Known known -> Optional.of(known.taskId());
+                  case EventTask.OfWorkSession session ->
+                      projects.taskOfWorkSession(owner, session.sessionId());
+                });
   }
 }

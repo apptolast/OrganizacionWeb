@@ -142,8 +142,9 @@ Además se añadió el recuento de POST a las otras dos filas del Examples (la d
 inspeccionaban el cuerpo con `find` sin contar nunca las peticiones.
 
 `pnpm --dir frontend exec vitest run src/external-calendar.test.tsx` →
-**26 pruebas, 26 en verde** (25 antes del ciclo… medido: 25 pasadas antes de
-añadir la prueba nueva, 26 después).
+**25 pruebas, 25 en verde**. Medido, no declarado: `grep -c "^it(" ` da 25 `it(`
+en el fichero tras el ciclo; eran 24 antes de añadir la prueba nueva, y con los
+mutantes de arriba el marcador fue `1 failed | 24 passed`.
 
 **Pendiente asociado, anotado y no silenciado.** La línea 84 de
 `e2e/external-calendar-ux-audit.spec.mjs`

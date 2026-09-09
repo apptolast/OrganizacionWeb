@@ -378,3 +378,102 @@ test("automatizaciones UX: zoom nativo de Chromium al 200 % sobre 320 px CSS @s4
     await context.close();
   }
 });
+
+// Grosor declarado por la regla `:focus-visible` de frontend/src/styles.scss.
+const FOCUS_RING_MIN_WIDTH = 3;
+// El enlace de salto y la barra lateral se interponen antes del editor.
+const MAX_TAB_STEPS = 60;
+
+// Lee el orden del DOM del propio editor, en vez de fijar una lista a mano: así
+// el oráculo compara recorrido de teclado contra orden del DOM, que es lo que
+// @s42 exige, y no contra la opinión de quien escribió la prueba.
+function domOrder(page) {
+  return page.evaluate(() =>
+    [
+      ...document.querySelectorAll(
+        ".automations a,.automations button,.automations input,.automations select,.automations textarea",
+      ),
+    ]
+      .filter(
+        (element) =>
+          element.getClientRects().length &&
+          !element.disabled &&
+          element.tabIndex >= 0,
+      )
+      .map((element) => {
+        const label = element.labels?.[0]?.textContent;
+        return (label ?? element.textContent ?? "").trim();
+      }),
+  );
+}
+
+function currentStop(page) {
+  return page.evaluate(() => {
+    const active = document.activeElement;
+    if (!active || active === document.body) return null;
+    const label = active.labels?.[0]?.textContent;
+    const style = getComputedStyle(active);
+    return {
+      name: (label ?? active.textContent ?? "").trim(),
+      insideEditor: Boolean(active.closest(".automations")),
+      matchesFocusVisible: active.matches(":focus-visible"),
+      outlineStyle: style.outlineStyle,
+      outlineWidth: parseFloat(style.outlineWidth),
+      outlineColor: style.outlineColor,
+    };
+  });
+}
+
+// El anillo del producto es `:focus-visible { outline: 3px solid var(--accent) }`.
+// Se exige ése y no el del agente de usuario, que Chromium computa con
+// `outline-style: auto` y que un `outline: none` del producto no apagaría.
+function ringIsVisible(stop) {
+  return (
+    stop.matchesFocusVisible &&
+    stop.outlineStyle === "solid" &&
+    stop.outlineWidth >= FOCUS_RING_MIN_WIDTH &&
+    !stop.outlineColor.includes("transparent")
+  );
+}
+
+async function walk(page, key, expected) {
+  const seen = [];
+  const invisible = [];
+  for (let step = 0; step < MAX_TAB_STEPS && seen.length < expected.length;) {
+    await page.keyboard.press(key);
+    step += 1;
+    const stop = await currentStop(page);
+    if (!stop || !stop.insideEditor) continue;
+    if (!expected.includes(stop.name) || seen.at(-1) === stop.name) continue;
+    seen.push(stop.name);
+    // Una medida por parada, no una al final: el contrato pide foco visible en
+    // cada control, así que un anillo apagado en el primero tiene que doler.
+    if (!ringIsVisible(stop)) invisible.push(stop.name);
+  }
+  return { seen, invisible };
+}
+
+test("automatizaciones UX: el recorrido con teclado sigue el orden del DOM y cada parada pinta foco @s42", async ({
+  page,
+  request,
+}) => {
+  await create(request, "Marketing");
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await openEditor(page);
+
+  const expected = await domOrder(page);
+  // Guardar antes que Simular es lo que progress/ux_automations.md declara como
+  // posición en serie; se afirma aquí para que la matriz tenga de dónde citarlo.
+  expect(expected.indexOf("Guardar")).toBeGreaterThanOrEqual(0);
+  expect(expected.indexOf("Guardar")).toBeLessThan(expected.indexOf("Simular"));
+
+  await page.evaluate(() => document.body.focus());
+  const forward = await walk(page, "Tab", expected);
+  expect(forward.seen).toEqual(expected);
+  expect(forward.invisible).toEqual([]);
+
+  // Y de vuelta: sin trampa de foco y en el orden inverso exacto.
+  const backwards = await walk(page, "Shift+Tab", [...expected].reverse());
+  expect(backwards.seen).toEqual([...expected].reverse());
+  expect(backwards.invisible).toEqual([]);
+});

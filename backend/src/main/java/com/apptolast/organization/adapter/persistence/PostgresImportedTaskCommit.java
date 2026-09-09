@@ -27,8 +27,6 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 @Component
 public final class PostgresImportedTaskCommit implements ImportedTaskCommit {
-  private static final String SOURCE = "github";
-
   private final JdbcTemplate jdbc;
   private final TransactionTemplate transaction;
   private final ObjectMapper json;
@@ -44,6 +42,7 @@ public final class PostgresImportedTaskCommit implements ImportedTaskCommit {
   public boolean save(
       String ownerId,
       UUID projectId,
+      String source,
       ExternalIssue issue,
       Function<String, TaskCreation> operation) {
     try {
@@ -59,11 +58,11 @@ public final class PostgresImportedTaskCommit implements ImportedTaskCommit {
                         ownerId,
                         projectId);
                 if (states.isEmpty()) throw new ResourceNotFoundException();
-                if (alreadyLinked(ownerId, issue.externalId())) return false;
+                if (alreadyLinked(ownerId, source, issue.externalId())) return false;
                 var creation = operation.apply(states.getFirst());
                 insertTask(projectId, creation.task());
                 insertEvent(ownerId, projectId, creation.event());
-                insertLink(ownerId, issue, creation.task());
+                insertLink(ownerId, source, issue, creation.task());
                 return true;
               }));
     } catch (ResourceNotFoundException | ProjectCompletedException | ValidationException error) {
@@ -74,14 +73,14 @@ public final class PostgresImportedTaskCommit implements ImportedTaskCommit {
     }
   }
 
-  private boolean alreadyLinked(String ownerId, String externalId) {
+  private boolean alreadyLinked(String ownerId, String source, String externalId) {
     return Boolean.TRUE.equals(
         jdbc.queryForObject(
             "SELECT EXISTS(SELECT 1 FROM task_external_links"
                 + " WHERE owner_id=? AND source=? AND external_id=?)",
             Boolean.class,
             ownerId,
-            SOURCE,
+            source,
             externalId));
   }
 
@@ -116,13 +115,13 @@ public final class PostgresImportedTaskCommit implements ImportedTaskCommit {
         "Event");
   }
 
-  private void insertLink(String ownerId, ExternalIssue issue, Task task) {
+  private void insertLink(String ownerId, String source, ExternalIssue issue, Task task) {
     expectOneRow(
         jdbc.update(
             "INSERT INTO task_external_links(owner_id,source,external_id,task_id,url,linked_at)"
                 + " VALUES (?,?,?,?,?,?)",
             ownerId,
-            SOURCE,
+            source,
             issue.externalId(),
             task.id(),
             issue.url(),

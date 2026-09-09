@@ -27,7 +27,7 @@ class ImportGithubIssuesTest {
 
   private ConnectorFakes fakes;
   private UUID projectId;
-  private ImportGithubIssues importIssues;
+  private ImportIssues importIssues;
 
   @BeforeEach
   void setUp() {
@@ -37,9 +37,9 @@ class ImportGithubIssuesTest {
     importIssues = newImport(NOW);
   }
 
-  private ImportGithubIssues newImport(Instant now) {
-    return new ImportGithubIssues(
-        fakes.connections,
+  private ImportIssues newImport(Instant now) {
+    return new ImportIssues(
+        new GithubIssueConnections(fakes.connections),
         fakes.receipts,
         fakes.projects,
         fakes.source,
@@ -92,7 +92,8 @@ class ImportGithubIssuesTest {
     assertFalse(receipt.truncated());
     assertNull(receipt.errorCode());
     assertEquals(projectId, receipt.projectId());
-    assertEquals(REPOSITORY, receipt.repository());
+    assertEquals(REPOSITORY, receipt.projectPath());
+    assertEquals("github", receipt.source());
     assertFalse(receipt.finishedAt().isBefore(receipt.startedAt()));
     assertEquals(3, fakes.tasks.tasks());
     assertEquals(3, fakes.tasks.events());
@@ -466,7 +467,8 @@ class ImportGithubIssuesTest {
 
     importIssues.execute(OWNER, projectId);
 
-    assertEquals(List.of("finished owner-1 octocat/Hello-World 3 0 0 false"), fakes.audit.lines());
+    assertEquals(
+        List.of("finished github owner-1 octocat/Hello-World 3 0 0 false"), fakes.audit.lines());
     assertFalse(String.join(" ", fakes.audit.lines()).contains("ghp_secreto123"));
   }
 
@@ -478,7 +480,7 @@ class ImportGithubIssuesTest {
     assertThrows(IssueImportFailedException.class, () -> importIssues.execute(OWNER, projectId));
 
     assertEquals(
-        List.of("import-failed owner-1 octocat/Hello-World RATE_LIMITED 100 429"),
+        List.of("import-failed github owner-1 octocat/Hello-World RATE_LIMITED 100 429"),
         fakes.audit.lines());
   }
 

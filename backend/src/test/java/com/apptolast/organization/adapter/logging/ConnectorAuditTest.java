@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 /**
- * @s34 la bitácora del conector cuenta propietario, repositorio, código HTTP de GitHub y
+ * @s34 la bitácora del conector cuenta gestor, propietario, proyecto, código HTTP del proveedor y
  *     contadores, y no cuenta el token ni en claro ni en base64.
  */
 class ConnectorAuditTest {
@@ -45,30 +45,31 @@ class ConnectorAuditTest {
   }
 
   @Test
-  void s34_connectingRecordsOwnerRepositoryAndLoginButNeverTheToken() {
-    audit.connected("owner-a", "octocat/Hello-World", "octocat");
+  void s34_connectingRecordsConnectorOwnerProjectAndAccountButNeverTheToken() {
+    audit.connected("github", "owner-a", "octocat/Hello-World", "octocat");
 
     assertThat(logged())
         .contains("owner=owner-a")
-        .contains("repository=octocat/Hello-World")
-        .contains("login=octocat")
+        .contains("project=octocat/Hello-World")
+        .contains("account=octocat")
         .doesNotContain(TOKEN);
   }
 
   @Test
   void s34_aRefusedConnectionRecordsTheReasonAndTheStatusGithubAnswered() {
-    audit.connectionRefused("owner-a", "octocat/Hello-World", "GITHUB_TOKEN_REJECTED", 401);
+    audit.connectionRefused(
+        "github", "owner-a", "octocat/Hello-World", "GITHUB_TOKEN_REJECTED", 401);
 
     assertThat(logged())
         .contains("owner=owner-a")
-        .contains("repository=octocat/Hello-World")
+        .contains("project=octocat/Hello-World")
         .contains("code=GITHUB_TOKEN_REJECTED")
-        .contains("githubStatus=401");
+        .contains("providerStatus=401");
   }
 
   @Test
   void s34_afinishedImportRecordsItsIdentifierAndItsCounters() {
-    audit.importFinished("owner-a", "octocat/Hello-World", IMPORT, 199, 0, 1, true);
+    audit.importFinished("github", "owner-a", "octocat/Hello-World", IMPORT, 199, 0, 1, true);
 
     assertThat(logged())
         .contains("importId=" + IMPORT)
@@ -80,21 +81,23 @@ class ConnectorAuditTest {
 
   @Test
   void s34_abrokenImportRecordsWhatItManagedToDoAndWhyItStopped() {
-    audit.importFailed("owner-a", "octocat/Hello-World", IMPORT, "RATE_LIMITED", 2, 429);
+    audit.importFailed("github", "owner-a", "octocat/Hello-World", IMPORT, "RATE_LIMITED", 2, 429);
 
     assertThat(logged())
         .contains("importId=" + IMPORT)
         .contains("code=RATE_LIMITED")
         .contains("created=2")
-        .contains("githubStatus=429");
+        .contains("providerStatus=429");
   }
 
   @Test
   void s34_nothingTheAuditWritesCanCarryTheTokenBecauseItNeverReceivesIt() {
-    audit.connected("owner-a", "octocat/Hello-World", "octocat");
-    audit.connectionRefused("owner-a", "octocat/Hello-World", "GITHUB_TOKEN_REJECTED", 401);
-    audit.importFinished("owner-a", "octocat/Hello-World", IMPORT, 1, 0, 0, false);
-    audit.importFailed("owner-a", "octocat/Hello-World", IMPORT, "GITHUB_UNAVAILABLE", 0, 500);
+    audit.connected("github", "owner-a", "octocat/Hello-World", "octocat");
+    audit.connectionRefused(
+        "github", "owner-a", "octocat/Hello-World", "GITHUB_TOKEN_REJECTED", 401);
+    audit.importFinished("github", "owner-a", "octocat/Hello-World", IMPORT, 1, 0, 0, false);
+    audit.importFailed(
+        "github", "owner-a", "octocat/Hello-World", IMPORT, "GITHUB_UNAVAILABLE", 0, 500);
 
     var everything = logged();
     assertThat(everything).doesNotContain(TOKEN);

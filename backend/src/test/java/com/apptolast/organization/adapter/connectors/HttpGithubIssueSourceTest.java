@@ -28,12 +28,12 @@ class HttpGithubIssueSourceTest {
   private static final Instant NOW = Instant.parse("2026-09-09T12:00:00Z");
   private static final String ISSUES_PATH = "/repos/octocat/Hello-World/issues";
 
-  private FakeGithub github;
+  private FakeIssueServer github;
   private HttpGithubIssueSource source;
 
   @BeforeEach
   void setUp() throws IOException {
-    github = new FakeGithub();
+    github = new FakeIssueServer();
     source = newSource(NOW);
   }
 
@@ -57,8 +57,8 @@ class HttpGithubIssueSourceTest {
   void s1_verifyingAsksTheRepositoryAndTheUserWithTheFourRequiredHeaders() {
     github.reply(
         "/repos/octocat/Hello-World",
-        FakeGithub.Reply.ok("{\"full_name\":\"octocat/Hello-World\"}"));
-    github.reply("/user", FakeGithub.Reply.ok("{\"login\":\"octocat\"}"));
+        FakeIssueServer.Reply.ok("{\"full_name\":\"octocat/Hello-World\"}"));
+    github.reply("/user", FakeIssueServer.Reply.ok("{\"login\":\"octocat\"}"));
 
     var identity = source.verify(REPOSITORY, TOKEN);
 
@@ -77,8 +77,8 @@ class HttpGithubIssueSourceTest {
   void s1_theCanonicalNameComesFromGithubNotFromWhatTheCallerTyped() {
     github.reply(
         "/repos/OCTOCAT/hello-world",
-        FakeGithub.Reply.ok("{\"full_name\":\"octocat/Hello-World\"}"));
-    github.reply("/user", FakeGithub.Reply.ok("{\"login\":\"octocat\"}"));
+        FakeIssueServer.Reply.ok("{\"full_name\":\"octocat/Hello-World\"}"));
+    github.reply("/user", FakeIssueServer.Reply.ok("{\"login\":\"octocat\"}"));
 
     assertEquals("octocat/Hello-World", source.verify("OCTOCAT/hello-world", TOKEN).fullName());
     assertEquals("/repos/OCTOCAT/hello-world", github.received().getFirst().path());
@@ -88,7 +88,7 @@ class HttpGithubIssueSourceTest {
 
   @Test
   void s13_s35_theIssuesRequestUsesTheFixedQueryAgainstTheConfiguredBase() {
-    github.reply(ISSUES_PATH, FakeGithub.Reply.ok("[]"));
+    github.reply(ISSUES_PATH, FakeIssueServer.Reply.ok("[]"));
 
     source.list(REPOSITORY, TOKEN, 1);
 
@@ -102,8 +102,8 @@ class HttpGithubIssueSourceTest {
   void s13_aRedirectIsNotFollowedAndCountsAsAnUnavailableGithub() {
     github.reply(
         ISSUES_PATH,
-        FakeGithub.Reply.status(302, Map.of("Location", github.base() + "/otra-ruta")));
-    github.reply("/otra-ruta", FakeGithub.Reply.ok("[]"));
+        FakeIssueServer.Reply.status(302, Map.of("Location", github.base() + "/otra-ruta")));
+    github.reply("/otra-ruta", FakeIssueServer.Reply.ok("[]"));
 
     assertEquals(Reason.UNAVAILABLE, listFailure().reason());
     assertEquals(1, github.received().size());
@@ -116,13 +116,13 @@ class HttpGithubIssueSourceTest {
   void s12_pullRequestsAreDiscardedButStillCountForPaging() {
     github.reply(
         ISSUES_PATH,
-        FakeGithub.Reply.ok(
+        FakeIssueServer.Reply.ok(
             "["
-                + FakeGithub.issueJson(101, "Uno", null)
+                + FakeIssueServer.githubIssue(101, "Uno", null)
                 + ","
-                + FakeGithub.issueJson(102, "Dos", null)
+                + FakeIssueServer.githubIssue(102, "Dos", null)
                 + ","
-                + FakeGithub.issueJson(103, "Tres", null)
+                + FakeIssueServer.githubIssue(103, "Tres", null)
                 + ",{\"id\":104,\"title\":\"Un PR\",\"html_url\":\"https://x/104\",\"pull_request\":{\"url\":\"https://x\"}}]"));
 
     var page = source.list(REPOSITORY, TOKEN, 1);
@@ -139,7 +139,8 @@ class HttpGithubIssueSourceTest {
   void s12_theIssueKeepsItsTitleBodyAndUrlAsGithubSentThem() {
     github.reply(
         ISSUES_PATH,
-        FakeGithub.Reply.ok("[" + FakeGithub.issueJson(7, "Arreglar login", "una nota") + "]"));
+        FakeIssueServer.Reply.ok(
+            "[" + FakeIssueServer.githubIssue(7, "Arreglar login", "una nota") + "]"));
 
     var issue = source.list(REPOSITORY, TOKEN, 1).issues().getFirst();
 
@@ -153,9 +154,9 @@ class HttpGithubIssueSourceTest {
   void s16_moreIsTrueOnlyWhenGithubAnnouncesANextPage() {
     github.reply(
         ISSUES_PATH,
-        new FakeGithub.Reply(
+        new FakeIssueServer.Reply(
             200,
-            FakeGithub.issuesJson(1, 2),
+            FakeIssueServer.githubIssues(1, 2),
             Map.of(
                 "Link",
                 "<https://api.github.com/repositories/1/issues?page=2>; rel=\"next\", "
@@ -168,9 +169,9 @@ class HttpGithubIssueSourceTest {
   void s16_aLinkHeaderWithoutANextRelationDoesNotAnnounceMore() {
     github.reply(
         ISSUES_PATH,
-        new FakeGithub.Reply(
+        new FakeIssueServer.Reply(
             200,
-            FakeGithub.issuesJson(1, 2),
+            FakeIssueServer.githubIssues(1, 2),
             Map.of("Link", "<https://api.github.com/repositories/1/issues?page=1>; rel=\"prev\"")));
 
     assertFalse(source.list(REPOSITORY, TOKEN, 1).more());
@@ -181,7 +182,7 @@ class HttpGithubIssueSourceTest {
   @ParameterizedTest
   @CsvSource({"30,30", "1,1", "3600,3600"})
   void s20_aTooManyRequestsUsesItsRetryAfter(String header, int expected) {
-    github.reply(ISSUES_PATH, FakeGithub.Reply.status(429, Map.of("Retry-After", header)));
+    github.reply(ISSUES_PATH, FakeIssueServer.Reply.status(429, Map.of("Retry-After", header)));
 
     var error = listFailure();
 
@@ -191,7 +192,7 @@ class HttpGithubIssueSourceTest {
 
   @Test
   void s20_aTooManyRequestsWithoutHeadersFallsBackToSixtySeconds() {
-    github.reply(ISSUES_PATH, FakeGithub.Reply.status(429, Map.of()));
+    github.reply(ISSUES_PATH, FakeIssueServer.Reply.status(429, Map.of()));
 
     assertEquals(60, listFailure().retryAfterSeconds());
   }
@@ -200,7 +201,7 @@ class HttpGithubIssueSourceTest {
   void s20_aForbiddenWithoutQuotaLeftUsesTheResetInstant() {
     github.reply(
         ISSUES_PATH,
-        FakeGithub.Reply.status(
+        FakeIssueServer.Reply.status(
             403,
             Map.of(
                 "x-ratelimit-remaining",
@@ -218,7 +219,7 @@ class HttpGithubIssueSourceTest {
   void s20_aResetAlreadyInThePastStillAsksToWaitOneSecond() {
     github.reply(
         ISSUES_PATH,
-        FakeGithub.Reply.status(
+        FakeIssueServer.Reply.status(
             403,
             Map.of(
                 "x-ratelimit-remaining",
@@ -233,7 +234,7 @@ class HttpGithubIssueSourceTest {
   void s20_retryAfterWinsOverTheResetInstant() {
     github.reply(
         ISSUES_PATH,
-        FakeGithub.Reply.status(
+        FakeIssueServer.Reply.status(
             403,
             Map.of(
                 "Retry-After",
@@ -249,7 +250,8 @@ class HttpGithubIssueSourceTest {
 
   @Test
   void s20_aForbiddenWithoutQuotaLeftAndWithoutInstantsFallsBackToSixtySeconds() {
-    github.reply(ISSUES_PATH, FakeGithub.Reply.status(403, Map.of("x-ratelimit-remaining", "0")));
+    github.reply(
+        ISSUES_PATH, FakeIssueServer.Reply.status(403, Map.of("x-ratelimit-remaining", "0")));
 
     var error = listFailure();
 
@@ -261,21 +263,21 @@ class HttpGithubIssueSourceTest {
 
   @Test
   void s7_anUnauthorizedMeansTheTokenWasRejected() {
-    github.reply(ISSUES_PATH, FakeGithub.Reply.status(401, Map.of()));
+    github.reply(ISSUES_PATH, FakeIssueServer.Reply.status(401, Map.of()));
 
     assertEquals(Reason.TOKEN_REJECTED, listFailure().reason());
   }
 
   @Test
   void s8_aNotFoundMeansTheRepositoryIsNotAvailable() {
-    github.reply(ISSUES_PATH, FakeGithub.Reply.status(404, Map.of()));
+    github.reply(ISSUES_PATH, FakeIssueServer.Reply.status(404, Map.of()));
 
     assertEquals(Reason.REPOSITORY_UNAVAILABLE, listFailure().reason());
   }
 
   @Test
   void s8_aForbiddenWithoutRateLimitMarksIsAlsoAnUnavailableRepository() {
-    github.reply(ISSUES_PATH, FakeGithub.Reply.status(403, Map.of()));
+    github.reply(ISSUES_PATH, FakeIssueServer.Reply.status(403, Map.of()));
 
     assertEquals(Reason.REPOSITORY_UNAVAILABLE, listFailure().reason());
   }
@@ -283,7 +285,7 @@ class HttpGithubIssueSourceTest {
   @ParameterizedTest
   @ValueSource(ints = {500, 502, 503, 418, 301})
   void s28_anyOtherStatusIsAnUnavailableGithub(int status) {
-    github.reply(ISSUES_PATH, FakeGithub.Reply.status(status, Map.of()));
+    github.reply(ISSUES_PATH, FakeIssueServer.Reply.status(status, Map.of()));
 
     assertEquals(Reason.UNAVAILABLE, listFailure().reason());
   }
@@ -298,14 +300,14 @@ class HttpGithubIssueSourceTest {
         "no es json"
       })
   void s28_aBodyThatIsNotAnArrayOfIssuesIsAnUnavailableGithub(String body) {
-    github.reply(ISSUES_PATH, FakeGithub.Reply.ok(body));
+    github.reply(ISSUES_PATH, FakeIssueServer.Reply.ok(body));
 
     assertEquals(Reason.UNAVAILABLE, listFailure().reason());
   }
 
   @Test
   void s28_aServerThatNeverSendsTheBodyGivesUpWellUnderFiveSeconds() {
-    github.reply(ISSUES_PATH, FakeGithub.Reply.ok("[]"));
+    github.reply(ISSUES_PATH, FakeIssueServer.Reply.ok("[]"));
     github.delayBody(Duration.ofSeconds(20).toMillis());
 
     var started = System.nanoTime();
@@ -318,7 +320,7 @@ class HttpGithubIssueSourceTest {
 
   @Test
   void s28_aRefusedConnectionGivesUpWellUnderThreeSeconds() throws IOException {
-    var closed = new FakeGithub();
+    var closed = new FakeIssueServer();
     var base = closed.base();
     closed.close();
     var offline =
@@ -335,7 +337,7 @@ class HttpGithubIssueSourceTest {
 
   @Test
   void s34_noFailureMessageEverCarriesTheToken() {
-    github.reply(ISSUES_PATH, FakeGithub.Reply.status(401, Map.of()));
+    github.reply(ISSUES_PATH, FakeIssueServer.Reply.status(401, Map.of()));
 
     var error = listFailure();
 

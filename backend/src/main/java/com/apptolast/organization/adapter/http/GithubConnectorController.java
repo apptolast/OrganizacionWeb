@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
@@ -28,6 +29,9 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 public final class GithubConnectorController {
+  /** Nombre del caso de uso de importación cableado para GitHub; GitLab tiene el suyo. */
+  public static final String GITHUB_IMPORTS = "githubImportIssues";
+
   private static final String CONNECTION = "/api/v1/me/connectors/github";
   private static final String IMPORTS = CONNECTION + "/imports";
   private static final String NO_STORE = "no-store, private";
@@ -39,7 +43,7 @@ public final class GithubConnectorController {
   private final ReadGithubConnectionUseCase read;
   private final ConnectGithubUseCase connect;
   private final DisconnectGithubUseCase disconnect;
-  private final ImportGithubIssuesUseCase importIssues;
+  private final ImportIssuesUseCase importIssues;
   private final ReadIssueImportUseCase readImport;
   private final ObjectMapper json;
 
@@ -47,7 +51,7 @@ public final class GithubConnectorController {
       ReadGithubConnectionUseCase read,
       ConnectGithubUseCase connect,
       DisconnectGithubUseCase disconnect,
-      ImportGithubIssuesUseCase importIssues,
+      @Qualifier(GITHUB_IMPORTS) ImportIssuesUseCase importIssues,
       ReadIssueImportUseCase readImport,
       ObjectMapper json) {
     this.read = read;
@@ -313,8 +317,9 @@ public final class GithubConnectorController {
 
   public record ImportResponse(
       UUID id,
+      String source,
       UUID projectId,
-      String repository,
+      String projectPath,
       String status,
       int created,
       int skipped,
@@ -328,8 +333,9 @@ public final class GithubConnectorController {
           ? null
           : new ImportResponse(
               receipt.id(),
+              receipt.source(),
               receipt.projectId(),
-              receipt.repository(),
+              receipt.projectPath(),
               receipt.status(),
               receipt.created(),
               receipt.skipped(),

@@ -203,7 +203,8 @@ class ConnectGithubTest {
     connect.execute(OWNER, "octocat/Hello-World", TOKEN);
 
     assertEquals(
-        java.util.List.of("connected owner-1 octocat/Hello-World octocat"), fakes.audit.lines());
+        java.util.List.of("connected github owner-1 octocat/Hello-World octocat"),
+        fakes.audit.lines());
     assertFalse(String.join(" ", fakes.audit.lines()).contains(TOKEN));
   }
 
@@ -216,7 +217,7 @@ class ConnectGithubTest {
         () -> connect.execute(OWNER, "octocat/Hello-World", "ghp_malo"));
 
     assertEquals(
-        java.util.List.of("refused owner-1 octocat/Hello-World GITHUB_TOKEN_REJECTED 401"),
+        java.util.List.of("refused github owner-1 octocat/Hello-World GITHUB_TOKEN_REJECTED 401"),
         fakes.audit.lines());
     assertFalse(String.join(" ", fakes.audit.lines()).contains("ghp_malo"));
   }

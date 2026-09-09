@@ -36,20 +36,31 @@ final class ConnectorFakes {
     }
 
     @Override
-    public void connected(String ownerId, String repository, String login) {
-      lines.add("connected " + ownerId + " " + repository + " " + login);
+    public void connected(String connector, String ownerId, String project, String account) {
+      lines.add("connected " + connector + " " + ownerId + " " + project + " " + account);
     }
 
     @Override
     public void connectionRefused(
-        String ownerId, String repository, String errorCode, int githubStatus) {
-      lines.add("refused " + ownerId + " " + repository + " " + errorCode + " " + githubStatus);
+        String connector, String ownerId, String project, String errorCode, int providerStatus) {
+      lines.add(
+          "refused "
+              + connector
+              + " "
+              + ownerId
+              + " "
+              + project
+              + " "
+              + errorCode
+              + " "
+              + providerStatus);
     }
 
     @Override
     public void importFinished(
+        String connector,
         String ownerId,
-        String repository,
+        String project,
         UUID importId,
         int created,
         int skipped,
@@ -57,9 +68,11 @@ final class ConnectorFakes {
         boolean truncated) {
       lines.add(
           "finished "
+              + connector
+              + " "
               + ownerId
               + " "
-              + repository
+              + project
               + " "
               + created
               + " "
@@ -72,23 +85,26 @@ final class ConnectorFakes {
 
     @Override
     public void importFailed(
+        String connector,
         String ownerId,
-        String repository,
+        String project,
         UUID importId,
         String errorCode,
         int created,
-        int githubStatus) {
+        int providerStatus) {
       lines.add(
           "import-failed "
+              + connector
+              + " "
               + ownerId
               + " "
-              + repository
+              + project
               + " "
               + errorCode
               + " "
               + created
               + " "
-              + githubStatus);
+              + providerStatus);
     }
   }
 
@@ -166,14 +182,20 @@ final class ConnectorFakes {
 
     @Override
     public IssueImportReceipt begin(
-        String ownerId, UUID projectId, String repository, Instant startedAt, Instant staleBefore) {
+        String ownerId,
+        UUID projectId,
+        String source,
+        String projectPath,
+        Instant startedAt,
+        Instant staleBefore) {
       interruptStale(ownerId, staleBefore);
       if (running(ownerId).isPresent()) throw new IssueImportInProgressException();
       var receipt =
           new IssueImportReceipt(
               UUID.randomUUID(),
+              source,
               projectId,
-              repository,
+              projectPath,
               "running",
               0,
               0,
@@ -213,10 +235,15 @@ final class ConnectorFakes {
     }
 
     @Override
-    public Optional<IssueImportReceipt> latest(String ownerId) {
+    public Optional<IssueImportReceipt> latest(String ownerId, String source) {
       return rows.values().stream()
-          .filter(row -> ownerId.equals(owners.get(row.id())))
+          .filter(row -> ownerId.equals(owners.get(row.id())) && source.equals(row.source()))
           .max(java.util.Comparator.comparing(IssueImportReceipt::startedAt));
+    }
+
+    @Override
+    public boolean importing(String ownerId, Instant staleBefore) {
+      return running(ownerId).filter(row -> !row.startedAt().isBefore(staleBefore)).isPresent();
     }
 
     private Optional<IssueImportReceipt> running(String ownerId) {
@@ -233,9 +260,14 @@ final class ConnectorFakes {
     }
 
     IssueImportReceipt seedCompleted(String ownerId) {
+      return seedCompleted(ownerId, "github");
+    }
+
+    IssueImportReceipt seedCompleted(String ownerId, String source) {
       var receipt =
           new IssueImportReceipt(
               UUID.randomUUID(),
+              source,
               UUID.randomUUID(),
               "octocat/Hello-World",
               "completed",
@@ -252,9 +284,14 @@ final class ConnectorFakes {
     }
 
     IssueImportReceipt seedRunning(String ownerId, Instant startedAt) {
+      return seedRunning(ownerId, "github", startedAt);
+    }
+
+    IssueImportReceipt seedRunning(String ownerId, String source, Instant startedAt) {
       var receipt =
           new IssueImportReceipt(
               UUID.randomUUID(),
+              source,
               UUID.randomUUID(),
               "octocat/Hello-World",
               "running",
@@ -279,7 +316,7 @@ final class ConnectorFakes {
     }
   }
 
-  static final class FakeIssueSource implements IssueSource {
+  static final class FakeIssueSource implements IssueSource, GithubRepositoryDirectory {
     private final List<String> calls = new ArrayList<>();
     private final Map<Integer, IssuePage> pages = new HashMap<>();
     private final Map<Integer, IssueSourceException> pageFailures = new HashMap<>();
@@ -321,8 +358,8 @@ final class ConnectorFakes {
     }
 
     @Override
-    public IssuePage list(String repository, String token, int page) {
-      calls.add("list " + repository + " page=" + page);
+    public IssuePage list(String projectReference, String token, int page) {
+      calls.add("list " + projectReference + " page=" + page);
       lastToken = token;
       if (failure != null) throw failure;
       var pageFailure = pageFailures.get(page);
@@ -386,7 +423,16 @@ final class ConnectorFakes {
     }
 
     void seedLink(String ownerId, String externalId) {
-      links.put(ownerId + "|github|" + externalId, UUID.randomUUID());
+      seedLink(ownerId, "github", externalId);
+    }
+
+    void seedLink(String ownerId, String source, String externalId) {
+      links.put(ownerId + "|" + source + "|" + externalId, UUID.randomUUID());
+    }
+
+    /** Claves de enlace confirmadas, en orden, ya sin el propietario: origen e identificador. */
+    List<String> linkKeys() {
+      return links.keySet().stream().map(key -> key.substring(key.indexOf('|') + 1)).toList();
     }
 
     int tasks() {
@@ -409,12 +455,13 @@ final class ConnectorFakes {
     public boolean save(
         String ownerId,
         UUID projectId,
+        String source,
         ExternalIssue issue,
         Function<String, TaskCreation> operation) {
       if (issue.externalId().equals(storageFailureOn))
         throw new StorageUnavailableException(new IllegalStateException("link insert failed"));
       if (issue.externalId().equals(completedOn)) projectStatus = "completed";
-      var key = ownerId + "|github|" + issue.externalId();
+      var key = ownerId + "|" + source + "|" + issue.externalId();
       if (links.containsKey(key)) return false;
       var creation = operation.apply(projectStatus);
       tasks.add(creation.task());

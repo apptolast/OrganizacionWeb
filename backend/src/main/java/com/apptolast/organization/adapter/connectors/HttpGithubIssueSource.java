@@ -1,5 +1,6 @@
 package com.apptolast.organization.adapter.connectors;
 
+import com.apptolast.organization.application.GithubRepositoryDirectory;
 import com.apptolast.organization.application.IssuePage;
 import com.apptolast.organization.application.IssueSource;
 import com.apptolast.organization.application.IssueSourceException;
@@ -24,7 +25,7 @@ import java.util.List;
  * Los plazos son cortos y explícitos, porque importar es una operación interactiva y quien espera
  * es una persona delante de la pantalla.
  */
-public final class HttpGithubIssueSource implements IssueSource {
+public final class HttpGithubIssueSource implements IssueSource, GithubRepositoryDirectory {
   private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(2);
   private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(4);
   private static final int DEFAULT_RETRY_SECONDS = 60;
@@ -55,8 +56,8 @@ public final class HttpGithubIssueSource implements IssueSource {
   }
 
   @Override
-  public IssuePage list(String repository, String token, int page) {
-    var response = get(base.issues(repository, page), token);
+  public IssuePage list(String projectReference, String token, int page) {
+    var response = get(base.issues(projectReference, page), token);
     var array = body(response);
     if (!array.isArray()) throw IssueSourceException.unavailable();
     var issues = new ArrayList<ExternalIssue>();

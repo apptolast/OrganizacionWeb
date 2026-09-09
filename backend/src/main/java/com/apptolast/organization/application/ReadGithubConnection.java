@@ -20,6 +20,7 @@ public final class ReadGithubConnection implements ReadGithubConnectionUseCase {
   public ConnectionView execute(String ownerId) {
     if (!cipher.enabled()) throw new ConnectorsDisabledException();
     var connection = connections.find(ownerId).orElseThrow(ConnectionNotFoundException::new);
-    return ConnectionView.of(connection, receipts.latest(ownerId).orElse(null));
+    return ConnectionView.of(
+        connection, receipts.latest(ownerId, GithubIssueConnections.SOURCE).orElse(null));
   }
 }

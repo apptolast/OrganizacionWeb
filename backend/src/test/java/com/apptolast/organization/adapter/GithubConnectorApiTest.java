@@ -48,8 +48,9 @@ class GithubConnectorApiTest {
 
   private static final String[] RECEIPT_FIELDS = {
     "id",
+    "source",
     "projectId",
-    "repository",
+    "projectPath",
     "status",
     "created",
     "skipped",
@@ -65,7 +66,10 @@ class GithubConnectorApiTest {
   @MockitoBean ReadGithubConnectionUseCase read;
   @MockitoBean ConnectGithubUseCase connect;
   @MockitoBean DisconnectGithubUseCase disconnect;
-  @MockitoBean ImportGithubIssuesUseCase importIssues;
+
+  @MockitoBean(name = GithubConnectorController.GITHUB_IMPORTS)
+  ImportIssuesUseCase importIssues;
+
   @MockitoBean ReadIssueImportUseCase readImport;
   @MockitoBean AuthenticateApiCredentialUseCase authenticateCredential;
   @MockitoBean ConsumeApiQuotaUseCase quota;
@@ -91,6 +95,7 @@ class GithubConnectorApiTest {
   private static IssueImportReceipt completed() {
     return new IssueImportReceipt(
         IMPORT,
+        "github",
         PROJECT,
         "octocat/Hello-World",
         "completed",
@@ -106,6 +111,7 @@ class GithubConnectorApiTest {
   private static IssueImportReceipt failedWith(String errorCode, int created) {
     return new IssueImportReceipt(
         IMPORT,
+        "github",
         PROJECT,
         "octocat/Hello-World",
         "failed",
@@ -154,7 +160,7 @@ class GithubConnectorApiTest {
   }
 
   @Test
-  void s10_theConnectionCarriesItsLastReceiptWithTheElevenFields() throws Exception {
+  void s10_theConnectionCarriesItsLastReceiptWithTheTwelveFields() throws Exception {
     when(read.execute("owner")).thenReturn(view(completed()));
 
     mvc.perform(get(CONNECTION).with(user("owner")))
@@ -163,7 +169,8 @@ class GithubConnectorApiTest {
             header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")))
         .andExpect(jsonPath("$.lastImport.id").value(IMPORT.toString()))
         .andExpect(jsonPath("$.lastImport.projectId").value(PROJECT.toString()))
-        .andExpect(jsonPath("$.lastImport.repository").value("octocat/Hello-World"))
+        .andExpect(jsonPath("$.lastImport.source").value("github"))
+        .andExpect(jsonPath("$.lastImport.projectPath").value("octocat/Hello-World"))
         .andExpect(jsonPath("$.lastImport.status").value("completed"))
         .andExpect(jsonPath("$.lastImport.created").value(3))
         .andExpect(jsonPath("$.lastImport.skipped").value(1))
@@ -189,7 +196,18 @@ class GithubConnectorApiTest {
   void s10_aRunningReceiptKeepsErrorCodeAndFinishedAtAsNull() throws Exception {
     var running =
         new IssueImportReceipt(
-            IMPORT, PROJECT, "octocat/Hello-World", "running", 2, 0, 0, false, null, STARTED, null);
+            IMPORT,
+            "github",
+            PROJECT,
+            "octocat/Hello-World",
+            "running",
+            2,
+            0,
+            0,
+            false,
+            null,
+            STARTED,
+            null);
     when(read.execute("owner")).thenReturn(view(running));
 
     mvc.perform(get(CONNECTION).with(user("owner")))
@@ -366,7 +384,7 @@ class GithubConnectorApiTest {
   // ---------------------------------------------------------------------- @s12 importar
 
   @Test
-  void s12_aFinishedImportAnswersCreatedWithItsLocationAndElevenFields() throws Exception {
+  void s12_aFinishedImportAnswersCreatedWithItsLocationAndTwelveFields() throws Exception {
     when(importIssues.execute("owner", PROJECT)).thenReturn(completed());
 
     mvc.perform(
@@ -535,7 +553,7 @@ class GithubConnectorApiTest {
   // ------------------------------------------------------------------------ @s30 recibos
 
   @Test
-  void s30_theOwnReceiptComesBackWithItsElevenFields() throws Exception {
+  void s30_theOwnReceiptComesBackWithItsTwelveFields() throws Exception {
     when(readImport.execute("owner", IMPORT)).thenReturn(completed());
 
     mvc.perform(get(IMPORTS + "/" + IMPORT).with(user("owner")))

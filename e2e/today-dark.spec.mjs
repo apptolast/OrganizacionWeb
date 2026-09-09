@@ -58,7 +58,7 @@ for (const variant of [
   { name: "DARK preference", theme: "DARK", scheme: "light" },
   { name: "SYSTEM with dark OS", theme: "SYSTEM", scheme: "dark" },
 ]) {
-  test(`today dark (${variant.name}): notice, agenda, focus ring and load error keep AA contrast @s2 @s21 @s23`, async ({
+  test(`today dark (${variant.name}): notice, agenda, focus ring and load error keep AA contrast @s34`, async ({
     page,
     request,
   }) => {

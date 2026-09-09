@@ -112,12 +112,12 @@ mutante que vaciara el barrido quedaría verde. Sin números mágicos:
 | Origen | Test |
 |---|---|
 | D1 `.today-summary` con `#ffffff` | `theme-tokens.test.ts`: «today.scss paints notice, summary and agenda cards only with theme tokens» + «no stylesheet declares a fixed color…»; `e2e/today-dark.spec.mjs` (axe, estado agenda) |
-| D2 `dt`/`dd` a 1,18 | `e2e/today-dark.spec.mjs` (axe `color-contrast`, estado agenda) @s2 |
-| D3 `.today-notice` con `#f0f3eb` | `theme-tokens.test.ts` (mismos dos casos); `e2e/today-dark.spec.mjs` (axe, estado notice) @s21 |
-| D4 enlace «Configurar disponibilidad» a 1,25 | `e2e/today-dark.spec.mjs` (axe, estado notice) |
+| D2 `dt`/`dd` a 1,18 | `e2e/today-dark.spec.mjs` (axe `color-contrast`, estado agenda) @s34 |
+| D3 `.today-notice` con `#f0f3eb` | `theme-tokens.test.ts` (mismos dos casos); `e2e/today-dark.spec.mjs` (axe, estado notice) @s34 |
+| D4 enlace «Configurar disponibilidad» a 1,25 | `e2e/today-dark.spec.mjs` (axe, estado notice) @s34 |
 | D5 `theme-color` claro en tema oscuro | `theme-color.test.tsx`: los 4 casos (metas con `media`, repintado en DARK, en LIGHT y al salir de la sesión) @s32 |
-| Anillo de foco invisible (#3) | `e2e/today-dark.spec.mjs`: contraste del `outline` contra el fondo real de la tarjeta ≥ 3 |
-| Estado de error de Hoy (#4) | `e2e/today-dark.spec.mjs` (axe, estado error, `/api/v1/today` a 503) @s23 |
+| Anillo de foco invisible (#3) | `e2e/today-dark.spec.mjs`: contraste del `outline` contra el fondo real de la tarjeta ≥ 3 @s34 |
+| Estado de error de Hoy (#4) | `e2e/today-dark.spec.mjs` (axe, estado error, `/api/v1/today` a 503) @s34 |
 | #6, #7, #8 | `theme-tokens.test.ts`: casos de `history.scss`, `.empty-divider`, seed art y sombras |
 
 ## 4. Medida después del rebase (D1–D5)
@@ -178,3 +178,101 @@ nunca mutación).
   como archivo sin seguimiento. Es la pasada visual temporal de la sesión
   anterior; **no debe entrar en el PR**. La guarda permanente es
   `e2e/today-dark.spec.mjs` más `theme-tokens.test.ts`.
+
+## 7. Cierre: las tres correcciones exigidas por el juez
+
+Dictamen `progress/judge_darkmode.md` (**APPROVED** con tres correcciones
+obligatorias). Los ocho commits ya estaban en `main`, así que estas van encima
+de `main` (`ac9e9a5`), no sobre la rama vieja.
+
+### 7.1 Etiquetas `@s` falsas (exigida 1)
+
+`e2e/today-dark.spec.mjs:61` se titulaba `@s2 @s21 @s23`. En
+`features/appearance.feature`, @s21 es «Editar sólo cambia muestra y borrador»
+y @s23 «Guardar confirma junto el formulario y la apariencia global»: el spec
+**no abre el formulario ni pulsa Guardar**. Lo que sí verifica es **@s34**
+(«Variantes conservan legibilidad… los contrastes definidos sobre los fondos
+reales», filas `DARK`).
+
+Se deja **`@s34` a secas**, no `@s2 @s34`. El juez permitía reconocer el PUT de
+preparación como @s2, pero `preferTheme()` solo comprueba que el PUT devuelve
+200: no verifica los colores canónicos, ni `updatedAt`, ni el UUID y la versión
+del ETag, ni que quede exactamente una fila. Reclamar @s2 sería exactamente el
+mismo tipo de cobertura falsa que la corrección venía a quitar. La tabla de
+trazabilidad (sección 3) queda alineada: las seis filas que apuntan a ese spec
+dicen @s34.
+
+Sin ciclo rojo: es una etiqueta, no comportamiento. Commit `0aa8c33`.
+
+### 7.2 Sombras: el ancla `$` dejaba pasar una capa clara (exigida 2, la grave)
+
+**ROJO.** Con el predicado anterior, la guarda global devolvía **`[]`** para el
+caso exacto del juez:
+
+```
+box-shadow: 0 0 8px #ffffff, 0 5px 18px rgb(0 0 0 / 6%)
+```
+
+`NEUTRAL_SHADOW = /rgb\(0 0 0 \/ \d+%\)$/` eximía la **declaración entera** si
+*terminaba* en una capa neutra, así que una capa blanca colada delante
+atravesaba las dos guardas. Tres casos nuevos lo fijan: el barrido sobre la
+declaración completa y `isNeutralShadow` con la capa clara delante y detrás.
+
+**VERDE.** `isNeutralShadow(value)` parte el valor en capas por las comas que
+no están dentro de paréntesis (`SHADOW_LAYER_SEPARATOR`) y exige que **ninguna
+capa** conserve un literal tras quitarle el negro puro. Además la exención solo
+se aplica ya a propiedades de sombra (`SHADOW_PROPERTY`), no a cualquier valor
+que acabe en negro translúcido. El test de sombras de `styles.scss` pasa a usar
+el mismo ayudante, así que las dos guardas se cierran de una vez.
+
+Commit `d5a496e`. 13 casos verdes.
+
+### 7.3 El barrido no entraba en subcarpetas (exigida 3)
+
+**ROJO.** `styleSheets()` usaba `readdirSync` sin `withFileTypes` y sin
+recursión. Un test sobre un directorio temporal con `top.scss`,
+`partials/mid.scss` y `partials/deep/low.scss` recibía las cuatro hojas de la
+raíz de `src` en vez de las tres anidadas: la función ni siquiera miraba la
+raíz que se le pedía.
+
+**VERDE.** Recorrido recursivo con `withFileTypes`, devolviendo rutas relativas
+a la raíz con barras normales (para que el mensaje de fallo sea legible en
+Windows). El `.md` del directorio de prueba se ignora.
+
+**Comprobación de punta a punta**, más fuerte que el test unitario: se creó
+`frontend/src/probe/nested-probe.scss` con los dos defectos a la vez y la
+guarda global lo señaló por ambos:
+
+```
+probe/nested-probe.scss -> background: #fff
+probe/nested-probe.scss -> box-shadow: 0 0 8px #ffffff, 0 5px 18px rgb(0 0 0 / 6%)
+```
+
+La sonda se retiró después; `frontend/src` vuelve a tener sus cuatro hojas.
+Commit `1595895`. 14 casos verdes.
+
+### 7.4 Verificación del cierre
+
+- `pnpm vitest run src/theme-tokens.test.ts` → **14 pasados** (11 antes de las
+  correcciones).
+- `npx tsc --noEmit`, `npx prettier --check`, `npx eslint` sobre los ficheros
+  tocados → limpios.
+- E2E no reejecutado: el único cambio en `today-dark.spec.mjs` es el texto del
+  título del test, sin efecto sobre lo que ejercita. Cinco carriles vivos en la
+  máquina; no se levantó pila.
+
+### 7.5 Recomendaciones del juez que **no** se aplican aquí
+
+Deliberadamente fuera de alcance, para que el conjunto revisado sea exactamente
+el exigido. Quedan anotadas para el `craftsman_lead`:
+
+- `today-dark.spec.mjs:43`: `[a, b].sort()` sin comparador (ordena como
+  cadenas). El propio juez constata que, si fallara, fallaría en dirección
+  segura (ratio < 1 → rojo, nunca verde falso). Cambiarlo obliga a reejecutar
+  el E2E para no cambiar el oráculo a ciegas.
+- `today-dark.spec.mjs:49`: `withTags(["wcag2aa"])` muerto, sobrescrito por
+  `withRules`.
+- `theme-tokens.test.ts`: derivar `DARK_PANEL` del mixin con `tokenValue()`.
+- Ampliar `COLOR_DECLARATION` con `background-image` y con las custom
+  properties declaradas fuera de los mixins.
+- Medir el tema **claro** con una pasada visual (aquí solo hay cálculo).

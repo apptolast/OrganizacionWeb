@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
 import { Webhooks } from "./webhooks";
@@ -50,16 +50,29 @@ function delivery(overrides: Record<string, unknown> = {}) {
 
 /** Answers the initial GET with the given list and routes everything else to the handler. */
 function stubApi(items: unknown[], handler?: typeof fetch) {
-  const other = vi.fn(handler ?? (() => Promise.reject(new Error("unexpected"))));
-  const fetcher = vi.fn(
-    (url: RequestInfo | URL, options?: RequestInit) =>
-      url === "/api/v1/me/webhooks" && (!options?.method || options.method === "GET")
-        ? Promise.resolve(Response.json({ items }))
-        : other(url as never, options as never),
+  const other = vi.fn(
+    handler ?? (() => Promise.reject(new Error("unexpected"))),
+  );
+  const fetcher = vi.fn((url: RequestInfo | URL, options?: RequestInit) =>
+    url === "/api/v1/me/webhooks" &&
+    (!options?.method || options.method === "GET")
+      ? Promise.resolve(Response.json({ items }))
+      : other(url as never, options as never),
   );
   vi.stubGlobal("fetch", fetcher);
   return { fetcher, other };
 }
+
+/** Typed accessors over the recorded fetch calls, so the tests stay readable. */
+type Call = [RequestInfo | URL, RequestInit | undefined];
+const callsOf = (mock: { mock: { calls: unknown[][] } }) =>
+  mock.mock.calls as unknown as Call[];
+const optionsOf = (mock: { mock: { calls: unknown[][] } }, index = 0) =>
+  callsOf(mock)[index][1]!;
+const bodyOf = (mock: { mock: { calls: unknown[][] } }, index = 0) =>
+  JSON.parse(String(optionsOf(mock, index).body)) as Record<string, unknown>;
+const urlOf = (mock: { mock: { calls: unknown[][] } }, index = 0) =>
+  String(callsOf(mock)[index][0]);
 
 async function shown() {
   await waitFor(() =>
@@ -76,7 +89,9 @@ it("@s36 announces the loading state before showing anything else", async () => 
 
   render(<Webhooks owner="Ana" />);
 
-  expect(screen.getByRole("heading", { level: 1, name: "Webhooks" })).toBeVisible();
+  expect(
+    screen.getByRole("heading", { level: 1, name: "Webhooks" }),
+  ).toBeVisible();
   const loading = screen.getByText("Cargando webhooks…");
   expect(loading).toBeVisible();
   expect(loading.closest("[aria-live]")).not.toBeNull();
@@ -111,9 +126,11 @@ it("@s36 reports a failed load with an alert and retries only the GET", async ()
 
   await user.click(screen.getByRole("button", { name: "Reintentar" }));
 
-  await waitFor(() => expect(screen.getByText("https://example.com/hooks")).toBeVisible());
+  await waitFor(() =>
+    expect(screen.getByText("https://example.com/hooks")).toBeVisible(),
+  );
   expect(fetcher).toHaveBeenCalledTimes(2);
-  expect(fetcher.mock.calls.every(([, options]) => !options?.method)).toBe(true);
+  expect(callsOf(fetcher).every(([, options]) => !options?.method)).toBe(true);
 });
 
 it("@s36 lists each webhook with its url, description, types and status", async () => {
@@ -158,7 +175,10 @@ it("@s39 shows an exhausted webhook with its date and the same value in ARIA", a
 
 it("@s37 sends one POST with the twelve types and shows the secret once", async () => {
   let reply!: (response: Response) => void;
-  const { other } = stubApi([], () => new Promise<Response>((r) => (reply = r)));
+  const { other } = stubApi(
+    [],
+    () => new Promise<Response>((r) => (reply = r)),
+  );
   const user = userEvent.setup();
 
   render(<Webhooks owner="Ana" />);
@@ -175,7 +195,7 @@ it("@s37 sends one POST with the twelve types and shows the secret once", async 
 
   expect(other).toHaveBeenCalledTimes(1);
   expect(create).toBeDisabled();
-  expect(JSON.parse(other.mock.calls[0][1].body).eventTypes).toHaveLength(12);
+  expect(bodyOf(other).eventTypes).toHaveLength(12);
 
   reply(Response.json({ endpoint: endpoint(), secret }, { status: 201 }));
 
@@ -199,7 +219,10 @@ it("@s37 a second submit that bypasses the disabled button still sends nothing",
 
   render(<Webhooks owner="Ana" />);
   await shown();
-  await user.type(screen.getByRole("textbox", { name: "URL" }), "https://example.com/hooks");
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
   await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
 
   const form = document.querySelector("form")!;
@@ -214,13 +237,18 @@ it("@s37 a second submit that bypasses the disabled button still sends nothing",
 
 it("@s37 hides the secret only when Cerrar is activated", async () => {
   const { other } = stubApi([], () =>
-    Promise.resolve(Response.json({ endpoint: endpoint(), secret }, { status: 201 })),
+    Promise.resolve(
+      Response.json({ endpoint: endpoint(), secret }, { status: 201 }),
+    ),
   );
   const user = userEvent.setup();
 
   render(<Webhooks owner="Ana" />);
   await shown();
-  await user.type(screen.getByRole("textbox", { name: "URL" }), "https://example.com/hooks");
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
   await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
   await user.click(screen.getByRole("button", { name: "Crear webhook" }));
   await waitFor(() => expect(screen.getByDisplayValue(secret)).toBeVisible());
@@ -241,7 +269,10 @@ it("@s38 aborts the pending creation when the view goes away and never shows its
 
   const view = render(<Webhooks owner="Ana" />);
   await shown();
-  await user.type(screen.getByRole("textbox", { name: "URL" }), "https://example.com/hooks");
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
   await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
   await user.click(screen.getByRole("button", { name: "Crear webhook" }));
   expect(other).toHaveBeenCalledTimes(1);
@@ -288,9 +319,11 @@ it("@s39 pings an active webhook and shows the pending delivery", async () => {
   await shown();
   await user.click(screen.getByRole("button", { name: "Enviar ping" }));
 
-  await waitFor(() => expect(screen.getByText("webhook.ping.v1")).toBeVisible());
+  await waitFor(() =>
+    expect(screen.getByText("webhook.ping.v1")).toBeVisible(),
+  );
   expect(screen.getAllByText("Pendiente").length).toBeGreaterThan(0);
-  expect(other.mock.calls[0][1].method).toBe("POST");
+  expect(optionsOf(other).method).toBe("POST");
 });
 
 it("@s39 disables an active webhook through the status route", async () => {
@@ -314,9 +347,8 @@ it("@s39 disables an active webhook through the status route", async () => {
   await waitFor(() =>
     expect(screen.getByText("Desactivado manualmente")).toBeVisible(),
   );
-  const [url, options] = other.mock.calls[0];
-  expect(String(url)).toBe(`/api/v1/me/webhooks/${id}/status`);
-  expect(JSON.parse(options.body)).toEqual({ status: "disabled" });
+  expect(urlOf(other)).toBe(`/api/v1/me/webhooks/${id}/status`);
+  expect(bodyOf(other)).toEqual({ status: "disabled" });
 });
 
 it("@s39 reactivates a manually disabled webhook", async () => {
@@ -337,7 +369,7 @@ it("@s39 reactivates a manually disabled webhook", async () => {
   await user.click(screen.getByRole("button", { name: "Activar" }));
 
   await waitFor(() => expect(screen.getByText("Activo")).toBeVisible());
-  expect(JSON.parse(other.mock.calls[0][1].body)).toEqual({ status: "active" });
+  expect(bodyOf(other)).toEqual({ status: "active" });
 });
 
 it("@s39 asks for confirmation before deleting and only then sends the DELETE", async () => {
@@ -353,17 +385,23 @@ it("@s39 asks for confirmation before deleting and only then sends the DELETE", 
   expect(other).not.toHaveBeenCalled();
   expect(screen.getByRole("dialog")).toBeVisible();
 
-  await user.click(screen.getByRole("button", { name: "Confirmar eliminación" }));
+  await user.click(
+    screen.getByRole("button", { name: "Confirmar eliminación" }),
+  );
 
   await waitFor(() =>
-    expect(screen.queryByText("https://example.com/hooks")).not.toBeInTheDocument(),
+    expect(
+      screen.queryByText("https://example.com/hooks"),
+    ).not.toBeInTheDocument(),
   );
-  expect(other.mock.calls[0][1].method).toBe("DELETE");
-  expect(screen.getByRole("heading", { level: 2, name: "Tus webhooks" })).toHaveFocus();
+  expect(optionsOf(other).method).toBe("DELETE");
+  expect(
+    screen.getByRole("heading", { level: 2, name: "Tus webhooks" }),
+  ).toHaveFocus();
 });
 
 it("@s40 opens the deliveries panel on demand, without polling, and redelivers terminal rows", async () => {
-  const { other } = stubApi([endpoint()], (url, options) =>
+  const { other } = stubApi([endpoint()], (url) =>
     String(url).endsWith("/redeliver")
       ? Promise.resolve(
           Response.json(
@@ -383,7 +421,14 @@ it("@s40 opens the deliveries panel on demand, without polling, and redelivers t
           Response.json({
             items: [
               delivery(),
-              delivery({ id: second, eventId: second, status: "exhausted", attempt: 6, errorClass: "HTTP_ERROR", httpStatus: 500 }),
+              delivery({
+                id: second,
+                eventId: second,
+                status: "exhausted",
+                attempt: 6,
+                errorClass: "HTTP_ERROR",
+                httpStatus: 500,
+              }),
               delivery({
                 id: "44444444-4444-4444-8444-444444444444",
                 eventId: "44444444-4444-4444-8444-444444444444",
@@ -405,7 +450,9 @@ it("@s40 opens the deliveries panel on demand, without polling, and redelivers t
   await user.click(screen.getByRole("button", { name: "Ver entregas" }));
 
   await waitFor(() => expect(screen.getByRole("table")).toBeVisible());
-  const headers = screen.getAllByRole("columnheader").map((cell) => cell.textContent);
+  const headers = screen
+    .getAllByRole("columnheader")
+    .map((cell) => cell.textContent);
   expect(headers).toEqual([
     "Tipo",
     "Intento",
@@ -425,7 +472,9 @@ it("@s40 opens the deliveries panel on demand, without polling, and redelivers t
 
   await user.click(screen.getAllByRole("button", { name: "Reenviar" })[0]);
   await waitFor(() =>
-    expect(other.mock.calls.some(([u]) => String(u).endsWith("/redeliver"))).toBe(true),
+    expect(callsOf(other).some(([u]) => String(u).endsWith("/redeliver"))).toBe(
+      true,
+    ),
   );
   vi.useRealTimers();
 });
@@ -450,24 +499,32 @@ it("@s40 the Actualizar button repeats a single deliveries GET", async () => {
 it.each([
   ["CONNECTORS_DISABLED", 503, /configuración del servidor/i],
   ["WEBHOOK_LIMIT", 409, /cinco/i],
-])("@s41 explains a %s without hiding the form", async (code, status, message) => {
-  const { other } = stubApi([], () =>
-    Promise.resolve(Response.json({ code }, { status })),
-  );
-  const user = userEvent.setup();
+])(
+  "@s41 explains a %s without hiding the form",
+  async (code, status, message) => {
+    const { other } = stubApi([], () =>
+      Promise.resolve(Response.json({ code }, { status })),
+    );
+    const user = userEvent.setup();
 
-  render(<Webhooks owner="Ana" />);
-  await shown();
-  await user.type(screen.getByRole("textbox", { name: "URL" }), "https://example.com/hooks");
-  await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
-  await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+    render(<Webhooks owner="Ana" />);
+    await shown();
+    await user.type(
+      screen.getByRole("textbox", { name: "URL" }),
+      "https://example.com/hooks",
+    );
+    await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
+    await user.click(screen.getByRole("button", { name: "Crear webhook" }));
 
-  await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent(message));
-  expect(screen.getByRole("textbox", { name: "URL" })).toHaveValue(
-    "https://example.com/hooks",
-  );
-  expect(other).toHaveBeenCalledTimes(1);
-});
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(message),
+    );
+    expect(screen.getByRole("textbox", { name: "URL" })).toHaveValue(
+      "https://example.com/hooks",
+    );
+    expect(other).toHaveBeenCalledTimes(1);
+  },
+);
 
 it("@s41 ties a blocked URL to the field with aria-describedby", async () => {
   stubApi([], () =>
@@ -486,7 +543,9 @@ it("@s41 ties a blocked URL to the field with aria-describedby", async () => {
 
   await waitFor(() => expect(url).toHaveAttribute("aria-describedby"));
   const described = url.getAttribute("aria-describedby")!;
-  expect(document.getElementById(described)!.textContent).toMatch(/no está permitida/i);
+  expect(document.getElementById(described)!.textContent).toMatch(
+    /no está permitida/i,
+  );
 });
 
 it("@s41 offers to refresh the list after a network failure of uncertain result", async () => {
@@ -495,26 +554,36 @@ it("@s41 offers to refresh the list after a network failure of uncertain result"
 
   render(<Webhooks owner="Ana" />);
   await shown();
-  await user.type(screen.getByRole("textbox", { name: "URL" }), "https://example.com/hooks");
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
   await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
   await user.click(screen.getByRole("button", { name: "Crear webhook" }));
 
   await waitFor(() =>
     expect(screen.getByRole("alert")).toHaveTextContent(/no sabemos|incierto/i),
   );
-  expect(screen.getByRole("button", { name: "Actualizar lista" })).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: "Actualizar lista" }),
+  ).toBeVisible();
   expect(other).toHaveBeenCalledTimes(1);
 });
 
 it("@s42 gives every control an accessible name and returns focus after closing the secret", async () => {
   const { other } = stubApi([], () =>
-    Promise.resolve(Response.json({ endpoint: endpoint(), secret }, { status: 201 })),
+    Promise.resolve(
+      Response.json({ endpoint: endpoint(), secret }, { status: 201 }),
+    ),
   );
   const user = userEvent.setup();
 
   render(<Webhooks owner="Ana" />);
   await shown();
-  await user.type(screen.getByRole("textbox", { name: "URL" }), "https://example.com/hooks");
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
   await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
   const create = screen.getByRole("button", { name: "Crear webhook" });
   await user.click(create);

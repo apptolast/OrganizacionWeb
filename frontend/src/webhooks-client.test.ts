@@ -147,11 +147,19 @@ it("@s37 creates a webhook and returns the one-time secret", async () => {
 });
 
 it("@s37 rejects a creation whose secret is not a whsec_ of 43 base64url characters", async () => {
-  for (const bad of ["whsec_short", `owp_${"A".repeat(43)}`, `whsec_${"A".repeat(44)}`]) {
+  for (const bad of [
+    "whsec_short",
+    `owp_${"A".repeat(43)}`,
+    `whsec_${"A".repeat(44)}`,
+  ]) {
     stub({ endpoint: endpoint(), secret: bad }, 201);
     await expect(
       createWebhook(
-        { url: "https://example.com/hooks", description: "", eventTypes: ["TaskCreated.v1"] },
+        {
+          url: "https://example.com/hooks",
+          description: "",
+          eventTypes: ["TaskCreated.v1"],
+        },
         new AbortController().signal,
       ),
     ).rejects.toThrow("Confirmación incompatible");
@@ -159,9 +167,19 @@ it("@s37 rejects a creation whose secret is not a whsec_ of 43 base64url charact
 });
 
 it("@s39 changes the status and returns the endpoint", async () => {
-  const fetcher = stub(endpoint({ status: "disabled", disabledReason: "MANUAL", disabledAt: "2026-09-08T11:00:00.000000Z" }));
+  const fetcher = stub(
+    endpoint({
+      status: "disabled",
+      disabledReason: "MANUAL",
+      disabledAt: "2026-09-08T11:00:00.000000Z",
+    }),
+  );
 
-  const changed = await setWebhookStatus(id, "disabled", new AbortController().signal);
+  const changed = await setWebhookStatus(
+    id,
+    "disabled",
+    new AbortController().signal,
+  );
 
   expect(changed.status).toBe("disabled");
   const [url, options] = fetcher.mock.calls[0];
@@ -232,7 +250,11 @@ it("@s40 redelivers a terminal delivery", async () => {
     202,
   );
 
-  const reopened = await redeliverWebhook(id, other, new AbortController().signal);
+  const reopened = await redeliverWebhook(
+    id,
+    other,
+    new AbortController().signal,
+  );
 
   expect(reopened.attempt).toBe(0);
   expect(fetcher.mock.calls[0][0]).toBe(
@@ -242,9 +264,9 @@ it("@s40 redelivers a terminal delivery", async () => {
 
 it("@s41 throws the response itself so the view can read its problem code", async () => {
   stub({ code: "WEBHOOK_LIMIT" }, 409);
-  await expect(listWebhooks(new AbortController().signal)).rejects.toBeInstanceOf(
-    Response,
-  );
+  await expect(
+    listWebhooks(new AbortController().signal),
+  ).rejects.toBeInstanceOf(Response);
 });
 
 it("@s38 refuses to start once the signal is already aborted", async () => {

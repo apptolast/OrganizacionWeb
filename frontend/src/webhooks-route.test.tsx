@@ -12,7 +12,8 @@ function stubSession() {
   vi.stubGlobal(
     "fetch",
     vi.fn(async (url: RequestInfo | URL) => {
-      if (String(url) === "/api/v1/me/webhooks") return Response.json({ items: [] });
+      if (String(url) === "/api/v1/me/webhooks")
+        return Response.json({ items: [] });
       if (String(url) === "/api/v1/me/appearance")
         return Response.json(
           {
@@ -48,10 +49,14 @@ it("@s36 the navigation entry sits right after API para integraciones and Hoy ke
   await screen.findByRole("heading", { level: 1, name: "Webhooks" });
 
   const links = [
-    ...screen.getByRole("navigation", { name: "Principal" }).querySelectorAll("a"),
+    ...screen
+      .getByRole("navigation", { name: "Principal" })
+      .querySelectorAll("a"),
   ];
   // Decorative markers are aria-hidden, so strip them to compare what a person hears.
-  const names = links.map((link) => link.textContent?.replace(/[^\p{L}\s]/gu, "").trim());
+  const names = links.map((link) =>
+    link.textContent?.replace(/[^\p{L}\s]/gu, "").trim(),
+  );
   expect(names[0]).toBe("Hoy");
   const api = names.findIndex((name) => name === "API para integraciones");
   expect(api).toBeGreaterThan(0);
@@ -66,7 +71,9 @@ it("@s36 another route does not mark Webhooks as the current page", async () => 
   render(<App username="Ana" />);
 
   const webhooks = [
-    ...screen.getByRole("navigation", { name: "Principal" }).querySelectorAll("a"),
+    ...screen
+      .getByRole("navigation", { name: "Principal" })
+      .querySelectorAll("a"),
   ].find((link) => link.textContent?.trim() === "Webhooks");
   expect(webhooks).toBeDefined();
   expect(webhooks).not.toHaveAttribute("aria-current");

@@ -69,7 +69,10 @@ function identifier(value: unknown): value is string {
 
 function whole(value: unknown, max: number): value is number {
   return (
-    typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= max
+    typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= 0 &&
+    value <= max
   );
 }
 
@@ -126,7 +129,10 @@ function decodeDelivery(value: unknown): WebhookDelivery {
     !(deliveryStatuses as readonly string[]).includes(value.status as string) ||
     !whole(value.attempt, 6) ||
     !(value.httpStatus === null || whole(value.httpStatus, 599)) ||
-    !(value.latencyMs === null || whole(value.latencyMs, Number.MAX_SAFE_INTEGER)) ||
+    !(
+      value.latencyMs === null ||
+      whole(value.latencyMs, Number.MAX_SAFE_INTEGER)
+    ) ||
     !(
       value.errorClass === null ||
       (errorClasses as readonly string[]).includes(value.errorClass as string)
@@ -145,7 +151,10 @@ function decodeDelivery(value: unknown): WebhookDelivery {
 function decodeList<T>(body: unknown, decode: (value: unknown) => T): T[] {
   if (!exact(body, "items") || !Array.isArray(body.items)) throw incompatible();
   const items = body.items.map(decode);
-  if (new Set(items.map((item) => (item as { id: string }).id)).size !== items.length)
+  if (
+    new Set(items.map((item) => (item as { id: string }).id)).size !==
+    items.length
+  )
     throw incompatible();
   return items;
 }
@@ -155,7 +164,11 @@ function webhookUrl(id: string) {
   return `/api/v1/me/webhooks/${id}`;
 }
 
-async function json(response: Response, signal: AbortSignal, expected: number[]) {
+async function json(
+  response: Response,
+  signal: AbortSignal,
+  expected: number[],
+) {
   signal.throwIfAborted();
   if (!expected.includes(response.status)) throw response;
   const body: unknown = await response.json();
@@ -208,7 +221,10 @@ export async function setWebhookStatus(
 
 export async function deleteWebhook(id: string, signal: AbortSignal) {
   signal.throwIfAborted();
-  const response = await apiRequest(webhookUrl(id), { method: "DELETE", signal });
+  const response = await apiRequest(webhookUrl(id), {
+    method: "DELETE",
+    signal,
+  });
   signal.throwIfAborted();
   if (response.status !== 204) throw response;
 }

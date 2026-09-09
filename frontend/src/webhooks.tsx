@@ -11,6 +11,7 @@ import {
   type WebhookDelivery,
   type WebhookEndpoint,
 } from "./webhooks-client";
+import "./webhooks.scss";
 
 /** Human labels for the twelve subscribable types, in catalogue order. */
 const eventLabels = [
@@ -92,9 +93,8 @@ function WebhookPanel() {
     [],
   );
 
-  const load = useCallback(() => {
-    setLoading(true);
-    setLoadFailed(false);
+  /** Only ever writes state from the resolved promise, never synchronously. */
+  const fetchList = useCallback(() => {
     const controller = track();
     void listWebhooks(controller.signal)
       .then((next) => {
@@ -108,7 +108,14 @@ function WebhookPanel() {
       });
   }, [track]);
 
-  useEffect(load, [load]);
+  // The list starts busy, so the first pass has nothing to set before fetching.
+  useEffect(fetchList, [fetchList]);
+
+  function load() {
+    setLoading(true);
+    setLoadFailed(false);
+    fetchList();
+  }
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -148,7 +155,9 @@ function WebhookPanel() {
       return;
     }
     if (code === "WEBHOOK_LIMIT") {
-      setFormError("Ya tienes cinco webhooks. Elimina uno antes de crear otro.");
+      setFormError(
+        "Ya tienes cinco webhooks. Elimina uno antes de crear otro.",
+      );
       return;
     }
     if (code === "WEBHOOK_INVALID") {
@@ -172,7 +181,10 @@ function WebhookPanel() {
     }
   }
 
-  function changeStatus(endpoint: WebhookEndpoint, status: "active" | "disabled") {
+  function changeStatus(
+    endpoint: WebhookEndpoint,
+    status: "active" | "disabled",
+  ) {
     void act(async (signal) => {
       const updated = await setWebhookStatus(endpoint.id, status, signal);
       if (signal.aborted) return;
@@ -187,7 +199,10 @@ function WebhookPanel() {
       const sent = await pingWebhook(endpoint.id, signal);
       if (signal.aborted) return;
       setDeliveriesOf(endpoint.id);
-      setDeliveries((current) => [sent, ...current.filter((d) => d.id !== sent.id)]);
+      setDeliveries((current) => [
+        sent,
+        ...current.filter((d) => d.id !== sent.id),
+      ]);
     });
   }
 
@@ -228,9 +243,7 @@ function WebhookPanel() {
     <section className="webhooks">
       <h1>Webhooks</h1>
 
-      <div aria-live="polite">
-        {loading && <p>Cargando webhooks…</p>}
-      </div>
+      <div aria-live="polite">{loading && <p>Cargando webhooks…</p>}</div>
 
       {loadFailed && (
         <p role="alert">
@@ -250,7 +263,11 @@ function WebhookPanel() {
           </p>
           <label>
             Secreto
-            <input readOnly value={secret} onFocus={(e) => e.currentTarget.select()} />
+            <input
+              readOnly
+              value={secret}
+              onFocus={(e) => e.currentTarget.select()}
+            />
           </label>
           <button
             type="button"
@@ -351,10 +368,15 @@ function WebhookPanel() {
             <span>{endpoint.description}</span>
             <span>
               {endpoint.eventTypes
-                .map((type) => eventLabels[webhookEventTypes.indexOf(type as never)])
+                .map(
+                  (type) =>
+                    eventLabels[webhookEventTypes.indexOf(type as never)],
+                )
                 .join(", ")}
             </span>
-            <span aria-label={statusLabel(endpoint)}>{statusLabel(endpoint)}</span>
+            <span aria-label={statusLabel(endpoint)}>
+              {statusLabel(endpoint)}
+            </span>
             {endpoint.status === "active" ? (
               <>
                 <button type="button" onClick={() => ping(endpoint)}>
@@ -368,7 +390,10 @@ function WebhookPanel() {
                 </button>
               </>
             ) : (
-              <button type="button" onClick={() => changeStatus(endpoint, "active")}>
+              <button
+                type="button"
+                onClick={() => changeStatus(endpoint, "active")}
+              >
                 Activar
               </button>
             )}
@@ -428,7 +453,9 @@ function WebhookPanel() {
                   <td>{row.eventType}</td>
                   <td>{row.attempt}</td>
                   <td>{row.httpStatus ?? "—"}</td>
-                  <td>{row.latencyMs === null ? "—" : `${row.latencyMs} ms`}</td>
+                  <td>
+                    {row.latencyMs === null ? "—" : `${row.latencyMs} ms`}
+                  </td>
                   <td>{row.errorClass ?? "—"}</td>
                   <td>{deliveryStatusLabels[row.status]}</td>
                   <td>{row.updatedAt.slice(0, 10)}</td>

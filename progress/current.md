@@ -311,3 +311,32 @@ de contenido durante la fusión, verificado por las 91 guardas de
 4. **La mutación nocturna** sigue rota y su arreglo ya no choca con nada.
 5. **`one_feature_at_a_time` está en `false`.** Devuélvelo a `true` al volver a un
    solo carril.
+
+## Defecto de producto abierto, con prueba: el feed externo puede colgarse para siempre
+
+Descubierto al arreglar el oráculo del corte por tamaño de la feature 28, y
+**demostrado con un volcado de hilos**, no inferido.
+
+`HttpCalendarFeed` no tiene ningún plazo para leer el **cuerpo** de la respuesta.
+`HttpRequest.timeout` **no cubre la lectura del cuerpo** cuando se usa
+`BodyHandlers.ofInputStream`: `send()` regresa al recibir las cabeceras y en ese
+momento el temporizador se cancela. El plazo de 5 segundos que la feature declara
+solo protege la fase de cabeceras.
+
+Consecuencia: un proveedor que envíe las cabeceras y después **se calle a mitad
+del cuerpo** deja `fetch` colgado indefinidamente. El corte por tamaño solo rescata
+el caso contrario, el del proveedor que sigue emitiendo. Con el corte por tamaño
+anulado a mano, el cliente quedó aparcado en `HttpCalendarFeed.read` (línea 79) y
+la compilación corrió más de cinco minutos sin fallar.
+
+Es la misma familia que la enmienda de seguridad B1 de los webhooks —un receptor
+lento que agota recursos—, pero en el conector de entrada y sin remediar.
+
+**No se ha tocado a propósito**: exige un contrato nuevo, porque
+`features/external_calendar.feature` no dice nada de un plazo de lectura del
+cuerpo, y eso pasa por la puerta del propietario. El detalle está en
+`progress/tdd_feed_size_abort.md`, sección 5.
+
+El dictamen final lo recoge de forma independiente en la dimensión de seguridad de
+la feature 28: «La lectura del cuerpo del feed no tiene ningún plazo: el timeout de
+5 s solo cubre las cabeceras».

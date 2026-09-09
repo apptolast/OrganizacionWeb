@@ -737,6 +737,28 @@ public class ApplicationConfiguration {
   }
 
   @Bean
+  com.apptolast.organization.adapter.persistence.PostgresAutomationWork automationWork(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions,
+      com.fasterxml.jackson.databind.ObjectMapper json,
+      com.apptolast.organization.application.CreateTaskUseCase createTask) {
+    return new com.apptolast.organization.adapter.persistence.PostgresAutomationWork(
+        jdbc, transactions, json, createTask);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ExecuteAutomationsUseCase executeAutomations(
+      com.apptolast.organization.application.AutomationWork work,
+      com.apptolast.organization.application.AutomationRuleStore rules,
+      com.apptolast.organization.application.AutomationMatcher matcher,
+      com.apptolast.organization.application.AutomationFacts facts,
+      com.apptolast.organization.application.WebhookEndpointLookup endpoints,
+      Clock clock) {
+    return new com.apptolast.organization.application.ExecuteAutomations(
+        work, rules, matcher, facts, endpoints, clock);
+  }
+
+  @Bean
   com.apptolast.organization.application.ReadAutomationRunsUseCase readAutomationRuns(
       com.apptolast.organization.application.AutomationRuleStore rules,
       com.apptolast.organization.application.AutomationRunStore runs) {

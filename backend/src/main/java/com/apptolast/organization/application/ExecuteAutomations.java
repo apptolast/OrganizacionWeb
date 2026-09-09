@@ -86,6 +86,9 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
       work.commit(new AutomationCommit(owner, reachedBy(event), outcomes));
       outcomes.forEach(ExecuteAutomations::log);
       return true;
+    } catch (AutomationClaimedException claimed) {
+      // Another worker got there first: its run is the one that counts and the walk carries on.
+      return true;
     } catch (RuntimeException failure) {
       // Whatever broke the confirmation, from here it is one thing: the write did not happen.
       // Stranding an owner behind an unexpected failure would be worse than one coarse code.

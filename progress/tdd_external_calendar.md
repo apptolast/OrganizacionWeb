@@ -312,8 +312,8 @@ la máquina. Queda listo para que el `mutation_tester` lance
 | s5 | `ExternalCalendarInputTest`, `SaveExternalCalendarTest.s5_*` |
 | s6 | `ExternalCalendarPersistenceTest.s6_*`, `SaveExternalCalendarTest.s6_*` |
 | s7 | `ExternalCalendarPersistenceTest.s7_*`, `SaveExternalCalendarTest.s7_*`, `ExternalCalendarApiTest.s7_*` |
-| s8 | `ExternalCalendarDisabledApiTest`, `ConnectorCipherTest.s8_*`, `external-calendar-api.test.ts` |
-| s9 | `ConnectorCipherTest.s9_*`, `ExternalCalendarWiringTest.s9_*`, `AesGcmSecretCipherTest.s9_*` |
+| s8 | `ExternalCalendarDisabledApiTest.s8_*` (7), `ExternalCalendarWiringTest.s8_*`, `external-calendar-api.test.ts` |
+| s9 | `ExternalCalendarWiringTest.s9_*`, `AesGcmSecretCipherTest.s9_*` |
 | s10 | `ExternalCalendarApiTest.s10_*`, `ExternalCalendarDisabledApiTest.s10_*` |
 | s11 | `OutboundHostGuardTest.s11_*`, `SyncExternalCalendarTest.s11_*`, `ExternalCalendarApiTest.s11_*` |
 | s12 | `HttpCalendarFeedTest.s12_*`, `SyncExternalCalendarTest.s12_*`, `ExternalCalendarPersistenceTest.s12_*` |
@@ -344,7 +344,7 @@ la máquina. Queda listo para que el `mutation_tester` lance
 | s37 | `external-calendar.test.tsx`, `external-calendar-route.test.tsx`, `external-calendar-api.test.ts` |
 | s38 | `external-calendar.test.tsx`, `external-calendar-api.test.ts` |
 | s39 | `external-calendar.test.tsx`, `external-calendar-api.test.ts` |
-| s40 | `external-calendar.test.tsx` (teclado y región viva), `e2e/external-calendar-ux-audit.spec.mjs` (sin ejecutar) |
+| s40 | `external-calendar.test.tsx` (teclado y región viva), `e2e/external-calendar-ux-audit.spec.mjs` (**5 pruebas, ejecutadas el 10-09-2026**: 14 anchos × 6 estados, axe, 4 modos × 6 estados, teclado, texto al 200 % × 6 estados), `e2e/external-calendar-native-zoom.spec.mjs` (zoom nativo al 200 %), `progress/ux_external_calendar.md` (matriz de los 30 principios) |
 
 ## Qué queda fuera de esta sesión
 

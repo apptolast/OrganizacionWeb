@@ -872,3 +872,143 @@ sección «Lo que este documento NO afirma» se reescribe para decir lo que ahor
 afirma, y el trabajo pendiente se reduce a la revisión manual con lector de pantalla,
 Firefox/WebKit y la excepción de `INPUT`/`SELECT`/`TEXTAREA`, que queda escrita en la
 lista en vez de silenciada.
+
+---
+
+## Ciclo 12 — repaso del contrato: @s30 sólo cumplía media frase
+
+Terminada la lista del dictamen, se repasó `features/external_calendar.feature`
+escenario a escenario contra el mapa `@s → test`. Aparecieron tres cosas; ésta se
+cierra aquí y las otras dos quedan escritas en el apartado siguiente.
+
+**Lo que decía el contrato.** @s30 (`features/external_calendar.feature:404-409`):
+
+> Given persona-a tiene suscripción con 5 eventos y lastSyncAt "2030-01-07T09:00:00Z"
+> And una sincronización confirmó en base de datos lastSyncAt "2030-01-07T11:00:00Z"
+> pero **su respuesta se perdió**
+> When el backend se reinicia y consulto GET "/api/v1/me/external-calendar"
+> Then recibo 200 con la misma id, lastSyncAt "2030-01-07T11:00:00Z" y **GET /events
+> devuelve los eventos de esa sincronización**
+
+**Lo que había.** `ExternalCalendarPersistenceTest.s30_aCommittedSubscriptionSurvivesANewStore`,
+seis líneas: crear y volver a leer con un almacén nuevo, comprobando la id y que la
+versión es cero. Ni una sincronización, ni la respuesta perdida, ni un solo evento. La
+segunda mitad del Then —la instantánea sobrevive y es la de la **última**
+sincronización— no la ejercía nadie.
+
+**VERDE.** `s30_theSnapshotOfASyncWhoseResponseWasLostSurvivesTheRestart`: se confirman
+**dos** sincronizaciones sobre la misma suscripción —la de las 09:00Z con cinco eventos
+y la de las 11:00Z con dos, cuyo valor de retorno se **descarta a propósito**, que es
+exactamente lo que le ocurre al llamante cuando la respuesta se pierde por el camino— y
+sólo entonces se abre un almacén nuevo sobre la misma base, que es como esta clase
+modela el reinicio. Se afirman la id, `lastSyncAt` 11:00Z, `lastAttemptAt`, el estado
+OK, la versión 2, `imported` 2 y que `events(...)` devuelve exactamente `w1` y `w2`.
+
+**ROJO acreditado, y con un mutante que no mataba nadie más.** En
+`PostgresExternalCalendarStore.commitSuccess` se cambió `imported = ?` por
+`imported = imported + ?`, es decir: los contadores pasan a acumular en vez de describir
+la última sincronización.
+
+```
+ExternalCalendarPersistenceTest > s30_theSnapshotOfASyncWhoseResponseWasLostSurvivesTheRestart() FAILED
+expected: 2
+ but was: 7
+20 tests completed, 1 failed
+```
+
+**Una sola** de las veinte pruebas de la clase cayó, y es la nueva. Las demás no
+encadenan dos sincronizaciones sobre la misma suscripción, así que ese mutante sobrevivía
+a la clase entera; los tests de aplicación usan un doble del almacén y los de HTTP un
+mock, de modo que tampoco lo veían. Producción restaurada y `BUILD SUCCESSFUL`.
+
+**Previsión de mutación (PIT).** `PostgresExternalCalendarStore` sí está en
+`externalCalendarClasses`, así que **este ciclo sí debería mover el marcador**: espero
+matar los mutantes que tocan la asignación de `imported` en `commitSuccess` y, en general,
+los que hacen que la instantánea o los contadores de la última sincronización no
+sobrevivan a una segunda pasada.
+
+---
+
+## Repaso del contrato, escenario a escenario — qué le falta a la 28 para el 100 %
+
+Hecho el 10 de septiembre de 2026, después de cerrar los diecinueve hallazgos del
+dictamen. Se recorrieron los **40 escenarios** de `features/external_calendar.feature`
+contra el mapa `@s → test` de `progress/tdd_external_calendar.md`, comprobando que
+cada clase citada **existe** y que cubre **todas las filas** del Outline, no sólo la
+primera.
+
+### Lo que se arregló en el propio repaso
+
+1. **@s30 sólo cumplía media frase.** Cerrado en el ciclo 12, arriba.
+2. **El mapa `@s → test` citaba una clase borrada.** `ConnectorCipherTest` aparecía en
+   las filas de @s8 y @s9 y **no existe**: desapareció con la deduplicación que unificó
+   el cifrado de las features 27 y 28. Quien leyera el mapa creía que había una prueba
+   que no hay. Las que sí hay —`ExternalCalendarDisabledApiTest.s8_*` (siete casos, uno
+   por ruta) y `ExternalCalendarWiringTest.s8_*`/`.s9_*`— quedan escritas en su lugar.
+   Cobertura real: intacta. Lo que estaba roto era el índice.
+3. **La fila de @s40 decía «sin ejecutar».** Era cierto cuando se escribió y ya no lo
+   es: se sustituye por lo que hoy se ejecuta, con cifras.
+
+### Lo que NO se ha podido cerrar, y por qué
+
+Ordenado por lo que más pesa en una puerta:
+
+1. **Las dos campañas de mutación no se han corrido.** No existe
+   `progress/mutation_external_calendar*.md`: ninguna campaña de PIT ni de Stryker ha
+   medido nunca esta feature. Es **la** puerta que falta, y no es de este carril: las
+   corre el orquestador en serie (`REPARTO_NOCHE.md`, regla 4). Previsión escrita por
+   ciclo, arriba; el ciclo 12 es el único que debería mover el marcador de PIT.
+2. **La revisión manual con lector de pantalla.** El propio spec de la auditoría la
+   declara obligatoria y `progress/ux_external_calendar.md` la lista como pendiente.
+   axe automatiza un subconjunto de reglas y no certifica NVDA ni VoiceOver. No es
+   automatizable: hace falta una persona.
+3. **Firefox y WebKit.** Todo lo medido en navegador es Chromium.
+   `external-calendar-native-zoom.spec.mjs` lo declara por escrito (el zoom nativo sólo
+   se sabe hacer con `chrome.tabs.setZoom`), y `playwright.config.mjs` no define
+   proyectos por motor. Es una limitación de casa, compartida con las features hermanas,
+   no un descuido de esta.
+
+### Limitaciones declaradas que NO considero deuda
+
+Están medidas, escritas y razonadas; las nombro para que nadie las descubra como
+sorpresa en el dictamen siguiente:
+
+- **2560 px CSS no se mide con zoom nativo al 200 %.** Exigiría una ventana de 5120 px
+  más el cromo. Sí se recorre en la matriz de 14 anchos, sin zoom.
+- **El estado «con lista larga de resúmenes Unicode» se siembra por SQL**, no por una
+  sincronización real: con la guardia SSRF activa no hay ningún feed iCalendar
+  alcanzable desde el contenedor. Lo medido es la pantalla, no el camino que la llena;
+  el camino lo cubren `IcsFeedTest`, `HttpCalendarFeedTest` (32 pruebas) y
+  `SyncExternalCalendarTest`.
+- **La pasada de `prefers-reduced-motion` es vacua** y la prueba lo afirma en vez de
+  esconderlo.
+- **`INPUT`, `SELECT` y `TEXTAREA` quedan fuera del oráculo de recorte** —y sólo de
+  ése—, documentado en el spec y en la matriz UX.
+- **@s35 y @s36 sólo se ejercen en jsdom.** Las once pruebas de
+  `today-external-calendar.test.tsx` y las dos de `today-external-section.test.tsx`
+  cubren **fila por fila** los cuatro *examples* de @s35 y los seis de @s36, incluidas
+  la cancelación por actualización nueva y la de salir de Hoy. La sección externa de
+  Hoy nunca se ha pintado en un navegador real, pero ningún Then de esos dos escenarios
+  habla de geometría ni de accesibilidad, así que no es un hueco de contrato: es una
+  oportunidad barata ahora que sembrar por SQL está resuelto, no un requisito.
+
+### Estado del recuento
+
+- 19 de 19 hallazgos del dictamen, cerrados.
+- 40 de 40 escenarios con al menos una prueba que puede fallar, y con las filas de los
+  Outline cubiertas una a una donde el contrato las enumera.
+- `feature_list.json`: la 28 sigue **`in_progress`**, y así debe seguir hasta que el
+  juez y el `mutation_tester` se pronuncien. Este carril no la marca `done`.
+
+### Verde de esta sesión
+
+```
+gradlew test --tests "…ExternalCalendarTodayApiTest"                 3 tests, BUILD SUCCESSFUL
+gradlew test --tests "…persistence.ExternalCalendarPersistenceTest"  20 tests, BUILD SUCCESSFUL
+gradlew test --tests "…ExternalCalendarIsolationTest"                BUILD SUCCESSFUL
+vitest run (los 5 ficheros del carril)                               85 passed (85)
+E2E_WEB_PORT=18092 … e2e/external-calendar-ux-audit.spec.mjs         5 passed
+```
+
+No se ha ejecutado la suite completa de backend ni PIT ni Stryker: cinco carriles
+comparten la máquina y las reglas lo prohíben.

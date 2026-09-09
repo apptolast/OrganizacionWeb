@@ -229,10 +229,10 @@ test("ics calendar Stryker selects its own nodes of the shared files", () => {
     ),
   );
   assert.deepEqual(config.mutate, [
-    "src/App.tsx:38:8-38:42",
-    "src/App.tsx:57:16-58:30",
-    "src/App.tsx:94:10-95:37",
-    "src/workspace.tsx:97:10-102:22",
+    "src/App.tsx:40:8-40:42",
+    "src/App.tsx:65:20-66:34",
+    "src/App.tsx:106:10-107:37",
+    "src/workspace.tsx:99:10-104:22",
     "src/calendar-feed-api.ts",
     "src/calendar.tsx",
   ]);
@@ -1660,10 +1660,10 @@ test("history Stryker covers new modules and complete integration nodes with inh
   assert.deepEqual(config.mutate, [
     "src/history-api.ts",
     "src/history.tsx",
-    "src/App.tsx:14:8-14:57",
-    "src/App.tsx:25:12-31:22",
-    "src/App.tsx:38:10-62:7",
-    "src/workspace.tsx:55:10-60:22",
+    "src/App.tsx:36:8-36:57",
+    "src/App.tsx:75:30-81:40",
+    "src/App.tsx:118:10-151:7",
+    "src/workspace.tsx:69:10-74:22",
     "src/project-reader.tsx:111:10-116:22",
     "src/task-reader.tsx:112:10-117:22",
   ]);
@@ -1931,10 +1931,10 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     "src/appearance-api.ts",
     "src/appearance-state.tsx",
     "src/appearance.tsx",
-    "src/App.tsx:36:8-36:44",
-    "src/App.tsx:61:20-73:36",
-    "src/App.tsx:98:10-139:7",
-    "src/workspace.tsx:85:10-90:22",
+    "src/App.tsx:38:8-38:44",
+    "src/App.tsx:69:24-81:40",
+    "src/App.tsx:110:10-151:7",
+    "src/workspace.tsx:87:10-92:22",
     "src/session-gate.tsx:32:2-52:6",
     "src/use-session.ts:208:0-229:1",
   ]);
@@ -2123,4 +2123,91 @@ test("the end to end stack enables the connectors with an explicit key and keeps
     harness,
     /APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES: "true"/,
   );
+});
+
+// Guardas de la feature 30 (automatizaciones), reinjertadas al fusionar: HEAD y la rama
+// anadian bloques de test intercalados sobre las mismas lineas y git no podia conservar los
+// dos lados. El contenido viene de claude/automations sin modificar.
+test("automations backend invokes only its fixed PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "automations-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=automations"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
+test("automations frontend runs only its Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "automations-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.automations.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("automations Stryker configuration mutates only the feature files", () => {
+  const config = JSON.parse(
+    readFileSync(resolve(root, "frontend/stryker.automations.config.json"), "utf8"),
+  );
+  assert.deepEqual(config.mutate, [
+    "src/automations-api.ts",
+    "src/automations.tsx",
+  ]);
+  assert.equal(config.thresholds.break, 80);
+});
+
+// Guardas de la feature 30, reinjertadas al fusionar: HEAD y la rama anadian bloques de
+// test intercalados sobre las mismas lineas y git no podia conservar los dos lados.
+test("automations backend invokes only its fixed PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "automations-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=automations"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
+test("automations frontend runs only its Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "automations-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.automations.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("automations Stryker configuration mutates only the feature files", () => {
+  const config = JSON.parse(
+    readFileSync(resolve(root, "frontend/stryker.automations.config.json"), "utf8"),
+  );
+  assert.deepEqual(config.mutate, [
+    "src/automations-api.ts",
+    "src/automations.tsx",
+  ]);
+  assert.equal(config.thresholds.break, 80);
 });

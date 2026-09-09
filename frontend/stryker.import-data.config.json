@@ -1,17 +1,21 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "vitest",
-  "plugins": ["@stryker-mutator/vitest-runner"],
-  "ignorePatterns": [".stryker-tmp-availability-replay"],
+  "plugins": [
+    "@stryker-mutator/vitest-runner"
+  ],
+  "ignorePatterns": [
+    ".stryker-tmp-availability-replay"
+  ],
   "mutate": [
     "src/import-data-api.ts",
     "src/import-data-intent.ts",
     "src/import-data.tsx",
-    "src/App.tsx:28:8-28:41",
-    "src/App.tsx:34:8-34:45",
-    "src/App.tsx:45:12-61:32",
-    "src/App.tsx:66:10-119:7",
-    "src/workspace.tsx:89:10-97:22",
+    "src/App.tsx:34:8-34:41",
+    "src/App.tsx:41:8-41:45",
+    "src/App.tsx:63:18-81:40",
+    "src/App.tsx:96:10-151:7",
+    "src/workspace.tsx:105:10-113:22",
     "src/use-session.ts:9:0-20:1",
     "src/use-session.ts:53:6-64:36",
     "src/use-session.ts:82:6-82:29",
@@ -21,7 +25,12 @@
     "src/appearance-state.tsx:171:8-177:9",
     "src/customization-state.ts:411:4-466:5"
   ],
-  "reporters": ["clear-text", "json", "html", "progress-append-only"],
+  "reporters": [
+    "clear-text",
+    "json",
+    "html",
+    "progress-append-only"
+  ],
   "thresholds": {
     "high": 90,
     "low": 80,

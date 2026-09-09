@@ -148,3 +148,17 @@ un cuarto conflicto a tres integraciones en curso. La nocturna no bloquea ningun
 puerta: `docs/verification.md` y `CHECKPOINTS.md` C7 exigen la mutación por
 alcance ejecutada por el `mutation_tester`, no esta. Se arregla en cuanto las
 tres estén dentro.
+## Carril `claude/automations` — feature 30, fase 1
+
+Rebasado sobre `origin/main` (7ea682d) replayando sólo los 20 comits del carril
+desde `01f80ab`; un `git rebase origin/main` directo intentaba 118 comits porque
+la rama salió de `codex/integration-api`, no de main.
+
+Fase 1 completa: reglas (crear, leer, reemplazar, borrar, cupo de veinte con
+carrera real), plantillas, evaluador, simulación en seco, auditoría paginada, API
+HTTP, migración V28 y la página `/automatizaciones`. Bitácora, trazabilidad
+@s → test, comandos y límites en `progress/tdd_automations.md`.
+
+No demostrado: la fase 2 entera (worker y `NOTIFY_WEBHOOK` real, dependen de 25).
+El punto de extensión `WebhookEndpointLookup` responde false y tiene test de
+contrato; ningún escenario de fase 2 se declara verde. Sin mutación lanzada.

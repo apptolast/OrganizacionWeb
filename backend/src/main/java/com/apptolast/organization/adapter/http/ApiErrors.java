@@ -207,6 +207,68 @@ public final class ApiErrors {
         .body(problem(404, "RESOURCE_NOT_FOUND", "No se ha encontrado el recurso."));
   }
 
+  @ExceptionHandler(com.apptolast.organization.domain.UnknownEventTypeException.class)
+  ResponseEntity<Map<String, Object>> unknownEventType(
+      com.apptolast.organization.domain.UnknownEventTypeException error) {
+    var body = problem(400, "UNKNOWN_EVENT_TYPE", error.getMessage());
+    body.put(
+        "errors",
+        List.of(
+            new com.apptolast.organization.domain.FieldError(
+                "trigger.eventType",
+                "UNKNOWN_EVENT_TYPE",
+                "Elige uno de los tipos de evento publicados.")));
+    return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_PROBLEM_JSON).body(body);
+  }
+
+  @ExceptionHandler(com.apptolast.organization.domain.AutomationTemplateException.class)
+  ResponseEntity<Map<String, Object>> template(
+      com.apptolast.organization.domain.AutomationTemplateException error) {
+    var body = problem(400, "INVALID_TEMPLATE", error.getMessage());
+    body.put("errors", error.errors());
+    return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_PROBLEM_JSON).body(body);
+  }
+
+  @ExceptionHandler(com.apptolast.organization.application.AutomationTargetNotFoundException.class)
+  ResponseEntity<Map<String, Object>> automationTarget(
+      com.apptolast.organization.application.AutomationTargetNotFoundException error) {
+    var body = problem(422, "TARGET_NOT_FOUND", error.getMessage());
+    body.put(
+        "errors",
+        List.of(
+            new com.apptolast.organization.domain.FieldError(
+                error.field(), "TARGET_NOT_FOUND", "Elige un proyecto propio existente.")));
+    return ResponseEntity.status(422).contentType(MediaType.APPLICATION_PROBLEM_JSON).body(body);
+  }
+
+  @ExceptionHandler(com.apptolast.organization.application.WebhookEndpointNotFoundException.class)
+  ResponseEntity<Map<String, Object>> automationEndpoint(
+      com.apptolast.organization.application.WebhookEndpointNotFoundException error) {
+    var body = problem(422, "ENDPOINT_NOT_FOUND", error.getMessage());
+    body.put(
+        "errors",
+        List.of(
+            new com.apptolast.organization.domain.FieldError(
+                error.field(), "ENDPOINT_NOT_FOUND", "Elige un endpoint propio y activo.")));
+    return ResponseEntity.status(422).contentType(MediaType.APPLICATION_PROBLEM_JSON).body(body);
+  }
+
+  @ExceptionHandler(com.apptolast.organization.application.AutomationLimitException.class)
+  ResponseEntity<Map<String, Object>> automationLimit(
+      com.apptolast.organization.application.AutomationLimitException error) {
+    var body = problem(409, "RULE_LIMIT", error.getMessage());
+    body.put("limit", com.apptolast.organization.application.AutomationRuleStore.RULE_LIMIT);
+    return ResponseEntity.status(409).contentType(MediaType.APPLICATION_PROBLEM_JSON).body(body);
+  }
+
+  @ExceptionHandler(com.apptolast.organization.application.AutomationConflictException.class)
+  ResponseEntity<Map<String, Object>> automationConflict(
+      com.apptolast.organization.application.AutomationConflictException error) {
+    return ResponseEntity.status(412)
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+        .body(problem(412, "AUTOMATION_CONFLICT", error.getMessage()));
+  }
+
   @ExceptionHandler(com.apptolast.organization.application.ProjectCompletedException.class)
   ResponseEntity<Map<String, Object>> completedProject() {
     return ResponseEntity.status(409)

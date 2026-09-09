@@ -20,6 +20,7 @@ export function Workspace({
     | "Importación"
     | "API para integraciones"
     | "Webhooks"
+    | "Automatizaciones"
     | null;
 }) {
   return (
@@ -123,6 +124,12 @@ export function Workspace({
             aria-current={section === "Webhooks" ? "page" : undefined}
           >
             Webhooks
+          </RouteLink>
+          <RouteLink
+            href="/automatizaciones"
+            aria-current={section === "Automatizaciones" ? "page" : undefined}
+          >
+            Automatizaciones
           </RouteLink>
         </nav>
         <div className="sidebar-note">

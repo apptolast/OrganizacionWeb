@@ -8,10 +8,10 @@
     ".stryker-tmp-availability-replay"
   ],
   "mutate": [
-    "src/App.tsx:38:8-38:42",
-    "src/App.tsx:57:16-58:30",
-    "src/App.tsx:94:10-95:37",
-    "src/workspace.tsx:97:10-102:22",
+    "src/App.tsx:40:8-40:42",
+    "src/App.tsx:65:20-66:34",
+    "src/App.tsx:106:10-107:37",
+    "src/workspace.tsx:99:10-104:22",
     "src/calendar-feed-api.ts",
     "src/calendar.tsx"
   ],

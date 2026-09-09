@@ -75,6 +75,8 @@ export function createProject(runner = run) {
           "export_data-persistence-backend",
           "external_calendar-backend",
           "external_calendar-frontend",
+          "automations-backend",
+          "automations-frontend",
         ].includes(target))
     ) {
       throw new Error(`Invalid target: ${target}`);
@@ -85,6 +87,21 @@ export function createProject(runner = run) {
         [taskName, "--no-daemon", ...args],
         { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
       );
+    if (task === "mutate" && target === "automations-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.automations.config.json",
+      ]);
+      return;
+    }
+    if (task === "mutate" && target === "automations-backend") {
+      backend("pitest", ["-PmutationScope=automations"]);
+      return;
+    }
     if (task === "mutate" && target === "github_connector-frontend") {
       runner("pnpm", [
         "--dir",
@@ -411,6 +428,8 @@ export function createProject(runner = run) {
         "e2e/github-connector-native-zoom.spec.mjs",
         "e2e/support/connector.mjs",
         "e2e/fake-github/server.mjs",
+        "e2e/automations.spec.mjs",
+        "e2e/automations-ux.spec.mjs",
       ]) {
         runner(process.execPath, ["--check", file]);
       }

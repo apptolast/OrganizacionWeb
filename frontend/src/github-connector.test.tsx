@@ -583,3 +583,52 @@ it("@s41 ignores the late answer of an import started before unmounting", async 
   await new Promise((resolve) => setTimeout(resolve, 0));
   expect(screen.queryByText("Creadas 199")).toBeNull();
 });
+
+// ------------------------------- @s40 la desconexión que falla: la rama que nadie había ejercido
+
+/**
+ * El catch de disconnect() no lo ejecutaba ninguna prueba: la campaña de
+ * mutación lo marcó como «sin cobertura», no como oráculo débil. Aquí se
+ * ejerce entero, con las dos ramas de su ternario.
+ */
+it("@s40 announces a failed disconnection and keeps the connection on screen", async () => {
+  serve("/api/v1/me/connectors/github", "DELETE", () =>
+    problem(409, { code: "CONNECTION_NOT_FOUND" }),
+  );
+  await open();
+  await screen.findByRole("combobox");
+
+  await userEvent.click(screen.getByRole("button", { name: "Desconectar" }));
+  await userEvent.click(
+    screen.getByRole("button", { name: "Confirmar desconexión" }),
+  );
+
+  expect(await screen.findByText("La conexión ya no existe")).toBeVisible();
+  // Nada se limpió: la desconexión no llegó a ocurrir.
+  expect(
+    screen.getByRole("button", { name: "Desconectar" }),
+  ).toBeInTheDocument();
+  expect(screen.queryByLabelText(/token/i)).toBeNull();
+});
+
+it("@s40 a failure that is not a typed connector error falls back to the generic message", async () => {
+  serve("/api/v1/me/connectors/github", "DELETE", () => {
+    // Un fallo del transporte, con un code que NO debe leerse: no es un
+    // ConnectorError, así que la pantalla ha de rehacerlo como genérico.
+    throw Object.assign(new Error("transporte"), {
+      code: "CONNECTION_NOT_FOUND",
+    });
+  });
+  await open();
+  await screen.findByRole("combobox");
+
+  await userEvent.click(screen.getByRole("button", { name: "Desconectar" }));
+  await userEvent.click(
+    screen.getByRole("button", { name: "Confirmar desconexión" }),
+  );
+
+  expect(
+    await screen.findByText("No se pudo importar. Inténtalo más tarde"),
+  ).toBeVisible();
+  expect(screen.queryByText("La conexión ya no existe")).toBeNull();
+});

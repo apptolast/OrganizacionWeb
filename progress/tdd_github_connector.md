@@ -159,6 +159,29 @@ lista blanca de rutas, que —correctamente— no incluye ninguna ruta del conec
   como se tecleó. El adaptador pide exactamente lo que recibe; el nombre canónico viene del
   `full_name` que responde GitHub, no de normalizar por nuestra cuenta.
 
+### Ciclo 11 — @s1 @s9 @s11 @s12 @s17 @s19 @s23 @s24 @s25 @s26 @s27 @s33 la persistencia
+
+- ROJO `GithubConnectorPersistenceTest`, 25 pruebas, **un solo contenedor PostgreSQL** para las tres
+  tablas y los tres adaptadores.
+- VERDE migración `V25__github_connector.sql` (la reservada; no se ha tocado ninguna anterior) y
+  `PostgresConnectorConnectionStore`, `PostgresIssueImportReceiptStore`,
+  `PostgresImportedTaskCommit`.
+- Invariantes que viven en el esquema, no en el código, y que las pruebas comprueban rompiéndolos:
+  - `CREATE UNIQUE INDEX ... ON issue_import_receipts (owner_id) WHERE status = 'running'`: la
+    exclusión mutua de @s25 la arbitra PostgreSQL. `begin` traduce la violación a
+    `IssueImportInProgressException`.
+  - `PRIMARY KEY (owner_id, source, external_id)` en `task_external_links`: reimportar no puede
+    duplicar (@s17), y dos propietarios sí pueden enlazar el mismo id externo (@s33).
+  - `CHECK ((status = 'running') = (finished_at IS NULL))` y hermanos: no cabe un recibo en curso
+    con final, ni uno cerrado sin él, ni uno en curso con código de error.
+  - `octet_length(token_ciphertext) BETWEEN 30 AND 284`: descarta que nadie guarde texto en claro.
+- `PostgresImportedTaskCommit` bloquea la fila del proyecto (`FOR UPDATE`) igual que la creación
+  normal de tareas, y **repropaga** `ResourceNotFoundException`, `ProjectCompletedException` y
+  `ValidationException` en lugar de disfrazarlas de fallo del almacén: la transacción revierte
+  igual, pero el motivo no es el almacén y el recibo no debe decir que sí.
+- Un rojo legítimo y era la prueba: construía un `ObjectMapper` pelado, incapaz de serializar
+  `Instant`. Ahora usa el mismo Jackson que configura la aplicación.
+
 ## Enmiendas al contrato aprobadas por el coordinador (9 de septiembre de 2026)
 
 Origen: `progress/security_review_connectors.md` (rama `main`). El coordinador actualiza

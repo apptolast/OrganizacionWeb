@@ -8,8 +8,8 @@ import java.util.Optional;
  * autenticado adicional, así que una fila movida a otro propietario deja de descifrar.
  *
  * <p>{@code decrypt} devuelve vacío en lugar de lanzar o devolver nulo para obligar a quien llama a
- * decidir qué hacer cuando el secreto ya no se puede leer: la feature 28 lo traduce a
- * {@code SECRET_UNREADABLE} y vuelve a pedir la dirección.
+ * decidir qué hacer cuando el secreto ya no se puede leer: la feature 28 lo traduce a {@code
+ * SECRET_UNREADABLE} y vuelve a pedir la dirección.
  */
 public interface SecretCipher {
   byte[] encrypt(String ownerId, String plaintext);

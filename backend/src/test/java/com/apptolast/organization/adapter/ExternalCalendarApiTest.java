@@ -54,8 +54,7 @@ import org.springframework.test.web.servlet.MockMvc;
     properties = {
       "app.auth.username=owner",
       "app.auth.password=test-only-secret",
-      "app.public-origin=https://organization.example",
-      "app.connectors.key=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
+      "app.public-origin=https://organization.example"
     })
 @Import(SecurityConfiguration.class)
 class ExternalCalendarApiTest {
@@ -71,6 +70,12 @@ class ExternalCalendarApiTest {
   @MockitoBean ExternalCalendarUseCases.Delete remove;
   @MockitoBean ExternalCalendarUseCases.Sync sync;
   @MockitoBean ExternalCalendarUseCases.ReadEvents events;
+  @MockitoBean com.apptolast.organization.application.SecretCipher cipher;
+
+  @org.junit.jupiter.api.BeforeEach
+  void connectorsAreEnabled() {
+    when(cipher.enabled()).thenReturn(true);
+  }
 
   static ExternalCalendarSubscription subscription() {
     return new ExternalCalendarSubscription(

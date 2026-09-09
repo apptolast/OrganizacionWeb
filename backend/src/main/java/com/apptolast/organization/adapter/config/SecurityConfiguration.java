@@ -77,7 +77,9 @@ public class SecurityConfiguration {
       org.springframework.beans.factory.ObjectProvider<
               com.apptolast.organization.application.ConsumeApiQuotaUseCase>
           quota,
-      @Value("${app.connectors.key:}") String connectorKey)
+      org.springframework.beans.factory.ObjectProvider<
+              com.apptolast.organization.application.SecretCipher>
+          connectorCipher)
       throws Exception {
     // The calendar routes stay out of the bearer channel: the feed is not exposed by credentials.
     return http.securityMatcher(
@@ -96,7 +98,7 @@ public class SecurityConfiguration {
             org.springframework.security.web.authentication.AnonymousAuthenticationFilter.class)
         .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
         .addFilterAfter(
-            new com.apptolast.organization.adapter.http.ConnectorsGate(connectorKey, json),
+            new com.apptolast.organization.adapter.http.ConnectorsGate(connectorCipher, json),
             org.springframework.security.web.access.intercept.AuthorizationFilter.class)
         .build();
   }
@@ -107,7 +109,9 @@ public class SecurityConfiguration {
       HttpSecurity http,
       com.fasterxml.jackson.databind.ObjectMapper json,
       @Value("${app.public-origin}") String publicOrigin,
-      @Value("${app.connectors.key:}") String connectorKey)
+      org.springframework.beans.factory.ObjectProvider<
+              com.apptolast.organization.application.SecretCipher>
+          connectorCipher)
       throws Exception {
     org.springframework.security.web.AuthenticationEntryPoint unauthorized =
         (request, response, error) -> {
@@ -156,7 +160,7 @@ public class SecurityConfiguration {
                         new com.apptolast.organization.adapter.http.SessionAccessDeniedHandler(
                             json)))
         .addFilterAfter(
-            new com.apptolast.organization.adapter.http.ConnectorsGate(connectorKey, json),
+            new com.apptolast.organization.adapter.http.ConnectorsGate(connectorCipher, json),
             org.springframework.security.web.access.intercept.AuthorizationFilter.class)
         .build();
   }

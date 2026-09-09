@@ -229,10 +229,10 @@ test("ics calendar Stryker selects its own nodes of the shared files", () => {
     ),
   );
   assert.deepEqual(config.mutate, [
-    "src/App.tsx:37:8-37:42",
-    "src/App.tsx:53:14-54:29",
-    "src/App.tsx:88:10-89:37",
-    "src/workspace.tsx:90:10-95:22",
+    "src/App.tsx:38:8-38:42",
+    "src/App.tsx:57:16-58:30",
+    "src/App.tsx:94:10-95:37",
+    "src/workspace.tsx:97:10-102:22",
     "src/calendar-feed-api.ts",
     "src/calendar.tsx",
   ]);
@@ -1931,10 +1931,10 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     "src/appearance-api.ts",
     "src/appearance-state.tsx",
     "src/appearance.tsx",
-    "src/App.tsx:35:8-35:44",
-    "src/App.tsx:57:18-69:34",
-    "src/App.tsx:92:10-133:7",
-    "src/workspace.tsx:78:10-83:22",
+    "src/App.tsx:36:8-36:44",
+    "src/App.tsx:61:20-73:36",
+    "src/App.tsx:98:10-139:7",
+    "src/workspace.tsx:85:10-90:22",
     "src/session-gate.tsx:32:2-52:6",
     "src/use-session.ts:208:0-229:1",
   ]);
@@ -2115,8 +2115,9 @@ test("the end to end stack enables the connectors with an explicit key and keeps
     /APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES: \$\{APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES:-false\}/,
   );
   const harness = readFileSync(resolve(root, "scripts/e2e.mjs"), "utf8");
-  const key = harness.match(/APP_CONNECTOR_KEY: "([^"]+)"/)?.[1];
+  const key = harness.match(/const connectorKey = "([^"]+)";/)?.[1];
   assert.ok(key, "el arnés de extremo a extremo debe fijar APP_CONNECTOR_KEY");
+  assert.match(harness, /APP_CONNECTOR_KEY: connectorKey,/);
   assert.equal(Buffer.from(key, "base64").length, 32);
   assert.doesNotMatch(
     harness,

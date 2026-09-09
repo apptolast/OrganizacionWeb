@@ -86,6 +86,11 @@ class SyncExternalCalendarTest {
     SecretCipher cipher =
         new SecretCipher() {
           @Override
+          public boolean enabled() {
+            return true;
+          }
+
+          @Override
           public byte[] encrypt(String ownerId, String url) {
             return url.getBytes(java.nio.charset.StandardCharsets.UTF_8);
           }

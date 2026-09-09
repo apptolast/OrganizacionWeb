@@ -31,8 +31,7 @@ import org.springframework.test.web.servlet.ResultActions;
     properties = {
       "app.auth.username=owner",
       "app.auth.password=test-only-secret",
-      "app.public-origin=https://organization.example",
-      "app.connectors.key="
+      "app.public-origin=https://organization.example"
     })
 @Import(SecurityConfiguration.class)
 class ExternalCalendarDisabledApiTest {
@@ -44,6 +43,9 @@ class ExternalCalendarDisabledApiTest {
   @MockitoBean ExternalCalendarUseCases.Delete remove;
   @MockitoBean ExternalCalendarUseCases.Sync sync;
   @MockitoBean ExternalCalendarUseCases.ReadEvents events;
+
+  /** Sin clave configurada, el cifrado unificado se declara deshabilitado. */
+  @MockitoBean com.apptolast.organization.application.SecretCipher cipher;
 
   @AfterEach
   void nothingWasAsked() {

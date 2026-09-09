@@ -58,10 +58,8 @@ class ConnectGithubTest {
 
     var stored = fakes.connections.find(OWNER).orElseThrow();
     assertEquals(-1, indexOfPlaintext(stored.tokenCiphertext()));
-    assertEquals(TOKEN, fakes.cipher.decrypt(OWNER, stored.tokenCiphertext()));
-    assertThrows(
-        SecretUndecipherableException.class,
-        () -> fakes.cipher.decrypt("otro-owner", stored.tokenCiphertext()));
+    assertEquals(TOKEN, fakes.cipher.decrypt(OWNER, stored.tokenCiphertext()).orElseThrow());
+    assertTrue(fakes.cipher.decrypt("otro-owner", stored.tokenCiphertext()).isEmpty());
   }
 
   @Test

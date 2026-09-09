@@ -1,9 +1,6 @@
 package com.apptolast.organization.adapter.connectors;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.Comparator;
 import java.util.List;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -37,11 +34,9 @@ public final class ConnectorKeyRing {
     return keys.getFirst();
   }
 
-  /** El byte de versión sólo ordena a las candidatas: quien decide es la etiqueta de GCM. */
-  List<ConnectorKey> candidatesFor(byte keyVersion) {
-    return keys.stream()
-        .sorted(Comparator.comparing((ConnectorKey key) -> key.version() != keyVersion))
-        .toList();
+  /** Se prueban en orden, la vigente primero: quien decide es la etiqueta de GCM. */
+  List<ConnectorKey> candidates() {
+    return keys;
   }
 
   private static ConnectorKey parse(String property, String raw) {
@@ -52,21 +47,18 @@ public final class ConnectorKeyRing {
       throw malformed(property);
     }
     if (material.length != KEY_BYTES) throw malformed(property);
-    return new ConnectorKey(version(material), new SecretKeySpec(material, "AES"));
+    return new ConnectorKey(new SecretKeySpec(material, "AES"));
   }
 
-  private static byte version(byte[] material) {
-    try {
-      return MessageDigest.getInstance("SHA-256").digest(material)[0];
-    } catch (NoSuchAlgorithmException error) {
-      throw new IllegalStateException("SHA-256 must be available", error);
-    }
-  }
-
+  /** Nombra la propiedad y su variable de entorno: @s9 de la feature 28 exige la segunda. */
   private static IllegalArgumentException malformed(String property) {
+    var variable = CURRENT.equals(property) ? "APP_CONNECTOR_KEY" : "APP_CONNECTOR_KEY_PREVIOUS";
     return new IllegalArgumentException(
-        property + " debe ser base64 de exactamente 32 bytes; revisa su variable de entorno");
+        property
+            + " ("
+            + variable
+            + ") debe ser base64 de exactamente 32 bytes; revisa su variable de entorno");
   }
 
-  record ConnectorKey(byte version, SecretKeySpec material) {}
+  record ConnectorKey(SecretKeySpec material) {}
 }

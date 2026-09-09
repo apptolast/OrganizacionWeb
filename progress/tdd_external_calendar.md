@@ -447,3 +447,100 @@ contra un `HttpServer` en loopback por `HttpCalendarFeedTest`. Cerrar ese hueco
 exigiría un contenedor de feed en la pila de E2E y
 `APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES=true`, que es justo lo que el contrato y
 la enmienda B10 quieren evitar por defecto: queda como decisión del coordinador.
+
+## Reasentamiento sobre `main` (a08d3be) y unificación de `SecretCipher`
+
+### La colisión de diseño: un solo concepto, un solo puerto
+
+Leídas las dos implementaciones, **son el mismo concepto** y se unifican. Pero el
+argumento decisivo no es de gusto, sino documental: **los dos contratos aprobados
+piden el mismo formato en reposo, y la 27 no lo cumplía.**
+
+- `features/github_connector.feature`, @s1: «token_ciphertext tiene octet_length
+  **12 + 14 + 16** bytes» —nonce, texto y etiqueta— y @s2: «sus **12 primeros
+  bytes** difieren».
+- `features/external_calendar.feature`, @s2: «url_ciphertext de **12 bytes de
+  nonce más cifrado**».
+
+La implementación de la 27 escribía `versión(1) || nonce(12) || sellado` (43
+bytes para ese token) y sus pruebas afirmaban `1 + 12 + …`, contradiciendo su
+propio contrato. Es exactamente la desviación de la enmienda B5 que este carril
+ya corrigió en el ciclo 6. Así que no he cambiado el formato de la 27 «porque me
+convenga»: lo he devuelto al que su Gherkin exige.
+
+Sobre el riesgo de dejar filas ilegibles: el byte de versión **no era portador de
+información**. El javadoc de `ConnectorKeyRing.candidatesFor` ya decía «el byte de
+versión sólo ordena a las candidatas: quien decide es la etiqueta de GCM».
+Quitarlo sólo elimina una pista de ordenación; la rotación de B5 sigue viva
+probando las claves del llavero. Lo que sí cambia es el desplazamiento del nonce,
+así que **cualquier fila `connector_connections` ya escrita quedaría ilegible**.
+En este repositorio no hay datos: V25 acaba de entrar y el despliegue vive en
+otro repositorio. Si el coordinador supiera de algún entorno con filas escritas,
+esto exige una migración y hay que decirlo antes de integrar.
+
+Resultado:
+
+- **Puerto único** `application/SecretCipher` con `encrypt`, `Optional<String>
+  decrypt` y `enabled()`. Gana `Optional` por lo que dijo el coordinador y porque
+  obliga a decidir en el punto de llamada.
+- **Adaptador único**: el de la 27, `adapter/connectors/AesGcmSecretCipher` sobre
+  `ConnectorKeyRing`, que es el más completo (llavero, rotación, validación al
+  arrancar). Se le quita el byte de versión y devuelve `Optional`.
+- **Se borran** mi `adapter/crypto/AesGcmSecretCipher` y `ConnectorCipher` con sus
+  dos tests: eran el duplicado. Sus casos valiosos ya los cubre
+  `adapter/connectors/AesGcmSecretCipherTest`, al que se le añadió la afirmación
+  del formato del contrato.
+- **`ConnectorsGate` consulta `enabled()`**, como recomendó el coordinador, en vez
+  de releer la propiedad: una sola fuente de verdad. Se inyecta como
+  `ObjectProvider<SecretCipher>` —el patrón que ya usa `SecurityConfiguration`
+  para la 24— porque si no, las rebanadas `@WebMvcTest` de la 27 no levantaban
+  contexto. Sin cifrado cableado, el valor por defecto es «deshabilitado».
+- **La 27 conserva su comportamiento**: su único punto de llamada
+  (`ImportGithubIssues.collect`) hace `.orElseThrow(SecretUndecipherableException::new)`.
+- `ConnectorKeyRing` pierde `version(byte[])` y el campo `version`, ya muertos, y
+  su mensaje de error nombra ahora la propiedad **y** la variable de entorno,
+  porque @s9 de la 28 exige que se mencione `APP_CONNECTOR_KEY`.
+
+**Defecto latente de la 27 que deja ver la unificación, y que no arreglo por no
+ser mi carril**: `SecretUndecipherableException` no se captura en ningún sitio, así
+que un token ilegible tras rotar la clave sale como 500 `INTERNAL_ERROR` en vez de
+un recibo fallido. Queda anotado en el código y aquí.
+
+### Los otros ocho conflictos
+
+`App.tsx` (tres hunks: import, constantes y cadena de render; se conservan
+`githubConnector`, `integrationsIndex`, `calendar` y `externalCalendar`),
+`workspace.tsx` (todas las entradas; la mía sigue antes de «Apariencia»),
+`build.gradle.kts` (unión `icsCalendarClasses + githubConnectorClasses +
+externalCalendarClasses`), `docker-compose.yml` y `scripts/e2e.mjs` (se conserva
+`connectorKey` de la 27 —la misma clave literal que yo había elegido— y se añade
+`APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES=false`), `styles.scss` (los dos bloques
+`.github-connector` y `.external-calendar` completos; `theme-tokens.test.ts` en
+verde), y los dos configs de Stryker con su espejo.
+
+`ApiCredentialCompatibilityTest` ya no tenía lista negra: no había nada que quitar
+para V26.
+
+### Rangos de Stryker recalculados sobre el `App.tsx` fusionado
+
+- `stryker.appearance.config.json`: `App.tsx` 36:8-36:44, 61:20-73:36, 98:10-139:7
+  y `workspace.tsx` 85:10-90:22.
+- `stryker.ics-calendar.config.json`: `App.tsx` 38:8-38:42, 57:16-58:30,
+  94:10-95:37 y `workspace.tsx` 97:10-102:22.
+
+Validados uno a uno por el oráculo de contenido de `scripts/project.test.mjs`:
+**85 pasan, 0 fallan**.
+
+### Pruebas ejecutadas
+
+- Carril 28 completo (backend filtrado) y frontend: verde.
+- **Feature 27**: `adapter.connectors.*`, `application.*Github*`,
+  `GithubConnectorWiringTest`, `GithubConnectorPersistenceTest`,
+  `GithubConnectorApiTest`, `github-connector.test.tsx`,
+  `github-connector-routing.test.tsx` → verde.
+- **Feature 24**: `adapter.ApiCredential*`, `adapter.persistence.ApiCredential*`,
+  `application.*ApiCredential*`, `SecurityHeadersTest`, `integration-api.test.tsx`
+  → verde.
+- Feature 26: `CalendarApiTest`, `CalendarWiringTest`, `calendar.test.tsx` → verde.
+- Frontend, 28 ficheros de prueba que tocan el armazón compartido: 1.031 pruebas
+  en verde.

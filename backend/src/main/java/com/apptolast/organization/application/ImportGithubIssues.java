@@ -123,7 +123,13 @@ public final class ImportGithubIssues implements ImportGithubIssuesUseCase {
       StoredConnection connection,
       IssueImportReceipt receipt,
       Tally tally) {
-    var token = cipher.decrypt(ownerId, connection.tokenCiphertext());
+    // El puerto unificado obliga a decidir: la 27 conserva su comportamiento previo, así que un
+    // secreto ilegible sigue siendo SecretUndecipherableException. Hoy nadie la captura y acaba en
+    // 500; queda anotado como defecto latente de la 27, ajeno a este carril.
+    var token =
+        cipher
+            .decrypt(ownerId, connection.tokenCiphertext())
+            .orElseThrow(SecretUndecipherableException::new);
     boolean more = false;
     for (int page = 1; page <= MAX_PAGES; page++) {
       var listed = source.list(connection.repository(), token, page);

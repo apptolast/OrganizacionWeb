@@ -40,6 +40,11 @@ class SaveExternalCalendarTest {
     int seals;
 
     @Override
+    public boolean enabled() {
+      return true;
+    }
+
+    @Override
     public byte[] encrypt(String ownerId, String url) {
       var plain = (url + "#" + seals++).getBytes(StandardCharsets.UTF_8);
       return plain;
@@ -172,6 +177,11 @@ class SaveExternalCalendarTest {
         new SaveExternalCalendar(
             store,
             new SecretCipher() {
+              @Override
+              public boolean enabled() {
+                return true;
+              }
+
               @Override
               public byte[] encrypt(String ownerId, String url) {
                 return cipher.encrypt(ownerId, url);

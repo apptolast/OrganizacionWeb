@@ -433,14 +433,6 @@ public class ApplicationConfiguration {
   // --- Feature 28: calendario externo ---
 
   @Bean
-  com.apptolast.organization.application.SecretCipher connectorCipher(
-      @org.springframework.beans.factory.annotation.Value("${app.connectors.key:}") String key,
-      @org.springframework.beans.factory.annotation.Value("${app.connectors.key-previous:}")
-          String previousKey) {
-    return com.apptolast.organization.adapter.crypto.ConnectorCipher.from(key, previousKey);
-  }
-
-  @Bean
   com.apptolast.organization.application.AddressPolicy connectorAddressPolicy(
       @org.springframework.beans.factory.annotation.Value(
               "${app.connectors.allow-private-addresses:false}")

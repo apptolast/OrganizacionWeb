@@ -2,24 +2,27 @@ package com.apptolast.organization.adapter.connectors;
 
 import com.apptolast.organization.application.ConnectorsDisabledException;
 import com.apptolast.organization.application.SecretCipher;
-import com.apptolast.organization.application.SecretUndecipherableException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Optional;
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 
 /**
  * AES-256-GCM con nonce nuevo por escritura, etiqueta de 128 bits y el propietario como dato
- * autenticado adicional. Formato: 1 byte de versión de clave, 12 de nonce, texto cifrado y
- * etiqueta.
+ * autenticado adicional. Formato: 12 bytes de nonce seguidos del sellado (texto cifrado y
+ * etiqueta), que es el que fijan los dos contratos: @s1 de la feature 27 exige octet_length 12 + 14
+ * + 16 y @s2 de la feature 28, "12 bytes de nonce más cifrado".
+ *
+ * <p>La rotación del hallazgo B5 sobrevive sin byte de versión: el llavero prueba las claves y es
+ * la etiqueta de GCM quien decide, que es lo que ya hacía antes.
  */
 public final class AesGcmSecretCipher implements SecretCipher {
   private static final int NONCE_BYTES = 12;
   private static final int TAG_BITS = 128;
-  private static final int VERSION_BYTES = 1;
-  private static final int SHORTEST = VERSION_BYTES + NONCE_BYTES + TAG_BITS / 8;
+  private static final int SHORTEST = NONCE_BYTES + TAG_BITS / 8;
   private final ConnectorKeyRing ring;
   private final SecureRandom random;
 
@@ -45,30 +48,29 @@ public final class AesGcmSecretCipher implements SecretCipher {
     } catch (GeneralSecurityException error) {
       throw new IllegalStateException("AES-GCM encryption failed", error);
     }
-    var output = new byte[VERSION_BYTES + NONCE_BYTES + sealed.length];
-    output[0] = key.version();
-    System.arraycopy(nonce, 0, output, VERSION_BYTES, NONCE_BYTES);
-    System.arraycopy(sealed, 0, output, VERSION_BYTES + NONCE_BYTES, sealed.length);
+    var output = new byte[NONCE_BYTES + sealed.length];
+    System.arraycopy(nonce, 0, output, 0, NONCE_BYTES);
+    System.arraycopy(sealed, 0, output, NONCE_BYTES, sealed.length);
     return output;
   }
 
   @Override
-  public String decrypt(String ownerId, byte[] ciphertext) {
+  public Optional<String> decrypt(String ownerId, byte[] ciphertext) {
     if (!ring.enabled()) throw new ConnectorsDisabledException();
-    if (ciphertext == null || ciphertext.length <= SHORTEST)
-      throw new SecretUndecipherableException();
-    var nonce = Arrays.copyOfRange(ciphertext, VERSION_BYTES, VERSION_BYTES + NONCE_BYTES);
-    var sealed = Arrays.copyOfRange(ciphertext, VERSION_BYTES + NONCE_BYTES, ciphertext.length);
-    for (var key : ring.candidatesFor(ciphertext[0])) {
+    if (ciphertext == null || ciphertext.length <= SHORTEST) return Optional.empty();
+    var nonce = Arrays.copyOf(ciphertext, NONCE_BYTES);
+    var sealed = Arrays.copyOfRange(ciphertext, NONCE_BYTES, ciphertext.length);
+    for (var key : ring.candidates()) {
       try {
-        return new String(
-            cipher(Cipher.DECRYPT_MODE, key, nonce, ownerId).doFinal(sealed),
-            StandardCharsets.UTF_8);
+        return Optional.of(
+            new String(
+                cipher(Cipher.DECRYPT_MODE, key, nonce, ownerId).doFinal(sealed),
+                StandardCharsets.UTF_8));
       } catch (GeneralSecurityException ignored) {
         // La etiqueta descarta la clave equivocada; se prueba la siguiente del llavero.
       }
     }
-    throw new SecretUndecipherableException();
+    return Optional.empty();
   }
 
   private static Cipher cipher(

@@ -8,6 +8,11 @@ const widths = [
   320, 359, 360, 361, 599, 600, 601, 767, 768, 769, 1279, 1280, 1281, 2560,
 ];
 const SECRET = "https://calendar.google.com/calendar/ical/e2e/private-WXYZ.ics";
+// Grosor declarado por la regla `:focus-visible` de frontend/src/styles.scss.
+const FOCUS_RING_MIN_WIDTH = 3;
+// Cota del recorrido con teclado: la barra lateral y el enlace de salto se
+// interponen, pero cinco paradas no necesitan más de cuarenta tabulaciones.
+const MAX_TAB_STEPS = 40;
 
 test.afterEach(() => {
   sql("DELETE FROM external_calendar_subscriptions WHERE owner_id='e2e-user'");
@@ -103,21 +108,56 @@ test("calendario externo audit: el recorrido con teclado sigue el orden del cont
     "Eliminar suscripción",
   ];
   const seen = [];
-  for (let step = 0; step < 40 && seen.length < expected.length; step++) {
+  // Un fallo por parada, no uno global: el contrato pide foco visible «en cada
+  // control», así que se mide dentro del bucle y se acumula el nombre del que
+  // falle. `intruders` recoge lo que recibe el foco DENTRO del formulario sin
+  // estar en el orden del contrato; fuera de él (saltar al contenido, barra
+  // lateral) los intermedios son legítimos y no cuentan.
+  const invisible = [];
+  const intruders = [];
+  for (
+    let step = 0;
+    step < MAX_TAB_STEPS && seen.length < expected.length;
+    step++
+  ) {
     await page.keyboard.press("Tab");
-    const name = await page.evaluate(() => {
+    const stop = await page.evaluate(() => {
       const active = document.activeElement;
-      if (!active) return "";
+      if (!active) return null;
       const label = active.labels?.[0]?.textContent;
-      return (label ?? active.textContent ?? "").trim();
+      const style = getComputedStyle(active);
+      return {
+        name: (label ?? active.textContent ?? "").trim(),
+        insideForm: Boolean(
+          active.closest(".external-calendar") && active !== document.body,
+        ),
+        matchesFocusVisible: active.matches(":focus-visible"),
+        outlineStyle: style.outlineStyle,
+        outlineWidth: parseFloat(style.outlineWidth),
+        outlineColor: style.outlineColor,
+      };
     });
-    if (expected.includes(name) && seen.at(-1) !== name) seen.push(name);
+    if (!stop) continue;
+    if (!expected.includes(stop.name)) {
+      if (stop.insideForm && !intruders.includes(stop.name))
+        intruders.push(stop.name);
+      continue;
+    }
+    if (seen.at(-1) === stop.name) continue;
+    seen.push(stop.name);
+    // El anillo del producto es `:focus-visible { outline: 3px solid var(--accent) }`
+    // (frontend/src/styles.scss). Se exige ese anillo y no el del agente de
+    // usuario, que Chromium computa con `outline-style: auto`.
+    const visible =
+      stop.matchesFocusVisible &&
+      stop.outlineStyle === "solid" &&
+      stop.outlineWidth >= FOCUS_RING_MIN_WIDTH &&
+      !stop.outlineColor.includes("transparent");
+    if (!visible) invisible.push(stop);
   }
   expect(seen).toEqual(expected);
-  const outline = await page.evaluate(
-    () => getComputedStyle(document.activeElement).outlineWidth,
-  );
-  expect(outline).not.toBe("0px");
+  expect(invisible).toEqual([]);
+  expect(intruders).toEqual([]);
 });
 
 test("calendario externo audit: texto al 200 % no recorta la pantalla a 320 px @s40", async ({

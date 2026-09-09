@@ -112,3 +112,102 @@ oráculo antiguo, ese mismo rechazo por validación bastaba para pasar.
 Fuera de alcance por decisión explícita del dictamen (arreglo 2 del hallazgo 16,
 marcado como opcional): no se añade la prueba de componente sobre la vía de
 éxito de `external-calendar.tsx:144-145` / `:128-129`.
+
+Commit: `39c04a4`.
+
+## Hallazgo 17 — el foco visible se comprobaba en un solo control, no «en cada control»
+
+**Qué había.** El bucle salía en cuanto `seen` reunía los cinco nombres y la
+única medición se hacía después, sobre el elemento activo en ese instante:
+«Eliminar suscripción». Etiqueta, Dirección secreta iCal, Guardar y Sincronizar
+ahora no se medían nunca. El predicado era `outlineWidth !== "0px"`, que ni
+siquiera distingue el anillo del producto del que pinta el agente de usuario.
+
+**Qué hay ahora.** La medición ocurre **dentro** del bucle, en cada una de las
+cinco paradas reconocidas, con el predicado del precedente del repositorio
+(`e2e/github-connector.spec.mjs:293-338`) más la parte específica del producto:
+
+```
+stop.matchesFocusVisible &&
+stop.outlineStyle === "solid" &&
+stop.outlineWidth >= FOCUS_RING_MIN_WIDTH &&
+!stop.outlineColor.includes("transparent")
+```
+
+Exigir `outlineStyle === "solid"` y 3 px es lo que declara la regla
+`:focus-visible` de `frontend/src/styles.scss:621-624`; el anillo de Chromium
+computa `outline-style: auto`, así que borrar esa regla global —el mutante que
+el dictamen señala como superviviente— ya no pasa desapercibido.
+
+Los fallos se acumulan en `invisible` con el nombre y las cuatro métricas de la
+parada, y se afirma `expect(invisible).toEqual([])`. Además se acumulan en
+`intruders` los nombres **no esperados** que reciben el foco dentro de
+`.external-calendar`, con `expect(intruders).toEqual([])`: así se afirma que no
+se cuela ningún foco intermedio dentro del formulario. Los intermedios de fuera
+del formulario (saltar al contenido, barra lateral) se siguen filtrando, que es
+lo correcto según el propio dictamen: el contrato pide orden, no contigüidad.
+Los dos números del bucle dejan de ser mágicos (`FOCUS_RING_MIN_WIDTH`,
+`MAX_TAB_STEPS`).
+
+**ROJO demostrado.** Defecto inyectado en `frontend/src/styles.scss`: se apaga
+el anillo del **primer** control del recorrido, justo el que el oráculo antiguo
+no miraba nunca.
+
+```scss
+#external-calendar-label:focus-visible {
+  outline: none;
+}
+```
+
+`E2E_WEB_PORT=18096 node scripts/e2e.mjs e2e/external-calendar-ux-audit.spec.mjs -g "recorrido con teclado"`:
+
+```
+> 159 |   expect(invisible).toEqual([]);
++   Object {
++     "insideForm": true,
++     "matchesFocusVisible": true,
++     "name": "Etiqueta",
++     "outlineColor": "rgb(35, 57, 47)",
++     "outlineStyle": "none",
++     "outlineWidth": 3,
++   },
+1 failed › calendario externo audit: el recorrido con teclado sigue el orden del contrato @s40
+```
+
+El mensaje nombra el control que falla, que era el objetivo del acumulador.
+
+**VERDE tras restaurar.** Revertido `frontend/src/styles.scss` a HEAD (`git
+status` limpio para ese fichero) y repetida la misma orden:
+
+```
+✓ e2e\external-calendar-ux-audit.spec.mjs:94:1 › calendario externo audit: el recorrido con teclado sigue el orden del contrato @s40 (1.2s)
+2 passed (7.8s)
+```
+
+(El segundo verde es `github-connector.spec.mjs:261`, que el `-g` también
+alcanza; se deja constancia para que nadie lo lea como una repetición.)
+
+**Refactor.** El cuerpo del bucle queda en tres decisiones cortas (intruso,
+repetición, medición) y prettier reformatea el `for`. Una sola pila E2E en el
+puerto 18096 por ejecución, bajada por el `finally` de `scripts/e2e.mjs` en
+ambas (rojo y verde): no quedan contenedores huérfanos.
+
+## Estado de cierre
+
+Los tres hallazgos quedan cerrados con rojo demostrado antes del verde
+(cuatro ejecuciones rojas en total: una en el 15, dos en el 16, una en el 17).
+Producción sin cambios: `git diff` contra la base es vacío para
+`frontend/src/external-calendar.tsx`, `frontend/src/external-calendar-api.ts` y
+`frontend/src/styles.scss`.
+
+No se marca nada `done`: falta el veredicto del juez y la mutación.
+
+Fuera de alcance (registrado por el lead, no tocado aquí):
+
+- La guardia contra SSRF descarta las direcciones que acaba de validar y vuelve
+  a conectar por nombre: la enmienda B3 no está implementada. Bloqueante de
+  seguridad aparte.
+- `HttpCalendarFeed` no tiene plazo para leer el **cuerpo**
+  (`HttpRequest.timeout` no lo cubre con `BodyHandlers.ofInputStream`); un
+  proveedor que se calle a mitad cuelga la descarga. Demostrado en
+  `progress/tdd_feed_size_abort.md` sección 5; exige contrato nuevo.

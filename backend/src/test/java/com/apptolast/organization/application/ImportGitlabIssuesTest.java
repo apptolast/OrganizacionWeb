@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * @s15 el mismo caso de uso de importación de 27, servido esta vez por GitLab: el recibo declara su
@@ -252,6 +254,41 @@ class ImportGitlabIssuesTest {
   }
 
   // ------------------------------------------- @s26 un fallo en la página 2 no borra la página 1
+
+  // -------------------------------------------------- @s16 paginar por X-Next-Page, tope de dos
+
+  /** Una página de {@code count} issues; {@code more} es lo que anunciaría X-Next-Page. */
+  private static IssuePage pageOf(int firstId, int count, boolean more) {
+    var issues = new java.util.ArrayList<ExternalIssue>();
+    for (int offset = 0; offset < count; offset++) issues.add(issue(firstId + offset));
+    return new IssuePage(issues, count, more);
+  }
+
+  @ParameterizedTest(name = "{0}+{2} issues -> {4} peticiones, created {5}, truncated {6}")
+  @CsvSource({
+    "0,  false, 0,   false, 1, 0,   false",
+    "37, false, 0,   false, 1, 37,  false",
+    "100, true, 40,  false, 2, 140, false",
+    "100, true, 100, true,  2, 200, true"
+  })
+  void s16_readsAtMostTwoPagesAndOnlySaysTruncatedWhenGitlabAnnouncesMore(
+      int firstCount,
+      boolean firstMore,
+      int secondCount,
+      boolean secondMore,
+      int expectedRequests,
+      int expectedCreated,
+      boolean expectedTruncated) {
+    fakes.source.page(1, pageOf(9001, firstCount, firstMore));
+    fakes.source.page(2, pageOf(9001 + firstCount, secondCount, secondMore));
+
+    var receipt = importIssues().execute(OWNER, projectId);
+
+    assertEquals(expectedRequests, fakes.source.calls().size());
+    assertEquals(expectedCreated, receipt.created());
+    assertEquals(expectedTruncated, receipt.truncated());
+    assertEquals(expectedCreated, fakes.tasks.links());
+  }
 
   /** Una página llena, que es la única forma de que se pida la siguiente. */
   private static IssuePage fullPage(int firstId) {

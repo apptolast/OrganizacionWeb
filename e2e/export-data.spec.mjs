@@ -67,6 +67,22 @@ test("export: real owner snapshot downloads original bytes twice without another
       page.getByRole("heading", { name: "Exportar mis datos", level: 1 }),
     ).toBeFocused();
     expect(reads).toHaveLength(0);
+    // El test se queda con los bytes del transporte: response.body() se los
+    // pediría a la caché del inspector de Chromium, que ya desaloja el cuerpo
+    // que la página consumió en streaming y falla bajo carga.
+    let transportFetches = 0;
+    let original = null;
+    let transport = null;
+    await page.route(
+      (url) => url.pathname === "/api/v1/me/export",
+      async (route) => {
+        transportFetches++;
+        const served = await route.fetch();
+        original = await served.body();
+        transport = { status: served.status(), headers: served.headers() };
+        await route.fulfill({ response: served, body: original });
+      },
+    );
     const received = page.waitForResponse(
       (response) => new URL(response.url()).pathname === "/api/v1/me/export",
     );
@@ -77,7 +93,13 @@ test("export: real owner snapshot downloads original bytes twice without another
       .click();
     const response = await received;
     expect(response.status()).toBe(200);
-    const original = await response.body();
+    expect(transportFetches).toBe(1);
+    expect(transport.status).toBe(200);
+    expect(original).toBeInstanceOf(Buffer);
+    expect(transport.headers["content-type"]).toMatch(
+      /^application\/json\s*;\s*charset=utf-8$/i,
+    );
+    expect(Number(transport.headers["content-length"])).toBe(original.length);
     expect(response.headers()["content-type"]).toMatch(
       /^application\/json\s*;\s*charset=utf-8$/i,
     );
@@ -121,6 +143,9 @@ test("export: real owner snapshot downloads original bytes twice without another
     await expect(page.getByRole("status")).toHaveText("Archivo preparado");
     expect(downloads).toHaveLength(0);
     const filename = `organizationweb-export-v1-${data.exportedAt.replace(/[-:.]/g, "")}.json`;
+    expect(transport.headers["content-disposition"]).toBe(
+      `attachment; filename="${filename}"`,
+    );
     expect(response.headers()["content-disposition"]).toBe(
       `attachment; filename="${filename}"`,
     );
@@ -136,6 +161,7 @@ test("export: real owner snapshot downloads original bytes twice without another
       expect(await readFile(await download.path())).toEqual(original);
     }
     expect(reads).toHaveLength(1);
+    expect(transportFetches).toBe(1);
     expect(downloads).toHaveLength(2);
     expect(writes).toEqual([]);
     expect(snapshot()).toBe(before);

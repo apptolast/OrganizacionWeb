@@ -812,14 +812,19 @@ it("@s41 a direct private route survives real login and adds one final navigatio
     }),
   ).toBeVisible();
   expect(window.location.pathname).toBe("/integraciones/api");
-  const links = screen
-    .getByRole("navigation", { name: "Principal" })
-    .querySelectorAll("a");
+  const links = [
+    ...screen
+      .getByRole("navigation", { name: "Principal" })
+      .querySelectorAll("a"),
+  ];
   expect(links[0]).toHaveAccessibleName("Hoy");
-  expect(links[links.length - 1]).toHaveAccessibleName(
-    "API para integraciones",
-  );
-  expect(links[links.length - 1]).toHaveAttribute("aria-current", "page");
+  // Feature 25 adds Webhooks after this entry, so what matters is that this link
+  // exists and is the current page, not that it is the last one in the list.
+  const api = links.find(
+    (link) => link.textContent?.trim() === "API para integraciones",
+  )!;
+  expect(api).toBeDefined();
+  expect(api).toHaveAttribute("aria-current", "page");
 });
 
 it("@s37 real logout retires the credential intention before its response arrives", async () => {

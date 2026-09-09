@@ -785,21 +785,20 @@ it("@s20 opens appearance through the principal navigation at its stable route",
     screen.getByRole("navigation", { name: "Principal" }),
   );
   expect(navigation.getAllByRole("link")[0]).toHaveAccessibleName("Hoy");
-  expect(navigation.getAllByRole("link").at(-5)).toHaveAccessibleName(
+  // Later features append entries, so assert the tail order by name and not by
+  // index: these keep their relative order however many entries exist.
+  const names = navigation
+    .getAllByRole("link")
+    .map((link) => link.textContent?.replace(/[^\p{L}\s]/gu, "").trim() ?? "");
+  const order = [
     "Apariencia",
-  );
-  expect(navigation.getAllByRole("link").at(-4)).toHaveAccessibleName(
     "Exportación",
-  );
-  expect(navigation.getAllByRole("link").at(-3)).toHaveAccessibleName(
     "Calendario",
-  );
-  expect(navigation.getAllByRole("link").at(-2)).toHaveAccessibleName(
     "Importación",
-  );
-  expect(navigation.getAllByRole("link").at(-1)).toHaveAccessibleName(
     "API para integraciones",
-  );
+  ].map((name) => names.indexOf(name));
+  expect(order.every((index) => index > 0)).toBe(true);
+  expect(order).toEqual([...order].sort((left, right) => left - right));
   await userEvent.click(screen.getByRole("link", { name: "Apariencia" }));
   expect(window.location.pathname).toBe("/apariencia");
   expect(await screen.findByRole("radio", { name: "Oscuro" })).toBeChecked();

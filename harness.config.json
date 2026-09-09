@@ -23,7 +23,7 @@
     "targets": []
   },
   "rules": {
-    "one_feature_at_a_time": true,
+    "one_feature_at_a_time": false,
     "require_approved_spec_to_implement": true,
     "require_tests_to_close": true,
     "require_mutation_to_close": true

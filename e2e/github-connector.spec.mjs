@@ -125,6 +125,12 @@ test("@s42 estado deshabilitado: el servidor sin clave de conectores", async ({
   page,
   request,
 }) => {
+  // Esta prueba recrea el backend dos veces —sin clave y de vuelta con ella— y espera a que
+  // responda cada vez. `waitForBackend` se da 90 s por espera, así que bajo el presupuesto de 30 s
+  // del `playwright.config` la espera interior no se puede honrar nunca: la prueba muere a los 30 s
+  // aunque el backend fuese a levantar al segundo 31. El presupuesto tiene que cubrir las dos
+  // esperas más las dos recreaciones de Compose.
+  test.setTimeout(240_000);
   await withConnectorDisabled(request, async () => {
     await page.goto(PAGE);
     await expect(page.getByRole("alert")).toContainText(

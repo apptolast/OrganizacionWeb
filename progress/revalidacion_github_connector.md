@@ -84,3 +84,78 @@ versión, salvo el comentario de la migración descrito arriba —que no es una 
 hacer fallar ninguna prueba— y `AesGcmWebhookSecrets`, que es el cifrador **de la feature 23**
 (webhooks) y tiene su propio formato con byte de versión por diseño: no comparte columna, ni tabla,
 ni contrato con el conector.
+
+---
+
+## Paso 2 — Primera campaña E2E sobre el árbol de hoy: 14 de 16, y el bloqueante del juez en verde
+
+    E2E_WEB_PORT=18096 pnpm test:e2e -- e2e/github-connector.spec.mjs \
+                                        e2e/github-connector-native-zoom.spec.mjs
+
+Pila propia (`organizationweb-e2e-67024`), construida desde cero, cuatro contenedores sanos
+(postgres, backend, web, github-fake), un solo worker, `retries: 0`.
+
+**Resultado: 16 pruebas, 14 verdes, 2 rojas, 2,2 minutos.**
+
+Lo primero que hay que decir, porque es lo que el juez pedía:
+
+> `✓ 4 e2e\github-connector.spec.mjs:151:1 › @s42 estado conectada, alcanzado conectando de verdad (7.1s)`
+
+**Esa es la prueba del bloqueante.** Es la que contiene
+`toBe(String(12 + TOKEN.length + 16))`, la que el juez declaró «aritméticamente falsa» sobre el
+formato viejo. Pasa contra el `octet_length` real de la fila que el backend acaba de escribir con el
+cifrador de hoy. El formato en reposo son **48 octetos** y la aserción los afirma. El bloqueante
+está cerrado con ejecución, no con lectura.
+
+Y `github-connector-native-zoom.spec.mjs` pasó también, en primera posición y en 12,2 s.
+
+### Las dos rojas: qué eran de verdad
+
+    ✘ 2 ...:124:1 › @s42 estado deshabilitado: el servidor sin clave de conectores (32.3s)
+    ✘ 3 ...:142:1 › @s42 estado sin conexión (3.3s)
+
+    Error: expect(received).toBe(expected)
+    Expected: 200
+    Received: 502
+    Call Log: - Test timeout of 30000ms exceeded
+        at waitForBackend (e2e\support\connector.mjs:67:6)
+        at withConnectorDisabled (e2e\support\connector.mjs:117:11)
+
+**No es el producto: es una contradicción de presupuestos en el andamiaje de la prueba.** La
+aritmética lo dice sola:
+
+- `withConnectorDisabled` recrea el backend **dos veces** —una sin `APP_CONNECTOR_KEY` y otra de
+  vuelta con ella, en el `finally`— y espera a que responda cada vez.
+- `waitForBackend` (`connector.mjs:65`) se concede `{ timeout: 90_000 }` por espera.
+- El presupuesto de la prueba era el de `playwright.config.mjs`: **30 s**.
+
+Una espera interior de 90 s bajo un presupuesto exterior de 30 s **no se puede honrar nunca**: la
+prueba muere a los 30 s aunque el backend fuese a levantar en el segundo 31. Con la máquina cargada
+—cinco carriles a la vez— una recreación de Compose pasa de 30 s con holgura, y eso es exactamente
+lo que ocurrió: el 502 es el proxy web contestando mientras el backend aún arranca.
+
+La segunda roja es **consecuencia de la primera, no un defecto propio**: al abortar la prueba a los
+30 s, el `finally` que restaura la clave quedó a medias, y «estado sin conexión» encontró el backend
+todavía levantándose (`502 !== 200` en el `loginSession` de su propio fixture). Que las doce pruebas
+siguientes pasaran confirma que la pila se restauró sola unos segundos después.
+
+Esto explica también por qué la campaña anterior del artesano fue verde y ésta no: **la prueba
+dependía de que la máquina recreara el backend en menos de 30 s.** Era verde por suerte de carga, no
+por presupuesto.
+
+### El arreglo, mínimo y en el sitio correcto
+
+`e2e/github-connector.spec.mjs`, en la única prueba que recrea la pila:
+
+    test.setTimeout(240_000);
+
+con el porqué escrito encima: dos esperas de hasta 90 s más las dos recreaciones de Compose no caben
+en 30 s. **No se relaja ninguna aserción ni se pierde cobertura**: el estado `deshabilitado` se
+sigue alcanzando recreando el backend sin clave de verdad, y se le siguen exigiendo el `role="alert"`
+con «configuración del servidor», la ausencia del campo token, la ausencia del botón de importar,
+axe y la geometría. Sólo se le da a la prueba el tiempo que su propio andamiaje ya declaraba
+necesitar. Es el mismo remedio que `github-connector-native-zoom.spec.mjs` ya aplicaba
+(`test.setTimeout(180_000)`) por la misma razón.
+
+**El rojo está acreditado por ejecución real**, no por construcción: la traza de arriba es de la
+campaña ejecutada, con su mensaje y su línea.

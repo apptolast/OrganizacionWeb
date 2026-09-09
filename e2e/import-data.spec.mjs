@@ -58,13 +58,11 @@ test("import: own durable project preview and deliberate atomic addition with no
       name: "Principal",
       exact: true,
     });
-    // El orden que la aplicacion SIRVE hoy, afirmado entero. Diverge de la
-    // enmienda de `project-spec.md:2504` en dos puntos, anotados en
-    // `progress/current.md`: «Calendario externo» no aparece en ella y
-    // «Calendario» y «Exportación» van intercambiados. Se afirma la lista
-    // completa y no posiciones desde el final: `nth(-2)` caduca en silencio en
-    // cuanto una feature añade una ruta.
-    const ORDEN_SERVIDO = [
+    // El orden canónico de `project-spec.md`, ampliación ratificada el 10 de
+    // septiembre de 2026: trece entradas, con «Calendario externo» en sexta
+    // posición. La enmienda prohíbe afirmar la posición por índice (`nth(-2)`,
+    // `last()`): caduca en silencio en cuanto una feature añade una ruta.
+    const ORDEN_CANONICO = [
       "Hoy",
       "Proyectos",
       "Disponibilidad",
@@ -79,8 +77,8 @@ test("import: own durable project preview and deliberate atomic addition with no
       "Webhooks",
       "Automatizaciones",
     ];
-    await expect(nav.getByRole("link")).toHaveCount(ORDEN_SERVIDO.length);
-    for (const [posicion, nombre] of ORDEN_SERVIDO.entries())
+    await expect(nav.getByRole("link")).toHaveCount(ORDEN_CANONICO.length);
+    for (const [posicion, nombre] of ORDEN_CANONICO.entries())
       await expect(nav.getByRole("link").nth(posicion)).toHaveAccessibleName(
         nombre,
       );

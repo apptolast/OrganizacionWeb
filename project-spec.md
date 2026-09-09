@@ -2509,6 +2509,14 @@ contradicción a tres bandas: las features 25 y 30 reclamaban ambas la entrada
 «API para integraciones» sea el **último** enlace del menú. Los tres enunciados
 no eran satisfacibles a la vez.
 
+**Ampliación ratificada por el propietario el 10 de septiembre de 2026.** La
+redacción anterior fijaba doce entradas y omitía «Calendario externo», la de la
+feature 28, que se integró después de redactarse: la enmienda original sólo
+arbitraba el choque entre la 25 y la 30. Además ordenaba «Calendario» antes que
+«Exportación», al revés de lo que la aplicación sirve. Puesta la contradicción
+delante del propietario, resolvió **extender la enmienda al orden servido**, y
+no mover la aplicación. Trece entradas, por tanto.
+
 El orden canónico y completo de la navegación principal es:
 
 1. Hoy
@@ -2516,17 +2524,26 @@ El orden canónico y completo de la navegación principal es:
 3. Disponibilidad
 4. Historial
 5. Revisión semanal
-6. Apariencia
-7. Calendario
+6. Calendario externo
+7. Apariencia
 8. Exportación
-9. Importación
-10. API para integraciones
-11. Webhooks
-12. Automatizaciones
+9. Calendario
+10. Importación
+11. API para integraciones
+12. Webhooks
+13. Automatizaciones
 
-Las dos entradas nuevas van detrás de «API para integraciones» en orden de
-número de feature, que es lo que ambas implementaciones ya hacen. El conector
-GitHub (feature 27) no añade entrada, por contrato propio.
+«Webhooks» (feature 25) y «Automatizaciones» (feature 30) van detrás de «API
+para integraciones» en orden de número de feature, que es lo que ambas
+implementaciones ya hacen. El conector GitHub (feature 27) no añade entrada, por
+contrato propio.
+
+Que esta contradicción viviera días sin que nadie la viera tiene una causa
+concreta, anotada aquí porque volverá a pasar: **las pruebas que vigilaban la
+navegación lo hacían por posición** —`nth(-3)`, `last()`— y esas aserciones
+siguen pasando aunque el orden entero cambie, mientras lo que miran siga donde
+estaba. Sólo al sustituirlas por la lista completa salió a la luz. De ahí la
+consecuencia obligatoria que viene a continuación.
 
 **Consecuencia obligatoria para las pruebas.** Toda aserción que fije la
 posición de un enlace por índice —`at(-1)`, `last()`, `length - 2`, un recuento

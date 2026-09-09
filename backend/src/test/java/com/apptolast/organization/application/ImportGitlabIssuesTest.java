@@ -251,6 +251,54 @@ class ImportGitlabIssuesTest {
     assertEquals(0, fakes.tasks.tasks());
   }
 
+  // ------------------------------------------- @s26 un fallo en la página 2 no borra la página 1
+
+  /** Una página llena, que es la única forma de que se pida la siguiente. */
+  private static IssuePage fullPage(int firstId) {
+    var issues = new java.util.ArrayList<ExternalIssue>();
+    for (int offset = 0; offset < IssuePage.PAGE_SIZE; offset++)
+      issues.add(issue(firstId + offset));
+    return new IssuePage(issues, IssuePage.PAGE_SIZE, true);
+  }
+
+  @Test
+  void s26_afailureOnTheSecondPageKeepsTheHundredTasksTheFirstOneConfirmed() {
+    fakes.source.page(1, fullPage(9001));
+    fakes.source.failOnPage(2, IssueSourceException.unavailable());
+
+    var error =
+        assertThrows(
+            IssueImportFailedException.class, () -> importIssues().execute(OWNER, projectId));
+
+    var receipt = error.receipt();
+    assertEquals("failed", receipt.status());
+    assertEquals("GITLAB_UNAVAILABLE", receipt.errorCode());
+    assertEquals(IssuePage.PAGE_SIZE, receipt.created());
+    assertEquals(0, receipt.skipped());
+    assertEquals(0, receipt.failed());
+    assertFalse(receipt.truncated());
+    assertNotNull(receipt.finishedAt());
+    assertEquals(IssuePage.PAGE_SIZE, fakes.tasks.tasks());
+    assertEquals(IssuePage.PAGE_SIZE, fakes.tasks.links());
+    assertEquals(IssuePage.PAGE_SIZE, fakes.tasks.events());
+  }
+
+  @Test
+  void s26_asecondImportWithBothPagesHealthyOnlyCreatesWhatTheFailureLeftOut() {
+    fakes.source.page(1, fullPage(9001));
+    fakes.source.failOnPage(2, IssueSourceException.unavailable());
+    assertThrows(IssueImportFailedException.class, () -> importIssues().execute(OWNER, projectId));
+    fakes.source.failOnPage(2, null);
+    fakes.source.page(2, new IssuePage(List.of(issue(9101), issue(9102)), 2, false));
+
+    var receipt = importIssues().execute(OWNER, projectId);
+
+    assertEquals("completed", receipt.status());
+    assertEquals(2, receipt.created());
+    assertEquals(IssuePage.PAGE_SIZE, receipt.skipped());
+    assertEquals(IssuePage.PAGE_SIZE + 2, fakes.tasks.links());
+  }
+
   @Test
   void s15_theIssuesAreAskedForByProjectReferenceWithTheDecryptedToken() {
     fakes.source.page(1, new IssuePage(List.of(issue(9001)), 1, false));

@@ -332,9 +332,17 @@ describe("@s36 cancelación", () => {
       "fetch",
       vi.fn().mockImplementation(async () => {
         controller.abort();
-        return Response.json({ configured: true, subscription: null });
+        return Response.json({ configured: false, subscription: null });
       }),
     );
-    await expect(readExternalCalendar(controller.signal)).rejects.toThrow();
+    const rejection = await readExternalCalendar(controller.signal).then(
+      () => null,
+      (error: unknown) => error,
+    );
+    expect(rejection).toBe(controller.signal.reason);
+    expect(rejection).toMatchObject({ name: "AbortError" });
+    expect(rejection).not.toMatchObject({
+      message: "Respuesta de calendario externo inválida.",
+    });
   });
 });

@@ -55,3 +55,60 @@ defecto puesto: es exactamente el hueco que el dictamen describe.
 **Refactor.** Ninguno necesario; la prueba queda en una sola función corta y sin
 duplicación con las vecinas (el `fetch` doblado local no puede compartirse con
 el de `beforeEach` porque ese resuelve al instante y aquí hace falta retener).
+
+Commit: `3ea8644`.
+
+## Hallazgo 16 — la prueba de «no validar una lectura ya cancelada» pasaba por el motivo equivocado
+
+**Qué había.** El `fetch` doblado abortaba y devolvía
+`{configured: true, subscription: null}`, cuerpo que `snapshotOf` ya declara
+inválido. La aserción era un `rejects.toThrow()` pelado: rechazaba, sí, pero
+podía estar rechazando por la validación de forma y no por el aborto. Borrar
+`external-calendar-api.ts:197` (`signal?.throwIfAborted()` posterior a
+`apiRequest`) dejaba la prueba verde.
+
+**Qué hay ahora.** El cuerpo devuelto es **válido**
+(`{configured: false, subscription: null}`), de modo que la validación de forma
+ya no puede enmascarar nada, y el rechazo se captura y se afirma en concreto:
+
+- `expect(rejection).toBe(controller.signal.reason)` — es exactamente el motivo
+  del aborto, no otro error cualquiera;
+- `expect(rejection).toMatchObject({ name: "AbortError" })`;
+- `expect(rejection).not.toMatchObject({ message: "Respuesta de calendario externo inválida." })`
+  — afirmación explícita de que **no** se lanzó el error de validación.
+
+**ROJO demostrado (dos veces).** Defecto inyectado en
+`frontend/src/external-calendar-api.ts`: borrado el `signal?.throwIfAborted();`
+posterior a `apiRequest` (el mutante que el dictamen nombra).
+
+1. Con el cuerpo válido de la prueba nueva, la lectura ya no rechaza:
+
+```
+- Expected: [Error: This operation was aborted]
++ Received: null
+ ❯ src/external-calendar-api.test.ts:342:23
+   expect(rejection).toBe(controller.signal.reason);
+```
+
+2. Con el mismo mutante y el cuerpo **inválido** de la versión anterior —es
+   decir, «que la validación falle en vez del aborto»— el rechazo existe pero es
+   el equivocado, y la prueba nueva lo distingue:
+
+```
+- "message": "This operation was aborted"
++ Error { "message": "Respuesta de calendario externo inválida." }
+ ❯ src/external-calendar-api.test.ts:342:23
+```
+
+Esa segunda ejecución es la prueba de que el hueco denunciado era real: con el
+oráculo antiguo, ese mismo rechazo por validación bastaba para pasar.
+
+**VERDE tras restaurar.** `git diff` sobre `external-calendar-api.ts` vacío
+(producción idéntica a `main`) y
+`pnpm --dir frontend exec vitest run src/external-calendar-api.test.ts` →
+`Test Files 1 passed (1) / Tests 42 passed (42)`.
+
+**Refactor.** Ninguno; tres aserciones, sin duplicación ni números mágicos.
+Fuera de alcance por decisión explícita del dictamen (arreglo 2 del hallazgo 16,
+marcado como opcional): no se añade la prueba de componente sobre la vía de
+éxito de `external-calendar.tsx:144-145` / `:128-129`.

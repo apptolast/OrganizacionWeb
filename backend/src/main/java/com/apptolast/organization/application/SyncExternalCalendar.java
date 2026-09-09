@@ -18,7 +18,7 @@ import java.util.function.Function;
  * resultado se confirma condicionado a la versión leída antes de empezar: si otra escritura ganó, se
  * descarta sin reintentar.
  */
-public final class SyncExternalCalendar {
+public final class SyncExternalCalendar implements ExternalCalendarUseCases.Sync {
   /** Por debajo de este umbral, una sincronización con {@code onlyIfStale} no se realiza. */
   public static final Duration FRESH = Duration.ofMinutes(15);
 
@@ -50,6 +50,7 @@ public final class SyncExternalCalendar {
     this.audit = audit;
   }
 
+  @Override
   public SyncOutcome execute(String ownerId, boolean onlyIfStale) {
     var stored = store.find(ownerId).orElseThrow(ExternalCalendarNotConfiguredException::new);
     var now = clock.instant();

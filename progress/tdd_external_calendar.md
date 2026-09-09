@@ -158,3 +158,24 @@ Comando: `backend\gradlew.bat test --no-daemon --tests '...domain.IcsCalendarTes
 - También verde: `DeleteExternalCalendar`, `ReadExternalCalendar`,
   `ReadExternalCalendarEvents` con `ExternalEventsView`, y el rango de dominio
   `ExternalEventsRange` con `ExternalEventsRangeTest` (@s32).
+
+### Ciclo 13 — las cinco rutas HTTP (@s1, @s2, @s4, @s7, @s8, @s9, @s10, @s28, @s31, @s32)
+
+- ROJO: `ExternalCalendarApiTest` (37 casos) y `ExternalCalendarDisabledApiTest`
+  no compilaban: no existía el controlador.
+- VERDE: `ExternalCalendarController` con los DTO cerrados (dos campos en la
+  suscripción, quince en `subscription`, cuatro en la lectura de eventos y cinco
+  por evento), `Cache-Control: no-store` en todas, JSON estricto con campos
+  desconocidos rechazados y `ConnectorsGate`.
+- Puertos de entrada `ExternalCalendarUseCases.{Read,Save,Delete,Sync,ReadEvents}`
+  para poder doblar los casos de uso, que son clases finales.
+- `ConnectorsGate` va detrás de `AuthorizationFilter` en las dos cadenas de
+  seguridad: así 401, 403 de CSRF y 403 de Origin siguen decidiendo antes que el
+  503 de conectores, y el cuerpo no se llega a leer.
+- Corrección nacida de un test: la guardia comparaba con `startsWith`, así que
+  también habría capturado `/api/v1/me/external-calendars`. Ahora exige la ruta
+  exacta o algo colgando de ella.
+- Cableado en `ApplicationConfiguration` con su `ExternalCalendarWiringTest`:
+  clave mal formada detiene el arranque sin revelar su valor (@s9), la política
+  de direcciones solo se relaja a propósito y el feed usa los 5 s y 1 MiB del
+  contrato.

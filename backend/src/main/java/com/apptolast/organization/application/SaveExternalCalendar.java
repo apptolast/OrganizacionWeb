@@ -13,7 +13,7 @@ import java.util.UUID;
  * nunca descarga el feed. Cambiar la dirección borra la instantánea; cambiar solo la etiqueta la
  * conserva; no cambiar nada no escribe.
  */
-public final class SaveExternalCalendar {
+public final class SaveExternalCalendar implements ExternalCalendarUseCases.Save {
   private final ExternalCalendarStore store;
   private final SecretCipher cipher;
   private final OutboundGuard guard;
@@ -27,6 +27,7 @@ public final class SaveExternalCalendar {
     this.clock = clock;
   }
 
+  @Override
   public ExternalCalendarSubscription execute(String ownerId, String label, String url) {
     var input = ExternalCalendarInput.of(label, url);
     reject(guard.check(input.urlHost()));

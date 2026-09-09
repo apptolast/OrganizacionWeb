@@ -374,10 +374,26 @@ it("@s39 elimina con una sola petición y deja el formulario vacío", async () =
 });
 
 it("@s39 cancela la petición en curso al desmontar la vista", async () => {
-  withoutSubscription();
+  let release: (() => void) | undefined;
+  const held = new Promise<void>((resolve) => (release = resolve));
+  const signals: AbortSignal[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string, options: RequestInit = {}) => {
+      calls.push({ url, method: options.method ?? "GET" });
+      if (options.signal) signals.push(options.signal);
+      await held;
+      return Response.json({ configured: true, subscription: synced });
+    }),
+  );
   const view = render(<ExternalCalendar />);
+  await waitFor(() => expect(signals.length).toBeGreaterThanOrEqual(1));
+  expect(signals.every((signal) => !signal.aborted)).toBe(true);
   view.unmount();
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  expect(signals.every((signal) => signal.aborted)).toBe(true);
+  release?.();
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  expect(screen.queryByText("calendar.google.com")).not.toBeInTheDocument();
   expect(document.body.textContent).toBe("");
 });
 

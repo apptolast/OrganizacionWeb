@@ -7,6 +7,7 @@ import {
 } from "react";
 import { RouteLink } from "./navigation";
 import { readProjects, type ProjectSummary } from "./read-projects-api";
+import { readConnectorCatalog } from "./connectors-catalog-client";
 import {
   GitlabConnectorError,
   connectGitlab,
@@ -35,6 +36,12 @@ const MESSAGES: Record<string, string> = {
   STORAGE_UNAVAILABLE: "No se pudo completar. Inténtalo más tarde",
   VALIDATION_ERROR: "Revisa la ruta del proyecto y el token",
 };
+
+/**
+ * Los fallos que no dicen nada del token pero sí dejan la vista desfasada: la acción honesta es
+ * releer, nunca reintentar sola.
+ */
+const NEEDS_REFRESH = new Set(["IMPORT_IN_PROGRESS", "CONNECTOR_ERROR"]);
 
 const STATUS_TEXT: Record<GitlabConnection["status"], string> = {
   connected: "Conectado",
@@ -74,6 +81,8 @@ function GitlabConnectorScreen() {
 
   const heading = useRef<HTMLHeadingElement>(null);
   const tokenField = useRef<HTMLInputElement>(null);
+  const replaceButton = useRef<HTMLButtonElement>(null);
+  const focusReplace = useRef(false);
   const pending = useRef<AbortController | null>(null);
   const mounted = useRef(true);
 
@@ -117,6 +126,13 @@ function GitlabConnectorScreen() {
   useEffect(() => {
     void loadConnection();
   }, [loadConnection]);
+
+  // El foco viaja a la acción sugerida sólo cuando el servidor dijo que la conexión murió.
+  useEffect(() => {
+    if (!focusReplace.current) return;
+    focusReplace.current = false;
+    replaceButton.current?.focus();
+  });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -180,11 +196,27 @@ function GitlabConnectorScreen() {
       setReceipt(started);
     } catch (error) {
       if (!live(controller)) return;
-      setActionError(
+      const failure =
         error instanceof GitlabConnectorError
           ? error
-          : new GitlabConnectorError({}),
-      );
+          : new GitlabConnectorError({});
+      setActionError(failure);
+      if (failure.code === "CONNECTION_INVALID") {
+        // El 409 es el servidor confirmando que el token dejó de valer: no es optimismo.
+        setConnection((current) =>
+          current
+            ? {
+                ...current,
+                status: "error",
+                lastError: {
+                  code: failure.code,
+                  at: new Date().toISOString(),
+                },
+              }
+            : current,
+        );
+        focusReplace.current = true;
+      }
     } finally {
       if (live(controller)) {
         setImporting(false);
@@ -217,6 +249,21 @@ function GitlabConnectorScreen() {
       if (live(controller)) {
         if (pending.current === controller) pending.current = null;
       }
+    }
+  }
+
+  /**
+   * Relee lo que el servidor sabe: la conexión y el catálogo. No reintenta la acción que falló;
+   * un reintento automático sobre una importación en curso es exactamente lo que la agravaría.
+   */
+  async function refreshStatus() {
+    setActionError(null);
+    const controller = new AbortController();
+    await loadConnection();
+    try {
+      await readConnectorCatalog(controller.signal);
+    } catch {
+      // El catálogo es contexto: que no se pueda leer no cambia esta pantalla.
     }
   }
 
@@ -283,7 +330,7 @@ function GitlabConnectorScreen() {
             </button>
           </div>
 
-          <button type="button" onClick={replaceToken}>
+          <button type="button" ref={replaceButton} onClick={replaceToken}>
             Actualizar token
           </button>
 
@@ -353,7 +400,16 @@ function GitlabConnectorScreen() {
         </form>
       ) : null}
 
-      {actionError ? <p role="alert">{describeFailure(actionError)}</p> : null}
+      {actionError ? (
+        <div>
+          <p role="alert">{describeFailure(actionError)}</p>
+          {NEEDS_REFRESH.has(actionError.code) ? (
+            <button type="button" onClick={() => void refreshStatus()}>
+              Actualizar estado
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       {receipt ? <Receipt receipt={receipt} /> : null}
 

@@ -473,3 +473,97 @@ it("@s35 leaves no trace of a previous token in the form it reopens", async () =
 
   expect((tokenField() as HTMLInputElement).value).toBe("");
 });
+
+// ================================================== @s36 los errores y su acción
+
+const importButton = () =>
+  screen.getByRole("button", { name: "Importar issues" });
+
+it("@s36 names the seconds of a rate limit and leaves the button usable again", async () => {
+  const user = userEvent.setup();
+  openConnected(problem(503, { code: "RATE_LIMITED", retryAfterSeconds: 30 }));
+
+  await renderConnected();
+  await user.click(importButton());
+
+  const alert = await screen.findByRole("alert");
+  expect(alert.textContent).toContain("30 segundos");
+  expect(importButton()).not.toBeDisabled();
+  expect(
+    screen.queryByRole("region", { name: "Resultado de la importación" }),
+  ).toBeNull();
+});
+
+it("@s36 turns the state into «Error» and suggests replacing the token, with the focus on it", async () => {
+  const user = userEvent.setup();
+  openConnected(problem(409, { code: "CONNECTION_INVALID" }));
+
+  await renderConnected();
+  await user.click(importButton());
+
+  await waitFor(() => expect(screen.getByText("Error")).toBeTruthy());
+  const suggested = screen.getByRole("button", { name: "Actualizar token" });
+  expect(document.activeElement).toBe(suggested);
+  expect(screen.queryByText("Conectado")).toBeNull();
+});
+
+it("@s36 offers «Actualizar estado» for an import already running, and it rereads both", async () => {
+  const user = userEvent.setup();
+  const fetcher = openConnected(
+    problem(409, { code: "IMPORT_IN_PROGRESS" }),
+    Response.json(connected),
+    Response.json({ connectors: [] }),
+  );
+
+  await renderConnected();
+  await user.click(importButton());
+
+  const alert = await screen.findByRole("alert");
+  expect(alert.textContent).toContain("importación en curso");
+  await user.click(screen.getByRole("button", { name: "Actualizar estado" }));
+
+  await waitFor(() => {
+    const asked = fetcher.mock.calls.map((call) => String(call[0]));
+    expect(asked).toContain("/api/v1/me/connectors/gitlab");
+    expect(asked).toContain("/api/v1/me/connectors");
+  });
+});
+
+it("@s36 warns that the provider is unavailable and keeps the path for a manual retry", async () => {
+  const user = userEvent.setup();
+  stub(
+    Response.json(notConnected),
+    Response.json(projects),
+    problem(503, { code: "GITLAB_UNAVAILABLE" }),
+  );
+
+  render(<GitlabConnector owner="owner" />);
+  await screen.findByLabelText(/Token de acceso personal/);
+  await fillAndSubmit(user);
+
+  const alert = await screen.findByRole("alert");
+  expect(alert.textContent).toContain("GitLab no responde");
+  expect((pathField() as HTMLInputElement).value).toBe("grupo/proyecto");
+  expect(connectButton()).not.toBeDisabled();
+  expect(screen.queryByText("Conectado")).toBeNull();
+});
+
+it("@s36 after a network failure offers «Actualizar estado» and retries nothing on its own", async () => {
+  const user = userEvent.setup();
+  const fetcher = vi.fn();
+  fetcher.mockResolvedValueOnce(Response.json(connected));
+  fetcher.mockResolvedValueOnce(Response.json(projects));
+  fetcher.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+  vi.stubGlobal("fetch", fetcher);
+
+  await renderConnected();
+  await user.click(importButton());
+
+  await screen.findByRole("button", { name: "Actualizar estado" });
+  const asked = fetcher.mock.calls.length;
+  await new Promise((resolve) => setTimeout(resolve, 60));
+  expect(fetcher.mock.calls.length).toBe(asked);
+  expect(
+    screen.queryByRole("region", { name: "Resultado de la importación" }),
+  ).toBeNull();
+});

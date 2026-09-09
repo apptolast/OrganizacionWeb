@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
 import { Webhooks } from "./webhooks";
@@ -522,19 +522,48 @@ it("@s40 opens the deliveries panel on demand, without polling, and redelivers t
     "Fecha",
     "Acciones",
   ]);
+  const [, succeededRow, exhaustedRow, pendingRow] = screen.getAllByRole("row");
   expect(screen.getAllByRole("row")).toHaveLength(4);
-  expect(screen.getAllByRole("button", { name: "Reenviar" })).toHaveLength(2);
+  expect(within(succeededRow).getByText("Entregada")).toBeVisible();
+  expect(within(exhaustedRow).getByText("Agotada")).toBeVisible();
+  expect(within(pendingRow).getByText("Pendiente")).toBeVisible();
+
+  // Which rows carry the button, not how many buttons there are.
+  const resend = within(succeededRow).getByRole("button", {
+    name: "Reenviar",
+  });
+  expect(
+    within(exhaustedRow).getByRole("button", { name: "Reenviar" }),
+  ).toBeVisible();
+  expect(
+    within(pendingRow).queryByRole("button", { name: "Reenviar" }),
+  ).toBeNull();
 
   const callsBefore = other.mock.calls.length;
   await vi.advanceTimersByTimeAsync(30_000);
   expect(other.mock.calls.length).toBe(callsBefore);
 
-  await user.click(screen.getAllByRole("button", { name: "Reenviar" })[0]);
+  await user.click(resend);
+
   await waitFor(() =>
-    expect(callsOf(other).some(([u]) => String(u).endsWith("/redeliver"))).toBe(
-      true,
-    ),
+    expect(
+      callsOf(other).filter(([u]) => String(u).endsWith("/redeliver")),
+    ).toHaveLength(1),
   );
+  const [sent] = callsOf(other).filter(([u]) =>
+    String(u).endsWith("/redeliver"),
+  );
+  // The id of the succeeded row, not of any other row.
+  expect(String(sent[0])).toBe(
+    `/api/v1/me/webhooks/${id}/deliveries/${deliveryId}/redeliver`,
+  );
+  expect(sent[1]?.method).toBe("POST");
+
+  await waitFor(() =>
+    expect(within(succeededRow).getByText("Pendiente")).toBeVisible(),
+  );
+  expect(within(succeededRow).getByRole("cell", { name: "0" })).toBeVisible();
+  expect(within(succeededRow).queryByText("Entregada")).toBeNull();
   vi.useRealTimers();
 });
 

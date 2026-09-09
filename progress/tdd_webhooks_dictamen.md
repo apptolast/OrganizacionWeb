@@ -119,3 +119,66 @@ Ambos mutantes dejaban verde la suite antes de este ciclo.
 
 **VERDE.** Retirados los dos mutantes; `git diff frontend/src/webhooks.tsx`
 vacío contra `HEAD` y `webhooks.test.tsx` 23/23 verde.
+
+Commit: `b2c4c16`.
+
+---
+
+## Hallazgo 20 (MEDIA) — `@s40`: se contaban botones en vez de mirar las filas
+
+**Fichero:** `frontend/src/webhooks.test.tsx`, prueba `@s40 opens the deliveries
+panel on demand, without polling, and redelivers terminal rows`.
+**Cláusulas:** `features/webhooks.feature:496-498` — «sólo las filas succeeded y
+exhausted tienen botón Reenviar y la fila pending no» y «se envía un POST
+redeliver y la fila pasa a Pendiente con intento 0».
+
+**Problema.** `expect(getAllByRole("button", { name: "Reenviar" })).toHaveLength(2)`
+mide un total, no la asociación fila-botón; y la tercera cláusula (efecto
+visible del reenvío) no tenía ninguna aserción: la prueba terminaba en un
+`waitFor` sobre «alguna URL acaba en /redeliver».
+
+**Prueba nueva.** Se desestructuran las filas
+(`const [, succeededRow, exhaustedRow, pendingRow] = getAllByRole("row")`), se
+confirma el estado de cada una («Entregada», «Agotada», «Pendiente») y luego:
+
+- `within(succeededRow).getByRole("button", { name: "Reenviar" })` y lo mismo
+  en `exhaustedRow`;
+- `within(pendingRow).queryByRole("button", { name: "Reenviar" })` a `null`;
+- el clic se hace sobre el botón **de la fila succeeded** obtenido con `within`;
+- se exige una única llamada `/redeliver`, con URL exacta
+  `/api/v1/me/webhooks/${id}/deliveries/${deliveryId}/redeliver` y método POST;
+- tras la respuesta, `within(succeededRow)` muestra «Pendiente», la celda de
+  intento vale `0` y ya no dice «Entregada».
+
+**ROJO 1 — botón en la fila equivocada** (`webhooks.tsx:503`,
+`row.status !== "pending"` → `row.status !== "succeeded"`; siguen siendo dos
+botones, pero en exhausted y **pending**, justo lo que el contrato prohíbe):
+
+```
+FAIL @s40 opens the deliveries panel…
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Reenviar"
+```
+
+Con la prueba antigua este mutante sobrevivía: el conteo seguía dando 2 y el
+clic sobre `[0]` seguía disparando una URL acabada en `/redeliver`.
+
+**ROJO 2 — se reenvía la entrega equivocada** (`webhooks.tsx:506`,
+`redeliver(deliveriesOf, row)` → `redeliver(deliveriesOf, deliveries[1])`):
+
+```
+AssertionError: expected '/api/v1/…/deliveries/33333333-…/redeliver' …
+Expected: "…/deliveries/33333333-3333-4333-8333-333333333333/redeliver"
+Received: "…/deliveries/22222222-2222-4222-8222-222222222222/redeliver"
+```
+
+**ROJO 3 — la fila no se actualiza** (`webhooks.tsx:244-246`,
+`current.map((item) => (item.id === reopened.id ? reopened : item))` →
+`current.map((item) => item)`):
+
+```
+TestingLibraryElementError: Unable to find an element with the text: Pendiente
+```
+
+**VERDE.** Los tres mutantes retirados uno a uno; `git diff
+frontend/src/webhooks.tsx` vacío contra `HEAD`. `webhooks.test.tsx` 23/23 verde,
+`tsc --noEmit`, `eslint` y `prettier --check` limpios.

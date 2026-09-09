@@ -761,9 +761,28 @@ public class ApplicationConfiguration {
       com.apptolast.organization.application.AutomationMatcher matcher,
       com.apptolast.organization.application.AutomationFacts facts,
       com.apptolast.organization.application.WebhookEndpointLookup endpoints,
+      com.apptolast.organization.application.AutomationAudit automationAudit,
       Clock clock) {
     return new com.apptolast.organization.application.ExecuteAutomations(
-        work, rules, matcher, facts, endpoints, clock);
+        work, rules, matcher, facts, endpoints, automationAudit, clock);
+  }
+
+  /**
+   * La fuente de estado del calendario externo se construye AQUI y no en ConnectorConfiguration
+   * porque `ExternalCalendarIsolationTest.s34` prohibe que nada de fuera de la rebanada dependa de
+   * `ExternalCalendarStore`, y esta clase es una de las tres que la regla exime por ser cableado.
+   * El catalogo recibe ya la fuente construida, cuyo nombre no esta en la lista prohibida: asi el
+   * catalogo no ve el almacen.
+   */
+  @Bean
+  com.apptolast.organization.application.ExternalCalendarStatusSource externalCalendarStatusSource(
+      com.apptolast.organization.application.ExternalCalendarStore store) {
+    return new com.apptolast.organization.application.ExternalCalendarStatusSource(store);
+  }
+
+  @Bean
+  com.apptolast.organization.application.AutomationAudit automationAudit() {
+    return new com.apptolast.organization.adapter.logging.Slf4jAutomationAudit();
   }
 
   @Bean

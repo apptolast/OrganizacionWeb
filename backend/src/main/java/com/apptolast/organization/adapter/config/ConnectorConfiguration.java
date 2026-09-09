@@ -183,7 +183,7 @@ public class ConnectorConfiguration {
       WebhookDeliveries webhookDeliveries,
       CalendarFeedTokens feedTokens,
       ConnectorConnectionStore githubConnections,
-      ExternalCalendarStore externalCalendars,
+      ExternalCalendarStatusSource externalCalendarStatus,
       ReadGitlabConnectionUseCase gitlabConnection,
       IssueImportReceiptStore receipts,
       SecretCipher cipher,
@@ -194,7 +194,7 @@ public class ConnectorConfiguration {
             new WebhookStatusSource(webhookEndpoints, webhookDeliveries),
             new IcsCalendarStatusSource(feedTokens),
             new GithubStatusSource(githubConnections, receipts),
-            new ExternalCalendarStatusSource(externalCalendars),
+            externalCalendarStatus,
             new GitlabStatusSource(gitlabConnection)),
         cipher);
   }

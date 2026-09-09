@@ -41,7 +41,7 @@ class ConnectorCatalogWiringTest {
         mock(WebhookDeliveries.class),
         mock(CalendarFeedTokens.class),
         mock(ConnectorConnectionStore.class),
-        mock(ExternalCalendarStore.class),
+        new ExternalCalendarStatusSource(mock(ExternalCalendarStore.class)),
         configuration.readGitlabConnection(
             gitlabConnections, receipts, configuration.gitlabApiBase(LOOPBACK), cipher),
         receipts,

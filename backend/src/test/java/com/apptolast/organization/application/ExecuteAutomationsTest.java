@@ -72,13 +72,17 @@ class ExecuteAutomationsTest {
       };
   private final AutomationMatcher matcher = new AutomationMatcher(projects, guard);
   private final WebhookEndpointLookup endpoints = (owner, endpoint) -> false;
+  // El adaptador real, no un doble: @s19 afirma sobre la LINEA que se emite, y un
+  // doble grabador solo probaria lo que el caso de uso pasa, no lo que se escribe.
+  private final AutomationAudit audit =
+      new com.apptolast.organization.adapter.logging.Slf4jAutomationAudit();
   private final Clock clock = Clock.fixed(T0.plusSeconds(3600), ZoneOffset.UTC);
   private final ExecuteAutomations execute =
-      new ExecuteAutomations(work, rules, matcher, facts, endpoints, clock);
+      new ExecuteAutomations(work, rules, matcher, facts, endpoints, audit, clock);
 
   private final ListAppender<ILoggingEvent> appender = new ListAppender<>();
   private final ch.qos.logback.classic.Logger logger =
-      (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(ExecuteAutomations.class);
+      (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("organization.automations");
 
   @BeforeEach
   void captureTheLog() {
@@ -240,7 +244,7 @@ class ExecuteAutomationsTest {
     work.cursors.put(OWNER, new AutomationCursor(T0, E0));
     work.outbox.add(taskCreated(E1, T0.plusSeconds(1)));
 
-    new ExecuteAutomations(work, racing, matcher, facts, endpoints, clock).runCycle();
+    new ExecuteAutomations(work, racing, matcher, facts, endpoints, audit, clock).runCycle();
 
     assertThat(racing.reads).as("one snapshot of the rules per event, never two").isEqualTo(1);
     assertThat(work.runs()).extracting(AutomationRun::status).containsExactly("succeeded");

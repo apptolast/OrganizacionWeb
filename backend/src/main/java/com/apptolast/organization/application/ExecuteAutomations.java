@@ -11,12 +11,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Walks each owner's outbox and turns the events their rules match into runs and effects. */
 public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
-  private static final Logger LOG = LoggerFactory.getLogger(ExecuteAutomations.class);
 
   private static final String SUCCEEDED = "succeeded";
   private static final String FAILED = "failed";
@@ -31,6 +28,7 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
   private final AutomationMatcher matcher;
   private final AutomationRendering rendering;
   private final WebhookEndpointLookup endpoints;
+  private final AutomationAudit audit;
   private final Clock clock;
 
   public ExecuteAutomations(
@@ -39,12 +37,14 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
       AutomationMatcher matcher,
       AutomationFacts facts,
       WebhookEndpointLookup endpoints,
+      AutomationAudit audit,
       Clock clock) {
     this.work = work;
     this.rules = rules;
     this.matcher = matcher;
     this.rendering = new AutomationRendering(matcher, facts);
     this.endpoints = endpoints;
+    this.audit = audit;
     this.clock = clock;
   }
 
@@ -84,7 +84,7 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
             : firedBy(owner, candidate);
     try {
       work.commit(new AutomationCommit(owner, reachedBy(event), outcomes));
-      outcomes.forEach(ExecuteAutomations::log);
+      outcomes.forEach(this::log);
       return true;
     } catch (AutomationClaimedException claimed) {
       // Another worker got there first: its run is the one that counts and the walk carries on.
@@ -105,15 +105,9 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
    * Identifiers only. A rendered title and a project name are the owner's content, and the worker
    * log is not the place for them.
    */
-  private static void log(AutomationOutcome outcome) {
+  private void log(AutomationOutcome outcome) {
     var run = outcome.run();
-    LOG.info(
-        "Automation run; ruleId={} eventId={} outcome={} attempt={} code={}",
-        run.ruleId(),
-        run.eventId(),
-        run.status(),
-        run.attempt(),
-        run.errorCode());
+    audit.runFinished(run.ruleId(), run.eventId(), run.status(), run.attempt(), run.errorCode());
   }
 
   /** The only row that survives a rolled back confirmation, written outside it. */

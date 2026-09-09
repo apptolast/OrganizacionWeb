@@ -218,6 +218,29 @@ todo un camino de fallo estaba sin una sola prueba detrás.
   paralelas**, porque hoy es la que decide si la puerta de mutación se puede
   medir siquiera.
 
+### La segunda rotura latente, que solo la CI podía ver
+
+Con `main` ya integrado y verde en local, la CI falló con
+`ERROR: cannot truncate a table referenced in a foreign key constraint`, y
+cayeron los E2E de autenticación, apariencia y varios más.
+
+No lo trajo esta sesión: es una **rotura latente desde la integración de las
+features 25 a 30**. La migración `V25` añadió `connector_connections`
+(`REFERENCES projects(id)`) y `task_external_links` (`REFERENCES tasks(id)`), y
+las listas de `TRUNCATE` de los 33 specs de E2E no las nombran. En local no se
+veía porque la suite de E2E no se había vuelto a ejecutar entera desde entonces:
+la CI llevaba días cayendo antes, primero por el lint y luego por el flake de
+exportación, así que nunca llegaba a este paso.
+
+Arreglado en `de04eff` añadiendo `CASCADE`. Es además lo que el ayudante de
+reinicio quiere decir de verdad —vaciar todo lo que cuelgue— y no volverá a
+quedarse corto la próxima vez que una migración añada una tabla dependiente.
+
+**La lección operativa**: enumerar tablas a mano en un `TRUNCATE` de test es una
+lista que caduca en silencio con cada migración. Y una CI que falla temprano por
+otra causa **esconde** todo lo que viene después; cuando se arregla el primer
+fallo, hay que contar con encontrar los siguientes.
+
 ### Una contradicción del contrato que solo puede resolver el propietario
 
 El hallazgo 11 de webhooks no es un defecto de código: `features/webhooks.feature`

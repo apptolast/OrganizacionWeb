@@ -489,3 +489,89 @@ cambios respecto a lo ya anotado.
 **Cerrados: 6** — hallazgos 1, 5, 15, 16, 17, 21, todos commiteados y verdes.
 **Intentado y devuelto al stash: 1** — hallazgo 2.
 **Abiertos: 8** — 2, 4, 9, 10, 11, 12(B), 13, 18. El 3 lo cerró otro carril.
+
+## Hallazgo 2 — el intento, salvado en un parche versionado
+
+El `stash` no sobrevive a nada: no se empuja, no se ve y el próximo que entre en
+este worktree no sabría que existe. El intento queda por tanto en
+**`progress/parche_webhooks_hallazgo_2.patch`** (99 líneas, generado con
+`git stash show -p stash@{0}`). Se aplica con:
+
+    git apply progress/parche_webhooks_hallazgo_2.patch
+
+El `stash@{0}` se deja donde está, por si acaso, pero el parche es la copia que
+manda.
+
+### El cambio de producto que probé, exactamente
+
+En `frontend/src/webhooks.tsx`, dentro de `<label>Secreto …</label>`:
+
+    - <input readOnly value={secret} onFocus={(e) => e.currentTarget.select()} />
+    + <textarea readOnly rows={2} value={secret}
+    +           onFocus={(e) => e.currentTarget.select()} />
+
+Y en `frontend/src/webhooks.scss`, retirar la regla muerta
+`overflow-wrap: anywhere` sobre `.webhook-secret input` —un campo de una línea no
+envuelve, por eso era muerta— y poner en su lugar:
+
+    .webhook-secret textarea {
+      width: 100%;
+      resize: none;
+      overflow-wrap: anywhere;
+      field-sizing: content;
+    }
+
+Motivo: a 320 px el `<input>` mostraba ~34 de los 49 caracteres del secreto, es
+decir, recorte real. El cierre exigido dice que la respuesta es de producto —un
+campo que envuelva—, no relajar el oráculo.
+
+### Por qué rompía `e2e/webhooks-ux.spec.mjs:330`
+
+La línea que falla, en los cinco tests que pasan por el estado `secret`, es:
+
+    await expect(view.getByLabel("Secreto", { exact: true })).toHaveValue(SECRET);
+
+El campo está envuelto por su etiqueta: `<label>Secreto <campo/></label>`, sin
+`htmlFor` ni `id`. Con asociación implícita, el nombre accesible sale del
+**`textContent` de la etiqueta entera**.
+
+**Hipótesis del diagnóstico (razonada, NO confirmada por ejecución).** React DOM
+no trata `<textarea value={…}>` como trata a `<input>`: en el input el valor vive
+sólo en la propiedad del nodo y el `textContent` de la etiqueta sigue siendo
+`"Secreto"`; en el textarea, React materializa el valor inicial como **texto hijo
+del elemento**, de modo que el `textContent` de la etiqueta pasa a ser
+`"Secreto" + el secreto entero`. Con `{ exact: true }`, `getByLabel("Secreto")`
+deja de casar y el localizador no encuentra nada. Es decir: **el fallo no es del
+oráculo de recorte ni del CSS, es del localizador**, y por eso revienta antes,
+en el paso previo del recorrido de estados.
+
+Tres hechos que sostienen la hipótesis y descartan las alternativas:
+
+1. **No es un bundle rancio.** Si la imagen web hubiera servido el JavaScript
+   viejo, la página tendría todavía el `<input>` y la línea 330 habría pasado.
+   Falló, luego el cambio sí llegó al navegador.
+2. **No es el `field-sizing` ni el `resize`.** Ninguno afecta al nombre
+   accesible, y el fallo es de localización, no de geometría.
+3. **Encaja con que los 23 unitarios siguieran verdes**: buscan el campo con
+   `getByDisplayValue(secret)`, que lee la propiedad `value` y es indiferente al
+   `textContent` de la etiqueta. Sólo el E2E usa `getByLabel(..., exact)`.
+
+### Arreglo que propongo probar primero
+
+Romper la asociación implícita y hacerla explícita, que además es mejor práctica
+y deja el nombre accesible aislado del valor:
+
+    <label htmlFor={secretFieldId}>Secreto</label>
+    <textarea id={secretFieldId} readOnly … />
+
+con `secretFieldId` de `useId()`, que ya está importado en el fichero. Con la
+etiqueta fuera del campo, su `textContent` vuelve a ser exactamente `"Secreto"` y
+`{ exact: true }` casa. **No cambiar la spec para acomodar el producto**: el
+localizador de la línea 330 es correcto y no debe relajarse.
+
+Orden de trabajo para quien lo retome: (1) aplicar el parche; (2) el arreglo del
+`htmlFor`; (3) `E2E_WEB_PORT=18090 pnpm test:e2e -- e2e/webhooks-ux.spec.mjs`
+hasta los seis en verde; (4) sólo entonces acreditar el rojo del oráculo con la
+mutación que el dictamen nombra —`li span { white-space: nowrap; overflow: hidden;
+text-overflow: clip; }`— que debe fallar en `${state}:${width} contenido
+recortado`; (5) restaurar, verde y commit.

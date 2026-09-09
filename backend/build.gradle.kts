@@ -38,6 +38,7 @@ pitest {
     val webhooksOnly = scope == "webhooks"
     val icsCalendarOnly = scope == "ics_calendar"
     val githubConnectorOnly = scope == "github_connector"
+    val additionalConnectorsOnly = scope == "additional_connectors"
     val integrationApiOnly = scope == "integration_api"
     val integrationApiHttpOnly = scope == "integration_api_http"
     val automationsOnly = scope == "automations"
@@ -64,6 +65,22 @@ pitest {
     val startWorkSessionOnly = scope == "start_work_session"
     val startWorkSessionReplayOnly = scope == "start_work_session_replay"
     val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
+    // Feature 29: el conector GitLab y el catalogo de conectores. No incluye las
+    // clases compartidas con la 27 (ImportIssues, IssueImportReceipt), que las
+    // muta el ambito github_connector: un mutante contado dos veces no informa.
+    val additionalConnectorsClasses = setOf(
+        "com.apptolast.organization.application.ConnectGitlab*",
+        "com.apptolast.organization.application.DisconnectGitlab*",
+        "com.apptolast.organization.application.ReadGitlabConnection*",
+        "com.apptolast.organization.application.GitlabConnection*",
+        "com.apptolast.organization.application.GitlabIssueConnections*",
+        "com.apptolast.organization.application.GitlabProject*",
+        "com.apptolast.organization.application.GitlabUnavailableException*",
+        "com.apptolast.organization.application.ConnectorStatusSource*",
+        "com.apptolast.organization.adapter.connectors.GitlabApiBase*",
+        "com.apptolast.organization.adapter.connectors.HttpGitlabIssueSource*",
+        "com.apptolast.organization.adapter.http.GitlabConnectorController*",
+        "com.apptolast.organization.adapter.persistence.PostgresGitlabConnectionStore*")
     val githubConnectorClasses = setOf(
         "com.apptolast.organization.domain.GithubRepository*",
         "com.apptolast.organization.domain.PersonalAccessToken*",
@@ -568,6 +585,7 @@ pitest {
         automationsOnly -> automationsClasses
         icsCalendarOnly -> icsCalendarClasses
         githubConnectorOnly -> githubConnectorClasses
+        additionalConnectorsOnly -> additionalConnectorsClasses
         integrationApiOnly -> integrationApiClasses
         integrationApiHttpOnly -> integrationApiHttpClasses
         importReaderOnly -> importReaderClasses
@@ -599,6 +617,7 @@ pitest {
         automationsOnly -> setOf("com.apptolast.organization.*")
         icsCalendarOnly -> setOf("com.apptolast.organization.*")
         githubConnectorOnly -> setOf("com.apptolast.organization.*")
+        additionalConnectorsOnly -> setOf("com.apptolast.organization.*")
         integrationApiOnly || integrationApiHttpOnly -> setOf("com.apptolast.organization.*")
         importReaderOnly -> importReaderTests
         importHttpOnly -> importHttpTests

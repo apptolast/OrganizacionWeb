@@ -79,6 +79,7 @@ export function createProject(runner = run) {
           "automations-frontend",
           "webhooks-backend",
           "webhooks-frontend",
+          "additional_connectors-backend",
         ].includes(target))
     ) {
       throw new Error(`Invalid target: ${target}`);
@@ -219,6 +220,10 @@ export function createProject(runner = run) {
     }
     if (task === "mutate" && target === "import_data-persistence-backend") {
       backend("pitest", ["-PmutationScope=import_data_persistence"]);
+      return;
+    }
+    if (task === "mutate" && target === "additional_connectors-backend") {
+      backend("pitest", ["-PmutationScope=additional_connectors"]);
       return;
     }
     if (task === "mutate" && target === "webhooks-backend") {

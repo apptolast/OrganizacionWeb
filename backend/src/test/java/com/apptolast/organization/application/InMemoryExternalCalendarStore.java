@@ -29,8 +29,21 @@ final class InMemoryExternalCalendarStore implements ExternalCalendarStore {
       String ownerId, UUID id, ExternalCalendarInput input, byte[] urlCiphertext, Instant now) {
     var subscription =
         new ExternalCalendarSubscription(
-            id, input.label(), input.urlHost(), input.urlTail(), null, null, null, null, null, 0, 0,
-            0, 0, false, now);
+            id,
+            input.label(),
+            input.urlHost(),
+            input.urlTail(),
+            null,
+            null,
+            null,
+            null,
+            null,
+            0,
+            0,
+            0,
+            0,
+            false,
+            now);
     return put(ownerId, new StoredSubscription(subscription, urlCiphertext, 0));
   }
 
@@ -43,10 +56,21 @@ final class InMemoryExternalCalendarStore implements ExternalCalendarStore {
         ownerId,
         new StoredSubscription(
             new ExternalCalendarSubscription(
-                kept.id(), label, kept.urlHost(), kept.urlTail(), kept.lastAttemptAt(),
-                kept.lastSyncAt(), kept.lastStatus(), kept.lastError(), kept.snapshotZoneId(),
-                kept.imported(), kept.skippedRecurring(), kept.skippedCancelled(),
-                kept.skippedInvalid(), kept.truncated(), now),
+                kept.id(),
+                label,
+                kept.urlHost(),
+                kept.urlTail(),
+                kept.lastAttemptAt(),
+                kept.lastSyncAt(),
+                kept.lastStatus(),
+                kept.lastError(),
+                kept.snapshotZoneId(),
+                kept.imported(),
+                kept.skippedRecurring(),
+                kept.skippedCancelled(),
+                kept.skippedInvalid(),
+                kept.truncated(),
+                now),
             urlCiphertext,
             previous.version() + 1));
   }
@@ -60,8 +84,21 @@ final class InMemoryExternalCalendarStore implements ExternalCalendarStore {
         ownerId,
         new StoredSubscription(
             new ExternalCalendarSubscription(
-                previous.subscription().id(), input.label(), input.urlHost(), input.urlTail(),
-                null, null, null, null, null, 0, 0, 0, 0, false, now),
+                previous.subscription().id(),
+                input.label(),
+                input.urlHost(),
+                input.urlTail(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                0,
+                0,
+                0,
+                0,
+                false,
+                now),
             urlCiphertext,
             previous.version() + 1));
   }
@@ -88,10 +125,21 @@ final class InMemoryExternalCalendarStore implements ExternalCalendarStore {
             ownerId,
             new StoredSubscription(
                 new ExternalCalendarSubscription(
-                    kept.id(), kept.label(), kept.urlHost(), kept.urlTail(), syncAt, syncAt,
-                    SyncStatus.OK, null, summary.snapshotZoneId(), summary.imported(),
-                    summary.skippedRecurring(), summary.skippedCancelled(),
-                    summary.skippedInvalid(), summary.truncated(), syncAt),
+                    kept.id(),
+                    kept.label(),
+                    kept.urlHost(),
+                    kept.urlTail(),
+                    syncAt,
+                    syncAt,
+                    SyncStatus.OK,
+                    null,
+                    summary.snapshotZoneId(),
+                    summary.imported(),
+                    summary.skippedRecurring(),
+                    summary.skippedCancelled(),
+                    summary.skippedInvalid(),
+                    summary.truncated(),
+                    syncAt),
                 previous.urlCiphertext(),
                 previous.version() + 1)));
   }
@@ -107,10 +155,21 @@ final class InMemoryExternalCalendarStore implements ExternalCalendarStore {
             ownerId,
             new StoredSubscription(
                 new ExternalCalendarSubscription(
-                    kept.id(), kept.label(), kept.urlHost(), kept.urlTail(), attemptAt,
-                    kept.lastSyncAt(), SyncStatus.FAILED, error, kept.snapshotZoneId(),
-                    kept.imported(), kept.skippedRecurring(), kept.skippedCancelled(),
-                    kept.skippedInvalid(), kept.truncated(), attemptAt),
+                    kept.id(),
+                    kept.label(),
+                    kept.urlHost(),
+                    kept.urlTail(),
+                    attemptAt,
+                    kept.lastSyncAt(),
+                    SyncStatus.FAILED,
+                    error,
+                    kept.snapshotZoneId(),
+                    kept.imported(),
+                    kept.skippedRecurring(),
+                    kept.skippedCancelled(),
+                    kept.skippedInvalid(),
+                    kept.truncated(),
+                    attemptAt),
                 previous.urlCiphertext(),
                 previous.version() + 1)));
   }

@@ -4,12 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Base64;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/** @s8 clave ausente, @s9 clave mal formada, @s29 clave rotada. */
+/**
+ * @s8 clave ausente, @s9 clave mal formada, @s29 clave rotada.
+ */
 class ConnectorCipherTest {
   static final String OWNER = "persona-a";
   static final String URL = "https://feed.example.test/calendar/ical/abc123/basic.ics";
@@ -37,5 +38,4 @@ class ConnectorCipherTest {
     assertTrue(thrown.getMessage().contains("APP_CONNECTOR_KEY"), thrown.getMessage());
     assertFalse(thrown.getMessage().contains(configured));
   }
-
 }

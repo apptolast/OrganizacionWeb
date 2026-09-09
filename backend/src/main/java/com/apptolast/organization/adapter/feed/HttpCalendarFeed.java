@@ -14,9 +14,9 @@ import java.time.Duration;
 import java.util.Locale;
 
 /**
- * Descarga de solo lectura: sin redirecciones, sin credenciales, con Accept text/calendar, corte a 1
- * MiB y solo 200 con un tipo textual. El cuerpo se lee en trozos para poder abortar antes de que el
- * proveedor termine de emitir.
+ * Descarga de solo lectura: sin redirecciones, sin credenciales, con Accept text/calendar, corte a
+ * 1 MiB y solo 200 con un tipo textual. El cuerpo se lee en trozos para poder abortar antes de que
+ * el proveedor termine de emitir.
  */
 public final class HttpCalendarFeed implements CalendarFeed {
   public static final Duration TIMEOUT = Duration.ofSeconds(5);

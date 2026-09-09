@@ -5,8 +5,8 @@ import java.util.Optional;
 
 /**
  * Elige el cifrado de los conectores a partir de la configuración. Clave ausente: los conectores
- * quedan deshabilitados y ningún secreto se puede leer ni escribir. Clave presente pero mal formada:
- * el arranque falla, sin revelar su valor (@s9).
+ * quedan deshabilitados y ningún secreto se puede leer ni escribir. Clave presente pero mal
+ * formada: el arranque falla, sin revelar su valor (@s9).
  */
 public final class ConnectorCipher {
   private ConnectorCipher() {}

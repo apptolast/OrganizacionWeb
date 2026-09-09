@@ -135,8 +135,7 @@ class HttpCalendarFeedTest {
     int port = closed.getAddress().getPort();
     closed.stop(0);
     assertEquals(
-        FeedError.FEED_UNREACHABLE,
-        codeOf(feed().fetch("http://127.0.0.1:" + port + "/cal.ics")));
+        FeedError.FEED_UNREACHABLE, codeOf(feed().fetch("http://127.0.0.1:" + port + "/cal.ics")));
   }
 
   @Test

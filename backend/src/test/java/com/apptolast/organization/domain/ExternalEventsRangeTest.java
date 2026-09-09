@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-/** @s32: el rango es obligatorio, va en UTC y no abarca más de dieciséis días. */
+/**
+ * @s32: el rango es obligatorio, va en UTC y no abarca más de dieciséis días.
+ */
 class ExternalEventsRangeTest {
   static final String START = "2030-01-07T00:00:00Z";
 

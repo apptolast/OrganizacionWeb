@@ -15,8 +15,8 @@ import java.util.function.Function;
 
 /**
  * Descarga, analiza y reemplaza la instantánea. La descarga ocurre fuera de toda transacción y el
- * resultado se confirma condicionado a la versión leída antes de empezar: si otra escritura ganó, se
- * descarta sin reintentar.
+ * resultado se confirma condicionado a la versión leída antes de empezar: si otra escritura ganó,
+ * se descarta sin reintentar.
  */
 public final class SyncExternalCalendar implements ExternalCalendarUseCases.Sync {
   /** Por debajo de este umbral, una sincronización con {@code onlyIfStale} no se realiza. */
@@ -72,7 +72,9 @@ public final class SyncExternalCalendar implements ExternalCalendarUseCases.Sync
 
   /** Lo que se sabe tras intentar: o un resumen con sus eventos, o el código del fallo. */
   private record Attempt(
-      FeedError error, SyncSummary summary, java.util.List<com.apptolast.organization.domain.ExternalEvent> events) {
+      FeedError error,
+      SyncSummary summary,
+      java.util.List<com.apptolast.organization.domain.ExternalEvent> events) {
     static Attempt failed(FeedError error) {
       return new Attempt(error, null, null);
     }

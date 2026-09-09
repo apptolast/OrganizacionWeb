@@ -110,7 +110,8 @@ public final class PostgresExternalCalendarStore implements ExternalCalendarStor
     return Boolean.TRUE.equals(
         writing(
             () ->
-                jdbc.update("DELETE FROM external_calendar_subscriptions WHERE owner_id = ?", ownerId)
+                jdbc.update(
+                        "DELETE FROM external_calendar_subscriptions WHERE owner_id = ?", ownerId)
                     > 0));
   }
 

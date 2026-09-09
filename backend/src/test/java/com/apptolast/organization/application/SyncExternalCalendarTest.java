@@ -26,7 +26,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-/** @s11, @s12, @s14, @s16, @s24, @s26, @s27, @s28, @s29. */
+/**
+ * @s11, @s12, @s14, @s16, @s24, @s26, @s27, @s28, @s29.
+ */
 class SyncExternalCalendarTest {
   static final String OWNER = "persona-a";
   static final Instant NOW = Instant.parse("2030-01-07T12:00:00Z");
@@ -201,8 +203,7 @@ class SyncExternalCalendarTest {
   void s11_aHostThatNoLongerResolvesIsAlsoRejected() {
     subscribed();
     verdict = OutboundHostGuard.Verdict.UNRESOLVABLE;
-    assertEquals(
-        FeedError.FEED_REJECTED, sync().execute(OWNER, false).subscription().lastError());
+    assertEquals(FeedError.FEED_REJECTED, sync().execute(OWNER, false).subscription().lastError());
     assertTrue(feed.requested.isEmpty());
   }
 
@@ -219,12 +220,7 @@ class SyncExternalCalendarTest {
   }
 
   @ParameterizedTest
-  @CsvSource({
-    "FEED_HTTP_ERROR",
-    "FEED_UNREACHABLE",
-    "FEED_TOO_LARGE",
-    "FEED_UNSUPPORTED_TYPE"
-  })
+  @CsvSource({"FEED_HTTP_ERROR", "FEED_UNREACHABLE", "FEED_TOO_LARGE", "FEED_UNSUPPORTED_TYPE"})
   void s12_aDownloadFailureKeepsThePreviousSnapshot(FeedError code) {
     withPreviousSnapshot();
     feed.answer = FeedFetch.failed(code);
@@ -264,12 +260,7 @@ class SyncExternalCalendarTest {
   }
 
   @ParameterizedTest
-  @CsvSource({
-    "Europe/Madrid, Europe/Madrid",
-    "UTC, UTC",
-    "Legacy/Retired, UTC",
-    ", UTC"
-  })
+  @CsvSource({"Europe/Madrid, Europe/Madrid", "UTC, UTC", "Legacy/Retired, UTC", ", UTC"})
   void s16_theSnapshotZoneFallsBackToUtc(String availability, String expected) {
     subscribed();
     zoneOfOwner = availability == null || availability.isBlank() ? null : availability;

@@ -43,6 +43,7 @@ pitest {
     val importHttpOnly = scope == "import_data_http"
     val importPersistenceOnly = scope == "import_data_persistence"
     val exportPersistenceOnly = scope == "export_data_persistence"
+    val externalCalendarOnly = scope == "external_calendar"
     val appearanceOnly = scope == "appearance"
     val customizationOnly = scope == "custom_views_fields"
     val weeklyReviewOnly = scope == "weekly_review"
@@ -376,6 +377,33 @@ pitest {
         "com.apptolast.organization.application.ExportTooLargeException*",
         "com.apptolast.organization.adapter.config.ApplicationConfiguration*"
     )
+    val externalCalendarClasses = setOf(
+        "com.apptolast.organization.domain.IcsFeed*",
+        "com.apptolast.organization.domain.ExternalCalendarInput*",
+        "com.apptolast.organization.domain.ExternalCalendarSnapshot*",
+        "com.apptolast.organization.domain.ExternalCalendarSubscription*",
+        "com.apptolast.organization.domain.ExternalEvent*",
+        "com.apptolast.organization.domain.ExternalEventsRange*",
+        "com.apptolast.organization.domain.SyncSummary*",
+        "com.apptolast.organization.application.SyncExternalCalendar*",
+        "com.apptolast.organization.application.SaveExternalCalendar*",
+        "com.apptolast.organization.application.ReadExternalCalendar*",
+        "com.apptolast.organization.application.ReadExternalCalendarEvents*",
+        "com.apptolast.organization.application.DeleteExternalCalendar*",
+        "com.apptolast.organization.application.OutboundHostGuard*",
+        "com.apptolast.organization.application.PublicAddressPolicy*",
+        "com.apptolast.organization.application.AddressPolicy*",
+        "com.apptolast.organization.application.ExternalEventsView*",
+        "com.apptolast.organization.adapter.crypto.AesGcmSecretCipher*",
+        "com.apptolast.organization.adapter.crypto.ConnectorCipher*",
+        "com.apptolast.organization.adapter.feed.HttpCalendarFeed*",
+        "com.apptolast.organization.adapter.net.SystemHostResolver*",
+        "com.apptolast.organization.adapter.http.ExternalCalendarController*",
+        "com.apptolast.organization.adapter.http.ConnectorsGate*",
+        "com.apptolast.organization.adapter.persistence.PostgresExternalCalendarStore*",
+        "com.apptolast.organization.adapter.logging.Slf4jExternalCalendarAudit*",
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration*"
+    )
     val exportHttpClasses = setOf(
         "com.apptolast.organization.adapter.http.ExportDataController*",
         "com.apptolast.organization.adapter.http.ExportHeadersFilter*",
@@ -469,6 +497,7 @@ pitest {
         importHttpOnly -> importHttpClasses
         importPersistenceOnly -> importPersistenceClasses
         exportPersistenceOnly -> exportPersistenceClasses
+        externalCalendarOnly -> externalCalendarClasses
         customizationOnly -> customizationClasses
         appearanceOnly -> appearanceClasses
         weeklyReviewOnly -> weeklyReviewClasses
@@ -486,7 +515,7 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses + integrationApiClasses + integrationApiHttpClasses + icsCalendarClasses + githubConnectorClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses + integrationApiClasses + integrationApiHttpClasses + icsCalendarClasses + githubConnectorClasses + externalCalendarClasses
     })
     targetTests.set(when {
         icsCalendarOnly -> setOf("com.apptolast.organization.*")
@@ -496,6 +525,7 @@ pitest {
         importHttpOnly -> importHttpTests
         importPersistenceOnly -> importPersistenceTests
         exportPersistenceOnly -> setOf("com.apptolast.organization.*")
+        externalCalendarOnly -> setOf("com.apptolast.organization.*")
         customizationOnly -> setOf("com.apptolast.organization.*")
         appearanceOnly -> setOf("com.apptolast.organization.*")
         weeklyReviewOnly -> setOf("com.apptolast.organization.*")
@@ -523,6 +553,7 @@ pitest {
     if (importHttpOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-http"))
     if (importPersistenceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-persistence"))
     if (exportPersistenceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-export-data-persistence"))
+    if (externalCalendarOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-external-calendar"))
     if (customizationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-custom-views-fields"))
     if (appearanceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-appearance"))
     if (weeklyReviewOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-weekly-review"))

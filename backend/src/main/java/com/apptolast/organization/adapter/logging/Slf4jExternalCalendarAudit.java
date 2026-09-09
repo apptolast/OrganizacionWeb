@@ -6,7 +6,9 @@ import com.apptolast.organization.domain.SyncStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Solo host, resultado, código y duración: la ruta de la dirección es el secreto y no se registra. */
+/**
+ * Solo host, resultado, código y duración: la ruta de la dirección es el secreto y no se registra.
+ */
 public final class Slf4jExternalCalendarAudit implements ExternalCalendarAudit {
   private static final Logger LOG = LoggerFactory.getLogger("organization.external-calendar");
 

@@ -23,7 +23,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-/** @s8: sin APP_CONNECTOR_KEY las cinco rutas responden 503 sin leer el cuerpo ni la base de datos. */
+/**
+ * @s8: sin APP_CONNECTOR_KEY las cinco rutas responden 503 sin leer el cuerpo ni la base de datos.
+ */
 @WebMvcTest(
     controllers = ExternalCalendarController.class,
     properties = {
@@ -91,7 +93,8 @@ class ExternalCalendarDisabledApiTest {
   @Test
   void s8_readingEventsWithAnInvalidRange() throws Exception {
     disabled(
-        mvc.perform(get(ROUTE + "/events").with(user("owner")).param("from", "x").param("to", "y")));
+        mvc.perform(
+            get(ROUTE + "/events").with(user("owner")).param("from", "x").param("to", "y")));
   }
 
   @Test
@@ -107,7 +110,11 @@ class ExternalCalendarDisabledApiTest {
   /** La guardia cubre la ruta y lo que cuelga de ella, no cualquier ruta que empiece igual. */
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.ValueSource(
-      strings = {"/api/v1/me/external-calendars", "/api/v1/me/external-calendar-otro", "/api/v1/me/otra-cosa"})
+      strings = {
+        "/api/v1/me/external-calendars",
+        "/api/v1/me/external-calendar-otro",
+        "/api/v1/me/otra-cosa"
+      })
   void s8_onlyTheFiveRoutesAreGated(String route) throws Exception {
     mvc.perform(get(route).with(user("owner")))
         .andExpect(status().is(org.hamcrest.Matchers.not(503)));

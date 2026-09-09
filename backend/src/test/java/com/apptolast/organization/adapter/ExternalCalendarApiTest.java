@@ -46,7 +46,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-/** @s1, @s2, @s4, @s10, @s28, @s31, @s32, @s33. */
+/**
+ * @s1, @s2, @s4, @s10, @s28, @s31, @s32, @s33.
+ */
 @WebMvcTest(
     controllers = ExternalCalendarController.class,
     properties = {
@@ -72,14 +74,40 @@ class ExternalCalendarApiTest {
 
   static ExternalCalendarSubscription subscription() {
     return new ExternalCalendarSubscription(
-        ID, "Trabajo", "feed.example.test", ".ics", null, null, null, null, null, 0, 0, 0, 0, false,
+        ID,
+        "Trabajo",
+        "feed.example.test",
+        ".ics",
+        null,
+        null,
+        null,
+        null,
+        null,
+        0,
+        0,
+        0,
+        0,
+        false,
         NOW);
   }
 
   static ExternalCalendarSubscription synced() {
     return new ExternalCalendarSubscription(
-        ID, "Trabajo", "feed.example.test", ".ics", NOW, NOW, SyncStatus.FAILED,
-        FeedError.FEED_HTTP_ERROR, "Europe/Madrid", 12, 3, 1, 0, true, NOW);
+        ID,
+        "Trabajo",
+        "feed.example.test",
+        ".ics",
+        NOW,
+        NOW,
+        SyncStatus.FAILED,
+        FeedError.FEED_HTTP_ERROR,
+        "Europe/Madrid",
+        12,
+        3,
+        1,
+        0,
+        true,
+        NOW);
   }
 
   @Test
@@ -121,7 +149,8 @@ class ExternalCalendarApiTest {
 
   @Test
   void s2_theResponseNeverCarriesTheUrlNorTheVersion() throws Exception {
-    when(save.execute("owner", "Trabajo", "https://feed.example.test/calendar/ical/abc123/basic.ics"))
+    when(save.execute(
+            "owner", "Trabajo", "https://feed.example.test/calendar/ical/abc123/basic.ics"))
         .thenReturn(subscription());
     mvc.perform(
             put(ROUTE)
@@ -134,7 +163,9 @@ class ExternalCalendarApiTest {
         .andExpect(header().string("Cache-Control", "no-store"))
         .andExpect(jsonPath("$.configured").value(true))
         .andExpect(jsonPath("$.subscription.length()").value(15))
-        .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("abc123"))))
+        .andExpect(
+            content()
+                .string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("abc123"))))
         .andExpect(jsonPath("$.subscription.version").doesNotExist())
         .andExpect(jsonPath("$.subscription.url").doesNotExist());
   }

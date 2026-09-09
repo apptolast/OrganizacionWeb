@@ -28,7 +28,10 @@ class AesGcmSecretCipherTest {
   void s2_storesANonceOfTwelveBytesFollowedByCiphertextWithoutThePlainUrl() {
     var stored = AesGcmSecretCipher.of(K1).encrypt(OWNER, URL);
     assertEquals(12, AesGcmSecretCipher.NONCE_LENGTH);
-    assertEquals(AesGcmSecretCipher.NONCE_LENGTH, AesGcmSecretCipher.HEADER_LENGTH, "el nonce abre el cifrado, sin cabecera propia");
+    assertEquals(
+        AesGcmSecretCipher.NONCE_LENGTH,
+        AesGcmSecretCipher.HEADER_LENGTH,
+        "el nonce abre el cifrado, sin cabecera propia");
     assertTrue(stored.length > AesGcmSecretCipher.HEADER_LENGTH);
     assertFalse(
         new String(stored, StandardCharsets.ISO_8859_1).contains("abc123"),

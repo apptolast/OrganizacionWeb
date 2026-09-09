@@ -5,8 +5,9 @@ package com.apptolast.organization.application;
  * Basta una dirección prohibida para rechazarlo entero, porque el cliente HTTP elegiría cualquiera
  * de ellas.
  *
- * <p>Riesgo residual conocido: entre esta comprobación y la conexión el DNS puede cambiar (rebinding
- * DNS). Se acepta y se mitiga repitiendo la comprobación en cada sincronización, no solo al guardar.
+ * <p>Riesgo residual conocido: entre esta comprobación y la conexión el DNS puede cambiar
+ * (rebinding DNS). Se acepta y se mitiga repitiendo la comprobación en cada sincronización, no solo
+ * al guardar.
  */
 public final class OutboundHostGuard implements OutboundGuard {
   private final HostResolver resolver;

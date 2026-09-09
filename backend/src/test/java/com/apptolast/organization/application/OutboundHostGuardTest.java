@@ -25,7 +25,10 @@ class OutboundHostGuardTest {
 
   static OutboundHostGuard guardResolving(Map<String, List<String>> zone) {
     HostResolver resolver =
-        host -> zone.getOrDefault(host, List.of()).stream().map(OutboundHostGuardTest::address).toList();
+        host ->
+            zone.getOrDefault(host, List.of()).stream()
+                .map(OutboundHostGuardTest::address)
+                .toList();
     return new OutboundHostGuard(resolver, AddressPolicy.blockingPrivateAddresses());
   }
 
@@ -37,7 +40,9 @@ class OutboundHostGuardTest {
 
   @Test
   void s4_aHostWithNoAddressesIsUnresolvable() {
-    assertEquals(OutboundHostGuard.Verdict.UNRESOLVABLE, guardResolving(Map.of()).check("no-existe.invalid"));
+    assertEquals(
+        OutboundHostGuard.Verdict.UNRESOLVABLE,
+        guardResolving(Map.of()).check("no-existe.invalid"));
   }
 
   @ParameterizedTest
@@ -63,14 +68,15 @@ class OutboundHostGuardTest {
 
   @Test
   void s4_oneForbiddenAddressAmongPublicOnesBlocksTheWholeHost() {
-    var guard =
-        guardResolving(Map.of("dual.example.test", List.of("93.184.216.34", "::1")));
+    var guard = guardResolving(Map.of("dual.example.test", List.of("93.184.216.34", "::1")));
     assertEquals(OutboundHostGuard.Verdict.BLOCKED, guard.check("dual.example.test"));
   }
 
   @Test
   void s11_aHostThatStopsResolvingIsRejectedToo() {
-    assertEquals(OutboundHostGuard.Verdict.UNRESOLVABLE, guardResolving(Map.of()).check("feed.example.test"));
+    assertEquals(
+        OutboundHostGuard.Verdict.UNRESOLVABLE,
+        guardResolving(Map.of()).check("feed.example.test"));
   }
 
   @Test

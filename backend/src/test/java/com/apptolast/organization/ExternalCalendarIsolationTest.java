@@ -14,8 +14,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * @s34: Hoy y la planificación de bloques no saben que existe el calendario externo, así que su
- *     respuesta y sus solapes no pueden cambiar por tener una suscripción. @s30: nadie sincroniza al
- *     arrancar.
+ *     respuesta y sus solapes no pueden cambiar por tener una suscripción. @s30: nadie sincroniza
+ *     al arrancar.
  */
 class ExternalCalendarIsolationTest {
   static final JavaClasses CLASSES =
@@ -57,7 +57,8 @@ class ExternalCalendarIsolationTest {
   void s34_nothingOutsideTheSliceDependsOnTheExternalCalendarTypes() {
     noClasses()
         .that()
-        .haveNameNotMatching(".*(ExternalCalendar|ExternalEvent|IcsCalendar|Ics|SyncSummary|SyncStatus|FeedError|SecretCipher|CalendarFeed|FeedFetch|StoredSubscription|OutboundGuard|OutboundHostGuard|AddressPolicy|HostResolver|SyncOutcome|ConnectorsGate|ConnectorCipher|AesGcmSecretCipher|SystemHostResolver|SecretUrl).*")
+        .haveNameNotMatching(
+            ".*(ExternalCalendar|ExternalEvent|IcsCalendar|Ics|SyncSummary|SyncStatus|FeedError|SecretCipher|CalendarFeed|FeedFetch|StoredSubscription|OutboundGuard|OutboundHostGuard|AddressPolicy|HostResolver|SyncOutcome|ConnectorsGate|ConnectorCipher|AesGcmSecretCipher|SystemHostResolver|SecretUrl).*")
         .and()
         .haveNameNotMatching(".*(ApplicationConfiguration|SecurityConfiguration|ApiErrors).*")
         .should()
@@ -71,7 +72,8 @@ class ExternalCalendarIsolationTest {
   void s30_noSchedulerTouchesTheExternalCalendar() throws Exception {
     var configuration =
         Files.readString(
-            Path.of("src/main/java/com/apptolast/organization/adapter/config/PublisherSchedule.java"));
+            Path.of(
+                "src/main/java/com/apptolast/organization/adapter/config/PublisherSchedule.java"));
     org.junit.jupiter.api.Assertions.assertFalse(
         configuration.contains("ExternalCalendar"),
         "el único planificador del backend no puede disparar sincronizaciones");

@@ -248,3 +248,27 @@ incluidas las 37 pruebas MockMvc y la de Testcontainers.
 - `today.test.tsx` aísla la sección con `vi.mock`, como `App.test.tsx` hace con
   `ProjectTasks`: sus 57 pruebas cuentan peticiones de Hoy y la sección añade
   dos. La integración real la cubre `today-external-section.test.tsx`.
+
+### Ciclo 19 — alcance de mutación (feature 28)
+
+- ROJO: cinco pruebas nuevas en `scripts/project.test.mjs` para los objetivos
+  `external_calendar-backend` y `external_calendar-frontend`, el conjunto de
+  clases del alcance PIT y la configuración de Stryker.
+- VERDE: `-PmutationScope=external_calendar` en `backend/build.gradle.kts` con
+  las 25 clases del carril, `frontend/stryker.external-calendar.config.json`
+  (umbral 80) y los dos bloques en `scripts/project.mjs`.
+- El alcance nuevo se suma al final de la unión `else ->` a propósito: las
+  pruebas de importación y exportación afirman tramos contiguos de esa línea y
+  así siguen verdes.
+- Reparación de arrastre: `App.tsx` y `workspace.tsx` movieron líneas al añadir
+  la ruta, y `stryker.appearance.config.json` selecciona nodos por línea y
+  columna. Se recalcularon los cuatro rangos y se actualizó su espejo en
+  `scripts/project.test.mjs`; la prueba de apariencia, que ya venía roja en la
+  rama, vuelve a verde.
+- `node --test scripts/project.test.mjs`: 75 pasan, 2 fallan. Las dos que fallan
+  son de la feature 24 (`integration_api-backend` y `-frontend`), cuyo carril no
+  está integrado en esta rama; ya fallaban antes de tocar nada.
+
+**No se ha ejecutado ninguna mutación** ni E2E: hay cinco carriles compartiendo
+la máquina. Queda listo para que el `mutation_tester` lance
+`bin/harness mutate external_calendar-backend` y `external_calendar-frontend`.

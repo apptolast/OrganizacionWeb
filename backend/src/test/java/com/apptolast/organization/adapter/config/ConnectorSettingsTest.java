@@ -23,8 +23,7 @@ class ConnectorSettingsTest {
 
   static Properties applicationProperties() throws IOException {
     var properties = new Properties();
-    try (var stream =
-        ConnectorSettingsTest.class.getResourceAsStream("/application.properties")) {
+    try (var stream = ConnectorSettingsTest.class.getResourceAsStream("/application.properties")) {
       properties.load(stream);
     }
     return properties;
@@ -39,8 +38,7 @@ class ConnectorSettingsTest {
   }
 
   @ParameterizedTest
-  @ValueSource(
-      strings = {"app.connectors.key", "app.connectors.key-previous", ALLOW_PRIVATE})
+  @ValueSource(strings = {"app.connectors.key", "app.connectors.key-previous", ALLOW_PRIVATE})
   void b10_connectorSettingsComeFromTheEnvironment(String setting) throws IOException {
     var value = applicationProperties().getProperty(setting);
     assertTrue(value != null && value.startsWith("${"), setting + " debe leerse del entorno");
@@ -53,14 +51,12 @@ class ConnectorSettingsTest {
         "APP_CONNECTOR_KEY_PREVIOUS",
         "APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES"
       })
-  void b10_theExampleEnvironmentDeclaresEveryConnectorVariable(String variable)
-      throws IOException {
+  void b10_theExampleEnvironmentDeclaresEveryConnectorVariable(String variable) throws IOException {
     assertTrue(example().contains(variable + "="), variable + " no está declarada");
   }
 
   @Test
-  void b10_theExampleEnvironmentDisablesPrivateAddressesWithAnExplicitWarning()
-      throws IOException {
+  void b10_theExampleEnvironmentDisablesPrivateAddressesWithAnExplicitWarning() throws IOException {
     var example = example();
     assertTrue(example.contains("APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES=false"));
     assertFalse(example.contains("APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES=true"));

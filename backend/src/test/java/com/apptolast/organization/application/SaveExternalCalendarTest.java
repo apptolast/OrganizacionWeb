@@ -21,7 +21,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-/** @s2, @s3, @s4 (resolución), @s6, @s7. */
+/**
+ * @s2, @s3, @s4 (resolución), @s6, @s7.
+ */
 class SaveExternalCalendarTest {
   static final String OWNER = "persona-a";
   static final Instant NOW = Instant.parse("2030-01-07T12:00:00Z");
@@ -193,7 +195,8 @@ class SaveExternalCalendarTest {
   void s4_aHostThatDoesNotPassTheGuardIsRejectedOnTheUrlFieldWithoutWriting(
       OutboundGuard.Verdict rejected, String code) {
     verdict = rejected;
-    var error = assertThrows(ValidationException.class, () -> save().execute(OWNER, "Trabajo", URL));
+    var error =
+        assertThrows(ValidationException.class, () -> save().execute(OWNER, "Trabajo", URL));
     assertEquals(1, error.errors().size());
     assertEquals("url", error.errors().getFirst().field());
     assertEquals(code, error.errors().getFirst().code());

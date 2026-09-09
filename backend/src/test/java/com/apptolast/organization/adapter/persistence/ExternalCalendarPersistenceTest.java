@@ -70,7 +70,8 @@ class ExternalCalendarPersistenceTest {
   }
 
   static ExternalEvent event(String uid, String startAt, String endAt) {
-    return new ExternalEvent(uid, "Evento " + uid, Instant.parse(startAt), Instant.parse(endAt), false);
+    return new ExternalEvent(
+        uid, "Evento " + uid, Instant.parse(startAt), Instant.parse(endAt), false);
   }
 
   static SyncSummary summary(int imported, boolean truncated) {
@@ -80,7 +81,9 @@ class ExternalCalendarPersistenceTest {
   @Test
   void s1_absenceIsReadWithoutInsertingAnything() {
     assertThat(store().find(A)).isEmpty();
-    assertThat(jdbc.queryForObject("SELECT count(*) FROM external_calendar_subscriptions", Integer.class))
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM external_calendar_subscriptions", Integer.class))
         .isZero();
     assertThat(jdbc.queryForObject("SELECT count(*) FROM external_calendar_events", Integer.class))
         .isZero();
@@ -117,10 +120,12 @@ class ExternalCalendarPersistenceTest {
         jdbc.queryForMap("SELECT * FROM external_calendar_subscriptions WHERE owner_id=?", A)
             .toString();
     assertThat(row).doesNotContain("abc123");
-    assertThat((byte[]) jdbc.queryForObject(
-            "SELECT url_ciphertext FROM external_calendar_subscriptions WHERE owner_id=?",
-            byte[].class,
-            A))
+    assertThat(
+            (byte[])
+                jdbc.queryForObject(
+                    "SELECT url_ciphertext FROM external_calendar_subscriptions WHERE owner_id=?",
+                    byte[].class,
+                    A))
         .isEqualTo(cipher("C"));
   }
 
@@ -136,22 +141,40 @@ class ExternalCalendarPersistenceTest {
   @Test
   void s6_relabellingBumpsTheVersionAndKeepsSnapshotAndCounters() {
     store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
-    store().commitSuccess(A, 0, summary(12, false), List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")), EARLIER);
+    store()
+        .commitSuccess(
+            A,
+            0,
+            summary(12, false),
+            List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")),
+            EARLIER);
     var relabelled = store().relabel(A, "Casa", cipher("E"), NOW);
     assertThat(relabelled.version()).isEqualTo(2);
     assertThat(relabelled.subscription().label()).isEqualTo("Casa");
     assertThat(relabelled.subscription().imported()).isEqualTo(12);
     assertThat(relabelled.subscription().lastSyncAt()).isEqualTo(EARLIER);
     assertThat(relabelled.subscription().lastStatus()).isEqualTo(SyncStatus.OK);
-    assertThat(store().events(A, Instant.parse("2030-01-08T00:00:00Z"), Instant.parse("2030-01-09T00:00:00Z")))
+    assertThat(
+            store()
+                .events(
+                    A,
+                    Instant.parse("2030-01-08T00:00:00Z"),
+                    Instant.parse("2030-01-09T00:00:00Z")))
         .hasSize(1);
   }
 
   @Test
   void s6_rebindingClearsTheSnapshotAndEveryCounter() {
     store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
-    store().commitSuccess(A, 0, summary(12, true), List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")), EARLIER);
-    var rebound = store().rebind(A, input("Trabajo", "https://otro.example.test/b.ics"), cipher("D"), NOW);
+    store()
+        .commitSuccess(
+            A,
+            0,
+            summary(12, true),
+            List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")),
+            EARLIER);
+    var rebound =
+        store().rebind(A, input("Trabajo", "https://otro.example.test/b.ics"), cipher("D"), NOW);
     assertThat(rebound.version()).isEqualTo(2);
     assertThat(rebound.subscription().urlHost()).isEqualTo("otro.example.test");
     assertThat(rebound.subscription().imported()).isZero();
@@ -168,16 +191,24 @@ class ExternalCalendarPersistenceTest {
   @Test
   void s6_rebindingKeepsTheIdentityOfTheSubscription() {
     var id = store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW).subscription().id();
-    assertThat(store().rebind(A, input("Otro", "https://otro.example.test/b.ics"), cipher("D"), NOW)
-            .subscription()
-            .id())
+    assertThat(
+            store()
+                .rebind(A, input("Otro", "https://otro.example.test/b.ics"), cipher("D"), NOW)
+                .subscription()
+                .id())
         .isEqualTo(id);
   }
 
   @Test
   void s7_deletingDragsTheSnapshotAndIsIdempotent() {
     store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
-    store().commitSuccess(A, 0, summary(1, false), List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")), NOW);
+    store()
+        .commitSuccess(
+            A,
+            0,
+            summary(1, false),
+            List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")),
+            NOW);
     assertThat(store().delete(A)).isTrue();
     assertThat(store().find(A)).isEmpty();
     assertThat(jdbc.queryForObject("SELECT count(*) FROM external_calendar_events", Integer.class))
@@ -188,20 +219,40 @@ class ExternalCalendarPersistenceTest {
   @Test
   void s25_aSuccessfulSyncReplacesTheWholeSnapshot() {
     store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
-    store().commitSuccess(A, 0, summary(2, false),
-        List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z"),
-            event("u2", "2030-01-08T11:00:00Z", "2030-01-08T12:00:00Z")), EARLIER);
+    store()
+        .commitSuccess(
+            A,
+            0,
+            summary(2, false),
+            List.of(
+                event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z"),
+                event("u2", "2030-01-08T11:00:00Z", "2030-01-08T12:00:00Z")),
+            EARLIER);
     var second =
-        store().commitSuccess(A, 1, summary(2, false),
-            List.of(new ExternalEvent("u2", "Nuevo", Instant.parse("2030-01-08T11:00:00Z"), Instant.parse("2030-01-08T12:00:00Z"), false),
-                event("u3", "2030-01-08T13:00:00Z", "2030-01-08T14:00:00Z")), NOW);
+        store()
+            .commitSuccess(
+                A,
+                1,
+                summary(2, false),
+                List.of(
+                    new ExternalEvent(
+                        "u2",
+                        "Nuevo",
+                        Instant.parse("2030-01-08T11:00:00Z"),
+                        Instant.parse("2030-01-08T12:00:00Z"),
+                        false),
+                    event("u3", "2030-01-08T13:00:00Z", "2030-01-08T14:00:00Z")),
+                NOW);
     assertThat(second).isPresent();
     assertThat(second.orElseThrow().version()).isEqualTo(2);
     assertThat(second.orElseThrow().subscription().lastSyncAt()).isEqualTo(NOW);
     assertThat(second.orElseThrow().subscription().lastAttemptAt()).isEqualTo(NOW);
     assertThat(second.orElseThrow().subscription().lastStatus()).isEqualTo(SyncStatus.OK);
     assertThat(second.orElseThrow().subscription().lastError()).isNull();
-    var events = store().events(A, Instant.parse("2030-01-08T00:00:00Z"), Instant.parse("2030-01-09T00:00:00Z"));
+    var events =
+        store()
+            .events(
+                A, Instant.parse("2030-01-08T00:00:00Z"), Instant.parse("2030-01-09T00:00:00Z"));
     assertThat(events.stream().map(ExternalEvent::uid)).containsExactly("u2", "u3");
     assertThat(events.getFirst().summary()).isEqualTo("Nuevo");
   }
@@ -209,22 +260,43 @@ class ExternalCalendarPersistenceTest {
   @Test
   void s26_aSyncThatLostTheVersionRaceChangesNothing() {
     store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
-    store().commitSuccess(A, 0, summary(1, false), List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")), EARLIER);
+    store()
+        .commitSuccess(
+            A,
+            0,
+            summary(1, false),
+            List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")),
+            EARLIER);
     var loser =
-        store().commitSuccess(A, 0, summary(9, false), List.of(event("u9", "2030-01-08T15:00:00Z", "2030-01-08T16:00:00Z")), NOW);
+        store()
+            .commitSuccess(
+                A,
+                0,
+                summary(9, false),
+                List.of(event("u9", "2030-01-08T15:00:00Z", "2030-01-08T16:00:00Z")),
+                NOW);
     assertThat(loser).isEmpty();
     assertThat(store().find(A).orElseThrow().subscription().imported()).isEqualTo(1);
     assertThat(store().find(A).orElseThrow().subscription().lastSyncAt()).isEqualTo(EARLIER);
-    assertThat(store().events(A, Instant.parse("2030-01-08T00:00:00Z"), Instant.parse("2030-01-09T00:00:00Z"))
-            .stream()
-            .map(ExternalEvent::uid))
+    assertThat(
+            store()
+                .events(
+                    A, Instant.parse("2030-01-08T00:00:00Z"), Instant.parse("2030-01-09T00:00:00Z"))
+                .stream()
+                .map(ExternalEvent::uid))
         .containsExactly("u1");
   }
 
   @Test
   void s12_aFailedSyncKeepsTheSnapshotAndTheCounters() {
     store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
-    store().commitSuccess(A, 0, summary(5, false), List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")), EARLIER);
+    store()
+        .commitSuccess(
+            A,
+            0,
+            summary(5, false),
+            List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")),
+            EARLIER);
     var failed = store().commitFailure(A, 1, FeedError.FEED_HTTP_ERROR, NOW).orElseThrow();
     assertThat(failed.subscription().lastStatus()).isEqualTo(SyncStatus.FAILED);
     assertThat(failed.subscription().lastError()).isEqualTo(FeedError.FEED_HTTP_ERROR);
@@ -232,7 +304,12 @@ class ExternalCalendarPersistenceTest {
     assertThat(failed.subscription().lastSyncAt()).isEqualTo(EARLIER);
     assertThat(failed.subscription().imported()).isEqualTo(5);
     assertThat(failed.subscription().snapshotZoneId()).isEqualTo("Europe/Madrid");
-    assertThat(store().events(A, Instant.parse("2030-01-08T00:00:00Z"), Instant.parse("2030-01-09T00:00:00Z")))
+    assertThat(
+            store()
+                .events(
+                    A,
+                    Instant.parse("2030-01-08T00:00:00Z"),
+                    Instant.parse("2030-01-09T00:00:00Z")))
         .hasSize(1);
   }
 
@@ -247,26 +324,72 @@ class ExternalCalendarPersistenceTest {
   @Test
   void s31_eventsAreReadInTheHalfOpenRangeOrderedByStartAndUid() {
     store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
-    store().commitSuccess(A, 0, summary(5, false),
-        List.of(new ExternalEvent("b", "A", Instant.parse("2030-01-07T08:00:00Z"), Instant.parse("2030-01-07T09:00:00Z"), false),
-            new ExternalEvent("a", "E", Instant.parse("2030-01-07T08:00:00Z"), Instant.parse("2030-01-07T09:00:00Z"), false),
-            new ExternalEvent("c", "B", Instant.parse("2030-01-07T23:30:00Z"), Instant.parse("2030-01-08T00:30:00Z"), false),
-            new ExternalEvent("d", "C", Instant.parse("2030-01-08T00:00:00Z"), Instant.parse("2030-01-08T01:00:00Z"), false),
-            new ExternalEvent("e", "D", Instant.parse("2030-01-06T23:00:00Z"), Instant.parse("2030-01-07T00:00:00Z"), false)),
-        NOW);
-    var items = store().events(A, Instant.parse("2030-01-07T00:00:00Z"), Instant.parse("2030-01-08T00:00:00Z"));
+    store()
+        .commitSuccess(
+            A,
+            0,
+            summary(5, false),
+            List.of(
+                new ExternalEvent(
+                    "b",
+                    "A",
+                    Instant.parse("2030-01-07T08:00:00Z"),
+                    Instant.parse("2030-01-07T09:00:00Z"),
+                    false),
+                new ExternalEvent(
+                    "a",
+                    "E",
+                    Instant.parse("2030-01-07T08:00:00Z"),
+                    Instant.parse("2030-01-07T09:00:00Z"),
+                    false),
+                new ExternalEvent(
+                    "c",
+                    "B",
+                    Instant.parse("2030-01-07T23:30:00Z"),
+                    Instant.parse("2030-01-08T00:30:00Z"),
+                    false),
+                new ExternalEvent(
+                    "d",
+                    "C",
+                    Instant.parse("2030-01-08T00:00:00Z"),
+                    Instant.parse("2030-01-08T01:00:00Z"),
+                    false),
+                new ExternalEvent(
+                    "e",
+                    "D",
+                    Instant.parse("2030-01-06T23:00:00Z"),
+                    Instant.parse("2030-01-07T00:00:00Z"),
+                    false)),
+            NOW);
+    var items =
+        store()
+            .events(
+                A, Instant.parse("2030-01-07T00:00:00Z"), Instant.parse("2030-01-08T00:00:00Z"));
     assertThat(items.stream().map(ExternalEvent::summary)).containsExactly("E", "A", "B");
   }
 
   @Test
   void s16_allDaySurvivesTheRoundTrip() {
     store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
-    store().commitSuccess(A, 0, summary(1, false),
-        List.of(new ExternalEvent("d1", "Fiesta", Instant.parse("2030-01-06T23:00:00Z"), Instant.parse("2030-01-07T23:00:00Z"), true)),
-        NOW);
-    assertThat(store().events(A, Instant.parse("2030-01-07T00:00:00Z"), Instant.parse("2030-01-08T00:00:00Z"))
-            .getFirst()
-            .allDay())
+    store()
+        .commitSuccess(
+            A,
+            0,
+            summary(1, false),
+            List.of(
+                new ExternalEvent(
+                    "d1",
+                    "Fiesta",
+                    Instant.parse("2030-01-06T23:00:00Z"),
+                    Instant.parse("2030-01-07T23:00:00Z"),
+                    true)),
+            NOW);
+    assertThat(
+            store()
+                .events(
+                    A, Instant.parse("2030-01-07T00:00:00Z"), Instant.parse("2030-01-08T00:00:00Z"))
+                .getFirst()
+                .allDay())
         .isTrue();
   }
 
@@ -279,7 +402,12 @@ class ExternalCalendarPersistenceTest {
       many.add(new ExternalEvent("u" + i, "Evento", start, start.plusSeconds(60), false));
     }
     store().commitSuccess(A, 0, summary(650, true), many, NOW);
-    assertThat(store().events(A, Instant.parse("2030-01-08T00:00:00Z"), Instant.parse("2030-01-09T00:00:00Z")))
+    assertThat(
+            store()
+                .events(
+                    A,
+                    Instant.parse("2030-01-08T00:00:00Z"),
+                    Instant.parse("2030-01-09T00:00:00Z")))
         .hasSize(500);
     assertThat(store().find(A).orElseThrow().subscription().truncated()).isTrue();
   }
@@ -287,10 +415,29 @@ class ExternalCalendarPersistenceTest {
   @Test
   void s33_ownersAreIsolated() {
     store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
-    store().commitSuccess(A, 0, summary(1, false), List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")), NOW);
-    store().create(B, UUID.randomUUID(), input("Suya", "https://otro.example.test/b.ics"), cipher("D"), NOW);
-    store().commitSuccess(B, 0, summary(1, false), List.of(event("u1", "2030-01-08T20:00:00Z", "2030-01-08T21:00:00Z")), NOW);
-    var window = List.of(Instant.parse("2030-01-08T00:00:00Z"), Instant.parse("2030-01-09T00:00:00Z"));
+    store()
+        .commitSuccess(
+            A,
+            0,
+            summary(1, false),
+            List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")),
+            NOW);
+    store()
+        .create(
+            B,
+            UUID.randomUUID(),
+            input("Suya", "https://otro.example.test/b.ics"),
+            cipher("D"),
+            NOW);
+    store()
+        .commitSuccess(
+            B,
+            0,
+            summary(1, false),
+            List.of(event("u1", "2030-01-08T20:00:00Z", "2030-01-08T21:00:00Z")),
+            NOW);
+    var window =
+        List.of(Instant.parse("2030-01-08T00:00:00Z"), Instant.parse("2030-01-09T00:00:00Z"));
     assertThat(store().events(A, window.getFirst(), window.get(1)).getFirst().startAt())
         .isEqualTo(Instant.parse("2030-01-08T09:00:00Z"));
     store().delete(B);
@@ -301,9 +448,27 @@ class ExternalCalendarPersistenceTest {
   @Test
   void s33_theSameUidCanBelongToTwoOwners() {
     store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
-    store().create(B, UUID.randomUUID(), input("Suya", "https://otro.example.test/b.ics"), cipher("D"), NOW);
-    store().commitSuccess(A, 0, summary(1, false), List.of(event("dup", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")), NOW);
-    store().commitSuccess(B, 0, summary(1, false), List.of(event("dup", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")), NOW);
+    store()
+        .create(
+            B,
+            UUID.randomUUID(),
+            input("Suya", "https://otro.example.test/b.ics"),
+            cipher("D"),
+            NOW);
+    store()
+        .commitSuccess(
+            A,
+            0,
+            summary(1, false),
+            List.of(event("dup", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")),
+            NOW);
+    store()
+        .commitSuccess(
+            B,
+            0,
+            summary(1, false),
+            List.of(event("dup", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")),
+            NOW);
     assertThat(jdbc.queryForObject("SELECT count(*) FROM external_calendar_events", Integer.class))
         .isEqualTo(2);
   }
@@ -311,7 +476,13 @@ class ExternalCalendarPersistenceTest {
   @Test
   void s25_syncingDoesNotTouchTheOutbox() {
     store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
-    store().commitSuccess(A, 0, summary(1, false), List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")), NOW);
+    store()
+        .commitSuccess(
+            A,
+            0,
+            summary(1, false),
+            List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")),
+            NOW);
     assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events", Integer.class)).isZero();
   }
 }

@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Rango semiabierto [from, to) en UTC. Ambos extremos son obligatorios, se escriben en el formato de
- * instante de la aplicación y no pueden abarcar más de dieciséis días.
+ * Rango semiabierto [from, to) en UTC. Ambos extremos son obligatorios, se escriben en el formato
+ * de instante de la aplicación y no pueden abarcar más de dieciséis días.
  */
 public record ExternalEventsRange(Instant from, Instant to) {
   public static final Duration MAX = Duration.ofDays(16);

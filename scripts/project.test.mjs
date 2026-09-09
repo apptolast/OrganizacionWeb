@@ -1969,3 +1969,113 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     );
   }
 });
+
+test("external calendar targets reject other tasks and injected options before execution", () => {
+  const { calls, project } = capture();
+  for (const target of [
+    "external_calendar-backend",
+    "external_calendar-frontend",
+  ]) {
+    assert.throws(() => project("test", target), /Invalid target/);
+    assert.throws(
+      () => project("mutate", `${target} -PmutationScope=other`),
+      /Invalid target/,
+    );
+    assert.throws(() => project("mutate", `${target}-extra`), /Invalid target/);
+  }
+  assert.deepEqual(calls, []);
+});
+
+test("external calendar backend mutation runs only its PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "external_calendar-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=external_calendar"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
+test("external calendar frontend mutation invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "external_calendar-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.external-calendar.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("external calendar PIT scope covers the whole slice and extends the default", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  const selected = build.match(
+    /val externalCalendarClasses = setOf\(([\s\S]*?)\n    \)/,
+  )?.[1];
+  assert.ok(selected);
+  assert.deepEqual(
+    [...selected.matchAll(/"([^"]+)"/g)].map((entry) => entry[1]),
+    [
+      "domain.IcsFeed*",
+      "domain.ExternalCalendarInput*",
+      "domain.ExternalCalendarSnapshot*",
+      "domain.ExternalCalendarSubscription*",
+      "domain.ExternalEvent*",
+      "domain.ExternalEventsRange*",
+      "domain.SyncSummary*",
+      "application.SyncExternalCalendar*",
+      "application.SaveExternalCalendar*",
+      "application.ReadExternalCalendar*",
+      "application.ReadExternalCalendarEvents*",
+      "application.DeleteExternalCalendar*",
+      "application.OutboundHostGuard*",
+      "application.PublicAddressPolicy*",
+      "application.AddressPolicy*",
+      "application.ExternalEventsView*",
+      "adapter.crypto.AesGcmSecretCipher*",
+      "adapter.crypto.ConnectorCipher*",
+      "adapter.feed.HttpCalendarFeed*",
+      "adapter.net.SystemHostResolver*",
+      "adapter.http.ExternalCalendarController*",
+      "adapter.http.ConnectorsGate*",
+      "adapter.persistence.PostgresExternalCalendarStore*",
+      "adapter.logging.Slf4jExternalCalendarAudit*",
+      "adapter.config.ApplicationConfiguration*",
+    ].map((name) => `com.apptolast.organization.${name}`),
+  );
+  assert.match(
+    build,
+    /val externalCalendarOnly = scope == "external_calendar"/,
+  );
+  assert.match(build, /externalCalendarOnly -> externalCalendarClasses/);
+  assert.match(
+    build,
+    /externalCalendarOnly -> setOf\("com\.apptolast\.organization\.\*"\)/,
+  );
+  assert.match(build, /else -> core \+ [^\n]*externalCalendarClasses/);
+});
+
+test("external calendar Stryker configuration mutates only its own files", () => {
+  const configuration = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.external-calendar.config.json"),
+      "utf8",
+    ),
+  );
+  assert.deepEqual(configuration.mutate, [
+    "src/external-calendar-api.ts",
+    "src/external-calendar.tsx",
+    "src/today-external-calendar.tsx",
+  ]);
+  assert.equal(configuration.thresholds.break, 80);
+  assert.equal(configuration.testRunner, "vitest");
+});

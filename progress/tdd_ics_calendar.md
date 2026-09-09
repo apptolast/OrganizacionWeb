@@ -277,3 +277,80 @@ pnpm vitest run src/calendar.test.tsx           → 26 pruebas
 pnpm vitest run src/export-data.test.tsx src/appearance.test.tsx → 72 pruebas
 pnpm exec eslint src/ ; pnpm exec prettier --check src/ ; pnpm exec tsc --noEmit → limpio
 ```
+
+### Ciclo 9 — infraestructura de cierre (nginx, mutación, E2E, documentación)
+
+- `deploy/nginx.conf`: `location /calendar/` enruta al backend con `access_log off`. El token viaja
+  en la ruta, así que no puede aparecer en un log de acceso; además, sin este bloque el `try_files`
+  del SPA devolvería `index.html` en vez del calendario. Esto cierra la «pregunta abierta» que la
+  propuesta de la feature 26 dejó pendiente de infraestructura.
+- `backend/build.gradle.kts`: alcance PIT `ics_calendar` (dominio, casos de uso, los dos
+  controladores, `CalendarDocuments`, `CalendarProblems`, `CalendarPaths`, `PostgresCalendarStore`,
+  `SnapshotRenderCalendar` y `ApplicationConfiguration`), con su `reportDir` propio y añadido a la
+  unión del perfil por defecto.
+- `frontend/stryker.ics-calendar.config.json` y los destinos `ics_calendar-backend` y
+  `ics_calendar-frontend` en `scripts/project.mjs`, con tres pruebas nuevas en
+  `scripts/project.test.mjs`. `node --test scripts/project.test.mjs` deja los mismos 3 fallos que
+  ya traía la rama antes de tocar nada (dos de `integration_api` y uno de `appearance`); ninguno es
+  de este carril.
+- `docs/ics-calendar.md`.
+
+## Mapa de trazabilidad @s a prueba
+
+Backend, 95 pruebas en 8 clases. Frontend, 39 pruebas en 2 ficheros.
+
+| @s | Prueba |
+| --- | --- |
+| @s1 | `CalendarFeedUseCasesTest.s1_generateReturnsTheUrlOnceAndStoresOnlyTheFingerprint`, `CalendarPersistenceTest.s1_s29_onlyTheThirtyTwoOctetFingerprintIsStoredAndOutlivesTheStore`, `CalendarApiTest.s1_creatingTheLinkAnswersOnlyUrlAndCreatedAt`, `CalendarWiringTest` |
+| @s2 | `CalendarFeedUseCasesTest.s2_statusWithoutTokenIsInactiveAndWritesNothing`, `CalendarApiTest.s2_statusWithoutLinkIsInactive` |
+| @s3 | `CalendarFeedUseCasesTest.s3_statusWithTokenExposesOnlyTheCreationInstant`, `CalendarApiTest.s3_statusWithLinkNeverRevealsTheTokenOrItsDigest` |
+| @s4 | `CalendarFeedUseCasesTest.s4_regeneratingKeepsOneRowAndInvalidatesThePreviousToken`, `CalendarPersistenceTest.s4_regeneratingLeavesOneRowAndTheOldFingerprintResolvesToNobody`, `e2e/ics-calendar.spec.mjs` (regeneración) |
+| @s5 | `CalendarFeedUseCasesTest.s5_revokeIsIdempotentAndLeavesNoRow`, `CalendarPersistenceTest.s5_revokeDeletesTheRowAndRepeatingItChangesNothing`, `CalendarApiTest.s5_revokingAnswersTwoHundredFourWithoutBody` |
+| @s6 | `CalendarApiTest.s6_aNonEmptyGenerationBodyIsRejectedWithoutTouchingTheToken` (5 filas) |
+| @s7 | `CalendarApiTest.s7_withoutSessionNoManagementRouteAnswersData` (4 rutas por con y sin Bearer) |
+| @s8 | `CalendarApiTest.s8_generatingAndRevokingKeepCsrfAndOrigin`, `CalendarApiTest.s8_s11_thePublicFeedNeedsNoCredentialsAndCarriesTheExactHeaders` |
+| @s9 | `CalendarPersistenceTest.s9_twoConcurrentRegenerationsLeaveExactlyOneToken` |
+| @s10 | `CalendarFeedUseCasesTest.s10_aFailedWriteIsAttemptedOnceAndNeverRetried`, `CalendarPersistenceTest.s10_aColludingFingerprintFailsOnceAndKeepsThePreviousToken`, `CalendarApiTest.s10_aFailedGenerationAnswersFiveHundredThreeWithoutUrl` |
+| @s11 | `CalendarApiTest.s8_s11_...`, `CalendarApiTest.s11_headAnswersTheSameHeadersWithAnEmptyBody`, `CalendarApiTest.s11_s15_theRequestLeavesNoTokenAndNoCalendarPathInTheLogs` |
+| @s12 | `IcsCalendarTest` (documento de 714 octetos byte a byte), `CalendarPersistenceTest.s12_aPlannedBlockWithoutProjectionCarriesVersionOneAndItsCreationStamp`, `e2e/ics-calendar.spec.mjs` |
+| @s13 | `IcsCalendarTest` (158 octetos, 7 líneas, sin VEVENT ni X-WR-TIMEZONE) |
+| @s14 | `IcsCalendarTest` (las tres filas de disponibilidad), `CalendarPersistenceTest.s14_theZoneIsTheAvailabilityZoneAndIsAbsentWithoutAvailability` |
+| @s15 | `CalendarFeedUseCasesTest.s15_anUnknownCandidateIsNotFoundAndNeverReachesTheCalendar`, `CalendarPersistenceTest.s15_anUnknownFingerprintResolvesToNobodyWithoutWriting`, `CalendarApiTest.s15_everyUnresolvableAddressAnswersTheSameNotFound` (8 direcciones), `SnapshotRenderCalendarTest.s15_s30_aFailureRollsBackAndTravelsUnchanged` |
+| @s16 | `CalendarApiTest.s16_thePublicResourceOnlyAcceptsGetAndHead` (4 métodos, token conocido y desconocido) |
+| @s17 | `CalendarFeedUseCasesTest.s17_theDownloadRendersTheOwnerFeedWithoutTouchingAnyToken`, `CalendarApiTest.s17_theSessionDownloadIsTheSameDocumentAsAnAttachment` (con y sin token) |
+| @s18 | `CalendarWindowTest` (las seis filas exactas del Examples), `CalendarFeedUseCasesTest.s18_theWindowIsThirtyDaysBackAndThreeHundredSixtyFiveDaysForward`, `CalendarPersistenceTest.s18_theWindowIsSemiOpenOnBothEnds` |
+| @s19 | `CalendarPersistenceTest.s19_aCancelledBlockLeavesTheFeedButNotTheDatabase` |
+| @s20 | `CalendarPersistenceTest.s20_aMovedBlockPublishesTheProjectionIntervalVersionAndStamp` |
+| @s21 | `CalendarPersistenceTest.s21_completedOrPausedOwnersStillPublishTheirBlocksWithTheTaskTitle` |
+| @s22 | `IcsCalendarTest` (los dos lados del cambio de hora en UTC, sin TZID) |
+| @s23 | `IcsCalendarTest` (escapes y viaje de ida y vuelta, incluidos 500 puntos de código) |
+| @s24 | `IcsCalendarTest` (las cinco fronteras de plegado) |
+| @s25 | `IcsCalendarTest.s25_eventsAreOrderedByStartThenUidRegardlessOfInput` |
+| @s26 | `CalendarFeedUseCasesTest.s26_twoThousandEventsStillRender` y `s26_moreThanTwoThousandEventsAreRefusedBeforeAnyDocumentExists`, `CalendarApiTest.s26_tooManyEventsAnswerThirteenWithoutPartialCalendar` |
+| @s27 | `CalendarFeedUseCasesTest.s27_atokenOnlyResolvesTheFeedOfItsOwner`, `CalendarPersistenceTest.s27_theFeedOfAnOwnerNeverContainsBlocksOfAnother` |
+| @s28 | `CalendarPersistenceTest.s28_zoneAndBlocksComeFromASingleRepeatableReadSnapshot`, `SnapshotRenderCalendarTest.s28_bothReadsRunInsideOneReadOnlyRepeatableReadTransaction` |
+| @s29 | `CalendarPersistenceTest.s1_s29_...` (una tienda nueva lee el token persistido), `e2e/ics-calendar.spec.mjs` (reinicio real del backend) |
+| @s30 | `CalendarFeedUseCasesTest.s30_anUnavailableStoreNeverProducesAPartialDocument`, `CalendarPersistenceTest.s30_anUnreachableDatabaseIsReportedAsStorageUnavailable`, `CalendarApiTest.s30_anUnavailableStoreAnswersFiveHundredThreeOnEveryRoute` (las tres rutas) |
+| @s31 | `calendar-feed-api.test.ts` (3 pruebas de estado), `calendar.test.tsx` (carga, sin enlace, enlace activo, fallo con reintento, entrada de navegación) |
+| @s32 | `calendar-feed-api.test.ts` (2 pruebas de creación), `calendar.test.tsx` (doble clic con un solo POST, anuncio, olvido tras recargar) |
+| @s33 | `calendar.test.tsx` (portapapeles disponible, que rechaza y ausente) |
+| @s34 | `calendar.test.tsx` (confirmación de regeneración y de revocación, con foco y sin petición) |
+| @s35 | `calendar-feed-api.test.ts` (DELETE sólo acepta 204), `calendar.test.tsx` (cancelar, confirmar regeneración, confirmar revocación, foco al h1, fallo sin reintento automático) |
+| @s36 | `calendar-feed-api.test.ts` (6 pruebas de validación y 413), `calendar.test.tsx` (preparación válida, tres respuestas inválidas, límite) |
+| @s37 | `calendar-feed-api.test.ts` (señal ya abortada), `calendar.test.tsx` (aborto al salir, 401 tardío descartado, nada en almacenamiento ni consola) |
+| @s38 | `e2e/ics-calendar.spec.mjs` (axe y barrido 320/768/1280 en cinco estados) — PENDIENTE DE EJECUTAR |
+
+## Lo que este carril NO ha ejecutado
+
+Por la disciplina de recursos de la sesión (cinco carriles compartiendo la máquina) no se han
+lanzado ni la suite completa del backend, ni la suite completa de Vitest, ni Playwright, ni PIT, ni
+Stryker. En consecuencia:
+
+- `e2e/ics-calendar.spec.mjs` está escrito y pasa `node --check`, pero nunca se ha ejecutado. @s38 y
+  la parte E2E de @s29 siguen sin evidencia. Es lo primero que debe correr quien integre.
+- Los rangos linea:columna de `stryker.ics-calendar.config.json` sobre `App.tsx` y `workspace.tsx`
+  se han calculado leyendo el fichero, no ejecutando Stryker; si alguien reformatea esos ficheros
+  habrá que recalcularlos.
+- La mutación (PIT y Stryker) queda para el `mutation_tester`.
+- El estado de la feature 26 en `feature_list.json` sigue en `in_progress`: no le corresponde a
+  este agente marcarlo `done`.

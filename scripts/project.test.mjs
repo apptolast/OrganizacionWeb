@@ -218,6 +218,45 @@ test("export Stryker keeps its complete modules and reviewed integration nodes w
     "reports/mutation-export-data/mutation.html",
   );
 });
+test("ics calendar frontend invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "ics_calendar-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.ics-calendar.config.json",
+      ],
+    ],
+  ]);
+});
+test("ics calendar backend runs PIT on its own scope and nothing else", () => {
+  const { calls, project } = capture();
+  project("mutate", "ics_calendar-backend");
+  assert.equal(calls.length, 1);
+  assert.deepEqual(calls[0][1], [
+    "pitest",
+    "--no-daemon",
+    "-PmutationScope=ics_calendar",
+  ]);
+});
+test("ics calendar targets reject other tasks and injected options", () => {
+  const { calls, project } = capture();
+  for (const target of ["ics_calendar-frontend", "ics_calendar-backend"]) {
+    assert.throws(() => project("test", target), /Invalid target/);
+    assert.throws(
+      () => project("mutate", `${target} -PmutationScope=other`),
+      /Invalid target/,
+    );
+    assert.throws(() => project("mutate", `${target}-extra`), /Invalid target/);
+  }
+  assert.deepEqual(calls, []);
+});
 test("export frontend invokes only its fixed Stryker configuration", () => {
   const { calls, project } = capture();
   project("mutate", "export_data-frontend");

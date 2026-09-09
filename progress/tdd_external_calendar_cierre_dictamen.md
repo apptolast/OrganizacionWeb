@@ -23,7 +23,7 @@ por clase concreta, nunca la suite entera.
 | 8 | alta | **CERRADO** | ciclo 2 |
 | 9 | alta | ya cerrado en la base (es el hallazgo 2) | — |
 | 10 | alta | pendiente | — |
-| 11 | alta | pendiente | — |
+| 11 | alta | **CERRADO** | ciclo 9 |
 | 12 | alta | **CERRADO** | ciclo 8 |
 | 13 | alta | pendiente | — |
 | 14 | alta | **CERRADO** (amplía contrato) | ciclo 4 |
@@ -607,3 +607,74 @@ encontró algo.
 llamado `clientWidth` en la raíz del worktree y relanzó una vez la pila de E2E. El
 fichero se ha borrado antes de commitear y la pila se bajó sola; ninguna de las dos
 cosas tocó código.
+
+---
+
+## Ciclo 9 — hallazgo 11: @s34 nunca ejecutaba su Given
+
+**Qué decía el dictamen.** El Outline @s34 tiene tres *examples* y dos Then, y ni el
+Given («persona-a suscribe un feed con &lt;evento&gt; ya sincronizado») ni ninguno de
+los dos Then se ejecutaban en ninguna parte. `ExternalCalendarIsolationTest` cierra
+el vector de **código** con dos reglas ArchUnit, y `e2e/external-calendar.spec.mjs`
+mira Hoy **sin** suscripción. El vector de **datos** —unir `external_calendar_events`
+en una consulta SQL de Hoy o de la planificación— no añade ninguna dependencia de
+clase, así que ArchUnit no lo ve, y ningún test siembra esas filas, así que tampoco
+lo ve nadie más. Los tres *examples* colapsaban en el mismo caso nulo.
+
+**VERDE.** `backend/src/test/java/com/apptolast/organization/adapter/ExternalCalendarTodayApiTest.java`,
+un `@SpringBootTest` con Testcontainers y MockMvc, parametrizado con los tres
+*examples* del contrato. Por cada uno: se siembra el bloque propio de 10:00Z a 11:00Z
+con presupuesto de 120 minutos, se captura **R0** de `GET /api/v1/today`, se inserta
+por SQL la suscripción y el evento del *example* en `external_calendar_subscriptions`
+y `external_calendar_events`, se repite `GET /api/v1/today` y se compara **la cadena
+entera** con R0, y se planifica el hueco del *example* exigiendo **201** y ausencia
+de `BLOCK_OVERLAP`.
+
+El reloj se para a las **10:30Z**, dentro del bloque propio, no a las 12:00Z: así
+`currentBlockId` y `closingAt` —los dos campos que el Then nombra— llevan valor
+(`ownBlock` y `2030-01-07T11:00:00Z`) en vez de `null`, que es el valor que cualquier
+regresión conservaría por accidente. Se afirman además los quince campos,
+`plannedSeconds` 3600 y `remainingSeconds` 3600 que el contrato escribe con número.
+
+**ROJO acreditado con dos mutaciones de control simultáneas**, las mismas que el
+dictamen señalaba como invisibles:
+
+1. `PostgresTodayQueries`: `AND NOT EXISTS (SELECT 1 FROM external_calendar_events e
+   WHERE e.owner_id=owner_project.owner_id AND e.start_at<…end_at AND e.end_at>…start_at)`
+   añadido al `WHERE` de los ítems de Hoy.
+2. `PostgresBlockStore.ownerBlocks`: `UNION ALL` que sintetiza cada fila de
+   `external_calendar_events` como si fuera un bloque planificado.
+
+Resultado: **3 de 3 en rojo**, y cada mitad del Then delató su mutación.
+
+```
+Hoy cambió al haber una suscripción con un evento ya sincronizado
+expected: "{…,"plannedSeconds":3600,…,"items":[{…}]}"
+ but was: "{…,"items":[]}"
+
+la planificación tropezó con el evento externo:
+{"code":"BLOCK_OVERLAP","conflict":{"id":"bb8fa9c7-060f-bb56-ff3f-761cb8e94cb0",…}}
+expected: 201
+ but was: 409
+```
+
+**Y la prueba de que el guardarraíl viejo no bastaba**: con las dos mutaciones
+puestas, `ExternalCalendarIsolationTest` (las dos reglas ArchUnit de @s34) siguió en
+`BUILD SUCCESSFUL`. Ese era exactamente el hueco: el vector de datos no toca ninguna
+clase del carril.
+
+Producción restaurada byte a byte (`git status` limpio en los dos ficheros) y verde
+recuperado: `3 tests completed, 0 failed`.
+
+**Corregida la bitácora que mentía.** `progress/tdd_external_calendar.md:16` afirmaba
+«HTTP MockMvc … Hoy intacto — @s34» cuando no existía ningún MockMvc de @s34; se
+anota la corrección fechada y se añade la clase nueva al mapa de trazabilidad (:337).
+
+**Coste declarado.** Una clase de test nueva es un contenedor PostgreSQL más en la
+suite completa (49 → 50). Se asume: la alternativa era escribir en `TodayApiTest`,
+que no es fichero de este carril y habría chocado en la integración.
+
+**Previsión de mutación (PIT).** Esta prueba no entra en `externalCalendarClasses`
+—`PostgresTodayQueries` y `PostgresBlockStore` son del carril de Hoy y de bloques—,
+así que **no espero que mueva el marcador de la campaña de la 28**. Su valor es de
+regresión: es la red que ArchUnit no puede tender.

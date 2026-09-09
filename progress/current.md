@@ -158,6 +158,37 @@ operación tenía oráculo. Y la rama sin cobertura resultó ser el `catch` de
 `disconnect()`, que **nunca se había ejecutado**: el producto era correcto, pero
 todo un camino de fallo estaba sin una sola prueba detrás.
 
+### La verificación posterior a la cosecha, y el defecto que solo aparece al integrar
+
+- **Lint verde**: Prettier y Spotless, todo el árbol.
+- **Frontend: 85 ficheros, 2866 pruebas, 0 fallos** (eran 2840 al empezar la
+  sesión).
+- **Backend, primera pasada: 1170 fallos de 4020.** No era el producto: **dos
+  carriles numeraron `V29` a la vez**. `V29__additional_connectors.sql` ya
+  existía en la rama de la feature 29 y la cota del texto cifrado del conector
+  se numeró encima, por una instrucción equivocada del orquestador que dijo
+  «usa V29» sin comprobar que estaba ocupada. Flyway aborta con «Found more than
+  one migration with version 29», el contexto de Spring no arranca y de ahí
+  salen **965 fallos en cascada** de «ApplicationContext failure threshold
+  exceeded». Renumerada a `V30` en `c179839`; ninguna de las dos estaba
+  aplicada, así que renumerar era seguro.
+
+  Es el defecto característico del trabajo en paralelo: **los diez pares de
+  ramas fusionaban limpio**, porque son ficheros distintos con nombres
+  distintos; la colisión está en el espacio de nombres de Flyway, que `git` no
+  conoce. La lección para la próxima tanda de carriles: **repartir los números
+  de migración por adelantado y por escrito**, y comprobar el directorio antes
+  de asignar uno.
+
+- **Backend, segunda pasada: 4697 pruebas, 1 fallo.** No se pudo identificar
+  cuál: OneDrive sincronizó y borró los XML de resultados antes de poder
+  leerlos, que es el mismo fallo de entorno ya anotado el 8 de septiembre —tener
+  `build/` dentro de OneDrive—. La sospecha razonable, no confirmada, es
+  `ImportScaleTest`, la misma prueba de escala de 32 MiB y 100 000 registros que
+  hizo abortar al PIT por fallar sin mutación bajo carga, y cuya hermana tarda
+  75 segundos. **Queda pendiente confirmarlo**; la CI de GitHub, que corre en
+  máquina limpia y fuera de OneDrive, es el árbitro.
+
 ### Una contradicción del contrato que solo puede resolver el propietario
 
 El hallazgo 11 de webhooks no es un defecto de código: `features/webhooks.feature`

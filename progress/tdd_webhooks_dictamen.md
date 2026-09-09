@@ -182,3 +182,62 @@ TestingLibraryElementError: Unable to find an element with the text: Pendiente
 **VERDE.** Los tres mutantes retirados uno a uno; `git diff
 frontend/src/webhooks.tsx` vacío contra `HEAD`. `webhooks.test.tsx` 23/23 verde,
 `tsc --noEmit`, `eslint` y `prettier --check` limpios.
+
+Commit: `12ca10d`.
+
+---
+
+## Hallazgo 19 (MEDIA) — la poda de `@s29` contaba 50, no comprobaba cuáles
+
+**Fichero:** `backend/src/test/java/com/apptolast/organization/adapter/persistence/WebhookWorkPersistenceTest.java`,
+método `s29_onlyTheFiftyMostRecentTerminalsSurviveAndPendingOnesAreNeverPruned`.
+**Cláusulas:** `features/webhooks.feature:367-368` — «quedan persistidas
+exactamente 50 terminales, **las de mayor updatedAt**, y las 2 pendientes» y
+«items … ordenados por updatedAt DESC y después id DESC».
+
+**Problema.** El oráculo era de cardinalidad: `assertEquals(52, log.size())` y
+`assertEquals(50, …filter("succeeded").count())`. Una poda que borrase cinco al
+azar —o que conservase las cinco más antiguas— pasaba igual.
+
+**Prueba nueva.** Se acumulan los ids de las 55 terminales en orden de registro
+(`recorded`, índice 0 el `updatedAt` menor) y se sustituye el conteo por
+identidad **y** orden:
+
+```java
+assertEquals(recorded.subList(5, 55).reversed(), survivors,
+    "the fifty terminals of greatest updatedAt, newest first");
+assertTrue(java.util.Collections.disjoint(recorded.subList(0, 5), survivors),
+    "the five oldest terminals are the ones pruned");
+```
+
+**ROJO 1 — se conservan las 50 más antiguas** (`PostgresWebhookWork.java:131`,
+`ORDER BY updated_at DESC, id DESC` → `ASC, id ASC` dentro del `prune`):
+
+```
+WebhookWorkPersistenceTest > s29_onlyTheFiftyMostRecentTerminals…() FAILED
+AssertionFailedError: the fifty terminals of greatest updatedAt, newest first
+  expected: <[7dbae1c8-…, 9c8b614b-…, …]>  (índices 54→5)
+  but was:  <[e9a7fe69-…, …, 1460a8a3-…]>  (índices 49→0: se perdieron las cinco más recientes)
+```
+
+**ROJO 2 — poda de cinco al azar** (mismo sitio, `ORDER BY random() LIMIT ?`):
+
+```
+WebhookWorkPersistenceTest > s29_onlyTheFiftyMostRecentTerminals…() FAILED
+(falla la aserción «the fifty terminals of greatest updatedAt, newest first»)
+```
+
+Los dos mutantes dejaban intactos `52 == log.size()` y `50 == count`, es decir
+sobrevivían al oráculo anterior.
+
+**ROJO 3 — el listado se sirve al revés** (`PostgresWebhookStore.java:123`,
+`ORDER BY updated_at DESC, id DESC` → `ASC, id ASC` en `list`). También rojo:
+la misma aserción fija ahora el orden del listado, que hasta hoy no tenía
+oráculo en ninguna prueba (`WebhookPersistenceTest:197` compara una lista de un
+solo elemento).
+
+**VERDE.** Los tres mutantes retirados; `git status backend/` sólo muestra
+modificado el fichero de test. Clase completa 6/6 verde
+(`build/test-results/test/TEST-…WebhookWorkPersistenceTest.xml`:
+`tests="6" skipped="0" failures="0" errors="0"`), `spotlessApply` sin cambios
+pendientes. Nunca se lanzó la suite entera: siempre `--tests` sobre esta clase.

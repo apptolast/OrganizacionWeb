@@ -182,8 +182,11 @@ class WebhookWorkPersistenceTest {
     var owner = "prune-" + UUID.randomUUID();
     var endpoint = given(owner, "active");
     var work = work();
+    // Recorded oldest first: index 0 has the smallest updatedAt, index 54 the largest.
+    var recorded = new ArrayList<UUID>();
     for (var index = 0; index < 55; index++) {
       var delivery = WebhookDelivery.ping(UUID.randomUUID(), T);
+      recorded.add(delivery.id());
       store().enqueuePing(owner, endpoint.id(), delivery, "{}");
       var claimed = claimOwn(work, owner, T.plusSeconds(index));
       work.record(
@@ -196,8 +199,19 @@ class WebhookWorkPersistenceTest {
 
     var log = store().list(owner, endpoint.id());
     assertEquals(52, log.size(), "fifty terminals plus the two pending ones");
+    var survivors =
+        log.stream()
+            .filter(delivery -> "succeeded".equals(delivery.status()))
+            .map(WebhookDelivery::id)
+            .toList();
+    // Which fifty, and in which order: cardinality alone would let a random prune pass.
     assertEquals(
-        50, log.stream().filter(delivery -> "succeeded".equals(delivery.status())).count());
+        recorded.subList(5, 55).reversed(),
+        survivors,
+        "the fifty terminals of greatest updatedAt, newest first");
+    assertTrue(
+        java.util.Collections.disjoint(recorded.subList(0, 5), survivors),
+        "the five oldest terminals are the ones pruned");
     var ids = log.stream().map(WebhookDelivery::id).toList();
     assertTrue(ids.contains(pendingOne.id()));
     assertTrue(ids.contains(pendingTwo.id()));

@@ -11,6 +11,18 @@ public record ConnectorRow(
     String id, String status, Instant lastActivityAt, ConnectorError lastError) {
   public static final String NOT_CONNECTED = "not_connected";
   public static final String DISABLED = "disabled";
+  public static final String CONNECTED = "connected";
+  public static final String ERROR = "error";
+
+  /** La integración existe y responde; el instante es lo último que se sabe de ella. */
+  public static ConnectorRow connected(String id, Instant lastActivityAt) {
+    return new ConnectorRow(id, CONNECTED, lastActivityAt, null);
+  }
+
+  /** La integración existe y está rota: se publica el código y cuándo, nunca el texto ajeno. */
+  public static ConnectorRow error(String id, Instant lastActivityAt, ConnectorError lastError) {
+    return new ConnectorRow(id, ERROR, lastActivityAt, lastError);
+  }
 
   /** Sin integración no hay error: hay ausencia, que es lo que la pantalla ofrece configurar. */
   public static ConnectorRow notConnected(String id) {

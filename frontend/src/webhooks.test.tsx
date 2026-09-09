@@ -296,14 +296,51 @@ it("@s38 aborts the pending creation when the view goes away and never shows its
   expect(screen.queryByDisplayValue(secret)).not.toBeInTheDocument();
 });
 
-it("@s38 starts clean for another identity", async () => {
-  stubApi([endpoint()]);
+it("@s38 shows the secret for one identity and starts clean for another", async () => {
+  // The Given of the outline is "un secreto visible en memoria": without first
+  // proving the secret and Ana's list ARE on screen, the absence proves nothing.
+  const bea = endpoint({
+    id: second,
+    url: "https://bea.example/h",
+    description: "Hook de Bea",
+  });
+  const lists = [[], [bea]];
+  let listed = 0;
+  const fetcher = vi.fn((url: RequestInfo | URL, options?: RequestInit) =>
+    url === "/api/v1/me/webhooks" &&
+    (!options?.method || options.method === "GET")
+      ? Promise.resolve(Response.json({ items: lists[listed++] ?? [] }))
+      : Promise.resolve(
+          Response.json({ endpoint: endpoint(), secret }, { status: 201 }),
+        ),
+  );
+  vi.stubGlobal("fetch", fetcher);
+  const user = userEvent.setup();
+
   const view = render(<Webhooks owner="Ana" />);
   await shown();
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
+  await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+
+  // Presence: the secret and Ana's freshly created webhook are on screen.
+  await waitFor(() => expect(screen.getByDisplayValue(secret)).toBeVisible());
+  expect(screen.getByText("Mi hook")).toBeVisible();
+  expect(screen.getByText("https://example.com/hooks")).toBeVisible();
 
   view.rerender(<Webhooks owner="Bea" />);
+  await shown();
 
+  // Absence: nothing of Ana survives into Bea's session.
   expect(screen.queryByDisplayValue(secret)).not.toBeInTheDocument();
+  expect(screen.queryByText("Mi hook")).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("https://example.com/hooks"),
+  ).not.toBeInTheDocument();
+  expect(screen.getByText("Hook de Bea")).toBeVisible();
 });
 
 it("@s39 pings an active webhook and shows the pending delivery", async () => {

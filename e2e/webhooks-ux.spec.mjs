@@ -87,6 +87,14 @@ async function simulate(page, control) {
         json: { endpoint: endpoint(), secret: SECRET },
       });
     }
+    if (path.endsWith("/status") && method === "PUT")
+      return route.fulfill({
+        json: endpoint({
+          status: "disabled",
+          disabledReason: "MANUAL",
+          disabledAt: "2026-09-08T11:00:00.000000Z",
+        }),
+      });
     if (path.endsWith("/deliveries") && method === "GET")
       return route.fulfill({
         json: {
@@ -538,6 +546,25 @@ test("webhooks audit: el teclado recorre todos los controles en el orden del DOM
   const backwards = await walk(page, "Shift+Tab", back);
   expect(backwards.seen).toEqual(back);
   expect(backwards.invisible).toEqual([]);
+});
+
+test("webhooks audit: desactivar anuncia su resultado por la región aria-live @s42", async ({
+  page,
+}) => {
+  const control = { items: [endpoint()], createFails: false };
+  await simulate(page, control);
+  await page.goto("/webhooks");
+  const view = page.getByRole("main");
+  await expect(view.getByText("https://example.com/hooks")).toBeVisible();
+
+  // La región se monta siempre, y vacía: un `role="status"` que aparece y desaparece
+  // del DOM no lo anuncia el lector de pantalla. `getByRole("status")` tampoco puede
+  // confundirse con el div de carga, que lleva `aria-live` pero no rol.
+  const announcement = view.getByRole("status");
+  await expect(announcement).toHaveText("");
+
+  await view.getByRole("button", { name: "Desactivar", exact: true }).click();
+  await expect(announcement).toHaveText("Webhook desactivado.");
 });
 
 test("webhooks audit: al cerrar la confirmación de borrado el foco vuelve al control que la abrió @s42", async ({

@@ -946,6 +946,58 @@ dos ramas ya funcionaban.
 anterior —«`PostgresWebhookOutbox.readyEndpoints()` filtra por `e.status='active'`
 y ese filtro no lo ejerce ninguna prueba»— deja de ser cierta.
 
+## Hallazgo 15, el punto (c) que quedaba — y un DEFECTO DE PRODUCTO que sólo apareció al ejecutar
+
+**Cubre:** `features/webhooks.feature:522`, «los cambios de estado se anuncian por
+aria-live», en la capa donde el contrato lo pide de verdad: el navegador.
+
+La sesión anterior cerró este hallazgo en unitarios y dejó declarado que faltaba
+el punto (c) del cierre mínimo: comprobar en `e2e/webhooks-ux.spec.mjs` que la
+región cambia tras «Desactivar». Con la pila ya levantada salía barato, así que se
+cierra. **Y al ejecutarlo apareció un defecto real que los 23 unitarios no podían
+ver.** REPARTO_NOCHE §5 otra vez: ejecutar, no razonar.
+
+**La prueba:** `webhooks audit: desactivar anuncia su resultado por la región
+aria-live @s42`. Exige la región **vacía y presente** antes de actuar, pulsa
+«Desactivar» y exige el texto «Webhook desactivado.». `simulate` gana la ruta
+`PUT …/status`, que no estaba enrutada.
+
+### El defecto: la región viva no estaba viva
+
+Primera ejecución, **roja por una razón inesperada**:
+
+    Error: element(s) not found
+    Expect "toHaveText" getByRole('main').getByRole('status')
+
+La causa es la regla que la propia sesión anterior había añadido «por
+conservadurismo»: `.webhook-announcement:empty { display: none }`. `display: none`
+**saca el elemento del árbol de accesibilidad**. Es decir, la región no existía
+para el lector de pantalla mientras estaba vacía y **aparecía** al llegar el texto
+— exactamente el «un `role="status"` que aparece y desaparece del DOM no lo
+anuncia el lector de pantalla» que esa misma nota decía querer evitar. La regla
+hacía justo lo contrario de lo que se proponía, y ningún unitario podía cazarlo:
+jsdom no aplica CSS, así que `getByRole("status")` allí siempre lo encontraba.
+
+**Arreglo de producto:** `:empty { margin: 0 }` en lugar de `display: none`. Un
+bloque vacío sin márgenes mide **cero** —la preocupación legítima de la nota
+anterior, que era no desplazar la geometría— y **sigue expuesto** en el árbol de
+accesibilidad. Comprobado que la geometría no se mueve: los cinco recorridos de
+los siete estados a cuatro anchos, con sus oráculos de recorte, de scroll y de
+objetivo de 44 px, siguen verdes.
+
+### Los dos rojos
+
+| Mutación | Rojo obtenido |
+|---|---|
+| Ninguna: **el producto tal como estaba** (`display: none`) | `element(s) not found` — `getByRole('main').getByRole('status')` no resuelve. Es el rojo del defecto, no de una mutación |
+| Con la región ya expuesta, se retira `setAnnouncement(...)` de `changeStatus` | `expect(locator).toHaveText` — `Expected: "Webhook desactivado." Received: ""`, y el log resuelve el localizador: `<p role="status" aria-live="polite" aria-atomic="true" class="webhook-announcement"></p>`. Esa línea es además la prueba de que el arreglo funciona: el elemento vacío ahora **sí** se encuentra |
+
+Restaurado y verde: **8 passed** en `e2e/webhooks-ux.spec.mjs`, **1 passed** en
+`e2e/webhooks-native-zoom.spec.mjs`, **23 passed** en los unitarios.
+
+**Ficheros cambiados.** `e2e/webhooks-ux.spec.mjs`, `frontend/src/webhooks.scss`,
+`progress/ux_webhooks.md`.
+
 # ÍNDICE DE LO ABIERTO — leer sólo esto, no hace falta el dictamen entero
 
 Ocho hallazgos abiertos. Una línea cada uno: qué exige, qué fichero se toca, y si

@@ -19,8 +19,14 @@
   // la tenga montada antes de que llegue el texto. Mientras está vacía no debe ocupar
   // ni un píxel: sin esto, su margen desplazaría la geometría que miden los oráculos
   // de recorte y de objetivo de 44 px del E2E de UX.
+  //
+  // Pero NO puede ocultarse con `display: none`, que es lo que hacía esta regla hasta
+  // el 10-09-2026: eso la saca del árbol de accesibilidad, y una región viva que no
+  // está expuesta y luego aparece no anuncia nada —es exactamente el «aparece y
+  // desaparece del DOM» que se quería evitar—. Lo detectó el E2E: `getByRole("status")`
+  // no encontraba el elemento. Un bloque vacío sin márgenes mide cero y sigue expuesto.
   .webhook-announcement:empty {
-    display: none;
+    margin: 0;
   }
 
   // A registered URL can be long; it must wrap instead of forcing a page scroll at 320 px.

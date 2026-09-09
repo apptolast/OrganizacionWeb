@@ -1,8 +1,9 @@
 # Revisión UX de Webhooks (25)
 
 Vista revisada: `frontend/src/webhooks.tsx` + `webhooks.scss`, ruta `/webhooks`.
-Auditoría E2E: `e2e/webhooks-ux.spec.mjs`, **6/6 verde** (`E2E_WEB_PORT=18097 pnpm
-test:e2e e2e/webhooks-ux.spec.mjs`). Unitarios de la vista y del cliente: **44
+Auditoría E2E: `e2e/webhooks-ux.spec.mjs`, **8/8 verde** al 10-09-2026
+(`E2E_WEB_PORT=18090 pnpm test:e2e e2e/webhooks-ux.spec.mjs`), más
+`e2e/webhooks-native-zoom.spec.mjs` 1/1. Unitarios de la vista y del cliente: **44
 verdes**, con este desglose por fichero, medido con la salida real de Vitest
 (`pnpm --dir frontend exec vitest run src/webhooks.test.tsx
 src/webhooks-route.test.tsx src/webhooks-client.test.ts` → `Tests 44 passed`):
@@ -34,8 +35,12 @@ estudio con personas usuarias.
   emulación se aplicó. `color-contrast` **solo** se desactiva bajo
   `forced-colors`, donde la paleta la impone el sistema; **nunca** en claro ni
   oscuro.
-- **Teclado**: recorrido con Tab dentro de `main`, cada control con nombre
-  accesible no vacío, y foco de vuelta al control que abrió la confirmación.
+- **Teclado**: recorrido completo con Tab dentro de `main` **comparado contra el
+  orden del DOM** derivado del propio documento (20 controles), la vuelta con
+  Shift+Tab en el inverso rotado una posición, el anillo de foco del producto
+  medido **en cada parada**, cada control con nombre accesible no vacío y sin
+  ninguno sacado de la secuencia con un tabindex negativo; y foco de vuelta al
+  control que abrió la confirmación.
 - **Evidencia en disco** bajo `.e2e-work/webhooks-ux/<modo>/`: `geometry.json`
   (ancho, `scrollWidth` y caja de cada control por estado y ancho),
   `<estado>-axe.json`, `<estado>-font-scale.json`, `media.json`,
@@ -117,7 +122,7 @@ verde, luego eran innecesarias.
 | Sesgo cognitivo | Sin métricas de productividad ni presión; ningún tipo de evento viene marcado por defecto. | Verificado estructuralmente. |
 | Sobrecarga de opciones | Doce tipos acotados con selección en bloque; las acciones destructivas piden confirmación. | Verificado; comprensión pendiente de uso real. |
 | Doherty | El botón queda deshabilitado mientras el POST está en vuelo y el estado de carga se anuncia por `aria-live`, sin fingir éxito ni porcentaje. **No se midió** el umbral de 400 ms en este carril. | Parcial y declarado: comportamiento verificado, latencia **no** medida. |
-| Anuncio de resultado | **Corregido el 9 de septiembre de 2026 (hallazgo 15 del dictamen).** Hasta ese día la única región live propia de la vista envolvía sólo «Cargando webhooks…», de modo que la cláusula de `features/webhooks.feature:522` —«los cambios de estado se anuncian por aria-live»— no estaba implementada ni probada. Ahora hay una región `role="status" aria-live="polite" aria-atomic="true"` a la que escriben desactivar, activar, enviar ping, eliminar y reenviar. | Verificado en unitarios: cinco aserciones sobre el texto de esa región, una por acción de @s39 y @s40. **Falta** la comprobación en el E2E de UX. |
+| Anuncio de resultado | **Corregido el 9 de septiembre de 2026 (hallazgo 15 del dictamen).** Hasta ese día la única región live propia de la vista envolvía sólo «Cargando webhooks…», de modo que la cláusula de `features/webhooks.feature:522` —«los cambios de estado se anuncian por aria-live»— no estaba implementada ni probada. Ahora hay una región `role="status" aria-live="polite" aria-atomic="true"` a la que escriben desactivar, activar, enviar ping, eliminar y reenviar. | Verificado en unitarios (cinco aserciones sobre el texto de esa región, una por acción de @s39 y @s40) **y en el E2E de UX** desde el 10-09-2026: `webhooks audit: desactivar anuncia su resultado por la región aria-live @s42`. Esa ejecución destapó un defecto que los unitarios no podían ver: la regla `.webhook-announcement:empty { display: none }` sacaba la región del árbol de accesibilidad, de modo que no estaba expuesta mientras estaba vacía y **aparecía** al llegar el texto, que es justo lo que impide que un lector de pantalla lo anuncie. jsdom no aplica CSS y por eso ningún unitario lo veía. Sustituida por `margin: 0`: mide cero igual y sigue expuesta. |
 
 ## Puertas que siguen abiertas
 

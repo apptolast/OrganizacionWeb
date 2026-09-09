@@ -387,15 +387,22 @@ Feature: Importar issues abiertas de GitHub como tareas propias con trazabilidad
   Scenario Outline: Sólo la sesión cookie autentica el conector
     Given <credencial>
     When solicito <operacion>
-    Then recibo HTTP 401 UNAUTHENTICATED sin datos privados y no se escribe ni se contacta con el servidor falso
+    Then recibo HTTP <estado> sin datos privados y no se escribe ni se contacta con el servidor falso
+    # Enmienda del 9 de septiembre de 2026, ratificada por el propietario. La última
+    # fila esperaba 401 UNAUTHENTICATED, pero una credencial Bearer válida SÍ está
+    # autenticada: el filtro de la feature 24 la identifica y después comprueba su
+    # lista de rutas permitidas, que no incluye el conector. Responder «no sé quién
+    # eres» a quien sí se ha identificado es falso; 403 API_SCOPE_DENIED dice la
+    # verdad. La propiedad de seguridad no cambia: la credencial no abre nada, no
+    # escribe nada y no contacta con el servidor falso.
     Examples:
-      | credencial                                            | operacion                                    |
-      | sin sesión                                            | GET de la conexión                           |
-      | sesión vencida                                        | PUT de conexión                              |
-      | sin sesión                                            | DELETE de la conexión                        |
-      | sesión vencida                                        | POST de importación                          |
-      | sin sesión                                            | GET de un recibo existente                   |
-      | una credencial Bearer válida del canal de integraciones | PUT de conexión                            |
+      | credencial                                              | operacion                  | estado               |
+      | sin sesión                                              | GET de la conexión         | 401 UNAUTHENTICATED  |
+      | sesión vencida                                          | PUT de conexión            | 401 UNAUTHENTICATED  |
+      | sin sesión                                              | DELETE de la conexión      | 401 UNAUTHENTICATED  |
+      | sesión vencida                                          | POST de importación        | 401 UNAUTHENTICATED  |
+      | sin sesión                                              | GET de un recibo existente | 401 UNAUTHENTICATED  |
+      | una credencial Bearer válida del canal de integraciones | PUT de conexión            | 403 API_SCOPE_DENIED |
       | una credencial Bearer válida del canal de integraciones | POST de importación                        |
 
   @s32

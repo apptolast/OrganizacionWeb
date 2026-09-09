@@ -395,7 +395,7 @@ Feature: Declarar reglas auditables «cuando ocurra este evento, haz esta acció
     Given una cuenta con 3 reglas, 5 eventos recientes de los que 2 son TaskCreated.v1 de "Redactar informe" en "Marketing", cursor en el último y N filas en tareas, outbox y ejecuciones
     When envía POST /api/v1/me/automations/simulate con la regla de @s18 sin id
     Then recibe 200 con exactamente { evaluatedEvents: 5, matches } y 2 coincidencias en orden occurredAt, eventId descendente
-    And cada coincidencia contiene exactamente eventId, eventType TaskCreated.v1, occurredAt y preview
+    And cada coincidencia contiene exactamente eventId, eventType TaskCreated.v1, occurredAt, preview y loopGuarded
     And la preview de la más reciente es exactamente { type: CREATE_TASK, projectId, title: "Revisar Redactar informe en Marketing", completionCriterion: "TaskCreated.v1 a las <occurredAt del evento>", estimatedMinutes: 30, wouldFail: null }
     And tareas, outbox y ejecuciones conservan exactamente N filas y el cursor no cambia
     And GET /api/v1/me/automations sigue devolviendo 3 reglas

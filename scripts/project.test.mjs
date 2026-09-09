@@ -597,7 +597,7 @@ test("end time Stryker preserves protection and measures both integrated surface
   assert.equal(config.concurrency, 8);
   assert.equal(config.coverageAnalysis, "perTest");
   assert.deepEqual(config.ignorePatterns, prior.ignorePatterns);
-  assert.ok(config.ignorePatterns.includes(".stryker-tmp-availability-replay"));
+  assert.ok(config.ignorePatterns.includes(".stryker-tmp-*"));
   assert.deepEqual(config.vitest, prior.vitest);
   assert.equal(
     config.jsonReporter.fileName,
@@ -741,7 +741,7 @@ test("close work Stryker includes shared navigation and protects previous report
   assert.equal(config.concurrency, 8);
   assert.equal(config.coverageAnalysis, "perTest");
   assert.deepEqual(config.ignorePatterns, prior.ignorePatterns);
-  assert.ok(config.ignorePatterns.includes(".stryker-tmp-availability-replay"));
+  assert.ok(config.ignorePatterns.includes(".stryker-tmp-*"));
   assert.deepEqual(config.vitest, prior.vitest);
   assert.equal(
     config.jsonReporter.fileName,
@@ -941,7 +941,7 @@ test("start work frontend scope includes the session flow and its task reader in
   assert.equal(config.thresholds.break, 80);
   assert.equal(config.coverageAnalysis, "perTest");
   assert.equal(config.concurrency, 8);
-  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-*"]);
   assert.equal(
     config.jsonReporter.fileName,
     "reports/mutation-start-work-session/mutation.json",
@@ -1125,7 +1125,7 @@ test("today replay preserves 63 reviewed identities plus the new focus region wi
   assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
   assert.equal(config.coverageAnalysis, "perTest");
   assert.equal(config.concurrency, 2);
-  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-*"]);
   for (const item of manifest.selection) {
     assert.ok(["Survived", "NoCoverage"].includes(item.originalStatus));
     const original = inventory.pending.find(
@@ -1171,7 +1171,7 @@ test("today configuration preserves its historical source and shared-region sele
   assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
   assert.equal(config.coverageAnalysis, "perTest");
   assert.equal(config.concurrency, 2);
-  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-*"]);
   assert.equal(
     config.jsonReporter.fileName,
     "reports/mutation-today/mutation.json",
@@ -1286,7 +1286,7 @@ test("frontend replay keeps measurement policy and writes separate reports", () 
   assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
   assert.equal(config.coverageAnalysis, "perTest");
   assert.equal(config.concurrency, 2);
-  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-*"]);
   assert.equal(
     config.jsonReporter.fileName,
     "reports/mutation-schedule-block/final.json",
@@ -1461,7 +1461,7 @@ test("today final selects only the two unresolved exact identities", () => {
   assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
   assert.equal(config.coverageAnalysis, "perTest");
   assert.equal(config.concurrency, 2);
-  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-*"]);
   assert.equal(
     config.jsonReporter.fileName,
     "reports/mutation-today/final.json",
@@ -1672,7 +1672,7 @@ test("history Stryker covers new modules and complete integration nodes with inh
   assert.equal(config.coverageAnalysis, "perTest");
   assert.equal(config.concurrency, 8);
   assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
-  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-*"]);
   assert.equal(
     config.jsonReporter.fileName,
     "reports/mutation-history/mutation.json",
@@ -1703,7 +1703,7 @@ test("default Stryker retains history modules and full new integration nodes", (
       entry,
     );
   assert.ok(config.mutate.includes("src/task-reader.tsx"));
-  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-*"]);
   assert.equal(config.thresholds.break, 80);
 });
 
@@ -1952,7 +1952,7 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     config.htmlReporter.fileName,
     "reports/mutation-appearance/mutation.html",
   );
-  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-availability-replay"]);
+  assert.deepEqual(config.ignorePatterns, [".stryker-tmp-*"]);
   assert.match(
     readFileSync(resolve(root, "frontend/vite.config.ts"), "utf8"),
     /src\/\*\*\/\*\.test\.\{ts,tsx\}/,

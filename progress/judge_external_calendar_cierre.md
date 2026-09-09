@@ -135,3 +135,177 @@ paralelos, no mala fe de nadie. Pero hoy `main` tiene **dos textos normativos qu
 contradicen sobre el mismo control de seguridad**, que es exactamente el defecto por el
 que el dictamen bloqueó esta feature: documentación que afirma un estado distinto del que
 el código tiene.
+
+Dos agravantes concretos que la decisión debe pesar:
+
+1. **La razón alegada para revocar es justo lo único que no está probado.**
+   `HttpCalendarFeedTest` habla HTTP en claro contra `127.0.0.1`; el apretón TLS con
+   `SSLParameters.setServerNames` y `setEndpointIdentificationAlgorithm("HTTPS")`
+   (`HttpCalendarFeed.java:156-166`) **no lo ejerce ninguna prueba**, y el artesano lo
+   declara. Mi lectura de SunJSSE es que la identidad se comprueba primero contra el
+   `SNIHostName` y sólo después contra el `peerHost`, de modo que el anclaje **no**
+   debería romper la verificación del certificado; pero eso es un argumento, no una
+   prueba, y si me equivoco **toda** suscripción https real termina en `FEED_UNREACHABLE`
+   sin que la suite se entere.
+2. **Efecto lateral de ámbito JVM.** El bloque estático de `HttpCalendarFeed.java:64-72`
+   fija `jdk.httpclient.allowRestrictedHeaders=host` para **todo el proceso**: habilita el
+   override de `Host` también a los clientes de webhooks y del conector de GitHub. Y el
+   cliente del JDK lee esa propiedad al cargar su clase de utilidades: si otro componente
+   crea un `HttpClient` antes, la autorización llega tarde y la descarga degrada a
+   `FEED_UNREACHABLE`, en silencio. Ninguna prueba guarda ninguna de las dos cosas.
+
+**Condición C1 (bloqueante).** El propietario elige una de las dos salidas, y lo elegido
+se escribe en la sección de enmiendas de `project-spec.md` y en `progress/current.md`:
+
+- **(a) Ratificar el anclaje para la 28.** Hay que corregir `project-spec.md:2492` y
+  `deploy/EGRESS.md:10-21`, que hoy describen la 28 al revés, **y** añadir la prueba TLS
+  que falta: servidor HTTPS con certificado propio para un nombre, resolutor que devuelve
+  loopback, y afirmar que la descarga llega con el certificado validado contra el
+  **nombre**, y que un certificado emitido para otro nombre la rechaza. Sin esa prueba, el
+  motivo por el que se revocó B3 sigue sin medirse. Añadir también la guarda de que, sin
+  la propiedad restringida, se degrada a `FEED_UNREACHABLE` en vez de conectar sin `Host`.
+- **(b) Mantener la revocación.** Revertir el anclaje en `HttpCalendarFeed`, dejar la
+  guardia como pre-comprobación y corregir `docs/external-calendar.md:40-45` para que no
+  prometa «cerrado, no aceptado».
+
+No decido yo cuál: es una decisión de riesgo del propietario. Lo que no puede quedarse es
+el estado actual, con dos documentos normativos incompatibles.
+
+**Condición C2 (bloqueante, puerta humana).** El ciclo 4 **amplía el contrato**
+(`features/external_calendar.feature:13-14` y la fila nueva de @s12 en `:199`). El
+artesano lo declaró en voz alta, como manda REGLAS.md, pero el `.feature` es puerta de
+aprobación humana: hace falta la ratificación explícita del propietario, o la reversión
+completa (contrato, documentación, código y prueba).
+
+---
+
+## 5. Accesibilidad, y los dos avisos honestos del artesano
+
+`progress/ux_external_calendar.md` tiene las 30 filas y pone los límites **antes** de la
+tabla. La evidencia en navegador es sustancial: 84 mediciones geométricas con cinco
+oráculos cada una, 24 pasadas de axe más geometría por modos, teclado medido parada a
+parada, texto al 200 % realmente ampliado y zoom nativo con DPR comprobado.
+
+**Los dos avisos NO son bloqueantes:**
+
+- **Revisión manual con lector de pantalla.** No es automatizable; axe lo declara en la
+  propia prueba (`e2e/external-calendar-ux-audit.spec.mjs:396-398`) y el documento UX lo
+  lista como pendiente. Ninguna feature cerrada de este repositorio ha pasado esa puerta.
+  Deuda declarada aceptable; que quede registrada en `progress/current.md` como pendiente
+  de producto, no de este carril.
+- **Firefox y WebKit.** `playwright.config.mjs` no define proyectos por motor y el zoom
+  nativo sólo se sabe hacer con `chrome.tabs.setZoom`. Es limitación **de casa**,
+  compartida con las features hermanas ya cerradas. Deuda declarada aceptable.
+
+Bloquear la 28 por cualquiera de las dos sería aplicarle un listón que no se aplicó a
+ninguna feature anterior. Que estén escritas, y no descubiertas por el siguiente dictamen,
+es exactamente lo que se pide.
+
+### 5.1 Residuo real que corrijo del recuento «19 de 19 sin residuo»
+
+`ExternalCalendarPersistenceTest.java:622-632` (`s25_syncingDoesNotTouchTheOutbox`) sigue
+comprobando **sólo** `SELECT count(*) FROM outbox_events = 0`. El tercer Then de @s25
+(`features/external_calendar.feature:357`) dice «ninguna otra tabla, outbox ni historial
+cambia». El artesano lo declara abierto en el ciclo 6 («Lo que este ciclo NO cierra»),
+pero la tabla de estado y el recuento final lo dan por cerrado sin residuo. **No bloquea**
+—el escenario tiene tres oráculos que sí muerden—, pero «19 de 19, sin residuo» es medio
+punto optimista. Cierre barato: instantánea de recuentos de **todas** las tablas antes y
+después de `commitSuccess`, no sólo de `outbox_events`.
+
+---
+
+## 6. Puerta de mutación: qué exijo para que la campaña signifique algo
+
+La campaña la corre el propietario. Fijo el listón teniendo en cuenta
+`progress/hallazgo_rangos_stryker.md` (ámbitos con rangos desplazados que acaban mutando
+sentencias `import`) y el hallazgo 7 (globs PIT muertos que bendecían una campaña sin
+tocar el cifrador).
+
+**Puntuación mínima: 80 % en cada capa.** Es el umbral vivo del proyecto
+(`harness.config.json` → `mutation.threshold = 0.8`; `backend/build.gradle.kts:694`
+`mutationThreshold = 80`; `stryker.external-calendar.config.json` → `break: 80`). Una
+cifra por encima de 80 **no vale por sí sola**: sólo vale si además se cumplen C3 y C4.
+
+**Condición C3 — PIT (`bin/harness mutate external_calendar-backend`).** El informe debe
+acreditar **mutantes generados mayores que cero** en cada una de estas clases. Si alguna
+sale con cero, la campaña es nula aunque la cifra global pase; es literalmente lo que
+ocurrió con `adapter.crypto`:
+
+1. `adapter.feed.HttpCalendarFeed` — **la más importante**: es donde vive todo lo escrito
+   esta noche (el instante límite de `:137`, `expired()` `:220-222`, la guillotina
+   `:196-200`, `literal()` `:169-177`, `authority()` `:179-181`, `isTextual()` y el bucle
+   de `:205-209`).
+2. `adapter.persistence.PostgresExternalCalendarStore` — `commitSuccess` (el `imported = ?`
+   que **sólo** mata la prueba nueva de @s30), `writing`, `reading` y `events`.
+3. `adapter.connectors.AesGcmSecretCipher` y `adapter.connectors.ConnectorKeyRing` — el
+   motivo del hallazgo 7; sus verdugos ya se ejecutan en esta puerta.
+4. `application.SyncExternalCalendar`, `application.SaveExternalCalendar`,
+   `application.ReadExternalCalendarEvents`, `application.OutboundHostGuard`,
+   `application.PublicAddressPolicy`.
+5. `domain.IcsFeed`, `domain.ExternalCalendarInput`, `domain.ExternalCalendarSnapshot`,
+   `domain.ExternalEventsRange`.
+6. `adapter.http.ExternalCalendarController` y `adapter.http.ConnectorsGate`.
+
+Dos avisos de lectura del informe: `adapter.config.ApplicationConfiguration*` está en el
+ámbito y es una clase compartida por todo el producto, así que sus supervivientes deben
+reportarse **aparte** y no computarse como deuda de la 28; y `ExternalCalendarTodayApiTest`
+(ciclo 9) **no** moverá el marcador, porque `PostgresTodayQueries` y `PostgresBlockStore`
+no están en este ámbito. Su valor es de regresión, y así debe leerse.
+
+**Condición C4 — Stryker (`external_calendar-frontend`).** Antes de lanzar, reejecutar
+`node --test --test-name-pattern "external calendar Stryker" scripts/project.test.mjs`.
+Hoy está verde: los cuatro rangos apuntan a
+`externalCalendar = route === "/calendario-externo"` (`App.tsx:46`), a su rama de
+`section` (`:59-81`), a su rama de render (`:92-151`) y al `RouteLink` con el
+`aria-current` (`workspace.tsx:81-86`). Si `App.tsx` o `workspace.tsx` se han tocado desde
+este dictamen —la feature 29 va a añadir una ruta—, ese test se pone rojo y **la campaña
+no debe lanzarse hasta recalcular los rangos**. En el informe debe constar **mutantes
+mayores que cero** en `src/external-calendar-api.ts`, `src/external-calendar.tsx`,
+`src/today-external-calendar.tsx` y en los cuatro rangos, y hay que verificar que
+**ningún** mutante de `App.tsx` o `workspace.tsx` cae sobre una sentencia `import`: ése es
+el síntoma exacto del rango desplazado.
+
+**Condición C5.** Dejar la evidencia en `progress/mutation_external_calendar_backend.md` y
+`progress/mutation_external_calendar_frontend.md` —hoy no existe ninguno de los dos—, con
+la lista de supervivientes y, por cada uno, o la prueba que lo mata o el motivo escrito
+por el que es equivalente.
+
+---
+
+## 7. Checkpoints
+
+- C1 Contrato Gherkin destilado y aprobado: **[x]** con salvedad — la ampliación del ciclo
+  4 espera ratificación humana (condición C2).
+- C2 Cobertura de escenarios, 40 de 40 con oráculo que puede fallar: **[x]**
+- C3 Disciplina TDD: rojo acreditado ciclo a ciclo, y ninguna producción sin prueba que la
+  pida: **[x]**
+- C4 Calidad de oráculos, sin placebos ni títulos que prometan de más: **[x]**
+- C5 Accesibilidad, matriz de 30 principios más evidencia en navegador: **[x]** con deuda
+  declarada
+- C6 Seguridad: **[ ]** — plazo del cuerpo cerrado; B3 en conflicto normativo (C1)
+- C7 Mutación: **[ ]** — pendiente de campaña (C3, C4, C5)
+
+## 8. Resumen de condiciones
+
+1. **C1 (bloqueante):** resolver el conflicto B3 entre `project-spec.md:2492` y
+   `deploy/EGRESS.md:10-21` por un lado, y `HttpCalendarFeed` más
+   `docs/external-calendar.md:40-45` por otro. Si se ratifica el anclaje, añadir la prueba
+   TLS/SNI que hoy no existe.
+2. **C2 (bloqueante):** ratificación humana de la ampliación de contrato del ciclo 4
+   (`features/external_calendar.feature:13-14` y la fila nueva de @s12 en `:199`).
+3. **C3, C4 y C5 (bloqueantes):** campaña de mutación con 80 % mínimo por capa **y** con
+   las clases y ficheros obligatorios recibiendo mutantes, sin mutantes sobre sentencias
+   `import`, con la evidencia escrita.
+4. **No bloqueante, a registrar:** el residuo de @s25 (5.1); la revisión con lector de
+   pantalla y Firefox/WebKit como deuda declarada; y el efecto de ámbito JVM de
+   `jdk.httpclient.allowRestrictedHeaders` (4.2, punto 2).
+
+Cumplidas las tres primeras, la 28 puede pasar a `done`. Mientras tanto,
+`feature_list.json` la mantiene correctamente en `in_progress`.
+
+Trabajo revisado con lente de artesano: el carril no sólo cerró sus diecinueve hallazgos,
+sino que al ejecutar por primera vez lo que antes sólo se declaraba encontró dos oráculos
+que mentían (la espera negativa de «Sincronizando» y el texto al 200 % que nunca amplió) y
+un hueco de contrato que nadie le señaló (@s30). Eso es exactamente lo que se le pide a
+una bitácora, y por eso el veredicto es condicionado y no rechazado: lo que queda abierto
+son dos decisiones del propietario y una campaña que no es suya.

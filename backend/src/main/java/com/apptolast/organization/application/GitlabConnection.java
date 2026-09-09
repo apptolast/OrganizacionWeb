@@ -25,6 +25,25 @@ public record GitlabConnection(
     return CONNECTED.equals(status);
   }
 
+  /** La misma fila, ya inservible: el token cifrado se conserva porque la pantalla lo describe. */
+  public GitlabConnection withError(String errorCode, Instant at) {
+    return new GitlabConnection(
+        projectPath,
+        projectId,
+        tokenHint,
+        ERROR,
+        tokenCiphertext,
+        lastActivityAt,
+        errorCode,
+        at,
+        version);
+  }
+
+  /** El último fallo publicable, o {@code null} si la conexión no arrastra ninguno. */
+  public ConnectorError lastError() {
+    return lastErrorCode == null ? null : new ConnectorError(lastErrorCode, lastErrorAt);
+  }
+
   @Override
   public boolean equals(Object other) {
     return other instanceof GitlabConnection row

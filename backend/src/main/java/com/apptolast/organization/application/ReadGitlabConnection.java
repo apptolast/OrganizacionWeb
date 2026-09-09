@@ -18,6 +18,9 @@ public final class ReadGitlabConnection implements ReadGitlabConnectionUseCase {
 
   @Override
   public GitlabConnectionView execute(String ownerId) {
-    return GitlabConnectionView.notConnected();
+    return connections
+        .find(ownerId)
+        .map(row -> GitlabConnectionView.of(row, apiBase))
+        .orElseGet(GitlabConnectionView::notConnected);
   }
 }

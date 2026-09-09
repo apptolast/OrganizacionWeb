@@ -39,6 +39,8 @@ export function createProject(runner = run) {
           "integration_api-http-backend",
           "ics_calendar-frontend",
           "ics_calendar-backend",
+          "github_connector-frontend",
+          "github_connector-backend",
           "import_data-frontend",
           "import_data-reader-backend",
           "import_data-http-backend",
@@ -81,6 +83,17 @@ export function createProject(runner = run) {
         [taskName, "--no-daemon", ...args],
         { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
       );
+    if (task === "mutate" && target === "github_connector-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.github-connector.config.json",
+      ]);
+      return;
+    }
     if (task === "mutate" && target === "appearance-frontend") {
       runner("pnpm", [
         "--dir",
@@ -169,6 +182,10 @@ export function createProject(runner = run) {
     }
     if (task === "mutate" && target === "integration_api-http-backend") {
       backend("pitest", ["-PmutationScope=integration_api_http"]);
+      return;
+    }
+    if (task === "mutate" && target === "github_connector-backend") {
+      backend("pitest", ["-PmutationScope=github_connector"]);
       return;
     }
     if (task === "mutate" && target === "import_data-reader-backend") {
@@ -373,6 +390,7 @@ export function createProject(runner = run) {
         "scripts/e2e.mjs",
         "playwright.config.mjs",
         "e2e/create-project.spec.mjs",
+        "e2e/github-connector.spec.mjs",
       ]) {
         runner(process.execPath, ["--check", file]);
       }

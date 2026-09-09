@@ -36,6 +36,7 @@ pitest {
     junit5PluginVersion.set("1.2.3")
     val scope = providers.gradleProperty("mutationScope").orNull
     val icsCalendarOnly = scope == "ics_calendar"
+    val githubConnectorOnly = scope == "github_connector"
     val integrationApiOnly = scope == "integration_api"
     val integrationApiHttpOnly = scope == "integration_api_http"
     val importReaderOnly = scope == "import_data_reader"
@@ -60,6 +61,28 @@ pitest {
     val startWorkSessionOnly = scope == "start_work_session"
     val startWorkSessionReplayOnly = scope == "start_work_session_replay"
     val core = setOf("com.apptolast.organization.domain.*", "com.apptolast.organization.application.*")
+    val githubConnectorClasses = setOf(
+        "com.apptolast.organization.domain.GithubRepository*",
+        "com.apptolast.organization.domain.PersonalAccessToken*",
+        "com.apptolast.organization.domain.ExternalIssue*",
+        "com.apptolast.organization.domain.IssueImportReceipt*",
+        "com.apptolast.organization.application.ConnectGithub*",
+        "com.apptolast.organization.application.ImportGithubIssues*",
+        "com.apptolast.organization.application.ReadGithubConnection*",
+        "com.apptolast.organization.application.DisconnectGithub*",
+        "com.apptolast.organization.application.ReadIssueImport*",
+        "com.apptolast.organization.application.ConnectorFailures*",
+        "com.apptolast.organization.application.IssueSourceException*",
+        "com.apptolast.organization.application.IssuePage*",
+        "com.apptolast.organization.application.StoredConnection*",
+        "com.apptolast.organization.application.ConnectionView*",
+        "com.apptolast.organization.adapter.connectors.*",
+        "com.apptolast.organization.adapter.http.GithubConnectorController*",
+        "com.apptolast.organization.adapter.persistence.PostgresConnectorConnectionStore*",
+        "com.apptolast.organization.adapter.persistence.PostgresIssueImportReceiptStore*",
+        "com.apptolast.organization.adapter.persistence.PostgresImportedTaskCommit*",
+        "com.apptolast.organization.adapter.logging.Slf4jConnectorAudit*",
+        "com.apptolast.organization.adapter.config.ConnectorConfiguration")
     val integrationApiClasses = setOf(
         "com.apptolast.organization.domain.ApiCredential*",
         "com.apptolast.organization.application.ApiCredential*",
@@ -439,6 +462,7 @@ pitest {
     )
     targetClasses.set(when {
         icsCalendarOnly -> icsCalendarClasses
+        githubConnectorOnly -> githubConnectorClasses
         integrationApiOnly -> integrationApiClasses
         integrationApiHttpOnly -> integrationApiHttpClasses
         importReaderOnly -> importReaderClasses
@@ -462,10 +486,11 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses + integrationApiClasses + integrationApiHttpClasses + icsCalendarClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses + integrationApiClasses + integrationApiHttpClasses + icsCalendarClasses + githubConnectorClasses
     })
     targetTests.set(when {
         icsCalendarOnly -> setOf("com.apptolast.organization.*")
+        githubConnectorOnly -> setOf("com.apptolast.organization.*")
         integrationApiOnly || integrationApiHttpOnly -> setOf("com.apptolast.organization.*")
         importReaderOnly -> importReaderTests
         importHttpOnly -> importHttpTests
@@ -491,6 +516,7 @@ pitest {
         else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests + weeklyReviewAdapterTests + appearanceAdapterTests + customizationAdapterTests + exportAdapterTests + importAdapterTests
     })
     if (icsCalendarOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-ics-calendar"))
+    if (githubConnectorOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-github-connector"))
     if (integrationApiOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-integration-api"))
     if (integrationApiHttpOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-integration-api-http"))
     if (importReaderOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-reader"))

@@ -16,6 +16,8 @@ import { ExportData } from "./export-data";
 import { ImportData } from "./import-data";
 import { Calendar } from "./calendar";
 import { IntegrationApi } from "./integration-api";
+import { GithubConnector } from "./github-connector";
+import { IntegrationsIndex } from "./integrations-index";
 import { useAppearance } from "./appearance-state";
 export function App({
   sessionControls,
@@ -35,6 +37,8 @@ export function App({
   const calendar = route === "/calendario";
   const importData = route === "/importacion";
   const integrationApi = route === "/integraciones/api";
+  const githubConnector = route === "/integraciones/github";
+  const integrationsIndex = route === "/integraciones";
   const taskRoute = /^\/proyectos\/([^/]+)\/tareas\/([^/?]+)$/.exec(route);
   const sessionRoute =
     /^\/proyectos\/([^/]+)\/tareas\/([^/]+)\/sesiones\/([^/?]+)$/.exec(route);
@@ -65,7 +69,11 @@ export function App({
                             : null
       }
     >
-      {integrationApi && username ? (
+      {githubConnector && username ? (
+        <GithubConnector owner={username} />
+      ) : integrationsIndex && username ? (
+        <IntegrationsIndex />
+      ) : integrationApi && username ? (
         <IntegrationApi owner={username} />
       ) : importData && username ? (
         <ImportData

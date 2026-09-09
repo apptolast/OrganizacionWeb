@@ -1,7 +1,7 @@
 // Guardas estáticas del tema: las hojas SCSS solo pueden pintar con tokens de
 // los mixins de apariencia. El oráculo de color real es el E2E con axe
 // (e2e/today-dark.spec.mjs); esto evita que vuelvan colores fijos.
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { expect, it } from "vitest";
 
@@ -9,6 +9,10 @@ const FIXED_COLOR = /#[0-9a-fA-F]{3,8}\b/g;
 // import.meta.url apunta a http://localhost en jsdom; se lee desde el cwd (frontend/).
 const read = (file: string) =>
   readFileSync(resolve(process.cwd(), "src", file), "utf8");
+const styleSheets = () =>
+  readdirSync(resolve(process.cwd(), "src")).filter((file) =>
+    file.endsWith(".scss"),
+  );
 
 it("today.scss paints notice, summary and agenda cards only with theme tokens (audit #1-#4)", () => {
   expect(read("today.scss").match(FIXED_COLOR)).toBeNull();
@@ -117,6 +121,44 @@ it("the dark seed tokens keep the shading order of the light art (audit #8)", ()
       )
       .join(" ");
   expect(order("dark-appearance")).toBe(order("light-appearance"));
+});
+
+// Regla de fondo: los mixins de apariencia son el único sitio donde un color
+// puede ser literal; el resto de las hojas pinta siempre con var(--token). Sin
+// esta guarda global cualquier hoja nueva puede repetir el blanco fijo de Hoy.
+const APPEARANCE_MIXINS = /@mixin (?:light|dark)-appearance \{[^}]*\}/g;
+const COLOR_DECLARATION =
+  /(?:^|[\s;{])(color|background|background-color|border|border-color|border-top|border-bottom|border-left|border-right|border-inline|border-inline-start|border-inline-end|border-block|outline|outline-color|box-shadow|text-shadow|fill|stroke|caret-color|accent-color|text-decoration-color|column-rule)\s*:\s*([^;{}]+)/g;
+const LITERAL_COLOR =
+  /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(|\b(?:white|black|red|blue|green|gray|grey|silver|whitesmoke|gainsboro|ivory|snow|beige|linen|lightgray|lightgrey|azure|mintcream|honeydew)\b/;
+// Una sombra de negro puro no aporta color: se ve igual en los dos temas.
+const NEUTRAL_SHADOW = /rgb\(0 0 0 \/ \d+%\)$/;
+
+const literalColorsOutsideTokens = (source: string) =>
+  [...source.replace(APPEARANCE_MIXINS, "").matchAll(COLOR_DECLARATION)]
+    .map(([, property, value]) => [property, value.trim()] as const)
+    .filter(
+      ([, value]) => LITERAL_COLOR.test(value) && !NEUTRAL_SHADOW.test(value),
+    )
+    .map(([property, value]) => `${property}: ${value}`);
+
+it("the literal-color scan catches the fixed white that broke Hoy in dark (audit #1)", () => {
+  expect(
+    literalColorsOutsideTokens(".today-summary { background: #fff; }"),
+  ).toEqual(["background: #fff"]);
+});
+
+it("no stylesheet declares a fixed color outside the appearance mixins (audit #1-#8)", () => {
+  const sheets = styleSheets();
+  expect(sheets).toContain("today.scss");
+  expect(sheets).toContain("styles.scss");
+  expect(
+    sheets.flatMap((sheet) =>
+      literalColorsOutsideTokens(read(sheet)).map(
+        (declaration) => `${sheet} -> ${declaration}`,
+      ),
+    ),
+  ).toEqual([]);
 });
 
 it("card shadows are neutral black so no fixed green survives in dark (audit #8)", () => {

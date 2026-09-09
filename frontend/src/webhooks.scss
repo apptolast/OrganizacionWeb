@@ -19,13 +19,18 @@
   // la tenga montada antes de que llegue el texto. Mientras está vacía no debe ocupar
   // ni un píxel: sin esto, su margen desplazaría la geometría que miden los oráculos
   // de recorte y de objetivo de 44 px del E2E de UX.
+  //
+  // Pero NO puede ocultarse con `display: none`, que es lo que hacía esta regla hasta
+  // el 10-09-2026: eso la saca del árbol de accesibilidad, y una región viva que no
+  // está expuesta y luego aparece no anuncia nada —es exactamente el «aparece y
+  // desaparece del DOM» que se quería evitar—. Lo detectó el E2E: `getByRole("status")`
+  // no encontraba el elemento. Un bloque vacío sin márgenes mide cero y sigue expuesto.
   .webhook-announcement:empty {
-    display: none;
+    margin: 0;
   }
 
   // A registered URL can be long; it must wrap instead of forcing a page scroll at 320 px.
-  li span,
-  .webhook-secret input {
+  li span {
     overflow-wrap: anywhere;
   }
 
@@ -68,7 +73,11 @@
     }
   }
 
-  input {
+  // El campo del secreto es un `textarea` (envuelve; un input de una línea no),
+  // así que hereda exactamente los mismos tokens: sin esto se pintaría con los
+  // colores del agente de usuario y el contraste dejaría de estar bajo control.
+  input,
+  textarea {
     min-height: 44px;
     color: var(--ink);
     background: var(--editable);
@@ -122,8 +131,22 @@
   border: 1px solid var(--accent);
   border-radius: 0.5rem;
 
-  input {
+  label {
+    display: block;
+  }
+
+  // El secreto entero tiene que verse sin recortar en los cuatro anchos y con el
+  // texto al 200 %. Un campo de una línea no envuelve: a 320 px mostraba 34 de sus
+  // 49 caracteres. `field-sizing: content` hace crecer el alto con el contenido,
+  // así que ni sobra alto ni se recorta cuando el texto se agranda; `box-sizing`
+  // impide que el borde sume sobre el 100 % y desborde el panel.
+  textarea {
+    display: block;
     width: 100%;
+    box-sizing: border-box;
+    resize: none;
+    overflow-wrap: anywhere;
+    field-sizing: content;
   }
 }
 

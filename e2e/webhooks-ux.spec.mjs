@@ -87,6 +87,14 @@ async function simulate(page, control) {
         json: { endpoint: endpoint(), secret: SECRET },
       });
     }
+    if (path.endsWith("/status") && method === "PUT")
+      return route.fulfill({
+        json: endpoint({
+          status: "disabled",
+          disabledReason: "MANUAL",
+          disabledAt: "2026-09-08T11:00:00.000000Z",
+        }),
+      });
     if (path.endsWith("/deliveries") && method === "GET")
       return route.fulfill({
         json: {
@@ -189,10 +197,38 @@ function auditor(page, folder, options = {}) {
           .filter((entry) => entry.right > innerWidth + 1 || entry.overflowing)
           .sort((left, right) => right.right - left.right)
           .slice(0, 6);
+        // @s42 exige «ni recorte de la URL, del secreto ni de la tabla de entregas».
+        // Conjunto NOMBRADO, uno por sujeto del contrato, nunca `body *`: el thead a
+        // <900 px es visually-hidden legítimo (width:1px; clip-path: inset(50%)) y
+        // una lista abierta haría fallar código correcto. El campo del secreto se
+        // busca como textarea Y como input: si alguien lo devuelve a un campo de una
+        // línea, el oráculo tiene que seguir mirándolo, no dejar de verlo.
+        // Se miden las DOS dimensiones: un oráculo que sólo mira la horizontal deja
+        // pasar el recorte vertical de las celdas apiladas.
+        const clipped = [
+          ...document.querySelectorAll(
+            "main li span, main .webhook-secret textarea, main .webhook-secret input, main tbody td",
+          ),
+        ]
+          .filter((element) => element.getClientRects().length)
+          .map((element) => ({
+            what: `${element.tagName}.${element.className?.toString?.() ?? ""}`,
+            text: (element.value ?? element.textContent ?? "").slice(0, 40),
+            scrollWidth: element.scrollWidth,
+            clientWidth: element.clientWidth,
+            scrollHeight: element.scrollHeight,
+            clientHeight: element.clientHeight,
+          }))
+          .filter(
+            (entry) =>
+              entry.scrollWidth > entry.clientWidth + 1 ||
+              entry.scrollHeight > entry.clientHeight + 1,
+          );
         return {
           width: innerWidth,
           scroll: document.documentElement.scrollWidth,
           offenders,
+          clipped,
           controls: controls.map((element) => {
             const box = target(element).getBoundingClientRect();
             return {
@@ -219,6 +255,13 @@ function auditor(page, folder, options = {}) {
         measured.scroll,
         `${state}:${width} horizontal page overflow; offenders=${JSON.stringify(measured.offenders)}`,
       ).toBeLessThanOrEqual(width);
+      // Recorte POR ELEMENTO sobre los tres sujetos que el contrato nombra. La
+      // aserción de scroll de arriba NO lo cubre: un elemento que recorta no
+      // ensancha la página, precisamente porque se recorta. Acreditado con tres
+      // rojos independientes (ver progress/tdd_webhooks_cierre_dictamen.md).
+      expect(measured.clipped, `${state}:${width} contenido recortado`).toEqual(
+        [],
+      );
       for (const box of measured.controls) {
         expect(
           box.x,
@@ -369,7 +412,98 @@ for (const mode of ["text200", "forced-colors", "reduced-motion"]) {
   });
 }
 
-test("webhooks audit: keyboard reaches every control in DOM order and focus returns @s42", async ({
+// El anillo más fino que declara la hoja del propio producto: los botones de
+// `.webhooks` usan `outline: 2px solid var(--accent)` (webhooks.scss) y el resto de
+// controles el global de 3 px de styles.scss. Es un SUELO, no una constante que
+// caduque al crecer nada: si alguien adelgaza el anillo por debajo de esto, o lo
+// apaga, la prueba tiene que doler.
+const FOCUS_RING_MIN_WIDTH = 2;
+
+// Con margen para dar la vuelta entera al documento: el enlace de salto, la barra
+// lateral y la cabecera se interponen antes y después del contenido.
+const MAX_TAB_STEPS = 120;
+
+/**
+ * Los controles del contenido, leídos del propio documento y en orden del DOM. Nunca
+ * una lista escrita a mano: así el oráculo compara el recorrido de teclado contra el
+ * orden del DOM —que es lo que @s42 exige— y no contra la opinión de quien escribió
+ * la prueba, y no caduca cuando el formulario gana un tipo de evento o la lista gana
+ * un botón.
+ *
+ * Se devuelven DOS listas a propósito. Si sólo se derivara la de los tabulables,
+ * poner `tabindex="-1"` a un botón lo sacaría a la vez de la expectativa y del
+ * recorrido, y la prueba seguiría verde con un control inalcanzable: el agujero
+ * exacto que @s42 prohíbe.
+ */
+function controlsOf(page) {
+  return page.evaluate(() => {
+    const named = (element) =>
+      (element.labels?.[0]?.textContent ?? element.textContent ?? "").trim();
+    const visible = [
+      ...document.querySelectorAll(
+        "main a, main button, main input, main select, main textarea",
+      ),
+    ].filter((element) => element.getClientRects().length && !element.disabled);
+    return {
+      visible: visible.map(named),
+      reachable: visible.filter((element) => element.tabIndex >= 0).map(named),
+    };
+  });
+}
+
+function currentStop(page) {
+  return page.evaluate(() => {
+    const active = document.activeElement;
+    if (!active || active === document.body) return null;
+    const style = getComputedStyle(active);
+    return {
+      name: (
+        active.labels?.[0]?.textContent ??
+        active.textContent ??
+        ""
+      ).trim(),
+      insideMain: Boolean(active.closest("main")),
+      // `matches(":focus-visible")` es la pregunta correcta. `getComputedStyle(el,
+      // ":focus-visible")` NO lo es: la API espera un pseudo-ELEMENTO, con una
+      // pseudo-clase devuelve el estilo del elemento sin más, y la comparación sale
+      // siempre verdadera. Era un no-op.
+      matchesFocusVisible: active.matches(":focus-visible"),
+      outlineStyle: style.outlineStyle,
+      outlineWidth: parseFloat(style.outlineWidth),
+      outlineColor: style.outlineColor,
+    };
+  });
+}
+
+// Se exige el anillo del PRODUCTO y no el del agente de usuario, que Chromium computa
+// con `outline-style: auto` y que un `outline: none` del producto no apagaría.
+function ringIsVisible(stop) {
+  return (
+    stop.matchesFocusVisible &&
+    stop.outlineStyle === "solid" &&
+    stop.outlineWidth >= FOCUS_RING_MIN_WIDTH &&
+    !stop.outlineColor.includes("transparent")
+  );
+}
+
+async function walk(page, key, expected) {
+  const seen = [];
+  const invisible = [];
+  for (let step = 0; step < MAX_TAB_STEPS && seen.length < expected.length;) {
+    await page.keyboard.press(key);
+    step += 1;
+    const stop = await currentStop(page);
+    if (!stop || !stop.insideMain) continue;
+    if (!expected.includes(stop.name) || seen.at(-1) === stop.name) continue;
+    seen.push(stop.name);
+    // Una medida por parada, no una al final: @s42 pide foco visible en CADA
+    // control, así que un anillo apagado en el primero tiene que doler.
+    if (!ringIsVisible(stop)) invisible.push(stop);
+  }
+  return { seen, invisible };
+}
+
+test("webhooks audit: el teclado recorre todos los controles en el orden del DOM, ida y vuelta, con foco visible en cada parada @s42", async ({
   page,
 }) => {
   test.setTimeout(120000);
@@ -377,35 +511,70 @@ test("webhooks audit: keyboard reaches every control in DOM order and focus retu
   await mkdir(folder, { recursive: true });
   const control = { items: [endpoint()], createFails: false };
   await simulate(page, control);
+  await page.setViewportSize({ width: 1280, height: 1000 });
   await page.goto("/webhooks");
   await expect(page.getByText("https://example.com/hooks")).toBeVisible();
 
-  // Every control is reachable by Tab, in the order it appears in the DOM.
-  const order = [];
-  for (let step = 0; step < 60; step++) {
-    await page.keyboard.press("Tab");
-    const focused = await page.evaluate(() => {
-      const active = document.activeElement;
-      if (!active || !active.closest("main")) return null;
-      return {
-        tag: active.tagName,
-        name:
-          active.getAttribute("aria-label") ||
-          active.labels?.[0]?.textContent ||
-          active.textContent ||
-          active.type,
-        visibleFocus:
-          getComputedStyle(active).outlineStyle !== "none" ||
-          getComputedStyle(active, ":focus-visible").outlineStyle !== "none",
-      };
-    });
-    if (focused) order.push(focused);
-  }
-  await writeFile(`${folder}/tab-order.json`, JSON.stringify(order, null, 2));
-  expect(order.length).toBeGreaterThan(5);
-  for (const item of order) expect(item.name?.trim()).not.toBe("");
+  const controls = await controlsOf(page);
+  await writeFile(
+    `${folder}/tab-order.json`,
+    JSON.stringify(controls, null, 2),
+  );
+  // Ningún control visible se ha sacado de la secuencia con un tabindex negativo.
+  expect(controls.reachable).toEqual(controls.visible);
+  const expected = controls.visible;
+  // Comparar por nombre sólo dice la verdad si los nombres distinguen las paradas:
+  // con un duplicado, dos controles distintos serían el mismo para el oráculo.
+  expect(new Set(expected).size).toBe(expected.length);
+  // «Todos los controles ... tienen nombre accesible», de la misma cláusula.
+  for (const name of expected) expect(name).not.toBe("");
 
-  // Closing the delete confirmation returns focus to the control that opened it.
+  // El punto de partida es el contenido, que es donde deja al usuario el enlace de
+  // salto; `main` lleva `tabIndex={-1}` justamente para poder recibirlo.
+  await page.evaluate(() => document.querySelector("main").focus());
+  const forward = await walk(page, "Tab", expected);
+  expect(forward.seen).toEqual(expected);
+  expect(forward.invisible).toEqual([]);
+
+  // Y de vuelta, sin trampa de foco y en el orden inverso exacto. Tras la ida el foco
+  // queda aparcado en el ÚLTIMO control, así que el primer Shift+Tab ya salta al
+  // penúltimo: la vuelta es el inverso ROTADO una posición, y el último en verse es
+  // aquel donde estábamos parados. Se afirma esa rotación exacta y no un «contiene
+  // los mismos»: una trampa de foco, o un orden distinto, la rompen igual.
+  const reversed = [...expected].reverse();
+  const back = [...reversed.slice(1), reversed[0]];
+  const backwards = await walk(page, "Shift+Tab", back);
+  expect(backwards.seen).toEqual(back);
+  expect(backwards.invisible).toEqual([]);
+});
+
+test("webhooks audit: desactivar anuncia su resultado por la región aria-live @s42", async ({
+  page,
+}) => {
+  const control = { items: [endpoint()], createFails: false };
+  await simulate(page, control);
+  await page.goto("/webhooks");
+  const view = page.getByRole("main");
+  await expect(view.getByText("https://example.com/hooks")).toBeVisible();
+
+  // La región se monta siempre, y vacía: un `role="status"` que aparece y desaparece
+  // del DOM no lo anuncia el lector de pantalla. `getByRole("status")` tampoco puede
+  // confundirse con el div de carga, que lleva `aria-live` pero no rol.
+  const announcement = view.getByRole("status");
+  await expect(announcement).toHaveText("");
+
+  await view.getByRole("button", { name: "Desactivar", exact: true }).click();
+  await expect(announcement).toHaveText("Webhook desactivado.");
+});
+
+test("webhooks audit: al cerrar la confirmación de borrado el foco vuelve al control que la abrió @s42", async ({
+  page,
+}) => {
+  const control = { items: [endpoint()], createFails: false };
+  await simulate(page, control);
+  await page.goto("/webhooks");
+  await expect(page.getByText("https://example.com/hooks")).toBeVisible();
+
   const remove = page
     .getByRole("main")
     .getByRole("button", { name: "Eliminar", exact: true });

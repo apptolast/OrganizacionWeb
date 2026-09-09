@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.apptolast.organization.adapter.webhook.WebhookSignature;
 import com.apptolast.organization.application.ClaimedDelivery;
+import com.apptolast.organization.application.EnqueueWebhookDeliveries;
 import com.apptolast.organization.application.ManageWebhook;
 import com.apptolast.organization.application.WebhookAudit;
 import com.apptolast.organization.application.WebhookSecrets;
@@ -143,17 +144,84 @@ class WebhookRecoveryPersistenceTest {
     return null;
   }
 
+  /**
+   * Una fila real de {@code outbox_events} del propietario, como la escribe el publicador. Es lo
+   * que faltaba en @s28: sin filas de outbox no hay «dos eventos suscritos posteriores al cursor»
+   * que entregar, y el Then del contrato se quedaba sin sujeto.
+   */
+  private static UUID givenEvent(String owner, UUID aggregate, String type, Instant occurredAt) {
+    var eventId = UUID.randomUUID();
+    var payload =
+        "{\"eventId\":\""
+            + eventId
+            + "\",\"aggregateId\":\""
+            + aggregate
+            + "\",\"ownerId\":\""
+            + owner
+            + "\",\"occurredAt\":\""
+            + occurredAt
+            + "\",\"schemaVersion\":1,\"type\":\""
+            + type
+            + "\",\"name\":\"Proyecto\"}";
+    WebhookPersistenceTest.Database.JDBC.update(
+        """
+        INSERT INTO outbox_events (
+          event_id, aggregate_id, owner_id, event_type, schema_version, occurred_at, payload, status)
+        VALUES (?,?,?,?,1,?,?::jsonb,'pending')
+        """,
+        eventId,
+        aggregate,
+        owner,
+        type,
+        java.sql.Timestamp.from(occurredAt),
+        payload);
+    return eventId;
+  }
+
+  private static EnqueueWebhookDeliveries enqueuerAt(Instant now) {
+    return new EnqueueWebhookDeliveries(outbox(), SILENT, Clock.fixed(now, ZoneOffset.UTC));
+  }
+
+  private static java.sql.Timestamp cursorTimeOf(UUID endpointId) {
+    return WebhookPersistenceTest.Database.JDBC.queryForObject(
+        "SELECT cursor_occurred_at FROM webhook_endpoints WHERE id=?",
+        java.sql.Timestamp.class,
+        endpointId);
+  }
+
+  private static UUID cursorEventOf(UUID endpointId) {
+    return WebhookPersistenceTest.Database.JDBC.queryForObject(
+        "SELECT cursor_event_id FROM webhook_endpoints WHERE id=?", UUID.class, endpointId);
+  }
+
   @Test
-  void s28_reactivatingResumesFromTheKeptCursorAndNeverResendsTheExhaustedDelivery() {
+  void s28_reactivatingResumesFromTheKeptCursorAndDeliversD2AndThenTheTwoLaterEventsInOrder() {
     var owner = "reactivate-" + UUID.randomUUID();
+    var project = UUID.randomUUID();
     var endpoint = given(owner, List.of("ProjectCreated.v1"));
     var store = store();
 
-    // D1 exhausted, D2 still pending, endpoint disabled by exhaustion.
+    // D2 es una entrega REAL de la outbox, no un ping. Es lo que la hace significativa: mientras
+    // está pending bloquea el encolador (`readyEndpoints()` excluye endpoints con una entrega de
+    // outbox pendiente, pero NO con un ping pendiente), y sin ese bloqueo el «primero D2 y después
+    // los dos eventos» del Then no tendría nada que ordenar.
+    var eventOfD2 = givenEvent(owner, project, "ProjectCreated.v1", T.plusSeconds(1));
+    enqueuerAt(T.plusSeconds(10)).runCycle();
+    var d2 =
+        WebhookPersistenceTest.Database.JDBC.queryForObject(
+            "SELECT id FROM webhook_deliveries WHERE endpoint_id=? AND event_id=?",
+            UUID.class,
+            endpoint.id(),
+            eventOfD2);
+    assertNotNull(d2, "D2 is the outbox delivery the enqueuer created");
+
+    // Los dos eventos suscritos POSTERIORES al cursor, que ahora está en (T+1, eventOfD2).
+    var firstLater = givenEvent(owner, project, "ProjectCreated.v1", T.plusSeconds(2));
+    var secondLater = givenEvent(owner, project, "ProjectCreated.v1", T.plusSeconds(3));
+
+    // D1 exhausted y el endpoint disabled por agotamiento.
     var exhausted = WebhookDelivery.ping(UUID.randomUUID(), T);
     store.enqueuePing(owner, endpoint.id(), exhausted, "{\"d\":1}");
-    var pending = WebhookDelivery.ping(UUID.randomUUID(), T.plusSeconds(1));
-    store.enqueuePing(owner, endpoint.id(), pending, "{\"d\":2}");
     WebhookPersistenceTest.Database.JDBC.update(
         """
         UPDATE webhook_deliveries
@@ -166,14 +234,11 @@ class WebhookRecoveryPersistenceTest {
         "UPDATE webhook_endpoints SET disabled_reason='DELIVERY_EXHAUSTED' WHERE id=?",
         endpoint.id());
 
-    var cursorBefore =
-        WebhookPersistenceTest.Database.JDBC.queryForObject(
-            "SELECT cursor_occurred_at FROM webhook_endpoints WHERE id=?",
-            java.sql.Timestamp.class,
-            endpoint.id());
+    var cursorBefore = cursorTimeOf(endpoint.id());
 
     // While disabled the worker must not send anything at all.
     var sender = new RecordingSender();
+    enqueuerAt(T.plusSeconds(10)).runCycle();
     drain(sender, owner, T.plusSeconds(10));
     assertTrue(sender.sent.isEmpty(), "a disabled endpoint delivers nothing");
 
@@ -186,19 +251,26 @@ class WebhookRecoveryPersistenceTest {
     assertNull(reactivated.disabledAt());
     assertEquals(
         cursorBefore,
-        WebhookPersistenceTest.Database.JDBC.queryForObject(
-            "SELECT cursor_occurred_at FROM webhook_endpoints WHERE id=?",
-            java.sql.Timestamp.class,
-            endpoint.id()),
+        cursorTimeOf(endpoint.id()),
         "reactivating never rewinds nor advances the cursor");
 
+    // Ciclos alternos de encolado y de envío, como los del worker: el encolador no adelanta nada
+    // mientras D2 sigue pendiente, así que la secuencia la impone el producto, no la prueba.
     sender.now = T.plusSeconds(30);
-    drain(sender, owner, T.plusSeconds(30));
+    for (var cycle = 0; cycle < 4; cycle++) {
+      enqueuerAt(T.plusSeconds(30)).runCycle();
+      drain(sender, owner, T.plusSeconds(30));
+    }
 
     assertEquals(
-        List.of(pending.eventId().toString()),
+        List.of(eventOfD2.toString(), firstLater.toString(), secondLater.toString()),
         sender.sent.stream().map(Sent::eventId).toList(),
-        "only D2 goes out; D1 is terminal and is never resent");
+        "D2 first and then the two later events, in outbox order; D1 is terminal and never resent");
+    assertEquals(
+        java.sql.Timestamp.from(T.plusSeconds(3)),
+        cursorTimeOf(endpoint.id()),
+        "the cursor ends on the last event actually enqueued");
+    assertEquals(secondLater, cursorEventOf(endpoint.id()));
     assertEquals(
         "exhausted",
         store.list(owner, endpoint.id()).stream()
@@ -209,10 +281,59 @@ class WebhookRecoveryPersistenceTest {
     assertEquals(
         "succeeded",
         store.list(owner, endpoint.id()).stream()
-            .filter(delivery -> delivery.id().equals(pending.id()))
+            .filter(delivery -> delivery.id().equals(d2))
             .findFirst()
             .orElseThrow()
             .status());
+  }
+
+  /**
+   * @s28, la compuerta que la reactivación abre en el lado del encolador: {@code e.status =
+   *     'active'} en {@code PostgresWebhookOutbox.readyEndpoints()}. Necesita su propio caso porque
+   *     en el escenario de arriba está <b>tapada</b> por la otra cláusula del mismo SQL: mientras
+   *     D2 sigue pendiente, el {@code NOT EXISTS} ya excluye al endpoint y suprimir el filtro de
+   *     estado no cambiaría nada. Aquí no hay ninguna entrega pendiente, así que lo único que
+   *     mantiene quieto al encolador es el estado.
+   */
+  @Test
+  void s28_theEnqueuerIgnoresADisabledEndpointAndResumesItOnceReactivated() {
+    var owner = "gate-" + UUID.randomUUID();
+    var project = UUID.randomUUID();
+    var endpoint = given(owner, List.of("ProjectCreated.v1"));
+    var store = store();
+    store.changeStatus(owner, endpoint.id(), "disabled", T);
+    var waiting = givenEvent(owner, project, "ProjectCreated.v1", T.plusSeconds(1));
+    var cursorBefore = cursorTimeOf(endpoint.id());
+
+    assertTrue(
+        outbox().readyEndpoints().stream()
+            .noneMatch(ready -> ready.endpoint().id().equals(endpoint.id())),
+        "a disabled endpoint is never ready");
+    enqueuerAt(T.plusSeconds(10)).runCycle();
+    assertEquals(
+        0, deliveryCountOf(endpoint.id()), "a disabled endpoint consumes nothing from the outbox");
+    assertEquals(cursorBefore, cursorTimeOf(endpoint.id()), "nor does its cursor move");
+
+    store.changeStatus(owner, endpoint.id(), "active", T.plusSeconds(20));
+
+    assertTrue(
+        outbox().readyEndpoints().stream()
+            .anyMatch(ready -> ready.endpoint().id().equals(endpoint.id())),
+        "reactivating puts it back in the ready set");
+    enqueuerAt(T.plusSeconds(30)).runCycle();
+    assertEquals(
+        List.of(waiting),
+        WebhookPersistenceTest.Database.JDBC.queryForList(
+            "SELECT event_id FROM webhook_deliveries WHERE endpoint_id=?",
+            UUID.class,
+            endpoint.id()),
+        "the event that waited behind the gate is the one enqueued");
+    assertEquals(java.sql.Timestamp.from(T.plusSeconds(1)), cursorTimeOf(endpoint.id()));
+  }
+
+  private static int deliveryCountOf(UUID endpointId) {
+    return WebhookPersistenceTest.Database.JDBC.queryForObject(
+        "SELECT COUNT(*) FROM webhook_deliveries WHERE endpoint_id=?", Integer.class, endpointId);
   }
 
   @Test

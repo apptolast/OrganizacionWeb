@@ -15,6 +15,14 @@
     color: var(--muted);
   }
 
+  // La región de anuncios de @s42:522 existe siempre, para que el lector de pantalla
+  // la tenga montada antes de que llegue el texto. Mientras está vacía no debe ocupar
+  // ni un píxel: sin esto, su margen desplazaría la geometría que miden los oráculos
+  // de recorte y de objetivo de 44 px del E2E de UX.
+  .webhook-announcement:empty {
+    display: none;
+  }
+
   // A registered URL can be long; it must wrap instead of forcing a page scroll at 320 px.
   li span,
   .webhook-secret input {

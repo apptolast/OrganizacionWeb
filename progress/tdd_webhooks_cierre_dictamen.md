@@ -224,6 +224,15 @@ levantar la pila y el plazo de la sesión no da. La fila de `ux_webhooks.md` lo
 dice con esas palabras. La cláusula del contrato sí queda implementada y con
 oráculo en la capa de unitarios, que es donde discrimina.
 
+**Detalle de la región vacía.** La región de anuncios se monta siempre —un
+`role="status"` que aparece y desaparece del DOM no lo anuncia el lector de
+pantalla—, así que mientras está vacía debe ocupar cero: `webhooks.scss` gana
+`.webhook-announcement:empty { display: none }`. Sin esa regla, el margen del
+párrafo vacío desplazaría la geometría que miden los oráculos de recorte y de
+objetivo de 44 px del E2E de UX, que este carril no puede ejecutar. Es la opción
+conservadora: con ella, el estado vacío deja la maquetación exactamente como
+estaba antes del cambio. El mismo patrón `:empty` ya se usa al final de la hoja.
+
 **Fuera de ámbito, anotado (REGLAS.md §9).** El «aviso adicional» del hallazgo
 —al pulsar «Desactivar», React desmonta el botón enfocado y el foco cae al
 `body`— no se toca: no forma parte del bloqueante y arreglarlo aquí, sin prueba

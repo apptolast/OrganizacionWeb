@@ -354,3 +354,30 @@ Stryker. En consecuencia:
 - La mutación (PIT y Stryker) queda para el `mutation_tester`.
 - El estado de la feature 26 en `feature_list.json` sigue en `in_progress`: no le corresponde a
   este agente marcarlo `done`.
+
+### Ciclo 10 — regresión encontrada en `ApplicationWiringTest`
+
+Al cerrar el carril se ejecutó `ApplicationWiringTest` (que no es de este carril) y sus 24 pruebas
+estaban en rojo por mi culpa:
+
+```
+NoSuchBeanDefinitionException: No qualifying bean of type
+'com.apptolast.organization.application.CalendarFeedTokens'
+  ... creating bean 'manageCalendarFeed' defined in ApplicationConfiguration
+```
+
+Causa: `PostgresCalendarStore` se había anotado `@Component`, pero `ApplicationWiringTest` levanta
+un contexto estrecho con `withUserConfiguration(ApplicationConfiguration.class)` y **sin escaneo de
+componentes**. Todo adaptador que un bean de `ApplicationConfiguration` necesite tiene que estar
+declarado allí como `@Bean`, igual que `exportDataQueries`, `historyQueries` o
+`apiCredentialStore`.
+
+Verde: se retira `@Component` de `PostgresCalendarStore` y se declara el bean `calendarStore(jdbc,
+manager)` en `ApplicationConfiguration`. Un único bean sirve a los dos puertos (`CalendarFeedTokens`
+y `CalendarQueries`), que es justo lo que hace falta para que la lectura del feed salga de un solo
+snapshot.
+
+Comprobado después del cambio: `ApplicationWiringTest` (24), `CalendarWiringTest`,
+`CalendarPersistenceTest`, `CalendarApiTest`, `ArchitectureTest` y `SecurityConfigurationTest`, más
+`ApiCredentialApiTest`, `ApiCredentialBearerTest`, `ApiCredentialBusinessCompatibilityTest` y
+`ExportDataApiTest` para descartar regresiones en los carriles vecinos. Todo verde.

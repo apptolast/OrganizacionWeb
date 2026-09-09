@@ -20,7 +20,6 @@ import org.springframework.transaction.support.TransactionTemplate;
  * live in one adapter because the public feed resolves the token and reads the calendar inside the
  * same read-only repeatable-read snapshot.
  */
-@org.springframework.stereotype.Component
 public final class PostgresCalendarStore implements CalendarFeedTokens, CalendarQueries {
   /** One more than the contract ceiling, so the use case can refuse before serialising. */
   private static final int CEILING_PROBE = 2001;

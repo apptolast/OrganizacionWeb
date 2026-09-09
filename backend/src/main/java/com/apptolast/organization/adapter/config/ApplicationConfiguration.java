@@ -288,6 +288,14 @@ public class ApplicationConfiguration {
     return new com.apptolast.organization.application.CreateSubtask(commit, clock);
   }
 
+  /** One adapter answers both calendar ports so a feed read stays inside one snapshot. */
+  @Bean
+  com.apptolast.organization.adapter.persistence.PostgresCalendarStore calendarStore(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager manager) {
+    return new com.apptolast.organization.adapter.persistence.PostgresCalendarStore(jdbc, manager);
+  }
+
   @Bean
   com.apptolast.organization.application.ManageCalendarFeedUseCase manageCalendarFeed(
       com.apptolast.organization.application.CalendarFeedTokens tokens,

@@ -204,9 +204,20 @@ for (const [width, zoom] of [
     ).toBeLessThanOrEqual(0);
     // The session gate focuses the destination heading after access is checked.
     // Reach the skip link by keyboard from that meaningful initial focus.
+    // The budget is derived, not a literal: every new feature adds a navigation
+    // entry ahead of the heading, and a hard-coded step count silently expires
+    // the day one more route ships — which is exactly how this test broke once
+    // webhooks, the external calendar and automations landed.
+    const budget =
+      (await page.evaluate(
+        () =>
+          document.querySelectorAll(
+            "a[href], button, input, select, textarea, [tabindex]:not([tabindex='-1'])",
+          ).length,
+      )) + 2;
     for (
       let step = 0;
-      step < 12 &&
+      step < budget &&
       !(await skipLink.evaluate(
         (element) => element === document.activeElement,
       ));

@@ -27,7 +27,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 /**
  * @s1 @s3 @s5 @s6 @s10 @s11 @s12 @s20 @s23 @s29 @s30 @s31 @s32 @s34 @s35 la frontera HTTP del
- * conector: cabeceras, validación estricta del cuerpo, códigos de problema y ausencia del token.
+ *     conector: cabeceras, validación estricta del cuerpo, códigos de problema y ausencia del
+ *     token.
  */
 @WebMvcTest(
     controllers = GithubConnectorController.class,
@@ -46,8 +47,17 @@ class GithubConnectorApiTest {
   private static final Instant STARTED = Instant.parse("2026-09-09T12:00:00Z");
 
   private static final String[] RECEIPT_FIELDS = {
-    "id", "projectId", "repository", "status", "created", "skipped", "failed", "truncated",
-    "errorCode", "startedAt", "finishedAt"
+    "id",
+    "projectId",
+    "repository",
+    "status",
+    "created",
+    "skipped",
+    "failed",
+    "truncated",
+    "errorCode",
+    "startedAt",
+    "finishedAt"
   };
 
   @Autowired MockMvc mvc;
@@ -71,7 +81,11 @@ class GithubConnectorApiTest {
 
   private static ConnectionView view(IssueImportReceipt lastImport) {
     return new ConnectionView(
-        "octocat/Hello-World", "octocat", "valid", Instant.parse("2026-09-09T10:00:00Z"), lastImport);
+        "octocat/Hello-World",
+        "octocat",
+        "valid",
+        Instant.parse("2026-09-09T10:00:00Z"),
+        lastImport);
   }
 
   private static IssueImportReceipt completed() {
@@ -122,7 +136,8 @@ class GithubConnectorApiTest {
                     .contentType("application/json")
                     .content(connectBody()))
             .andExpect(status().isOk())
-            .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")))
+            .andExpect(
+                header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")))
             .andExpect(jsonPath("$.repository").value("octocat/Hello-World"))
             .andExpect(jsonPath("$.login").value("octocat"))
             .andExpect(jsonPath("$.status").value("valid"))
@@ -144,7 +159,8 @@ class GithubConnectorApiTest {
 
     mvc.perform(get(CONNECTION).with(user("owner")))
         .andExpect(status().isOk())
-        .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")))
+        .andExpect(
+            header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")))
         .andExpect(jsonPath("$.lastImport.id").value(IMPORT.toString()))
         .andExpect(jsonPath("$.lastImport.projectId").value(PROJECT.toString()))
         .andExpect(jsonPath("$.lastImport.repository").value("octocat/Hello-World"))
@@ -158,7 +174,11 @@ class GithubConnectorApiTest {
         .andExpect(jsonPath("$.lastImport.finishedAt").value("2026-09-09T12:00:04Z"))
         .andReturn();
 
-    var body = mvc.perform(get(CONNECTION).with(user("owner"))).andReturn().getResponse().getContentAsString();
+    var body =
+        mvc.perform(get(CONNECTION).with(user("owner")))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
     org.assertj.core.api.Assertions.assertThat(keysOf(body))
         .containsExactlyInAnyOrder("repository", "login", "status", "connectedAt", "lastImport");
     org.assertj.core.api.Assertions.assertThat(keysOf(body, "lastImport"))
@@ -357,15 +377,17 @@ class GithubConnectorApiTest {
                 .content("{\"projectId\":\"" + PROJECT + "\"}"))
         .andExpect(status().isCreated())
         .andExpect(header().string("Location", IMPORTS + "/" + IMPORT))
-        .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")))
+        .andExpect(
+            header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")))
         .andExpect(jsonPath("$.id").value(IMPORT.toString()))
         .andExpect(jsonPath("$.status").value("completed"))
         .andExpect(jsonPath("$.created").value(3))
         .andExpect(jsonPath("$.truncated").value(false))
-        .andExpect(result ->
-            org.assertj.core.api.Assertions.assertThat(
-                    keysOf(result.getResponse().getContentAsString()))
-                .containsExactlyInAnyOrder(RECEIPT_FIELDS));
+        .andExpect(
+            result ->
+                org.assertj.core.api.Assertions.assertThat(
+                        keysOf(result.getResponse().getContentAsString()))
+                    .containsExactlyInAnyOrder(RECEIPT_FIELDS));
   }
 
   @ParameterizedTest
@@ -398,7 +420,8 @@ class GithubConnectorApiTest {
                 .with(user("owner"))
                 .with(csrf().asHeader())
                 .contentType("application/json")
-                .content("{\"projectId\":\"" + withLetters.toUpperCase(java.util.Locale.ROOT) + "\"}"))
+                .content(
+                    "{\"projectId\":\"" + withLetters.toUpperCase(java.util.Locale.ROOT) + "\"}"))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors[0].field").value("projectId"))
         .andExpect(jsonPath("$.errors[0].code").value("INVALID_FORMAT"));
@@ -517,12 +540,14 @@ class GithubConnectorApiTest {
 
     mvc.perform(get(IMPORTS + "/" + IMPORT).with(user("owner")))
         .andExpect(status().isOk())
-        .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")))
+        .andExpect(
+            header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")))
         .andExpect(jsonPath("$.id").value(IMPORT.toString()))
-        .andExpect(result ->
-            org.assertj.core.api.Assertions.assertThat(
-                    keysOf(result.getResponse().getContentAsString()))
-                .containsExactlyInAnyOrder(RECEIPT_FIELDS));
+        .andExpect(
+            result ->
+                org.assertj.core.api.Assertions.assertThat(
+                        keysOf(result.getResponse().getContentAsString()))
+                    .containsExactlyInAnyOrder(RECEIPT_FIELDS));
   }
 
   @ParameterizedTest
@@ -572,7 +597,8 @@ class GithubConnectorApiTest {
       mvc.perform(request)
           .andExpect(status().isServiceUnavailable())
           .andExpect(jsonPath("$.code").value("CONNECTORS_DISABLED"))
-          .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")));
+          .andExpect(
+              header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")));
     }
   }
 
@@ -629,7 +655,10 @@ class GithubConnectorApiTest {
   @Test
   void s32_writingWithoutACsrfTokenIsForbidden() throws Exception {
     mvc.perform(
-            put(CONNECTION).with(user("owner")).contentType("application/json").content(connectBody()))
+            put(CONNECTION)
+                .with(user("owner"))
+                .contentType("application/json")
+                .content(connectBody()))
         .andExpect(status().isForbidden());
     mvc.perform(delete(CONNECTION).with(user("owner"))).andExpect(status().isForbidden());
     mvc.perform(

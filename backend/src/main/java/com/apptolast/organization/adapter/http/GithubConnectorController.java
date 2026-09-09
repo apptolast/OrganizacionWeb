@@ -75,7 +75,8 @@ public final class GithubConnectorController {
     var body = object(raw, CONNECT_FIELDS);
     var repository = text(body, "repository");
     var token = text(body, "token");
-    return noStore().body(ConnectionResponse.of(connect.execute(principal.getName(), repository, token)));
+    return noStore()
+        .body(ConnectionResponse.of(connect.execute(principal.getName(), repository, token)));
   }
 
   @DeleteMapping(CONNECTION)
@@ -105,7 +106,8 @@ public final class GithubConnectorController {
   @GetMapping(IMPORTS + "/{id}")
   public ResponseEntity<ImportResponse> getImport(Principal principal, @PathVariable String id) {
     if (!CANONICAL_UUID.matcher(id).matches()) throw new IssueImportNotFoundException();
-    return noStore().body(ImportResponse.of(readImport.execute(principal.getName(), UUID.fromString(id))));
+    return noStore()
+        .body(ImportResponse.of(readImport.execute(principal.getName(), UUID.fromString(id))));
   }
 
   // --------------------------------------------------------------------------- lectura JSON
@@ -119,9 +121,11 @@ public final class GithubConnectorController {
             .readTree(raw);
     if (body == null || !body.isObject()) throw invalid("body", "INVALID_TYPE");
     var extras = new TreeSet<String>();
-    body.fieldNames().forEachRemaining(field -> {
-      if (!allowed.contains(field)) extras.add(field);
-    });
+    body.fieldNames()
+        .forEachRemaining(
+            field -> {
+              if (!allowed.contains(field)) extras.add(field);
+            });
     if (!extras.isEmpty()) throw invalid(extras.first(), "UNKNOWN_FIELD");
     return body;
   }
@@ -213,14 +217,16 @@ public final class GithubConnectorController {
     var receipt = error.receipt();
     if ("RATE_LIMITED".equals(receipt.errorCode()))
       return rateLimitedProblem(error.retryAfterSeconds(), receipt);
-    var response = problem(statusOf(receipt.errorCode()), receipt.errorCode(), titleOf(receipt.errorCode()));
+    var response =
+        problem(statusOf(receipt.errorCode()), receipt.errorCode(), titleOf(receipt.errorCode()));
     return withReceipt(response, receipt);
   }
 
   private ResponseEntity<Map<String, Object>> rateLimitedProblem(
       int retryAfterSeconds, IssueImportReceipt receipt) {
     var body =
-        ApiErrors.problem(503, "RATE_LIMITED", "GitHub limita las peticiones. Reintenta más tarde.");
+        ApiErrors.problem(
+            503, "RATE_LIMITED", "GitHub limita las peticiones. Reintenta más tarde.");
     body.put("retryAfterSeconds", retryAfterSeconds);
     if (receipt != null) putReceipt(body, receipt);
     return ResponseEntity.status(503)
@@ -254,15 +260,15 @@ public final class GithubConnectorController {
   private static String titleOf(String errorCode) {
     return switch (errorCode) {
       case "CONNECTION_INVALID" -> "La conexión ya no es válida. Vuelve a conectarla.";
-      case "GITHUB_REPOSITORY_UNAVAILABLE" ->
-          "El repositorio no está disponible con ese token.";
+      case "GITHUB_REPOSITORY_UNAVAILABLE" -> "El repositorio no está disponible con ese token.";
       case "PROJECT_COMPLETED" -> "Reabre el proyecto en pausa para añadir tareas.";
       case "STORAGE_UNAVAILABLE" -> "El almacenamiento no está disponible. Inténtalo más tarde.";
       default -> "GitHub no responde. Inténtalo más tarde.";
     };
   }
 
-  private static ResponseEntity<Map<String, Object>> problem(int status, String code, String title) {
+  private static ResponseEntity<Map<String, Object>> problem(
+      int status, String code, String title) {
     return ResponseEntity.status(status)
         .header("Cache-Control", NO_STORE)
         .contentType(MediaType.APPLICATION_PROBLEM_JSON)
@@ -273,11 +279,15 @@ public final class GithubConnectorController {
 
   /**
    * Cinco campos y ni uno más: no hay sitio donde esconder el token. Los nulos se serializan,
-   * porque "sin importaciones todavía" es información que la interfaz necesita distinguir de
-   * "este campo no ha venido".
+   * porque "sin importaciones todavía" es información que la interfaz necesita distinguir de "este
+   * campo no ha venido".
    */
   public record ConnectionResponse(
-      String repository, String login, String status, Instant connectedAt, ImportResponse lastImport) {
+      String repository,
+      String login,
+      String status,
+      Instant connectedAt,
+      ImportResponse lastImport) {
     static ConnectionResponse of(ConnectionView view) {
       return new ConnectionResponse(
           view.repository(),

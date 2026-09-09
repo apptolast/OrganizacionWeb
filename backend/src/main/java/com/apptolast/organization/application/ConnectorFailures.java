@@ -2,8 +2,8 @@ package com.apptolast.organization.application;
 
 /**
  * Traduce el fallo del gestor externo al lenguaje de cada operación. Un token rechazado significa
- * cosas distintas según el momento: al conectar es un token que no sirve, y durante una
- * importación es una conexión que ha dejado de valer y hay que marcar como tal.
+ * cosas distintas según el momento: al conectar es un token que no sirve, y durante una importación
+ * es una conexión que ha dejado de valer y hay que marcar como tal.
  */
 final class ConnectorFailures {
   private ConnectorFailures() {}

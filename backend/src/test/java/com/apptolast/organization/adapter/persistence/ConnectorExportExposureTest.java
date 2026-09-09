@@ -10,8 +10,9 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @s34 la exportación JSON v1 conserva catorce colecciones y ninguna de ellas es la conexión ni los
- * enlaces. El conector no puede ampliar el archivo por la puerta de atrás: si alguien añadiera sus
- * tablas al volcado, el texto cifrado del token acabaría en un fichero que la persona se descarga.
+ *     enlaces. El conector no puede ampliar el archivo por la puerta de atrás: si alguien añadiera
+ *     sus tablas al volcado, el texto cifrado del token acabaría en un fichero que la persona se
+ *     descarga.
  */
 class ConnectorExportExposureTest {
   private static final List<String> EXPECTED =

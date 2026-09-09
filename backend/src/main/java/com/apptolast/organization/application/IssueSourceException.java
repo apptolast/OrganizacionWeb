@@ -14,6 +14,7 @@ public final class IssueSourceException extends RuntimeException {
   }
 
   private static final int DEFAULT_RETRY_SECONDS = 60;
+
   /** No hubo respuesta: caída de red, plazo agotado o cuerpo ilegible. */
   private static final int NO_ANSWER = 0;
 

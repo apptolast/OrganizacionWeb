@@ -126,7 +126,14 @@ class ImportGithubIssuesTest {
   // ------------------------------------------------------------------ @s16 paginación
 
   @ParameterizedTest
-  @CsvSource({"0,1,0,false", "99,1,99,false", "100,2,100,false", "150,2,150,false", "200,2,200,false", "201,2,200,true"})
+  @CsvSource({
+    "0,1,0,false",
+    "99,1,99,false",
+    "100,2,100,false",
+    "150,2,150,false",
+    "200,2,200,false",
+    "201,2,200,true"
+  })
   void s16_atMostTwoPagesOfAHundredAndTruncatedReflectsWhatWasLeft(
       int open, int calls, int created, boolean truncated) {
     int first = Math.min(open, 100);
@@ -186,7 +193,11 @@ class ImportGithubIssuesTest {
   @Test
   void s17_onlyTheNewIssueIsCreatedOnASecondImport() {
     IntStream.rangeClosed(1, 5).forEach(n -> fakes.tasks.seedLink(OWNER, String.valueOf(n)));
-    githubPage(1, List.of(issue("1"), issue("2"), issue("3"), issue("4"), issue("5"), issue("999")), 6, false);
+    githubPage(
+        1,
+        List.of(issue("1"), issue("2"), issue("3"), issue("4"), issue("5"), issue("999")),
+        6,
+        false);
 
     var receipt = importIssues.execute(OWNER, projectId);
 
@@ -241,7 +252,8 @@ class ImportGithubIssuesTest {
     fakes.tasks.failStorageOn("3");
 
     var error =
-        assertThrows(IssueImportFailedException.class, () -> importIssues.execute(OWNER, projectId));
+        assertThrows(
+            IssueImportFailedException.class, () -> importIssues.execute(OWNER, projectId));
 
     var receipt = error.receipt();
     assertEquals("failed", receipt.status());
@@ -275,7 +287,8 @@ class ImportGithubIssuesTest {
     fakes.source.fail(IssueSourceException.rateLimited(120));
 
     var error =
-        assertThrows(IssueImportFailedException.class, () -> importIssues.execute(OWNER, projectId));
+        assertThrows(
+            IssueImportFailedException.class, () -> importIssues.execute(OWNER, projectId));
 
     assertEquals("RATE_LIMITED", error.receipt().errorCode());
     assertEquals(120, error.retryAfterSeconds());
@@ -288,7 +301,8 @@ class ImportGithubIssuesTest {
     fakes.source.fail(IssueSourceException.unavailable());
 
     var error =
-        assertThrows(IssueImportFailedException.class, () -> importIssues.execute(OWNER, projectId));
+        assertThrows(
+            IssueImportFailedException.class, () -> importIssues.execute(OWNER, projectId));
 
     assertEquals("GITHUB_UNAVAILABLE", error.receipt().errorCode());
     assertEquals(0, error.receipt().created());
@@ -300,7 +314,8 @@ class ImportGithubIssuesTest {
     fakes.source.fail(IssueSourceException.repositoryUnavailable());
 
     var error =
-        assertThrows(IssueImportFailedException.class, () -> importIssues.execute(OWNER, projectId));
+        assertThrows(
+            IssueImportFailedException.class, () -> importIssues.execute(OWNER, projectId));
 
     assertEquals("GITHUB_REPOSITORY_UNAVAILABLE", error.receipt().errorCode());
     assertEquals("valid", fakes.connections.find(OWNER).orElseThrow().status());
@@ -312,7 +327,8 @@ class ImportGithubIssuesTest {
     fakes.source.failOnPage(2, IssueSourceException.tokenRejected());
 
     var error =
-        assertThrows(IssueImportFailedException.class, () -> importIssues.execute(OWNER, projectId));
+        assertThrows(
+            IssueImportFailedException.class, () -> importIssues.execute(OWNER, projectId));
 
     assertEquals("CONNECTION_INVALID", error.receipt().errorCode());
     assertEquals(100, error.receipt().created());
@@ -356,7 +372,8 @@ class ImportGithubIssuesTest {
     fakes.tasks.completeProjectOn("3");
 
     var error =
-        assertThrows(IssueImportFailedException.class, () -> importIssues.execute(OWNER, projectId));
+        assertThrows(
+            IssueImportFailedException.class, () -> importIssues.execute(OWNER, projectId));
 
     assertEquals("PROJECT_COMPLETED", error.receipt().errorCode());
     assertEquals("failed", error.receipt().status());
@@ -449,8 +466,7 @@ class ImportGithubIssuesTest {
 
     importIssues.execute(OWNER, projectId);
 
-    assertEquals(
-        List.of("finished owner-1 octocat/Hello-World 3 0 0 false"), fakes.audit.lines());
+    assertEquals(List.of("finished owner-1 octocat/Hello-World 3 0 0 false"), fakes.audit.lines());
     assertFalse(String.join(" ", fakes.audit.lines()).contains("ghp_secreto123"));
   }
 

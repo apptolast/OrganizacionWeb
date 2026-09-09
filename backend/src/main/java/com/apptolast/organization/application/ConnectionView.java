@@ -8,7 +8,11 @@ import java.time.Instant;
  * claro, ni siquiera para su longitud.
  */
 public record ConnectionView(
-    String repository, String login, String status, Instant connectedAt, IssueImportReceipt lastImport) {
+    String repository,
+    String login,
+    String status,
+    Instant connectedAt,
+    IssueImportReceipt lastImport) {
   public static ConnectionView of(StoredConnection connection, IssueImportReceipt lastImport) {
     return new ConnectionView(
         connection.repository(),

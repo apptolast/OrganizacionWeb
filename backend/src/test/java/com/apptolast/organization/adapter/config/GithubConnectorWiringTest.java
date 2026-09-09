@@ -2,7 +2,6 @@ package com.apptolast.organization.adapter.config;
 
 import static org.assertj.core.api.Assertions.*;
 
-import com.apptolast.organization.adapter.connectors.GithubApiBase;
 import com.apptolast.organization.application.ConnectorsDisabledException;
 import com.apptolast.organization.application.SecretCipher;
 import java.util.Base64;
@@ -13,7 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * @s3 sin clave el conector queda deshabilitado y ninguna ruta lee ni escribe, @s4 una clave
- * presente pero inválida impide arrancar sin revelarla, @s35 la base de la API es del servidor.
+ *     presente pero inválida impide arrancar sin revelarla, @s35 la base de la API es del servidor.
  */
 class GithubConnectorWiringTest {
   private static final String KEY = Base64.getEncoder().encodeToString(new byte[32]);
@@ -77,7 +76,8 @@ class GithubConnectorWiringTest {
     var rotated = configuration.secretCipher(KEY, previous);
 
     assertThat(rotated.decrypt("owner", sealed)).isEqualTo("ghp_viejo");
-    assertThat(rotated.decrypt("owner", rotated.encrypt("owner", "ghp_nuevo"))).isEqualTo("ghp_nuevo");
+    assertThat(rotated.decrypt("owner", rotated.encrypt("owner", "ghp_nuevo")))
+        .isEqualTo("ghp_nuevo");
   }
 
   @Test

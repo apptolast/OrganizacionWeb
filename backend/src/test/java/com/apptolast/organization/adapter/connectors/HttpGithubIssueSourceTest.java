@@ -55,7 +55,9 @@ class HttpGithubIssueSourceTest {
 
   @Test
   void s1_verifyingAsksTheRepositoryAndTheUserWithTheFourRequiredHeaders() {
-    github.reply("/repos/octocat/Hello-World", FakeGithub.Reply.ok("{\"full_name\":\"octocat/Hello-World\"}"));
+    github.reply(
+        "/repos/octocat/Hello-World",
+        FakeGithub.Reply.ok("{\"full_name\":\"octocat/Hello-World\"}"));
     github.reply("/user", FakeGithub.Reply.ok("{\"login\":\"octocat\"}"));
 
     var identity = source.verify(REPOSITORY, TOKEN);
@@ -73,7 +75,9 @@ class HttpGithubIssueSourceTest {
 
   @Test
   void s1_theCanonicalNameComesFromGithubNotFromWhatTheCallerTyped() {
-    github.reply("/repos/OCTOCAT/hello-world", FakeGithub.Reply.ok("{\"full_name\":\"octocat/Hello-World\"}"));
+    github.reply(
+        "/repos/OCTOCAT/hello-world",
+        FakeGithub.Reply.ok("{\"full_name\":\"octocat/Hello-World\"}"));
     github.reply("/user", FakeGithub.Reply.ok("{\"login\":\"octocat\"}"));
 
     assertEquals("octocat/Hello-World", source.verify("OCTOCAT/hello-world", TOKEN).fullName());
@@ -125,7 +129,9 @@ class HttpGithubIssueSourceTest {
 
     assertEquals(4, page.elements());
     assertEquals(3, page.issues().size());
-    assertEquals(java.util.List.of("101", "102", "103"), page.issues().stream().map(i -> i.externalId()).toList());
+    assertEquals(
+        java.util.List.of("101", "102", "103"),
+        page.issues().stream().map(i -> i.externalId()).toList());
     assertFalse(page.more());
   }
 
@@ -197,8 +203,10 @@ class HttpGithubIssueSourceTest {
         FakeGithub.Reply.status(
             403,
             Map.of(
-                "x-ratelimit-remaining", "0",
-                "x-ratelimit-reset", String.valueOf(NOW.plusSeconds(120).getEpochSecond()))));
+                "x-ratelimit-remaining",
+                "0",
+                "x-ratelimit-reset",
+                String.valueOf(NOW.plusSeconds(120).getEpochSecond()))));
 
     var error = listFailure();
 
@@ -213,8 +221,10 @@ class HttpGithubIssueSourceTest {
         FakeGithub.Reply.status(
             403,
             Map.of(
-                "x-ratelimit-remaining", "0",
-                "x-ratelimit-reset", String.valueOf(NOW.minusSeconds(5).getEpochSecond()))));
+                "x-ratelimit-remaining",
+                "0",
+                "x-ratelimit-reset",
+                String.valueOf(NOW.minusSeconds(5).getEpochSecond()))));
 
     assertEquals(1, listFailure().retryAfterSeconds());
   }
@@ -226,8 +236,10 @@ class HttpGithubIssueSourceTest {
         FakeGithub.Reply.status(
             403,
             Map.of(
-                "Retry-After", "7",
-                "x-ratelimit-reset", String.valueOf(NOW.plusSeconds(900).getEpochSecond()))));
+                "Retry-After",
+                "7",
+                "x-ratelimit-reset",
+                String.valueOf(NOW.plusSeconds(900).getEpochSecond()))));
 
     var error = listFailure();
 
@@ -314,8 +326,7 @@ class HttpGithubIssueSourceTest {
             GithubApiBase.of(base), new ObjectMapper(), Clock.fixed(NOW, ZoneOffset.UTC));
 
     var started = System.nanoTime();
-    var error =
-        assertThrows(IssueSourceException.class, () -> offline.list(REPOSITORY, TOKEN, 1));
+    var error = assertThrows(IssueSourceException.class, () -> offline.list(REPOSITORY, TOKEN, 1));
     var elapsed = Duration.ofNanos(System.nanoTime() - started);
 
     assertEquals(Reason.UNAVAILABLE, error.reason());

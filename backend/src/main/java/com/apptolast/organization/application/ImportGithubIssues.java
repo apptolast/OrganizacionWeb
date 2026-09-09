@@ -27,6 +27,7 @@ public final class ImportGithubIssues implements ImportGithubIssuesUseCase {
   static final Duration ABANDONED_AFTER = Duration.ofMinutes(15);
   private static final int MAX_PAGES = 2;
   private static final String COMPLETED_PROJECT = "completed";
+
   /** El fallo no vino del gestor externo, así que no hay código HTTP suyo que anotar. */
   private static final int NOT_GITHUB = 0;
 
@@ -67,7 +68,11 @@ public final class ImportGithubIssues implements ImportGithubIssuesUseCase {
     var startedAt = now();
     var receipt =
         receipts.begin(
-            ownerId, projectId, connection.repository(), startedAt, startedAt.minus(ABANDONED_AFTER));
+            ownerId,
+            projectId,
+            connection.repository(),
+            startedAt,
+            startedAt.minus(ABANDONED_AFTER));
     return run(ownerId, projectId, connection, receipt);
   }
 
@@ -175,8 +180,7 @@ public final class ImportGithubIssues implements ImportGithubIssuesUseCase {
       int retryAfterSeconds,
       int githubStatus) {
     var closed =
-        receipts.finish(
-            ownerId, receipt.id(), IssueImportReceipt.FAILED, errorCode, false, now());
+        receipts.finish(ownerId, receipt.id(), IssueImportReceipt.FAILED, errorCode, false, now());
     audit.importFailed(
         ownerId, connection.repository(), closed.id(), errorCode, closed.created(), githubStatus);
     return new IssueImportFailedException(closed, retryAfterSeconds);

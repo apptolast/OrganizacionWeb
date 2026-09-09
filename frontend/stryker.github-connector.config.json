@@ -17,7 +17,11 @@
   "concurrency": 8,
   "coverageAnalysis": "perTest",
   "vitest": { "configFile": "vite.config.ts" },
-  "jsonReporter": { "fileName": "reports/mutation-github-connector/mutation.json" },
-  "htmlReporter": { "fileName": "reports/mutation-github-connector/mutation.html" },
+  "jsonReporter": {
+    "fileName": "reports/mutation-github-connector/mutation.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation-github-connector/mutation.html"
+  },
   "tempDirName": ".stryker-tmp-github-connector"
 }

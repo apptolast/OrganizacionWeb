@@ -51,8 +51,7 @@ public final class HttpGithubIssueSource implements IssueSource {
   public RepositoryIdentity verify(String repository, String token) {
     var repositoryBody = body(get(base.repository(repository), token));
     var userBody = body(get(base.user(), token));
-    return new RepositoryIdentity(
-        text(repositoryBody, "full_name"), text(userBody, "login"));
+    return new RepositoryIdentity(text(repositoryBody, "full_name"), text(userBody, "login"));
   }
 
   @Override
@@ -150,7 +149,9 @@ public final class HttpGithubIssueSource implements IssueSource {
   }
 
   private static int atLeastOneSecond(long seconds) {
-    return seconds < MINIMUM_RETRY_SECONDS ? MINIMUM_RETRY_SECONDS : (int) Math.min(seconds, Integer.MAX_VALUE);
+    return seconds < MINIMUM_RETRY_SECONDS
+        ? MINIMUM_RETRY_SECONDS
+        : (int) Math.min(seconds, Integer.MAX_VALUE);
   }
 
   private static java.util.Optional<Long> seconds(HttpResponse<String> response, String name) {

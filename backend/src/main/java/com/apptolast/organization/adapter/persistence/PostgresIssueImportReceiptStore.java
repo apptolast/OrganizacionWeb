@@ -69,7 +69,9 @@ public final class PostgresIssueImportReceiptStore implements IssueImportReceipt
     }
   }
 
-  /** Un recibo en curso más viejo que el plazo dejó de existir de verdad: se cierra y cede el turno. */
+  /**
+   * Un recibo en curso más viejo que el plazo dejó de existir de verdad: se cierra y cede el turno.
+   */
   private void interruptAbandoned(String ownerId, Instant staleBefore, Instant finishedAt) {
     jdbc.update(
         "UPDATE issue_import_receipts SET status='failed', error_code=?, finished_at=?"
@@ -146,7 +148,9 @@ public final class PostgresIssueImportReceiptStore implements IssueImportReceipt
         () ->
             jdbc
                 .query(
-                    "SELECT " + COLUMNS + " FROM issue_import_receipts WHERE owner_id=?"
+                    "SELECT "
+                        + COLUMNS
+                        + " FROM issue_import_receipts WHERE owner_id=?"
                         + " ORDER BY started_at DESC, id DESC LIMIT 1",
                     mapper(),
                     ownerId)

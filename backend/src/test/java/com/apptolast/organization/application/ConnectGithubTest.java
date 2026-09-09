@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @s1 conectar guarda el token cifrado, @s5 y @s6 validan antes de salir a la red, @s7 token
- * rechazado, @s8 repositorio no disponible, @s9 reconectar y @s21 cuota agotada al conectar.
+ *     rechazado, @s8 repositorio no disponible, @s9 reconectar y @s21 cuota agotada al conectar.
  */
 class ConnectGithubTest {
   private static final String OWNER = "owner-1";
@@ -75,7 +75,8 @@ class ConnectGithubTest {
 
   @Test
   void s5_anInvalidRepositoryIsRejectedBeforeTouchingGithub() {
-    var error = assertThrows(ValidationException.class, () -> connect.execute(OWNER, "octocat", TOKEN));
+    var error =
+        assertThrows(ValidationException.class, () -> connect.execute(OWNER, "octocat", TOKEN));
 
     assertEquals("repository", error.errors().getFirst().field());
     assertEquals("INVALID_FORMAT", error.errors().getFirst().code());
@@ -172,7 +173,8 @@ class ConnectGithubTest {
     assertEquals(receipt, view.lastImport());
     assertEquals(1, fakes.connections.size());
     assertFalse(
-        java.util.Arrays.equals(first, fakes.connections.find(OWNER).orElseThrow().tokenCiphertext()));
+        java.util.Arrays.equals(
+            first, fakes.connections.find(OWNER).orElseThrow().tokenCiphertext()));
   }
 
   @Test

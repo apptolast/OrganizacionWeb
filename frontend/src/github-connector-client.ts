@@ -63,7 +63,9 @@ function counter(value: unknown): number | null {
 
 function identifier(value: unknown): value is string {
   return (
-    uuid(value) && value === (value as string).toLowerCase() && value.length === 36
+    uuid(value) &&
+    value === (value as string).toLowerCase() &&
+    value.length === 36
   );
 }
 
@@ -113,19 +115,15 @@ function decodeConnection(value: unknown): GithubConnection {
     throw new Error(INCOMPATIBLE);
   return {
     ...(value as unknown as GithubConnection),
-    lastImport: value.lastImport === null ? null : decodeReceipt(value.lastImport),
+    lastImport:
+      value.lastImport === null ? null : decodeReceipt(value.lastImport),
   };
 }
 
 /** Convierte un problema RFC 7807 del conector en el error tipado que la pantalla entiende. */
 async function failure(response: Response): Promise<never> {
-  let body: unknown = null;
-  try {
-    body = await response.json();
-    // Un cuerpo ilegible no debe tapar el estado que sí conocemos.
-  } catch {
-    body = null;
-  }
+  // Un cuerpo ilegible no debe tapar el estado que sí conocemos.
+  const body: unknown = await response.json().catch(() => null);
   throw new ConnectorError(
     body && typeof body === "object" ? (body as Record<string, unknown>) : {},
   );
@@ -164,7 +162,10 @@ export async function connectGithub(
 
 export async function disconnectGithub(signal: AbortSignal): Promise<void> {
   signal.throwIfAborted();
-  const response = await apiRequest(CONNECTION_URL, { method: "DELETE", signal });
+  const response = await apiRequest(CONNECTION_URL, {
+    method: "DELETE",
+    signal,
+  });
   signal.throwIfAborted();
   if (response.status !== 204) return failure(response);
 }

@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { RouteLink } from "./navigation";
 import { readProjects, type ProjectSummary } from "./read-projects-api";
 import {
@@ -34,7 +40,8 @@ const MESSAGES: Record<string, string> = {
   PROJECT_COMPLETED: "El proyecto está terminado",
   GITHUB_UNAVAILABLE: "GitHub no responde. Inténtalo más tarde",
   GITHUB_TOKEN_REJECTED: "GitHub rechazó el token",
-  GITHUB_REPOSITORY_UNAVAILABLE: "El repositorio no está disponible con ese token",
+  GITHUB_REPOSITORY_UNAVAILABLE:
+    "El repositorio no está disponible con ese token",
   CONNECTION_NOT_FOUND: "La conexión ya no existe",
   RESOURCE_NOT_FOUND: "El proyecto ya no está disponible",
   VALIDATION_ERROR: "Revisa el repositorio y el token",
@@ -83,7 +90,9 @@ function GithubConnectorScreen() {
   }, []);
 
   const live = (controller: AbortController) =>
-    mounted.current && !controller.signal.aborted && pending.current === controller;
+    mounted.current &&
+    !controller.signal.aborted &&
+    pending.current === controller;
 
   const loadConnection = useCallback(async () => {
     pending.current?.abort();
@@ -97,7 +106,10 @@ function GithubConnectorScreen() {
       if (found === null) setReconnecting(false);
     } catch (error) {
       if (!live(controller)) return;
-      if (error instanceof ConnectorError && error.code === "CONNECTORS_DISABLED")
+      if (
+        error instanceof ConnectorError &&
+        error.code === "CONNECTORS_DISABLED"
+      )
         setDisabled(true);
       setConnection(null);
     } finally {
@@ -108,8 +120,12 @@ function GithubConnectorScreen() {
     }
   }, []);
 
+  // La lectura inicial va dentro de una función asíncrona: el estado sólo cambia cuando la
+  // respuesta llega, nunca de forma síncrona mientras React está pintando.
   useEffect(() => {
-    void loadConnection();
+    void (async () => {
+      await loadConnection();
+    })();
   }, [loadConnection]);
 
   useEffect(() => {
@@ -118,7 +134,8 @@ function GithubConnectorScreen() {
     void (async () => {
       try {
         const page = await readProjects("/proyectos", controller.signal);
-        if (controller.signal.aborted || !mounted.current || !("items" in page)) return;
+        if (controller.signal.aborted || !mounted.current || !("items" in page))
+          return;
         const open = page.items.filter((item) => item.status !== "completed");
         setProjects(open);
         setSelected((current) => current || (open[0]?.id ?? ""));
@@ -153,7 +170,10 @@ function GithubConnectorScreen() {
     setConnecting(true);
     setConnectError(null);
     try {
-      const saved = await connectGithub({ repository, token }, controller.signal);
+      const saved = await connectGithub(
+        { repository, token },
+        controller.signal,
+      );
       if (!live(controller)) return;
       setConnection(saved);
       setReconnecting(false);
@@ -228,13 +248,15 @@ function GithubConnectorScreen() {
           error instanceof ConnectorError ? error : new ConnectorError({}),
         );
     } finally {
-      if (mounted.current && pending.current === controller) pending.current = null;
+      if (mounted.current && pending.current === controller)
+        pending.current = null;
     }
   }
 
   const invalid = connection?.status === "invalid";
   const running = connection?.lastImport?.status === "running";
-  const showForm = !disabled && !loading && (connection === null || reconnecting);
+  const showForm =
+    !disabled && !loading && (connection === null || reconnecting);
   const shownSummary = summary ?? fromLastImport(connection);
   const canImport = Boolean(connection) && !invalid && !running;
 
@@ -249,8 +271,9 @@ function GithubConnectorScreen() {
 
       {disabled ? (
         <p role="alert">
-          Falta configuración del servidor para usar los conectores. Pide a quien
-          administra esta instalación que configure la clave de conectores.
+          Falta configuración del servidor para usar los conectores. Pide a
+          quien administra esta instalación que configure la clave de
+          conectores.
         </p>
       ) : null}
 
@@ -292,7 +315,11 @@ function GithubConnectorScreen() {
                   </option>
                 ))}
               </select>
-              <button type="button" disabled={importing} onClick={() => void startImport()}>
+              <button
+                type="button"
+                disabled={importing}
+                onClick={() => void startImport()}
+              >
                 Importar issues abiertas
               </button>
             </div>
@@ -359,7 +386,10 @@ function GithubConnectorScreen() {
             <p id="github-token-help">
               Necesita únicamente permiso de lectura de issues del repositorio.
             </p>
-            <p id="github-token-error" role={connectError ? "alert" : undefined}>
+            <p
+              id="github-token-error"
+              role={connectError ? "alert" : undefined}
+            >
               {connectError ? importMessage(connectError) : ""}
             </p>
           </div>

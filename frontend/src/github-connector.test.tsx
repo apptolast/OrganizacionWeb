@@ -99,7 +99,9 @@ async function open() {
 }
 
 function callsTo(url: string, method: string) {
-  return calls.filter((call) => call.url.split("?")[0] === url && call.method === method);
+  return calls.filter(
+    (call) => call.url.split("?")[0] === url && call.method === method,
+  );
 }
 
 // ------------------------------------------------------------------ @s36 un estado a la vez
@@ -143,7 +145,9 @@ it("@s36 shows the connected state without the token form", async () => {
   expect(screen.getByText("Conectada")).toBeInTheDocument();
   expect(screen.getByRole("combobox")).toBeInTheDocument();
   expect(importButton()).toBeEnabled();
-  expect(screen.getByRole("button", { name: "Desconectar" })).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Desconectar" }),
+  ).toBeInTheDocument();
   expect(screen.queryByLabelText(/token/i)).toBeNull();
 });
 
@@ -217,7 +221,10 @@ it("@s37 keeps the token field a password that never autocompletes nor survives 
   expect(token).toHaveAttribute("type", "password");
   expect(token).toHaveAttribute("autocomplete", "off");
 
-  await userEvent.type(screen.getByLabelText(/repositorio/i), "octocat/Hello-World");
+  await userEvent.type(
+    screen.getByLabelText(/repositorio/i),
+    "octocat/Hello-World",
+  );
   await userEvent.type(token, "ghp_secreto123");
   await userEvent.click(screen.getByRole("button", { name: "Conectar" }));
 
@@ -245,7 +252,9 @@ it("@s37 keeps the repository but clears the token and explains a rejected token
 
   const token = await screen.findByLabelText(/token/i);
   await waitFor(() => expect(token).toHaveValue(""));
-  expect(screen.getByLabelText(/repositorio/i)).toHaveValue("octocat/Hello-World");
+  expect(screen.getByLabelText(/repositorio/i)).toHaveValue(
+    "octocat/Hello-World",
+  );
   expect(token).toHaveAttribute("type", "password");
   expect(token).toHaveAttribute("autocomplete", "off");
   const described = token.getAttribute("aria-describedby")!.split(" ");
@@ -263,7 +272,9 @@ it("@s37 keeps the repository but clears the token and explains a rejected token
 it("@s38 offers only the projects that are not completed", async () => {
   await open();
 
-  const options = within(await screen.findByRole("combobox")).getAllByRole("option");
+  const options = within(await screen.findByRole("combobox")).getAllByRole(
+    "option",
+  );
   expect(options.map((option) => option.textContent)).toEqual([
     "Primero",
     "Segundo",
@@ -307,11 +318,17 @@ it("@s38 imports into the project chosen in the selector", async () => {
   let sent: unknown = null;
   serve("/api/v1/me/connectors/github/imports", "POST", (options) => {
     sent = JSON.parse(options.body as string);
-    return Response.json({ ...receipt, projectId: otherProjectId }, { status: 201 });
+    return Response.json(
+      { ...receipt, projectId: otherProjectId },
+      { status: 201 },
+    );
   });
   await open();
 
-  await userEvent.selectOptions(await screen.findByRole("combobox"), otherProjectId);
+  await userEvent.selectOptions(
+    await screen.findByRole("combobox"),
+    otherProjectId,
+  );
   await userEvent.click(importButton());
 
   await screen.findByText("Creadas 199");
@@ -342,18 +359,23 @@ it.each([
   [{ code: "CONNECTION_INVALID" }, 409, "La conexión ya no es válida"],
   [{ code: "IMPORT_IN_PROGRESS" }, 409, "Hay una importación en curso"],
   [{ code: "PROJECT_COMPLETED" }, 409, "El proyecto está terminado"],
-])("@s39 explains %o and never retries by itself", async (body, status, message) => {
-  serve("/api/v1/me/connectors/github/imports", "POST", () =>
-    problem(status, body),
-  );
-  await open();
-  await screen.findByRole("combobox");
+])(
+  "@s39 explains %o and never retries by itself",
+  async (body, status, message) => {
+    serve("/api/v1/me/connectors/github/imports", "POST", () =>
+      problem(status, body),
+    );
+    await open();
+    await screen.findByRole("combobox");
 
-  await userEvent.click(importButton());
+    await userEvent.click(importButton());
 
-  expect(await screen.findByText(new RegExp(message))).toBeInTheDocument();
-  expect(callsTo("/api/v1/me/connectors/github/imports", "POST")).toHaveLength(1);
-});
+    expect(await screen.findByText(new RegExp(message))).toBeInTheDocument();
+    expect(
+      callsTo("/api/v1/me/connectors/github/imports", "POST"),
+    ).toHaveLength(1);
+  },
+);
 
 it("@s39 offers Reconectar after an invalid connection", async () => {
   serve("/api/v1/me/connectors/github/imports", "POST", () =>
@@ -364,7 +386,9 @@ it("@s39 offers Reconectar after an invalid connection", async () => {
 
   await userEvent.click(importButton());
 
-  await userEvent.click(await screen.findByRole("button", { name: "Reconectar" }));
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Reconectar" }),
+  );
   expect(screen.getByLabelText(/token/i)).toBeInTheDocument();
 });
 
@@ -381,7 +405,9 @@ it("@s39 offers Consultar estado after an import already in progress", async () 
   );
 
   await waitFor(() =>
-    expect(callsTo("/api/v1/me/connectors/github", "GET").length).toBeGreaterThan(1),
+    expect(
+      callsTo("/api/v1/me/connectors/github", "GET").length,
+    ).toBeGreaterThan(1),
   );
 });
 
@@ -440,7 +466,11 @@ it("@s40 asks for confirmation, and cancelling changes nothing", async () => {
 });
 
 it("@s40 sends a single DELETE when confirmed and returns to the disconnected state", async () => {
-  serve("/api/v1/me/connectors/github", "DELETE", () => new Response(null, { status: 204 }));
+  serve(
+    "/api/v1/me/connectors/github",
+    "DELETE",
+    () => new Response(null, { status: 204 }),
+  );
   await open();
   await screen.findByRole("combobox");
 

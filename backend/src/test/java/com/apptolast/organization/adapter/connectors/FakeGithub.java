@@ -62,7 +62,9 @@ final class FakeGithub implements AutoCloseable {
     var headers = new LinkedHashMap<String, String>();
     exchange
         .getRequestHeaders()
-        .forEach((name, values) -> headers.put(name.toLowerCase(java.util.Locale.ROOT), values.getFirst()));
+        .forEach(
+            (name, values) ->
+                headers.put(name.toLowerCase(java.util.Locale.ROOT), values.getFirst()));
     received.add(
         new Received(exchange.getRequestMethod(), uri.getPath(), uri.getRawQuery(), headers));
     var reply = replies.getOrDefault(uri.getPath(), new Reply(404, "{}", Map.of()));

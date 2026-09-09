@@ -12,7 +12,8 @@ import javax.crypto.spec.GCMParameterSpec;
 
 /**
  * AES-256-GCM con nonce nuevo por escritura, etiqueta de 128 bits y el propietario como dato
- * autenticado adicional. Formato: 1 byte de versión de clave, 12 de nonce, texto cifrado y etiqueta.
+ * autenticado adicional. Formato: 1 byte de versión de clave, 12 de nonce, texto cifrado y
+ * etiqueta.
  */
 public final class AesGcmSecretCipher implements SecretCipher {
   private static final int NONCE_BYTES = 12;
@@ -54,7 +55,8 @@ public final class AesGcmSecretCipher implements SecretCipher {
   @Override
   public String decrypt(String ownerId, byte[] ciphertext) {
     if (!ring.enabled()) throw new ConnectorsDisabledException();
-    if (ciphertext == null || ciphertext.length <= SHORTEST) throw new SecretUndecipherableException();
+    if (ciphertext == null || ciphertext.length <= SHORTEST)
+      throw new SecretUndecipherableException();
     var nonce = Arrays.copyOfRange(ciphertext, VERSION_BYTES, VERSION_BYTES + NONCE_BYTES);
     var sealed = Arrays.copyOfRange(ciphertext, VERSION_BYTES + NONCE_BYTES, ciphertext.length);
     for (var key : ring.candidatesFor(ciphertext[0])) {

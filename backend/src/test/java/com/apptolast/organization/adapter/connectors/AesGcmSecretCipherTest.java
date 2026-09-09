@@ -35,7 +35,8 @@ class AesGcmSecretCipherTest {
     assertEquals(1 + 12 + TOKEN.length() + 16, sealed.length);
     assertFalse(
         new String(sealed, StandardCharsets.ISO_8859_1)
-            .contains(new String(TOKEN.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1)));
+            .contains(
+                new String(TOKEN.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1)));
     assertEquals(TOKEN, cipher(KEY, null).decrypt(OWNER, sealed));
   }
 
@@ -91,7 +92,8 @@ class AesGcmSecretCipherTest {
   @ValueSource(strings = {"", "no-es-base64!!", "AAAAAAAAAAAAAAAAAAAAAA==", "clave-de-32-mas-uno"})
   void s4_aMalformedKeyStopsTheStartupWithoutRevealingItsValue(String raw) {
     var value = raw.equals("clave-de-32-mas-uno") ? key((byte) 3) + "=" : raw;
-    var error = assertThrows(IllegalArgumentException.class, () -> ConnectorKeyRing.of(value, null));
+    var error =
+        assertThrows(IllegalArgumentException.class, () -> ConnectorKeyRing.of(value, null));
     assertTrue(error.getMessage().contains("app.connectors.key"));
     if (!value.isEmpty()) assertFalse(error.getMessage().contains(value));
   }

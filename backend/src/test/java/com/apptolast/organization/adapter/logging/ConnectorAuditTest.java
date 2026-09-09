@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @s34 la bitácora del conector cuenta propietario, repositorio, código HTTP de GitHub y
- * contadores, y no cuenta el token ni en claro ni en base64.
+ *     contadores, y no cuenta el token ni en claro ni en base64.
  */
 class ConnectorAuditTest {
   private static final String TOKEN = "ghp_canal_secreto";
@@ -98,10 +98,8 @@ class ConnectorAuditTest {
 
     var everything = logged();
     assertThat(everything).doesNotContain(TOKEN);
-    assertThat(everything)
-        .doesNotContain(Base64.getEncoder().encodeToString(TOKEN.getBytes()));
+    assertThat(everything).doesNotContain(Base64.getEncoder().encodeToString(TOKEN.getBytes()));
     for (var method : Slf4jConnectorAudit.class.getMethods())
-      assertThat(method.getName().toLowerCase(java.util.Locale.ROOT))
-          .doesNotContain("token");
+      assertThat(method.getName().toLowerCase(java.util.Locale.ROOT)).doesNotContain("token");
   }
 }

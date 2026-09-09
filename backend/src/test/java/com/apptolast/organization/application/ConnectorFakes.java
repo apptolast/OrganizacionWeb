@@ -56,8 +56,18 @@ final class ConnectorFakes {
         int failed,
         boolean truncated) {
       lines.add(
-          "finished " + ownerId + " " + repository + " " + created + " " + skipped + " " + failed
-              + " " + truncated);
+          "finished "
+              + ownerId
+              + " "
+              + repository
+              + " "
+              + created
+              + " "
+              + skipped
+              + " "
+              + failed
+              + " "
+              + truncated);
     }
 
     @Override
@@ -69,7 +79,15 @@ final class ConnectorFakes {
         int created,
         int githubStatus) {
       lines.add(
-          "import-failed " + ownerId + " " + repository + " " + errorCode + " " + created + " "
+          "import-failed "
+              + ownerId
+              + " "
+              + repository
+              + " "
+              + errorCode
+              + " "
+              + created
+              + " "
               + githubStatus);
     }
   }

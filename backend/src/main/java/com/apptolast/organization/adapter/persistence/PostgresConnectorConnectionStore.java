@@ -1,8 +1,8 @@
 package com.apptolast.organization.adapter.persistence;
 
 import com.apptolast.organization.application.ConnectorConnectionStore;
-import com.apptolast.organization.application.StoredConnection;
 import com.apptolast.organization.application.StorageUnavailableException;
+import com.apptolast.organization.application.StoredConnection;
 import java.sql.Timestamp;
 import java.util.Optional;
 import org.springframework.dao.DataAccessException;

@@ -6,9 +6,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Puerto de salida de los recibos. {@code begin} es la sección crítica: cierra como
- * {@code INTERRUPTED} el recibo en curso anterior a {@code staleBefore} y garantiza que nunca haya
- * más de un recibo {@code running} por propietario, o lanza {@link IssueImportInProgressException}.
+ * Puerto de salida de los recibos. {@code begin} es la sección crítica: cierra como {@code
+ * INTERRUPTED} el recibo en curso anterior a {@code staleBefore} y garantiza que nunca haya más de
+ * un recibo {@code running} por propietario, o lanza {@link IssueImportInProgressException}.
  */
 public interface IssueImportReceiptStore {
   IssueImportReceipt begin(

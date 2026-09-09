@@ -8,7 +8,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/** @s10 consultar la conexión, @s11 desconectar, @s30 consultar un recibo y @s33 aislamiento. */
+/**
+ * @s10 consultar la conexión, @s11 desconectar, @s30 consultar un recibo y @s33 aislamiento.
+ */
 class GithubConnectorQueriesTest {
   private static final String OWNER = "owner-1";
   private static final String OTHER = "owner-2";
@@ -111,7 +113,8 @@ class GithubConnectorQueriesTest {
 
     assertEquals(mine, found);
     assertThrows(IssueImportNotFoundException.class, () -> readReceipt.execute(OWNER, theirs.id()));
-    assertThrows(IssueImportNotFoundException.class, () -> readReceipt.execute(OWNER, UUID.randomUUID()));
+    assertThrows(
+        IssueImportNotFoundException.class, () -> readReceipt.execute(OWNER, UUID.randomUUID()));
   }
 
   @Test

@@ -2,7 +2,6 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import { App } from "./App";
 
-
 function go(path: string) {
   window.history.pushState({}, "", path);
   window.dispatchEvent(new PopStateEvent("popstate"));
@@ -32,7 +31,10 @@ it("@s36 renders the connector page at /integraciones/github", async () => {
   render(<App username="owner" />);
 
   expect(
-    await screen.findByRole("heading", { level: 1, name: "Conector de GitHub" }),
+    await screen.findByRole("heading", {
+      level: 1,
+      name: "Conector de GitHub",
+    }),
   ).toBeInTheDocument();
 });
 
@@ -75,7 +77,6 @@ it("@s31 the connector page is not rendered without a signed-in person", () => {
     screen.queryByRole("heading", { level: 1, name: "Conector de GitHub" }),
   ).toBeNull();
 });
-
 
 /** El menú tenía nueve entradas antes del conector y debe seguir teniéndolas. */
 const navLinkCount = 9;

@@ -6,8 +6,8 @@ import java.util.UUID;
 
 /**
  * Recibo persistido de una importación. Es el único cuerpo que la API devuelve para una
- * importación, con sus once campos siempre presentes: lo que el POST responde es exactamente lo
- * que el GET del recibo vuelve a leer, también tras un reinicio.
+ * importación, con sus once campos siempre presentes: lo que el POST responde es exactamente lo que
+ * el GET del recibo vuelve a leer, también tras un reinicio.
  */
 public record IssueImportReceipt(
     UUID id,

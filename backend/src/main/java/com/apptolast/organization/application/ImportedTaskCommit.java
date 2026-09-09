@@ -11,5 +11,8 @@ import java.util.function.Function;
  */
 public interface ImportedTaskCommit {
   boolean save(
-      String ownerId, UUID projectId, ExternalIssue issue, Function<String, TaskCreation> operation);
+      String ownerId,
+      UUID projectId,
+      ExternalIssue issue,
+      Function<String, TaskCreation> operation);
 }

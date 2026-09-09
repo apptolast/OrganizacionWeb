@@ -13,13 +13,17 @@ export function IntegrationsIndex() {
         <li>
           <RouteLink href="/integraciones/github">Conector de GitHub</RouteLink>
           <p>
-            Trae las issues abiertas de un repositorio como tareas de un proyecto
-            propio.
+            Trae las issues abiertas de un repositorio como tareas de un
+            proyecto propio.
           </p>
         </li>
         <li>
-          <RouteLink href="/integraciones/api">API para integraciones</RouteLink>
-          <p>Credenciales personales para que otros programas lean tus datos.</p>
+          <RouteLink href="/integraciones/api">
+            API para integraciones
+          </RouteLink>
+          <p>
+            Credenciales personales para que otros programas lean tus datos.
+          </p>
         </li>
       </ul>
     </main>

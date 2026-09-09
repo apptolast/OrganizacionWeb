@@ -47,6 +47,30 @@ error de `IssueSourceException`.
   normalizado por `String.lines()`; recorte a 2000 puntos de código con `…`.
 - REFACTOR: `cut` y `trim` compartidos con el título; `firstLines` con `Collectors.joining`.
 
+### Ciclo 5 — reanudación: el resguardo `wip` era verde
+
+Al retomar el carril, `compileTestJava` y las clases `adapter.connectors.*`, `GithubRepositoryTest`,
+`ExternalIssue*Test` y `PersonalAccessTokenTest` pasaron sin tocar nada: el rojo de la validación de
+la base de la API (`GithubApiBase`, @s35/B11) ya había encontrado su verde antes de aparcar.
+
+### Ciclo 6 — @s1 @s3 @s5 @s6 @s7 @s8 @s9 @s21 @s22 @s28 conectar
+
+- ROJO `ConnectGithubTest` (no compilaba: faltaban `ConnectGithub` y sus cinco puertos).
+- VERDE: puertos `ConnectorConnectionStore`, `ImportReceiptStore`, `IssueSource`,
+  `ImportedTaskCommit`; valores `StoredConnection`, `ConnectionView`, `IssuePage`,
+  `RepositoryIdentity`, `domain/ImportReceipt`; errores `IssueSourceException` (con `Reason`),
+  `GithubTokenRejectedException`, `GithubRepositoryUnavailableException`,
+  `GithubUnavailableException`, `ConnectorRateLimitedException`, `ConnectionNotFoundException`,
+  `ConnectionInvalidException`, `ImportInProgressException`, `ImportNotFoundException`; caso de uso
+  `ConnectGithub`.
+- Orden fijado por el contrato: clave del conector, formato del repositorio, formato del token y
+  sólo entonces la red. La fila se escribe después de que el gestor confirme, así que @s7, @s8,
+  @s21 y @s28 dejan la conexión previa byte a byte igual.
+- REFACTOR: `ConnectorFailures` concentra la traducción de `IssueSourceException`, que difiere
+  entre conectar (token rechazado ⇒ 409 `GITHUB_TOKEN_REJECTED`) e importar (⇒ `CONNECTION_INVALID`).
+- `StoredConnection.toString` redacta el texto cifrado y `ConnectionView` no tiene hueco para el
+  token: la ausencia es estructural, no una omisión al serializar.
+
 ## Enmiendas al contrato aprobadas por el coordinador (9 de septiembre de 2026)
 
 Origen: `progress/security_review_connectors.md` (rama `main`). El coordinador actualiza

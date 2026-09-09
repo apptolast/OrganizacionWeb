@@ -10,19 +10,29 @@ por el worker y `NOTIFY_WEBHOOK` real) no existe todavía y **no se valora aquí
 Regla aplicada de `AGENTS.md`: axe por sí solo no declara cumplimiento. Lo que sigue distingue
 siempre lo **medido** de lo **revisado heurísticamente**, y nombra lo que no está demostrado.
 
-## Estados verificados (los siete que exige la revisión)
+## Modalidades verificadas (las siete que exige la revisión)
+
+> Aviso, tras el dictamen de la feature 30: la tabla que sigue enumera
+> **modalidades de presentación** (anchos, temas, zoom, `forced-colors`,
+> `reduced-motion`), no **estados de pantalla**. De los siete estados
+> excluyentes del componente —carga, error con «Reintentar», vacío, lista,
+> editor, resultados de simulación e historial— la auditoría sólo ha medido
+> dos: el vacío y el editor, que se pintan juntos. El Given de @s42
+> (`features/automations.feature:548`, «lista, editor abierto y resultados de
+> simulación visibles») **no se cumple en ninguna corrida**. Es el hallazgo 3/4
+> del dictamen, abierto: ver `progress/tdd_automations_fase2.md`.
 
 Todo lo de abajo se ejecutó sobre la pila real (`docker compose`, PostgreSQL y backend de verdad),
 puerto 18093, pila retirada al terminar.
 
 | Estado | Cómo se midió | Resultado |
 | --- | --- | --- |
-| 1. Anchos 320, 768, 1280 y 1440 px CSS | `e2e/automations-ux.spec.mjs`, lista y editor abiertos | Sin desplazamiento horizontal (`scrollWidth <= clientWidth`) y todo control ≥ 44 × 44 px |
+| 1. Anchos 320, 768, 1280 y 1440 px CSS | `e2e/automations-ux.spec.mjs`, **estado vacío más editor abierto**: el `clearRules()` del `beforeEach` deja cero reglas y la simulación no se ejecuta, así que ni el `<ul aria-label="Reglas">` ni el bloque de coincidencias llegaron a pintarse | Sin desplazamiento **horizontal de página** (`documentElement.scrollWidth <= clientWidth`) y todo control ≥ 44 × 44 px. **No medido: el recorte de contenido** (`overflowX`/`overflowY` por elemento), que es la otra mitad del Then de @s42 |
 | 2. Tema claro | `page.emulateMedia({ colorScheme: "light" })` en los cuatro anchos | Verificado; capturas `light-<ancho>.png` |
 | 3. Tema oscuro | `page.emulateMedia({ colorScheme: "dark" })` en los cuatro anchos | Verificado; capturas `dark-<ancho>.png` |
 | 4. Texto al 200 % | Se dobla el tamaño **calculado** de cada elemento de `main` por su atributo `style`, y se comprueba elemento a elemento que el tamaño final es el doble | Verificado en los cuatro anchos y los dos temas, sin desbordamiento ni controles por debajo de 44 px |
 | 5. Zoom nativo al 200 % | Chromium real con extensión y `chrome.tabs.setZoom(tab, 2)`; se comprueba `devicePixelRatio` duplicado y se estrecha la ventana hasta `innerWidth === 320` | Verificado; captura `zoom200-compositor.png` y medidas en `native-zoom.json` |
-| 6. `forced-colors: active` | `page.emulateMedia({ forcedColors: "active" })` a 320 px | `matchMedia` confirma el modo; foco alcanzable y visible; sin desbordamiento |
+| 6. `forced-colors: active` | `page.emulateMedia({ forcedColors: "active" })` a 320 px | `matchMedia` confirma el modo y no hay desbordamiento. Sobre el foco solo se comprueba `save.focus()` + `toBeFocused()`: **el foco es alcanzable programaticamente; ni el recorrido con Tab ni la visibilidad del indicador (`outlineWidth`) estan medidos** |
 | 7. `prefers-reduced-motion: reduce` | `page.emulateMedia({ reducedMotion: "reduce" })` | `matchMedia` confirma el modo y **cero** elementos con animación o transición activa en `main` |
 
 axe (`wcag2a`, `wcag2aa`, `wcag21aa`, `wcag22aa`, `best-practice`) devuelve **cero violaciones de
@@ -60,9 +70,9 @@ Ninguno se detectó por inspección; los destapó la ejecución.
 | Atención selectiva | Un solo objetivo por pantalla: la lista, y dentro del editor «Simular» y «Guardar». Los avisos van en `role="alert"` discreto. | Revisión heurística sobre capturas de los 4 anchos y 2 temas. |
 | Carga cognitiva | El editor pide nombre, disparador, proyecto opcional y plantillas; nada exige recordar datos de otra pantalla, y los proyectos se ofrecen en un `<select>`. | Recorrido verificado en E2E; comprensión pendiente de uso real. |
 | Estética-usabilidad | Reutiliza tokens y patrones de `.export-data` y `.calendar-feed`; errores del servidor se anclan a su campo. | Verificado visual y funcionalmente; no se infiere facilidad de la estética. |
-| Posición en serie | «Nueva regla» al final de la lista y al pie del estado vacío; en el editor, Guardar antes que Simular en el DOM y en el orden de teclado. | Orden verificado en los 4 anchos. |
+| Posición en serie | «Nueva regla» al final de la lista y al pie del estado vacío; en el editor, Guardar antes que Simular en el DOM. | **Orden del DOM verificado por lectura** (`automations.tsx:528` y `:531`); el orden de teclado **no está medido**: no hay ningún recorrido con Tab en la feature. |
 | Tendencia a la meta | No hay progreso ni objetivo cuantificado en automatizaciones. | No aplicable; no se inventa progreso. |
-| Von Restorff | El estado de cada regla se distingue por **texto** («Activa»/«Inactiva») además del borde; nunca sólo por color. | Verificado en claro, oscuro y `forced-colors`. |
+| Von Restorff | El estado de cada regla se distingue por **texto** («Activa»/«Inactiva») además del borde; nunca sólo por color. | **Verificado por lectura del codigo y en unitario** (`automations.tsx:421-431` imprime el texto). En E2E **no esta medido**: ese `role="switch"` nunca se renderizo en ninguna corrida, porque las suites borran todas las reglas antes de cada test. |
 | Zeigarnik | Ante un 412 el borrador se conserva hasta que se pulsa «Cargar versión actual»; ante errores de campo, también. | Verificado en unitario y E2E. |
 | Fluir | Automatizar no inicia ni cierra sesiones de trabajo. | No aplicable; la regla no altera el recorrido de sesiones. |
 | Fragmentación | Lista, editor e historial son secciones separadas con su propio encabezado y región. | Verificado estructuralmente. |
@@ -78,7 +88,7 @@ Ninguno se detectó por inspección; los destapó la ejecución.
 | Postel | El nombre recorta `White_Space` Unicode y admite 1–80 puntos de código, emoji incluido; las plantillas se guardan byte a byte, con llaves sueltas permitidas. | Verificado por tests de dominio y de API. |
 | Proximidad | Cada error va en un `<p>` inmediatamente después de su campo, enlazado por `aria-describedby`, con `aria-invalid` y foco automático. | Verificado en unitario; también a 320 px. |
 | Prägnanz | Los estados de ejecución se leen como texto («Correcta», «Reintento», «Fallida») además del color, y el código de error se muestra cuando existe. | Verificado en unitario. |
-| Región común | La lista es un `<ul aria-label="Reglas">`, el editor y el historial son `<section>` con etiqueta. | Verificado estructuralmente y con axe. |
+| Región común | La lista es un `<ul aria-label="Reglas">`, el editor y el historial son `<section>` con etiqueta. | Verificado **estructuralmente por lectura**. Con axe **solo el editor y el estado vacio**: axe nunca vio el `<ul aria-label="Reglas">`, el `<ul aria-label="Coincidencias">` ni la seccion de historial. |
 | Tesler | El sistema resuelve de qué proyecto habla cada evento (por agregado, por tarea o por sesión); el usuario sólo elige «Sólo en el proyecto». Los errores internos nunca se muestran. | Verificado en dominio, aplicación y persistencia. |
 | Modelo mental | La regla **crea una tarea pendiente**; no completa, no cierra ni replanifica nada. La simulación no escribe. | Verificado: la simulación deja el almacén intacto, comprobado también en SQL sobre la pila real. |
 | Usuario activo | El estado vacío explica qué es una regla y ofrece «Nueva regla»; la ayuda de los cuatro marcadores está siempre visible en el editor, con vista previa. | Verificado en unitario y E2E; primera experiencia no medida con usuarios. |

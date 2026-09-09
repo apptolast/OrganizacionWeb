@@ -277,3 +277,117 @@ contenedor.
 
 El planificador copia `WebhookSchedule`: un `@Scheduled` que no puede propagar
 excepciones, condicionado a `app.automations.enabled`.
+
+---
+
+# Hallazgos que quedan ABIERTOS, y por qué
+
+Los cuatro que faltan (3, 4, 7, 8 y 9) viven todos en la misma auditoría E2E,
+`e2e/automations-ux.spec.mjs`, y exigen levantar la pila real
+(`E2E_WEB_PORT=18094`) para acreditar el rojo. No cabían en el plazo de la
+sesión, y REGLAS.md §3 prohíbe cerrar un hallazgo con un oráculo que nunca se
+ha visto fallar: un oráculo E2E escrito a ciegas es exactamente la prueba
+placebo que el dictamen castiga. Se dejan abiertos y documentados, no
+silenciados.
+
+Lo que **sí** se ha hecho por ellos en esta sesión: corregir
+`progress/ux_automations.md`, que declaraba verificado lo que nunca se midió.
+Eso es la mitad del hallazgo 3, la mitad del 4 y la mitad del 9 —la infracción
+de `AGENTS.md:51` («no declarar cumplimiento sin medirlo»)— y se cierra sin
+necesidad de pila:
+
+- Título de la sección: pasa de «Estados verificados (los siete…)» a
+  «Modalidades verificadas», con un aviso que dice en qué consiste la confusión
+  y qué dos de los siete estados de pantalla se midieron realmente.
+- Fila 1 (anchos): ya no dice «lista y editor abiertos» —era falso, el
+  `clearRules()` del `beforeEach` deja cero reglas—, y nombra explícitamente
+  que el recorte de contenido no está medido.
+- Fila 6 (`forced-colors`): ya no dice «foco alcanzable y visible». Dice lo que
+  el test hace: `save.focus()` + `toBeFocused()` sobre un solo control, sin
+  recorrido con Tab y sin `outlineWidth`.
+- Fila «Posición en serie»: el orden del DOM está verificado por lectura; el
+  orden de teclado **no está medido**.
+- Fila «Von Restorff»: verificada por lectura y en unitario; en E2E ese
+  `role="switch"` nunca se renderizó.
+- Fila «Región común»: axe nunca vio el `<ul aria-label="Reglas">`, el
+  `<ul aria-label="Coincidencias">` ni la sección de historial.
+
+## Hallazgo 4 [BLOQUEANTE] — el Given de @s42 no se cumple en ningún test
+
+`features/automations.feature:548` exige «lista, editor abierto y resultados de
+simulación visibles», y ese Given rige las cinco filas del Examples. Las dos
+suites que tocan `/automatizaciones` (`e2e/automations-ux.spec.mjs:18-25` y
+`e2e/automations.spec.mjs:9-16`) hacen `clearRules()` en `beforeEach` y entran
+por `goto` + «Nueva regla», de modo que `rules.length === 0` y `simulation`
+sigue nulo.
+
+**Remedio, listo para ejecutar.** En el `beforeEach` de
+`e2e/automations-ux.spec.mjs`, tras `clearRules()`, sembrar por API dos reglas
+—una activa con nombre largo y acción `CREATE_TASK`, otra inactiva— igual que
+`e2e/automations.spec.mjs:49-53` hace al guardar; abrir el editor con «Editar
+<la primera>» en vez de «Nueva regla»; pulsar «Simular» y esperar
+`getByRole("status", { name: "Resultado de la simulación" })` antes de
+`geometry()`. Con una coincidencia `wouldFail` para que el texto largo esté
+presente. Rojo acreditable: con el `beforeEach` actual, la espera del
+`role="status"` caduca.
+
+## Hallazgo 3 [BLOQUEANTE] — la auditoría alcanza 2 de los 7 estados de pantalla
+
+Faltan cinco: carga retenida, error 503 con «Reintentar», lista con dos reglas,
+resultados de simulación e historial abierto con una fila con `createdTaskId`.
+Cada uno necesita axe + geometría en los mismos anchos y temas. El remedio del
+hallazgo 4 cubre dos de los cinco (lista y simulación); los otros tres exigen
+rutas interceptadas (`page.route`) para retener la carga y forzar el 503, y
+sembrar una ejecución para el historial.
+
+## Hallazgos 7 y 8 [ALTA/MEDIA] — «ni contenido cortado» sin oráculo
+
+El único oráculo geométrico es
+`expect(observed.scroll).toBeLessThanOrEqual(observed.client)` sobre
+`documentElement`: mide desbordamiento de página, nunca recorte. El repositorio
+ya tiene el oráculo correcto y probado en
+`e2e/ics-calendar-ux.spec.mjs:171-185` (campo `clipped`, recorriendo
+`main, main *`, marcando cuando `overflowX !== "visible" && scrollWidth >
+clientWidth + 1` o el equivalente vertical).
+
+**Remedio.** Portar `clipped` a `geometry()` y asertar `toEqual([])` en
+`assertUsable`, con lo que los cuatro tests (siete modalidades, zoom nativo
+incluido) quedan cubiertos de golpe. **Caveat que hay que decidir por escrito**:
+`.automations input, select` lleva `text-overflow: ellipsis`
+(`styles.scss:502`) y Chromium aplica `overflow: clip` a los `<input>` de texto
+en su hoja de agente; la primera ejecución los marcará. O se exceptúan los
+controles de formulario nativos con justificación (su valor es alcanzable con
+el cursor y está íntegro en el árbol de accesibilidad) o se arregla como en
+ics; excluirlos en silencio vuelve a vaciar el oráculo. Y la mutación de
+control obligatoria antes de cerrar: `.automations li { overflow: hidden;
+max-height: 96px; }` debe hacer fallar la suite.
+
+Además, `e2e/automations.spec.mjs:97` se titula «el texto al 200 % **no corta
+contenido**» y sólo mide `scrollWidth`: o se renombra a «no desborda en
+horizontal» o se le pone el oráculo que promete.
+
+## Hallazgo 9 [ALTA] — ni recorrido de teclado ni foco visible
+
+Lo único relacionado con teclado en toda la feature son tres líneas de
+`.focus()` programático dentro del test de `forced-colors`. `outlineWidth` se
+mide en al menos diez specs del repositorio y aquí en ninguno.
+
+**Remedio.** Un test que recorra con `page.keyboard.press("Tab")` desde el
+inicio del `<main>`, recoja rol y nombre accesible de cada parada, afirme la
+secuencia esperada —incluido Guardar antes que Simular—, exija
+`outlineWidth >= 2` (o `box-shadow` equivalente) en cada parada, y vuelva con
+`Shift+Tab` comprobando que se sale por ambos extremos sin trampa de foco.
+Repetirlo en `forced-colors`. La parte de matriz ya está corregida arriba.
+
+## Puerta de mutación
+
+**No ejecutada**, por instrucción explícita del coordinador (plazo y carga de
+máquina). Pendientes, para quien la lance:
+
+1. Añadir `"com.apptolast.organization.adapter.http.ApiErrors"` a
+   `automationsClasses` en `backend/build.gradle.kts:492-511` — hallazgo 10,
+   que el brief da por cerrado; conviene confirmarlo antes de la campaña.
+2. `node scripts/project.mjs mutate automations-frontend` con el ámbito ya
+   ampliado en esta sesión (hallazgo 11), y `automations-backend`.
+3. Registrar en `progress/mutation_automations_*.md` la **lista de
+   supervivientes**, no sólo el porcentaje. Umbral 0,80.

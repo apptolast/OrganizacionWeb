@@ -580,9 +580,11 @@ public class ApplicationConfiguration {
   }
 
   @Bean
-  com.apptolast.organization.application.CalendarFeed calendarFeed() {
+  com.apptolast.organization.application.CalendarFeed calendarFeed(
+      com.apptolast.organization.application.HostResolver resolver,
+      com.apptolast.organization.application.AddressPolicy policy) {
     return new com.apptolast.organization.adapter.feed.HttpCalendarFeed(
-        com.apptolast.organization.adapter.feed.HttpCalendarFeed.TIMEOUT);
+        com.apptolast.organization.adapter.feed.HttpCalendarFeed.TIMEOUT, resolver, policy);
   }
 
   @Bean

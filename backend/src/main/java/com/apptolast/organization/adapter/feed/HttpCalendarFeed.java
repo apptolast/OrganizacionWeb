@@ -1,25 +1,47 @@
 package com.apptolast.organization.adapter.feed;
 
+import com.apptolast.organization.application.AddressPolicy;
 import com.apptolast.organization.application.CalendarFeed;
 import com.apptolast.organization.application.FeedFetch;
+import com.apptolast.organization.application.HostResolver;
 import com.apptolast.organization.domain.FeedError;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SNIHostName;
+import javax.net.ssl.SSLParameters;
 
 /**
  * Descarga de solo lectura: sin redirecciones, sin credenciales, con Accept text/calendar, corte a
  * 1 MiB y solo 200 con un tipo textual. El cuerpo se lee en trozos para poder abortar antes de que
  * el proveedor termine de emitir.
+ *
+ * <p><b>Enmienda B3 (project-spec.md:2492), que prevalece sobre el texto anterior.</b> «Se resuelve
+ * el nombre una vez, se validan todas las direcciones devueltas y se conecta contra la dirección
+ * literal ya validada, conservando el nombre original en la cabecera Host y en la indicación de
+ * servidor de TLS.» Eso es lo que hace {@link #fetch(String)}: resuelve aquí, dentro de la misma
+ * clase que abre la conexión, exige que <b>todas</b> las direcciones devueltas pasen la {@link
+ * AddressPolicy}, y construye la petición contra la dirección literal. El nombre viaja en la
+ * cabecera {@code Host} y en el {@code SNIHostName} de TLS. Como el cliente HTTP recibe ya una
+ * dirección, no vuelve a preguntar al DNS: el reenlace de nombres entre la comprobación y el uso
+ * deja de ser posible, en vez de aceptarse como riesgo residual.
+ *
+ * <p>Límite que sí queda, y conviene no disfrazar: si el nombre resuelve a varias direcciones se
+ * conecta a la primera y no se reintenta con las demás. Todas estaban validadas, así que no es un
+ * agujero de seguridad; es una pérdida de tolerancia a fallos frente al comportamiento por defecto
+ * del cliente.
  *
  * <p>El plazo es del <b>intercambio completo</b>: conexión, cabeceras y lectura del cuerpo. No basta
  * con {@code HttpRequest.timeout}, porque con {@code BodyHandlers.ofInputStream()} el temporizador
@@ -38,6 +60,16 @@ public final class HttpCalendarFeed implements CalendarFeed {
   private static final int CHUNK = 16 * 1024;
   private static final String ACCEPT = "text/calendar";
 
+  static {
+    // Enviar «Host» a mano es imprescindible para conectar por dirección literal sin perder el
+    // nombre, y el cliente del JDK lo prohíbe salvo que se le autorice antes de cargar su clase de
+    // utilidades. Se añade sin pisar lo que ya hubiera declarado el despliegue.
+    var allowed = System.getProperty("jdk.httpclient.allowRestrictedHeaders", "");
+    if (!allowed.toLowerCase(Locale.ROOT).contains("host"))
+      System.setProperty(
+          "jdk.httpclient.allowRestrictedHeaders", allowed.isEmpty() ? "host" : allowed + ",host");
+  }
+
   /**
    * Un solo hilo demonio para todas las descargas: sólo cierra cuerpos vencidos, no lee nada, y
    * siendo demonio no impide que la aplicación termine.
@@ -50,34 +82,59 @@ public final class HttpCalendarFeed implements CalendarFeed {
             return thread;
           });
 
-  private final HttpClient client;
   private final Duration timeout;
+  private final HostResolver resolver;
+  private final AddressPolicy policy;
 
-  public HttpCalendarFeed(Duration timeout) {
+  public HttpCalendarFeed(Duration timeout, HostResolver resolver, AddressPolicy policy) {
     this.timeout = timeout;
-    this.client =
-        HttpClient.newBuilder()
-            .version(HttpClient.Version.HTTP_1_1)
-            .followRedirects(HttpClient.Redirect.NEVER)
-            .connectTimeout(timeout)
-            .build();
+    this.resolver = resolver;
+    this.policy = policy;
   }
 
   @Override
   public FeedFetch fetch(String url) {
-    HttpRequest request;
+    URI target;
+    String host;
     try {
-      request =
-          HttpRequest.newBuilder(URI.create(url))
-              .GET()
-              .header("Accept", ACCEPT)
-              .timeout(timeout)
-              .build();
+      target = URI.create(url);
+      host = target.getHost();
     } catch (IllegalArgumentException malformed) {
       return FeedFetch.failed(FeedError.FEED_UNREACHABLE);
     }
-    long deadline = System.nanoTime() + timeout.toNanos();
+    if (host == null || host.isBlank()) return FeedFetch.failed(FeedError.FEED_UNREACHABLE);
+
+    List<InetAddress> addresses;
     try {
+      addresses = resolver.resolve(host);
+    } catch (RuntimeException unresolvable) {
+      return FeedFetch.failed(FeedError.FEED_UNREACHABLE);
+    }
+    if (addresses == null || addresses.isEmpty())
+      return FeedFetch.failed(FeedError.FEED_UNREACHABLE);
+    if (!addresses.stream().allMatch(policy::allows))
+      return FeedFetch.failed(FeedError.FEED_REJECTED);
+
+    return download(target, host, addresses.getFirst());
+  }
+
+  private FeedFetch download(URI target, String host, InetAddress pinned) {
+    HttpRequest request;
+    try {
+      request =
+          HttpRequest.newBuilder(literal(target, pinned))
+              .GET()
+              .header("Accept", ACCEPT)
+              .header("Host", authority(target, host))
+              .timeout(timeout)
+              .build();
+    } catch (IllegalArgumentException rejected) {
+      // Incluye el caso de que el despliegue no admita la cabecera Host restringida: antes de
+      // conectar sin ella —y por tanto contra el servidor equivocado— se prefiere no conectar.
+      return FeedFetch.failed(FeedError.FEED_UNREACHABLE);
+    }
+    long deadline = System.nanoTime() + timeout.toNanos();
+    try (var client = client(host)) {
       var response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
       try (var body = response.body()) {
         if (response.statusCode() != 200) return FeedFetch.failed(FeedError.FEED_HTTP_ERROR);
@@ -88,6 +145,37 @@ public final class HttpCalendarFeed implements CalendarFeed {
       if (unreachable instanceof InterruptedException) Thread.currentThread().interrupt();
       return FeedFetch.failed(FeedError.FEED_UNREACHABLE);
     }
+  }
+
+  /**
+   * El cliente se construye por descarga porque el nombre de servidor de TLS es propio de cada
+   * destino: sin él, conectar por dirección literal presentaría la IP como SNI y el proveedor no
+   * podría elegir su certificado.
+   */
+  private HttpClient client(String host) {
+    var parameters = new SSLParameters();
+    parameters.setServerNames(List.of(new SNIHostName(host)));
+    parameters.setEndpointIdentificationAlgorithm("HTTPS");
+    return HttpClient.newBuilder()
+        .version(HttpClient.Version.HTTP_1_1)
+        .followRedirects(HttpClient.Redirect.NEVER)
+        .connectTimeout(timeout)
+        .sslParameters(parameters)
+        .build();
+  }
+
+  /** La misma URL, pero con la dirección ya validada en lugar del nombre. */
+  private static URI literal(URI target, InetAddress pinned) {
+    var address = pinned.getHostAddress();
+    var written = pinned instanceof Inet6Address ? "[" + address + "]" : address;
+    var port = target.getPort() < 0 ? "" : ":" + target.getPort();
+    var path = target.getRawPath() == null || target.getRawPath().isEmpty() ? "/" : target.getRawPath();
+    var query = target.getRawQuery() == null ? "" : "?" + target.getRawQuery();
+    return URI.create(target.getScheme() + "://" + written + port + path + query);
+  }
+
+  private static String authority(URI target, String host) {
+    return target.getPort() < 0 ? host : host + ":" + target.getPort();
   }
 
   private static boolean isTextual(HttpResponse<InputStream> response) {

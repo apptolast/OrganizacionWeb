@@ -18,7 +18,7 @@ por clase concreta, nunca la suite entera.
 | 3 | bloqueante | **CERRADO** | ciclo 5 |
 | 4 | bloqueante | **fuera de alcance**: lo hace otro carril en `e2e/external-calendar-native-zoom.spec.mjs` (instrucción del coordinador) | — |
 | 5 | bloqueante | pendiente | — |
-| 6 | bloqueante | pendiente | — |
+| 6 | bloqueante | **CERRADO** | ciclo 7 |
 | 7 | bloqueante | ya cerrado en la base | — |
 | 8 | alta | **CERRADO** | ciclo 2 |
 | 9 | alta | ya cerrado en la base (es el hallazgo 2) | — |
@@ -455,3 +455,91 @@ existentes —el hallazgo 7 ya corrigió los dos globs muertos hacia
 `stryker.external-calendar.config.json` siguen alineados: la prueba
 `external calendar Stryker ranges still cover the route and the navigation entry (@s37)`
 lo verifica sin necesidad de ejecutar Stryker.
+
+---
+
+## Ciclo 7 — hallazgo 6: la enmienda B3, entera
+
+**Qué decía el dictamen.** `project-spec.md:2488` aprueba las enmiendas «con
+prevalencia sobre el texto de las secciones 25 a 28 escrito antes», y B3 dice: «se
+resuelve el nombre una vez, se validan todas las direcciones devueltas y **se
+conecta contra la dirección literal ya validada**, conservando el nombre original
+en la cabecera Host y en la indicación de servidor de TLS». El código cumplía la
+primera mitad y no la segunda: `OutboundHostGuard` descartaba la lista resuelta
+(su veredicto era un enum sin datos) y `HttpCalendarFeed` construía
+`HttpRequest.newBuilder(URI.create(url))`, con lo que el JDK volvía a resolver el
+nombre **por segunda vez e independientemente**. Encima el javadoc y
+`docs/external-calendar.md` publicaban como «riesgo residual aceptado» justo lo que
+la enmienda había dejado de aceptar, sin resolución del coordinador que lo
+autorizara.
+
+**Diseño elegido, y por qué éste.** El dictamen proponía que el veredicto de la
+guardia arrastrase las direcciones hasta el feed. Se ha hecho algo equivalente y
+más barato de verificar: **quien conecta es quien resuelve**. `HttpCalendarFeed`
+recibe ahora el `HostResolver` y la `AddressPolicy` —los mismos beans que usa la
+guardia— y en `fetch` resuelve una vez, exige `allMatch(policy::allows)` y
+construye la petición contra la dirección literal, con el nombre en `Host` y en
+`SNIHostName`. La ventana entre comprobación y uso no se estrecha: **desaparece**,
+porque ya no hay dos resoluciones. La guardia de `SaveExternalCalendar` y
+`SyncExternalCalendar` se conserva intacta: sigue siendo la que decide si una
+suscripción puede guardarse o sincronizarse, y su interfaz no cambia (radio de
+cambio pequeño, que con el plazo que quedaba era decisivo).
+
+**VERDE.** Dos pruebas nuevas en `HttpCalendarFeedTest`:
+
+1. `s13_connectsToTheValidatedAddressAndKeepsTheNameInHost`. Pide
+   `http://nombre.que.no.resuelve.invalid:<puerto>/cal.ics?tok=WXYZ` con un
+   resolutor que devuelve el loopback. **Ese nombre no existe en ningún DNS**: si
+   el cliente volviera a resolverlo, la descarga acabaría en `FEED_UNREACHABLE`.
+   Se afirma que la descarga llega, que el resolutor se llamó **exactamente una
+   vez** y que el servidor recibió `Host: nombre.que.no.resuelve.invalid:<puerto>`.
+   Ése es el reenlace cerrado, medido.
+2. `s13_aNameThatResolvesToAForbiddenAddressNeverConnects`. Con una política que
+   rechaza todo: `FEED_REJECTED` y `received.isEmpty()` — no se abrió ninguna
+   conexión, no basta con fallar después.
+
+`gradlew test --tests "…HttpCalendarFeedTest" --tests "…ExternalCalendarWiringTest"`
+→ `BUILD SUCCESSFUL`, 34 pruebas en la clase del feed.
+
+**ROJO demostrado sobre producción.** Se volvió a poner
+`HttpRequest.newBuilder(target)` —conectar por nombre, el código anterior—:
+
+```
+HttpCalendarFeedTest > s13_connectsToTheValidatedAddressAndKeepsTheNameInHost() FAILED
+org.opentest4j.AssertionFailedError: Unexpected type,
+expected: <FeedFetch.Downloaded> but was: <FeedFetch.Failed>
+34 tests completed, 1 failed
+```
+
+El fallo es el correcto: sin anclaje, el JDK intenta resolver el nombre inventado,
+no puede, y devuelve `FEED_UNREACHABLE`. Producción restaurada y verde recuperado.
+
+**La documentación deja de mentir.** El javadoc de `OutboundHostGuard` ya no habla
+de riesgo residual aceptado —dice dónde vive la otra mitad de B3— y
+`docs/external-calendar.md` pasa de «*Riesgo residual aceptado*» a «**cerrado, no
+aceptado**», con el mecanismo explicado.
+
+**Límites que se dejan escritos, no disfrazados.**
+
+- Si el nombre resuelve a varias direcciones se usa la primera y no se reintenta
+  con las demás. Todas estaban validadas: es pérdida de tolerancia a fallos, no de
+  seguridad.
+- La parte de **SNI y verificación de certificado no tiene prueba propia**: el
+  arnés de esta clase habla HTTP en claro contra `127.0.0.1`. Lo verificado es el
+  anclaje de dirección y la cabecera `Host`; el apretón de manos TLS con SNI
+  fijado está implementado (`SSLParameters.setServerNames` +
+  `setEndpointIdentificationAlgorithm("HTTPS")`) pero **no ejercido por ninguna
+  prueba**. Quien quiera cerrarlo del todo necesita un servidor TLS con
+  certificado propio en el arnés.
+- Enviar `Host` a mano exige `jdk.httpclient.allowRestrictedHeaders=host`. La
+  clase lo añade en un bloque estático **sin pisar** lo que declare el despliegue,
+  pero el cliente del JDK lee esa propiedad al cargar su clase de utilidades: si
+  otro componente creara un `HttpClient` antes, la autorización llegaría tarde. En
+  ese caso `HttpRequest.Builder` lanza `IllegalArgumentException` y la descarga
+  devuelve `FEED_UNREACHABLE` — **no se conecta sin `Host`**, que sería conectar
+  contra el servidor equivocado. Recomendación para el despliegue: declarar la
+  propiedad también en los argumentos de la JVM.
+- **Alcance no invadido:** la feature 25 tiene el mismo defecto en
+  `JdkWebhookSender.guardDestination`, y el dictamen pedía cubrir 25 y 28 a la vez.
+  No se ha tocado: es de otro carril y REGLAS.md §9 lo prohíbe. Queda anotado aquí
+  para que el coordinador lo enrute.

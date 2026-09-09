@@ -5,9 +5,12 @@ package com.apptolast.organization.application;
  * Basta una dirección prohibida para rechazarlo entero, porque el cliente HTTP elegiría cualquiera
  * de ellas.
  *
- * <p>Riesgo residual conocido: entre esta comprobación y la conexión el DNS puede cambiar
- * (rebinding DNS). Se acepta y se mitiga repitiendo la comprobación en cada sincronización, no solo
- * al guardar.
+ * <p>Esta guardia decide si una suscripción puede guardarse o sincronizarse; <b>no</b> es la que
+ * abre la conexión. La segunda mitad de la enmienda B3 —conectar contra la dirección literal ya
+ * validada, conservando el nombre en Host y en SNI— vive en
+ * {@code adapter.feed.HttpCalendarFeed}, que resuelve una vez y conecta él mismo. Por eso ya no
+ * queda aquí ningún «riesgo residual de rebinding aceptado»: no hay ventana entre la resolución y
+ * la conexión, porque quien conecta es quien resolvió.
  */
 public final class OutboundHostGuard implements OutboundGuard {
   private final HostResolver resolver;

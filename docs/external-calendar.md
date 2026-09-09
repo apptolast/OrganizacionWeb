@@ -37,10 +37,17 @@ La dirección completa no aparece en ninguna respuesta, log ni error: solo `urlH
   `application/PublicAddressPolicy`, con rangos CIDR explícitos para IPv4 e IPv6 (incluidos
   `100.64.0.0/10`, `fc00::/7`, 6to4 y NAT64, y la desnormalización de IPv4 mapeada). La comprobación
   se repite en **cada** sincronización, no solo al guardar.
-  - *Riesgo residual aceptado*: entre la comprobación y la conexión el DNS puede cambiar (rebinding).
-    Se mitiga repitiendo la comprobación y limitando lo que se puede hacer con la respuesta: solo se
-    lee, con 200, tipo textual, 1 MiB y un plazo total de 5 s que cubre también la lectura del
-    cuerpo (`HttpCalendarFeed` programa el cierre del cuerpo al vencer, no sólo el de las cabeceras).
+  - **Reenlace de nombres (DNS rebinding): cerrado, no aceptado.** La enmienda B3 de
+    `project-spec.md:2492` dejó de admitirlo como límite. `HttpCalendarFeed` resuelve el nombre una
+    vez, exige que **todas** las direcciones devueltas pasen la política y **conecta contra la
+    dirección literal ya validada**, conservando el nombre original en la cabecera `Host` y en el
+    `SNIHostName` de TLS. Como el cliente HTTP recibe una dirección y no un nombre, no hay segunda
+    resolución y por tanto no hay ventana entre la comprobación y el uso.
+  - Límite que sí queda escrito: si el nombre resuelve a varias direcciones se usa la primera y no
+    se reintenta con las demás. Todas estaban validadas, así que es pérdida de tolerancia a fallos,
+    no de seguridad. Y la parte de SNI/certificado no tiene prueba propia: el arnés de esta clase
+    habla HTTP en claro contra `127.0.0.1`, así que lo verificado es el anclaje de dirección y la
+    cabecera `Host`, no el apretón de manos TLS.
 - **Descarga.** Redirecciones deshabilitadas, `Accept: text/calendar`, sin cookie ni `Authorization`,
   **plazo total de 5 s para el intercambio completo** —conexión, cabeceras y lectura del cuerpo—,
   aborto al superar 1 MiB, y solo 200 con `Content-Type` `text/*`. El plazo del cuerpo no lo da

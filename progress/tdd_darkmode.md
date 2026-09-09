@@ -39,6 +39,14 @@ previo: `darkmode-backup` (apunta al antiguo `f5a16cd`).
 **Conflictos:** ninguno manual. Dos auto-merges limpios en `styles.scss`
 (`b8ec804` y `e1e25c7`), porque la feature 24 no toca ese archivo.
 
+**Segundo reasentamiento.** Durante la sesión `main` avanzó dos commits
+(`803dfe2` arnés y `ab26f53` docs, que tocan `.claude/settings.json`,
+`.gitignore`, `progress/current.md` y `progress/darkmode_audit.md`). La rama se
+volvió a rebasar sobre `ab26f53` sin un solo conflicto: no comparte ningún
+archivo con esos dos commits. Hashes finales `17cc59a`…`df3d2af`. Después del
+rebase la suite filtrada se reejecutó (122 casos verdes) y las comprobaciones
+de no destrucción se repitieron sobre la nueva base.
+
 **Verificación de que no se destruyó nada** (la comprobación que exigía el
 riesgo, hecha después del rebase):
 
@@ -153,8 +161,8 @@ nunca mutación).
 
 ## 6. Riesgos y límites
 
-- **Riesgo de integración: bajo.** La rama es `main` + 7 commits, 9 archivos,
-  cero borrados. No toca backend, ni `feature_list.json`, ni nada de la
+- **Riesgo de integración: bajo.** La rama es `main` (`ab26f53`) + 8 commits,
+  9 archivos, cero borrados y cero commits por detrás de `main`. No toca backend, ni `feature_list.json`, ni nada de la
   feature 24. Los únicos archivos compartidos con otros carriles son
   `frontend/src/styles.scss` (+26/−9, todo dentro de los mixins, `.seed-art`,
   `.empty-divider` y tres `box-shadow`) y `frontend/index.html` (dos metas).

@@ -36,36 +36,66 @@ bloqueo de controles de @s38 reteniendo la respuesta del `POST /sync`.
 
 ### Lo que se ha ejecutado en navegador real
 
-`e2e/external-calendar-ux-audit.spec.mjs` (Chromium, Playwright): axe con las
-etiquetas `wcag2a`, `wcag2aa`, `wcag21aa`, `wcag22aa` y `best-practice` sobre los
-estados **vacío**, **con suscripción** y **tras sincronizar**; recorrido de teclado
-completo con medición del anillo `:focus-visible` **parada por parada**; matriz de
-14 anchos (320, 359, 360, 361, 599, 600, 601, 767, 768, 769, 1279, 1280, 1281,
-2560) con medición de objetivos de 44×44 px; y texto ampliado al 200 % a 320 px.
+Actualizado el **10 de septiembre de 2026**, tras cerrar los hallazgos 1, 5, 10 y 13.
+Todo con `E2E_WEB_PORT=18092` sobre la pila real, `5 passed`.
+
+`e2e/external-calendar-ux-audit.spec.mjs` (Chromium, Playwright), 5 pruebas:
+
+1. **Matriz geométrica**: los **14 anchos** (320, 359, 360, 361, 599, 600, 601, 767,
+   768, 769, 1279, 1280, 1281, 2560) por los **seis estados** de pantalla = 84
+   mediciones. Cada medición comprueba cinco cosas: desbordamiento horizontal de la
+   página, controles fuera del viewport, objetivos menores de 44 × 44 px, **recorte
+   por elemento en los dos ejes** y **solapes por pares de rectángulos**.
+2. **axe** con `wcag2a`, `wcag2aa`, `wcag21aa`, `wcag22aa` y `best-practice` sobre
+   vacío, con suscripción y tras una sincronización real contra un proveedor
+   inalcanzable.
+3. **Cuatro modos × seis estados** = 24 pasadas de axe + geometría: claro, oscuro,
+   `forced-colors: active` y `prefers-reduced-motion: reduce`. Cero violaciones.
+4. **Recorrido de teclado** completo con medición del anillo `:focus-visible`
+   **parada por parada**.
+5. **Texto ampliado al 200 %** a 320 px en los **seis estados**, escalando el
+   `font-size` calculado elemento a elemento y **afirmando que se ha duplicado**.
+
+`e2e/external-calendar-native-zoom.spec.mjs` (Chromium con extensión efímera y
+`chrome.tabs.setZoom`): **zoom nativo al 200 %** a 320, 768 y 1280 px CSS, con
+comprobación de que el DPR se duplica de verdad antes de medir.
+
+Los **seis estados de pantalla** son los cinco del Given de @s40 —vacío, con
+suscripción, con error, con lista larga de resúmenes Unicode y guardando— más el
+diálogo de confirmación abierto, que se añade porque «Sí, eliminar» y «Cancelar» son
+controles que la línea 546 del contrato obliga a medir a 44 × 44 px y que sólo
+existen dentro de `{confirming ? …}`. «Con suscripción», «con error» y «lista larga»
+se siembran por SQL contra el postgres de la pila; «guardando» se congela reteniendo
+la respuesta del `PUT` con `page.route`.
 
 ### Lo que este documento NO afirma
 
 1. **No afirma cumplimiento a partir de axe.** axe automatiza un subconjunto de
    reglas; no certifica un lector de pantalla real. La revisión manual con lector
    de pantalla **sigue pendiente** y así consta en las filas afectadas.
-2. **No afirma cobertura de los cinco estados en geometría.** El Given de @s40
-   nombra cinco (vacío, con suscripción, con error, con lista larga de resúmenes
-   Unicode y guardando). La matriz de anchos y la de texto al 200 % se ejercen hoy
-   sobre el estado **vacío**; «con suscripción» y «tras sincronizar» sólo pasan por
-   axe. Las filas geométricas quedan **parcialmente verificadas** y así se marcan.
-   Cerrarlo es el hallazgo 5 del dictamen.
-3. **No afirma zoom nativo del navegador al 200 %.** Lo único ejecutado es texto
-   ampliado (`documentElement.style.fontSize = "32px"`), que es otra cosa: el
-   contrato nombra las dos por separado y `docs/ux-requirements.md:50` dice que «la
-   emulación de ancho equivalente no sustituye toda la comprobación de zoom real».
-   El zoom nativo con `chrome.tabs.setZoom` lo cubre un fichero aparte
-   (`e2e/external-calendar-native-zoom.spec.mjs`, hallazgo 4 del dictamen, en otro
-   carril); **hasta que ese fichero exista y se ejecute, aquí queda pendiente**.
-4. **No afirma tema oscuro ni forced-colors.** No se ha ejecutado ninguna pasada
-   con `emulateMedia` sobre esta ruta (hallazgo 13). La pantalla no introduce
-   tokens de color propios —usa `.field-error`, `.failure`, `.save-status`,
-   `.notice`, `button` e `input` globales, ya auditados en otras rutas—, pero eso
-   es un argumento de plausibilidad, no una medición.
+2. **Sí afirma, desde el 10-09-2026, cobertura de los cinco estados en geometría.**
+   El Given de @s40 nombra cinco (vacío, con suscripción, con error, con lista larga
+   de resúmenes Unicode y guardando) y los cinco se recorren en los 14 anchos, más el
+   diálogo de confirmación. Lo que **no** se afirma es que el estado «con lista larga»
+   se haya alcanzado por una sincronización real: con la guardia SSRF activa no hay
+   ningún feed iCalendar alcanzable desde el contenedor, así que las filas se siembran
+   por SQL. Lo medido es la pantalla, no el camino que la llena; el camino lo cubren
+   las pruebas de backend del carril.
+3. **Sí afirma zoom nativo del navegador al 200 %, y sólo a 320, 768 y 1280 px CSS.**
+   `e2e/external-calendar-native-zoom.spec.mjs` amplía de verdad con
+   `chrome.tabs.setZoom`. **2560 px queda fuera y con motivo**: al 200 % cada píxel
+   CSS ocupa dos de ventana, así que ver 2560 px CSS exigiría una ventana de 5120 px
+   más el cromo, que ninguna pantalla de desarrollo o de CI de este proyecto tiene, y
+   el gestor de ventanas recortaría la petición en silencio. 2560 sí se recorre en la
+   matriz de anchos, sin zoom.
+4. **Sí afirma tema oscuro y colores forzados, y declara vacua la pasada de
+   movimiento reducido.** Cuatro modos por seis estados, con axe y geometría en cada
+   combinación. Bajo `forced-colors` se omite **sólo** la regla `color-contrast`,
+   porque Chromium pinta colores del sistema mientras axe lee los declarados; el
+   resto de reglas se conserva. La pasada de `prefers-reduced-motion` **no aporta
+   evidencia**: esta pantalla no tiene ni una transición ni una animación que reducir,
+   ni con la preferencia puesta ni sin ella, y la prueba lo afirma explícitamente para
+   que deje de ser vacua en cuanto alguien añada movimiento aquí.
 5. **No afirma cobertura de Firefox ni WebKit ni de dispositivos reales.** Todo lo
    de navegador es Chromium.
 6. **No afirma nada sobre facilidad de aprendizaje ni carga cognitiva reales.** No
@@ -85,14 +115,14 @@ recorrido existe pero nadie lo ha medido; «no aplica» siempre con motivo.
 | Estética-usabilidad | Reutiliza `.form-card`, `.field`, `.field-error` y `.failure` del resto del producto; los errores de feed se traducen a mensajes accionables, no a códigos. | Pruebas de FEED_UNREACHABLE, FEED_HTTP_ERROR y SECRET_UNREADABLE en `external-calendar.test.tsx`; axe sin violaciones en tres estados. | Verificado parcialmente; estética, revisión heurística |
 | Posición en serie | El orden visual y el de teclado coinciden: Etiqueta, Dirección, Guardar, Sincronizar ahora, Eliminar suscripción, y no cambian con el ancho. | E2E: recorrido de teclado que exige exactamente esa secuencia y rechaza intrusos dentro del formulario. Unitaria @s40 equivalente en jsdom. | Verificado en navegador (Chromium) |
 | Tendencia a la meta | Los contadores describen el feed real («12 eventos, 3 recurrentes no incluidos, 1 cancelado, 0 inválidos»); no hay barra de progreso inventada. | @s37 y @s38 comparan el texto exacto de contadores contra la respuesta. | Verificado en jsdom |
-| Von Restorff | El fallo se distingue por `role="alert"`, texto propio y borde, no sólo por color; el aviso de truncado por su texto. | axe sin violaciones; el `role="alert"` se comprueba en las pruebas de error. Bajo forced-colors sólo se perdería el matiz rojo, nunca el texto. | Verificado en jsdom; forced-colors **pendiente** (hallazgo 13) |
+| Von Restorff | El fallo se distingue por `role="alert"`, texto propio y borde, no sólo por color; el aviso de truncado por su texto. | axe sin violaciones en los cuatro modos por los seis estados, `forced-colors: active` incluido; el `role="alert"` se comprueba en las pruebas de error. Bajo colores forzados se pierde el matiz rojo, nunca el texto. | Verificado en navegador (Chromium), claro, oscuro y forced-colors |
 | Zeigarnik | Un guardado que falla conserva el borrador y devuelve el foco al campo culpable; el trabajo a medias no se pierde al equivocarse. | @s38 «conserva el borrador y enfoca el campo cuando la dirección se rechaza». | Verificado en jsdom |
 | Fluir | No aplica: esta pantalla no gobierna sesiones de trabajo ni duración; su unidad es una suscripción, no un bloque de tiempo. | — | No aplica, con motivo |
 | Fragmentación | Tres grupos con nombre: el formulario (`form-card` con `aria-labelledby`), el estado de la suscripción (`dl` de metadatos) y la lista de eventos. | axe sin violaciones (`region`, `landmark-unique`); E2E localiza la región por nombre accesible. | Verificado en navegador (Chromium) |
 | Memoria de trabajo | La etiqueta guardada se recarga en el campo al abrir; el borrador sobrevive a 503 y a fallo de red. | @s38 filas de 503 y fallo de red: «se conserva el borrador». | Verificado en jsdom |
 | Navaja de Occam | Cinco controles y ninguno de adorno: dos campos, Guardar, Sincronizar ahora, Eliminar suscripción, más los dos del diálogo de confirmación. | El recorrido de teclado de @s40 declara la lista cerrada: cualquier control nuevo dentro del formulario aparece como «intruso» y rompe la prueba. | Verificado en navegador (Chromium) |
 | Conectividad uniforme | No aplica: la pantalla no dibuja líneas ni conectores entre entidades. | — | No aplica, con motivo |
-| Fitts | Objetivo interno de 44×44 px CSS para todo botón y campo. | E2E `controlsAreLargeEnough` en los 14 anchos… **pero sólo en el estado vacío**: los botones «Sincronizar ahora», «Eliminar suscripción», «Sí, eliminar» y «Cancelar» viven en estados que la matriz no recorre. | **Parcialmente verificado** — cerrarlo es el hallazgo 5 |
+| Fitts | Objetivo interno de 44×44 px CSS para todo botón y campo. | E2E: los 14 anchos por los **seis estados** = 84 mediciones, con el diálogo de confirmación abierto, de modo que «Sincronizar ahora», «Eliminar suscripción», «Sí, eliminar» y «Cancelar» entran en la medición. Repetido bajo zoom nativo al 200 % a 320, 768 y 1280 px. | Verificado en navegador (Chromium) |
 | Hick | Una decisión principal por estado; el borrado exige confirmación explícita en vez de ofrecer un menú. | @s39: cancelar la confirmación no envía DELETE; confirmar envía exactamente uno. | Verificado en jsdom |
 | Jakob | Formulario HTML convencional, `type="url"`, enlace de navegación con `aria-current="page"`, vuelta a «/» al reabrir sesión. | `external-calendar-route.test.tsx`: 5 pruebas, incluidas entrada por enlace, URL directa y retorno tras iniciar sesión. | Verificado en jsdom |
 | Semejanza | Estados equivalentes con la misma apariencia que el resto del producto: `.save-status` para «Guardando…»/«Sincronizando…», `.failure` para los fallos. | Comparación de clases con las pantallas hermanas; axe sin violaciones. | Heurístico + axe |
@@ -111,26 +141,36 @@ recorrido existe pero nadie lo ha medido; «no aplica» siempre con motivo.
 | Sobrecarga de opciones | Una única suscripción por propietario, por contrato: no hay que elegir entre calendarios ni configurar nada más. | El contrato lo fija y el backend lo impone; la pantalla no ofrece alternativas. | Verificado por contrato |
 | Doherty | Feedback antes de 400 ms sin prometer red: «Guardando…» y «Sincronizando…» aparecen al instante, se envía **una** sola petición y los controles quedan bloqueados hasta la respuesta. | Dos pruebas que retienen la respuesta con una promesa y afirman el estado intermedio, el bloqueo y `toHaveLength(1)` en el recuento de peticiones (una para Guardar, otra para Sincronizar, añadida en el cierre del hallazgo 8). | Verificado en jsdom; el objetivo de 400 ms es de feedback, no de red |
 
-Recuento: 30 filas, ninguna omitida. Verificadas con prueba que puede fallar: 22.
-Parcialmente verificadas y con hallazgo abierto que las cierra: 2 (Fitts,
-Von Restorff). Heurísticas declaradas: 3 (Semejanza, Miller, y la parte estética
-de Estética-usabilidad). No aplicables con motivo: 3 (Fluir, Conectividad
+Recuento al 10-09-2026: 30 filas, ninguna omitida. Verificadas con prueba que puede
+fallar: **24** (Fitts y Von Restorff pasan de parciales a verificadas al cerrar los
+hallazgos 1, 5, 10 y 13). Heurísticas declaradas: 3 (Semejanza, Miller, y la parte
+estética de Estética-usabilidad). No aplicables con motivo: 3 (Fluir, Conectividad
 uniforme, Parkinson).
 
 ## Trabajo pendiente que este documento deja escrito, no tapado
 
-1. **Geometría en los cinco estados** del Given de @s40, no sólo en el vacío
-   (hallazgo 5 del dictamen). Incluye medir a 44×44 px los botones «Sincronizar
-   ahora», «Eliminar suscripción», «Sí, eliminar» y «Cancelar», que hoy no entran
-   en ninguna medición.
-2. **Oráculo de recorte y de solapes** en los dos ejes y por elemento, no sólo
-   `scrollWidth` del documento (hallazgos 10 y 12).
-3. **Zoom nativo al 200 %** con `chrome.tabs.setZoom` (hallazgo 4; lo cubre otro
-   carril en `e2e/external-calendar-native-zoom.spec.mjs`).
-4. **Tema oscuro y forced-colors** con `emulateMedia` (hallazgo 13). Movimiento
-   reducido sería una comprobación vacua en esta pantalla —no hay `transition`,
-   `animation` ni `transform` propios— y si se ejecuta debe declararse como tal y
-   no contarse como evidencia.
+1. ~~Geometría en los cinco estados del Given de @s40~~ — **cerrado el 10-09-2026**:
+   14 anchos × 6 estados, con «Sincronizar ahora», «Eliminar suscripción», «Sí,
+   eliminar» y «Cancelar» dentro de la medición de 44 × 44 px.
+2. ~~Oráculo de recorte y de solapes en los dos ejes y por elemento~~ — **cerrado**:
+   `geometry()` mide desbordamiento, escape del viewport, objetivos, recorte por
+   elemento en los dos ejes y solapes por pares. Acreditado con una mutación de
+   control (`li { overflow: hidden; max-height: 96px }`) que tumbó 3 de 4 pruebas y
+   que con el oráculo anterior no habría movido una sola aserción.
+3. ~~Zoom nativo al 200 %~~ — **cerrado** en
+   `e2e/external-calendar-native-zoom.spec.mjs`, con 2560 px excluido y razonado
+   arriba.
+4. ~~Tema oscuro y forced-colors~~ — **cerrado**: cuatro modos × seis estados.
+   Movimiento reducido se ejecuta y se declara **vacuo** en la propia prueba.
 5. **Revisión manual con lector de pantalla**, que el propio comentario del spec
-   reconoce obligatoria y que no consta hecha.
-6. **Firefox y WebKit**, y dispositivos táctiles reales.
+   reconoce obligatoria y que **no consta hecha**. Sigue siendo el hueco principal de
+   este documento: nada de lo automático la sustituye.
+6. **Firefox y WebKit**, y dispositivos táctiles reales. Todo lo medido es Chromium.
+7. **La excepción de `INPUT`, `SELECT` y `TEXTAREA` en el oráculo de recorte**, que
+   se documenta en el propio spec: su `scrollWidth > clientWidth` con un valor largo
+   es su comportamiento correcto —el usuario recorre el valor con el cursor y no
+   pierde texto—, y contarlo daría falso positivo garantizado en una pantalla cuyo
+   dato principal es una dirección iCal larga. La excepción vale **sólo** para el
+   recorte: esos elementos siguen entrando en objetivos, en solapes y en escape del
+   viewport. Queda escrita aquí porque una lista blanca silenciosa es exactamente lo
+   que este documento existe para impedir.

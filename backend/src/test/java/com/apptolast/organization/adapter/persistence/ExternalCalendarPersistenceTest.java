@@ -142,6 +142,64 @@ class ExternalCalendarPersistenceTest {
     assertThat(reopened.version()).isZero();
   }
 
+  /**
+   * @s30 entero, que la prueba de arriba dejaba a medias: «una sincronización confirmó en base de
+   *     datos lastSyncAt 11:00Z pero su respuesta se perdió; el backend se reinicia y GET devuelve
+   *     200 con la misma id, ese lastSyncAt, y GET /events devuelve los eventos de esa
+   *     sincronización».
+   *     <p>Lo que faltaba: la respuesta perdida y la instantánea. Aquí se confirman **dos**
+   *     sincronizaciones —la de las 09:00Z con cinco eventos y la de las 11:00Z, cuya respuesta se
+   *     descarta a propósito, que es exactamente lo que significa «se perdió»— y sólo entonces se
+   *     abre un almacén nuevo sobre la misma base, que es como se modela el reinicio en esta clase.
+   */
+  @Test
+  void s30_theSnapshotOfASyncWhoseResponseWasLostSurvivesTheRestart() {
+    var id = UUID.randomUUID();
+    var nineOClock = Instant.parse("2030-01-07T09:00:00Z");
+    var elevenOClock = Instant.parse("2030-01-07T11:00:00Z");
+    store().create(A, id, work(), cipher("C"), NOW);
+    store()
+        .commitSuccess(
+            A,
+            0,
+            summary(5, false),
+            List.of(
+                event("v1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z"),
+                event("v2", "2030-01-08T10:00:00Z", "2030-01-08T11:00:00Z"),
+                event("v3", "2030-01-08T11:00:00Z", "2030-01-08T12:00:00Z"),
+                event("v4", "2030-01-08T12:00:00Z", "2030-01-08T13:00:00Z"),
+                event("v5", "2030-01-08T13:00:00Z", "2030-01-08T14:00:00Z")),
+            nineOClock);
+    // La segunda sí se confirma en la base; su valor de retorno se descarta, que es lo que le pasa
+    // al llamante cuando la respuesta se pierde por el camino.
+    store()
+        .commitSuccess(
+            A,
+            1,
+            summary(2, false),
+            List.of(
+                event("w1", "2030-01-08T15:00:00Z", "2030-01-08T16:00:00Z"),
+                event("w2", "2030-01-08T17:00:00Z", "2030-01-08T18:00:00Z")),
+            elevenOClock);
+
+    var afterRestart = store().find(A).orElseThrow();
+    assertThat(afterRestart.subscription().id()).isEqualTo(id);
+    assertThat(afterRestart.subscription().lastSyncAt()).isEqualTo(elevenOClock);
+    assertThat(afterRestart.subscription().lastAttemptAt()).isEqualTo(elevenOClock);
+    assertThat(afterRestart.subscription().lastStatus()).isEqualTo(SyncStatus.OK);
+    assertThat(afterRestart.subscription().imported()).isEqualTo(2);
+    assertThat(afterRestart.version()).isEqualTo(2);
+    assertThat(
+            store()
+                .events(
+                    A,
+                    Instant.parse("2030-01-08T00:00:00Z"),
+                    Instant.parse("2030-01-09T00:00:00Z"))
+                .stream()
+                .map(ExternalEvent::uid))
+        .containsExactly("w1", "w2");
+  }
+
   @Test
   void s6_relabellingBumpsTheVersionAndKeepsSnapshotAndCounters() {
     store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);

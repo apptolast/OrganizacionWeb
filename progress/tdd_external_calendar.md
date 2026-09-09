@@ -14,6 +14,10 @@ Contrato: `features/external_calendar.feature` (@s1…@s40). Ponytail full / Cav
 7. Casos de uso — @s6, @s11, @s12, @s14, @s16, @s26, @s27, @s28, @s29.
 8. Cliente HTTP del feed — @s12, @s13.
 9. HTTP MockMvc — @s1, @s2, @s4, @s8, @s10, @s28, @s31, @s32; Hoy intacto — @s34.
+   Corrección del 10-09-2026: cuando se escribió esta línea @s34 sólo tenía
+   `ExternalCalendarIsolationTest` (ArchUnit) y una E2E *sin* suscripción; no había
+   ningún MockMvc que ejecutara su Given. Lo hay desde el hallazgo 11 del dictamen:
+   `ExternalCalendarTodayApiTest`.
 10. Frontend — @s35…@s40; E2E; docs; registro de mutación.
 
 ## Bitácora de ciclos
@@ -308,8 +312,8 @@ la máquina. Queda listo para que el `mutation_tester` lance
 | s5 | `ExternalCalendarInputTest`, `SaveExternalCalendarTest.s5_*` |
 | s6 | `ExternalCalendarPersistenceTest.s6_*`, `SaveExternalCalendarTest.s6_*` |
 | s7 | `ExternalCalendarPersistenceTest.s7_*`, `SaveExternalCalendarTest.s7_*`, `ExternalCalendarApiTest.s7_*` |
-| s8 | `ExternalCalendarDisabledApiTest`, `ConnectorCipherTest.s8_*`, `external-calendar-api.test.ts` |
-| s9 | `ConnectorCipherTest.s9_*`, `ExternalCalendarWiringTest.s9_*`, `AesGcmSecretCipherTest.s9_*` |
+| s8 | `ExternalCalendarDisabledApiTest.s8_*` (7), `ExternalCalendarWiringTest.s8_*`, `external-calendar-api.test.ts` |
+| s9 | `ExternalCalendarWiringTest.s9_*`, `AesGcmSecretCipherTest.s9_*` |
 | s10 | `ExternalCalendarApiTest.s10_*`, `ExternalCalendarDisabledApiTest.s10_*` |
 | s11 | `OutboundHostGuardTest.s11_*`, `SyncExternalCalendarTest.s11_*`, `ExternalCalendarApiTest.s11_*` |
 | s12 | `HttpCalendarFeedTest.s12_*`, `SyncExternalCalendarTest.s12_*`, `ExternalCalendarPersistenceTest.s12_*` |
@@ -334,13 +338,13 @@ la máquina. Queda listo para que el `mutation_tester` lance
 | s31 | `ExternalCalendarPersistenceTest.s31_*`, `ReadExternalCalendarEventsTest.s31_*`, `ExternalCalendarApiTest.s31_*`, `external-calendar.test.tsx` (ventana) |
 | s32 | `ExternalEventsRangeTest`, `ExternalCalendarApiTest.s32_*` |
 | s33 | `ExternalCalendarPersistenceTest.s33_*`, `ReadExternalCalendarEventsTest.s33_*`, `ExternalCalendarApiTest.s33_*` |
-| s34 | `ExternalCalendarIsolationTest.s34_*`, `e2e/external-calendar.spec.mjs` |
+| s34 | `ExternalCalendarIsolationTest.s34_*`, `ExternalCalendarTodayApiTest.s34_*`, `e2e/external-calendar.spec.mjs` |
 | s35 | `today-external-calendar.test.tsx`, `today-external-section.test.tsx` |
 | s36 | `today-external-calendar.test.tsx`, `external-calendar-api.test.ts` |
 | s37 | `external-calendar.test.tsx`, `external-calendar-route.test.tsx`, `external-calendar-api.test.ts` |
 | s38 | `external-calendar.test.tsx`, `external-calendar-api.test.ts` |
 | s39 | `external-calendar.test.tsx`, `external-calendar-api.test.ts` |
-| s40 | `external-calendar.test.tsx` (teclado y región viva), `e2e/external-calendar-ux-audit.spec.mjs` (sin ejecutar) |
+| s40 | `external-calendar.test.tsx` (teclado y región viva), `e2e/external-calendar-ux-audit.spec.mjs` (**5 pruebas, ejecutadas el 10-09-2026**: 14 anchos × 6 estados, axe, 4 modos × 6 estados, teclado, texto al 200 % × 6 estados), `e2e/external-calendar-native-zoom.spec.mjs` (zoom nativo al 200 %), `progress/ux_external_calendar.md` (matriz de los 30 principios) |
 
 ## Qué queda fuera de esta sesión
 

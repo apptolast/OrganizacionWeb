@@ -31,7 +31,7 @@ class GitlabConnectionUseCasesTest {
   }
 
   private ReadGitlabConnectionUseCase read() {
-    return new ReadGitlabConnection(fakes.connections, API_BASE, fakes.cipher);
+    return new ReadGitlabConnection(fakes.connections, receipts, API_BASE, fakes.cipher);
   }
 
   @Test
@@ -75,6 +75,30 @@ class GitlabConnectionUseCasesTest {
     assertEquals(FAILED_AT, view.lastError().at());
   }
 
+  @Test
+  void s15_theLastActivityIsTheEndOfTheLastImportAndNotTheInstantOfTheConnection() {
+    fakes.connections.put(OWNER, connected());
+    var receipt = receipts.seedCompleted(OWNER, "gitlab");
+
+    assertEquals(receipt.finishedAt(), read().execute(OWNER).lastActivityAt());
+  }
+
+  @Test
+  void s15_animportOfTheOtherSourceDoesNotCountAsGitlabActivity() {
+    fakes.connections.put(OWNER, connected());
+    receipts.seedCompleted(OWNER, "github");
+
+    assertEquals(CONNECTED_AT, read().execute(OWNER).lastActivityAt());
+  }
+
+  @Test
+  void s15_arunningImportCountsFromWhenItStartedBecauseItHasNotEndedYet() {
+    fakes.connections.put(OWNER, connected());
+    var running = receipts.seedRunning(OWNER, "gitlab", NOW.minusSeconds(30));
+
+    assertEquals(running.startedAt(), read().execute(OWNER).lastActivityAt());
+  }
+
   // ------------------------------------------------------------------------- @s9 conectar
 
   @Test
@@ -95,7 +119,7 @@ class GitlabConnectionUseCasesTest {
     assertEquals(1L, view.version());
 
     var row = fakes.connections.find(OWNER).orElseThrow();
-    assertEquals(TOKEN, fakes.cipher.decrypt(OWNER, row.tokenCiphertext()));
+    assertEquals(TOKEN, fakes.cipher.decrypt(OWNER, row.tokenCiphertext()).orElseThrow());
     assertFalse(row.toString().contains(TOKEN));
   }
 
@@ -121,7 +145,10 @@ class GitlabConnectionUseCasesTest {
     assertEquals(2L, view.version());
     assertEquals(
         "glpat-otro-secreto-largo9Q2p",
-        fakes.cipher.decrypt(OWNER, fakes.connections.find(OWNER).orElseThrow().tokenCiphertext()));
+        fakes
+            .cipher
+            .decrypt(OWNER, fakes.connections.find(OWNER).orElseThrow().tokenCiphertext())
+            .orElseThrow());
   }
 
   // ------------------------------------------------------------------------ @s14 desconectar

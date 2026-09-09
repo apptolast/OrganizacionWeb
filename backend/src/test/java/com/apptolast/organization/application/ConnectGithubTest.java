@@ -203,7 +203,8 @@ class ConnectGithubTest {
     connect.execute(OWNER, "octocat/Hello-World", TOKEN);
 
     assertEquals(
-        java.util.List.of("connected github owner-1 octocat/Hello-World octocat"), fakes.audit.lines());
+        java.util.List.of("connected github owner-1 octocat/Hello-World octocat"),
+        fakes.audit.lines());
     assertFalse(String.join(" ", fakes.audit.lines()).contains(TOKEN));
   }
 

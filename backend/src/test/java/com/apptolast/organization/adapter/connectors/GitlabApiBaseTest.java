@@ -72,6 +72,7 @@ class GitlabApiBaseTest {
     var base = GitlabApiBase.of("https://gitlab.com/api/v4");
 
     assertThat(base.issues("4821", 2))
-        .isEqualTo("https://gitlab.com/api/v4/projects/4821/issues?state=opened&per_page=100&page=2");
+        .isEqualTo(
+            "https://gitlab.com/api/v4/projects/4821/issues?state=opened&per_page=100&page=2");
   }
 }

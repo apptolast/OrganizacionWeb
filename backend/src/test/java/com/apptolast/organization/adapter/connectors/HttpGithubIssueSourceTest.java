@@ -139,7 +139,8 @@ class HttpGithubIssueSourceTest {
   void s12_theIssueKeepsItsTitleBodyAndUrlAsGithubSentThem() {
     github.reply(
         ISSUES_PATH,
-        FakeIssueServer.Reply.ok("[" + FakeIssueServer.githubIssue(7, "Arreglar login", "una nota") + "]"));
+        FakeIssueServer.Reply.ok(
+            "[" + FakeIssueServer.githubIssue(7, "Arreglar login", "una nota") + "]"));
 
     var issue = source.list(REPOSITORY, TOKEN, 1).issues().getFirst();
 
@@ -249,7 +250,8 @@ class HttpGithubIssueSourceTest {
 
   @Test
   void s20_aForbiddenWithoutQuotaLeftAndWithoutInstantsFallsBackToSixtySeconds() {
-    github.reply(ISSUES_PATH, FakeIssueServer.Reply.status(403, Map.of("x-ratelimit-remaining", "0")));
+    github.reply(
+        ISSUES_PATH, FakeIssueServer.Reply.status(403, Map.of("x-ratelimit-remaining", "0")));
 
     var error = listFailure();
 

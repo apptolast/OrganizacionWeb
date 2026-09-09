@@ -467,7 +467,8 @@ class ImportGithubIssuesTest {
 
     importIssues.execute(OWNER, projectId);
 
-    assertEquals(List.of("finished github owner-1 octocat/Hello-World 3 0 0 false"), fakes.audit.lines());
+    assertEquals(
+        List.of("finished github owner-1 octocat/Hello-World 3 0 0 false"), fakes.audit.lines());
     assertFalse(String.join(" ", fakes.audit.lines()).contains("ghp_secreto123"));
   }
 

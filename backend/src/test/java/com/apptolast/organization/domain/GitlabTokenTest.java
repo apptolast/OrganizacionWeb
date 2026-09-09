@@ -37,8 +37,7 @@ class GitlabTokenTest {
   }
 
   private static String codeOf(String raw) {
-    var error =
-        assertThrows(ValidationException.class, () -> token(raw)).errors().getFirst();
+    var error = assertThrows(ValidationException.class, () -> token(raw)).errors().getFirst();
     assertEquals("token", error.field());
     return error.code();
   }

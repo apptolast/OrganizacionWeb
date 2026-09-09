@@ -4,8 +4,8 @@ import com.apptolast.organization.adapter.connectors.AesGcmSecretCipher;
 import com.apptolast.organization.adapter.connectors.ConnectorKeyRing;
 import com.apptolast.organization.adapter.connectors.GithubApiBase;
 import com.apptolast.organization.adapter.connectors.GitlabApiBase;
-import com.apptolast.organization.adapter.connectors.HttpGitlabIssueSource;
 import com.apptolast.organization.adapter.connectors.HttpGithubIssueSource;
+import com.apptolast.organization.adapter.connectors.HttpGitlabIssueSource;
 import com.apptolast.organization.adapter.http.GithubConnectorController;
 import com.apptolast.organization.adapter.http.GitlabConnectorController;
 import com.apptolast.organization.application.*;
@@ -94,8 +94,11 @@ public class ConnectorConfiguration {
 
   @Bean
   public ReadGitlabConnectionUseCase readGitlabConnection(
-      GitlabConnectionStore connections, GitlabApiBase base, SecretCipher cipher) {
-    return new ReadGitlabConnection(connections, base.value(), cipher);
+      GitlabConnectionStore connections,
+      IssueImportReceiptStore receipts,
+      GitlabApiBase base,
+      SecretCipher cipher) {
+    return new ReadGitlabConnection(connections, receipts, base.value(), cipher);
   }
 
   @Bean

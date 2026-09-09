@@ -75,7 +75,13 @@ public record GitlabConnection(
   @Override
   public int hashCode() {
     return Objects.hash(
-            projectPath, projectId, tokenHint, status, lastActivityAt, lastErrorCode, lastErrorAt,
+            projectPath,
+            projectId,
+            tokenHint,
+            status,
+            lastActivityAt,
+            lastErrorCode,
+            lastErrorAt,
             version)
         + Arrays.hashCode(tokenCiphertext);
   }

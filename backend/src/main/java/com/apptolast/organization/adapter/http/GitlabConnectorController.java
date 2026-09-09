@@ -222,7 +222,8 @@ public final class GitlabConnectorController {
   private ResponseEntity<Map<String, Object>> rateLimitedProblem(
       int retryAfterSeconds, IssueImportReceipt receipt) {
     var body =
-        ApiErrors.problem(503, "RATE_LIMITED", "GitLab limita las peticiones. Reintenta más tarde.");
+        ApiErrors.problem(
+            503, "RATE_LIMITED", "GitLab limita las peticiones. Reintenta más tarde.");
     body.put("retryAfterSeconds", retryAfterSeconds);
     if (receipt != null) putReceipt(body, receipt);
     return ResponseEntity.status(503)
@@ -256,7 +257,8 @@ public final class GitlabConnectorController {
     };
   }
 
-  private static ResponseEntity<Map<String, Object>> problem(int status, String code, String title) {
+  private static ResponseEntity<Map<String, Object>> problem(
+      int status, String code, String title) {
     return ResponseEntity.status(status)
         .header("Cache-Control", NO_STORE)
         .contentType(MediaType.APPLICATION_PROBLEM_JSON)

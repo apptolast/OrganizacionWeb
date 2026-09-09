@@ -48,7 +48,13 @@ class GitlabConnectorApiTest {
   private static final Instant STARTED = Instant.parse("2026-09-09T12:00:00Z");
 
   private static final String[] CONNECTION_FIELDS = {
-    "status", "apiBase", "projectPath", "projectId", "tokenHint", "lastActivityAt", "lastError",
+    "status",
+    "apiBase",
+    "projectPath",
+    "projectId",
+    "tokenHint",
+    "lastActivityAt",
+    "lastError",
     "version"
   };
 
@@ -194,7 +200,9 @@ class GitlabConnectorApiTest {
 
     org.assertj.core.api.Assertions.assertThat(keysOf(body, "lastError"))
         .containsExactlyInAnyOrder("code", "at");
-    org.assertj.core.api.Assertions.assertThat(body).doesNotContain("glpat").doesNotContain("1234x");
+    org.assertj.core.api.Assertions.assertThat(body)
+        .doesNotContain("glpat")
+        .doesNotContain("1234x");
   }
 
   // ---------------------------------------------------------------------- @s9 @s10 conectar
@@ -330,7 +338,10 @@ class GitlabConnectorApiTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"'{\"projectId\":\"no-uuid\"}'", "'{\"projectId\":\"" + "11111111-2222-3333-4444-555555555555" + "\",\"projectPath\":\"g/p\"}'"})
+  @CsvSource({
+    "'{\"projectId\":\"no-uuid\"}'",
+    "'{\"projectId\":\"" + "11111111-2222-3333-4444-555555555555" + "\",\"projectPath\":\"g/p\"}'"
+  })
   void s22_abadImportBodyNeverReachesTheUseCase(String body) throws Exception {
     mvc.perform(
             post(IMPORTS)
@@ -402,9 +413,11 @@ class GitlabConnectorApiTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"no-uuid, 400, VALIDATION_ERROR",
+  @CsvSource({
+    "no-uuid, 400, VALIDATION_ERROR",
     "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE, 400, VALIDATION_ERROR",
-    "99999999-9999-4999-8999-999999999999, 404, IMPORT_NOT_FOUND"})
+    "99999999-9999-4999-8999-999999999999, 404, IMPORT_NOT_FOUND"
+  })
   void s30_amalformedOrUnknownReceiptIdentifierNeverLeaksWhatExists(
       String id, int status, String code) throws Exception {
     when(readImport.execute(any(), any())).thenThrow(new IssueImportNotFoundException());

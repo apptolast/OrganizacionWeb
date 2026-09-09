@@ -58,7 +58,7 @@ public final class ConnectGitlab implements ConnectGitlabUseCase {
             null,
             nextVersion(ownerId));
     connections.save(ownerId, row);
-    return GitlabConnectionView.of(row, apiBase);
+    return GitlabConnectionView.of(row, apiBase, row.lastActivityAt());
   }
 
   /** Cada sustitución de token sube la versión; se publica sólo para diagnóstico. */

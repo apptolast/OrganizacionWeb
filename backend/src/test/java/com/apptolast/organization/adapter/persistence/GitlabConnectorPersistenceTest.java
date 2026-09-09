@@ -109,8 +109,7 @@ class GitlabConnectorPersistenceTest {
 
   private boolean link(String ownerId, String source, String externalId) {
     var external = issue(externalId);
-    return commit.save(
-        ownerId, projectId, source, external, status -> creation(ownerId, external));
+    return commit.save(ownerId, projectId, source, external, status -> creation(ownerId, external));
   }
 
   private TaskCreation creation(String ownerId, ExternalIssue external) {
@@ -154,9 +153,7 @@ class GitlabConnectorPersistenceTest {
   @Test
   void s9_theSchemaRefusesAnythingTooShortToBeSealedWithNonceAndTag() {
     assertThatThrownBy(
-            () ->
-                connections.save(
-                    OWNER, connection(GitlabConnection.CONNECTED, new byte[8], 1L)))
+            () -> connections.save(OWNER, connection(GitlabConnection.CONNECTED, new byte[8], 1L)))
         .isInstanceOf(StorageUnavailableException.class);
     assertThat(count("gitlab_connections")).isZero();
   }
@@ -279,12 +276,7 @@ class GitlabConnectorPersistenceTest {
     assertThatThrownBy(
             () ->
                 receipts.begin(
-                    OWNER,
-                    projectId,
-                    "gitlab",
-                    PROJECT_PATH,
-                    NOW,
-                    NOW.minus(FIFTEEN_MINUTES)))
+                    OWNER, projectId, "gitlab", PROJECT_PATH, NOW, NOW.minus(FIFTEEN_MINUTES)))
         .isInstanceOf(IssueImportInProgressException.class);
     assertThat(receipts.importing(OWNER, NOW.minus(FIFTEEN_MINUTES))).isTrue();
     assertThat(receipts.importing(OTHER, NOW.minus(FIFTEEN_MINUTES))).isFalse();

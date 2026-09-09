@@ -9,8 +9,7 @@ import java.util.List;
  * adaptador descartó por no ser trabajo planificable, que el recibo declara como omitido. {@code
  * more} dice si el gestor anuncia todavía más páginas, y de ahí sale {@code truncated}.
  */
-public record IssuePage(
-    List<ExternalIssue> issues, int elements, int excluded, boolean more) {
+public record IssuePage(List<ExternalIssue> issues, int elements, int excluded, boolean more) {
   public static final int PAGE_SIZE = 100;
 
   public IssuePage {

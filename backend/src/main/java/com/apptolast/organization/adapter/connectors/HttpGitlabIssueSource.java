@@ -152,7 +152,8 @@ public final class HttpGitlabIssueSource implements IssueSource, GitlabProjectDi
    */
   private IssueSourceException classify(HttpResponse<String> response) {
     int status = response.statusCode();
-    if (status == 401 || status == 403) return IssueSourceException.tokenRejected().answeredWith(status);
+    if (status == 401 || status == 403)
+      return IssueSourceException.tokenRejected().answeredWith(status);
     if (status == 429) return IssueSourceException.rateLimited(retryAfter(response));
     if (status == 404) return IssueSourceException.repositoryUnavailable();
     return IssueSourceException.unavailable().answeredWith(status);

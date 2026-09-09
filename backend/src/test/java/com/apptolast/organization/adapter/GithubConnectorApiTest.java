@@ -66,7 +66,10 @@ class GithubConnectorApiTest {
   @MockitoBean ReadGithubConnectionUseCase read;
   @MockitoBean ConnectGithubUseCase connect;
   @MockitoBean DisconnectGithubUseCase disconnect;
-  @MockitoBean(name = GithubConnectorController.GITHUB_IMPORTS) ImportIssuesUseCase importIssues;
+
+  @MockitoBean(name = GithubConnectorController.GITHUB_IMPORTS)
+  ImportIssuesUseCase importIssues;
+
   @MockitoBean ReadIssueImportUseCase readImport;
   @MockitoBean AuthenticateApiCredentialUseCase authenticateCredential;
   @MockitoBean ConsumeApiQuotaUseCase quota;

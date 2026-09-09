@@ -108,7 +108,8 @@ class ImportGitlabIssuesTest {
   void s18_repeatingTheImportOnlyCreatesTheIssuesThatWereNotLinkedYet() {
     fakes.source.page(
         1,
-        new IssuePage(List.of(issue(9001), issue(9002), issue(9003), issue(9004), issue(9005)), 5, false));
+        new IssuePage(
+            List.of(issue(9001), issue(9002), issue(9003), issue(9004), issue(9005)), 5, false));
     importIssues().execute(OWNER, projectId);
     fakes.source.page(
         1,
@@ -195,8 +196,7 @@ class ImportGitlabIssuesTest {
     assertEquals("gitlab", gitlabReceipt.source());
     assertEquals(githubReceipt.created(), gitlabReceipt.created());
     assertEquals(githubReceipt.status(), gitlabReceipt.status());
-    assertEquals(
-        List.of("github|101", "gitlab|gitlab.example.com:9001"), fakes.tasks.linkKeys());
+    assertEquals(List.of("github|101", "gitlab|gitlab.example.com:9001"), fakes.tasks.linkKeys());
   }
 
   // ------------------------------------------------------ @s23 @s24 @s25 fallos del gestor

@@ -41,7 +41,9 @@ final class GitlabFakes {
     private IssueSourceException failure;
 
     void accept(String canonicalPath, long projectId) {
-      known.put(canonicalPath.toLowerCase(java.util.Locale.ROOT), new GitlabProject(projectId, canonicalPath));
+      known.put(
+          canonicalPath.toLowerCase(java.util.Locale.ROOT),
+          new GitlabProject(projectId, canonicalPath));
     }
 
     void reject(IssueSourceException error) {

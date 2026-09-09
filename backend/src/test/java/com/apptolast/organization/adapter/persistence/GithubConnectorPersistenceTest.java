@@ -324,7 +324,8 @@ class GithubConnectorPersistenceTest {
   @Test
   void s12_beginningARunningReceiptRecordsItWithZeroedCounters() {
     var receipt =
-        receipts.begin(OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
+        receipts.begin(
+            OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
 
     assertThat(receipt.status()).isEqualTo("running");
     assertThat(receipt.created()).isZero();
@@ -343,12 +344,7 @@ class GithubConnectorPersistenceTest {
     assertThatThrownBy(
             () ->
                 receipts.begin(
-                    OWNER,
-                    projectId,
-                    "github",
-                    REPOSITORY,
-                    NOW,
-                    NOW.minus(Duration.ofMinutes(15))))
+                    OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15))))
         .isInstanceOf(IssueImportInProgressException.class);
     assertThat(count("issue_import_receipts")).isEqualTo(1);
   }
@@ -406,12 +402,7 @@ class GithubConnectorPersistenceTest {
 
     assertThat(
             receipts.begin(
-                OTHER,
-                otherProject,
-                "github",
-                "otra/Cosa",
-                NOW,
-                NOW.minus(Duration.ofMinutes(15))))
+                OTHER, otherProject, "github", "otra/Cosa", NOW, NOW.minus(Duration.ofMinutes(15))))
         .isNotNull();
     assertThat(count("issue_import_receipts")).isEqualTo(2);
   }
@@ -429,7 +420,8 @@ class GithubConnectorPersistenceTest {
     receipts.progress(OWNER, stale.id(), 2, 1, 0);
 
     var fresh =
-        receipts.begin(OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
+        receipts.begin(
+            OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
 
     assertThat(fresh.status()).isEqualTo("running");
     var interrupted = receipts.find(OWNER, stale.id()).orElseThrow();
@@ -443,7 +435,8 @@ class GithubConnectorPersistenceTest {
   @Test
   void s27_progressIsVisibleWhileTheReceiptIsStillRunning() {
     var receipt =
-        receipts.begin(OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
+        receipts.begin(
+            OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
 
     receipts.progress(OWNER, receipt.id(), 2, 0, 0);
 
@@ -457,7 +450,8 @@ class GithubConnectorPersistenceTest {
   @Test
   void s12_finishingClosesTheReceiptWithItsCountersAndInstant() {
     var receipt =
-        receipts.begin(OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
+        receipts.begin(
+            OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
     receipts.progress(OWNER, receipt.id(), 3, 1, 1);
 
     var closed = receipts.finish(OWNER, receipt.id(), "completed", null, true, NOW.plusSeconds(4));
@@ -475,7 +469,8 @@ class GithubConnectorPersistenceTest {
   @Test
   void s20_afailedReceiptKeepsItsErrorCode() {
     var receipt =
-        receipts.begin(OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
+        receipts.begin(
+            OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
 
     var closed =
         receipts.finish(OWNER, receipt.id(), "failed", "RATE_LIMITED", false, NOW.plusSeconds(1));
@@ -487,10 +482,12 @@ class GithubConnectorPersistenceTest {
   @Test
   void s10_theLatestReceiptIsTheOneWithTheGreatestStartInstant() {
     var older =
-        receipts.begin(OWNER, projectId, "github", REPOSITORY, NOW.minusSeconds(100), NOW.minusSeconds(9000));
+        receipts.begin(
+            OWNER, projectId, "github", REPOSITORY, NOW.minusSeconds(100), NOW.minusSeconds(9000));
     receipts.finish(OWNER, older.id(), "completed", null, false, NOW.minusSeconds(99));
     var newer =
-        receipts.begin(OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
+        receipts.begin(
+            OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
 
     assertThat(receipts.latest(OWNER, "github").orElseThrow().id()).isEqualTo(newer.id());
   }
@@ -499,7 +496,8 @@ class GithubConnectorPersistenceTest {
   void s33_receiptsNeverCrossOwners() {
     var otherProject = seedProject(OTHER, "idea");
     var theirs =
-        receipts.begin(OTHER, otherProject, "github", "otra/Cosa", NOW, NOW.minus(Duration.ofMinutes(15)));
+        receipts.begin(
+            OTHER, otherProject, "github", "otra/Cosa", NOW, NOW.minus(Duration.ofMinutes(15)));
 
     assertThat(receipts.find(OWNER, theirs.id())).isEmpty();
     assertThat(receipts.latest(OWNER, "github")).isEmpty();
@@ -510,7 +508,8 @@ class GithubConnectorPersistenceTest {
     connections.save(OWNER, connection(REPOSITORY, "valid", ciphertext("A")));
     save(OWNER, projectId, issue("101"));
     var receipt =
-        receipts.begin(OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
+        receipts.begin(
+            OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
     receipts.finish(OWNER, receipt.id(), "completed", null, false, NOW.plusSeconds(1));
 
     connections.delete(OWNER);
@@ -554,7 +553,8 @@ class GithubConnectorPersistenceTest {
   @Test
   void s19_anImportThatBreaksHalfwayLeavesExactlyWhatWasConfirmed() {
     var receipt =
-        receipts.begin(OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
+        receipts.begin(
+            OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
     int created = 0;
     for (var external : List.of(issue("1"), issue("2"))) {
       if (save(OWNER, projectId, external)) created++;

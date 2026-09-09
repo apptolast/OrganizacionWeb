@@ -25,7 +25,9 @@ public record GitlabProjectPath(String value) {
     return new GitlabProjectPath(raw);
   }
 
-  /** Un segmento hecho sólo de puntos nombra el directorio actual o el de arriba: no es proyecto. */
+  /**
+   * Un segmento hecho sólo de puntos nombra el directorio actual o el de arriba: no es proyecto.
+   */
   private static boolean isUsable(String segment) {
     return SEGMENT.matcher(segment).matches() && !segment.chars().allMatch(c -> c == '.');
   }

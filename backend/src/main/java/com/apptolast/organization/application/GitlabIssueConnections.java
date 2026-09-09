@@ -33,7 +33,9 @@ public final class GitlabIssueConnections implements IssueConnections {
 
   @Override
   public void invalidate(String ownerId, String errorCode, Instant at) {
-    connections.find(ownerId).ifPresent(row -> connections.save(ownerId, row.withError(errorCode, at)));
+    connections
+        .find(ownerId)
+        .ifPresent(row -> connections.save(ownerId, row.withError(errorCode, at)));
   }
 
   @Override

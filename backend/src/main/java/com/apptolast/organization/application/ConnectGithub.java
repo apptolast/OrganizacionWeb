@@ -49,9 +49,9 @@ public final class ConnectGithub implements ConnectGithubUseCase {
             cipher.encrypt(ownerId, secret.value()),
             connectedAt);
     connections.save(ownerId, row);
-    audit.connected(
-        GithubIssueConnections.SOURCE, ownerId, row.repository(), row.login());
-    return ConnectionView.of(row, receipts.latest(ownerId, GithubIssueConnections.SOURCE).orElse(null));
+    audit.connected(GithubIssueConnections.SOURCE, ownerId, row.repository(), row.login());
+    return ConnectionView.of(
+        row, receipts.latest(ownerId, GithubIssueConnections.SOURCE).orElse(null));
   }
 
   private RepositoryIdentity identify(

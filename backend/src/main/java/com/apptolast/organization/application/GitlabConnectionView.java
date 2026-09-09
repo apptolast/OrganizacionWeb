@@ -22,14 +22,15 @@ public record GitlabConnectionView(
     return new GitlabConnectionView(NOT_CONNECTED, null, null, null, null, null, null, null);
   }
 
-  public static GitlabConnectionView of(GitlabConnection connection, String apiBase) {
+  public static GitlabConnectionView of(
+      GitlabConnection connection, String apiBase, Instant lastActivityAt) {
     return new GitlabConnectionView(
         connection.status(),
         apiBase,
         connection.projectPath(),
         connection.projectId(),
         connection.tokenHint(),
-        connection.lastActivityAt(),
+        lastActivityAt,
         connection.lastError(),
         connection.version());
   }

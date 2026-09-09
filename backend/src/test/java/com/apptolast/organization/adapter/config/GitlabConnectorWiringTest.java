@@ -49,7 +49,10 @@ class GitlabConnectorWiringTest {
     var view =
         configuration
             .readGitlabConnection(
-                empty(), configuration.gitlabApiBase(LOOPBACK), configuration.secretCipher(KEY, null))
+                empty(),
+                receipts(),
+                configuration.gitlabApiBase(LOOPBACK),
+                configuration.secretCipher(KEY, null))
             .execute("owner");
 
     assertThat(view.status()).isEqualTo("not_connected");
@@ -61,7 +64,9 @@ class GitlabConnectorWiringTest {
     var cipher = configuration.secretCipher(null, null);
     var base = configuration.gitlabApiBase(LOOPBACK);
 
-    assertThatThrownBy(() -> configuration.readGitlabConnection(empty(), base, cipher).execute("o"))
+    assertThatThrownBy(
+            () ->
+                configuration.readGitlabConnection(empty(), receipts(), base, cipher).execute("o"))
         .isInstanceOf(com.apptolast.organization.application.ConnectorsDisabledException.class);
     assertThatThrownBy(
             () ->

@@ -56,8 +56,7 @@ class HttpGitlabIssueSourceTest {
   @Test
   void s9_verifyingAsksForTheEncodedProjectWithThePrivateTokenHeaderAndNeverInTheUrl() {
     projectReplies(
-        FakeIssueServer.Reply.ok(
-            "{\"id\":4821,\"path_with_namespace\":\"grupo/sub/proyecto\"}"));
+        FakeIssueServer.Reply.ok("{\"id\":4821,\"path_with_namespace\":\"grupo/sub/proyecto\"}"));
 
     var project = source.verify(PROJECT_PATH, TOKEN);
 
@@ -94,8 +93,7 @@ class HttpGitlabIssueSourceTest {
             status, "{\"message\":\"invalid_token: glpat-abcdef1234\"}", Map.of()));
 
     var error =
-        catchThrowableOfType(
-            IssueSourceException.class, () -> source.verify(PROJECT_PATH, TOKEN));
+        catchThrowableOfType(IssueSourceException.class, () -> source.verify(PROJECT_PATH, TOKEN));
 
     assertThat(error.reason()).isEqualTo(IssueSourceException.Reason.valueOf(reason));
     assertThat(error.getMessage()).doesNotContain("glpat").doesNotContain("invalid_token");
@@ -114,8 +112,7 @@ class HttpGitlabIssueSourceTest {
     projectReplies(FakeIssueServer.Reply.status(429, Map.of("Retry-After", "20")));
 
     var error =
-        catchThrowableOfType(
-            IssueSourceException.class, () -> source.verify(PROJECT_PATH, TOKEN));
+        catchThrowableOfType(IssueSourceException.class, () -> source.verify(PROJECT_PATH, TOKEN));
 
     assertThat(error.reason()).isEqualTo(IssueSourceException.Reason.RATE_LIMITED);
     assertThat(error.retryAfterSeconds()).isEqualTo(20);
@@ -127,7 +124,8 @@ class HttpGitlabIssueSourceTest {
   void s16_listingAsksForOpenIssuesAHundredAtATimeAndReadsTheNextPageHeader() {
     issuesReply(
         new FakeIssueServer.Reply(
-            200, "[" + gitlabIssue(9001) + "," + gitlabIssue(9002) + "]",
+            200,
+            "[" + gitlabIssue(9001) + "," + gitlabIssue(9002) + "]",
             Map.of("X-Next-Page", "2")));
 
     var page = source.list(REFERENCE, TOKEN, 1);

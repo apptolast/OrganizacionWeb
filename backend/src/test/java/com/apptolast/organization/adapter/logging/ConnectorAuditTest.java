@@ -81,8 +81,7 @@ class ConnectorAuditTest {
 
   @Test
   void s34_abrokenImportRecordsWhatItManagedToDoAndWhyItStopped() {
-    audit.importFailed(
-        "github", "owner-a", "octocat/Hello-World", IMPORT, "RATE_LIMITED", 2, 429);
+    audit.importFailed("github", "owner-a", "octocat/Hello-World", IMPORT, "RATE_LIMITED", 2, 429);
 
     assertThat(logged())
         .contains("importId=" + IMPORT)

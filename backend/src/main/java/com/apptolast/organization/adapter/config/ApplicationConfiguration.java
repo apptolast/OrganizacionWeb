@@ -396,4 +396,55 @@ public class ApplicationConfiguration {
       com.apptolast.organization.application.ImportReceiptQueries queries) {
     return new com.apptolast.organization.application.ReadImportReceipt(queries);
   }
+
+  @Bean
+  com.apptolast.organization.adapter.persistence.PostgresWebhookStore webhookStore(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions) {
+    return new com.apptolast.organization.adapter.persistence.PostgresWebhookStore(
+        jdbc, transactions);
+  }
+
+  /**
+   * Amendment B5: an absent connector key degrades into {@code WebhookSecrets.DISABLED} (503
+   * CONNECTORS_DISABLED on the writing operations); a malformed one fails fast at startup.
+   */
+  @Bean
+  com.apptolast.organization.application.WebhookSecrets webhookSecrets(
+      @org.springframework.beans.factory.annotation.Value("${app.connectors.key:}") String key,
+      @org.springframework.beans.factory.annotation.Value("${app.connectors.key-previous:}")
+          String previous) {
+    var secrets =
+        com.apptolast.organization.adapter.webhook.AesGcmWebhookSecrets.from(key, previous);
+    return secrets == null
+        ? com.apptolast.organization.application.WebhookSecrets.DISABLED
+        : secrets;
+  }
+
+  @Bean
+  com.apptolast.organization.application.WebhookDestinationGuard webhookDestinationGuard() {
+    return new com.apptolast.organization.application.WebhookDestinationGuard(
+        java.net.InetAddress::getAllByName,
+        com.apptolast.organization.application.AddressPolicy::isBlocked);
+  }
+
+  @Bean
+  com.apptolast.organization.application.CreateWebhook createWebhook(
+      com.apptolast.organization.application.WebhookEndpoints endpoints,
+      com.apptolast.organization.application.WebhookSecrets secrets,
+      com.apptolast.organization.application.WebhookDestinationGuard destinations,
+      Clock clock) {
+    return new com.apptolast.organization.application.CreateWebhook(
+        endpoints, secrets, destinations, clock, new java.security.SecureRandom());
+  }
+
+  @Bean
+  com.apptolast.organization.application.ManageWebhook manageWebhook(
+      com.apptolast.organization.application.WebhookEndpoints endpoints,
+      com.apptolast.organization.application.WebhookDeliveries deliveries,
+      com.apptolast.organization.application.WebhookSecrets secrets,
+      Clock clock) {
+    return new com.apptolast.organization.application.ManageWebhook(
+        endpoints, deliveries, secrets, clock);
+  }
 }

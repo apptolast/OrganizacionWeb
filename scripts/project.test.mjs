@@ -2217,10 +2217,35 @@ test("automations Stryker configuration mutates only the feature files", () => {
     ),
   );
   assert.deepEqual(config.mutate, [
+    "src/App.tsx:47:8-47:51",
+    "src/App.tsx:55:8-56:30",
+    "src/App.tsx:84:7-85:40",
+    "src/workspace.tsx:128:10-133:22",
     "src/automations-api.ts",
     "src/automations.tsx",
   ]);
   assert.equal(config.thresholds.break, 80);
+  // Los cuatro rangos se validan por contenido: App.tsx se desplaza con cada
+  // feature y un rango obsoleto mutaria lineas de otra pantalla en silencio.
+  const expected = [
+    ["automations = route", "/automatizaciones"],
+    ["automations", "Automatizaciones"],
+    ["automations && username", "<Automations owner={username} />"],
+    ["<RouteLink", "/automatizaciones"],
+  ];
+  for (const [index, selector] of config.mutate.slice(0, 4).entries()) {
+    const [, path, startLine, startColumn, endLine, endColumn] = selector.match(
+      /^(.+):(\d+):(\d+)-(\d+):(\d+)$/,
+    );
+    const lines = readFileSync(resolve(root, "frontend", path), "utf8").split(
+      /\r?\n/,
+    );
+    const selected = lines.slice(Number(startLine) - 1, Number(endLine));
+    selected[selected.length - 1] = selected.at(-1).slice(0, Number(endColumn));
+    selected[0] = selected[0].slice(Number(startColumn));
+    assert.ok(selected.join("\n").startsWith(expected[index][0]), selector);
+    assert.ok(selected.join("\n").includes(expected[index][1]), selector);
+  }
 });
 
 // Guardas de la puerta de mutacion de la feature 25 (webhooks). La feature se

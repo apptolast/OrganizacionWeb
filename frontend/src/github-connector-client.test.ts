@@ -282,3 +282,226 @@ it("@s39 an unexpected status is not silently taken for success", async () => {
 
   await expect(startGithubImport(projectId, signal())).rejects.toBeDefined();
 });
+
+// --------------------------------------------------- @s41 disciplina de cancelación, punto a punto
+
+/**
+ * Las cinco operaciones consultan la señal tres veces: antes de tocar la red,
+ * al volver la respuesta y tras leer el cuerpo. Cada llamada necesita su propio
+ * oráculo, porque borrar cualquiera de ellas deja las demás verdes.
+ */
+const operations = [
+  {
+    name: "readGithubConnection",
+    ok: () => Response.json(connection),
+    call: (s: AbortSignal) => readGithubConnection(s),
+    decodes: true,
+  },
+  {
+    name: "connectGithub",
+    ok: () => Response.json(connection),
+    call: (s: AbortSignal) =>
+      connectGithub({ repository: "octocat/Hello-World", token: "t" }, s),
+    decodes: true,
+  },
+  {
+    name: "disconnectGithub",
+    ok: () => new Response(null, { status: 204 }),
+    call: (s: AbortSignal) => disconnectGithub(s),
+    decodes: false,
+  },
+  {
+    name: "startGithubImport",
+    ok: () => Response.json(receipt, { status: 201 }),
+    call: (s: AbortSignal) => startGithubImport(projectId, s),
+    decodes: true,
+  },
+  {
+    name: "readGithubImport",
+    ok: () => Response.json(receipt),
+    call: (s: AbortSignal) => readGithubImport(importId, s),
+    decodes: true,
+  },
+];
+
+for (const operation of operations) {
+  it(`@s41 ${operation.name} does not touch the network with an aborted signal`, async () => {
+    const controller = new AbortController();
+    const fetcher = stub(operation.ok());
+    controller.abort();
+
+    await expect(operation.call(controller.signal)).rejects.toThrow();
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it(`@s41 ${operation.name} stops when the abort lands while the request is in flight`, async () => {
+    const controller = new AbortController();
+    const fetcher = vi.fn(async () => {
+      controller.abort();
+      return operation.ok();
+    });
+    vi.stubGlobal("fetch", fetcher);
+
+    await expect(operation.call(controller.signal)).rejects.toThrow();
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  if (operation.decodes)
+    it(`@s41 ${operation.name} stops when the abort lands while the body is read`, async () => {
+      const controller = new AbortController();
+      const answer = operation.ok();
+      const late = {
+        status: answer.status,
+        json: async () => {
+          controller.abort();
+          return answer.json();
+        },
+      } as unknown as Response;
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => late),
+      );
+
+      await expect(operation.call(controller.signal)).rejects.toThrow();
+    });
+}
+
+// ------------------------------------------- @s41 la petición lleva señal y tipo de contenido
+
+it("@s41 every operation hands its signal to the transport", async () => {
+  for (const operation of operations) {
+    const controller = new AbortController();
+    const fetcher = stub(operation.ok());
+
+    await operation.call(controller.signal);
+
+    expect(fetcher.mock.calls[0][1].signal, operation.name).toBe(
+      controller.signal,
+    );
+    vi.unstubAllGlobals();
+  }
+});
+
+it("@s41 the two writes with a body declare application/json", async () => {
+  const writes = [
+    {
+      ok: () => Response.json(connection),
+      call: (s: AbortSignal) =>
+        connectGithub({ repository: "octocat/Hello-World", token: "t" }, s),
+    },
+    {
+      ok: () => Response.json(receipt, { status: 201 }),
+      call: (s: AbortSignal) => startGithubImport(projectId, s),
+    },
+  ];
+  for (const write of writes) {
+    const fetcher = stub(write.ok());
+
+    await write.call(signal());
+
+    const headers = new Headers(fetcher.mock.calls[0][1].headers);
+    expect(headers.get("Content-Type")).toBe("application/json");
+    vi.unstubAllGlobals();
+  }
+});
+
+// ------------------------------------------ @s39 el error tipado y sus contadores, campo a campo
+
+/**
+ * ConnectorError normaliza el problema RFC 7807. Cada rama tenía mutantes vivos:
+ * el código por defecto, el mensaje, y el filtro de contadores, que sólo admite
+ * enteros no negativos y devuelve null para todo lo demás.
+ */
+it("@s39 a problem without a usable code falls back to CONNECTOR_ERROR", async () => {
+  for (const body of [{}, { code: 7 }, { code: null }]) {
+    stub(problem(500, body));
+
+    const error = await startGithubImport(projectId, signal()).catch(
+      (raised) => raised,
+    );
+
+    expect(error).toBeInstanceOf(ConnectorError);
+    expect(error.code).toBe("CONNECTOR_ERROR");
+    expect(error.message).toBe("CONNECTOR_ERROR");
+    vi.unstubAllGlobals();
+  }
+});
+
+it("@s39 a problem with a code keeps it as code and as message", async () => {
+  stub(problem(429, { code: "RATE_LIMITED" }));
+
+  const error = await startGithubImport(projectId, signal()).catch(
+    (raised) => raised,
+  );
+
+  expect(error.code).toBe("RATE_LIMITED");
+  expect(error.message).toBe("RATE_LIMITED");
+});
+
+it("@s39 the counters of a problem only accept non negative integers", async () => {
+  const cases = [
+    { sent: 0, kept: 0 },
+    { sent: 12, kept: 12 },
+    { sent: -1, kept: null },
+    { sent: 1.5, kept: null },
+    { sent: "3", kept: null },
+    { sent: null, kept: null },
+  ];
+  for (const { sent, kept } of cases) {
+    stub(
+      problem(409, {
+        code: "IMPORT_FAILED",
+        retryAfterSeconds: sent,
+        created: sent,
+        skipped: sent,
+        failed: sent,
+      }),
+    );
+
+    const error = await startGithubImport(projectId, signal()).catch(
+      (raised) => raised,
+    );
+
+    expect(error.retryAfterSeconds, `retryAfterSeconds ${sent}`).toBe(kept);
+    expect(error.created, `created ${sent}`).toBe(kept);
+    expect(error.skipped, `skipped ${sent}`).toBe(kept);
+    expect(error.failed, `failed ${sent}`).toBe(kept);
+    vi.unstubAllGlobals();
+  }
+});
+
+it("@s39 the importId of a problem survives only as a canonical uuid", async () => {
+  const cases = [
+    { sent: importId, kept: importId },
+    { sent: importId.toUpperCase(), kept: importId.toUpperCase() },
+    { sent: "no-es-uuid", kept: null },
+    { sent: 7, kept: null },
+  ];
+  for (const { sent, kept } of cases) {
+    stub(problem(409, { code: "IMPORT_FAILED", importId: sent }));
+
+    const error = await startGithubImport(projectId, signal()).catch(
+      (raised) => raised,
+    );
+
+    expect(error.importId, String(sent)).toBe(kept);
+    vi.unstubAllGlobals();
+  }
+});
+
+it("@s39 an unreadable problem body still yields the typed error", async () => {
+  stub(
+    new Response("no es json", {
+      status: 503,
+      headers: { "Content-Type": "application/problem+json" },
+    }),
+  );
+
+  const error = await startGithubImport(projectId, signal()).catch(
+    (raised) => raised,
+  );
+
+  expect(error).toBeInstanceOf(ConnectorError);
+  expect(error.code).toBe("CONNECTOR_ERROR");
+  expect(error.retryAfterSeconds).toBeNull();
+});

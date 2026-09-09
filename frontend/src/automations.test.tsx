@@ -49,7 +49,7 @@ const projects = {
 
 type Route = { status: number; body?: unknown; delay?: Promise<void> };
 let routes: Map<string, Route[]>;
-let calls: { url: string; method: string }[];
+let calls: { url: string; method: string; headers: Headers }[];
 
 function key(url: string, method: string) {
   return `${method} ${url.split("?")[0]}`;
@@ -73,7 +73,7 @@ beforeEach(() => {
   route("GET", "/api/v1/projects", 200, projects);
   vi.stubGlobal("fetch", async (url: string, options: RequestInit = {}) => {
     const method = options.method ?? "GET";
-    calls.push({ url, method });
+    calls.push({ url, method, headers: new Headers(options.headers) });
     const list = routes.get(key(url, method));
     const next = list && list.length > 1 ? list.shift()! : list?.[0];
     if (!next) return new Response(null, { status: 404 });
@@ -338,33 +338,68 @@ describe("automations page", () => {
     );
   });
 
+  const putsOf = (id: string) =>
+    calls.filter(
+      (call) =>
+        call.method === "PUT" && call.url === `/api/v1/me/automations/${id}`,
+    );
+
   it("@s40 flips the switch only after the confirmed answer and sends the live ETag", async () => {
     listed({ ...rule, version: 2 });
+    let release = () => {};
+    route(
+      "PUT",
+      `/api/v1/me/automations/${RULE}`,
+      200,
+      { ...rule, version: 3, enabled: false },
+      new Promise<void>((resolve) => (release = resolve)),
+    );
     route("PUT", `/api/v1/me/automations/${RULE}`, 200, {
       ...rule,
-      version: 3,
-      enabled: false,
+      version: 4,
+      enabled: true,
     });
     render(<Automations owner="owner" />);
     const toggle = await screen.findByRole("switch", { name: /seguimiento/i });
     expect(toggle).toBeChecked();
     await userEvent.click(toggle);
+    await waitFor(() => expect(putsOf(RULE)).toHaveLength(1));
+    // In flight: nothing may change until the server confirms it.
+    expect(toggle).toBeChecked();
+    expect(screen.getByText("Activa")).toBeInTheDocument();
+    release();
     await waitFor(() => expect(toggle).not.toBeChecked());
     expect(screen.getByText("Inactiva")).toBeInTheDocument();
+    expect(putsOf(RULE)[0].headers.get("If-Match")).toBe('"2"');
+    // The version the server just returned is the one the next write must send.
+    await userEvent.click(toggle);
+    await waitFor(() => expect(toggle).toBeChecked());
+    expect(putsOf(RULE)[1].headers.get("If-Match")).toBe('"3"');
   });
 
   it("@s40 puts the switch back and announces the error when the server fails", async () => {
     listed({ ...rule, version: 2 });
-    route("PUT", `/api/v1/me/automations/${RULE}`, 503, {
-      code: "STORAGE_UNAVAILABLE",
-    });
+    let release = () => {};
+    route(
+      "PUT",
+      `/api/v1/me/automations/${RULE}`,
+      503,
+      { code: "STORAGE_UNAVAILABLE" },
+      new Promise<void>((resolve) => (release = resolve)),
+    );
     render(<Automations owner="owner" />);
     const toggle = await screen.findByRole("switch", { name: /seguimiento/i });
     await userEvent.click(toggle);
+    await waitFor(() => expect(putsOf(RULE)).toHaveLength(1));
+    // No optimistic flip: an unchecked switch here would be undone a moment later.
+    expect(toggle).toBeChecked();
+    expect(screen.getByText("Activa")).toBeInTheDocument();
+    release();
     await screen.findByRole("alert");
     expect(toggle).toBeChecked();
     expect(screen.getByText("Activa")).toBeInTheDocument();
-    expect(calls.filter((call) => call.method === "PUT")).toHaveLength(1);
+    expect(putsOf(RULE)).toHaveLength(1);
+    expect(putsOf(RULE)[0].headers.get("If-Match")).toBe('"2"');
   });
 
   it("@s41 loads the history in pages with textual state and a link to the task", async () => {
@@ -435,6 +470,57 @@ describe("automations page", () => {
     release();
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(localStorage.length).toBe(0);
+    expect(sessionStorage.length).toBe(0);
+  });
+
+  it("@s43 keeps no rule nor simulation of the identity that just left", async () => {
+    listed(rule);
+    listed(disabled);
+    route("POST", "/api/v1/me/automations/simulate", 200, {
+      evaluatedEvents: 5,
+      matches: [
+        {
+          eventId: "55555555-5555-4555-8555-555555555555",
+          eventType: "TaskCreated.v1",
+          occurredAt: "2026-09-08T10:15:30.123456Z",
+          preview: {
+            type: "CREATE_TASK",
+            projectId: PROJECT,
+            title: "Revisar lo de Ana",
+            completionCriterion: "",
+            estimatedMinutes: 30,
+            wouldFail: null,
+          },
+          loopGuarded: false,
+        },
+      ],
+    });
+    const view = render(<Automations owner="ana" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Editar Seguimiento" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    await screen.findByRole("status", { name: "Resultado de la simulación" });
+    expect(screen.getByText("Revisar lo de Ana")).toBeInTheDocument();
+
+    view.rerender(<Automations owner="bruno" />);
+
+    await screen.findByRole("switch", { name: /pausada/i });
+    expect(screen.queryByText("Revisar lo de Ana")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("status", { name: "Resultado de la simulación" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("switch", { name: /seguimiento/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/nombre/i)).not.toBeInTheDocument();
+    expect(
+      calls.filter(
+        (call) =>
+          call.method === "GET" && call.url === "/api/v1/me/automations",
+      ),
+    ).toHaveLength(2);
     expect(localStorage.length).toBe(0);
     expect(sessionStorage.length).toBe(0);
   });

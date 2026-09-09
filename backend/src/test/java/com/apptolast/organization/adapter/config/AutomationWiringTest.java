@@ -62,6 +62,20 @@ class AutomationWiringTest {
         new CreateTaskAction(project, "Revisar {{task.title}}", null, 30));
   }
 
+  /** One recorded execution of a rule, so the history survives the PUT that @s12 demands. */
+  private UUID run(String owner, UUID rule) {
+    var id = UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO automation_runs(id,rule_id,owner_id,event_id,event_type,occurred_at,attempt,"
+            + "status,created_task_id,delivery_id,error_code,executed_at)"
+            + " VALUES (?,?,?,?,'TaskCreated.v1',now(),1,'succeeded',NULL,NULL,NULL,now())",
+        id,
+        rule,
+        owner,
+        UUID.randomUUID());
+    return id;
+  }
+
   @Test
   void s1_s11_s12_s14_theRealBeansCreateReadReplaceAndDeleteAgainstPostgres() {
     var owner = "wiring-automations-" + UUID.randomUUID();
@@ -70,11 +84,39 @@ class AutomationWiringTest {
     assertThat(created.version()).isEqualTo(1);
     assertThat(read.list(owner)).containsExactly(created);
     assertThat(read.get(owner, created.id())).isEqualTo(created);
-    var replaced = replace.replace(owner, created.id(), 1, draft(project));
-    assertThat(replaced.version()).isEqualTo(2);
     assertThat(runs.read(owner, created.id(), null).items()).isEmpty();
-    delete.delete(owner, created.id(), 2);
+    delete.delete(owner, created.id(), 1);
     assertThat(read.list(owner)).isEmpty();
+  }
+
+  /**
+   * The Given of @s12 is «a rule with 2 recorded executions», and three of its four rows demand
+   * that both stay readable after the PUT. Replacing a rule by delete-and-insert, or a migration
+   * that changed the ON DELETE SET NULL of automation_runs, would orphan them silently.
+   */
+  @Test
+  void s12_replacingARuleKeepsItsTwoRecordedRunsReadableAndUnchanged() {
+    var owner = "wiring-automations-" + UUID.randomUUID();
+    var project = project(owner, "active");
+    var created = create.create(owner, draft(project));
+    var first = run(owner, created.id());
+    var second = run(owner, created.id());
+    var before = runs.read(owner, created.id(), null).items();
+    assertThat(before).extracting(AutomationRun::id).containsExactlyInAnyOrder(first, second);
+
+    var disabled =
+        new AutomationDraft(
+            "Seguimiento",
+            false,
+            "TaskStatusChanged.v1",
+            null,
+            new CreateTaskAction(project, "Revisar {{task.title}}", null, 30));
+    var replaced = replace.replace(owner, created.id(), 1, disabled);
+
+    assertThat(replaced.version()).isEqualTo(2);
+    assertThat(read.get(owner, created.id()).draft().enabled()).isFalse();
+    assertThat(runs.read(owner, created.id(), null).items())
+        .containsExactlyInAnyOrderElementsOf(before);
   }
 
   @Test

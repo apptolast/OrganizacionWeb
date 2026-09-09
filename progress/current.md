@@ -272,6 +272,36 @@ el paso de E2E no se ejecutaba, así que estas cinco no se veían. Al arreglar e
 primer fallo hay que contar con encontrar los siguientes, y no leerlo como que
 «ahora se ha roto todo».
 
+### Regresión abierta: la importación del conector GitHub no crea tareas
+
+**Esto es lo más serio que queda abierto, y es de producto, no de pruebas.**
+
+Cuatro pruebas de `e2e/github-connector.spec.mjs` fallan porque la región
+«Resultado de la importación» **no muestra ningún contador**: se espera
+«Creadas 1» y no aparece nada. Afecta a importar, reimportar y a la
+desconexión que conserva lo importado, más la spec de zoom nativo del conector.
+
+**No lo causa el arreglo del `TRUNCATE`, y está comprobado ejecutando, no
+razonando**: revertido el fichero a la versión de `main`, la misma prueba falla
+igual. Es anterior.
+
+**El sospechoso, con nombre y apellidos**: el commit `a347936` de la feature 29,
+«un solo caso de uso de importación para GitHub y GitLab», que unificó el caso
+de uso de importación de las dos plataformas y tocó `ImportGithubIssues`,
+`IssueImportReceipt` e `IssueSourceException`. La feature 27 tenía sus 16
+pruebas verdes esta misma tarde, antes de integrar la 29.
+
+**Por qué nadie lo vio**: la CI llevaba días cayendo antes del paso de E2E
+—primero por el lint, después por el flake de exportación—, así que las pruebas
+que lo habrían cazado no se ejecutaban. Es la misma causa que escondió las diez
+roturas de arriba.
+
+**Por dónde empezar**: comparar `ImportGithubIssues` antes y después de
+`a347936`, y mirar qué devuelve hoy el endpoint de importación —si el conteo
+llega vacío desde el backend o si es la vista la que no lo pinta—. Las pruebas
+unitarias de `ImportGithubIssuesTest` pasan, así que el hueco está entre el caso
+de uso y la frontera HTTP, o en la forma del recibo.
+
 ### La enmienda de navegación que ratificaste no se cumple
 
 `project-spec.md:2504` fija el orden canónico de la navegación principal en doce

@@ -131,14 +131,24 @@ const COLOR_DECLARATION =
   /(?:^|[\s;{])(color|background|background-color|border|border-color|border-top|border-bottom|border-left|border-right|border-inline|border-inline-start|border-inline-end|border-block|outline|outline-color|box-shadow|text-shadow|fill|stroke|caret-color|accent-color|text-decoration-color|column-rule)\s*:\s*([^;{}]+)/g;
 const LITERAL_COLOR =
   /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(|\b(?:white|black|red|blue|green|gray|grey|silver|whitesmoke|gainsboro|ivory|snow|beige|linen|lightgray|lightgrey|azure|mintcream|honeydew)\b/;
-// Una sombra de negro puro no aporta color: se ve igual en los dos temas.
-const NEUTRAL_SHADOW = /rgb\(0 0 0 \/ \d+%\)$/;
+// Una sombra de negro puro no aporta color: se ve igual en los dos temas. La
+// exención se decide capa por capa, nunca sobre la declaración entera.
+const NEUTRAL_BLACK = /rgb\(0 0 0 \/ \d+%\)/g;
+const SHADOW_LAYER_SEPARATOR = /,(?![^(]*\))/;
+const SHADOW_PROPERTY = /shadow$/;
+
+const isNeutralShadow = (value: string) =>
+  value
+    .split(SHADOW_LAYER_SEPARATOR)
+    .every((layer) => !LITERAL_COLOR.test(layer.replace(NEUTRAL_BLACK, "")));
 
 const literalColorsOutsideTokens = (source: string) =>
   [...source.replace(APPEARANCE_MIXINS, "").matchAll(COLOR_DECLARATION)]
     .map(([, property, value]) => [property, value.trim()] as const)
     .filter(
-      ([, value]) => LITERAL_COLOR.test(value) && !NEUTRAL_SHADOW.test(value),
+      ([property, value]) =>
+        LITERAL_COLOR.test(value) &&
+        !(SHADOW_PROPERTY.test(property) && isNeutralShadow(value)),
     )
     .map(([property, value]) => `${property}: ${value}`);
 
@@ -146,6 +156,28 @@ it("the literal-color scan catches the fixed white that broke Hoy in dark (audit
   expect(
     literalColorsOutsideTokens(".today-summary { background: #fff; }"),
   ).toEqual(["background: #fff"]);
+});
+
+// El juez encontró que la excepción de sombra neutra eximía la declaración
+// entera si *terminaba* en una capa neutra, así que una capa clara colada
+// delante atravesaba las dos guardas.
+const GLARING_SHADOW =
+  "box-shadow: 0 0 8px #ffffff, 0 5px 18px rgb(0 0 0 / 6%)";
+
+it("the literal-color scan catches a light shadow layer hidden before a neutral one (juez #2)", () => {
+  expect(literalColorsOutsideTokens(`.card { ${GLARING_SHADOW}; }`)).toEqual([
+    GLARING_SHADOW,
+  ]);
+});
+
+it("a shadow is neutral only when every one of its layers is (juez #2)", () => {
+  expect(isNeutralShadow("0 5px 18px rgb(0 0 0 / 6%)")).toBe(true);
+  expect(isNeutralShadow("0 0 8px #ffffff, 0 5px 18px rgb(0 0 0 / 6%)")).toBe(
+    false,
+  );
+  expect(isNeutralShadow("0 5px 18px rgb(0 0 0 / 6%), 0 0 8px #ffffff")).toBe(
+    false,
+  );
 });
 
 it("no stylesheet declares a fixed color outside the appearance mixins (audit #1-#8)", () => {
@@ -166,5 +198,5 @@ it("card shadows are neutral black so no fixed green survives in dark (audit #8)
     .map(([, value]) => value)
     .filter((value) => value !== "none");
   expect(shadows.length).toBeGreaterThan(0);
-  for (const shadow of shadows) expect(shadow).toMatch(/rgb\(0 0 0 \/ \d+%\)$/);
+  expect(shadows.filter((shadow) => !isNeutralShadow(shadow))).toEqual([]);
 });

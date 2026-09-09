@@ -7,10 +7,22 @@ package com.apptolast.organization.domain;
  */
 public record ExternalIssue(String externalId, String title, String body, String url) {
   private static final int TITLE_LIMIT = 160;
+  private static final int CRITERION_LIMIT = 2000;
+  private static final int BODY_LINES = 20;
   private static final String ELLIPSIS = "…";
+  private static final String BLANK_LINE = "\n\n";
 
   public String taskTitle() {
     return cut(trim(title), TITLE_LIMIT);
+  }
+
+  public String taskCompletionCriterion() {
+    String excerpt = firstLines(trim(body));
+    return cut(excerpt.isEmpty() ? url : url + BLANK_LINE + excerpt, CRITERION_LIMIT);
+  }
+
+  private static String firstLines(String body) {
+    return body.lines().limit(BODY_LINES).collect(java.util.stream.Collectors.joining("\n"));
   }
 
   static String trim(String raw) {

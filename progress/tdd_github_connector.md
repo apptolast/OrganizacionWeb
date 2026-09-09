@@ -38,3 +38,27 @@ error de `IssueSourceException`.
 - ROJO `ExternalIssueTest` (no compilaba: `ExternalIssue` no existía).
 - VERDE `domain/ExternalIssue.taskTitle()`: recorte Unicode y, si supera 160 puntos de código,
   159 puntos más `…`. Se cuenta por puntos de código, así que `🚀` no se parte.
+
+### Ciclo 4 — @s15 criterio de completitud
+
+- ROJO `ExternalIssueCriterionTest` (no compilaba: faltaba `taskCompletionCriterion`).
+- VERDE `ExternalIssue.taskCompletionCriterion()`: URL sola cuando el cuerpo falta o es sólo
+  Unicode White_Space; si no, URL, línea en blanco y las 20 primeras líneas del cuerpo con `\r\n`
+  normalizado por `String.lines()`; recorte a 2000 puntos de código con `…`.
+- REFACTOR: `cut` y `trim` compartidos con el título; `firstLines` con `Collectors.joining`.
+
+## Enmiendas al contrato aprobadas por el coordinador (9 de septiembre de 2026)
+
+Origen: `progress/security_review_connectors.md` (rama `main`). El coordinador actualiza
+`project-spec.md` y el `.feature` en `main`; aquí se implementa ya el comportamiento corregido.
+
+- **B11** — `app.github.api-base` se valida al arrancar contra una lista fija: exactamente
+  `https://api.github.com`, o un host de loopback (`127.0.0.1`, `::1`, `localhost`) para pruebas.
+  Cualquier otro valor impide arrancar. El valor nunca se toma de nada con alcance de petición.
+  Refuerza @s35, que ya exigía fallo de arranque con `http://api.github.com`.
+- **B5** — El texto cifrado lleva delante un byte de versión de clave y se leen
+  `APP_CONNECTOR_KEY` y `APP_CONNECTOR_KEY_PREVIOUS`, de modo que rotar la clave siga
+  descifrando lo guardado. Política unificada: clave mal formada impide arrancar (@s4), clave
+  ausente degrada a 503 `CONNECTORS_DISABLED` (@s3). El AAD ata el texto cifrado al propietario.
+  **Desvío medible respecto a @s1**: `octet_length` pasa de 12 + 14 + 16 = 42 a
+  1 + 12 + 14 + 16 = 43 bytes, y el `CHECK` de la migración pasa a `BETWEEN 30 AND 284`.

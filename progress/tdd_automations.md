@@ -138,6 +138,25 @@ Feature en curso: 30 — automations. Escenarios a recorrer en fase 1: @s1–@s1
   microsegundos no dependa de un ajuste del serializador.
 - Focal verde: `AutomationsApiTest` 84/84 y `ArchitectureTest` en verde.
 
+### Ciclo 9 — @s1, @s9, @s10, @s11, @s12, @s13, @s14 (persistencia de reglas, V28)
+
+- **Rojo visto fallar**: `AutomationPersistenceTest` (6 tests) con
+  `cannot find symbol: class PostgresAutomationStore`.
+- **Verde mínimo**: la migración reservada `V28__automations.sql` con
+  `automation_rules`, `automation_runs` (`rule_id ... ON DELETE SET NULL`, único
+  `(rule_id, event_id)`) y `automation_cursors`, más `PostgresAutomationStore` y
+  `AutomationActionJson` para la columna JSONB.
+- **Decisión de concurrencia (@s10)**: el cupo se serializa con
+  `pg_advisory_xact_lock(hashtext(owner_id))`. Un `SELECT count(*) ... FOR UPDATE`
+  no sirve: no se pueden bloquear filas que todavía no existen. El test lanza dos
+  hilos reales contra la última plaza y comprueba que hay exactamente un aceptado,
+  un rechazado y veinte reglas.
+- **Sobre el cursor**: la PREGUNTA ABIERTA de la propuesta se resuelve creando
+  `automation_cursors` en V28, porque la feature 25 no ha entregado V23 ni tabla de
+  cursores por consumidor. Queda anotado por si 25 la introduce después.
+- Sólo se toca V28. No se ha modificado ninguna migración existente.
+- Focal verde: `AutomationPersistenceTest` 6/6 (un único contenedor para todo el carril).
+
 ## Discrepancia de contrato pendiente de dictamen (@s30 vs @s32)
 
 @s30 dice que cada coincidencia contiene «exactamente eventId, eventType, occurredAt

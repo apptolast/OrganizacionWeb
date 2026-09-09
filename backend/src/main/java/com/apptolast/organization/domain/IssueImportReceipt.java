@@ -6,13 +6,18 @@ import java.util.UUID;
 
 /**
  * Recibo persistido de una importación. Es el único cuerpo que la API devuelve para una
- * importación, con sus once campos siempre presentes: lo que el POST responde es exactamente lo que
+ * importación, con sus doce campos siempre presentes: lo que el POST responde es exactamente lo que
  * el GET del recibo vuelve a leer, también tras un reinicio.
+ *
+ * <p>{@code source} nombra al gestor del que salieron las issues y {@code projectPath} al proyecto
+ * suyo del que se leyeron. Los dos gestores comparten forma de recibo, así que una importación de
+ * GitHub y otra de GitLab sólo se distinguen por sus valores, nunca por sus claves.
  */
 public record IssueImportReceipt(
     UUID id,
+    String source,
     UUID projectId,
-    String repository,
+    String projectPath,
     String status,
     int created,
     int skipped,
@@ -27,8 +32,10 @@ public record IssueImportReceipt(
   private static final Set<String> STATUSES = Set.of(RUNNING, COMPLETED, FAILED);
 
   public IssueImportReceipt {
-    if (id == null || projectId == null || repository == null || startedAt == null)
+    if (id == null || projectId == null || projectPath == null || startedAt == null)
       throw new IllegalArgumentException("An import receipt requires identity and a start instant");
+    if (source == null || source.isBlank())
+      throw new IllegalArgumentException("An import receipt always names the source it read");
     if (!STATUSES.contains(status))
       throw new IllegalArgumentException("An import receipt is running, completed or failed");
     if (created < 0 || skipped < 0 || failed < 0)
@@ -48,8 +55,9 @@ public record IssueImportReceipt(
   public IssueImportReceipt withCounters(int created, int skipped, int failed) {
     return new IssueImportReceipt(
         id,
+        source,
         projectId,
-        repository,
+        projectPath,
         status,
         created,
         skipped,
@@ -64,8 +72,9 @@ public record IssueImportReceipt(
       String status, String errorCode, boolean truncated, Instant finishedAt) {
     return new IssueImportReceipt(
         id,
+        source,
         projectId,
-        repository,
+        projectPath,
         status,
         created,
         skipped,

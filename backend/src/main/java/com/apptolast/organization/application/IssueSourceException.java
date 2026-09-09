@@ -20,13 +20,13 @@ public final class IssueSourceException extends RuntimeException {
 
   private final Reason reason;
   private final int retryAfterSeconds;
-  private final int githubStatus;
+  private final int providerStatus;
 
-  private IssueSourceException(Reason reason, int retryAfterSeconds, int githubStatus) {
+  private IssueSourceException(Reason reason, int retryAfterSeconds, int providerStatus) {
     super("El gestor externo respondió " + reason);
     this.reason = reason;
     this.retryAfterSeconds = retryAfterSeconds;
-    this.githubStatus = githubStatus;
+    this.providerStatus = providerStatus;
   }
 
   public static IssueSourceException tokenRejected() {
@@ -49,13 +49,13 @@ public final class IssueSourceException extends RuntimeException {
   }
 
   /** El mismo fallo, anotando qué código respondió de verdad el gestor, para la bitácora. */
-  public IssueSourceException answeredWith(int githubStatus) {
-    return new IssueSourceException(reason, retryAfterSeconds, githubStatus);
+  public IssueSourceException answeredWith(int providerStatus) {
+    return new IssueSourceException(reason, retryAfterSeconds, providerStatus);
   }
 
   /** Código HTTP del gestor, o cero cuando ni siquiera llegó a contestar. */
-  public int githubStatus() {
-    return githubStatus;
+  public int providerStatus() {
+    return providerStatus;
   }
 
   public Reason reason() {

@@ -4,6 +4,7 @@ import com.apptolast.organization.adapter.connectors.AesGcmSecretCipher;
 import com.apptolast.organization.adapter.connectors.ConnectorKeyRing;
 import com.apptolast.organization.adapter.connectors.GithubApiBase;
 import com.apptolast.organization.adapter.connectors.HttpGithubIssueSource;
+import com.apptolast.organization.adapter.http.GithubConnectorController;
 import com.apptolast.organization.application.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.SecureRandom;
@@ -80,8 +81,8 @@ public class ConnectorConfiguration {
     return new ReadIssueImport(receipts, cipher);
   }
 
-  @Bean
-  ImportGithubIssuesUseCase importGithubIssues(
+  @Bean(GithubConnectorController.GITHUB_IMPORTS)
+  ImportIssuesUseCase githubImportIssues(
       ConnectorConnectionStore connections,
       IssueImportReceiptStore receipts,
       ProjectQueries projects,
@@ -90,8 +91,15 @@ public class ConnectorConfiguration {
       SecretCipher cipher,
       ConnectorAudit audit,
       Clock clock) {
-    return new ImportGithubIssues(
-        connections, receipts, projects, source, commit, cipher, audit, clock);
+    return new ImportIssues(
+        new GithubIssueConnections(connections),
+        receipts,
+        projects,
+        source,
+        commit,
+        cipher,
+        audit,
+        clock);
   }
 
   /** Una variable de entorno sin definir llega como cadena vacía: eso es ausencia, no error. */

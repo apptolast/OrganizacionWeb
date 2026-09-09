@@ -27,7 +27,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Component
 public final class PostgresIssueImportReceiptStore implements IssueImportReceiptStore {
   private static final String COLUMNS =
-      "id, project_id, repository, status, created, skipped, failed, truncated, error_code,"
+      "id, source, project_id, project_path, status, created, skipped, failed, truncated, error_code,"
           + " started_at, finished_at";
   private static final String INTERRUPTED = "INTERRUPTED";
 
@@ -41,12 +41,18 @@ public final class PostgresIssueImportReceiptStore implements IssueImportReceipt
 
   @Override
   public IssueImportReceipt begin(
-      String ownerId, UUID projectId, String repository, Instant startedAt, Instant staleBefore) {
+      String ownerId,
+      UUID projectId,
+      String source,
+      String projectPath,
+      Instant startedAt,
+      Instant staleBefore) {
     var receipt =
         new IssueImportReceipt(
             UUID.randomUUID(),
+            source,
             projectId,
-            repository,
+            projectPath,
             IssueImportReceipt.RUNNING,
             0,
             0,
@@ -84,12 +90,14 @@ public final class PostgresIssueImportReceiptStore implements IssueImportReceipt
 
   private void insert(String ownerId, IssueImportReceipt receipt) {
     jdbc.update(
-        "INSERT INTO issue_import_receipts(id,owner_id,project_id,repository,status,created,skipped,"
-            + "failed,truncated,error_code,started_at,finished_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO issue_import_receipts(id,owner_id,source,project_id,project_path,status,created,"
+            + "skipped,failed,truncated,error_code,started_at,finished_at)"
+            + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
         receipt.id(),
         ownerId,
+        receipt.source(),
         receipt.projectId(),
-        receipt.repository(),
+        receipt.projectPath(),
         receipt.status(),
         receipt.created(),
         receipt.skipped(),
@@ -143,17 +151,18 @@ public final class PostgresIssueImportReceiptStore implements IssueImportReceipt
   }
 
   @Override
-  public Optional<IssueImportReceipt> latest(String ownerId) {
+  public Optional<IssueImportReceipt> latest(String ownerId, String source) {
     return guarded(
         () ->
             jdbc
                 .query(
                     "SELECT "
                         + COLUMNS
-                        + " FROM issue_import_receipts WHERE owner_id=?"
+                        + " FROM issue_import_receipts WHERE owner_id=? AND source=?"
                         + " ORDER BY started_at DESC, id DESC LIMIT 1",
                     mapper(),
-                    ownerId)
+                    ownerId,
+                    source)
                 .stream()
                 .findFirst());
   }
@@ -173,8 +182,9 @@ public final class PostgresIssueImportReceiptStore implements IssueImportReceipt
     return (row, index) ->
         new IssueImportReceipt(
             row.getObject("id", UUID.class),
+            row.getString("source"),
             row.getObject("project_id", UUID.class),
-            row.getString("repository"),
+            row.getString("project_path"),
             row.getString("status"),
             row.getInt("created"),
             row.getInt("skipped"),

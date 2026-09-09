@@ -39,6 +39,20 @@ public record GitlabConnection(
         version);
   }
 
+  /** El gestor falló sin que el token deje de valer: se anota el motivo y la conexión sigue. */
+  public GitlabConnection withFailure(String errorCode, Instant at) {
+    return new GitlabConnection(
+        projectPath,
+        projectId,
+        tokenHint,
+        status,
+        tokenCiphertext,
+        lastActivityAt,
+        errorCode,
+        at,
+        version);
+  }
+
   /** El último fallo publicable, o {@code null} si la conexión no arrastra ninguno. */
   public ConnectorError lastError() {
     return lastErrorCode == null ? null : new ConnectorError(lastErrorCode, lastErrorAt);

@@ -6,13 +6,19 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Puerto de salida de los recibos. {@code begin} es la sección crítica: cierra como {@code
- * INTERRUPTED} el recibo en curso anterior a {@code staleBefore} y garantiza que nunca haya más de
- * un recibo {@code running} por propietario, o lanza {@link IssueImportInProgressException}.
+ * Puerto de salida de los recibos. {@code begin} es la sección crítica del conector: cierra como
+ * {@code INTERRUPTED} el recibo en curso anterior a {@code staleBefore} y garantiza que nunca haya
+ * más de un recibo {@code running} por propietario —no por gestor—, o lanza {@link
+ * IssueImportInProgressException}.
  */
 public interface IssueImportReceiptStore {
   IssueImportReceipt begin(
-      String ownerId, UUID projectId, String repository, Instant startedAt, Instant staleBefore);
+      String ownerId,
+      UUID projectId,
+      String source,
+      String projectPath,
+      Instant startedAt,
+      Instant staleBefore);
 
   void progress(String ownerId, UUID importId, int created, int skipped, int failed);
 
@@ -26,5 +32,6 @@ public interface IssueImportReceiptStore {
 
   Optional<IssueImportReceipt> find(String ownerId, UUID importId);
 
-  Optional<IssueImportReceipt> latest(String ownerId);
+  /** El recibo más reciente del propietario para ese gestor, que es su última actividad. */
+  Optional<IssueImportReceipt> latest(String ownerId, String source);
 }

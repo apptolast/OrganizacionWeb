@@ -49,8 +49,9 @@ public final class ConnectGithub implements ConnectGithubUseCase {
             cipher.encrypt(ownerId, secret.value()),
             connectedAt);
     connections.save(ownerId, row);
-    audit.connected(ownerId, row.repository(), row.login());
-    return ConnectionView.of(row, receipts.latest(ownerId).orElse(null));
+    audit.connected(
+        GithubIssueConnections.SOURCE, ownerId, row.repository(), row.login());
+    return ConnectionView.of(row, receipts.latest(ownerId, GithubIssueConnections.SOURCE).orElse(null));
   }
 
   private RepositoryIdentity identify(
@@ -59,10 +60,11 @@ public final class ConnectGithub implements ConnectGithubUseCase {
       return source.verify(target.fullName(), secret.value());
     } catch (IssueSourceException error) {
       audit.connectionRefused(
+          GithubIssueConnections.SOURCE,
           ownerId,
           target.fullName(),
           ConnectorFailures.connectErrorCode(error),
-          error.githubStatus());
+          error.providerStatus());
       throw ConnectorFailures.whileConnecting(error);
     }
   }

@@ -6,47 +6,51 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Escribe la bitácora del conector con lo que sirve para diagnosticar —propietario, repositorio,
- * código HTTP de GitHub y contadores— y nada más. El token no aparece porque ningún método lo
- * recibe.
+ * Escribe la bitácora del conector con lo que sirve para diagnosticar —gestor, propietario,
+ * proyecto, código HTTP del proveedor y contadores— y nada más. El token no aparece porque ningún
+ * método lo recibe.
  */
 public final class Slf4jConnectorAudit implements ConnectorAudit {
   private static final Logger LOG = LoggerFactory.getLogger("organization.connectors");
 
   @Override
-  public void connected(String ownerId, String repository, String login) {
+  public void connected(String connector, String ownerId, String project, String account) {
     LOG.info(
-        "connector=github outcome=connected owner={} repository={} login={}",
+        "connector={} outcome=connected owner={} project={} account={}",
+        connector,
         ownerId,
-        repository,
-        login);
+        project,
+        account);
   }
 
   @Override
   public void connectionRefused(
-      String ownerId, String repository, String errorCode, int githubStatus) {
+      String connector, String ownerId, String project, String errorCode, int providerStatus) {
     LOG.warn(
-        "connector=github outcome=connection_refused owner={} repository={} code={} githubStatus={}",
+        "connector={} outcome=connection_refused owner={} project={} code={} providerStatus={}",
+        connector,
         ownerId,
-        repository,
+        project,
         errorCode,
-        githubStatus);
+        providerStatus);
   }
 
   @Override
   public void importFinished(
+      String connector,
       String ownerId,
-      String repository,
+      String project,
       UUID importId,
       int created,
       int skipped,
       int failed,
       boolean truncated) {
     LOG.info(
-        "connector=github outcome=import_finished owner={} repository={} importId={} created={}"
+        "connector={} outcome=import_finished owner={} project={} importId={} created={}"
             + " skipped={} failed={} truncated={}",
+        connector,
         ownerId,
-        repository,
+        project,
         importId,
         created,
         skipped,
@@ -56,20 +60,22 @@ public final class Slf4jConnectorAudit implements ConnectorAudit {
 
   @Override
   public void importFailed(
+      String connector,
       String ownerId,
-      String repository,
+      String project,
       UUID importId,
       String errorCode,
       int created,
-      int githubStatus) {
+      int providerStatus) {
     LOG.warn(
-        "connector=github outcome=import_failed owner={} repository={} importId={} code={}"
-            + " created={} githubStatus={}",
+        "connector={} outcome=import_failed owner={} project={} importId={} code={}"
+            + " created={} providerStatus={}",
+        connector,
         ownerId,
-        repository,
+        project,
         importId,
         errorCode,
         created,
-        githubStatus);
+        providerStatus);
   }
 }

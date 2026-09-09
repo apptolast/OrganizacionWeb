@@ -107,6 +107,37 @@ Feature en curso: 30 — automations. Escenarios a recorrer en fase 1: @s1–@s1
 - **Refactor**: ninguno.
 - Focal verde: `ReadAutomationRunsTest` 5/5.
 
+### Ciclo 8 — @s1–@s14, @s30, @s33, @s34, @s35, @s36 (la API HTTP)
+
+- **Rojo visto fallar**: `AutomationsApiTest` (84 tests), `compileTestJava FAILED`
+  con `cannot find symbol: class AutomationController`.
+- **Verde mínimo**: `AutomationController` con las siete rutas, `AutomationBody`
+  (lectura estricta del cuerpo cerrado), `AutomationView` (formas de salida),
+  `AutomationRunCursorCodec` (cursor opaco base64url) y seis manejadores nuevos en
+  `ApiErrors`: `UNKNOWN_EVENT_TYPE`, `INVALID_TEMPLATE`, `TARGET_NOT_FOUND`,
+  `ENDPOINT_NOT_FOUND`, `RULE_LIMIT` y `AUTOMATION_CONFLICT`.
+- **Dos rojos legítimos encontrados por el test, no por inspección**:
+  1. PATCH devolvía 500 porque el `@ExceptionHandler(Exception.class)` compartido
+     capturaba `HttpRequestMethodNotSupportedException`. Un `@ExceptionHandler`
+     local no sirve: la excepción nace en el `DispatcherServlet`, antes del
+     controlador. Se resolvió como en `ApiCredentialController` y
+     `ExportDataController`: un mapeo explícito de PATCH que responde 405 con
+     `Allow`. **No se tocó el manejador global**, para no cambiar el 500 de las
+     demás features desde este carril.
+  2. Las formas de salida no podían usar `@JsonInclude(NON_NULL)`: @s1, @s30 y @s34
+     exigen `condition: null`, `criterionTemplate: null`, `wouldFail: null`,
+     `deliveryId: null` y `nextCursor: null` **presentes**. Cada variante es ahora
+     su propio record (`TaskAction`/`WebhookAction`, `TaskPreview`/`WebhookPreview`)
+     para escribir siempre todas sus claves sin filtrar las de la otra.
+- **Decisión de campos de error anotada**: en `action`, un juego de claves
+  equivocado señala `action` (así lo fija @s8 para `{ type: CREATE_TASK }` sin
+  projectId); en el cuerpo, una propiedad desconocida o duplicada señala `body` y
+  una clave obligatoria ausente señala esa clave (@s8, fila `name ausente`); en
+  `condition`, ambos casos señalan `condition.projectId` (@s3).
+- Los instantes viajan como texto ISO-8601 propio para que la resolución de
+  microsegundos no dependa de un ajuste del serializador.
+- Focal verde: `AutomationsApiTest` 84/84 y `ArchitectureTest` en verde.
+
 ## Discrepancia de contrato pendiente de dictamen (@s30 vs @s32)
 
 @s30 dice que cada coincidencia contiene «exactamente eventId, eventType, occurredAt

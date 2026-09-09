@@ -12,7 +12,7 @@ final class InMemoryAutomations implements AutomationRuleStore {
   @Override
   public AutomationRule create(String owner, AutomationRule rule) {
     var owned = byOwner.computeIfAbsent(owner, key -> new ArrayList<>());
-    if (owned.size() >= 20) throw new AutomationLimitException();
+    if (owned.size() >= AutomationRuleStore.RULE_LIMIT) throw new AutomationLimitException();
     owned.add(rule);
     return rule;
   }

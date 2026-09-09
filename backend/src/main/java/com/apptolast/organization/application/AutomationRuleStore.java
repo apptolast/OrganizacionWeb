@@ -9,6 +9,9 @@ import java.util.UUID;
 
 /** Owner-scoped storage of rules with optimistic versions and the twenty-rule cap. */
 public interface AutomationRuleStore {
+  /** Disabled rules count too; deleting one frees a slot. */
+  int RULE_LIMIT = 20;
+
   AutomationRule create(String owner, AutomationRule rule);
 
   List<AutomationRule> list(String owner);

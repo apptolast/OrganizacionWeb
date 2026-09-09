@@ -240,7 +240,18 @@ test("@s40 los anchos que caben al 200 % de zoom nativo: sin recorte, con el ord
       .toBe(baseline.dpr * 2);
 
     const chrome_ = baseline.outerWidth - baseline.innerWidth;
-    for (const width of WIDTHS) {
+    // Chromium rechaza una ventana que no quepa al menos al 50 % en la pantalla visible
+    // («Invalid value for bounds»), y al 200 % ver `width` px CSS exige `2 * width + cromo`.
+    // En una pantalla pequeña —el xvfb de CI— hay anchos que no se pueden medir: se declaran
+    // omitidos con su motivo en vez de fingir que se midieron.
+    const available = await page.evaluate(() => screen.availWidth);
+    const fits = WIDTHS.filter((width) => width * 2 + chrome_ <= available);
+    const skipped = WIDTHS.filter((width) => !fits.includes(width));
+    expect(
+      fits,
+      `ningún ancho del contrato cabe al 200 % en una pantalla de ${available} px`,
+    ).not.toHaveLength(0);
+    for (const width of fits) {
       await worker.evaluate(
         async ({ url, outer }) => {
           const [tab] = await chrome.tabs.query({ url });
@@ -280,9 +291,13 @@ test("@s40 los anchos que caben al 200 % de zoom nativo: sin recorte, con el ord
 
     await writeFile(
       join(scratch, "evidence.json"),
-      JSON.stringify(evidence, null, 2),
+      JSON.stringify(
+        { pantalla: available, medidos: evidence, omitidos: skipped },
+        null,
+        2,
+      ),
     );
-    expect(evidence).toHaveLength(WIDTHS.length);
+    expect(evidence).toHaveLength(fits.length);
   } finally {
     await context.close();
   }

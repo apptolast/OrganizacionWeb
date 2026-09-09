@@ -457,9 +457,9 @@ test("automatizaciones UX: el recorrido con teclado sigue el orden del DOM y cad
   page,
   request,
 }) => {
-  await create(request, "Marketing");
+  const { id: project } = await create(request, "Marketing");
   await page.setViewportSize({ width: 1280, height: 1000 });
-  await openEditor(page);
+  await openDenseScreen(page, request, project);
 
   const expected = await domOrder(page);
   // Guardar antes que Simular es lo que progress/ux_automations.md declara como
@@ -472,8 +472,15 @@ test("automatizaciones UX: el recorrido con teclado sigue el orden del DOM y cad
   expect(forward.seen).toEqual(expected);
   expect(forward.invisible).toEqual([]);
 
-  // Y de vuelta: sin trampa de foco y en el orden inverso exacto.
-  const backwards = await walk(page, "Shift+Tab", [...expected].reverse());
-  expect(backwards.seen).toEqual([...expected].reverse());
+  // Y de vuelta: sin trampa de foco y en el orden inverso exacto. Tras la ida el
+  // foco queda aparcado en el ÚLTIMO control, así que el primer Shift+Tab ya
+  // salta al penúltimo: la vuelta es el inverso rotado una posición, y el último
+  // en verse es aquel donde estábamos parados. Se afirma esa rotación exacta y no
+  // un «contiene los mismos»: una trampa de foco, o un orden distinto, la rompen
+  // igual.
+  const reversed = [...expected].reverse();
+  const back = [...reversed.slice(1), reversed[0]];
+  const backwards = await walk(page, "Shift+Tab", back);
+  expect(backwards.seen).toEqual(back);
   expect(backwards.invisible).toEqual([]);
 });

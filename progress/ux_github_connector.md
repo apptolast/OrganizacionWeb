@@ -6,12 +6,19 @@ Pantalla revisada: `/integraciones/github` (`frontend/src/github-connector.tsx`)
 
 ## Qué se ha medido y con qué
 
-- **E2E ejecutado**, puerto 18094, pila de compose con PostgreSQL real y **servicio falso de GitHub**
+- **E2E ejecutado**, pila de compose con PostgreSQL real y **servicio falso de GitHub**
   (`e2e/fake-github/`, perfil `e2e`). Los estados se alcanzan **por la interfaz**, no fabricando
   filas: se conecta, se importa, se reimporta, se desconecta.
+
+  La campaña que vale es la **revalidación del 9-sep, puerto 18096**, ejecutada sobre el árbol con
+  el formato en reposo **sin byte de versión** (48 octetos). La campaña anterior (puerto 18094) se
+  midió contra el formato viejo y el juez, con razón, no la aceptó: ver
+  `progress/revalidacion_github_connector.md`.
+
   - `e2e/github-connector.spec.mjs` — **15 pruebas, 15 en verde**.
   - `e2e/github-connector-native-zoom.spec.mjs` — **1 prueba, en verde**, con Chromium real y
     `chrome.tabs.setZoom` al 200 %.
+  - Las dos juntas, en una sola pila: **16 de 16 en verde, 2,2 minutos, `retries: 0`, un worker.**
 - **axe-core** (`wcag2a`, `wcag2aa`, `wcag21aa`, `wcag22aa`, `best-practice`) en **los siete estados**
   que nombra @s42: deshabilitado, sin conexión, conectada, importando, resultado, error recuperable
   e inválida. **Cero violaciones.**
@@ -26,6 +33,11 @@ Pantalla revisada: `/integraciones/github` (`frontend/src/github-connector.tsx`)
 
   El `devicePixelRatio` triplicado respecto al 1 del arranque (1,5 × 2) confirma que el zoom se
   aplicó de verdad; `scrollWidth == clientWidth` es la ausencia de desplazamiento horizontal.
+
+  Estas nueve cifras son las **regeneradas en la revalidación**
+  (`.e2e-work/github-connector-zoom/organizationweb-e2e-66604/evidence.json`), no las de la campaña
+  anterior: coinciden con ellas fila a fila, que es lo esperable —el cambio de formato en reposo no
+  toca el pintado— pero ahora están medidas sobre el árbol vigente.
 - **Unitarias** (Vitest): 28 en `github-connector.test.tsx`, 5 en `github-connector-routing.test.tsx`
   y 23 en `github-connector-client.test.ts`.
 

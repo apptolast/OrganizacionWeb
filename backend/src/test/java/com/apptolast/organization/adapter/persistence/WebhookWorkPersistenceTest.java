@@ -18,6 +18,9 @@ import org.junit.jupiter.api.Test;
 class WebhookWorkPersistenceTest {
   private static final Instant T = Instant.parse("2026-09-08T12:00:00.000000Z");
   private static final String SECRET = "whsec_AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8";
+  // Las diez entregas y el receptor que tarda en responder, ambos del Given de @s23.
+  private static final int DELIVERIES = 10;
+  private static final long RECEIVER_MILLIS = 120;
 
   private static PostgresWebhookStore store() {
     return new PostgresWebhookStore(
@@ -125,22 +128,157 @@ class WebhookWorkPersistenceTest {
     assertTrue(claimedFor(work(), owner, T).isEmpty());
   }
 
+  /**
+   * @s23 el Given nombra un receptor que tarda en responder 200, y el Then pide tres cosas: «el
+   *     receptor recibe exactamente 10 peticiones, una por eventId», «ninguna instancia espera al
+   *     bloqueo de fila de la otra» y «las 10 entregas quedan succeeded con attempt 1».
+   *
+   * <p>La versión anterior de esta prueba sólo reclamaba: sin receptor, sin {@code record} y sin
+   * ninguna aserción sobre la espera. Eso la dejaba ciega al único defecto que este escenario existe
+   * para cazar. Si en {@code PostgresWebhookWork} se cambia {@code FOR UPDATE OF d SKIP LOCKED} por
+   * un {@code FOR UPDATE} a secas, las diez filas comparten {@code next_attempt_at} y las dos
+   * instancias eligen la misma primera fila; la perdedora se bloquea, al desbloquearse reevalúa el
+   * predicado en READ COMMITTED, ya no lo cumple, recibe {@code Optional.empty} y abandona. La
+   * ganadora drena las diez sin contención y las dos aserciones de cardinalidad seguían saliendo
+   * verdes.
+   *
+   * <p>El oráculo del no bloqueo es <b>que las dos instancias reclamen algo</b>, no un tiempo de
+   * pared: con cinco carriles compitiendo por esta máquina, un umbral temporal daría falsos rojos, y
+   * una prueba que falla por la carga ajena deja de creerse. El retardo del receptor es lo que hace
+   * discriminante a esa aserción: sin él las dos instancias podrían turnarse sin solaparse nunca.
+   */
   @Test
   void s23_twoWorkersNeverClaimTheSameDeliveryAndNeitherWaitsForTheOther() throws Exception {
     var owner = "race-" + UUID.randomUUID();
     var endpoint = given(owner, "active");
-    for (var index = 0; index < 10; index++) enqueue(owner, endpoint.id(), "{}");
+    for (var index = 0; index < DELIVERIES; index++) enqueue(owner, endpoint.id(), "{}");
+    var sent = new java.util.concurrent.CopyOnWriteArrayList<UUID>();
 
-    Callable<List<UUID>> worker =
-        () ->
-            claimedFor(work(), owner, T).stream().map(claimed -> claimed.delivery().id()).toList();
+    Callable<List<UUID>> worker = () -> deliverAll(owner, sent);
     try (var pool = Executors.newFixedThreadPool(2)) {
       var results = pool.invokeAll(List.of(worker, worker));
+      var first = results.get(0).get();
+      var second = results.get(1).get();
       var all = new ArrayList<UUID>();
-      for (var result : results) all.addAll(result.get());
-      assertEquals(10, all.size(), "each delivery is claimed exactly once");
-      assertEquals(10, java.util.Set.copyOf(all).size(), "no delivery is claimed twice");
+      all.addAll(first);
+      all.addAll(second);
+
+      assertEquals(DELIVERIES, all.size(), "each delivery is claimed exactly once");
+      assertEquals(DELIVERIES, java.util.Set.copyOf(all).size(), "no delivery is claimed twice");
+      // La cláusula «ninguna instancia espera al bloqueo de fila de la otra». Con FOR UPDATE
+      // bloqueante la perdedora acaba con cero reclamaciones y esta aserción muere.
+      assertTrue(
+          !first.isEmpty() && !second.isEmpty(),
+          "both workers made progress: " + first.size() + " and " + second.size());
+      // «El receptor recibe exactamente 10 peticiones, una por eventId».
+      assertEquals(DELIVERIES, sent.size(), "the receiver got one request per delivery");
+      assertEquals(DELIVERIES, java.util.Set.copyOf(sent).size(), "one request per eventId");
+      // «Las 10 entregas quedan succeeded con attempt 1».
+      var log = store().list(owner, endpoint.id());
+      assertEquals(DELIVERIES, log.size());
+      assertTrue(
+          log.stream().allMatch(delivery -> "succeeded".equals(delivery.status())),
+          "every delivery settled as succeeded");
+      assertTrue(
+          log.stream().allMatch(delivery -> delivery.attempt() == 1),
+          "every delivery settled on its first attempt");
     }
+  }
+
+  /**
+   * @s23 «ninguna instancia espera al bloqueo de fila de la otra», con un oráculo que <b>sí</b>
+   *     distingue.
+   *
+   * <p>Conviene dejar escrito lo que se intentó antes y por qué no valía, para que nadie lo repita:
+   * el oráculo natural parecía ser «las dos instancias reclaman algo», pero <b>no discrimina</b>.
+   * Sustituí a mano {@code SKIP LOCKED} por {@code FOR UPDATE} en producción y la prueba de arriba
+   * <b>siguió verde</b>: con diez filas libres, la instancia que pierde el bloqueo no se queda sin
+   * trabajo, sólo espera un instante y reevalúa quedándose con otra de las nueve. La espera existe,
+   * pero es invisible para cualquier aserción de cardinalidad. La teoría de que la perdedora acaba
+   * con cero reclamaciones no se sostiene cuando hay cola.
+   *
+   * <p>Lo que sí distingue es preguntar por la <b>identidad</b> de lo reclamado mientras otra
+   * transacción retiene la primera fila del orden de reclamación: con {@code SKIP LOCKED} la
+   * consulta la salta y devuelve la siguiente <b>sin esperar</b>; con {@code FOR UPDATE} se queda
+   * bloqueada hasta que el tenedor confirme, y entonces devuelve justo la que estaba retenida. Dos
+   * conductas incompatibles, sin cronómetro de por medio.
+   */
+  @Test
+  void s23_aRowHeldByAnotherTransactionIsSkippedInsteadOfWaitedFor() throws Exception {
+    var owner = "skip-" + UUID.randomUUID();
+    var endpoint = given(owner, "active");
+    enqueue(owner, endpoint.id(), "{}");
+    enqueue(owner, endpoint.id(), "{}");
+    var held =
+        WebhookPersistenceTest.Database.JDBC.queryForObject(
+            "SELECT id FROM webhook_deliveries WHERE endpoint_id=? ORDER BY next_attempt_at, id"
+                + " LIMIT 1",
+            UUID.class,
+            endpoint.id());
+
+    var holding = new java.util.concurrent.CountDownLatch(1);
+    var release = new java.util.concurrent.CountDownLatch(1);
+    try (var pool = Executors.newFixedThreadPool(2)) {
+      var holder =
+          pool.submit(
+              () ->
+                  new org.springframework.transaction.support.TransactionTemplate(
+                          WebhookPersistenceTest.Database.TRANSACTIONS)
+                      .execute(
+                          status -> {
+                            WebhookPersistenceTest.Database.JDBC.queryForObject(
+                                "SELECT id FROM webhook_deliveries WHERE id=? FOR UPDATE",
+                                UUID.class,
+                                held);
+                            holding.countDown();
+                            try {
+                              release.await(10, java.util.concurrent.TimeUnit.SECONDS);
+                            } catch (InterruptedException interrupted) {
+                              Thread.currentThread().interrupt();
+                            }
+                            return null;
+                          }));
+      assertTrue(holding.await(10, java.util.concurrent.TimeUnit.SECONDS), "the row was never held");
+
+      var claim = pool.submit(() -> claimOwn(work(), owner, T));
+      try {
+        // Si la consulta esperase al bloqueo, aquí no habría respuesta: el tenedor sigue dentro de
+        // su transacción y no la confirmará hasta el `release` de más abajo. El tiempo de espera es
+        // el detector del bloqueo, no el oráculo: el oráculo es la identidad de la fila.
+        var claimed = claim.get(10, java.util.concurrent.TimeUnit.SECONDS);
+        assertNotEquals(
+            held,
+            claimed.delivery().id(),
+            "the held row must be skipped, not handed over after waiting for its lock");
+      } catch (java.util.concurrent.TimeoutException waited) {
+        claim.cancel(true);
+        fail("claimNext waited for the row lock of another instance instead of skipping it");
+      } finally {
+        release.countDown();
+        holder.get(10, java.util.concurrent.TimeUnit.SECONDS);
+      }
+    }
+  }
+
+  /**
+   * Reclama, «envía» al receptor lento y liquida, hasta que no queda nada que reclamar. Devuelve los
+   * identificadores de lo que esta instancia entregó, para poder afirmar que ambas avanzaron.
+   */
+  private static List<UUID> deliverAll(String owner, List<UUID> sent) throws InterruptedException {
+    var work = work();
+    var mine = new ArrayList<UUID>();
+    for (var attempt = 0; attempt < 200; attempt++) {
+      var next = work.claimNext(T);
+      if (next.isEmpty()) break;
+      var claimed = next.get();
+      if (!claimed.ownerId().equals(owner)) continue;
+      // El receptor del Given tarda en responder: es lo que solapa a las dos instancias.
+      Thread.sleep(RECEIVER_MILLIS);
+      sent.add(claimed.delivery().eventId());
+      work.record(claimed, claimed.delivery().recorded(WebhookAttempt.http(200, 1), T), null);
+      mine.add(claimed.delivery().id());
+    }
+    return mine;
   }
 
   @Test

@@ -268,6 +268,98 @@ class WebhookRecoveryPersistenceTest {
     assertEquals(rowsAfterFirst, countRows(endpoint.id()), "a redelivery adds no row to the log");
   }
 
+  /**
+   * @s22 fila «el proceso muere antes de abrir la conexión | el receptor recibe 1 petición».
+   *
+   * <p>Hasta ahora ninguna de las dos filas del outline se recorría entera: el único test de
+   * recuperación reclamaba, comprobaba que el arrendamiento ocultaba la entrega y que al vencer
+   * volvía a ser reclamable, pero no había receptor —así que no se contaba ninguna petición— ni se
+   * liquidaba nada —así que el «Then» común, «el registro final es succeeded con attempt 1», no se
+   * observaba tras un reinicio—. La cadena reclamar → vencer → volver a reclamar → enviar →
+   * liquidar no se recorría en ningún sitio.
+   *
+   * <p>La muerte se simula del modo más fiel que permite la prueba: se reclama y <b>no se llama a
+   * {@code record}</b>, que es exactamente lo que deja tras de sí un proceso que cae con el
+   * arrendamiento tomado.
+   */
+  @Test
+  void s22_aDeliveryClaimedByADeadProcessIsSentOnceAfterTheLeaseExpires() {
+    var owner = "crash-before-" + UUID.randomUUID();
+    var endpoint = given(owner, List.of("TaskCreated.v1"));
+    var delivery = WebhookDelivery.ping(UUID.randomUUID(), T);
+    store().enqueuePing(owner, endpoint.id(), delivery, "{\"d\":1}");
+
+    // El proceso reclama y muere: nadie envía y nadie liquida.
+    assertNotNull(claimOwn(work(), owner, T), "the delivery was claimable before the crash");
+
+    var sender = new RecordingSender();
+    // Antes de vencer el arrendamiento nadie más puede tocarla: si esto fallase, el reinicio no
+    // estaría protegiendo nada y las dos filas del outline serían indistinguibles.
+    drain(sender, owner, T.plusSeconds(60));
+    assertTrue(sender.sent.isEmpty(), "the lease hides the delivery until it expires");
+
+    var afterLease = T.plusSeconds(360);
+    sender.now = afterLease;
+    sender.outcome = WebhookAttempt.http(200, 1);
+    drain(sender, owner, afterLease);
+
+    assertEquals(
+        List.of(delivery.eventId().toString()),
+        sender.sent.stream().map(Sent::eventId).toList(),
+        "the receiver got exactly one request");
+    assertSettledExactlyOnce(owner, endpoint.id());
+  }
+
+  /**
+   * @s22 fila «el proceso muere después de que el receptor respondiera 200 y antes de confirmar la
+   *     transacción | el receptor recibe 2 peticiones».
+   *
+   * <p>Es la fila que no existía en ningún fichero del repositorio, y la que de verdad duele: el
+   * receptor ve la entrega <b>dos veces</b> porque la primera respuesta se perdió con el proceso.
+   * Que sean dos y no una es la propiedad que hay que fijar —el contrato la acepta explícitamente:
+   * la entrega es al-menos-una-vez—, y que las dos lleven el <b>mismo eventId</b> es lo que permite
+   * al receptor deduplicar. Y pese a las dos peticiones, el registro es uno solo.
+   */
+  @Test
+  void s22_aDeliveryWhoseAcknowledgementDiedIsSentTwiceWithTheSameEventId() {
+    var owner = "crash-after-" + UUID.randomUUID();
+    var endpoint = given(owner, List.of("TaskCreated.v1"));
+    var delivery = WebhookDelivery.ping(UUID.randomUUID(), T);
+    store().enqueuePing(owner, endpoint.id(), delivery, "{\"d\":1}");
+    var sender = new RecordingSender();
+    sender.outcome = WebhookAttempt.http(200, 1);
+
+    // El proceso reclama, el receptor responde 200… y el proceso muere antes de confirmar: se
+    // descarta el resultado sin llamar a `record`.
+    var claimed = claimOwn(work(), owner, T);
+    assertNotNull(claimed);
+    sender.send(
+        claimed.endpoint().url(),
+        claimed.secret(),
+        claimed.delivery().eventId().toString(),
+        claimed.body());
+    assertEquals(1, sender.sent.size(), "the receiver already got the first request");
+
+    var afterLease = T.plusSeconds(360);
+    sender.now = afterLease;
+    drain(sender, owner, afterLease);
+
+    assertEquals(
+        List.of(delivery.eventId().toString(), delivery.eventId().toString()),
+        sender.sent.stream().map(Sent::eventId).toList(),
+        "the receiver got two requests carrying the same eventId");
+    assertSettledExactlyOnce(owner, endpoint.id());
+  }
+
+  /** El «Then» común a las dos filas: un solo registro, succeeded y con attempt 1. */
+  private static void assertSettledExactlyOnce(String owner, UUID endpointId) {
+    assertEquals(1, countRows(endpointId), "a restart never duplicates the delivery log");
+    var log = store().list(owner, endpointId);
+    assertEquals(1, log.size());
+    assertEquals("succeeded", log.getFirst().status());
+    assertEquals(1, log.getFirst().attempt(), "the retry after a crash is still the first attempt");
+  }
+
   private static int countRows(UUID endpointId) {
     return WebhookPersistenceTest.Database.JDBC.queryForObject(
         "SELECT count(*) FROM webhook_deliveries WHERE endpoint_id=?", Integer.class, endpointId);

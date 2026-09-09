@@ -51,6 +51,8 @@ export class GitlabConnectorError extends Error {
   readonly created: number | null;
   readonly skipped: number | null;
   readonly failed: number | null;
+  /** Campo → código, para poder señalar el control que el servidor rechazó. */
+  readonly fields: Record<string, string>;
 
   constructor(body: Record<string, unknown>) {
     super(typeof body.code === "string" ? body.code : "CONNECTOR_ERROR");
@@ -61,7 +63,25 @@ export class GitlabConnectorError extends Error {
     this.created = counter(body.created);
     this.skipped = counter(body.skipped);
     this.failed = counter(body.failed);
+    this.fields = fieldErrors(body.errors);
   }
+}
+
+function fieldErrors(value: unknown): Record<string, string> {
+  if (!Array.isArray(value)) return {};
+  const found: Record<string, string> = {};
+  for (const entry of value) {
+    if (
+      entry &&
+      typeof entry === "object" &&
+      nonEmpty((entry as Record<string, unknown>).field) &&
+      nonEmpty((entry as Record<string, unknown>).code)
+    )
+      found[(entry as Record<string, string>).field] = (
+        entry as Record<string, string>
+      ).code;
+  }
+  return found;
 }
 
 function counter(value: unknown): number | null {

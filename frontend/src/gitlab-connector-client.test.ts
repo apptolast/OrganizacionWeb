@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { observeAccess, setCsrfToken } from "./api-client";
 import {
@@ -7,6 +9,8 @@ import {
   readGitlabConnection,
   readGitlabImport,
   startGitlabImport,
+  CONNECTION_KEYS,
+  RECEIPT_KEYS,
 } from "./gitlab-connector-client";
 
 const projectId = "11111111-2222-4333-8444-555555555555";
@@ -256,4 +260,46 @@ it("@s37 does not decode anything once the caller aborted", async () => {
   controller.abort();
 
   await expect(readGitlabConnection(controller.signal)).rejects.toThrow();
+});
+
+// ------------------------------------------------- el contrato, atado a los dos lados
+
+/**
+ * La regresión de la noche del 9 de septiembre: el recibo pasó a llevar `source` y `projectPath`
+ * en vez de `repository` y el cliente del otro conector siguió decodificando la forma vieja. No
+ * había ninguna prueba que atara las dos orillas, así que el cambio pasó los dos lados por
+ * separado y falló al juntarlos. Ésta lee la fuente Java y compara las claves, una a una.
+ */
+function componentsOf(record: string, source: string): string[] {
+  const body = new RegExp(`record ${record}\(([^)]*)\)`, "s").exec(source);
+  if (!body) throw new Error(`no se encontró el record ${record}`);
+  return body[1]
+    .split(",")
+    .map((each) => each.trim().split(/\s+/).at(-1) ?? "")
+    .filter(Boolean);
+}
+
+const CONTROLLER =
+  "backend/src/main/java/com/apptolast/organization/adapter/http/GitlabConnectorController.java";
+
+/** Sube desde el directorio de trabajo hasta encontrar la raíz del repositorio. */
+function controller(): string {
+  for (let where = process.cwd(), step = 0; step < 6; step++) {
+    const candidate = resolve(where, CONTROLLER);
+    if (existsSync(candidate)) return readFileSync(candidate, "utf8");
+    where = dirname(where);
+  }
+  throw new Error(`no se encontró ${CONTROLLER} desde ${process.cwd()}`);
+}
+
+it("@s15 decodes exactly the receipt the controller publishes, in the same order", () => {
+  expect(componentsOf("ImportResponse", controller())).toEqual(
+    RECEIPT_KEYS.split(" "),
+  );
+});
+
+it("@s8 decodes exactly the connection the controller publishes, in the same order", () => {
+  expect(componentsOf("ConnectionResponse", controller())).toEqual(
+    CONNECTION_KEYS.split(" "),
+  );
 });

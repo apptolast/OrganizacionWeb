@@ -6,11 +6,15 @@ import {
   useState,
 } from "react";
 import { RouteLink } from "./navigation";
+import { readProjects, type ProjectSummary } from "./read-projects-api";
 import {
   GitlabConnectorError,
   connectGitlab,
+  disconnectGitlab,
   readGitlabConnection,
+  startGitlabImport,
   type GitlabConnection,
+  type GitlabImportReceipt,
 } from "./gitlab-connector-client";
 
 /**
@@ -53,14 +57,23 @@ function GitlabConnectorScreen() {
   const [connection, setConnection] = useState<GitlabConnection | null>(null);
   const [disabled, setDisabled] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState("");
   const [projectPath, setProjectPath] = useState("");
+  const [replacing, setReplacing] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState<GitlabConnectorError | null>(
     null,
   );
+  const [projects, setProjects] = useState<ProjectSummary[]>([]);
+  const [selected, setSelected] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [receipt, setReceipt] = useState<GitlabImportReceipt | null>(null);
+  const [actionError, setActionError] = useState<GitlabConnectorError | null>(
+    null,
+  );
+  const [confirming, setConfirming] = useState(false);
 
   const heading = useRef<HTMLHeadingElement>(null);
+  const tokenField = useRef<HTMLInputElement>(null);
   const pending = useRef<AbortController | null>(null);
   const mounted = useRef(true);
 
@@ -105,6 +118,24 @@ function GitlabConnectorScreen() {
     void loadConnection();
   }, [loadConnection]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    void (async () => {
+      try {
+        const page = await readProjects("/proyectos", controller.signal);
+        if (controller.signal.aborted || !mounted.current || !("items" in page))
+          return;
+        // Un proyecto terminado no admite tareas nuevas: ofrecerlo sería ofrecer un 409.
+        const open = page.items.filter((item) => item.status !== "completed");
+        setProjects(open);
+        setSelected((current) => current || (open[0]?.id ?? ""));
+      } catch {
+        // El selector sin proyectos ya cuenta por sí mismo que no hay dónde importar.
+      }
+    })();
+    return () => controller.abort();
+  }, []);
+
   async function submitConnection(event: React.FormEvent) {
     event.preventDefault();
     if (connecting) return;
@@ -114,13 +145,13 @@ function GitlabConnectorScreen() {
     pending.current = controller;
     try {
       const view = await connectGitlab(
-        { token, projectPath },
+        { token: tokenField.current?.value ?? "", projectPath },
         controller.signal,
       );
       if (!live(controller)) return;
       setConnection(view);
-      // El token deja de existir en la página en cuanto el servidor confirma que lo guardó.
-      setToken("");
+      // Al ocultarse el formulario, el nodo que tenía el token desaparece con él.
+      setReplacing(false);
     } catch (error) {
       if (!live(controller)) return;
       setConnectError(
@@ -136,8 +167,68 @@ function GitlabConnectorScreen() {
     }
   }
 
+  async function startImport() {
+    if (importing || !selected) return;
+    setImporting(true);
+    setActionError(null);
+    setReceipt(null);
+    const controller = new AbortController();
+    pending.current = controller;
+    try {
+      const started = await startGitlabImport(selected, controller.signal);
+      if (!live(controller)) return;
+      setReceipt(started);
+    } catch (error) {
+      if (!live(controller)) return;
+      setActionError(
+        error instanceof GitlabConnectorError
+          ? error
+          : new GitlabConnectorError({}),
+      );
+    } finally {
+      if (live(controller)) {
+        setImporting(false);
+        if (pending.current === controller) pending.current = null;
+      }
+    }
+  }
+
+  async function confirmDisconnect() {
+    setConfirming(false);
+    setActionError(null);
+    const controller = new AbortController();
+    pending.current = controller;
+    try {
+      await disconnectGitlab(controller.signal);
+      if (!live(controller)) return;
+      // Sólo tras el 204 se vuelve al estado sin conexión, nunca antes.
+      setConnection(null);
+      setReceipt(null);
+      setProjectPath("");
+      setReplacing(false);
+    } catch (error) {
+      if (!live(controller)) return;
+      setActionError(
+        error instanceof GitlabConnectorError
+          ? error
+          : new GitlabConnectorError({}),
+      );
+    } finally {
+      if (live(controller)) {
+        if (pending.current === controller) pending.current = null;
+      }
+    }
+  }
+
+  function replaceToken() {
+    setConnectError(null);
+    setProjectPath(connection?.projectPath ?? "");
+    setReplacing(true);
+  }
+
   const isConnected = connection?.status === "connected";
-  const showForm = !disabled && !loading && !isConnected;
+  const showPanel = !disabled && !loading && Boolean(connection) && !replacing;
+  const showForm = !disabled && !loading && (!isConnected || replacing);
 
   return (
     <main id="proyectos" className="gitlab-connector" tabIndex={-1}>
@@ -156,7 +247,7 @@ function GitlabConnectorScreen() {
         </p>
       ) : null}
 
-      {isConnected && connection ? (
+      {showPanel && connection && connection.status !== "not_connected" ? (
         <section aria-label="Conexión">
           <dl>
             <dt>Estado</dt>
@@ -168,6 +259,52 @@ function GitlabConnectorScreen() {
             <dt>Token</dt>
             <dd>{maskHint(connection.tokenHint ?? "")}</dd>
           </dl>
+
+          <div>
+            <label htmlFor="gitlab-project">Proyecto de destino</label>
+            <select
+              id="gitlab-project"
+              value={selected}
+              disabled={importing}
+              onChange={(event) => setSelected(event.target.value)}
+            >
+              {projects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              disabled={importing}
+              onClick={() => void startImport()}
+            >
+              Importar issues
+            </button>
+          </div>
+
+          <button type="button" onClick={replaceToken}>
+            Actualizar token
+          </button>
+
+          {confirming ? (
+            <div role="group" aria-label="Confirmar desconexión">
+              <p>
+                Se borrará el token guardado. Las tareas ya importadas y sus
+                enlaces se conservan.
+              </p>
+              <button type="button" onClick={() => void confirmDisconnect()}>
+                Confirmar desconexión
+              </button>
+              <button type="button" onClick={() => setConfirming(false)}>
+                Cancelar
+              </button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => setConfirming(true)}>
+              Desconectar
+            </button>
+          )}
         </section>
       ) : null}
 
@@ -197,11 +334,11 @@ function GitlabConnectorScreen() {
               name="token"
               type="password"
               autoComplete="off"
-              value={token}
+              ref={tokenField}
+              defaultValue=""
               readOnly={connecting}
               aria-invalid={connectError?.fields.token ? true : undefined}
               aria-describedby="gitlab-token-help"
-              onChange={(event) => setToken(event.target.value)}
             />
             <p id="gitlab-token-help">
               Usa un token personal con alcance read_api y nada más.
@@ -216,9 +353,42 @@ function GitlabConnectorScreen() {
         </form>
       ) : null}
 
+      {actionError ? <p role="alert">{describeFailure(actionError)}</p> : null}
+
+      {receipt ? <Receipt receipt={receipt} /> : null}
+
       <p role="status" aria-live="polite" aria-atomic="true">
-        {connecting ? "Guardando…" : ""}
+        {connecting
+          ? "Guardando…"
+          : importing
+            ? "Importando issues. Esto puede tardar un poco…"
+            : ""}
       </p>
     </main>
+  );
+}
+
+/** Cuatro cifras etiquetadas, sin porcentajes ni barras: lo que el recibo dice y nada más. */
+function Receipt({ receipt }: { receipt: GitlabImportReceipt }) {
+  return (
+    <section aria-label="Resultado de la importación">
+      <dl>
+        <dt>Creadas</dt>
+        <dd>{receipt.created}</dd>
+        <dt>Omitidas</dt>
+        <dd>{receipt.skipped}</dd>
+        <dt>Fallidas</dt>
+        <dd>{receipt.failed}</dd>
+        <dt>Truncado</dt>
+        <dd>{receipt.truncated ? "Sí" : "No"}</dd>
+      </dl>
+      {receipt.truncated ? (
+        <p>
+          El proyecto tiene más issues abiertas de las que caben en una
+          importación: quedaron issues sin traer. Vuelve a importar para
+          continuar.
+        </p>
+      ) : null}
+    </section>
   );
 }

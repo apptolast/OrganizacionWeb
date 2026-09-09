@@ -4,9 +4,9 @@ import { microseconds } from "./work-session-api";
 
 const CONNECTION_URL = "/api/v1/me/connectors/gitlab";
 const IMPORTS_URL = `${CONNECTION_URL}/imports`;
-const CONNECTION_FIELDS =
+export const CONNECTION_KEYS =
   "status apiBase projectPath projectId tokenHint lastActivityAt lastError version";
-const RECEIPT_FIELDS =
+export const RECEIPT_KEYS =
   "id source projectId projectPath status created skipped failed truncated errorCode startedAt finishedAt";
 const ERROR_FIELDS = "code at";
 const INCOMPATIBLE = "Confirmación incompatible";
@@ -120,7 +120,7 @@ function decodeFailure(value: unknown): ConnectorFailure | null {
 /** Sin conexión los siete campos restantes son nulos; con conexión, ninguno de los cinco lo es. */
 function decodeConnection(value: unknown): GitlabConnection {
   if (
-    !exact(value, CONNECTION_FIELDS) ||
+    !exact(value, CONNECTION_KEYS) ||
     !["connected", "error", "not_connected"].includes(value.status as string)
   )
     throw new Error(INCOMPATIBLE);
@@ -150,7 +150,7 @@ function decodeConnection(value: unknown): GitlabConnection {
 
 function decodeReceipt(value: unknown): GitlabImportReceipt {
   if (
-    !exact(value, RECEIPT_FIELDS) ||
+    !exact(value, RECEIPT_KEYS) ||
     !identifier(value.id) ||
     value.source !== SOURCE ||
     !identifier(value.projectId) ||

@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { setCsrfToken } from "./api-client";
 import { GitlabConnector } from "./gitlab-connector";
@@ -60,7 +60,7 @@ afterEach(() => {
 // ------------------------------------------------------------- @s34 el formulario
 
 it("@s34 offers a token field that is a password, never autofilled and never prefilled", async () => {
-  stub(Response.json(notConnected));
+  stub(Response.json(notConnected), Response.json(projects));
 
   render(<GitlabConnector owner="owner" />);
 
@@ -71,7 +71,7 @@ it("@s34 offers a token field that is a password, never autofilled and never pre
 });
 
 it("@s34 shows the shape of the project path and asks for a read_api token", async () => {
-  stub(Response.json(notConnected));
+  stub(Response.json(notConnected), Response.json(projects));
 
   render(<GitlabConnector owner="owner" />);
 
@@ -81,7 +81,7 @@ it("@s34 shows the shape of the project path and asks for a read_api token", asy
 });
 
 it("@s34 does not announce success before there is any", async () => {
-  stub(Response.json(notConnected));
+  stub(Response.json(notConnected), Response.json(projects));
 
   render(<GitlabConnector owner="owner" />);
 
@@ -96,6 +96,7 @@ it("@s34 disables the button and says «Guardando…» while the request is in f
   let settle: (value: Response) => void = () => {};
   const fetcher = vi.fn();
   fetcher.mockResolvedValueOnce(Response.json(notConnected));
+  fetcher.mockResolvedValueOnce(Response.json(projects));
   fetcher.mockReturnValueOnce(
     new Promise<Response>((resolve) => {
       settle = resolve;
@@ -120,7 +121,11 @@ it("@s34 disables the button and says «Guardando…» while the request is in f
 
 it("@s34 shows «Conectado», the masked hint and the project only after the 200", async () => {
   const user = userEvent.setup();
-  stub(Response.json(notConnected), Response.json(connected));
+  stub(
+    Response.json(notConnected),
+    Response.json(projects),
+    Response.json(connected),
+  );
 
   render(<GitlabConnector owner="owner" />);
   await screen.findByLabelText(/Token de acceso personal/);
@@ -133,7 +138,11 @@ it("@s34 shows «Conectado», the masked hint and the project only after the 200
 
 it("@s34 empties the token field once the connection is confirmed", async () => {
   const user = userEvent.setup();
-  stub(Response.json(notConnected), Response.json(connected));
+  stub(
+    Response.json(notConnected),
+    Response.json(projects),
+    Response.json(connected),
+  );
 
   render(<GitlabConnector owner="owner" />);
   await screen.findByLabelText(/Token de acceso personal/);
@@ -149,6 +158,7 @@ it("@s34 shows the translated code, keeps the path and says nothing about being 
   const user = userEvent.setup();
   stub(
     Response.json(notConnected),
+    Response.json(projects),
     problem(409, { code: "CONNECTION_INVALID" }),
   );
 
@@ -167,6 +177,7 @@ it("@s34 marks the field the server complained about", async () => {
   const user = userEvent.setup();
   stub(
     Response.json(notConnected),
+    Response.json(projects),
     problem(400, {
       code: "VALIDATION_ERROR",
       errors: [{ field: "projectPath", code: "INVALID_FORMAT" }],
@@ -187,7 +198,11 @@ it("@s34 marks the field the server complained about", async () => {
 
 it("@s32 never leaves the token in localStorage, sessionStorage or cookies", async () => {
   const user = userEvent.setup();
-  stub(Response.json(notConnected), Response.json(connected));
+  stub(
+    Response.json(notConnected),
+    Response.json(projects),
+    Response.json(connected),
+  );
 
   render(<GitlabConnector owner="owner" />);
   await screen.findByLabelText(/Token de acceso personal/);
@@ -205,6 +220,7 @@ it("@s32 does not paint the token even while the request is still travelling", a
   let settle: (value: Response) => void = () => {};
   const fetcher = vi.fn();
   fetcher.mockResolvedValueOnce(Response.json(notConnected));
+  fetcher.mockResolvedValueOnce(Response.json(projects));
   fetcher.mockReturnValueOnce(
     new Promise<Response>((resolve) => {
       settle = resolve;
@@ -217,11 +233,14 @@ it("@s32 does not paint the token even while the request is still travelling", a
   await fillAndSubmit(user);
 
   await waitFor(() => expect(connectButton()).toBeDisabled());
-  // El único sitio del documento donde el token puede estar es el campo que lo recoge.
-  const holders = [...document.querySelectorAll("*")].filter((node) =>
-    node.outerHTML.includes(TOKEN),
-  );
-  expect(holders.at(-1)).toBe(tokenField());
+  // El token vive sólo en la propiedad value del campo: no está en el HTML serializado
+  // de ningún elemento, así que ningún volcado del documento puede publicarlo.
+  expect((tokenField() as HTMLInputElement).value).toBe(TOKEN);
+  expect(
+    [...document.querySelectorAll("*")].some((node) =>
+      node.outerHTML.includes(TOKEN),
+    ),
+  ).toBe(false);
   expect(document.body.textContent).not.toContain(TOKEN);
 
   settle(Response.json(connected));
@@ -239,4 +258,218 @@ it("@s29 without the server key it explains the missing configuration and offers
   expect(alert.textContent).toContain("configuración del servidor");
   expect(screen.queryByLabelText(/Token de acceso personal/)).toBeNull();
   expect(screen.queryByRole("button")).toBeNull();
+});
+
+// ============================================================ @s35 con conexión existente
+
+const projectId = "11111111-2222-4333-8444-555555555555";
+const otherProjectId = "22222222-3333-4444-8555-666666666666";
+const doneProjectId = "33333333-4444-4555-8666-777777777777";
+const importId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
+
+function summary(id: string, name: string, status: string) {
+  return {
+    id,
+    name,
+    status,
+    createdAt: "2026-09-01T08:00:00.000000Z",
+    updatedAt: "2026-09-01T08:00:00.000000Z",
+  };
+}
+
+const projects = {
+  items: [
+    summary(projectId, "Primero", "idea"),
+    summary(otherProjectId, "Segundo", "active"),
+    summary(doneProjectId, "Terminado", "completed"),
+  ],
+  nextCursor: null,
+};
+
+function receipt(overrides: Record<string, unknown> = {}) {
+  return {
+    id: importId,
+    source: "gitlab",
+    projectId,
+    projectPath: "grupo/proyecto",
+    status: "completed",
+    created: 7,
+    skipped: 2,
+    failed: 1,
+    truncated: false,
+    errorCode: null,
+    startedAt: "2026-09-09T12:00:00.123456Z",
+    finishedAt: "2026-09-09T12:00:04.123456Z",
+    ...overrides,
+  };
+}
+
+/** La pantalla arranca pidiendo la conexión y la lista de proyectos, en ese orden. */
+function openConnected(...rest: Response[]) {
+  return stub(Response.json(connected), Response.json(projects), ...rest);
+}
+
+async function renderConnected() {
+  render(<GitlabConnector owner="owner" />);
+  await screen.findByRole("button", { name: "Importar issues" });
+}
+
+it("@s35 shows the hint, the path and the identifier next to the three buttons", async () => {
+  openConnected();
+
+  await renderConnected();
+
+  expect(screen.getByText("••••WXYZ")).toBeTruthy();
+  expect(screen.getByText("grupo/proyecto")).toBeTruthy();
+  expect(screen.getByText("4821")).toBeTruthy();
+  for (const name of ["Importar issues", "Actualizar token", "Desconectar"])
+    expect(screen.getByRole("button", { name })).toBeTruthy();
+});
+
+it("@s35 lists only the open projects in the native selector", async () => {
+  openConnected();
+
+  await renderConnected();
+
+  const options = screen.getAllByRole("option");
+  expect(options.map((option) => option.textContent)).toEqual([
+    "Primero",
+    "Segundo",
+  ]);
+});
+
+it("@s35 announces progress without a percentage while the import travels", async () => {
+  const user = userEvent.setup();
+  let settle: (value: Response) => void = () => {};
+  const fetcher = vi.fn();
+  fetcher.mockResolvedValueOnce(Response.json(connected));
+  fetcher.mockResolvedValueOnce(Response.json(projects));
+  fetcher.mockReturnValueOnce(
+    new Promise<Response>((resolve) => {
+      settle = resolve;
+    }),
+  );
+  vi.stubGlobal("fetch", fetcher);
+
+  await renderConnected();
+  await user.click(screen.getByRole("button", { name: "Importar issues" }));
+
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Importar issues" }),
+    ).toBeDisabled(),
+  );
+  const notice = screen.getByRole("status");
+  expect(notice.textContent).toContain("Importando");
+  expect(notice.textContent).not.toMatch(/\d+\s*%/);
+
+  settle(Response.json(receipt(), { status: 201 }));
+  await screen.findByText("Creadas");
+});
+
+it("@s35 presents the receipt as four labelled figures", async () => {
+  const user = userEvent.setup();
+  openConnected(Response.json(receipt(), { status: 201 }));
+
+  await renderConnected();
+  await user.click(screen.getByRole("button", { name: "Importar issues" }));
+
+  const summaryBox = await screen.findByRole("region", {
+    name: "Resultado de la importación",
+  });
+  for (const [label, value] of [
+    ["Creadas", "7"],
+    ["Omitidas", "2"],
+    ["Fallidas", "1"],
+    ["Truncado", "No"],
+  ]) {
+    expect(within(summaryBox).getByText(label)).toBeTruthy();
+    expect(within(summaryBox).getByText(value)).toBeTruthy();
+  }
+});
+
+it("@s35 warns visibly when the import came back truncated", async () => {
+  const user = userEvent.setup();
+  openConnected(Response.json(receipt({ truncated: true }), { status: 201 }));
+
+  await renderConnected();
+  await user.click(screen.getByRole("button", { name: "Importar issues" }));
+
+  const summaryBox = await screen.findByRole("region", {
+    name: "Resultado de la importación",
+  });
+  expect(within(summaryBox).getByText("Sí")).toBeTruthy();
+  expect(screen.getByText(/quedaron issues sin traer/i)).toBeTruthy();
+});
+
+it("@s35 asks for an explicit confirmation that promises the imported tasks survive", async () => {
+  const user = userEvent.setup();
+  openConnected();
+
+  await renderConnected();
+  await user.click(screen.getByRole("button", { name: "Desconectar" }));
+
+  const confirmation = screen.getByRole("group", {
+    name: "Confirmar desconexión",
+  });
+  expect(within(confirmation).getByText(/se conservan/i)).toBeTruthy();
+  expect(screen.getByText("••••WXYZ")).toBeTruthy();
+});
+
+it("@s35 only goes back to the disconnected state after the 204", async () => {
+  const user = userEvent.setup();
+  openConnected(new Response(null, { status: 204 }));
+
+  await renderConnected();
+  await user.click(screen.getByRole("button", { name: "Desconectar" }));
+  await user.click(
+    screen.getByRole("button", { name: "Confirmar desconexión" }),
+  );
+
+  await screen.findByLabelText(/Token de acceso personal/);
+  expect(screen.queryByText("••••WXYZ")).toBeNull();
+  expect(screen.queryByRole("button", { name: "Importar issues" })).toBeNull();
+});
+
+it("@s35 keeps the connection when the disconnection fails", async () => {
+  const user = userEvent.setup();
+  openConnected(problem(503, { code: "STORAGE_UNAVAILABLE" }));
+
+  await renderConnected();
+  await user.click(screen.getByRole("button", { name: "Desconectar" }));
+  await user.click(
+    screen.getByRole("button", { name: "Confirmar desconexión" }),
+  );
+
+  await screen.findByRole("alert");
+  expect(screen.getByText("••••WXYZ")).toBeTruthy();
+});
+
+it("@s35 opens the form with an empty token field when the token is replaced", async () => {
+  const user = userEvent.setup();
+  openConnected();
+
+  await renderConnected();
+  await user.click(screen.getByRole("button", { name: "Actualizar token" }));
+
+  expect((tokenField() as HTMLInputElement).value).toBe("");
+  expect((pathField() as HTMLInputElement).value).toBe("grupo/proyecto");
+});
+
+it("@s35 leaves no trace of a previous token in the form it reopens", async () => {
+  const user = userEvent.setup();
+  stub(
+    Response.json(notConnected),
+    Response.json(projects),
+    Response.json(connected),
+    Response.json(projects),
+  );
+
+  render(<GitlabConnector owner="owner" />);
+  await screen.findByLabelText(/Token de acceso personal/);
+  await fillAndSubmit(user);
+  await waitFor(() => expect(screen.getByText("Conectado")).toBeTruthy());
+  await user.click(screen.getByRole("button", { name: "Actualizar token" }));
+
+  expect((tokenField() as HTMLInputElement).value).toBe("");
 });

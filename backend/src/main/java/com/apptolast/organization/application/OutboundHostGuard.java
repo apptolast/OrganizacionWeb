@@ -8,13 +8,7 @@ package com.apptolast.organization.application;
  * <p>Riesgo residual conocido: entre esta comprobación y la conexión el DNS puede cambiar (rebinding
  * DNS). Se acepta y se mitiga repitiendo la comprobación en cada sincronización, no solo al guardar.
  */
-public final class OutboundHostGuard {
-  public enum Verdict {
-    ALLOWED,
-    UNRESOLVABLE,
-    BLOCKED
-  }
-
+public final class OutboundHostGuard implements OutboundGuard {
   private final HostResolver resolver;
   private final AddressPolicy policy;
 
@@ -23,6 +17,7 @@ public final class OutboundHostGuard {
     this.policy = policy;
   }
 
+  @Override
   public Verdict check(String host) {
     java.util.List<java.net.InetAddress> addresses;
     try {

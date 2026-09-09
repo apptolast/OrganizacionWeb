@@ -127,3 +127,34 @@ Comando: `backend\gradlew.bat test --no-daemon --tests '...domain.IcsCalendarTes
   por clave ajena en cascada y es idempotente.
 - El orden de `events` usa `uid COLLATE "C"` para que coincida con el orden de
   `String.compareTo` que aplica el dominio al truncar a 500.
+
+### Ciclo 11 — caso de uso de sincronización (@s11, @s12, @s13, @s14, @s16, @s23, @s24, @s26, @s27, @s28, @s29)
+
+- ROJO: `SyncExternalCalendarTest` con un almacén en memoria, un feed que
+  registra las descargas y una auditoría que registra las líneas.
+- VERDE: `SyncExternalCalendar` más `SyncOutcome`, `ExternalCalendarAudit`,
+  `OutboundGuard` (interfaz funcional que ahora implementa `OutboundHostGuard`)
+  y `ExternalCalendarNotConfiguredException`.
+- Orden fijado por los tests: descifrar, guardia de direcciones, descarga,
+  análisis. Los dos primeros fallos no emiten ninguna petición HTTP.
+- El reloj se lee una sola vez: `lastAttemptAt` y `lastSyncAt` coinciden en el
+  éxito. `imported` cuenta todos los VEVENT válidos, también los que quedan
+  fuera de la ventana almacenada.
+- Corrección de un test mal planteado: la carrera de @s26 no se reproduce
+  escribiendo antes de `execute` (entonces se lee la versión nueva). El
+  competidor se confirma *durante* la descarga, con un gancho en el feed.
+- La zona de instantánea cae a `ZoneId.of("UTC")`, no a `ZoneOffset.UTC`, cuyo
+  identificador es "Z" y no "UTC".
+
+### Ciclo 12 — guardar, borrar y leer (@s2, @s3, @s4, @s5, @s6, @s7, @s31, @s32, @s33)
+
+- ROJO: `SaveExternalCalendarTest` exige que guardar la misma dirección otra vez
+  deje un cifrado distinto (@s3) conservando la instantánea (@s6). El puerto
+  tenía `relabel(owner, label, now)` y no volvía a sellar.
+- VERDE: `relabel` recibe ahora el cifrado nuevo; `SaveExternalCalendar` decide
+  entre crear, resellar con otra etiqueta, reasignar dirección o no escribir
+  nada. Una dirección que ya no se puede descifrar cuenta como distinta, así que
+  reasigna y limpia la instantánea.
+- También verde: `DeleteExternalCalendar`, `ReadExternalCalendar`,
+  `ReadExternalCalendarEvents` con `ExternalEventsView`, y el rango de dominio
+  `ExternalEventsRange` con `ExternalEventsRangeTest` (@s32).

@@ -69,13 +69,15 @@ public final class PostgresExternalCalendarStore implements ExternalCalendarStor
   }
 
   @Override
-  public StoredSubscription relabel(String ownerId, String label, Instant now) {
+  public StoredSubscription relabel(
+      String ownerId, String label, byte[] urlCiphertext, Instant now) {
     return writing(
         () -> {
           jdbc.update(
-              "UPDATE external_calendar_subscriptions SET label = ?, version = version + 1,"
-                  + " updated_at = ? WHERE owner_id = ?",
+              "UPDATE external_calendar_subscriptions SET label = ?, url_ciphertext = ?,"
+                  + " version = version + 1, updated_at = ? WHERE owner_id = ?",
               label,
+              urlCiphertext,
               at(now),
               ownerId);
           return read(ownerId).orElseThrow();

@@ -137,7 +137,7 @@ class ExternalCalendarPersistenceTest {
   void s6_relabellingBumpsTheVersionAndKeepsSnapshotAndCounters() {
     store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
     store().commitSuccess(A, 0, summary(12, false), List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")), EARLIER);
-    var relabelled = store().relabel(A, "Casa", NOW);
+    var relabelled = store().relabel(A, "Casa", cipher("E"), NOW);
     assertThat(relabelled.version()).isEqualTo(2);
     assertThat(relabelled.subscription().label()).isEqualTo("Casa");
     assertThat(relabelled.subscription().imported()).isEqualTo(12);

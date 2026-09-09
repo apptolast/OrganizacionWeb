@@ -348,6 +348,51 @@ class GithubConnectorPersistenceTest {
   }
 
   @Test
+  void s25_twoRealSimultaneousImportsLeaveExactlyOneReceiptRunning() throws Exception {
+    int attempts = 8;
+    var start = new java.util.concurrent.CyclicBarrier(attempts);
+    var pool = java.util.concurrent.Executors.newFixedThreadPool(attempts);
+    var began = new java.util.concurrent.atomic.AtomicInteger();
+    var refused = new java.util.concurrent.atomic.AtomicInteger();
+    try {
+      var results =
+          pool.invokeAll(
+              java.util.stream.IntStream.range(0, attempts)
+                  .<java.util.concurrent.Callable<Void>>mapToObj(
+                      n ->
+                          () -> {
+                            start.await();
+                            try {
+                              receipts.begin(
+                                  OWNER,
+                                  projectId,
+                                  REPOSITORY,
+                                  NOW,
+                                  NOW.minus(Duration.ofMinutes(15)));
+                              began.incrementAndGet();
+                            } catch (IssueImportInProgressException expected) {
+                              refused.incrementAndGet();
+                            }
+                            return null;
+                          })
+                  .toList());
+      for (var result : results) result.get();
+    } finally {
+      pool.shutdownNow();
+    }
+
+    assertThat(began.get()).isEqualTo(1);
+    assertThat(refused.get()).isEqualTo(attempts - 1);
+    assertThat(count("issue_import_receipts")).isEqualTo(1);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM issue_import_receipts WHERE owner_id=? AND status='running'",
+                Integer.class,
+                OWNER))
+        .isEqualTo(1);
+  }
+
+  @Test
   void s25_anotherOwnerMayImportAtTheSameTime() {
     var otherProject = seedProject(OTHER, "idea");
     receipts.begin(OWNER, projectId, REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));

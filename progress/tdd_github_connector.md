@@ -241,6 +241,26 @@ lista blanca de rutas, que —correctamente— no incluye ninguna ruta del conec
 - El índice `/integraciones` enlaza "Conector de GitHub" y "API para integraciones"; la prueba
   busca dentro de `main` para no confundirse con el enlace que el menú ya tenía.
 
+### Ciclo 16 — @s25 @s34 los huecos que quedaban
+
+Auditoría de trazabilidad @s → prueba: tres escenarios no estaban cubiertos de verdad.
+
+1. **@s25 concurrencia real.** Había prueba del índice único, pero no de dos peticiones a la vez.
+   Nueva prueba en `GithubConnectorPersistenceTest`: ocho hilos con `CyclicBarrier` llaman a
+   `begin` sobre el mismo propietario. Exactamente uno empieza, siete reciben
+   `IssueImportInProgressException` y queda un solo recibo `running`. Verde.
+2. **@s34 la exportación.** `ConnectorExportExposureTest` fija que la exportación sigue teniendo
+   catorce colecciones y que ninguna se llama como algo del conector. Si alguien añadiera las
+   tablas nuevas al volcado, el texto cifrado del token acabaría en un fichero descargable.
+3. **@s34 la bitácora.** No existía. ROJO `ConnectorAuditTest`, VERDE puerto
+   `application/ConnectorAudit` y adaptador `adapter/logging/Slf4jConnectorAudit`, cableados en
+   `ConnectGithub` y en `ImportGithubIssues`.
+   - La bitácora registra lo que el contrato pide: propietario, repositorio, **código HTTP de
+     GitHub** y contadores. Para eso `IssueSourceException` gana `githubStatus`.
+   - **Ningún método del puerto admite el token.** Que no se pueda registrar es una propiedad del
+     tipo, no una disciplina de quien escribe la línea; una prueba recorre los métodos por
+     reflexión para que nadie añada después uno que lo acepte.
+
 ## Enmiendas al contrato aprobadas por el coordinador (9 de septiembre de 2026)
 
 Origen: `progress/security_review_connectors.md` (rama `main`). El coordinador actualiza

@@ -27,6 +27,8 @@ public final class ImportGithubIssues implements ImportGithubIssuesUseCase {
   static final Duration ABANDONED_AFTER = Duration.ofMinutes(15);
   private static final int MAX_PAGES = 2;
   private static final String COMPLETED_PROJECT = "completed";
+  /** El fallo no vino del gestor externo, así que no hay código HTTP suyo que anotar. */
+  private static final int NOT_GITHUB = 0;
 
   private final ConnectorConnectionStore connections;
   private final IssueImportReceiptStore receipts;
@@ -34,6 +36,7 @@ public final class ImportGithubIssues implements ImportGithubIssuesUseCase {
   private final IssueSource source;
   private final ImportedTaskCommit commit;
   private final SecretCipher cipher;
+  private final ConnectorAudit audit;
   private final Clock clock;
 
   public ImportGithubIssues(
@@ -43,6 +46,7 @@ public final class ImportGithubIssues implements ImportGithubIssuesUseCase {
       IssueSource source,
       ImportedTaskCommit commit,
       SecretCipher cipher,
+      ConnectorAudit audit,
       Clock clock) {
     this.connections = connections;
     this.receipts = receipts;
@@ -50,6 +54,7 @@ public final class ImportGithubIssues implements ImportGithubIssuesUseCase {
     this.source = source;
     this.commit = commit;
     this.cipher = cipher;
+    this.audit = audit;
     this.clock = clock;
   }
 
@@ -77,16 +82,32 @@ public final class ImportGithubIssues implements ImportGithubIssuesUseCase {
     var tally = new Tally();
     try {
       boolean truncated = collect(ownerId, projectId, connection, receipt, tally);
-      return receipts.finish(
-          ownerId, receipt.id(), IssueImportReceipt.COMPLETED, null, truncated, now());
+      var closed =
+          receipts.finish(
+              ownerId, receipt.id(), IssueImportReceipt.COMPLETED, null, truncated, now());
+      audit.importFinished(
+          ownerId,
+          connection.repository(),
+          closed.id(),
+          closed.created(),
+          closed.skipped(),
+          closed.failed(),
+          closed.truncated());
+      return closed;
     } catch (IssueSourceException error) {
       if (error.reason() == IssueSourceException.Reason.TOKEN_REJECTED)
         connections.invalidate(ownerId);
-      throw failed(ownerId, receipt, ConnectorFailures.importErrorCode(error), error.retryAfterSeconds());
+      throw failed(
+          ownerId,
+          connection,
+          receipt,
+          ConnectorFailures.importErrorCode(error),
+          error.retryAfterSeconds(),
+          error.githubStatus());
     } catch (ProjectCompletedException error) {
-      throw failed(ownerId, receipt, "PROJECT_COMPLETED", 0);
+      throw failed(ownerId, connection, receipt, "PROJECT_COMPLETED", 0, NOT_GITHUB);
     } catch (StorageUnavailableException error) {
-      throw failed(ownerId, receipt, "STORAGE_UNAVAILABLE", 0);
+      throw failed(ownerId, connection, receipt, "STORAGE_UNAVAILABLE", 0, NOT_GITHUB);
     }
   }
 
@@ -147,10 +168,17 @@ public final class ImportGithubIssues implements ImportGithubIssuesUseCase {
   }
 
   private IssueImportFailedException failed(
-      String ownerId, IssueImportReceipt receipt, String errorCode, int retryAfterSeconds) {
+      String ownerId,
+      StoredConnection connection,
+      IssueImportReceipt receipt,
+      String errorCode,
+      int retryAfterSeconds,
+      int githubStatus) {
     var closed =
         receipts.finish(
             ownerId, receipt.id(), IssueImportReceipt.FAILED, errorCode, false, now());
+    audit.importFailed(
+        ownerId, connection.repository(), closed.id(), errorCode, closed.created(), githubStatus);
     return new IssueImportFailedException(closed, retryAfterSeconds);
   }
 

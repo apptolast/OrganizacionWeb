@@ -16,6 +16,7 @@ public final class ConnectGithub implements ConnectGithubUseCase {
   private final IssueImportReceiptStore receipts;
   private final IssueSource source;
   private final SecretCipher cipher;
+  private final ConnectorAudit audit;
   private final Clock clock;
 
   public ConnectGithub(
@@ -23,11 +24,13 @@ public final class ConnectGithub implements ConnectGithubUseCase {
       IssueImportReceiptStore receipts,
       IssueSource source,
       SecretCipher cipher,
+      ConnectorAudit audit,
       Clock clock) {
     this.connections = connections;
     this.receipts = receipts;
     this.source = source;
     this.cipher = cipher;
+    this.audit = audit;
     this.clock = clock;
   }
 
@@ -36,7 +39,7 @@ public final class ConnectGithub implements ConnectGithubUseCase {
     if (!cipher.enabled()) throw new ConnectorsDisabledException();
     var target = GithubRepository.parse(repository);
     var secret = new PersonalAccessToken(token);
-    var identity = identify(target, secret);
+    var identity = identify(ownerId, target, secret);
     var connectedAt = clock.instant().truncatedTo(MICROS);
     var row =
         new StoredConnection(
@@ -46,13 +49,20 @@ public final class ConnectGithub implements ConnectGithubUseCase {
             cipher.encrypt(ownerId, secret.value()),
             connectedAt);
     connections.save(ownerId, row);
+    audit.connected(ownerId, row.repository(), row.login());
     return ConnectionView.of(row, receipts.latest(ownerId).orElse(null));
   }
 
-  private RepositoryIdentity identify(GithubRepository target, PersonalAccessToken secret) {
+  private RepositoryIdentity identify(
+      String ownerId, GithubRepository target, PersonalAccessToken secret) {
     try {
       return source.verify(target.fullName(), secret.value());
     } catch (IssueSourceException error) {
+      audit.connectionRefused(
+          ownerId,
+          target.fullName(),
+          ConnectorFailures.connectErrorCode(error),
+          error.githubStatus());
       throw ConnectorFailures.whileConnecting(error);
     }
   }

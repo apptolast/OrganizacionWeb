@@ -45,6 +45,7 @@ class ImportGithubIssuesTest {
         fakes.source,
         fakes.tasks,
         fakes.cipher,
+        fakes.audit,
         Clock.fixed(now, ZoneOffset.UTC));
   }
 
@@ -440,6 +441,29 @@ class ImportGithubIssuesTest {
     fakes.projects.status(projectId, "completed");
 
     assertThrows(ProjectCompletedException.class, () -> importIssues.execute(OWNER, projectId));
+  }
+
+  @Test
+  void s34_theAuditRecordsTheCountersOfAFinishedImportAndNeverTheToken() {
+    githubPage(1, issues(1, 3), 3, false);
+
+    importIssues.execute(OWNER, projectId);
+
+    assertEquals(
+        List.of("finished owner-1 octocat/Hello-World 3 0 0 false"), fakes.audit.lines());
+    assertFalse(String.join(" ", fakes.audit.lines()).contains("ghp_secreto123"));
+  }
+
+  @Test
+  void s34_theAuditRecordsWhatABrokenImportManagedToDoAndWhatGithubAnswered() {
+    githubPage(1, issues(1, 100), 100, true);
+    fakes.source.failOnPage(2, IssueSourceException.rateLimited(120));
+
+    assertThrows(IssueImportFailedException.class, () -> importIssues.execute(OWNER, projectId));
+
+    assertEquals(
+        List.of("import-failed owner-1 octocat/Hello-World RATE_LIMITED 100 429"),
+        fakes.audit.lines());
   }
 
   @Test

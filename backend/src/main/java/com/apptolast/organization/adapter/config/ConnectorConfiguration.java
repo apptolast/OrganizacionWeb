@@ -43,6 +43,11 @@ public class ConnectorConfiguration {
   }
 
   @Bean
+  ConnectorAudit connectorAudit() {
+    return new com.apptolast.organization.adapter.logging.Slf4jConnectorAudit();
+  }
+
+  @Bean
   IssueSource githubIssueSource(GithubApiBase base, ObjectMapper json, Clock clock) {
     return new HttpGithubIssueSource(base, json, clock);
   }
@@ -53,8 +58,9 @@ public class ConnectorConfiguration {
       IssueImportReceiptStore receipts,
       IssueSource source,
       SecretCipher cipher,
+      ConnectorAudit audit,
       Clock clock) {
-    return new ConnectGithub(connections, receipts, source, cipher, clock);
+    return new ConnectGithub(connections, receipts, source, cipher, audit, clock);
   }
 
   @Bean
@@ -82,8 +88,10 @@ public class ConnectorConfiguration {
       IssueSource source,
       ImportedTaskCommit commit,
       SecretCipher cipher,
+      ConnectorAudit audit,
       Clock clock) {
-    return new ImportGithubIssues(connections, receipts, projects, source, commit, cipher, clock);
+    return new ImportGithubIssues(
+        connections, receipts, projects, source, commit, cipher, audit, clock);
   }
 
   /** Una variable de entorno sin definir llega como cadena vacía: eso es ausencia, no error. */

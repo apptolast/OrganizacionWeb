@@ -25,6 +25,54 @@ final class ConnectorFakes {
   final FakeCipher cipher = new FakeCipher();
   final FakeImportedTaskCommit tasks = new FakeImportedTaskCommit();
   final FakeProjects projects = new FakeProjects();
+  final FakeAudit audit = new FakeAudit();
+
+  /** Bitácora en memoria: guarda las líneas para poder afirmar qué se registró y qué no. */
+  static final class FakeAudit implements ConnectorAudit {
+    private final List<String> lines = new ArrayList<>();
+
+    List<String> lines() {
+      return List.copyOf(lines);
+    }
+
+    @Override
+    public void connected(String ownerId, String repository, String login) {
+      lines.add("connected " + ownerId + " " + repository + " " + login);
+    }
+
+    @Override
+    public void connectionRefused(
+        String ownerId, String repository, String errorCode, int githubStatus) {
+      lines.add("refused " + ownerId + " " + repository + " " + errorCode + " " + githubStatus);
+    }
+
+    @Override
+    public void importFinished(
+        String ownerId,
+        String repository,
+        UUID importId,
+        int created,
+        int skipped,
+        int failed,
+        boolean truncated) {
+      lines.add(
+          "finished " + ownerId + " " + repository + " " + created + " " + skipped + " " + failed
+              + " " + truncated);
+    }
+
+    @Override
+    public void importFailed(
+        String ownerId,
+        String repository,
+        UUID importId,
+        String errorCode,
+        int created,
+        int githubStatus) {
+      lines.add(
+          "import-failed " + ownerId + " " + repository + " " + errorCode + " " + created + " "
+              + githubStatus);
+    }
+  }
 
   /** Cifrado reversible con nonce por escritura y propietario como dato autenticado. */
   static final class FakeCipher implements SecretCipher {

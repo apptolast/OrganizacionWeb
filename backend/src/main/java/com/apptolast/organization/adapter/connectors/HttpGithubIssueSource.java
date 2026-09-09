@@ -127,11 +127,12 @@ public final class HttpGithubIssueSource implements IssueSource {
     if (status == 401) return IssueSourceException.tokenRejected();
     if (status == 429) return IssueSourceException.rateLimited(retryAfter(response));
     if (status == 403)
-      return exhaustedQuota(response)
-          ? IssueSourceException.rateLimited(retryAfter(response))
-          : IssueSourceException.repositoryUnavailable();
+      return (exhaustedQuota(response)
+              ? IssueSourceException.rateLimited(retryAfter(response))
+              : IssueSourceException.repositoryUnavailable())
+          .answeredWith(status);
     if (status == 404) return IssueSourceException.repositoryUnavailable();
-    return IssueSourceException.unavailable();
+    return IssueSourceException.unavailable().answeredWith(status);
   }
 
   private static boolean exhaustedQuota(HttpResponse<String> response) {

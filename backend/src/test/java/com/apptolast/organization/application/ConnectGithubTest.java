@@ -33,6 +33,7 @@ class ConnectGithubTest {
         fakes.receipts,
         fakes.source,
         fakes.cipher,
+        fakes.audit,
         Clock.fixed(now, ZoneOffset.UTC));
   }
 
@@ -193,6 +194,38 @@ class ConnectGithubTest {
         () -> connect.execute(OWNER, "octocat/Hello-World", TOKEN));
     assertEquals(java.util.List.of(), fakes.source.calls());
     assertTrue(fakes.connections.find(OWNER).isEmpty());
+  }
+
+  @Test
+  void s34_theAuditRecordsOwnerRepositoryAndLoginButNeverTheToken() {
+    fakes.source.identify("octocat/Hello-World", "octocat");
+
+    connect.execute(OWNER, "octocat/Hello-World", TOKEN);
+
+    assertEquals(
+        java.util.List.of("connected owner-1 octocat/Hello-World octocat"), fakes.audit.lines());
+    assertFalse(String.join(" ", fakes.audit.lines()).contains(TOKEN));
+  }
+
+  @Test
+  void s34_theAuditRecordsWhyAConnectionWasRefusedAndWhatGithubAnswered() {
+    fakes.source.fail(IssueSourceException.tokenRejected());
+
+    assertThrows(
+        GithubTokenRejectedException.class,
+        () -> connect.execute(OWNER, "octocat/Hello-World", "ghp_malo"));
+
+    assertEquals(
+        java.util.List.of("refused owner-1 octocat/Hello-World GITHUB_TOKEN_REJECTED 401"),
+        fakes.audit.lines());
+    assertFalse(String.join(" ", fakes.audit.lines()).contains("ghp_malo"));
+  }
+
+  @Test
+  void s34_nothingIsAuditedWhenTheRequestNeverReachedGithub() {
+    assertThrows(ValidationException.class, () -> connect.execute(OWNER, "octocat", TOKEN));
+
+    assertEquals(java.util.List.of(), fakes.audit.lines());
   }
 
   private static int indexOfPlaintext(byte[] ciphertext) {

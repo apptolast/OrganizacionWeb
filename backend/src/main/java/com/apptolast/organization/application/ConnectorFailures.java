@@ -17,6 +17,16 @@ final class ConnectorFailures {
     };
   }
 
+  /** Código con el que la bitácora nombra un rechazo al conectar. */
+  static String connectErrorCode(IssueSourceException error) {
+    return switch (error.reason()) {
+      case TOKEN_REJECTED -> "GITHUB_TOKEN_REJECTED";
+      case REPOSITORY_UNAVAILABLE -> "GITHUB_REPOSITORY_UNAVAILABLE";
+      case RATE_LIMITED -> "RATE_LIMITED";
+      case UNAVAILABLE -> "GITHUB_UNAVAILABLE";
+    };
+  }
+
   /** Código de recibo con el que se cierra una importación rota por el gestor externo. */
   static String importErrorCode(IssueSourceException error) {
     return switch (error.reason()) {

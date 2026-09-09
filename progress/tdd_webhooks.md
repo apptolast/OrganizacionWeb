@@ -380,3 +380,60 @@ objetivos de 44 px y tabla con desplazamiento propio en la hoja de estilo).
 **La parte de axe, los cuatro anchos, el zoom al 200 % y ambos temas es E2E**, y
 la disciplina de esta sesión me prohíbe lanzarlo. Queda para la puerta del
 coordinador; no lo doy por probado.
+
+## Sesión 3 — reintegración y cierre de `@s42`
+
+### Reintegración (commits `d03e4ba` y `37b2da5`)
+
+Dos merges: primero `af6f455` (feature 26, enmiendas, modo oscuro) y después
+`origin/main` 9d81c17 (feature 27 y la guarda de esquema aditivo ya
+generalizada por el coordinador). Tomo **su** versión de la guarda y retiro la
+mía. `App.tsx` conserva las cinco vistas; `@s36` mantiene Webhooks justo tras
+«API para integraciones».
+
+Dos regresiones ajenas, ambas **ya rojas antes de tocar nada**:
+
+- `ApiCredentialCompatibilityTest`: tras la V24 la lista negra de tablas
+  fallaba por `calendar_feed_tokens`, no por las mías. Lo generalicé; luego
+  llegó la versión del coordinador y me quedo con la suya.
+- `WeeklyReviewPersistenceTest`: la V25 crea `task_external_links` e
+  `issue_import_receipts`, que referencian `tasks` y `projects`, y su
+  `TRUNCATE` no se actualizó. Verificado sobre `origin/main`: llega roto. Uso
+  `TRUNCATE ... CASCADE` en vez de ir añadiendo tabla por tabla, que es lo que
+  lo hizo frágil.
+
+### `@s42` — auditoría E2E (commit `99f1e94`)
+
+`e2e/webhooks-ux.spec.mjs`, **6/6 verde**. Siete estados (`empty`, `form`,
+`secret`, `list`, `deliveries`, `confirm`, `error`) x cuatro anchos (320, 768,
+1280, 1440) x cinco modalidades (claro, oscuro, texto 200 %, `forced-colors`,
+`prefers-reduced-motion`), más recorrido de teclado. `color-contrast` solo se
+desactiva bajo colores forzados.
+
+**Defectos reales que cazó**, todos corregidos:
+
+1. La vista abría en `<section>`: «Saltar al contenido» (`#proyectos`) no tenía
+   destino en `/webhooks`.
+2. La tabla de entregas se salía (`Reenviar` en x=907 con viewport 768). Ocho
+   columnas con objetivos de 44 px no caben en 320, y `@s42` prohíbe **a la
+   vez** scroll horizontal y recorte, así que `overflow-x` era la respuesta
+   equivocada. Ahora refluye con roles ARIA explícitos; ningún dato se oculta.
+3. Desbordamiento real al 200 % en el primer estado: campos con ancho
+   intrínseco `size=20` y tokens que no rompen.
+4. El foco no volvía al cancelar la confirmación de borrado.
+
+**Un fallo era mío, no del producto.** El ayudante de texto al 200 % no
+restauraba el tamaño original, así que cada estado volvía a doblar
+(51 -> 102 -> 204 -> 409 px). Estuve a punto de «arreglar» el CSS para
+satisfacer un oráculo roto. Corregido el ayudante, **retiré** las dos reglas
+que sólo servían para eso y reejecuté: 6/6 sigue verde, luego sobraban.
+
+`progress/ux_webhooks.md` recorre los 30 principios sin omitir filas.
+
+### Límites declarados, no cubiertos
+
+- **No se ejecutó zoom nativo** del navegador: el 200 % se mide por tamaño de
+  fuente computado y reflow. No afirmo zoom nativo.
+- El umbral de Doherty (<400 ms) **no se midió** en este carril.
+- La API del navegador se simula con `page.route`: audita interfaz, no
+  aceptación de backend (esa la cubre la suite JVM filtrada).

@@ -198,6 +198,18 @@ lista blanca de rutas, que —correctamente— no incluye ninguna ruta del conec
   venir de nada con alcance de petición.
 - `ArchitectureTest` (ArchUnit) sigue verde: dominio y aplicación no han ganado dependencias.
 
+### Ciclo 13 — @s10 @s12 @s20 @s21 @s30 @s37 @s39 @s41 el cliente del navegador
+
+- ROJO `github-connector-client.test.ts`, 23 pruebas (el módulo no existía).
+- VERDE `github-connector-client.ts`: cinco llamadas sobre el transporte de cookie y CSRF que ya
+  existe, y `ConnectorError` con `code`, `retryAfterSeconds`, `importId` y los contadores
+  parciales, que es justo lo que @s39 necesita para ofrecer la acción que resuelve cada error.
+- El decodificador comprueba la forma acordada y **rechaza** lo que no encaja en lugar de
+  confiar: campos exactos, estados de la lista, contadores no negativos, y la regla de que sólo un
+  recibo en curso carece de final y de error. Sin esto, un backend equivocado se vería como datos.
+- Un rojo legítimo y era la prueba: `apiRequest` normaliza las cabeceras a `Headers`, así que
+  `options.headers["X-CSRF-TOKEN"]` era `undefined`. Se comprueba con `.get(...)`.
+
 ## Enmiendas al contrato aprobadas por el coordinador (9 de septiembre de 2026)
 
 Origen: `progress/security_review_connectors.md` (rama `main`). El coordinador actualiza

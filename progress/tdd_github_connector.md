@@ -138,6 +138,27 @@ lista blanca de rutas, que —correctamente— no incluye ninguna ruta del conec
 - Hace falta decidir: o el `.feature` acepta 403 `API_SCOPE_DENIED` para esta fila, o el carril de
   la feature 24 cambia el filtro para responder 401 en rutas fuera de su lista blanca.
 
+### Ciclo 10 — @s1 @s13 @s16 @s20 @s28 @s34 @s35 el adaptador HTTP de GitHub
+
+- ROJO `HttpGithubIssueSourceTest`, 32 pruebas contra `FakeGithub`, un servidor del JDK en loopback
+  y puerto efímero (sin Testcontainers, sin red saliente).
+- VERDE `adapter/connectors/HttpGithubIssueSource`:
+  - `followRedirects(NEVER)`: seguir un 302 llevaría el PAT del usuario a un destino que elige el
+    otro extremo. Un 302 es `UNAVAILABLE` y la ruta del `Location` no recibe ninguna petición.
+  - Plazos explícitos: 2 s de conexión y 4 s de petición, por debajo de los 2,9 s y 4,9 s que pide
+    @s28. Las pruebas los miden con reloj de pared.
+  - Clasificación: 401 token rechazado; 404 repositorio no disponible; 429 cuota; 403 **es** cuota
+    si GitHub lo dice (`x-ratelimit-remaining: 0` o `Retry-After`) y si no, repositorio no
+    disponible, que es justo lo que distingue @s8 de @s20; el resto, caída.
+  - Segundos de espera: `Retry-After` manda sobre `x-ratelimit-reset`, un reinicio ya pasado pide 1
+    segundo y sin ninguna de las dos cabeceras se piden 60.
+  - `more` sale del `Link` con `rel="next"`; los elementos con `pull_request` se descartan pero
+    cuentan para decidir si se pide la página siguiente.
+  - Ningún mensaje de error incorpora el token ni el cuerpo de la respuesta.
+- Un rojo legítimo, y era la prueba: registraba la ruta en minúsculas y pedía el repositorio tal y
+  como se tecleó. El adaptador pide exactamente lo que recibe; el nombre canónico viene del
+  `full_name` que responde GitHub, no de normalizar por nuestra cuenta.
+
 ## Enmiendas al contrato aprobadas por el coordinador (9 de septiembre de 2026)
 
 Origen: `progress/security_review_connectors.md` (rama `main`). El coordinador actualiza

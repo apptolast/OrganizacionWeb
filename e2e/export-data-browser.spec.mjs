@@ -490,21 +490,17 @@ test("export browser simulated API: cancellation, 413 and voluntary focus destin
 test("export browser simulated API: keyboard preparation and native byte-exact download @s23 @s24 @s26 @s31", async ({
   page,
 }, testInfo) => {
-  page.on("response", async (response) => {
-    if (!response.url().endsWith("/api/v1/me/export")) return;
-    const body = await response.body();
-    await writeFile(
-      testInfo.outputPath("transport.json"),
-      JSON.stringify(
-        {
-          headers: await response.allHeaders(),
-          bytes: body.length,
-          equal: body.equals(bytes),
-        },
-        null,
-        2,
-      ),
-    );
+  // La evidencia del transporte se queda con las cabeceras (metadatos que
+  // Playwright ya tiene) y con los bytes que el navegador persiste en la
+  // descarga: response.body() se los pediría a la caché del inspector de
+  // Chromium, que desaloja el cuerpo ya consumido y falla de forma
+  // intermitente bajo carga.
+  // fulfillArchive reencamina la petición al servidor local, así que la
+  // respuesta observable termina en /export en lugar de /api/v1/me/export.
+  let transportHeaders = null;
+  page.on("response", (response) => {
+    if (new URL(response.url()).pathname.endsWith("/export"))
+      transportHeaders = response.headers();
   });
   let release;
   const gate = new Promise((resolve) => {
@@ -553,13 +549,27 @@ test("export browser simulated API: keyboard preparation and native byte-exact d
   await expect(
     page.getByRole("button", { name: "Preparar de nuevo" }),
   ).toBeFocused();
+  let delivered = null;
   for (let i = 0; i < 2; i++) {
     const downloading = page.waitForEvent("download");
     await page.getByRole("link", { name: "Descargar archivo JSON" }).click();
     const download = await downloading;
     expect(download.suggestedFilename()).toBe(filename);
-    expect(await readFile(await download.path())).toEqual(bytes);
+    delivered = await readFile(await download.path());
+    expect(delivered).toEqual(bytes);
   }
+  await writeFile(
+    testInfo.outputPath("transport.json"),
+    JSON.stringify(
+      {
+        headers: transportHeaders,
+        bytes: delivered.length,
+        equal: delivered.equals(bytes),
+      },
+      null,
+      2,
+    ),
+  );
   expect(calls).toBe(1);
   expect(unexpected).toEqual([]);
 });

@@ -327,7 +327,50 @@ retirada al terminar (contenedores, red y volumen comprobados como eliminados).
 
 Con esto **@s42 pasa a estar cubierto**; la tabla de trazabilidad se actualiza.
 
-## Discrepancia de contrato pendiente de dictamen (@s30 vs @s32)
+### Ciclo 19 — segundo reasentamiento sobre `origin/main` (a6164e4)
+
+Main avanzó mientras trabajaba: entró el carril `ics_calendar` (con su entrada de
+navegación y su ámbito PIT) y el comit `a6164e4`, que **ratifica la enmienda de
+@s30**: la coincidencia lleva cinco campos, con `loopGuarded` junto a `preview`.
+Es exactamente lo que la fase 1 ya tenía en verde; no hubo que cambiar código.
+
+Se rebasó otra vez (`git rebase --onto origin/main 7ea682d claude/automations`)
+porque dejar los rangos de Stryker fijados contra un `App.tsx` viejo habría
+anulado el trabajo del ciclo 17.
+
+**Conflicto de navegación resuelto conservando todas las entradas.** El orden
+final del menú es: Hoy, Proyectos, Disponibilidad, Historial, Revisión semanal,
+Apariencia, Exportación, **Calendario**, Importación, API para integraciones,
+**Automatizaciones**. Se conservaron las dos ramas del ternario de `section` y las
+dos ramas de render en `App.tsx`, y se ajustaron a cinco posiciones las
+aserciones de cola de `App.test.tsx`, `export-data.test.tsx` y
+`appearance.test.tsx`. En `backend/build.gradle.kts` conviven ahora los ámbitos
+`ics_calendar` y `automations`, y en `scripts/project.mjs` los siete objetivos
+(`integration_api` ×3, `ics_calendar` ×2, `automations` ×2).
+
+**Rangos de Stryker re-derivados por segunda vez**, ahora también los de
+`ics-calendar`, que mi entrada había desplazado. 25 rangos, los 25 validados con
+el oráculo de contenido antes de escribirlos:
+
+| Configuración | Rango final |
+| --- | --- |
+| appearance | `App.tsx:34:8-34:44`, `App.tsx:57:20-69:36`, `App.tsx:90:10-131:7`, `workspace.tsx:79:10-84:22` |
+| export-data | `App.tsx:35:8-35:45`, `App.tsx:55:18-69:36`, `App.tsx:88:10-131:7`, `workspace.tsx:85:10-90:22` |
+| import-data | `App.tsx:30:8-30:41`, `App.tsx:37:8-37:45`, `App.tsx:51:14-69:36`, `App.tsx:76:10-131:7`, `workspace.tsx:97:10-105:22` |
+| history | `App.tsx:32:8-32:57`, `App.tsx:63:26-69:36`, `App.tsx:98:10-131:7`, `workspace.tsx:67:10-72:22` |
+| integration-api | `App.tsx:38:8-38:55`, `App.tsx:49:12-69:36`, `App.tsx:74:10-131:7`, `workspace.tsx:106:10-113:22` |
+| ics-calendar | `App.tsx:36:8-36:42`, `App.tsx:53:16-54:30`, `App.tsx:86:10-87:37`, `workspace.tsx:91:10-96:22` |
+
+`scripts/project.test.mjs`: **79 pasan, 0 fallan**. Migraciones sin colisión: V24
+es de calendario, V28 sigue siendo la mía.
+
+**Verificación tras el reasentamiento**: backend focal 155/155 y `spotlessCheck`
+limpio; frontend `tsc`, Prettier y 793 tests de los 21 ficheros que renderizan
+`App` o `Workspace`; E2E **7/7 otra vez** sobre la pila real en 18093 (se repitió
+porque el menú ganó una entrada y eso afecta al desbordamiento a 320 px), pila
+retirada.
+
+## Discrepancia de contrato @s30 vs @s32 — RATIFICADA por el propietario (a6164e4)
 
 @s30 dice que cada coincidencia contiene «exactamente eventId, eventType, occurredAt
 y preview» (cuatro campos), pero @s32 exige leer `loopGuarded true` y `loopGuarded false`,

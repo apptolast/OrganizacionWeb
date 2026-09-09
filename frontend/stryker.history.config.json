@@ -6,10 +6,10 @@
   "mutate": [
     "src/history-api.ts",
     "src/history.tsx",
-    "src/App.tsx:31:8-31:57",
-    "src/App.tsx:59:24-65:34",
-    "src/App.tsx:92:10-125:7",
-    "src/workspace.tsx:66:10-71:22",
+    "src/App.tsx:32:8-32:57",
+    "src/App.tsx:63:26-69:36",
+    "src/App.tsx:98:10-131:7",
+    "src/workspace.tsx:67:10-72:22",
     "src/project-reader.tsx:111:10-116:22",
     "src/task-reader.tsx:112:10-117:22"
   ],

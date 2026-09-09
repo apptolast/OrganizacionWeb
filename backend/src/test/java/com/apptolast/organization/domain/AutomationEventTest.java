@@ -58,6 +58,32 @@ class AutomationEventTest {
   }
 
   @Test
+  void s6_s18_theTaskOfAnEventIsNamedDirectlyOrReachedThroughItsSession() {
+    for (var type :
+        java.util.List.of(
+            "TaskCreated.v1",
+            "SubtaskCreated.v1",
+            "TaskStatusChanged.v1",
+            "BlockPlanned.v1",
+            "BlockChanged.v1",
+            "WorkSessionStarted.v1"))
+      assertThat(event(type, PROJECT, Map.of("taskId", TASK.toString())).taskSource())
+          .hasValue(new EventTask.Known(TASK));
+    for (var type :
+        java.util.List.of(
+            "WorkSessionStateChanged.v1", "WorkSessionExtended.v1", "WorkSessionClosed.v1"))
+      assertThat(event(type, SESSION, Map.of()).taskSource())
+          .hasValue(new EventTask.OfWorkSession(SESSION));
+  }
+
+  @Test
+  void s7_projectEventsHaveNoTaskAtAll() {
+    for (var type :
+        java.util.List.of("ProjectCreated.v1", "ProjectUpdated.v1", "ProjectStatusChanged.v1"))
+      assertThat(event(type, PROJECT, Map.of("name", "Marketing")).taskSource()).isEmpty();
+  }
+
+  @Test
   void s29_onlyTaskCreationEventsConsultTheLoopGuard() {
     var created = Map.<String, Object>of("taskId", TASK.toString(), "title", "Redactar informe");
     assertThat(event("TaskCreated.v1", PROJECT, created).loopGuardTaskId()).hasValue(TASK);

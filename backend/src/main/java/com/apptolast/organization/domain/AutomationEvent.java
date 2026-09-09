@@ -27,6 +27,16 @@ public record AutomationEvent(
     };
   }
 
+  /** Empty for the three project events, which have no task to name. */
+  public Optional<EventTask> taskSource() {
+    return switch (eventType) {
+      case "ProjectCreated.v1", "ProjectUpdated.v1", "ProjectStatusChanged.v1" -> Optional.empty();
+      case "WorkSessionStateChanged.v1", "WorkSessionExtended.v1", "WorkSessionClosed.v1" ->
+          Optional.of(new EventTask.OfWorkSession(aggregateId));
+      default -> Optional.of(new EventTask.Known(uuid("taskId")));
+    };
+  }
+
   /** Present only for the two creation events; the guard is never consulted for the others. */
   public Optional<UUID> loopGuardTaskId() {
     return switch (eventType) {

@@ -6,7 +6,7 @@ Feature en curso: 25 — webhooks. Escenarios a recorrer: @s1…@s42.
 
 ## Decisiones previas
 
-- @s33 filas Bearer: `ApiCredentialBearerFilter` autentica la credencial y, para rutas fuera de su allowlist, responde `403 API_SCOPE_DENIED` (no 401). Por la decisión 5 del coordinador, esas dos filas se prueban con `403 API_SCOPE_DENIED` y sin tocar webhooks.
+- @s33 filas Bearer: `ApiCredentialBearerFilter` autentica la credencial y, para rutas fuera de su allowlist, responde `403 API_SCOPE_DENIED` (no 401). Por la decisión 5 del coordinador, esas dos filas deben probarse con `403 API_SCOPE_DENIED` y sin tocar webhooks. **Corrección del 9 de septiembre de 2026 (hallazgo 16 del dictamen):** durante la feature 25 esa prueba nunca se escribió —el dictamen lo verificó: `WebhookApiTest` no montaba ni una petición con cabecera `Authorization`—. La cubre ahora `WebhookApiTest.s33_aBearerCredentialOfTheIntegrationChannelReachesNoWebhookRoute`, y las filas 413-414 de `features/webhooks.feature` quedan enmendadas a 403.
 - Firma HMAC y AES-GCM viven en adaptadores (`javax.crypto` no está permitido en dominio/aplicación por ArchUnit). El dominio conserva catálogo, validación, política de direcciones y tabla de reintentos.
 - Errores de aplicación: una sola `WebhookOperationException(Code)` para los códigos 4xx/5xx estables; `WebhookInvalidException(campos)` en dominio para `WEBHOOK_INVALID` con `errors[]`.
 
@@ -37,6 +37,12 @@ manda la enmienda.
   una vez, se validan todas las direcciones devueltas y se conecta contra la IP
   literal ya validada, conservando el nombre original en la cabecera `Host` y en
   SNI. Deja de ser un límite aceptado. Afecta al entregador y a @s25.
+  **Revocado el 9 de septiembre de 2026 (hallazgo 5 del dictamen).** La segunda
+  mitad —conectar contra la IP literal conservando `Host` y SNI— no se
+  implementó y se decide no implementarla: en el cliente HTTP del JDK exige
+  `jdk.httpclient.allowRestrictedHeaders=host` y rompe la verificación del
+  nombre del certificado. El reenlace vuelve a ser límite aceptado y declarado;
+  ver `project-spec.md` (enmienda B2/B3) y `deploy/EGRESS.md`.
 - **B4 (media) — deduplicación sobre material firmado.** Solo documentación:
   `docs/webhooks.md` debe decir que se verifica la firma primero, que se
   deduplica por el `eventId` que viaja dentro del cuerpo firmado (la cabecera

@@ -117,6 +117,7 @@ verde, luego eran innecesarias.
 | Sesgo cognitivo | Sin métricas de productividad ni presión; ningún tipo de evento viene marcado por defecto. | Verificado estructuralmente. |
 | Sobrecarga de opciones | Doce tipos acotados con selección en bloque; las acciones destructivas piden confirmación. | Verificado; comprensión pendiente de uso real. |
 | Doherty | El botón queda deshabilitado mientras el POST está en vuelo y el estado de carga se anuncia por `aria-live`, sin fingir éxito ni porcentaje. **No se midió** el umbral de 400 ms en este carril. | Parcial y declarado: comportamiento verificado, latencia **no** medida. |
+| Anuncio de resultado | **Corregido el 9 de septiembre de 2026 (hallazgo 15 del dictamen).** Hasta ese día la única región live propia de la vista envolvía sólo «Cargando webhooks…», de modo que la cláusula de `features/webhooks.feature:522` —«los cambios de estado se anuncian por aria-live»— no estaba implementada ni probada. Ahora hay una región `role="status" aria-live="polite" aria-atomic="true"` a la que escriben desactivar, activar, enviar ping, eliminar y reenviar. | Verificado en unitarios: cinco aserciones sobre el texto de esa región, una por acción de @s39 y @s40. **Falta** la comprobación en el E2E de UX. |
 
 ## Puertas que siguen abiertas
 

@@ -84,6 +84,7 @@ function WebhookPanel() {
   const [confirming, setConfirming] = useState<WebhookEndpoint | null>(null);
   const [deliveriesOf, setDeliveriesOf] = useState<string | null>(null);
   const [deliveries, setDeliveries] = useState<WebhookDelivery[]>([]);
+  const [announcement, setAnnouncement] = useState("");
 
   const listHeading = useRef<HTMLHeadingElement>(null);
   const createButton = useRef<HTMLButtonElement>(null);
@@ -204,6 +205,9 @@ function WebhookPanel() {
       setItems((current) =>
         current.map((item) => (item.id === updated.id ? updated : item)),
       );
+      setAnnouncement(
+        status === "disabled" ? "Webhook desactivado." : "Webhook activado.",
+      );
     });
   }
 
@@ -216,6 +220,7 @@ function WebhookPanel() {
         sent,
         ...current.filter((d) => d.id !== sent.id),
       ]);
+      setAnnouncement("Ping enviado. La entrega queda pendiente.");
     });
   }
 
@@ -225,6 +230,7 @@ function WebhookPanel() {
       if (signal.aborted) return;
       setItems((current) => current.filter((item) => item.id !== endpoint.id));
       setConfirming(null);
+      setAnnouncement("Webhook eliminado.");
       listHeading.current?.focus();
     });
   }
@@ -244,6 +250,7 @@ function WebhookPanel() {
       setDeliveries((current) =>
         current.map((item) => (item.id === reopened.id ? reopened : item)),
       );
+      setAnnouncement("Entrega reenviada. Vuelve a estar pendiente.");
     });
   }
 
@@ -263,6 +270,16 @@ function WebhookPanel() {
       <h1>Webhooks</h1>
 
       <div aria-live="polite">{loading && <p>Cargando webhooks…</p>}</div>
+
+      {/* @s42:522 — el resultado de cada acción de @s39 y @s40 se anuncia aquí. */}
+      <p
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="webhook-announcement"
+      >
+        {announcement}
+      </p>
 
       {loadFailed && (
         <p role="alert">

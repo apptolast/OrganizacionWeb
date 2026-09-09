@@ -22,9 +22,19 @@ import javax.net.ssl.SSLException;
  * <p>Amendment B1: five seconds to connect and ten for the whole exchange, so a receiver that
  * accepts the connection and stalls still times out. The response body is discarded, never stored.
  *
- * <p>Amendment B3: the host is resolved once and every returned address is checked before
- * connecting, so no name can be re-pointed between the check and the use. The check uses the shared
- * {@link AddressPolicy}, whose {@code allows} answers PERMITTED: the rejection is its negation.
+ * <p>Amendment B3, stated as what the code actually does: the host is resolved once, every returned
+ * address is checked, and the request is abandoned before any connection is opened if a single one
+ * is blocked. The check uses the shared {@link AddressPolicy}, whose {@code allows} answers
+ * PERMITTED: the rejection is its negation.
+ *
+ * <p>Residual limit, accepted and written down instead of hidden: the request then travels by
+ * NAME, not by the literal address just validated, so the client resolves again and a name
+ * re-pointed between the check and the use is not closed here. Anchoring the connection to the
+ * literal would force {@code jdk.httpclient.allowRestrictedHeaders=host} and break certificate
+ * name verification, which would make TLS worse, not better. What contains the residue instead is
+ * mandatory https with redirects never followed —an internal service would have to present a
+ * certificate valid for the attacker's name, which {@code JdkWebhookSenderTest} now proves is
+ * rejected— plus the egress policy declared as a deployment requirement in {@code deploy/EGRESS.md}.
  */
 public final class JdkWebhookSender implements WebhookSender {
   private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(5);
@@ -37,20 +47,44 @@ public final class JdkWebhookSender implements WebhookSender {
   private final AddressPolicy policy;
   private final com.apptolast.organization.application.WebhookDestinationGuard.HostResolver
       resolver;
+  private final Duration exchangeDeadline;
   private final HttpClient client;
 
   public JdkWebhookSender(
       Clock clock,
       AddressPolicy policy,
       com.apptolast.organization.application.WebhookDestinationGuard.HostResolver resolver) {
+    this(clock, policy, resolver, CONNECT_TIMEOUT, EXCHANGE_TIMEOUT);
+  }
+
+  /**
+   * The deadlines are injectable so a test can produce a real timeout in milliseconds instead of
+   * paying the ten seconds of production. Production wiring goes through the public constructor.
+   */
+  JdkWebhookSender(
+      Clock clock,
+      AddressPolicy policy,
+      com.apptolast.organization.application.WebhookDestinationGuard.HostResolver resolver,
+      Duration connectDeadline,
+      Duration exchangeDeadline) {
     this.clock = clock;
     this.policy = policy;
     this.resolver = resolver;
+    this.exchangeDeadline = exchangeDeadline;
     this.client =
         HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.NEVER)
-            .connectTimeout(CONNECT_TIMEOUT)
+            .connectTimeout(connectDeadline)
             .build();
+  }
+
+  /** Read back from the client itself, not from a field: it is the deadline actually wired. */
+  Duration connectDeadline() {
+    return client.connectTimeout().orElseThrow();
+  }
+
+  Duration exchangeDeadline() {
+    return exchangeDeadline;
   }
 
   @Override
@@ -98,7 +132,7 @@ public final class JdkWebhookSender implements WebhookSender {
 
   private HttpRequest request(String url, String secret, String eventId, byte[] payload) {
     return HttpRequest.newBuilder(URI.create(url))
-        .timeout(EXCHANGE_TIMEOUT)
+        .timeout(exchangeDeadline)
         .header("Content-Type", CONTENT_TYPE)
         .header("User-Agent", USER_AGENT)
         .header("X-OrganizationWeb-Event-Id", eventId)

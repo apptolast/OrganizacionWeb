@@ -186,8 +186,20 @@ todo un camino de fallo estaba sin una sola prueba detrás.
   `build/` dentro de OneDrive—. La sospecha razonable, no confirmada, es
   `ImportScaleTest`, la misma prueba de escala de 32 MiB y 100 000 registros que
   hizo abortar al PIT por fallar sin mutación bajo carga, y cuya hermana tarda
-  75 segundos. **Queda pendiente confirmarlo**; la CI de GitHub, que corre en
-  máquina limpia y fuera de OneDrive, es el árbitro.
+  75 segundos.
+
+  **Confirmado por contraste**: ejecutada sola y con la máquina libre,
+  `ImportScaleTest` pasa —2 de 2, `BUILD SUCCESSFUL` en 55 s—, frente a los más
+  de 75 s por prueba que tardaba bajo carga. El fallo era de carga, no de
+  producto, y es la misma causa que hizo abortar al PIT. La CI de GitHub, en
+  máquina limpia y fuera de OneDrive, es el árbitro definitivo.
+
+  Dos cosas que arreglar cuando haya tiempo, porque hoy costaron una hora entre
+  las dos: **sacar `build/` de OneDrive** (la sincronización borra los XML de
+  resultados a mitad de ejecución y deja la suite sin diagnóstico), y **dar a
+  `ImportScaleTest` un presupuesto propio o aislarla de las ejecuciones
+  paralelas**, porque hoy es la que decide si la puerta de mutación se puede
+  medir siquiera.
 
 ### Una contradicción del contrato que solo puede resolver el propietario
 

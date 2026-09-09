@@ -105,7 +105,10 @@ test("import PIT keeps complete disjoint classes and dedicated tests while exten
     /"com\.apptolast\.organization\.adapter\.config\.Import\*Test"/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 test("import backend targets invoke only their fixed PIT scopes", () => {
   for (const part of ["reader", "http", "persistence"]) {
@@ -404,7 +407,10 @@ test("export persistence PIT preserves complete classes and extends the default"
     /if \(exportPersistenceOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-export-data-persistence"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 
 test("export persistence backend invokes only its fixed PIT scope", () => {
@@ -548,7 +554,10 @@ test("customization PIT includes complete families and exposes their adapter tes
     /if \(customizationOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-custom-views-fields"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 test("customization backend invokes only its fixed PIT scope", () => {
   const { calls, project } = capture();
@@ -644,7 +653,10 @@ test("end time PIT preserves shared guards, all JUnit candidates and threshold",
     /if \(endTimeNotificationOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-end-time-notification"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 test("end time frontend invokes only its fixed Stryker configuration", () => {
   const { calls, project } = capture();
@@ -781,7 +793,10 @@ test("close work PIT scope includes changed core and shared adapters with all JU
     /if \(closeWorkSessionOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-close-work-session"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 
 test("close work frontend invokes only its fixed Stryker configuration", () => {
@@ -877,7 +892,10 @@ test("start work PIT selects the complete feature and shared publication with al
       "com.apptolast.organization.adapter.broker.RabbitBrokerPublisher",
     ],
   );
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
   assert.match(build, /mutationThreshold\.set\(80\)/);
 });
 
@@ -1583,7 +1601,10 @@ test("history PIT includes complete new modules and wiring with all JUnit candid
     /if \(historyOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-history"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 
 test("default PIT exposes history adapter tests for the newly selected classes", () => {
@@ -1746,7 +1767,10 @@ test("weekly review PIT includes complete new modules and wiring with all JUnit 
     /if \(weeklyReviewOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-weekly-review"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 
 test("default PIT exposes weekly review adapter tests for the newly selected classes", () => {
@@ -1831,7 +1855,10 @@ test("appearance PIT includes all new modules and makes their tests available by
     /if \(appearanceOnly\) reportDir\.set\(layout\.buildDirectory\.dir\("reports\/pitest-appearance"\)\)/,
   );
   assert.match(build, /mutationThreshold\.set\(80\)/);
-  assert.match(build, /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/);
+  assert.match(
+    build,
+    /threads\.set\(if \(integrationApiOnly \|\| integrationApiHttpOnly\) 8 else 4\)/,
+  );
 });
 
 test("github connector frontend invokes only its fixed Stryker configuration", () => {
@@ -2078,4 +2105,21 @@ test("external calendar Stryker configuration mutates only its own files", () =>
   ]);
   assert.equal(configuration.thresholds.break, 80);
   assert.equal(configuration.testRunner, "vitest");
+});
+
+test("the end to end stack enables the connectors with an explicit key and keeps the SSRF guard", () => {
+  const compose = readFileSync(resolve(root, "docker-compose.yml"), "utf8");
+  assert.match(compose, /APP_CONNECTOR_KEY: \$\{APP_CONNECTOR_KEY:-\}/);
+  assert.match(
+    compose,
+    /APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES: \$\{APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES:-false\}/,
+  );
+  const harness = readFileSync(resolve(root, "scripts/e2e.mjs"), "utf8");
+  const key = harness.match(/APP_CONNECTOR_KEY: "([^"]+)"/)?.[1];
+  assert.ok(key, "el arnés de extremo a extremo debe fijar APP_CONNECTOR_KEY");
+  assert.equal(Buffer.from(key, "base64").length, 32);
+  assert.doesNotMatch(
+    harness,
+    /APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES: "true"/,
+  );
 });

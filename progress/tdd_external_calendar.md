@@ -272,3 +272,81 @@ incluidas las 37 pruebas MockMvc y la de Testcontainers.
 **No se ha ejecutado ninguna mutación** ni E2E: hay cinco carriles compartiendo
 la máquina. Queda listo para que el `mutation_tester` lance
 `bin/harness mutate external_calendar-backend` y `external_calendar-frontend`.
+
+### Ciclo 20 — estilos, extremo a extremo y documentación (@s40)
+
+- ROJO: una prueba nueva en `scripts/project.test.mjs` exigía que la pila de
+  extremo a extremo declarase `APP_CONNECTOR_KEY` (32 bytes en base64) y dejase
+  la guardia SSRF activada.
+- VERDE: `docker-compose.yml` y `scripts/e2e.mjs` pasan las tres variables de
+  conectores; la clave del arnés es de pruebas y
+  `APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES` se queda en `false`.
+- Estilos: `.external-calendar` en `styles.scss` y `.today-external-calendar` en
+  `today.scss`, con `min-width: 0`, `overflow-wrap: anywhere`, controles de
+  44×44 px y colapso a una columna por debajo de 520 px.
+- Especificaciones de extremo a extremo escritas, **no ejecutadas**:
+  `e2e/external-calendar.spec.mjs` (alta, cifrado en reposo comprobado en SQL,
+  sincronización, guardia de direcciones y borrado con confirmación) y
+  `e2e/external-calendar-ux-audit.spec.mjs` (matriz de anchos, axe, orden de
+  teclado y texto al 200 %). Solo se han validado con `node --check` y prettier.
+- `docs/external-calendar.md` documenta configuración, rutas, seguridad,
+  sincronización, análisis y alcance de mutación.
+- Arrastre resuelto: mi entrada de navegación desplazaba índices que afirma
+  `appearance.test.tsx` (`at(-4)`). En vez de tocar el test de otro carril, la
+  entrada se coloca **antes** de "Apariencia": así `at(-4)`, `at(-2)` y `at(-1)`
+  siguen valiendo. Se recalculó de nuevo el rango de `workspace.tsx` en
+  `stryker.appearance.config.json`.
+
+## Mapa @s → test
+
+| @s | Dónde |
+| --- | --- |
+| s1 | `ExternalCalendarApiTest.s1_*`, `ExternalCalendarPersistenceTest.s1_*`, `ReadExternalCalendarEventsTest.s1_*` |
+| s2 | `ExternalCalendarApiTest.s2_*`, `ExternalCalendarPersistenceTest.s2_*`, `SaveExternalCalendarTest.s2_*`, `AesGcmSecretCipherTest.s2_*`, `ExternalCalendarWiringTest.s2_*` |
+| s3 | `AesGcmSecretCipherTest.s3_*`, `SaveExternalCalendarTest.s3_*` |
+| s4 | `ExternalCalendarInputTest`, `OutboundHostGuardTest.s4_*`, `SaveExternalCalendarTest.s4_*`, `ExternalCalendarApiTest.s4_*` |
+| s5 | `ExternalCalendarInputTest`, `SaveExternalCalendarTest.s5_*` |
+| s6 | `ExternalCalendarPersistenceTest.s6_*`, `SaveExternalCalendarTest.s6_*` |
+| s7 | `ExternalCalendarPersistenceTest.s7_*`, `SaveExternalCalendarTest.s7_*`, `ExternalCalendarApiTest.s7_*` |
+| s8 | `ExternalCalendarDisabledApiTest`, `ConnectorCipherTest.s8_*`, `external-calendar-api.test.ts` |
+| s9 | `ConnectorCipherTest.s9_*`, `ExternalCalendarWiringTest.s9_*`, `AesGcmSecretCipherTest.s9_*` |
+| s10 | `ExternalCalendarApiTest.s10_*`, `ExternalCalendarDisabledApiTest.s10_*` |
+| s11 | `OutboundHostGuardTest.s11_*`, `SyncExternalCalendarTest.s11_*`, `ExternalCalendarApiTest.s11_*` |
+| s12 | `HttpCalendarFeedTest.s12_*`, `SyncExternalCalendarTest.s12_*`, `ExternalCalendarPersistenceTest.s12_*` |
+| s13 | `HttpCalendarFeedTest.s13_*`, `SyncExternalCalendarTest.s13_*` |
+| s14 | `IcsCalendarTest`, `SyncExternalCalendarTest.s14_*` |
+| s15 | `IcsCalendarTest` (TZID con DST real) |
+| s16 | `IcsCalendarTest`, `SyncExternalCalendarTest.s16_*`, `ExternalCalendarPersistenceTest.s16_*` |
+| s17 | `IcsCalendarTest` (DURATION y fines no posteriores) |
+| s18 | `IcsCalendarTest` (cancelados y recurrentes) |
+| s19 | `IcsCalendarTest` (desplegado y escapes) |
+| s20 | `IcsCalendarTest` (UID repetido) |
+| s21 | `IcsCalendarTest` (inválidos) |
+| s22 | `IcsCalendarTest` (componentes ajenos) |
+| s23 | `ExternalCalendarSnapshotTest`, `SyncExternalCalendarTest.s23_*` |
+| s24 | `ExternalCalendarSnapshotTest`, `SyncExternalCalendarTest.s24_*`, `ExternalCalendarPersistenceTest.s24_*` |
+| s25 | `ExternalCalendarPersistenceTest.s25_*` |
+| s26 | `ExternalCalendarPersistenceTest.s26_*`, `SyncExternalCalendarTest.s26_*` |
+| s27 | `SyncExternalCalendarTest.s27_*` |
+| s28 | `SyncExternalCalendarTest.s28_*`, `ExternalCalendarApiTest.s28_*` |
+| s29 | `AesGcmSecretCipherTest.s29_*`, `SyncExternalCalendarTest.s29_*`, `SaveExternalCalendarTest.s29_*` |
+| s30 | `ExternalCalendarPersistenceTest.s30_*`, `ExternalCalendarIsolationTest.s30_*` |
+| s31 | `ExternalCalendarPersistenceTest.s31_*`, `ReadExternalCalendarEventsTest.s31_*`, `ExternalCalendarApiTest.s31_*`, `external-calendar.test.tsx` (ventana) |
+| s32 | `ExternalEventsRangeTest`, `ExternalCalendarApiTest.s32_*` |
+| s33 | `ExternalCalendarPersistenceTest.s33_*`, `ReadExternalCalendarEventsTest.s33_*`, `ExternalCalendarApiTest.s33_*` |
+| s34 | `ExternalCalendarIsolationTest.s34_*`, `e2e/external-calendar.spec.mjs` |
+| s35 | `today-external-calendar.test.tsx`, `today-external-section.test.tsx` |
+| s36 | `today-external-calendar.test.tsx`, `external-calendar-api.test.ts` |
+| s37 | `external-calendar.test.tsx`, `external-calendar-route.test.tsx`, `external-calendar-api.test.ts` |
+| s38 | `external-calendar.test.tsx`, `external-calendar-api.test.ts` |
+| s39 | `external-calendar.test.tsx`, `external-calendar-api.test.ts` |
+| s40 | `external-calendar.test.tsx` (teclado y región viva), `e2e/external-calendar-ux-audit.spec.mjs` (sin ejecutar) |
+
+## Qué queda fuera de esta sesión
+
+- **No se ha ejecutado la suite completa** de backend ni de frontend, ni PIT, ni
+  Stryker, ni E2E: cinco carriles comparten la máquina. Verde comprobado con
+  filtros, carril a carril.
+- Las dos especificaciones de extremo a extremo son código no ejecutado.
+- `node --test scripts/project.test.mjs` deja 2 fallos ajenos, de la feature 24,
+  cuyo carril no está integrado en esta rama; ya fallaban antes de empezar.

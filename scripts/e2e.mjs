@@ -43,6 +43,8 @@ const env = {
   APP_MAX_ACTIVE_PROJECTS: "3",
   APP_CONNECTOR_KEY: connectorKey,
   APP_GITHUB_API_BASE: githubApiBase,
+  // La guardia SSRF se deja activada: ninguna prueba puede alcanzar una red privada.
+  APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES: "false",
   E2E_COMPOSE_PROJECT: project,
   E2E_ENV_FILE: environmentFile,
 };

@@ -63,3 +63,29 @@
     min-height: 44px;
   }
 }
+
+.today-external-calendar {
+  min-width: 0;
+  margin-block-start: 24px;
+  overflow-wrap: anywhere;
+  h2 {
+    margin-bottom: 8px;
+  }
+  p {
+    line-height: 1.6;
+    max-width: 68ch;
+  }
+  .today-external-calendar-events {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+    display: grid;
+    gap: 6px;
+    li {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 12px;
+      min-width: 0;
+    }
+  }
+}

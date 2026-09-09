@@ -23,11 +23,12 @@ services:
       APP_PUBLIC_ORIGIN: ${APP_PUBLIC_ORIGIN:-http://127.0.0.1:${WEB_PORT:-8080}}
       APP_AUTH_USERNAME: ${APP_AUTH_USERNAME:?Set APP_AUTH_USERNAME in .env}
       APP_AUTH_PASSWORD: ${APP_AUTH_PASSWORD:?Set APP_AUTH_PASSWORD in .env}
-      # Conectores (feature 27). Sin clave el conector queda deshabilitado y sus rutas
-      # responden 503, que es el comportamiento por defecto de un despliegue que no los usa.
+      # Conectores (features 27 y 28). Sin clave los conectores quedan deshabilitados y sus
+      # rutas responden 503, que es el comportamiento por defecto de un despliegue que no los usa.
       APP_CONNECTOR_KEY: ${APP_CONNECTOR_KEY:-}
       APP_CONNECTOR_KEY_PREVIOUS: ${APP_CONNECTOR_KEY_PREVIOUS:-}
       APP_GITHUB_API_BASE: ${APP_GITHUB_API_BASE:-https://api.github.com}
+      APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES: ${APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES:-false}
     depends_on:
       postgres:
         condition: service_healthy

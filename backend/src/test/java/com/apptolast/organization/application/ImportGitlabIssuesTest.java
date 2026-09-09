@@ -90,6 +90,103 @@ class ImportGitlabIssuesTest {
         fakes.tasks.linkKeys());
   }
 
+  // ---------------------------------------------- @s18 @s19 @s20 idempotencia y simetría
+
+  @Test
+  void s18_repeatingTheImportOnlyCreatesTheIssuesThatWereNotLinkedYet() {
+    fakes.source.page(
+        1,
+        new IssuePage(List.of(issue(9001), issue(9002), issue(9003), issue(9004), issue(9005)), 5, false));
+    importIssues().execute(OWNER, projectId);
+    fakes.source.page(
+        1,
+        new IssuePage(
+            List.of(issue(9001), issue(9002), issue(9003), issue(9004), issue(9005), issue(9006)),
+            6,
+            false));
+
+    var receipt = importIssues().execute(OWNER, projectId);
+
+    assertEquals(1, receipt.created());
+    assertEquals(5, receipt.skipped());
+    assertEquals(0, receipt.failed());
+    assertEquals(6, fakes.tasks.links());
+  }
+
+  @Test
+  void s19_theSameExternalIdOnGithubDoesNotMakeTheGitlabImportSkipIt() {
+    fakes.tasks.seedLink(OWNER, "github", "gitlab.example.com:9001");
+    fakes.source.page(1, new IssuePage(List.of(issue(9001)), 1, false));
+
+    var receipt = importIssues().execute(OWNER, projectId);
+
+    assertEquals(1, receipt.created());
+    assertEquals(0, receipt.skipped());
+    assertEquals(
+        List.of("github|gitlab.example.com:9001", "gitlab|gitlab.example.com:9001"),
+        fakes.tasks.linkKeys());
+  }
+
+  @Test
+  void s20_theSameIssueImportedFromEitherSourceProducesTheSameTaskAndReceiptKeys() {
+    var githubProject = fakes.projects.seed(OWNER, "idea");
+    fakes.connections.save(
+        OWNER,
+        new StoredConnection(
+            "octocat/Hello-World",
+            "octocat",
+            StoredConnection.VALID,
+            gitlab.cipher.encrypt(OWNER, "ghp_secreto"),
+            NOW));
+    fakes.source.page(
+        1,
+        new IssuePage(
+            List.of(
+                new ExternalIssue(
+                    "101", "Revisar despliegue", "una\ndos\ntres", "https://github.test/i/101")),
+            1,
+            false));
+    var githubReceipt =
+        new ImportIssues(
+                new GithubIssueConnections(fakes.connections),
+                fakes.receipts,
+                fakes.projects,
+                fakes.source,
+                fakes.tasks,
+                gitlab.cipher,
+                fakes.audit,
+                Clock.fixed(NOW, ZoneOffset.UTC))
+            .execute(OWNER, githubProject);
+    var githubTask = fakes.tasks.lastTask();
+
+    fakes.source.page(
+        1,
+        new IssuePage(
+            List.of(
+                new ExternalIssue(
+                    "gitlab.example.com:9001",
+                    "Revisar despliegue",
+                    "una\ndos\ntres",
+                    "https://gitlab.example.com/i/9001")),
+            1,
+            false));
+    var gitlabReceipt = importIssues().execute(OWNER, projectId);
+    var gitlabTask = fakes.tasks.lastTask();
+
+    assertEquals(githubTask.title(), gitlabTask.title());
+    assertEquals(githubTask.status(), gitlabTask.status());
+    assertNull(gitlabTask.estimatedMinutes());
+    assertEquals(
+        githubTask.completionCriterion().replace("https://github.test/i/101", ""),
+        gitlabTask.completionCriterion().replace("https://gitlab.example.com/i/9001", ""));
+    assertEquals("github", githubReceipt.source());
+    assertEquals("gitlab", gitlabReceipt.source());
+    assertEquals(githubReceipt.created(), gitlabReceipt.created());
+    assertEquals(githubReceipt.status(), gitlabReceipt.status());
+    assertEquals(
+        List.of("github|101", "gitlab|gitlab.example.com:9001"), fakes.tasks.linkKeys());
+  }
+
   // ------------------------------------------------------ @s23 @s24 @s25 fallos del gestor
 
   @Test

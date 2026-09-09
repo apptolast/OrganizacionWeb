@@ -87,3 +87,45 @@ heredoc: la aserción de `@s17` contenía un escape Unicode espurio (u0001 con b
 del cuerpo JSON. Aparto ese test, confirmo el verde del ciclo 2 y lo commiteo
 antes de rehacer el ciclo de `ManageWebhook` con Write/Edit.
 
+
+### Ciclo 3 — recuperación de `ManageWebhook` (commit `18107ad`)
+
+- **Estado de partida**: cinco ficheros sin añadir a git. **No compilaban**:
+  `ManageWebhook` declaraba una clase interna `Code` que ocultaba el enum
+  `WebhookOperationException.Code`, así que cada `operation(Code.X)` no
+  convertía tipos (6 errores de compilación).
+- VERDE de compilación: elimino la clase interna y uso importación estática.
+- ROJO real: `s12_aStatusOutsideActiveOrDisabledIsAFieldErrorBeforeAnyLookup`
+  falla con `NullPointerException` — `List.of(...).contains(null)` lanza en vez
+  de rechazar el campo `status`.
+- VERDE mínimo: comprobar `status == null` antes de consultar la lista.
+- 12 tests verdes. Cubre `@s9 @s11 @s12 @s13 @s14 @s17 @s30`.
+
+### Ciclo 4 — alta por HTTP (commit `8815113`)
+
+- ROJO: `WebhookApiTest.s1_...` no compila (no existe `WebhookController`).
+- VERDE: `WebhookController.create` con lectura estricta del cuerpo
+  (duplicados y tokens finales), 201 + `Location` + `no-store`, cuerpo de
+  exactamente `endpoint` y `secret`. `WebhookEndpointView` cierra el DTO a los
+  nueve campos y formatea instantes con `appendInstant(6)`.
+- Cubre `@s1`.
+
+### Ciclo 5 — resto de la superficie HTTP (commit `7e6acfe`)
+
+- ROJO: 16 tests nuevos fallan (listar, find, status, delete, ping,
+  deliveries, redeliver y el mapa de códigos).
+- VERDE: rutas restantes + `WebhookDeliveryView` (once campos) + un único
+  manejador que traduce cada `Code` a su par (HTTP, `problem+json`). Un id de
+  ruta que no es UUID canónico responde 404 `WEBHOOK_NOT_FOUND` **sin** tocar
+  el caso de uso, para no servir de oráculo de existencia.
+- 17 tests verdes en `WebhookApiTest`; ArchUnit verde.
+- Cubre `@s10 @s11 @s12 @s13 @s14 @s29 @s30 @s34` (parte HTTP).
+
+### Pendiente al cierre de esta sesión
+
+- Persistencia: migración `V23__webhooks.sql` + `PostgresWebhookEndpoints` /
+  `PostgresWebhookDeliveries` (`@s6 @s7 @s10 @s13 @s29`).
+- Frontera HTTP fina: 413/415/query (`@s4`), seguridad de sesión (`@s33`),
+  cableado en `ApplicationConfiguration` + `WebhookWiringTest`.
+- Despachador: worker de encolado y envío (`@s15 @s16 @s18`–`@s28 @s31 @s32`).
+- UI de webhooks (`@s36`–`@s42`).

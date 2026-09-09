@@ -164,3 +164,54 @@ backend\gradlew.bat -p backend test --no-daemon --tests "…domain.CalendarWindo
   --tests "…application.CalendarFeedUseCasesTest"
 BUILD SUCCESSFUL — 49 pruebas, 0 fallos
 ```
+
+### Ciclo 5 — @s1–@s8, @s10, @s11, @s15–@s17, @s26, @s30 (capa HTTP)
+
+Rojo: `adapter/CalendarApiTest` (27 pruebas, `@WebMvcTest` con `SecurityConfiguration`) no compilaba
+(`cannot find symbol: CalendarFeedController, PublicCalendarController`).
+
+Verde:
+- `CalendarPaths`: las tres direcciones en un solo sitio, para que enrutado y seguridad no se
+  separen.
+- `PublicCalendarController` (`/calendar/**`, GET y HEAD): endurece la respuesta antes de resolver
+  nada, exige un único segmento terminado en `.ics` y sin parámetros, y responde 405 con
+  `Allow: GET, HEAD` para el resto de métodos **sin llegar a leer el candidato**, de modo que un
+  token válido y uno inexistente producen respuestas idénticas (@s16).
+- `CalendarFeedController`: estado, generación (cuerpo vacío obligatorio, 400 `VALIDATION_ERROR` en
+  cuanto hay un solo octeto), revocación 204 y descarga con
+  `Content-Disposition: attachment; filename="organizationweb-bloques.ics"`.
+- `CalendarDocuments`: `text/calendar; charset=utf-8`, `Cache-Control: private, no-store`,
+  `X-Content-Type-Options: nosniff`, `Content-Length` en octetos UTF-8 y cuerpo vacío en HEAD.
+- `SecurityConfiguration`: nueva cadena `@Order(0)` para `/calendar/**` (permitAll, sin CSRF, sin
+  sesión, `STATELESS`), y la cadena Bearer de la feature 24 deja de reclamar las rutas de
+  calendario, para que sin sesión respondan `401 UNAUTHENTICATED` y no `API_UNAUTHENTICATED` (@s7).
+
+Segundo rojo, este de comportamiento y muy instructivo: `@s15`, `@s26` y `@s30` fallaban con
+`Content-Disposition: inline;filename=f.txt`. Es la protección contra *Reflected File Download* de
+`AbstractMessageConverterMethodProcessor`, que añade esa cabecera a toda respuesta serializada por
+un conversor cuya ruta termina en una extensión no segura — es decir, a todos nuestros `.ics`. Hacía
+que el 404 de `/calendar/<token>.ics` y el de `/calendar/<token>` (sin extensión) **no** fueran
+idénticos, justo lo que @s15 prohíbe.
+
+Verde: `CalendarProblems` escribe los problemas de calendario directamente en la respuesta
+(status, `application/problem+json`, `Content-Length`) sin pasar por el conversor; los manejadores
+`@ExceptionHandler` locales de ambos controladores devuelven `void`. Se retiran de `ApiErrors` los
+dos manejadores globales de calendario que habían quedado sin uso.
+
+### Ciclo 6 — @s28 (una lectura, un snapshot) y cableado
+
+Rojo: `SnapshotRenderCalendarTest` no compilaba; después `CalendarWiringTest` falló con
+`NoSuchBeanDefinitionException: ManageCalendarFeedUseCase`.
+
+Verde: `adapter/persistence/SnapshotRenderCalendar` decora `RenderCalendarUseCase` con una
+`TransactionTemplate` read-only `REPEATABLE_READ`; como las plantillas de `PostgresCalendarStore`
+usan propagación `REQUIRED`, la resolución del token, la zona y los bloques quedan dentro de la
+misma transacción. Beans `manageCalendarFeed` y `renderCalendar` en `ApplicationConfiguration`.
+
+Comandos:
+```
+--tests "…adapter.CalendarApiTest"                       → 27 pruebas, 0 fallos
+--tests "…adapter.persistence.SnapshotRenderCalendarTest" \
+--tests "…adapter.config.CalendarWiringTest"             → BUILD SUCCESSFUL
+--tests "…ArchitectureTest" --tests "…SecurityConfigurationTest" → BUILD SUCCESSFUL
+```

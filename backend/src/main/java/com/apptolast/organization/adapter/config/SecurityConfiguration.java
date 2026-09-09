@@ -46,6 +46,24 @@ public class SecurityConfiguration {
             .build());
   }
 
+  /**
+   * The calendar feed is a capability in the path: it takes no session, no CSRF token and no bearer
+   * credential, and it must never receive a session cookie in return.
+   */
+  @Bean
+  @org.springframework.core.annotation.Order(0)
+  SecurityFilterChain publicCalendarSecurity(HttpSecurity http) throws Exception {
+    return http.securityMatcher(com.apptolast.organization.adapter.http.CalendarPaths::isPublicFeed)
+        .csrf(csrf -> csrf.disable())
+        .logout(logout -> logout.disable())
+        .requestCache(cache -> cache.disable())
+        .httpBasic(basic -> basic.disable())
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+        .build();
+  }
+
   @Bean
   @org.springframework.core.annotation.Order(1)
   SecurityFilterChain bearerSecurity(
@@ -59,7 +77,11 @@ public class SecurityConfiguration {
               com.apptolast.organization.application.ConsumeApiQuotaUseCase>
           quota)
       throws Exception {
-    return http.securityMatcher(request -> request.getHeader("Authorization") != null)
+    // The calendar routes stay out of the bearer channel: the feed is not exposed by credentials.
+    return http.securityMatcher(
+            request ->
+                request.getHeader("Authorization") != null
+                    && !com.apptolast.organization.adapter.http.CalendarPaths.isCalendar(request))
         .headers(SecurityConfiguration::securityHeaders)
         .logout(logout -> logout.disable())
         .csrf(csrf -> csrf.disable())

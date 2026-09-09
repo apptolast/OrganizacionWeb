@@ -102,3 +102,13 @@ Estado sobre el código de la feature 24 en `main`, salvo donde se indique.
 8. No busqué secretos en el historial de git, solo en el árbol seguido.
 9. No afirmo que el canal Bearer sea seguro. Afirmo que los puntos marcados «pasa»
    los comprobé en el código citado, y nada más.
+
+## Resolución del coordinador sobre A1 y A2 — 9 de septiembre de 2026
+
+Los hallazgos A1 y A2 se cierran como **riesgo aceptado**, no como defecto corregido, porque su corrección tal y como estaba propuesta contradice escenarios ya aprobados del contrato.
+
+El artesano encargado de aplicarlos paró y pidió cambio de contrato en lugar de implementarlos, que es la conducta correcta. Sus citas son exactas. El escenario `@s32` fija un `Given` de credencial válida **sin cuota restante** y un `Then` en el que el documento OpenAPI responde **sin consumir cuota** ni ejecutar negocio; consumirla haría inalcanzable ese documento justo cuando la cuota se agota, que es cuando un integrador más necesita consultarlo. La última fila de `@s24` exige 403 ante token válido sin scope y con cuota agotada, de modo que comprobar la cuota antes que el scope devolvería 429 y rompería esa fila. Tres pruebas vigentes fallarían.
+
+El riesgo que describe la revisión es real: un cliente remoto puede provocar una consulta a `api_credentials` sin que ningún contador la mida. La mitigación correcta no es violar el contrato sino la que la propia revisión ofrece como alternativa en A1 y exige en A3: limitación de tasa por dirección en el proxy inverso. Esa medida queda como **requisito obligatorio antes de cualquier despliegue productivo**, registrada en la sección de enmiendas de seguridad de `project-spec.md` y en `progress/current.md`. No se aplica mientras haya carriles ejecutando pruebas de extremo a extremo, porque cambiar `deploy/nginx.conf` reconstruye su imagen web y desestabiliza sus suites.
+
+Cambiar el contrato para consumir cuota en esos dos caminos sigue siendo una opción legítima, pero exigiría reescribir `@s32` y `@s24` y volver a pasar por la puerta de aprobación. No se hace en esta sesión.

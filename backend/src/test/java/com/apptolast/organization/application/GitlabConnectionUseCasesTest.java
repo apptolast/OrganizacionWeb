@@ -3,18 +3,23 @@ package com.apptolast.organization.application;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * @s8 leer la conexión de GitLab, con conexión y sin ella, con los ocho campos del contrato.
+ * @s8 leer la conexión de GitLab, con conexión y sin ella, y @s9 conectarla: el token se cifra
+ *     antes de guardarse y sólo su pista de cuatro caracteres vuelve a salir.
  */
 class GitlabConnectionUseCasesTest {
   private static final String OWNER = "owner-1";
   private static final String API_BASE = "https://gitlab.example.com/api/v4";
   private static final Instant CONNECTED_AT = Instant.parse("2026-09-09T10:00:00Z");
   private static final Instant FAILED_AT = Instant.parse("2026-09-09T11:30:00Z");
+  private static final Instant NOW = Instant.parse("2026-09-09T12:00:00Z");
+  private static final String TOKEN = "glpat-xxxxxxxxxxxxxxxxWXYZ";
 
   private GitlabFakes fakes;
 
@@ -66,6 +71,44 @@ class GitlabConnectionUseCasesTest {
     assertEquals("error", view.status());
     assertEquals("CONNECTION_INVALID", view.lastError().code());
     assertEquals(FAILED_AT, view.lastError().at());
+  }
+
+  // ------------------------------------------------------------------------- @s9 conectar
+
+  @Test
+  void s9_connectingVerifiesTheProjectAndStoresTheTokenEncryptedAndNothingElse() {
+    fakes.projects.accept("grupo/proyecto", 4821L);
+
+    var view = connect().execute(OWNER, TOKEN, "grupo/proyecto");
+
+    assertEquals("grupo/proyecto", fakes.projects.verifiedPath());
+    assertEquals(TOKEN, fakes.projects.verifiedToken());
+    assertEquals("connected", view.status());
+    assertEquals(API_BASE, view.apiBase());
+    assertEquals("grupo/proyecto", view.projectPath());
+    assertEquals(4821L, view.projectId());
+    assertEquals("WXYZ", view.tokenHint());
+    assertEquals(NOW, view.lastActivityAt());
+    assertNull(view.lastError());
+    assertEquals(1L, view.version());
+
+    var row = fakes.connections.find(OWNER).orElseThrow();
+    assertEquals(TOKEN, fakes.cipher.decrypt(OWNER, row.tokenCiphertext()));
+    assertFalse(row.toString().contains(TOKEN));
+  }
+
+  @Test
+  void s9_theStoredProjectPathIsTheCanonicalOneAnsweredByGitlab() {
+    fakes.projects.accept("Grupo/Proyecto", 77L);
+
+    var view = connect().execute(OWNER, TOKEN, "grupo/proyecto");
+
+    assertEquals("Grupo/Proyecto", view.projectPath());
+  }
+
+  private ConnectGitlabUseCase connect() {
+    return new ConnectGitlab(
+        fakes.connections, fakes.projects, API_BASE, fakes.cipher, Clock.fixed(NOW, ZoneOffset.UTC));
   }
 
   private static GitlabConnection connected() {

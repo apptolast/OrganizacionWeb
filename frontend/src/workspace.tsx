@@ -18,6 +18,7 @@ export function Workspace({
     | "Calendario"
     | "Importación"
     | "API para integraciones"
+    | "Automatizaciones"
     | null;
 }) {
   return (
@@ -109,6 +110,12 @@ export function Workspace({
             }
           >
             API para integraciones
+          </RouteLink>
+          <RouteLink
+            href="/automatizaciones"
+            aria-current={section === "Automatizaciones" ? "page" : undefined}
+          >
+            Automatizaciones
           </RouteLink>
         </nav>
         <div className="sidebar-note">

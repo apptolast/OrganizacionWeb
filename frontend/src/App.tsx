@@ -18,6 +18,7 @@ import { Calendar } from "./calendar";
 import { IntegrationApi } from "./integration-api";
 import { GithubConnector } from "./github-connector";
 import { IntegrationsIndex } from "./integrations-index";
+import { Automations } from "./automations";
 import { useAppearance } from "./appearance-state";
 export function App({
   sessionControls,
@@ -39,6 +40,7 @@ export function App({
   const integrationApi = route === "/integraciones/api";
   const githubConnector = route === "/integraciones/github";
   const integrationsIndex = route === "/integraciones";
+  const automations = route === "/automatizaciones";
   const taskRoute = /^\/proyectos\/([^/]+)\/tareas\/([^/?]+)$/.exec(route);
   const sessionRoute =
     /^\/proyectos\/([^/]+)\/tareas\/([^/]+)\/sesiones\/([^/?]+)$/.exec(route);
@@ -46,30 +48,34 @@ export function App({
     <Workspace
       sessionControls={sessionControls}
       section={
-        integrationApi
-          ? "API para integraciones"
-          : importData
-            ? "Importación"
-            : calendar
-              ? "Calendario"
-              : exportData
-                ? "Exportación"
-                : appearance
-                  ? "Apariencia"
-                  : route === "/"
-                    ? "Hoy"
-                    : weeklyReview
-                      ? "Revisión semanal"
-                      : history
-                        ? "Historial"
-                        : availability
-                          ? "Disponibilidad"
-                          : route.startsWith("/proyectos")
-                            ? "Proyectos"
-                            : null
+        automations
+          ? "Automatizaciones"
+          : integrationApi
+            ? "API para integraciones"
+            : importData
+              ? "Importación"
+              : calendar
+                ? "Calendario"
+                : exportData
+                  ? "Exportación"
+                  : appearance
+                    ? "Apariencia"
+                    : route === "/"
+                      ? "Hoy"
+                      : weeklyReview
+                        ? "Revisión semanal"
+                        : history
+                          ? "Historial"
+                          : availability
+                            ? "Disponibilidad"
+                            : route.startsWith("/proyectos")
+                              ? "Proyectos"
+                              : null
       }
     >
-      {githubConnector && username ? (
+      {automations && username ? (
+        <Automations owner={username} />
+      ) : githubConnector && username ? (
         <GithubConnector owner={username} />
       ) : integrationsIndex && username ? (
         <IntegrationsIndex />

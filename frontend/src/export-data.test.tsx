@@ -397,10 +397,11 @@ it("@s22 opens Exportación from the final navigation link without fetching an a
   const links = within(navigation).getAllByRole("link");
   expect(links[0]).toHaveAccessibleName("Hoy");
   const link = within(navigation).getByRole("link", { name: "Exportación" });
-  expect(links.at(-4)).toBe(link);
-  expect(links.at(-3)).toHaveAccessibleName("Calendario");
-  expect(links.at(-2)).toHaveAccessibleName("Importación");
-  expect(links.at(-1)).toHaveAccessibleName("API para integraciones");
+  expect(links.at(-5)).toBe(link);
+  expect(links.at(-4)).toHaveAccessibleName("Calendario");
+  expect(links.at(-3)).toHaveAccessibleName("Importación");
+  expect(links.at(-2)).toHaveAccessibleName("API para integraciones");
+  expect(links.at(-1)).toHaveAccessibleName("Automatizaciones");
   await userEvent.click(link);
   expect(window.location.pathname).toBe("/exportacion");
   expect(

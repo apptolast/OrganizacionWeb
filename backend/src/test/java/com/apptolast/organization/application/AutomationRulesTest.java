@@ -25,8 +25,7 @@ class AutomationRulesTest {
   }
 
   AutomationRule stored(String owner, UUID id, Instant createdAt, long version) {
-    return rules.create(
-        owner, new AutomationRule(id, draft("R"), version, createdAt, createdAt));
+    return rules.create(owner, new AutomationRule(id, draft("R"), version, createdAt, createdAt));
   }
 
   @Test

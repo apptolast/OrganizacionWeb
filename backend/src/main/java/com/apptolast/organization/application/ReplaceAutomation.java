@@ -22,7 +22,8 @@ public final class ReplaceAutomation implements ReplaceAutomationUseCase {
   }
 
   @Override
-  public AutomationRule replace(String owner, UUID id, long expectedVersion, AutomationDraft draft) {
+  public AutomationRule replace(
+      String owner, UUID id, long expectedVersion, AutomationDraft draft) {
     references.check(owner, draft);
     return rules.replace(owner, id, expectedVersion, draft, CustomizationTime.capture(clock));
   }

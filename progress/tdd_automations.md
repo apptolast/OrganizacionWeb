@@ -50,6 +50,20 @@ Feature en curso: 30 — automations. Escenarios a recorrer en fase 1: @s1–@s1
 - **Refactor**: ninguno; el `switch` sobre el tipo ya es la tabla del contrato.
 - Focal verde: `AutomationEventTest` 4/4.
 
+### Ciclo 4 — @s27, @s24 (parcial), @s28, @s29 (el evaluador)
+
+- **Rojo visto fallar**: `AutomationMatcherTest` (5 tests), `compileTestJava FAILED`
+  por `AutomationEventProjects`, `AutomationLoopGuard` y `AutomationMatcher`
+  inexistentes.
+- **Verde mínimo**: los dos puertos y `AutomationMatcher`, con `matches` (regla
+  activa, mismo propietario, mismo tipo y condición sobre el proyecto resuelto) y
+  `loopGuarded` separado de `matches`: la ejecución salta el evento, pero la
+  simulación necesita evaluar la coincidencia *e* informar `loopGuarded`, así que
+  no podían ser la misma decisión.
+- **Refactor**: `projectOf` queda público porque la simulación lo reutiliza para
+  la vista previa; `spotlessApply` sobre todo lo tocado.
+- Focal verde: 38 tests en las 7 clases `Automation*`, 0 fallos.
+
 ## Estado en curso (nota para el coordinador)
 
 Se ejecutan **sólo pruebas focales con filtro** por la contención de Testcontainers

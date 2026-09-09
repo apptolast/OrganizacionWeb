@@ -2529,9 +2529,17 @@ El orden canónico y completo de la navegación principal es:
 8. Exportación
 9. Calendario
 10. Importación
-11. API para integraciones
-12. Webhooks
-13. Automatizaciones
+11. Conectores
+12. API para integraciones
+13. Webhooks
+14. Automatizaciones
+
+**Segunda ampliación, 10 de septiembre de 2026.** La feature 29 añade
+«Conectores», y su propio contrato (`features/additional_connectors.feature`,
+@s33) sitúa la entrada **después de «Importación»**, no al final. Prevalece el
+escenario ratificado de la feature sobre la costumbre de añadir al final, de
+modo que «API para integraciones», «Webhooks» y «Automatizaciones» bajan una
+posición. Catorce entradas.
 
 «Webhooks» (feature 25) y «Automatizaciones» (feature 30) van detrás de «API
 para integraciones» en orden de número de feature, que es lo que ambas

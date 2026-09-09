@@ -4,10 +4,10 @@
   "plugins": ["@stryker-mutator/vitest-runner"],
   "ignorePatterns": [".stryker-tmp-*"],
   "mutate": [
-    "src/App.tsx:47:8-47:51",
-    "src/App.tsx:55:8-56:30",
-    "src/App.tsx:84:7-85:40",
-    "src/workspace.tsx:128:10-133:22",
+    "src/App.tsx:49:8-49:51",
+    "src/App.tsx:61:12-62:32",
+    "src/App.tsx:94:10-95:40",
+    "src/workspace.tsx:138:10-143:22",
     "src/automations-api.ts",
     "src/automations.tsx"
   ],

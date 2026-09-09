@@ -465,3 +465,61 @@ Frontend tras el reasentamiento (modo oscuro incluido): `theme-tokens` 14, `them
 guarda global de colores fijos del modo oscuro porque sólo usa tokens (`$ink`, `var(--panel)`,
 `var(--editable)`, `var(--control-border)`, `var(--accent)`, `var(--line)`, `var(--warning)`,
 `var(--error)`).
+
+### Ciclo 14 — el E2E ejecutado por fin, y los tres defectos que destapó
+
+`E2E_WEB_PORT=18092 pnpm test:e2e e2e/ics-calendar.spec.mjs`, una sola pila, bajada al terminar.
+Primera ejecución: **3 de 4 en rojo**. Ninguno era ruido; los tres apuntaban a defectos reales.
+
+**Defecto 1 (producto, frontend).** El POST de creación fallaba y la vista mostraba «No se pudo
+completar la operación». Causa: `calendar-feed-api.ts` validaba la url devuelta con
+`/^https:\/\/…/`, con el esquema **fijo a https**. La pila E2E sirve en
+`http://127.0.0.1:18092`, así que el cliente rechazaba una respuesta perfectamente válida. Habría
+roto también cualquier despliegue local o interno sin TLS. Rojo primero en
+`calendar-feed-api.test.ts` («@s32 accepts the address of a deployment served over plain http»),
+verde relajando el esquema a `https?` y manteniendo el resto de la forma que fija el contrato.
+
+**Defecto 2 (mi propio E2E).** Las cuatro pruebas compartían el token del propietario: el arnés
+`authenticated` limpia customización, no `calendar_feed_tokens`, así que la segunda prueba abría la
+vista ya en estado «enlace activo» y no encontraba «Crear enlace de suscripción». Corregido con
+`withoutFeedToken()` al principio de cada preparación, en vez de heredar el estado de la anterior.
+Se corrigió además una lectura sin espera (`inputValue()` justo tras el clic) por la aserción
+web-first `await expect(field).not.toHaveValue(first)`.
+
+**Defecto 3 (despliegue, real).** El feed respondía `X-Content-Type-Options: nosniff, nosniff`.
+`deploy/nginx.conf` añade la postura de seguridad con `add_header` a nivel de `server`, y desde el
+hallazgo A8 el backend emite las mismas cabeceras; `add_header` **suma**, no sustituye. Corregido en
+mi `location /calendar/` con `proxy_hide_header` de las tres (`X-Content-Type-Options`,
+`Content-Security-Policy`, `Referrer-Policy`), de modo que llega exactamente una copia de cada una
+venga o no de un proxy. El E2E ahora lo comprueba explícitamente.
+
+**Desviación registrada, no tapada.** El contrato de @s11 cita
+`Content-Type: text/calendar; charset=utf-8` y dice que las cabeceras se comparan exactas. Sobre
+Tomcat la respuesta real es `text/calendar;charset=utf-8`, **sin el espacio**: `Response.setContentType`
+parsea el tipo y lo reserializa, y ninguna capa de la aplicación puede evitarlo
+(`setHeader("Content-Type", …)` desemboca en el mismo `setContentType`). El espacio es OWS opcional
+según RFC 9110 y el tipo es semánticamente idéntico, así que se deja constancia en vez de
+maquillarlo: la prueba MockMvc sigue fijando lo que el controlador pide y el E2E afirma lo que el
+contenedor entrega, con el porqué escrito al lado. **Queda a criterio del juez** si esto exige una
+enmienda al contrato.
+
+**Hallazgo fuera de mi alcance, no tocado.** El mismo `add_header` duplicado afecta a `location
+/api/`: desde A8 el backend emite CSP y `Referrer-Policy` y nginx las vuelve a añadir, así que las
+rutas `/api/` deberían estar devolviendo esas tres cabeceras por duplicado. No lo he tocado para no
+alterar el comportamiento que el juez de la feature 24 ya revisó; lo reporto al coordinador.
+
+Resultado final, con la pila levantada y bajada:
+```
+✓ ics: an anonymous client reads the feed … @s11 @s12 @s15 @s16 @s27 @s32 @s35   (2,3 s)
+✓ ics: regenerating invalidates the previous address and a restart keeps … @s4 @s29 @s35 (9,5 s)
+✓ ics: the session download offers the same document as an attachment @s17 @s36  (2,2 s)
+✓ ics: the view is operable and free of axe violations in every state and width @s38 (6,8 s)
+4 passed (22,4 s)
+```
+
+Con esto **@s38 y la parte de reinicio de @s29 dejan de estar sin demostrar**: axe sin violaciones
+en cinco estados a 320, 768 y 1280 px, sin desbordamiento horizontal, y el feed devuelve los mismos
+octetos después de reiniciar el proceso del backend contra la misma base de datos.
+
+Sigue pendiente, y no me corresponde: la mutación (PIT `ics_calendar` y Stryker
+`ics_calendar-frontend`) y el cambio de estado de la feature 26.

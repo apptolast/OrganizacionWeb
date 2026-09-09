@@ -13,7 +13,16 @@ const minute = (offsetDays) => {
 const utc = (at) => at.toISOString().replace(/\.\d{3}Z$/, "Z");
 const local = (at) => utc(at).replace("Z", "");
 
+/**
+ * The shared fixture does not know about the feed table, so each test starts from «sin enlace»
+ * explicitly instead of inheriting the token of whichever test ran before it.
+ */
+function withoutFeedToken() {
+  sql("DELETE FROM calendar_feed_tokens WHERE owner_id='e2e-user'");
+}
+
 async function plannedBlock(request) {
+  withoutFeedToken();
   const suffix = randomUUID();
   const project = await create(request, `Calendario ${suffix}`, "");
   const task = await saveTask(request, project.id, `Revisión ${suffix}`, {
@@ -54,9 +63,22 @@ test("ics: an anonymous client reads the feed of a planned block and loses it wh
   try {
     const feed = await anonymous.request.get(path);
     expect(feed.status()).toBe(200);
-    expect(feed.headers()["content-type"]).toBe("text/calendar; charset=utf-8");
+    // El controlador fija «text/calendar; charset=utf-8»; Tomcat reserializa el tipo y suprime el
+    // espacio opcional tras el «;» (OWS que RFC 9110 permite). Ver la desviación en
+    // progress/tdd_ics_calendar.md; ninguna capa de la aplicación puede evitar esa normalización.
+    expect(feed.headers()["content-type"].replace("; ", ";")).toBe(
+      "text/calendar;charset=utf-8",
+    );
     expect(feed.headers()["cache-control"]).toBe("private, no-store");
+    // Una sola copia de cada una: el backend las emite y el proxy no las duplica.
     expect(feed.headers()["x-content-type-options"]).toBe("nosniff");
+    expect(feed.headers()["referrer-policy"]).toBe("same-origin");
+    expect(feed.headers()["content-security-policy"]).toContain(
+      "frame-ancestors 'none'",
+    );
+    expect(feed.headers()["content-security-policy"]).not.toContain(
+      "frame-ancestors 'none', ",
+    );
     expect(feed.headers()["content-disposition"]).toBeUndefined();
     expect(feed.headers()["set-cookie"]).toBeUndefined();
     const document = await feed.text();
@@ -79,7 +101,6 @@ test("ics: an anonymous client reads the feed of a planned block and loses it wh
       path + "?x=1",
       "/calendar/",
     ]) {
-      if (wrong === path) continue;
       const missing = await anonymous.request.get(wrong);
       expect(missing.status()).toBe(404);
       expect(await missing.json()).toMatchObject({
@@ -116,10 +137,10 @@ test("ics: regenerating invalidates the previous address and a restart keeps the
   await page
     .getByRole("button", { name: "Confirmar regeneración", exact: true })
     .click();
-  const second = await page
-    .getByLabel("Enlace de suscripción", { exact: true })
-    .inputValue();
-  expect(second).not.toBe(first);
+  // Aserción web-first: el campo se repuebla cuando llega el 201, no en el clic.
+  const field = page.getByLabel("Enlace de suscripción", { exact: true });
+  await expect(field).not.toHaveValue(first);
+  const second = await field.inputValue();
 
   const anonymous = await browser.newContext();
   try {

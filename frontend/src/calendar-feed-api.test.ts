@@ -112,6 +112,26 @@ it("@s32 sends the creation with an empty body and returns the url once", async 
   expect(fetched.mock.calls[0][1].body).toBeUndefined();
 });
 
+it("@s32 accepts the address of a deployment served over plain http", async () => {
+  const plain = `http://127.0.0.1:18092/calendar/${"a".repeat(43)}.ics`;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          url: plain,
+          createdAt: "2026-09-08T12:00:00.000000Z",
+        }),
+        { status: 201, headers: { "Content-Type": "application/json" } },
+      ),
+    ),
+  );
+  await expect(createCalendarFeed(signal())).resolves.toEqual({
+    url: plain,
+    createdAt: "2026-09-08T12:00:00.000000Z",
+  });
+});
+
 it("@s32 refuses a creation answer whose url is not the public feed address", async () => {
   for (const payload of [
     {

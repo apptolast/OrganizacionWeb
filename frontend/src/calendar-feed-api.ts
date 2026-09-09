@@ -4,7 +4,11 @@ import { exact, instant } from "./schedule-block-api";
 const FEED = "/api/v1/me/calendar-feed";
 const DOWNLOAD = "/api/v1/me/calendar.ics";
 export const CALENDAR_FILE_NAME = "organizationweb-bloques.ics";
-const FEED_ADDRESS = /^https:\/\/[^/]+\/calendar\/[A-Za-z0-9_-]{43}\.ics$/;
+/**
+ * The scheme belongs to the deployment, not to this module: `app.public-origin` is plain http in
+ * local and end-to-end stacks. What must hold is the shape of the address the contract fixes.
+ */
+const FEED_ADDRESS = /^https?:\/\/[^/]+\/calendar\/[A-Za-z0-9_-]{43}\.ics$/;
 const OPENING = "BEGIN:VCALENDAR\r\n";
 const CLOSING = "END:VCALENDAR\r\n";
 

@@ -6,7 +6,24 @@ Feature en curso: 30 — automations. Escenarios a recorrer en fase 1: @s1–@s1
 
 ## Bitácora de ciclos
 
-(se rellena por ciclo: escenario, test rojo, cambio mínimo, refactor)
+### Ciclo 1 — @s1, @s3, @s4, @s5 (validación de referencias al crear)
+
+- **Rojo**: `CreateAutomationTest` (3 tests) no compilaba: faltaban `AutomationRule`,
+  `AutomationRuleStore`, `AutomationTargets`, `WebhookEndpointLookup` y las cuatro
+  excepciones. 29 errores de compilación en `compileTestJava`.
+- **Verde**: `AutomationRule` (id, draft, version, createdAt, updatedAt),
+  el puerto `AutomationRuleStore`, los puertos de referencias y `CreateAutomation`,
+  que valida referencias, captura el instante con `CustomizationTime` (micros) y
+  guarda versión 1. `WebhookEndpointLookup` es el puerto de la fase 2: en fase 1 se
+  usa un doble que responde «no encontrado».
+- **Refactor**: la comprobación de referencias vive en `AutomationReferences`,
+  colaborador de paquete, para que la reutilicen reemplazo y simulación.
+- Focal verde: `--tests "…application.CreateAutomationTest" --tests "…domain.Automation*"`.
+
+## Estado en curso (nota para el coordinador)
+
+Se ejecutan **sólo pruebas focales con filtro** por la contención de Testcontainers
+en la máquina; la suite completa queda para el cierre, con turno del coordinador.
 
 ## Trazabilidad
 

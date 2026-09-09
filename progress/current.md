@@ -340,3 +340,47 @@ cuerpo, y eso pasa por la puerta del propietario. El detalle está en
 El dictamen final lo recoge de forma independiente en la dimensión de seguridad de
 la feature 28: «La lectura del cuerpo del feed no tiene ningún plazo: el timeout de
 5 s solo cubre las cabeceras».
+
+## Cerrado del dictamen: los once hallazgos rápidos — 9 de septiembre de 2026
+
+De los 53 hallazgos confirmados en `progress/dictamen_final_25_28_30.md`, se
+cerraron los once catalogados como «de minutos». Ocho eran huecos de oráculo, y
+los ocho se cerraron **demostrando el rojo primero**: rompiendo el producto a mano
+y viendo fallar la prueba nueva. En total, **trece ejecuciones rojas acreditadas**.
+La producción quedó intacta en los dos carriles.
+
+**Feature 25 (webhooks), cinco:**
+
+- `@s38` afirmaba que un secreto no estaba visible **sin haber comprobado nunca
+  que llegó a estarlo**: no podía fallar. Ahora exige presencia y después ausencia.
+- `@s37`: la cláusula «no se copia al portapapeles sin activar Copiar» no tenía
+  ningún oráculo. Escribir en el portapapeles sin que nadie lo pida es justo lo
+  que el contrato prohíbe, y nada lo vigilaba.
+- `@s40` contaba dos botones «Reenviar» sin comprobar en qué filas estaban.
+- `@s29` contaba 50 supervivientes de 55 sin comprobar que fueran los correctos:
+  una poda que borrase cinco al azar habría pasado igual.
+- La matriz UX declaraba 58 pruebas unitarias; son **44**, medidas y desglosadas.
+
+**Feature 28 (calendario externo), tres:**
+
+- La prueba de cancelación al desmontar **pasaba aunque se quitara el `abort`**.
+- La de «no validar una lectura ya cancelada» pasaba por el motivo equivocado: no
+  distinguía el aborto del error de forma.
+- El foco visible se medía en un solo control, cuando el contrato dice «en cada
+  control».
+
+**Tres de configuración, cerrados por el orquestador:**
+
+- El ámbito PIT del calendario externo apuntaba a `adapter.crypto`, un paquete
+  borrado al unificar el cifrado: **el AES-256-GCM no recibía ni un mutante** y la
+  campaña lo bendecía. Corregido, y verificado que todos los ámbitos apuntan a
+  clases existentes.
+- `ApiErrors` quedaba fuera del ámbito de automatizaciones: los seis manejadores
+  de error de la feature no recibían mutantes.
+- La feature 25 no tenía puerta de mutación —ni ámbito PIT, ni destinos en el
+  arnés, ni configuración de Stryker—, así que **no podía cerrarse**. Creada y
+  verificada con siete mutantes introducidos a mano sobre la propia puerta.
+
+Como subproducto queda una guarda nueva que exige que **todo patrón PIT resuelva a
+un `.java` existente**: es la que habría cazado el paquete muerto. Un patrón muerto
+no aborta PIT, lo descarta en silencio, y por eso aquello pasó desapercibido.

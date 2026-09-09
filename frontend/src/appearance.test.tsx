@@ -785,11 +785,14 @@ it("@s20 opens appearance through the principal navigation at its stable route",
     screen.getByRole("navigation", { name: "Principal" }),
   );
   expect(navigation.getAllByRole("link")[0]).toHaveAccessibleName("Hoy");
-  expect(navigation.getAllByRole("link").at(-4)).toHaveAccessibleName(
+  expect(navigation.getAllByRole("link").at(-5)).toHaveAccessibleName(
     "Apariencia",
   );
-  expect(navigation.getAllByRole("link").at(-3)).toHaveAccessibleName(
+  expect(navigation.getAllByRole("link").at(-4)).toHaveAccessibleName(
     "Exportación",
+  );
+  expect(navigation.getAllByRole("link").at(-3)).toHaveAccessibleName(
+    "Calendario",
   );
   expect(navigation.getAllByRole("link").at(-2)).toHaveAccessibleName(
     "Importación",

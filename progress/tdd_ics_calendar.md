@@ -227,3 +227,53 @@ ruta de calendario registra nada, porque los 404 y 413 se resuelven con manejado
 tocan el `logger` de `ApiErrors`. Las dos pruebas confirman propiedades que el diseño ya garantiza
 y las dejan protegidas frente a regresiones (si alguien cambiara `ON CONFLICT` por dos sentencias,
 o devolviera el 404 por el manejador genérico que sí escribe una línea de log, se pondrían rojas).
+
+### Ciclo 8 — @s31–@s37 (módulo de cliente y vista /calendario)
+
+Rojo 1: `calendar-feed-api.test.ts` (13 pruebas) no resolvía el módulo
+(`Failed to resolve import "./calendar-feed-api"`).
+
+Verde: `calendar-feed-api.ts` con `readCalendarFeed`, `createCalendarFeed`, `revokeCalendarFeed` y
+`readCalendarFile`. Cada uno valida la forma exacta de la respuesta con los ayudantes `exact` e
+`instant` que ya usa el resto del cliente: el estado debe traer exactamente `active` y `createdAt`
+y ser coherente (activo con instante, inactivo con `null`); la creación debe traer exactamente
+`url` y `createdAt` y la url debe ser la dirección pública del feed; la descarga exige
+`text/calendar; charset=utf-8`, `Content-Length` que coincida con los octetos recibidos y un cuerpo
+que empiece por `BEGIN:VCALENDAR\r\n` y acabe en `END:VCALENDAR\r\n` antes de devolver nada. El 413
+se propaga como `Response` para que la vista explique el límite.
+
+Un rojo intermedio útil: `toEqual` sobre dos `Uint8Array` fallaba con «Compared values have no
+visual difference» en jsdom; se compara con `Array.from` en ambos lados.
+
+Rojo 2: `calendar.test.tsx` (25 pruebas) no resolvía `./calendar`.
+
+Verde: `calendar.tsx`. Un único `AbortController` por vista (`run(...)` centraliza ocupado, fallo,
+descarte de respuestas tardías y aborto al desmontar), confirmación inline con `role="group"` que
+recibe el foco, portapapeles nativo sin fingir éxito, descarga validada antes de crear el `Blob` y
+foco al h1 sólo si el control iniciador desapareció y la persona no movió el foco. `key={owner}` en
+`Calendar` hace que cambiar de identidad reinicie la vista entera (@s37).
+
+Rojo 3: la entrada de navegación. `Unable to find an accessible element with the role "link" and
+name "Calendario"`.
+
+Verde: ruta `/calendario` y sección «Calendario» en `App.tsx`, entrada `RouteLink` en
+`workspace.tsx` justo después de «Exportación», y estilos `.calendar-feed` en `styles.scss`
+(objetivos de 44 px, campo de url a ancho completo sin desbordar, tokens de tema).
+
+Efecto colateral honesto: `export-data.test.tsx` y `appearance.test.tsx` afirmaban la posición de
+«Exportación» y «Apariencia» contando desde el final de la navegación. Insertar «Calendario» las
+desplaza una posición; se han corregido los índices y se ha añadido la afirmación de que la nueva
+entrada está justo después de «Exportación», que es lo que exige @s31.
+
+Nota de honestidad sobre este ciclo: las 25 pruebas de la vista se escribieron juntas y pasaron en
+la primera ejecución tras implementar el componente. El rojo fue de resolución de módulo, no de
+comportamiento prueba a prueba; es un ciclo más grueso que los del backend. Lo compensa la
+mutación de Stryker, que dirá si alguna de esas 25 no está realmente sujetando nada.
+
+Comandos:
+```
+pnpm vitest run src/calendar-feed-api.test.ts   → 13 pruebas
+pnpm vitest run src/calendar.test.tsx           → 26 pruebas
+pnpm vitest run src/export-data.test.tsx src/appearance.test.tsx → 72 pruebas
+pnpm exec eslint src/ ; pnpm exec prettier --check src/ ; pnpm exec tsc --noEmit → limpio
+```

@@ -24,6 +24,7 @@ final class ConnectorFakes {
   final FakeIssueSource source = new FakeIssueSource();
   final FakeCipher cipher = new FakeCipher();
   final FakeImportedTaskCommit tasks = new FakeImportedTaskCommit();
+  final FakeProjects projects = new FakeProjects();
 
   /** Cifrado reversible con nonce por escritura y propietario como dato autenticado. */
   static final class FakeCipher implements SecretCipher {
@@ -91,6 +92,11 @@ final class ConnectorFakes {
   static final class FakeReceipts implements IssueImportReceiptStore {
     private final Map<UUID, IssueImportReceipt> rows = new LinkedHashMap<>();
     private final Map<UUID, String> owners = new HashMap<>();
+    private final List<Integer> progressCreated = new ArrayList<>();
+
+    List<Integer> progressCreated() {
+      return List.copyOf(progressCreated);
+    }
 
     @Override
     public IssueImportReceipt begin(
@@ -117,6 +123,7 @@ final class ConnectorFakes {
 
     @Override
     public void progress(String ownerId, UUID importId, int created, int skipped, int failed) {
+      progressCreated.add(created);
       rows.computeIfPresent(importId, (id, row) -> row.withCounters(created, skipped, failed));
     }
 
@@ -209,8 +216,10 @@ final class ConnectorFakes {
   static final class FakeIssueSource implements IssueSource {
     private final List<String> calls = new ArrayList<>();
     private final Map<Integer, IssuePage> pages = new HashMap<>();
+    private final Map<Integer, IssueSourceException> pageFailures = new HashMap<>();
     private RepositoryIdentity identity = new RepositoryIdentity("octocat/Hello-World", "octocat");
     private IssueSourceException failure;
+    private String lastToken;
 
     void identify(String fullName, String login) {
       identity = new RepositoryIdentity(fullName, login);
@@ -221,6 +230,10 @@ final class ConnectorFakes {
       failure = error;
     }
 
+    void failOnPage(int number, IssueSourceException error) {
+      pageFailures.put(number, error);
+    }
+
     void page(int number, IssuePage page) {
       pages.put(number, page);
     }
@@ -229,9 +242,14 @@ final class ConnectorFakes {
       return List.copyOf(calls);
     }
 
+    String lastToken() {
+      return lastToken;
+    }
+
     @Override
     public RepositoryIdentity verify(String repository, String token) {
       calls.add("verify " + repository + " " + token);
+      lastToken = token;
       if (failure != null) throw failure;
       return identity;
     }
@@ -239,23 +257,59 @@ final class ConnectorFakes {
     @Override
     public IssuePage list(String repository, String token, int page) {
       calls.add("list " + repository + " page=" + page);
+      lastToken = token;
       if (failure != null) throw failure;
+      var pageFailure = pageFailures.get(page);
+      if (pageFailure != null) throw pageFailure;
       return pages.getOrDefault(page, new IssuePage(List.of(), 0, false));
+    }
+  }
+
+  /** Proyectos del propietario: sólo lo que el conector necesita saber de ellos. */
+  static final class FakeProjects implements ProjectQueries {
+    private final Map<UUID, com.apptolast.organization.domain.Project> rows = new LinkedHashMap<>();
+
+    UUID seed(String ownerId, String status) {
+      var id = UUID.randomUUID();
+      rows.put(id, project(id, ownerId, status));
+      return id;
+    }
+
+    void status(UUID id, String status) {
+      var row = rows.get(id);
+      rows.put(id, project(id, row.ownerId(), status));
+    }
+
+    private static com.apptolast.organization.domain.Project project(
+        UUID id, String ownerId, String status) {
+      var now = Instant.parse("2026-09-01T08:00:00Z");
+      return new com.apptolast.organization.domain.Project(
+          id, ownerId, "Proyecto", "", status, now, now);
+    }
+
+    @Override
+    public List<com.apptolast.organization.domain.ProjectSummary> list(
+        String ownerId, com.apptolast.organization.domain.ProjectPosition after, int limit) {
+      throw new UnsupportedOperationException("El conector no lista proyectos");
+    }
+
+    @Override
+    public Optional<com.apptolast.organization.domain.ProjectSnapshot> find(
+        String ownerId, UUID id) {
+      return Optional.ofNullable(rows.get(id))
+          .filter(row -> row.ownerId().equals(ownerId))
+          .map(row -> new com.apptolast.organization.domain.ProjectSnapshot(row, 1));
     }
   }
 
   /** Confirma tarea, evento y enlace juntos, o revierte los tres. */
   static final class FakeImportedTaskCommit implements ImportedTaskCommit {
     private final Map<String, UUID> links = new LinkedHashMap<>();
-    private final List<UUID> tasks = new ArrayList<>();
+    private final List<com.apptolast.organization.domain.Task> tasks = new ArrayList<>();
     private final List<UUID> events = new ArrayList<>();
     private String projectStatus = "idea";
     private String storageFailureOn;
     private String completedOn;
-
-    void projectStatus(String status) {
-      projectStatus = status;
-    }
 
     void failStorageOn(String externalId) {
       storageFailureOn = externalId;
@@ -273,6 +327,10 @@ final class ConnectorFakes {
       return tasks.size();
     }
 
+    com.apptolast.organization.domain.Task lastTask() {
+      return tasks.getLast();
+    }
+
     int events() {
       return events.size();
     }
@@ -283,14 +341,17 @@ final class ConnectorFakes {
 
     @Override
     public boolean save(
-        String ownerId, UUID projectId, ExternalIssue issue, Function<String, TaskCreation> operation) {
+        String ownerId,
+        UUID projectId,
+        ExternalIssue issue,
+        Function<String, TaskCreation> operation) {
       if (issue.externalId().equals(storageFailureOn))
         throw new StorageUnavailableException(new IllegalStateException("link insert failed"));
       if (issue.externalId().equals(completedOn)) projectStatus = "completed";
       var key = ownerId + "|github|" + issue.externalId();
       if (links.containsKey(key)) return false;
       var creation = operation.apply(projectStatus);
-      tasks.add(creation.task().id());
+      tasks.add(creation.task());
       events.add(creation.event().eventId());
       links.put(key, creation.task().id());
       return true;

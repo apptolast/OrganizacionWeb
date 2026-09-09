@@ -84,6 +84,28 @@ la base de la API (`GithubApiBase`, @s35/B11) ya había encontrado su verde ante
   `IssueImportNotFoundException` e `IssueImportInProgressException`. Ninguna clase existente se ha
   tocado.
 
+### Ciclo 8 — @s12 @s16 @s17 @s18 @s19 @s20 @s22 @s24 @s26 @s27 @s28 @s29 importar
+
+- ROJO `ImportGithubIssuesTest`, 34 pruebas (no compilaba: faltaban `ImportGithubIssues` y
+  `IssueImportFailedException`).
+- VERDE `ImportGithubIssues`. Decisiones que el contrato fija y que el código hace explícitas:
+  - **Orden de precondiciones** (@s29): clave, conexión, validez de la conexión, proyecto, estado
+    del proyecto, exclusión mutua. El recibo se crea el último, así que @s23, @s24 (primera fila),
+    @s25 y @s29 no dejan recibo ni tocan la red.
+  - **Paginación** (@s16): se pide la página siguiente porque la anterior trajo exactamente 100
+    *elementos* —los descartados por no ser issues también cuentan—, no porque venga `Link
+    rel="next"`. `truncated` sale de que el gestor anuncie más después de la última página leída,
+    que es lo único que distingue 200 issues (false) de 201 (true).
+  - **Fallo aislado frente a fallo que detiene** (@s18 vs @s19): un título vacío se cuenta como
+    fallido sin llegar al almacén; un `StorageUnavailableException` aborta, porque a partir de ahí
+    no se puede garantizar que tarea, evento y enlace vayan juntos.
+  - **Progreso incremental** (@s27): `receipts.progress` tras cada issue, para que una muerte a
+    mitad deje el recibo `running` con lo confirmado y ni una tarea más.
+  - **401 durante la importación** (@s22) marca la conexión `invalid`; el resto de fallos del
+    gestor la dejan `valid`.
+- Comprobación de que las pruebas muerden: al subir `MAX_PAGES` a 3 y cambiar la condición de
+  parada a "página vacía", 9 de las 34 fallan. Revertido.
+
 ## Enmiendas al contrato aprobadas por el coordinador (9 de septiembre de 2026)
 
 Origen: `progress/security_review_connectors.md` (rama `main`). El coordinador actualiza

@@ -39,7 +39,7 @@ public final class CreateWebhook implements CreateWebhookUseCase {
     var endpoint =
         WebhookEndpoint.active(UUID.randomUUID(), intent, CustomizationTime.capture(clock));
     var secret = newSecret();
-    endpoints.insert(owner, endpoint, secrets.encrypt(endpoint.id(), secret));
+    endpoints.insert(owner, endpoint, secrets.encrypt(owner, endpoint.id(), secret));
     return new WebhookCreation(endpoint, secret);
   }
 

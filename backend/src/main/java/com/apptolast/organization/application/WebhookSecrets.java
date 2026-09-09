@@ -2,7 +2,12 @@ package com.apptolast.organization.application;
 
 import java.util.UUID;
 
-/** Encrypts webhook secrets at rest; unavailable when the connector key is missing or invalid. */
+/**
+ * Encrypts webhook secrets at rest; unavailable when the connector key is missing.
+ *
+ * <p>Amendment B6: the associated data binds both the owner and the endpoint, so a row moved or
+ * restored under another owner no longer opens.
+ */
 public interface WebhookSecrets {
   WebhookSecrets DISABLED =
       new WebhookSecrets() {
@@ -12,19 +17,19 @@ public interface WebhookSecrets {
         }
 
         @Override
-        public byte[] encrypt(UUID endpointId, String secret) {
+        public byte[] encrypt(String ownerId, UUID endpointId, String secret) {
           throw new IllegalStateException("Connectors are disabled");
         }
 
         @Override
-        public String decrypt(UUID endpointId, byte[] ciphertext) {
+        public String decrypt(String ownerId, UUID endpointId, byte[] ciphertext) {
           throw new IllegalStateException("Connectors are disabled");
         }
       };
 
   boolean available();
 
-  byte[] encrypt(UUID endpointId, String secret);
+  byte[] encrypt(String ownerId, UUID endpointId, String secret);
 
-  String decrypt(UUID endpointId, byte[] ciphertext);
+  String decrypt(String ownerId, UUID endpointId, byte[] ciphertext);
 }

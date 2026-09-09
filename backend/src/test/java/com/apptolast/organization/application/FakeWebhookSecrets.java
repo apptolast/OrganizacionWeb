@@ -1,8 +1,9 @@
 package com.apptolast.organization.application;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-/** Reversible stand-in for AES-GCM: the endpoint id acts as the additional authenticated data. */
+/** Reversible stand-in for AES-GCM binding the same associated data as the real adapter (B6). */
 class FakeWebhookSecrets implements WebhookSecrets {
   static final WebhookSecrets KEYED = new FakeWebhookSecrets();
 
@@ -12,18 +13,19 @@ class FakeWebhookSecrets implements WebhookSecrets {
   }
 
   @Override
-  public byte[] encrypt(UUID endpointId, String secret) {
-    return prefix(endpointId).concat(secret).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+  public byte[] encrypt(String ownerId, UUID endpointId, String secret) {
+    return prefix(ownerId, endpointId).concat(secret).getBytes(StandardCharsets.UTF_8);
   }
 
   @Override
-  public String decrypt(UUID endpointId, byte[] ciphertext) {
-    var text = new String(ciphertext, java.nio.charset.StandardCharsets.UTF_8);
-    if (!text.startsWith(prefix(endpointId))) throw new IllegalStateException("Wrong endpoint id");
-    return text.substring(prefix(endpointId).length());
+  public String decrypt(String ownerId, UUID endpointId, byte[] ciphertext) {
+    var text = new String(ciphertext, StandardCharsets.UTF_8);
+    var prefix = prefix(ownerId, endpointId);
+    if (!text.startsWith(prefix)) throw new IllegalStateException("Wrong associated data");
+    return text.substring(prefix.length());
   }
 
-  private static String prefix(UUID endpointId) {
-    return "cipher:" + endpointId + ":";
+  private static String prefix(String ownerId, UUID endpointId) {
+    return "cipher:" + ownerId + "|" + endpointId + ":";
   }
 }

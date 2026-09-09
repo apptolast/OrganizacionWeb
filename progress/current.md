@@ -162,3 +162,88 @@ HTTP, migración V28 y la página `/automatizaciones`. Bitácora, trazabilidad
 No demostrado: la fase 2 entera (worker y `NOTIFY_WEBHOOK` real, dependen de 25).
 El punto de extensión `WebhookEndpointLookup` responde false y tiene test de
 contrato; ningún escenario de fase 2 se declara verde. Sin mutación lanzada.
+
+## Cierre de la integración — 9 de septiembre de 2026, última sesión
+
+El usuario avisó de que esta es la última sesión dedicada al proyecto tras siete
+días. Lo que sigue es el estado real, sin adornos, para que quien lo retome sepa
+exactamente qué está acreditado y qué no.
+
+### Los cinco merges están hechos
+
+`main` contiene ahora las features 24, 25, 26, 27, 28 y 30. En orden:
+
+| Commit | Qué integra |
+| ------ | ----------- |
+| `fa49fd7` | feature 27, conector GitHub, versión corregida tras su rechazo |
+| `bdbeafc` | feature 25, webhooks |
+| `5b9937e` | feature 28, calendario externo, con la unificación de `AddressPolicy` |
+| `444ce24` | feature 30, automatizaciones fase 1 |
+| `57608a8` | feature 26, calendario ICS, versión aprobada en tercera lectura |
+
+El integrador que hacía este trabajo murió al agotarse el límite de sesión, con
+el merge de la 28 resuelto pero **sin commitear**. No se perdió nada: no había
+conflictos pendientes, se verificó la resolución de `AddressPolicy` a mano y se
+commiteó. Los merges cuarto y quinto se hicieron desde el orquestador.
+
+### La resolución que importaba: `AddressPolicy`
+
+Las features 25 y 28 añadían cada una `application/AddressPolicy` con el mismo
+nombre cualificado, sin base común en `main`, con la polaridad invertida
+—`isBlocked` frente a `allows`— y, lo que es peor, **con conducta distinta**
+sobre las formas IPv6 que encapsulan una IPv4: la 25 las normalizaba a la IPv4
+embebida, la 28 bloquea `2002::/16`, `64:ff9b::/96` y `::/96` como rangos
+enteros. Cada suite fijaba la respuesta contraria, así que ninguna unión de sus
+pruebas pasaba: exigía una decisión de seguridad, no un renombrado.
+
+Sobrevive la forma de la 28 —interfaz, no clase estática— y la conducta más
+restrictiva. El envío de webhooks queda **deliberadamente fuera** del interruptor
+`app.connectors.allow-private-addresses`: esa válvula existe para el perfil de
+extremo a extremo del calendario externo, y un webhook firmado no debe quedar a
+su merced. La trampa de polaridad se evita **por tipo**: los consumidores reciben
+un `AddressPolicy` en vez de un `Predicate` cuyo `true` significaba BLOQUEADA, de
+modo que el compilador impide confundir los sentidos.
+
+Esta colisión la encontró la auditoría previa (`progress/auditoria_colisiones_25_28_30.md`),
+no el choque. Una fusión apresurada habría dejado la guarda contra SSRF invertida
+—permitiendo solo direcciones privadas— sin que ningún test lo detectase.
+
+### Rangos de Stryker: recalculados y con un defecto real corregido
+
+Se recalcularon **todos** contra el `App.tsx` fusionado, con el oráculo de
+contenido. Dos guardas (`ics calendar` y `appearance`) **ya fallaban en `main`
+antes de esta integración**, comprobado ejecutándolas en un worktree sobre
+`5b9937e`. Y salió un defecto que no es cosmético: el alcance de `export-data`
+apuntaba a `use-session.ts:190:6-190:29` cuando el nodo congelado está en
+`221:6-221:29`. Un rango desfasado no falla: muta el código equivocado y la
+campaña lo bendice igual.
+
+`scripts/project.test.mjs`: 91 de 91 en verde.
+
+### Lo que NO está hecho, y es lo que falta para el 100 %
+
+1. **Ninguna de las features 25, 26, 27, 28 y 30 está en `done`.** Siguen en
+   `in_progress` y así deben quedarse. `done` exige juez aprobado **y** mutación
+   sobre el umbral, y eso no se ha completado para ninguna salvo lo que sigue.
+2. **Feature 26:** juez **APPROVED** en tercera lectura, con una condición
+   explícita que **no** está cumplida: `calendar.tsx` cambió después de la
+   campaña de 340/384 y está entero en el alcance, así que **hay que reejecutar
+   `node scripts/project.mjs mutate ics_calendar-frontend`** sobre este árbol.
+   Su campaña de backend nunca llegó a correr porque PIT aborta si la suite no
+   está verde, y lo estuvo hasta hace poco.
+3. **Feature 27:** su juez la rechazó, el artesano cerró los cinco bloqueantes y
+   esa versión ya está integrada, pero **no ha vuelto a pasar por el juez**.
+4. **Features 25, 28 y 30: sin juez y sin mutación.** El barrido de pre-juicio
+   (`wu4x7ut0o`, 174 agentes) dejó hallazgos verificados que el juez encontrará
+   igual; conviene leerlos antes de convocarlo. Para la 25, ocho bloqueantes,
+   entre ellos que el zoom nativo al 200 % no se ejecuta nunca pese a que
+   `features/webhooks.feature:518` lo exige, y que su oráculo de teclado es un
+   umbral —«hubo más de cinco»— y no un recorrido.
+5. **Feature 29, conectores adicionales: prácticamente sin empezar.** Su carril
+   murió por el límite de sesión al poco de arrancar. La rama
+   `claude/additional-connectors` existe, salida de `99d3e64`.
+6. **La mutación nocturna sigue rota** por la causa ya diagnosticada, y su
+   arreglo —matriz por objetivo derivando la lista de `scripts/project.mjs`— ya
+   no choca con nada, porque las integraciones están hechas.
+7. **`one_feature_at_a_time` está en `false`** en `harness.config.json`.
+   Devuélvelo a `true` cuando el proyecto vuelva a un solo carril.

@@ -6,6 +6,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.apptolast.organization.support.TestDatabase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.*;
 import java.util.*;
@@ -56,9 +57,7 @@ class ScheduleBlockApiTest {
     when(catalog.zones()).thenReturn(ZoneId.getAvailableZoneIds());
     when(clock.instant()).thenReturn(Instant.parse("2030-01-01T00:00:00.123456789Z"));
     when(clock.getZone()).thenReturn(ZoneOffset.UTC);
-    jdbc.execute(
-        "TRUNCATE project_custom_field_values,task_custom_field_values,"
-            + " work_session_intervals,work_session_changes,work_sessions,block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
+    TestDatabase.empty(jdbc);
     project = UUID.randomUUID();
     task = UUID.randomUUID();
     preference = UUID.randomUUID();

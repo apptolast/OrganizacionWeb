@@ -7,6 +7,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.apptolast.organization.support.TestDatabase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Clock;
 import java.time.Instant;
@@ -65,9 +66,7 @@ class ProjectApiTest {
 
   @BeforeEach
   void clear() {
-    jdbc.execute(
-        "TRUNCATE project_custom_field_values,task_custom_field_values, work_session_intervals,work_session_changes,work_sessions,block_changes,block_projections,planned_blocks,"
-            + " task_status_history, tasks, outbox_events, projects");
+    TestDatabase.empty(jdbc);
   }
 
   @org.junit.jupiter.params.ParameterizedTest

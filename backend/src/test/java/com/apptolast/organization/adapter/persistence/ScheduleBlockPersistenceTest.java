@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import com.apptolast.organization.application.*;
 import com.apptolast.organization.domain.*;
+import com.apptolast.organization.support.TestDatabase;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.*;
@@ -47,9 +48,7 @@ class ScheduleBlockPersistenceTest {
 
   @BeforeEach
   void reset() {
-    jdbc.execute(
-        "TRUNCATE project_custom_field_values,task_custom_field_values,"
-            + " work_session_intervals,work_session_changes,work_sessions,block_changes,block_projections,planned_blocks,availability_preferences,task_status_history,tasks,outbox_events,projects");
+    TestDatabase.empty(jdbc);
     store =
         new PostgresBlockStore(
             jdbc, transaction, new PostgresAvailabilityStore(jdbc, transaction), json);

@@ -2,6 +2,7 @@ package com.apptolast.organization.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.apptolast.organization.support.TestDatabase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.*;
 import java.net.http.*;
@@ -43,10 +44,7 @@ class AuthenticationHttpTest {
 
   @BeforeEach
   void browser() {
-    jdbc.execute("TRUNCATE spring_session CASCADE");
-    jdbc.execute(
-        "TRUNCATE project_custom_field_values,task_custom_field_values, work_session_intervals,work_session_changes,work_sessions,block_changes,block_projections,planned_blocks,"
-            + " task_status_history, tasks, outbox_events, projects");
+    TestDatabase.empty(jdbc);
     cookies = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
     client =
         HttpClient.newBuilder()

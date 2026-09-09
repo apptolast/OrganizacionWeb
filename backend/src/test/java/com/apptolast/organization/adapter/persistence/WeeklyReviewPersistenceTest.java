@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 import com.apptolast.organization.application.*;
+import com.apptolast.organization.support.TestDatabase;
 import java.time.*;
 import java.util.Set;
 import org.flywaydb.core.Flyway;
@@ -706,8 +707,7 @@ class WeeklyReviewPersistenceTest {
 
   @BeforeEach
   void clean() {
-    jdbc.execute(
-        "TRUNCATE project_custom_field_values,task_custom_field_values, work_session_intervals,work_session_changes,work_sessions,block_changes,block_projections,planned_blocks,task_status_history,tasks,outbox_events,projects,availability_preferences");
+    TestDatabase.empty(jdbc);
   }
 
   @Container

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.apptolast.organization.application.*;
+import com.apptolast.organization.support.TestDatabase;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.*;
@@ -46,8 +47,7 @@ class WorkSessionStoreTest {
 
   @BeforeEach
   void context() {
-    jdbc.execute(
-        "TRUNCATE work_session_intervals,work_session_changes,work_sessions,projects,outbox_events,availability_preferences CASCADE");
+    TestDatabase.empty(jdbc);
     project = UUID.randomUUID();
     task = UUID.randomUUID();
     key = UUID.randomUUID();

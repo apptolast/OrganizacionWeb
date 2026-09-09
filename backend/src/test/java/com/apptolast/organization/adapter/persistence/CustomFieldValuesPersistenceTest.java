@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.apptolast.organization.application.*;
 import com.apptolast.organization.domain.*;
+import com.apptolast.organization.support.TestDatabase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.*;
 import java.util.*;
@@ -1417,18 +1418,7 @@ class CustomFieldValuesPersistenceTest {
 
   @BeforeEach
   void clearOwnDatabase() {
-    for (var table :
-        List.of(
-            "project_custom_field_values",
-            "task_custom_field_values",
-            "customization_preferences",
-            "work_session_intervals",
-            "work_session_changes",
-            "work_sessions",
-            "task_status_history",
-            "outbox_events",
-            "tasks",
-            "projects")) jdbc.update("DELETE FROM " + table);
+    TestDatabase.empty(jdbc);
   }
 
   @Test

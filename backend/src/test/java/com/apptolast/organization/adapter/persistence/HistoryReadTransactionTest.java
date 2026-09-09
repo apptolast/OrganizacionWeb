@@ -3,6 +3,7 @@ package com.apptolast.organization.adapter.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.apptolast.organization.application.HistoryFilters;
+import com.apptolast.organization.support.TestDatabase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeAll;
@@ -97,8 +98,7 @@ class HistoryReadTransactionTest {
 
   @org.junit.jupiter.api.BeforeEach
   void clearFacts() {
-    jdbc.execute(
-        "TRUNCATE project_custom_field_values,task_custom_field_values, work_session_intervals,work_session_changes,work_sessions,block_changes,block_projections,planned_blocks,task_status_history,tasks,outbox_events,projects");
+    TestDatabase.empty(jdbc);
   }
 
   @Test

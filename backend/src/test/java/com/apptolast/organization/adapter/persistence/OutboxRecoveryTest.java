@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.apptolast.organization.adapter.broker.RabbitBrokerPublisher;
 import com.apptolast.organization.application.*;
 import com.apptolast.organization.domain.*;
+import com.apptolast.organization.support.TestDatabase;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbitmq.client.*;
@@ -77,9 +78,7 @@ class OutboxRecoveryTest {
 
   @BeforeEach
   void clear() throws Exception {
-    jdbc.execute(
-        "TRUNCATE project_custom_field_values,task_custom_field_values, work_session_intervals,work_session_changes,work_sessions,block_changes,block_projections,planned_blocks,"
-            + " task_status_history, tasks, outbox_events, projects");
+    TestDatabase.empty(jdbc);
     try (var connection = factory().newConnection();
         var channel = connection.createChannel()) {
       channel.queuePurge(QUEUE);

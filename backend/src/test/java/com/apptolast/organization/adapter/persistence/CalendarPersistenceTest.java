@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.*;
 import com.apptolast.organization.application.StorageUnavailableException;
 import com.apptolast.organization.domain.CalendarEntry;
 import com.apptolast.organization.domain.CalendarFeedSecret;
+import com.apptolast.organization.support.TestDatabase;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -43,14 +44,7 @@ class CalendarPersistenceTest {
 
   @BeforeEach
   void clean() {
-    jdbc.update("DELETE FROM calendar_feed_tokens");
-    jdbc.update("DELETE FROM block_changes");
-    jdbc.update("DELETE FROM block_projections");
-    jdbc.update("DELETE FROM planned_blocks");
-    jdbc.update("DELETE FROM tasks");
-    jdbc.update("DELETE FROM outbox_events");
-    jdbc.update("DELETE FROM projects");
-    jdbc.update("DELETE FROM availability_preferences");
+    TestDatabase.empty(jdbc);
   }
 
   static PostgresCalendarStore store() {

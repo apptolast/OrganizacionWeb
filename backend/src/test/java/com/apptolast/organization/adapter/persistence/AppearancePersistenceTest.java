@@ -2,6 +2,7 @@ package com.apptolast.organization.adapter.persistence;
 
 import static org.assertj.core.api.Assertions.*;
 
+import com.apptolast.organization.support.TestDatabase;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.*;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -90,7 +91,7 @@ class AppearancePersistenceTest {
 
   @BeforeEach
   void clean() {
-    jdbc.execute("TRUNCATE appearance_preferences");
+    TestDatabase.empty(jdbc);
   }
 
   @Test

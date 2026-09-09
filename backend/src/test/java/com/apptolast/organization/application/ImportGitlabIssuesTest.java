@@ -90,6 +90,58 @@ class ImportGitlabIssuesTest {
         fakes.tasks.linkKeys());
   }
 
+  // ------------------------------------------------------ @s23 @s24 @s25 fallos del gestor
+
+  @Test
+  void s23_aRejectedTokenMarksTheConnectionInErrorAndLeavesAFailedReceipt() {
+    fakes.source.failOnPage(1, IssueSourceException.tokenRejected());
+
+    var error =
+        assertThrows(
+            IssueImportFailedException.class, () -> importIssues().execute(OWNER, projectId));
+
+    var receipt = error.receipt();
+    assertEquals("failed", receipt.status());
+    assertEquals("CONNECTION_INVALID", receipt.errorCode());
+    assertEquals(0, receipt.created());
+    assertNotNull(receipt.finishedAt());
+
+    var row = gitlab.connections.find(OWNER).orElseThrow();
+    assertEquals("error", row.status());
+    assertEquals("CONNECTION_INVALID", row.lastError().code());
+    assertEquals(NOW, row.lastError().at());
+    assertNotNull(row.tokenCiphertext());
+  }
+
+  @Test
+  void s25_anUnavailableProviderAnnotatesTheFailureButLeavesTheConnectionConnected() {
+    fakes.source.failOnPage(1, IssueSourceException.unavailable());
+
+    var error =
+        assertThrows(
+            IssueImportFailedException.class, () -> importIssues().execute(OWNER, projectId));
+
+    assertEquals("GITLAB_UNAVAILABLE", error.receipt().errorCode());
+    var row = gitlab.connections.find(OWNER).orElseThrow();
+    assertEquals("connected", row.status());
+    assertEquals("GITLAB_UNAVAILABLE", row.lastError().code());
+    assertEquals(0, fakes.tasks.tasks());
+  }
+
+  @Test
+  void s24_anExhaustedQuotaKeepsTheConnectionAndFailsTheReceiptWithItsRetryAfter() {
+    fakes.source.failOnPage(1, IssueSourceException.rateLimited(30));
+
+    var error =
+        assertThrows(
+            IssueImportFailedException.class, () -> importIssues().execute(OWNER, projectId));
+
+    assertEquals("RATE_LIMITED", error.receipt().errorCode());
+    assertEquals(30, error.retryAfterSeconds());
+    assertEquals("connected", gitlab.connections.find(OWNER).orElseThrow().status());
+    assertEquals(0, fakes.tasks.tasks());
+  }
+
   @Test
   void s15_theIssuesAreAskedForByProjectReferenceWithTheDecryptedToken() {
     fakes.source.page(1, new IssuePage(List.of(issue(9001)), 1, false));

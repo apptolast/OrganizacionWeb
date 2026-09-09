@@ -324,7 +324,7 @@ Feature: Entregar los eventos propios ya confirmados a URLs https elegidas con f
       | responde 404                                             | HTTP_ERROR      | 404  |
       | responde 500                                             | HTTP_ERROR      | 500  |
       | responde 302 con Location a otra URL                     | REDIRECT        | 302  |
-      | acepta la conexión y no responde en 5 s                  | TIMEOUT         | null |
+      | acepta la conexión y no responde dentro del plazo de intercambio | TIMEOUT   | null |
       | tiene el puerto cerrado                                  | CONNECTION      | null |
       | presenta un certificado no confiable                     | TLS             | null |
       | tiene un host que ya no resuelve                         | DNS             | null |

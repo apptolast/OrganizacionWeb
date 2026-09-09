@@ -10,10 +10,13 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
@@ -39,8 +42,23 @@ class JdkWebhookSenderTest {
   /** The whole internet is off limits: no destination survives the guard. */
   private static final AddressPolicy NO_ADDRESS_ALLOWED = address -> false;
 
+  /** Short enough that a stalling receiver costs the suite a fraction of a second, not ten. */
+  private static final Duration TEST_CONNECT_DEADLINE = Duration.ofSeconds(2);
+
+  private static final Duration TEST_EXCHANGE_DEADLINE = Duration.ofMillis(300);
+
   private static JdkWebhookSender sender(AddressPolicy policy) {
     return new JdkWebhookSender(CLOCK, policy, InetAddress::getAllByName);
+  }
+
+  /** The same sender with the two deadlines shortened, so the timeout row is affordable. */
+  private static JdkWebhookSender senderWithShortDeadlines() {
+    return new JdkWebhookSender(
+        CLOCK,
+        EVERY_ADDRESS_ALLOWED,
+        InetAddress::getAllByName,
+        TEST_CONNECT_DEADLINE,
+        TEST_EXCHANGE_DEADLINE);
   }
 
   private record Receiver(HttpServer server, List<HttpExchange> received) implements AutoCloseable {
@@ -65,6 +83,14 @@ class JdkWebhookSenderTest {
         });
     server.start();
     return new Receiver(server, received);
+  }
+
+  private static void await(CountDownLatch latch) {
+    try {
+      latch.await(10, TimeUnit.SECONDS);
+    } catch (InterruptedException interrupted) {
+      Thread.currentThread().interrupt();
+    }
   }
 
   private static void respond(HttpExchange exchange, int code, byte[] body) {
@@ -194,6 +220,38 @@ class JdkWebhookSenderTest {
 
     assertEquals("DNS", outcome.errorClass());
     assertNull(outcome.httpStatus());
+  }
+
+  @Test
+  void b1_theProductionDeadlinesAreFiveSecondsToConnectAndTenForTheWholeExchange() {
+    var production = sender(EVERY_ADDRESS_ALLOWED);
+
+    assertEquals(Duration.ofSeconds(5), production.connectDeadline());
+    assertEquals(Duration.ofSeconds(10), production.exchangeDeadline());
+  }
+
+  @Test
+  void s25_aReceiverThatAcceptsTheConnectionAndNeverAnswersIsATimeout() throws Exception {
+    var accepted = new CountDownLatch(1);
+    var release = new CountDownLatch(1);
+    try (var receiver =
+        start(
+            exchange -> {
+              accepted.countDown();
+              await(release);
+              respond(exchange, 200, new byte[0]);
+            })) {
+      var outcome = senderWithShortDeadlines().send(receiver.url(), SECRET, EVENT, BODY);
+      release.countDown();
+
+      assertTrue(accepted.await(2, TimeUnit.SECONDS), "the receiver did accept the connection");
+      assertEquals("TIMEOUT", outcome.errorClass());
+      assertNull(outcome.httpStatus());
+      assertFalse(outcome.succeeded());
+      assertTrue(
+          outcome.latencyMs() >= TEST_EXCHANGE_DEADLINE.toMillis(),
+          "the exchange deadline elapsed before giving up, got " + outcome.latencyMs() + " ms");
+    }
   }
 
   @Test

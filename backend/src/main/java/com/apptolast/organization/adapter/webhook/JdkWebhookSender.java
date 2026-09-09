@@ -37,20 +37,44 @@ public final class JdkWebhookSender implements WebhookSender {
   private final AddressPolicy policy;
   private final com.apptolast.organization.application.WebhookDestinationGuard.HostResolver
       resolver;
+  private final Duration exchangeDeadline;
   private final HttpClient client;
 
   public JdkWebhookSender(
       Clock clock,
       AddressPolicy policy,
       com.apptolast.organization.application.WebhookDestinationGuard.HostResolver resolver) {
+    this(clock, policy, resolver, CONNECT_TIMEOUT, EXCHANGE_TIMEOUT);
+  }
+
+  /**
+   * The deadlines are injectable so a test can produce a real timeout in milliseconds instead of
+   * paying the ten seconds of production. Production wiring goes through the public constructor.
+   */
+  JdkWebhookSender(
+      Clock clock,
+      AddressPolicy policy,
+      com.apptolast.organization.application.WebhookDestinationGuard.HostResolver resolver,
+      Duration connectDeadline,
+      Duration exchangeDeadline) {
     this.clock = clock;
     this.policy = policy;
     this.resolver = resolver;
+    this.exchangeDeadline = exchangeDeadline;
     this.client =
         HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.NEVER)
-            .connectTimeout(CONNECT_TIMEOUT)
+            .connectTimeout(connectDeadline)
             .build();
+  }
+
+  /** Read back from the client itself, not from a field: it is the deadline actually wired. */
+  Duration connectDeadline() {
+    return client.connectTimeout().orElseThrow();
+  }
+
+  Duration exchangeDeadline() {
+    return exchangeDeadline;
   }
 
   @Override
@@ -98,7 +122,7 @@ public final class JdkWebhookSender implements WebhookSender {
 
   private HttpRequest request(String url, String secret, String eventId, byte[] payload) {
     return HttpRequest.newBuilder(URI.create(url))
-        .timeout(EXCHANGE_TIMEOUT)
+        .timeout(exchangeDeadline)
         .header("Content-Type", CONTENT_TYPE)
         .header("User-Agent", USER_AGENT)
         .header("X-OrganizationWeb-Event-Id", eventId)

@@ -282,7 +282,7 @@ test("appearance audit: text200 preserves appearance session history and weekly 
 }, testInfo) => {
   test.setTimeout(180000);
   sql(
-    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects CASCADE",
   );
   await configure(request, 120, "UTC");
   const project = await create(

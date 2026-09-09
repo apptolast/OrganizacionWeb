@@ -55,7 +55,7 @@ test("weekly review: nativeZoom200 preserves weekly reading at 320 CSS pixels @s
   baseURL,
 }) => {
   sql(
-    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects CASCADE",
   );
   await configure(request, 0, "UTC");
   const scratch = resolve(
@@ -168,7 +168,7 @@ test("weekly review: native selection and seven days remain usable across widths
   const folder = `.e2e-work/weekly-review-real/${page.context().browser().browserType().name()}/ux`;
   await mkdir(folder, { recursive: true });
   sql(
-    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects CASCADE",
   );
   await page.goto("/revision-semanal?date=2020-01-08&zoneId=UTC");
   await expect(
@@ -283,7 +283,7 @@ test("weekly review: text200 preserves dates controls and neutral weekly facts @
   request,
 }) => {
   sql(
-    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects CASCADE",
   );
   await configure(request, 0, "UTC");
   const folder = `.e2e-work/weekly-review-real/${page.context().browser().browserType().name()}/text200`;
@@ -325,7 +325,7 @@ test("weekly review: refresh announces waiting and recovers without losing the s
   request,
 }) => {
   sql(
-    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects CASCADE",
   );
   await configure(request, 0, "UTC");
   const folder = `.e2e-work/weekly-review-real/${page.context().browser().browserType().name()}/recovery`;

@@ -10,7 +10,7 @@ test("weekly review: explicit selection and browser Back preserve the applied da
   page,
 }) => {
   sql(
-    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects CASCADE",
   );
   const readings = [];
   page.on("request", (request) => {
@@ -79,7 +79,7 @@ test("weekly review: opens seven empty days from the existing navigation @s1 @s2
   page,
 }) => {
   sql(
-    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects CASCADE",
   );
   await page.goto("/proyectos");
   const link = page
@@ -139,7 +139,7 @@ test("weekly review: past plan and closed work survive own outbox removal and AP
   request,
 }) => {
   sql(
-    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects",
+    "TRUNCATE project_custom_field_values, task_custom_field_values, work_session_intervals, work_session_changes, work_sessions, block_changes, block_projections, planned_blocks, availability_preferences, task_status_history, tasks, outbox_events, projects CASCADE",
   );
   const project = await create(request, "Semana durable");
   const task = await saveTask(

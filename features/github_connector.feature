@@ -52,12 +52,18 @@ Feature: Importar issues abiertas de GitHub como tareas propias con trazabilidad
     Given APP_CONNECTOR_KEY con valor <valor>
     When la aplicación arranca
     Then el arranque falla con un mensaje que nombra app.connectors.key y no contiene el valor configurado
+    # Enmienda del 9 de septiembre de 2026, ratificada por el propietario. La fila
+    # «cadena vacía» sale de la tabla: una variable de entorno no definida llega a
+    # Spring como cadena vacía, así que exigir que ese caso impida arrancar obligaría
+    # a que un despliegue que no usa conectores se negase a levantar. La ausencia de
+    # clave significa «conectores deshabilitados», que es lo que @s3 ya describe, no
+    # un error de configuración. Las otras tres filas sí bloquean el arranque, porque
+    # una clave presente pero inválida sí es un error del operador.
     Examples:
       | valor                          |
       | base64 de 16 bytes             |
       | base64 de 33 bytes             |
       | texto que no es base64         |
-      | cadena vacía                   |
 
   @s5
   Scenario Outline: El repositorio se recorta y se valida antes de hablar con GitHub

@@ -132,6 +132,11 @@ Feature: Suscribir un calendario externo a los bloques planificados propios medi
   Scenario Outline: El feed público responde sin credenciales, con cabeceras exactas y sin escribir ni registrar nada
     Given persona-a tiene el token <token> activo
     When un cliente sin cookies, sin CSRF y sin Authorization envía <metodo> /calendar/<token>.ics
+    # Enmienda del 9 de septiembre de 2026, ratificada por el propietario. El espacio
+    # tras el punto y coma es OPCIONAL: RFC 9110 lo declara espacio en blanco
+    # opcional entre parámetros, y Tomcat entrega la forma sin espacio sin que
+    # ninguna capa de la aplicación pueda cambiarlo. Donde este contrato escribe
+    # «text/calendar; charset=utf-8» se admite igualmente «text/calendar;charset=utf-8».
     Then recibe 200 con Content-Type text/calendar; charset=utf-8, Cache-Control private, no-store y X-Content-Type-Options nosniff
     And Content-Length es 714 y <cuerpo>
     And no incluye Content-Disposition, Set-Cookie, ETag ni Content-Encoding distinto de identity

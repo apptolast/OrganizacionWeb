@@ -2500,3 +2500,38 @@ Una revisión de seguridad de solo lectura aplicó las listas `springboot-securi
 **B7, B8 y B9.** La ruta pública del calendario de la feature 26 exige, en el mismo cambio que la introduce, un bloque propio en la configuración del proxy que la reenvíe al backend. Sin él, todo lo que no cuelga de la interfaz de programación cae en la entrega de la aplicación de una sola página y la ruta devolvería la página con código 200, sin las cabeceras prometidas y sin llegar siquiera al servicio. Ese bloque incorpora limitación de tasa y la supresión del registro de accesos, porque el token de capacidad viaja en la ruta.
 
 **Pendiente del coordinador, no de los carriles.** La entrada de sesión por formulario no tiene hoy ninguna protección contra adivinación de contraseña, ni en la aplicación ni en el proxy, y cada intento cuesta una verificación de contraseña deliberadamente costosa. La corrección es limitación de tasa por dirección en el proxy. No se aplica mientras haya carriles ejecutando pruebas de extremo a extremo, porque cambiar esa configuración reconstruye la imagen web de todas sus pilas y puede volver inestables sus suites. Se entrega tras integrar los carriles y antes de cualquier despliegue.
+
+## Enmienda normativa: orden canónico de la navegación principal
+
+Ratificada por el propietario el 9 de septiembre de 2026. Resuelve una
+contradicción a tres bandas: las features 25 y 30 reclamaban ambas la entrada
+«tras API para integraciones», y la feature 24 tiene pruebas que exigen que
+«API para integraciones» sea el **último** enlace del menú. Los tres enunciados
+no eran satisfacibles a la vez.
+
+El orden canónico y completo de la navegación principal es:
+
+1. Hoy
+2. Proyectos
+3. Disponibilidad
+4. Historial
+5. Revisión semanal
+6. Apariencia
+7. Calendario
+8. Exportación
+9. Importación
+10. API para integraciones
+11. Webhooks
+12. Automatizaciones
+
+Las dos entradas nuevas van detrás de «API para integraciones» en orden de
+número de feature, que es lo que ambas implementaciones ya hacen. El conector
+GitHub (feature 27) no añade entrada, por contrato propio.
+
+**Consecuencia obligatoria para las pruebas.** Toda aserción que fije la
+posición de un enlace por índice —`at(-1)`, `last()`, `length - 2`, un recuento
+fijo de enlaces— queda prohibida a partir de esta enmienda: es exactamente lo
+que ha roto tres carriles esta noche. Las pruebas de la feature 24 y su E2E, que
+hoy afirman que «API para integraciones» es el último enlace, deben reescribirse
+para afirmar el **orden relativo por nombre**, que es la propiedad que de verdad
+les importa y la única que sobrevive a que otra feature añada su entrada.

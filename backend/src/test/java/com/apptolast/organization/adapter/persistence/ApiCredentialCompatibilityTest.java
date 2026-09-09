@@ -7,12 +7,32 @@ import java.io.*;
 import java.security.SecureRandom;
 import java.time.*;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.*;
 
 class ApiCredentialCompatibilityTest {
+  private static final String PUBLIC_COLUMNS =
+      "SELECT table_name,column_name,data_type,ordinal_position FROM information_schema.columns"
+          + " WHERE table_schema='public' ORDER BY table_name,ordinal_position";
+
+  private static List<Map<String, Object>> publicColumns(JdbcTemplate jdbc) {
+    return jdbc.queryForList(PUBLIC_COLUMNS);
+  }
+
+  private static Set<String> tableNamesOf(List<Map<String, Object>> columns) {
+    return columns.stream()
+        .map(column -> (String) column.get("table_name"))
+        .collect(Collectors.toSet());
+  }
+
+  private static List<Map<String, Object>> columnsOfTables(
+      List<Map<String, Object>> columns, Set<String> tables) {
+    return columns.stream().filter(column -> tables.contains(column.get("table_name"))).toList();
+  }
+
   @Test
   void s42_additiveUpgradePreservesBusinessAndExportImportNeverCopiesCredentials()
       throws Exception {
@@ -35,9 +55,8 @@ class ApiCredentialCompatibilityTest {
           "INSERT INTO projects(id,owner_id,name,description,status,created_at,updated_at) VALUES (?,?,'Business','','idea','2026-09-08Z','2026-09-08Z')",
           project,
           owner);
-      var columns =
-          jdbc.queryForList(
-              "SELECT table_name,column_name,data_type FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name,ordinal_position");
+      var columnsBeforeUpgrade = publicColumns(jdbc);
+      var tablesBeforeUpgrade = tableNamesOf(columnsBeforeUpgrade);
       var before =
           jdbc.queryForObject(
               "SELECT row_to_json(p)::text||xmin::text||ctid::text FROM projects p WHERE id=?",
@@ -48,10 +67,7 @@ class ApiCredentialCompatibilityTest {
       var original = new ByteArrayOutputStream();
       export.prepare(owner).writeTo(original);
       Flyway.configure().dataSource(source).load().migrate();
-      assertEquals(
-          columns,
-          jdbc.queryForList(
-              "SELECT table_name,column_name,data_type FROM information_schema.columns WHERE table_schema='public' AND table_name NOT IN ('api_credentials','api_owner_quotas','api_credential_quotas') ORDER BY table_name,ordinal_position"));
+      assertEquals(columnsBeforeUpgrade, columnsOfTables(publicColumns(jdbc), tablesBeforeUpgrade));
       assertEquals(
           before,
           jdbc.queryForObject(

@@ -4,9 +4,9 @@
   "plugins": ["@stryker-mutator/vitest-runner"],
   "ignorePatterns": [".stryker-tmp-availability-replay"],
   "mutate": [
-    "src/App.tsx:35:8-35:45",
-    "src/App.tsx:55:18-69:36",
-    "src/App.tsx:88:10-131:7",
+    "src/App.tsx:37:8-37:45",
+    "src/App.tsx:59:18-73:36",
+    "src/App.tsx:96:10-139:7",
     "src/workspace.tsx:85:10-90:22",
     "src/session-gate.tsx:44:10-44:37",
     "src/use-session.ts:190:6-190:29",

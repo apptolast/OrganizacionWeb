@@ -226,10 +226,10 @@ test("ics calendar Stryker selects its own nodes of the shared files", () => {
     ),
   );
   assert.deepEqual(config.mutate, [
-    "src/App.tsx:37:8-37:42",
-    "src/App.tsx:53:14-54:29",
-    "src/App.tsx:88:10-89:37",
-    "src/workspace.tsx:90:10-95:22",
+    "src/App.tsx:38:8-38:42",
+    "src/App.tsx:57:16-58:30",
+    "src/App.tsx:94:10-95:37",
+    "src/workspace.tsx:91:10-96:22",
     "src/calendar-feed-api.ts",
     "src/calendar.tsx",
   ]);
@@ -1639,10 +1639,10 @@ test("history Stryker covers new modules and complete integration nodes with inh
   assert.deepEqual(config.mutate, [
     "src/history-api.ts",
     "src/history.tsx",
-    "src/App.tsx:31:8-31:57",
-    "src/App.tsx:59:24-65:34",
-    "src/App.tsx:92:10-125:7",
-    "src/workspace.tsx:66:10-71:22",
+    "src/App.tsx:34:8-34:57",
+    "src/App.tsx:67:26-73:36",
+    "src/App.tsx:106:10-139:7",
+    "src/workspace.tsx:67:10-72:22",
     "src/project-reader.tsx:111:10-116:22",
     "src/task-reader.tsx:112:10-117:22",
   ]);
@@ -1671,9 +1671,9 @@ test("default Stryker retains history modules and full new integration nodes", (
   for (const entry of [
     "src/history-api.ts",
     "src/history.tsx",
-    "src/App.tsx:59:24-65:34",
-    "src/App.tsx:92:10-125:7",
-    "src/workspace.tsx:66:10-71:22",
+    "src/App.tsx:67:26-73:36",
+    "src/App.tsx:106:10-139:7",
+    "src/workspace.tsx:67:10-72:22",
     "src/project-reader.tsx:111:10-116:22",
   ])
     assert.ok(
@@ -1904,10 +1904,10 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     "src/appearance-api.ts",
     "src/appearance-state.tsx",
     "src/appearance.tsx",
-    "src/App.tsx:35:8-35:44",
-    "src/App.tsx:57:18-69:34",
-    "src/App.tsx:92:10-133:7",
-    "src/workspace.tsx:78:10-83:22",
+    "src/App.tsx:36:8-36:44",
+    "src/App.tsx:61:20-73:36",
+    "src/App.tsx:98:10-139:7",
+    "src/workspace.tsx:79:10-84:22",
     "src/session-gate.tsx:32:2-52:6",
     "src/use-session.ts:208:0-229:1",
   ]);

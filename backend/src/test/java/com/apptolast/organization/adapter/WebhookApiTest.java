@@ -424,7 +424,8 @@ class WebhookApiTest {
       mvc.perform(request)
           .andExpect(status().isForbidden())
           .andExpect(jsonPath("$.code").value("API_SCOPE_DENIED"))
-          .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")));
+          .andExpect(
+              header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")));
     }
 
     verifyNoInteractions(create, manage);

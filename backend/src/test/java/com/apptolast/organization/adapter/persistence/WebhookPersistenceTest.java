@@ -248,17 +248,14 @@ class WebhookPersistenceTest {
         List.of(delivery.id()),
         store.list(owner, owning.id()).stream().map(WebhookDelivery::id).toList());
 
-    var manage =
-        new ManageWebhook(
-            store, store, KEYED, Clock.fixed(NOW, ZoneOffset.UTC));
+    var manage = new ManageWebhook(store, store, KEYED, Clock.fixed(NOW, ZoneOffset.UTC));
     var refused =
         assertThrows(
             WebhookOperationException.class,
             () -> manage.redeliver(owner, asked.id(), delivery.id()));
 
     assertEquals(WebhookOperationException.Code.NOT_FOUND, refused.code());
-    assertEquals(
-        "succeeded", store.find(owner, owning.id(), delivery.id()).orElseThrow().status());
+    assertEquals("succeeded", store.find(owner, owning.id(), delivery.id()).orElseThrow().status());
   }
 
   private static int count(String owner) {

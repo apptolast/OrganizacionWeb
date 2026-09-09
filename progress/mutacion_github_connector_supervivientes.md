@@ -92,6 +92,59 @@ pasaría de 73,17 % a del orden de 86–88 %. Sobre el total de la feature, de
 69,44 % a aproximadamente **74–75 %**: **todavía por debajo del umbral 80**,
 porque los 108 supervivientes de `github-connector.tsx` siguen intactos.
 
+
+## Racimo 4 — los 5 mutantes SIN COBERTURA de `github-connector.tsx`
+
+Lineas 54 y 265-267. "Sin cobertura" no era un oraculo debil: **el `catch` de
+`disconnect()` no lo ejecutaba ninguna prueba**. La suite tenia el camino feliz
+del DELETE 204, y ni uno solo del fallo.
+
+Pruebas anadidas a `github-connector.test.tsx`:
+
+1. El DELETE responde 409 `CONNECTION_NOT_FOUND`: se afirma que se anuncia «La
+   conexion ya no existe» y que **nada se limpio** (sigue el boton «Desconectar»
+   y no aparece el campo de token). Ejerce el `catch` entero con un
+   `ConnectorError` autentico.
+2. El transporte lanza un fallo que **no** es `ConnectorError`, con un `code`
+   que no debe leerse: se afirma el mensaje generico «No se pudo importar.
+   Intentalo mas tarde» y que NO aparece el mensaje del code ajeno.
+
+**Verificado a mano, mutante a mutante** (5 ejecuciones, restaurando entre
+cada una):
+
+| Mutante | Linea | Resultado |
+| --- | --- | --- |
+| `BlockStatement -> {}` | 265 | **muere** (2 pruebas fallan) |
+| `ConditionalExpression -> true` | 266 | **SIGUE VIVO** |
+| `ConditionalExpression -> false` | 266 | **muere** (1 prueba falla) |
+| `CallExpression -> ;` | 267 | **muere** (2 pruebas fallan) |
+| `StringLiteral -> ""` | 54 | **muere** (1 prueba falla) |
+
+**Prevision de este racimo: 4 de 5.**
+
+Por que sobrevive el `-> true`: convierte el ternario en «usa siempre el error
+tal cual». Mi prueba 2 lanza un `Error` con `code` propio esperando que el
+mutante lo mostrara, pero el transporte de `api-client` no deja pasar ese
+objeto intacto, asi que el error que llega al `catch` tampoco tiene un `code`
+util y el mensaje resultante coincide con el del producto sano. Para matarlo
+haria falta que el `catch` recibiera un objeto **con un `code` mapeado en
+MESSAGES y que no sea instancia de ConnectorError**: se consigue espiando
+`disconnectGithub` con `vi.mock` del modulo del cliente para que rechace con
+`Object.assign(new Error(), { code: "CONNECTION_NOT_FOUND" })`, en vez de
+inducir el fallo desde `fetch`. Queda apuntado, no hecho: se acabo el plazo.
+
+## Prevision acumulada de la sesion
+
+Racimos 1+2+3 (cliente): 31-33 mutantes. Racimo 4 (pantalla): 4.
+**Total 35-37 muertos** de los 175 supervivientes. Sigue **por debajo del
+umbral 80**: los ~104 supervivientes restantes de `github-connector.tsx` y los
+~35 validadores del cliente son el trabajo que queda.
+
+Verificacion final: `vitest run src/github-connector.test.tsx
+src/github-connector-client.test.ts` -> **74/74 en verde**, produccion intacta
+(`git diff` sobre `github-connector.tsx` y `github-connector-client.ts`
+vacio).
+
 ## Lo que queda, por orden de rentabilidad
 
 1. `github-connector.tsx`, 108 supervivientes y **5 sin cobertura** (líneas 54

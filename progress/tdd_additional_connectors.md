@@ -66,7 +66,7 @@ Leyenda de la columna **estado**:
 | `@s` | qué exige | estado | prueba → fichero:línea |
 | --- | --- | --- | --- |
 | `@s1` | catálogo de seis filas en orden fijo | **cerrado** | caso de uso `ReadConnectorCatalogTest`; frontera `ConnectorCatalogApiTest` (`s1_…`, dos pruebas); cableado `ConnectorCatalogWiringTest` (`s1_…`, dos) |
-| `@s2` | cada fila deriva su estado de su fuente | **cerrado** | las doce filas, una a una, en `ConnectorStatusSourcesTest` (21 pruebas); la frontera en `ConnectorCatalogApiTest:s2_…` |
+| `@s2` | cada fila deriva su estado de su fuente | **cerrado** | las doce filas, una a una, en `ConnectorStatusSourcesTest` (28 pruebas más una parametrizada de seis filas: 34 casos); la frontera en `ConnectorCatalogApiTest:s2_…` |
 | `@s3` | sin clave, las filas que cifran salen `disabled` | **cerrado** | `ReadConnectorCatalogTest` (dos mitades); `ConnectorStatusSourcesTest:s3_…` (quién cifra y quién no, las seis); `ConnectorCatalogWiringTest:s3_…` (con el cableado real, y a la lectura de GitLab no se la llega a llamar); `ConnectorCatalogApiTest:s3_…` |
 | `@s4` | el catálogo sólo ve al propietario autenticado | **cerrado** | `ReadConnectorCatalogTest:s4_…` (a quién se preguntó, no sólo qué contestó); `ConnectorStatusSourcesTest:s4_…`; `GitlabConnectorPersistenceTest:168` |
 | `@s5` | `lastError` sin secretos ni texto del proveedor | **cerrado** | `ConnectorCatalogApiTest:s5_…` (el cuerpo entero: sin `glpat`, sin `invalid_token`, sin pista, sin ruta y sin ninguna URL); `ConnectorStatusSourcesTest:s5_…`; el cliente se niega a leer un `lastError` con texto del proveedor en `connectors-catalog-client.test.ts` |
@@ -422,7 +422,7 @@ Cuatro y cuatro, exactamente las previstas.
 
 ## Ciclo 2 — `@s1` `@s3` `@s6` `@s7`: el endpoint y el cableado (commit `3a0d084`)
 
-`ConnectorCatalogController`, once pruebas en `ConnectorCatalogApiTest`, y el
+`ConnectorCatalogController`, diez pruebas en `ConnectorCatalogApiTest`, y el
 bean en `ConnectorConfiguration` con tres pruebas más en
 `ConnectorCatalogWiringTest`.
 
@@ -600,7 +600,7 @@ ConnectorCatalogController*
 ```
 
 Las seis primeras son donde está la lógica de verdad: las seis derivaciones de
-estado, con 21 pruebas encima.
+estado, con 34 casos de prueba encima.
 
 ### Qué mutantes espero que sobrevivan
 

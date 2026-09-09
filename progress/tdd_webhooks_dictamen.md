@@ -241,3 +241,37 @@ modificado el fichero de test. Clase completa 6/6 verde
 (`build/test-results/test/TEST-…WebhookWorkPersistenceTest.xml`:
 `tests="6" skipped="0" failures="0" errors="0"`), `spotlessApply` sin cambios
 pendientes. Nunca se lanzó la suite entera: siempre `--tests` sobre esta clase.
+
+Commit: `422b68e`.
+
+---
+
+## Hallazgo 23 (MEDIA) — la cifra de unitarios de la matriz UX no era reproducible
+
+**Fichero:** `progress/ux_webhooks.md:5`. No hay ciclo rojo-verde: es un defecto
+documental, no un hueco de oráculo. La disciplina aquí es **medir**, no razonar.
+
+**Medición real** (no conteo de declaraciones):
+
+```
+pnpm --dir frontend exec vitest run src/webhooks.test.tsx \
+  src/webhooks-route.test.tsx src/webhooks-client.test.ts
+→ Tests 44 passed (44)
+   webhooks.test.tsx 23 · webhooks-client.test.ts 18 · webhooks-route.test.tsx 3
+```
+
+(el desglose por fichero se extrajo del `--reporter=json` de esa misma corrida).
+
+**De dónde no salían los 58.** En `99f1e94`, el commit que escribió la matriz,
+los tres ficheros declaraban 22 + 18 + 3 = 43 `it`, o 44 casos contando el
+`it.each` de dos filas de `webhooks.test.tsx`. Ningún otro fichero de pruebas
+del frontend contiene pruebas de webhooks (`integration-api.test.tsx` lo
+menciona sólo en un comentario), así que **no** se trata de haber incluido
+ficheros ajenos: la cifra nunca fue reproducible. No hay cobertura perdida; los
+dos tests de `@s42` que añadió ese mismo commit están contados.
+
+**Arreglo.** `progress/ux_webhooks.md:5` pasa a declarar 44 con desglose por
+fichero y con el comando exacto que lo reproduce, para que la cifra sea
+auditable sin ejecutar nada. Los 23 de `webhooks.test.tsx` incluyen las pruebas
+reforzadas en esta sesión: se han endurecido oráculos, no añadido casos, así que
+la cifra no cambia por mi trabajo.

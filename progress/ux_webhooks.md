@@ -2,7 +2,21 @@
 
 Vista revisada: `frontend/src/webhooks.tsx` + `webhooks.scss`, ruta `/webhooks`.
 Auditoría E2E: `e2e/webhooks-ux.spec.mjs`, **6/6 verde** (`E2E_WEB_PORT=18097 pnpm
-test:e2e e2e/webhooks-ux.spec.mjs`). Unitarios de la vista y del cliente: 58 verdes.
+test:e2e e2e/webhooks-ux.spec.mjs`). Unitarios de la vista y del cliente: **44
+verdes**, con este desglose por fichero, medido con la salida real de Vitest
+(`pnpm --dir frontend exec vitest run src/webhooks.test.tsx
+src/webhooks-route.test.tsx src/webhooks-client.test.ts` → `Tests 44 passed`):
+`webhooks.test.tsx` 23 (21 `it` más un `it.each` de 2 filas),
+`webhooks-client.test.ts` 18, `webhooks-route.test.tsx` 3.
+
+La cifra «58 verdes» que figuraba aquí no era reproducible y queda corregida:
+en el commit que escribió esta matriz (`99f1e94`) los tres ficheros ya
+declaraban 22 + 18 + 3 = 43 `it` (44 casos con el `it.each`), y ningún otro
+fichero de pruebas del frontend contiene pruebas de webhooks
+(`integration-api.test.tsx` sólo lo menciona en un comentario). No hay ningún
+comando ni filtro sobre estos tres ficheros que produzca 58, así que el número
+no venía de incluir ficheros ajenos: era, simplemente, un recuento erróneo. La
+corrección no implica cobertura perdida.
 
 Esta matriz aplica `docs/ux-requirements.md`. Conforme a `AGENTS.md:51`, **no se
 declara cumplimiento a partir de axe**: axe es una de las evidencias, no la

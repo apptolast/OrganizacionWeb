@@ -403,7 +403,7 @@ Feature: Importar issues abiertas de GitHub como tareas propias con trazabilidad
       | sesión vencida                                          | POST de importación        | 401 UNAUTHENTICATED  |
       | sin sesión                                              | GET de un recibo existente | 401 UNAUTHENTICATED  |
       | una credencial Bearer válida del canal de integraciones | PUT de conexión            | 403 API_SCOPE_DENIED |
-      | una credencial Bearer válida del canal de integraciones | POST de importación                        |
+      | una credencial Bearer válida del canal de integraciones | POST de importación        | 403 API_SCOPE_DENIED |
 
   @s32
   Scenario Outline: CSRF y Origin protegen las operaciones que escriben

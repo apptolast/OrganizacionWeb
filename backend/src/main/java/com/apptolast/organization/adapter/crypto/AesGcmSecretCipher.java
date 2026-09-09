@@ -1,5 +1,6 @@
-package com.apptolast.organization.application;
+package com.apptolast.organization.adapter.crypto;
 
+import com.apptolast.organization.application.SecretCipher;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ import javax.crypto.spec.SecretKeySpec;
  * decide. Una clave mal formada detiene el arranque; una clave ausente deja los conectores en modo
  * degradado.
  */
-public final class SecretUrlCipher {
+public final class AesGcmSecretCipher implements SecretCipher {
   public static final int NONCE_LENGTH = 12;
   public static final int HEADER_LENGTH = NONCE_LENGTH;
   public static final int KEY_LENGTH = 32;
@@ -36,25 +37,26 @@ public final class SecretUrlCipher {
   private final List<SecretKey> readable;
   private final SecureRandom random;
 
-  private SecretUrlCipher(SecretKey current, List<SecretKey> readable, SecureRandom random) {
+  private AesGcmSecretCipher(SecretKey current, List<SecretKey> readable, SecureRandom random) {
     this.current = current;
     this.readable = readable;
     this.random = random;
   }
 
-  public static SecretUrlCipher of(String configuredKey) {
+  public static AesGcmSecretCipher of(String configuredKey) {
     return of(configuredKey, null);
   }
 
-  public static SecretUrlCipher of(String configuredKey, String previousKey) {
+  public static AesGcmSecretCipher of(String configuredKey, String previousKey) {
     var currentKey = material(configuredKey, CURRENT_SETTING);
     var keys = new ArrayList<SecretKey>();
     keys.add(currentKey);
     if (previousKey != null && !previousKey.isEmpty())
       keys.add(material(previousKey, PREVIOUS_SETTING));
-    return new SecretUrlCipher(currentKey, List.copyOf(keys), new SecureRandom());
+    return new AesGcmSecretCipher(currentKey, List.copyOf(keys), new SecureRandom());
   }
 
+  @Override
   public byte[] encrypt(String ownerId, String url) {
     var nonce = new byte[NONCE_LENGTH];
     random.nextBytes(nonce);
@@ -71,6 +73,7 @@ public final class SecretUrlCipher {
   }
 
   /** Vacío significa {@code SECRET_UNREADABLE}: hay que volver a pedir la dirección. */
+  @Override
   public Optional<String> decrypt(String ownerId, byte[] stored) {
     if (stored == null || stored.length <= NONCE_LENGTH) return Optional.empty();
     var nonce = Arrays.copyOf(stored, NONCE_LENGTH);

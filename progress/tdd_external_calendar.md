@@ -89,3 +89,12 @@ Comando: `backend\gradlew.bat test --no-daemon --tests '...domain.IcsCalendarTes
 - VERDE: `HostResolver` y `OutboundHostGuard`.
 - Riesgo residual anotado en el javadoc: rebinding DNS entre la comprobación y
   la conexión. Se mitiga repitiendo la comprobación en cada sincronización.
+
+### Ciclo 8 — la criptografía sale de la capa de aplicación
+
+- ROJO: `ArchitectureTest` fallaba con 15 violaciones. El commit de resguardo
+  había dejado `SecretUrlCipher` en `application` dependiendo de
+  `javax.crypto`, que no entra en `java..`.
+- VERDE: puerto `application/SecretCipher` (encrypt/decrypt con el propietario
+  como dato autenticado) y adaptador `adapter/crypto/AesGcmSecretCipher` con
+  su test movido al mismo paquete.

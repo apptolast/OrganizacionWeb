@@ -8,6 +8,7 @@ const widths = [
   320, 359, 360, 361, 599, 600, 601, 767, 768, 769, 1279, 1280, 1281, 2560,
 ];
 const SECRET = "https://calendar.google.com/calendar/ical/e2e/private-WXYZ.ics";
+const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa", "best-practice"];
 // Grosor declarado por la regla `:focus-visible` de frontend/src/styles.scss.
 const FOCUS_RING_MIN_WIDTH = 3;
 // Cota del recorrido con teclado: la barra lateral y el enlace de salto se
@@ -15,10 +16,182 @@ const FOCUS_RING_MIN_WIDTH = 3;
 const MAX_TAB_STEPS = 40;
 // Objetivo táctil del producto (docs/ux-requirements.md), no una cifra de la ley de Fitts.
 const MIN_TARGET = 44;
+// Cuántos eventos tiene la «lista larga» del contrato. Suficiente para que la página crezca varias
+// veces la altura del viewport sin convertir la auditoría en una prueba de rendimiento.
+const LONG_LIST = 60;
 
-test.afterEach(() => {
+/**
+ * Los estados de pantalla del Given de @s40 (`features/external_calendar.feature:542`).
+ *
+ * Los cinco primeros son literalmente los que el contrato enumera. El sexto —el diálogo de
+ * confirmación abierto— se añade porque «Sí, eliminar» y «Cancelar» son controles que el Then de la
+ * línea 546 obliga a medir a 44 × 44 px y que sólo existen dentro de `{confirming ? …}`
+ * (`frontend/src/external-calendar.tsx:374`): sin este estado, tres de los siete controles de la
+ * pantalla no entrarían en ninguna medición. Es una ampliación del estado «con suscripción», no una
+ * sustitución de ninguna fila del contrato.
+ */
+const STATES = [
+  "vacío",
+  "con suscripción",
+  "con error",
+  "lista larga de resúmenes Unicode",
+  "guardando",
+  "confirmando la eliminación",
+];
+
+// Bytes cualesquiera de longitud válida: la fila exige `octet_length(url_ciphertext) > 12` y la
+// pantalla no descifra nada, sólo pinta `url_host` y `url_tail`.
+const CIPHERTEXT = "decode('000102030405060708090a0b0c0d0e0f','hex')";
+// Etiqueta con emoji y acentos construida con `chr()`: el texto viaja a `psql` como argumento de
+// proceso, y en Windows los caracteres fuera de ASCII se pueden estropear por el camino. Así lo que
+// llega a la base es exactamente lo que se pretende.
+const LABEL_SQL = "'Trabajo ' || chr(128512) || ' ' || chr(233) || chr(241)";
+// Resumen Unicode largo: 120 puntos de código de emoji y acentos más una palabra sin espacios de
+// 280 caracteres, que es el caso que de verdad puede desbordar una caja.
+const LONG_SUMMARY_SQL =
+  "repeat(chr(128512) || chr(233) || chr(241) || chr(120), 30)" +
+  " || repeat('Zusammenarbeitsvereinbarungsentwurf', 8)";
+const SHORT_SUMMARY_SQL = "'Reuni' || chr(243) || 'n de equipo ' || g::text";
+
+function forget() {
   sql("DELETE FROM external_calendar_subscriptions WHERE owner_id='e2e-user'");
-});
+}
+
+test.afterEach(() => forget());
+
+function seedSubscription({
+  status = "OK",
+  error = null,
+  imported = 3,
+  truncated = false,
+} = {}) {
+  sql(
+    "INSERT INTO external_calendar_subscriptions(owner_id,id,label,url_ciphertext," +
+      "url_host,url_tail,version,created_at,updated_at,last_attempt_at,last_sync_at," +
+      "last_status,last_error,snapshot_zone_id,imported,skipped_recurring," +
+      "skipped_cancelled,skipped_invalid,truncated) VALUES ('e2e-user',gen_random_uuid()," +
+      LABEL_SQL +
+      "," +
+      CIPHERTEXT +
+      ",'calendar.google.com','.ics',0,now(),now(),now()," +
+      (status === "OK" ? "now()" : "NULL") +
+      ",'" +
+      status +
+      "'," +
+      (error === null ? "NULL" : "'" + error + "'") +
+      ",'Europe/Madrid'," +
+      imported +
+      ",1,2,0," +
+      truncated +
+      ")",
+  );
+}
+
+function seedEvents(count, long) {
+  sql(
+    "INSERT INTO external_calendar_events(owner_id,uid,summary,start_at,end_at,all_day)" +
+      " SELECT 'e2e-user','uid-'||g," +
+      (long ? LONG_SUMMARY_SQL : SHORT_SUMMARY_SQL) +
+      ", now() + (g || ' hours')::interval, now() + ((g+1) || ' hours')::interval, g = 2" +
+      " FROM generate_series(1," +
+      count +
+      ") AS g",
+  );
+  expect(
+    sql(
+      "SELECT count(*) FROM external_calendar_events WHERE owner_id='e2e-user'",
+    ),
+    "la siembra de eventos no llegó a la base",
+  ).toBe(String(count));
+}
+
+/**
+ * Deja la pantalla en el estado pedido y devuelve la función que lo deshace.
+ *
+ * Los estados con datos se siembran por SQL en vez de por la interfaz a propósito: con la guardia
+ * SSRF activa no hay ningún feed iCalendar alcanzable desde el contenedor, así que una
+ * sincronización real nunca termina en `lastStatus OK` y la lista de eventos jamás se pintaría. La
+ * bitácora de la feature daba por eso el estado «con lista larga» por inalcanzable; no lo es:
+ * `e2e/support/projects.mjs` ejecuta SQL contra el postgres de la pila, y la pantalla lee esas
+ * mismas filas por `GET …/external-calendar/events`.
+ */
+async function enter(page, state) {
+  forget();
+  if (state === "con suscripción" || state === "confirmando la eliminación") {
+    seedSubscription();
+    seedEvents(3, false);
+  } else if (state === "con error") {
+    seedSubscription({
+      status: "FAILED",
+      error: "FEED_HTTP_ERROR",
+      imported: 0,
+    });
+  } else if (state === "lista larga de resúmenes Unicode") {
+    seedSubscription({ imported: LONG_LIST, truncated: true });
+    seedEvents(LONG_LIST, true);
+  }
+
+  await page.goto("/calendario-externo");
+  await expect(page.getByLabel("Etiqueta")).toBeVisible();
+
+  if (state === "vacío") {
+    await expect(
+      page.getByText("Todavía no tienes ningún calendario externo."),
+    ).toBeVisible();
+    return async () => {};
+  }
+  if (state === "con suscripción") {
+    await expect(page.getByText("calendar.google.com")).toBeVisible();
+    await expect(page.getByRole("listitem")).toHaveCount(3);
+    return async () => {};
+  }
+  if (state === "con error") {
+    await expect(page.getByRole("alert")).toContainText(
+      "El proveedor respondió",
+    );
+    return async () => {};
+  }
+  if (state === "lista larga de resúmenes Unicode") {
+    await expect(page.getByRole("listitem")).toHaveCount(LONG_LIST);
+    await expect(page.getByRole("note")).toBeVisible();
+    return async () => {};
+  }
+  if (state === "confirmando la eliminación") {
+    await expect(page.getByText("calendar.google.com")).toBeVisible();
+    await page.getByRole("button", { name: "Eliminar suscripción" }).click();
+    await expect(page.getByRole("alertdialog")).toBeVisible();
+    return async () => {};
+  }
+
+  // «Guardando»: la respuesta del PUT se retiene con una promesa que sólo se libera al salir del
+  // estado. Sin esto el estado dura milisegundos y no se puede medir en catorce anchos.
+  let release;
+  const held = new Promise((resolve) => {
+    release = resolve;
+  });
+  await page.route(
+    (url) => url.pathname === "/api/v1/me/external-calendar",
+    async (route) => {
+      if (route.request().method() !== "PUT") {
+        await route.fallback();
+        return;
+      }
+      await held;
+      await route.abort();
+    },
+  );
+  await page
+    .getByLabel("Etiqueta")
+    .fill("Trabajo 😀 con resumen Unicode largo");
+  await page.getByLabel("Dirección secreta iCal").fill(SECRET);
+  await page.getByRole("button", { name: "Guardar" }).click();
+  await expect(page.getByRole("status")).toHaveText("Guardando…");
+  await expect(page.getByRole("button", { name: "Guardar" })).toBeDisabled();
+  return async () => {
+    release();
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+  };
+}
 
 /**
  * Mide las tres cosas que el Then de @s40 nombra —«no hay solapes, recortes ni scroll horizontal
@@ -151,17 +324,42 @@ async function nothingBreaksAt(page, label) {
   return measured;
 }
 
-test("calendario externo audit: sin solapes, recortes ni scroll horizontal en toda la matriz @s40", async ({
+test("calendario externo audit: sin solapes, recortes ni scroll horizontal en los seis estados y toda la matriz @s40", async ({
   page,
 }) => {
-  await page.goto("/calendario-externo");
-  await expect(page.getByLabel("Etiqueta")).toBeVisible();
-  for (const width of widths) {
-    // A 768 px se fuerza una altura corta: es donde el recorte vertical es más probable, y hasta
-    // ahora era justo el caso que el oráculo de sólo `scrollWidth` no podía ver.
-    await page.setViewportSize({ width, height: width === 768 ? 400 : 900 });
-    await nothingBreaksAt(page, `vacío a ${width} px`);
+  test.setTimeout(300_000);
+  const seen = [];
+  for (const state of STATES) {
+    const leave = await enter(page, state);
+    try {
+      for (const width of widths) {
+        // A 768 px se fuerza una altura corta: es donde el recorte vertical es más probable, y hasta
+        // ahora era justo el caso que el oráculo de sólo `scrollWidth` no podía ver.
+        await page.setViewportSize({
+          width,
+          height: width === 768 ? 400 : 900,
+        });
+        const measured = await nothingBreaksAt(page, `${state} a ${width} px`);
+        seen.push({ state, width, controls: measured.controls });
+      }
+    } finally {
+      await leave();
+    }
+    await page.setViewportSize({ width: 1280, height: 900 });
   }
+  expect(seen).toHaveLength(STATES.length * widths.length);
+  // El estado con suscripción tiene más controles que el vacío: si la preparación de estados dejara
+  // de funcionar, la matriz volvería a medir seis veces el formulario vacío sin avisar.
+  const controlsOf = (state) =>
+    seen.find((row) => row.state === state).controls;
+  expect(
+    controlsOf("con suscripción"),
+    "el estado con suscripción no pintó Sincronizar ni Eliminar",
+  ).toBeGreaterThan(controlsOf("vacío"));
+  expect(
+    controlsOf("confirmando la eliminación"),
+    "el diálogo de confirmación no aportó sus dos botones",
+  ).toBe(controlsOf("con suscripción") + 2);
 });
 
 test("calendario externo audit: axe no encuentra violaciones en vacío y con suscripción @s40", async ({
@@ -169,9 +367,7 @@ test("calendario externo audit: axe no encuentra violaciones en vacío y con sus
 }) => {
   await page.goto("/calendario-externo");
   await expect(page.getByLabel("Etiqueta")).toBeVisible();
-  const empty = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa", "best-practice"])
-    .analyze();
+  const empty = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
   expect(empty.violations).toEqual([]);
 
   await page
@@ -181,7 +377,7 @@ test("calendario externo audit: axe no encuentra violaciones en vacío y con sus
   await page.getByRole("button", { name: "Guardar" }).click();
   await expect(page.getByText("calendar.google.com")).toBeVisible();
   const configured = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa", "best-practice"])
+    .withTags(AXE_TAGS)
     .analyze();
   expect(configured.violations).toEqual([]);
 
@@ -195,9 +391,7 @@ test("calendario externo audit: axe no encuentra violaciones en vacío y con sus
     /^Sincroniza(do\.|ción fallida\.)$/,
     { timeout: 20_000 },
   );
-  const afterSync = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa", "best-practice"])
-    .analyze();
+  const afterSync = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
   expect(afterSync.violations).toEqual([]);
   // axe automatiza reglas, no certifica un lector de pantalla real: la revisión
   // manual con lector sigue siendo obligatoria antes de dar la feature por buena.
@@ -273,14 +467,65 @@ test("calendario externo audit: el recorrido con teclado sigue el orden del cont
   expect(intruders).toEqual([]);
 });
 
-test("calendario externo audit: texto al 200 % no recorta la pantalla a 320 px @s40", async ({
+/**
+ * Duplica el tamaño de letra **calculado** de cada elemento de la pantalla y comprueba que se ha
+ * duplicado de verdad, como `e2e/ics-calendar-ux.spec.mjs`, `reschedule-text` y
+ * `appearance-ux-audit`.
+ *
+ * La versión anterior de esta prueba hacía `addInitScript(() => documentElement.style.fontSize =
+ * "32px")` y no comprobaba nada. Al ejecutar la auditoría por primera vez, ese valor medía **16 px**
+ * en el navegador: el texto nunca se amplió y la prueba llevaba desde su nacimiento midiendo la
+ * pantalla a tamaño normal con el título «texto al 200 %». Y aunque hubiera funcionado, tampoco
+ * habría bastado: la hoja de estilos declara la mayoría de sus tamaños en píxeles
+ * (`frontend/src/styles.scss:658`, `:671`, `:692`…), que no dependen del `font-size` de la raíz.
+ * Por eso se escala elemento a elemento y se afirma el resultado.
+ */
+async function doubleText(page) {
+  const scaled = await page.evaluate(() => {
+    const elements = [
+      ...document.querySelectorAll(".external-calendar, .external-calendar *"),
+    ];
+    const before = elements.map((element) =>
+      parseFloat(getComputedStyle(element).fontSize),
+    );
+    elements.forEach((element, index) => {
+      // Con prioridad: la hoja global declara `.quiet-note { font-size: 14px !important }`
+      // (`frontend/src/styles.scss:1095`), y una declaración en línea sin `!important` pierde
+      // contra ella. Sin esta prioridad el estado vacío se mediría a tamaño normal y la prueba
+      // volvería a mentir en su título. La regla no es un defecto de accesibilidad —el zoom del
+      // navegador sí escala esos píxeles, y eso lo mide
+      // `e2e/external-calendar-native-zoom.spec.mjs`—, pero sí impide emular la ampliación
+      // desde la prueba, así que se declara aquí en vez de tocar una hoja compartida.
+      element.style.setProperty(
+        "font-size",
+        `${before[index] * 2}px`,
+        "important",
+      );
+    });
+    return elements.map((element, index) => ({
+      before: before[index],
+      after: parseFloat(getComputedStyle(element).fontSize),
+    }));
+  });
+  expect(scaled.length, "no se encontró texto que ampliar").toBeGreaterThan(0);
+  const stubborn = scaled.filter(
+    (size) => Math.abs(size.after - size.before * 2) > 0.01,
+  );
+  expect(stubborn, "elementos que no llegaron al 200 %").toEqual([]);
+}
+
+test("calendario externo audit: texto al 200 % no recorta ninguno de los seis estados a 320 px @s40", async ({
   page,
 }) => {
+  test.setTimeout(180_000);
   await page.setViewportSize({ width: 320, height: 900 });
-  await page.addInitScript(() => {
-    document.documentElement.style.fontSize = "32px";
-  });
-  await page.goto("/calendario-externo");
-  await expect(page.getByLabel("Etiqueta")).toBeVisible();
-  await nothingBreaksAt(page, "texto al 200 % a 320 px");
+  for (const state of STATES) {
+    const leave = await enter(page, state);
+    try {
+      await doubleText(page);
+      await nothingBreaksAt(page, `texto al 200 % a 320 px, ${state}`);
+    } finally {
+      await leave();
+    }
+  }
 });

@@ -27,7 +27,7 @@ por clase concreta, nunca la suite entera.
 | 12 | alta | pendiente | — |
 | 13 | alta | pendiente | — |
 | 14 | alta | pendiente | — |
-| 15 | media | pendiente | — |
+| 15 | media | **CERRADO** | ciclo 3 |
 | 16 | media | ya cerrado en la base | — |
 | 17 | media | ya cerrado en la base | — |
 | 18 | media | **CERRADO** | ciclo 1 |
@@ -159,3 +159,49 @@ sustituye al reescribir la auditoría (hallazgos 1/4/5/10/12/13), no aquí.
 @s38 exige «los controles quedan bloqueados», que es lo que se ha medido
 (`disabled` y `readonly`); `aria-busy` no lo pide el contrato, así que no se ha
 tocado producción para añadirlo.
+
+---
+
+## Ciclo 3 — hallazgo 15: @s39 fila 4 (cierre de sesión) y la tercera entrada de @s37
+
+**Qué decía el dictamen.** La fila 4 de @s39
+(`features/external_calendar.feature:538`) exige que al cerrar sesión desaparezcan
+host, cola, contadores y lista, que la ruta se reinicie a `/` y que no se conserve
+borrador. No había ninguna prueba de cierre de sesión para /calendario-externo, ni
+unitaria ni E2E. El verificador precisó dos cosas que se han respetado:
+
+- **no** añadir `expect(window.location.pathname).toBe("/")` a la prueba de 401 de
+  `external-calendar.test.tsx:266`: ese fichero nunca toca `window.history`, así
+  que la aserción sería un placebo;
+- escribir la prueba sobre **`SessionGate`**, y sobre la transición real, porque
+  «la ruta se reinicia a /» no ocurre al cerrar sino al volver a abrir sesión: el
+  único `replaceState(null, "", "/")` del producto (`use-session.ts:49`) se dispara
+  en anónimo→autenticado y sólo si la ruta actual NO está en `isPrivateRoute`.
+
+**VERDE.** Prueba nueva en `frontend/src/external-calendar-route.test.tsx`:
+`@s39 al cerrar sesión desaparecen los datos y el retorno tras iniciar sesión reinicia la ruta a / (@s37)`.
+Parte de `/calendario-externo` con suscripción sincronizada y un evento en lista,
+escribe un borrador en «Dirección secreta iCal», pulsa «Cerrar sesión» y exige que
+desaparezcan host, cola, contadores, lista y el borrador; después vuelve a iniciar
+sesión y exige `window.location.pathname === "/"`; y por último entra otra vez en
+la vista para comprobar que el campo de dirección está vacío.
+
+De paso cierra la **tercera entrada de @s37**, «retorno tras iniciar sesión», que
+el dictamen señalaba como no cubierta ni siquiera por oráculo (hallazgo 18).
+
+**ROJO demostrado sobre producción.** Se añadió `path === "/calendario-externo"`
+a la lista blanca `isPrivateRoute` de `frontend/src/use-session.ts` —exactamente el
+cambio que la feature 24 hizo con `/integraciones/api` y que hoy nadie detectaba—:
+
+```
+FAIL src/external-calendar-route.test.tsx > @s39 al cerrar sesión ...
+AssertionError: expected '/calendario-externo' to be '/'
+Tests  1 failed | 4 passed (5)
+```
+
+Restaurado `use-session.ts`: `Tests 5 passed (5)`.
+
+**Límite declarado.** La mitad «desaparecen los datos» está garantizada por
+construcción (`session-gate.tsx` desmonta `<App/>`), así que esa aserción no
+discrimina por sí sola: lo que discrimina, y lo que el ciclo fija de verdad, es la
+ruta. Queda escrito para que nadie la lea como más de lo que es.

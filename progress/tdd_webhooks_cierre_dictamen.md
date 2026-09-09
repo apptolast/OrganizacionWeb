@@ -879,6 +879,73 @@ anterior se negó a hacer y por lo que este hallazgo llegó hasta aquí.
 
 Ninguno compartido. `features/webhooks.feature` y `project-spec.md` **no** se tocan.
 
+## Hallazgo 18 — @s28: la reactivación llega ahora a los dos eventos posteriores al cursor, y la compuerta del encolador tiene oráculo — CERRADO
+
+**Cubre:** `features/webhooks.feature:356-359`, «D2 se entrega y **después los dos
+eventos posteriores, en orden**».
+
+**Desbloqueado.** La sesión anterior no lo tocó por una prohibición del
+coordinador sobre el backend de webhooks, que en este encargo queda levantada.
+
+**Lo que había.** El test montaba D1 y D2 como dos **pings** sintéticos y no
+insertaba ni una fila en `outbox_events`; el helper `outbox()` estaba declarado y
+no se usaba. La aserción final exigía **exactamente un envío**, así que el test se
+habría puesto **rojo si el producto hubiera entregado los dos eventos** que el
+contrato manda entregar: oráculo y contrato se contradecían.
+
+Y había un segundo agujero, más fino: con D2 como ping, la parte de **orden** del
+Then quedaba vacía por construcción. `readyEndpoints()` excluye un endpoint que
+tenga una entrega de outbox pendiente, **pero no si lo pendiente es un ping**
+(`AND d.event_type <> ?`). Con D2 como ping no había bloqueo que ordenara nada.
+
+**Lo que hay.** Dos tests.
+
+1. `s28_reactivatingResumesFromTheKeptCursorAndDeliversD2AndThenTheTwoLaterEventsInOrder`
+   (renombrado: el nombre viejo prometía la mitad). D2 pasa a ser una **entrega
+   real de la outbox**, creada por `EnqueueWebhookDeliveries` a partir de un
+   `ProjectCreated.v1` en `T+1s`; después se insertan los **dos eventos
+   posteriores al cursor** (`T+2s` y `T+3s`, fuera de la ventana de gracia de 5 s);
+   D1 sigue siendo el ping agotado y el endpoint se desactiva por agotamiento.
+   Tras reactivar por el caso de uso, se alternan ciclos de encolado y de envío
+   —como hace el worker— y se afirma la **secuencia completa** sobre el
+   `RecordingSender`: `[eventOfD2, E1, E2]`, más el cursor final en
+   `(T+3s, E2)`, más D1 todavía `exhausted` y D2 `succeeded`. Se conserva lo que
+   el test ya hacía bien: nada sale mientras está disabled y reactivar no mueve el
+   cursor.
+2. `s28_theEnqueuerIgnoresADisabledEndpointAndResumesItOnceReactivated`, para la
+   compuerta `e.status = 'active'` de `PostgresWebhookOutbox.readyEndpoints()`.
+   **Necesita ser un test aparte**, y conviene entender por qué: en el escenario
+   de arriba la compuerta está **tapada** por la otra cláusula del mismo SQL —
+   mientras D2 sigue pendiente, el `NOT EXISTS` ya excluye al endpoint y suprimir
+   el filtro de estado no cambiaría nada—. En este segundo caso no hay ninguna
+   entrega pendiente, así que lo único que mantiene quieto al encolador es el
+   estado: disabled → no está en `readyEndpoints()`, no encola y no mueve el
+   cursor; tras `changeStatus(..., "active")` → vuelve al conjunto y encola el
+   evento que esperaba detrás de la compuerta.
+
+### Los dos rojos acreditados
+
+Aplicadas a la vez sobre `PostgresWebhookOutbox`, porque cada una rompe un test
+distinto y la atribución es inequívoca:
+
+| Mutación | Rojo obtenido |
+|---|---|
+| `after()`: `ORDER BY occurred_at, event_id` → `ORDER BY occurred_at DESC, event_id DESC` | `WebhookRecoveryPersistenceTest.java:265` — «D2 first and then the two later events, in outbox order» `expected: <[D2, E1, E2]> but was: <[D2, E2]>`: invertido el orden, el encolador se lleva E2 primero y E1 se queda **detrás del cursor para siempre**. El oráculo viejo, que exigía un solo envío, no habría visto nada de esto |
+| `readyEndpoints()`: se suprime `WHERE e.status = 'active'` | `WebhookRecoveryPersistenceTest.java:308` — «a disabled endpoint is never ready» `expected: <true> but was: <false>`. Antes de este test, suprimir ese filtro **no rompía nada en todo el repositorio**: un webhook desactivado seguía consumiendo su outbox y avanzando su cursor |
+
+Restaurado con `git checkout` y verde: `BUILD SUCCESSFUL`, también con
+`WebhookOutboxPersistenceTest` en la misma invocación. `spotlessApply` pasado.
+
+**Ficheros cambiados.**
+- `backend/src/test/java/com/apptolast/organization/adapter/persistence/WebhookRecoveryPersistenceTest.java`
+
+Ningún cambio de producción: el hallazgo era de oráculo y lo era de verdad, las
+dos ramas ya funcionaban.
+
+**Se retira de la lista de «fuera de ámbito».** La observación de la sesión
+anterior —«`PostgresWebhookOutbox.readyEndpoints()` filtra por `e.status='active'`
+y ese filtro no lo ejerce ninguna prueba»— deja de ser cierta.
+
 # ÍNDICE DE LO ABIERTO — leer sólo esto, no hace falta el dictamen entero
 
 Ocho hallazgos abiertos. Una línea cada uno: qué exige, qué fichero se toca, y si

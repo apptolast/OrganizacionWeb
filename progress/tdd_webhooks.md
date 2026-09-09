@@ -296,3 +296,87 @@ completa, ni pitest, ni E2E, conforme a la disciplina de recursos.
   test HTTP que recorra las tablas de ejemplos por la ruta real.
 - `@s22` fila «muere después de que el receptor respondiera 200» (2 copias):
   cubierta la recuperación por arrendamiento, no el conteo de copias.
+
+## Sesión 2 — reasentamiento sobre main y cierre de la feature
+
+### Reasentamiento (commit `6ac9537`)
+
+`git rebase` sobre `main` intentaba reproducir **124 commits** propios (el
+carril forkó en 4c7d558) y chocaba ya en el segundo con docs compartidos. Uso
+**merge**: mismo objetivo, una sola pasada de conflictos, sin reescribir 124
+commits. El hash que me dieron, `c0e22a3`, es la cabeza de `main` **local**, 6
+commits por delante de `origin/main` (aa6ec86); rebasé sobre él, que es lo que
+describía el coordinador.
+
+Ocho conflictos: los de la feature 24 (`SecurityConfiguration`, tres
+`ApiCredential*Test`) y `progress/current.md` se resuelven con la versión de
+`main`, que es la integrada y aprobada; `project-spec.md` incorpora la sección
+de enmiendas B1–B6; en `feature_list.json` la 24 conserva el valor de main (no
+es mi carril) y la 25 sigue `in_progress`.
+
+### Ciclo 16 — auditoría (commit `81f8491`) — `@s35`
+
+Puerto `WebhookAudit` + `Slf4jWebhookAudit`. La garantía es **estructural**: el
+puerto solo acepta `UUID` y códigos cortos, así que **no existe parámetro** por
+el que una URL, un secreto, una firma o un cuerpo puedan llegar al log. Un test
+lo comprueba por reflexión sobre la firma del puerto. Las filas `blocked` no se
+auditan; `INVALID_EVENT` y `UNSUPPORTED_EVENT` sí.
+
+### Ciclo 17 — arranque degradado (commit `089b002`) — `@s9`
+
+`DispatchWebhooks` corta el ciclo **antes de reclamar** si no hay clave, y
+`WebhookConnectorStartup` audita `CONFIGURATION_ERROR` **una sola vez** al
+arrancar (`compareAndSet`), no una vez por ciclo.
+
+### Ciclo 18 — reactivación y reenvío (commit `14a1911`) — `@s28 @s31`
+
+ROJO por **mi fixture**: creaba la entrega a las 12:00 y drenaba a las 10:00,
+así que nunca vencía. Corregido el fixture, **sin tocar producción**, que era
+justo lo que había que demostrar: el cursor no retrocede al reactivar, D1 sigue
+`exhausted` y no se reenvía, y el reenvío conserva el cuerpo byte a byte con
+firma nueva (`t=1788872400` frente a `t=1788861600`) sin añadir fila.
+
+### Ciclos 19–22 — la UI (`7f7a229`, `11d2193`, `fd04f30`, `897711b`)
+
+- **Cliente** `webhooks-client.ts`: decodificación estricta con `exact(...)`
+  contra los DTO cerrados; rechaza cualquier `secret` o `body` filtrado.
+- **Vista** `webhooks.tsx`: estados de `@s36`, formulario y secreto de un solo
+  uso de `@s37`, aborto e identidad de `@s38`, acciones de `@s39`, panel de
+  entregas manual de `@s40` y errores de `@s41`.
+- **Ruta y navegación**: `/webhooks` y entrada justo tras «API para
+  integraciones».
+- **Estilo**: `webhooks.scss` solo con tokens, para pasar la guarda global que
+  main trajo con el modo oscuro.
+
+**Verificación de que los tests muerden.** Inyecté dos mutantes en la vista. El
+de abortar al desmontar murió; el del guard de doble envío **sobrevivió**: mi
+test solo probaba que el botón deshabilitado frena el segundo clic. Un
+formulario también se envía con Enter o `requestSubmit`, que eso no cubre.
+Añadí un test por `requestSubmit` que ahora mata ese mutante.
+
+### Daños colaterales corregidos (no relajados)
+
+Colocar «Webhooks» donde manda `@s36` rompió **cinco** aserciones ajenas que
+daban por hecha la POSICIÓN de los enlaces (`integration-api` @s41,
+`App` @s33, `appearance` @s20, `export-data` @s22) y la guarda de esquema
+aditivo de `ApiCredentialCompatibility` @s42. Todas reescritas **conservando su
+intención** —orden relativo por nombre, y las tablas de V23 excluidas junto a
+las de V22— en vez de debilitarlas o de renunciar a la posición del contrato.
+Al hacerlo detecté que una aserción mía era un falso positivo: `indexOf` daba
+−1 por un marcador decorativo y `−1 < índice` pasa siempre.
+
+## Estado final
+
+- Backend: **472 tests verdes** (webhooks + feature 24 + ArchUnit).
+- Frontend: **42 tests** propios de webhooks; **246** en los siete ficheros que
+  tocan la navegación. `tsc` y `eslint` limpios.
+- Nunca se lanzó la suite completa, ni `pitest`, ni E2E.
+
+### Lo único que queda fuera de mi alcance
+
+`@s42` está cubierto en lo verificable en jsdom (nombres accesibles, foco de
+vuelta tras cerrar el panel del secreto y la confirmación, `aria-live`,
+objetivos de 44 px y tabla con desplazamiento propio en la hoja de estilo).
+**La parte de axe, los cuatro anchos, el zoom al 200 % y ambos temas es E2E**, y
+la disciplina de esta sesión me prohíbe lanzarlo. Queda para la puerta del
+coordinador; no lo doy por probado.

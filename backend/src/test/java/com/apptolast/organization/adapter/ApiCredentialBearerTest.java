@@ -51,7 +51,7 @@ class ApiCredentialBearerTest {
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.ValueSource(
       strings = {"", "Basic abc", "Bearer", "Bearer  abc", "Bearer abc,def", "Bearer invalid"})
-  void s20_malformedOrInvalidBearerNeverFallsBackToCookie(String header) throws Exception {
+  void s19_malformedOrInvalidBearerNeverFallsBackToCookie(String header) throws Exception {
     when(authenticate.authenticate(anyString())).thenThrow(new ApiUnauthenticatedException());
     mvc.perform(
             get("/api/v1/projects")
@@ -87,7 +87,7 @@ class ApiCredentialBearerTest {
     "GET,/api/v1/weekly-review",
     "GET,/api/v1/projects/p/tasks/t/history"
   })
-  void s21_eachOperationRequiresItsOwnScopeBeforeQuota(String method, String path)
+  void s23_eachOperationRequiresItsOwnScopeBeforeQuota(String method, String path)
       throws Exception {
     when(authenticate.authenticate(token))
         .thenReturn(new ApiCredentialAccess(access.id(), "owner", List.of()));
@@ -102,7 +102,7 @@ class ApiCredentialBearerTest {
 
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.ValueSource(booleans = {true, false})
-  void s22_authenticationPrecedesOriginAndOriginPrecedesScope(boolean valid) throws Exception {
+  void s24_authenticationPrecedesOriginAndOriginPrecedesScope(boolean valid) throws Exception {
     if (valid) when(authenticate.authenticate(token)).thenReturn(access);
     else when(authenticate.authenticate(token)).thenThrow(new ApiUnauthenticatedException());
     mvc.perform(
@@ -166,9 +166,12 @@ class ApiCredentialBearerTest {
     "GET,/api/v1/not-allowed",
     "HEAD,/api/v1/integration-openapi.json",
     "GET,/api/v1/projects/",
-    "GET,/api/v1/projects/p/tasks/"
+    "GET,/api/v1/projects/p/tasks/",
+    "POST,/api/v1/projects/p/tasks/t/blocks",
+    "GET,/api/v1/work-sessions/active",
+    "GET,/api/v1/me/appearance"
   })
-  void s21_allowlistDeniesOtherMethodsAndRoutesEvenWithAllScopes(String method, String path)
+  void s23_allowlistDeniesOtherMethodsAndRoutesEvenWithAllScopes(String method, String path)
       throws Exception {
     when(authenticate.authenticate(token))
         .thenReturn(
@@ -192,7 +195,7 @@ class ApiCredentialBearerTest {
   }
 
   @Test
-  void s20_duplicateAuthorizationIsRejectedBeforeAuthentication() throws Exception {
+  void s19_duplicateAuthorizationIsRejectedBeforeAuthentication() throws Exception {
     mvc.perform(
             get("/api/v1/projects")
                 .header("Authorization", "Bearer " + token, "Bearer " + token)
@@ -231,7 +234,7 @@ class ApiCredentialBearerTest {
   }
 
   @Test
-  void s19_bearerAuthenticatesAdmitsThenReadsAsOwnerWithoutCookie() throws Exception {
+  void s20_bearerAuthenticatesAdmitsThenReadsAsOwnerWithoutCookie() throws Exception {
     when(authenticate.authenticate(token)).thenReturn(access);
     when(projects.list("owner", null)).thenReturn(new ProjectPage(List.of(), null));
     mvc.perform(get("/api/v1/projects").header("Authorization", "Bearer " + token))

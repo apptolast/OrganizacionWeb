@@ -75,7 +75,7 @@ class ApiCredentialHttpPersistenceTest {
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.ValueSource(
       strings = {"invalid", "revoked", "disabled", "orphan"})
-  void s20_s31_realInvalidRevokedOrDisabledCredentialNeverUsesCookieOrQuota(String state)
+  void s19_s21_realInvalidRevokedOrDisabledCredentialNeverUsesCookieOrQuota(String state)
       throws Exception {
     var id = UUID.randomUUID();
     var token =
@@ -124,7 +124,7 @@ class ApiCredentialHttpPersistenceTest {
   }
 
   @Test
-  void s21_bearerLogoutIsDeniedWithoutChangingCookieSessionAndCookieLogoutStillWorks()
+  void s23_bearerLogoutIsDeniedWithoutChangingCookieSessionAndCookieLogoutStillWorks()
       throws Exception {
     var login =
         mvc.perform(
@@ -179,7 +179,7 @@ class ApiCredentialHttpPersistenceTest {
   }
 
   @Test
-  void s21_defaultFrameworkLogoutCannotBypassBearerAuthentication() throws Exception {
+  void s23_defaultFrameworkLogoutCannotBypassBearerAuthentication() throws Exception {
     clearInvocations(sessions);
     mvc.perform(
             post("/logout")

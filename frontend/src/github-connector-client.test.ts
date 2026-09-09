@@ -282,3 +282,125 @@ it("@s39 an unexpected status is not silently taken for success", async () => {
 
   await expect(startGithubImport(projectId, signal())).rejects.toBeDefined();
 });
+
+// --------------------------------------------------- @s41 disciplina de cancelación, punto a punto
+
+/**
+ * Las cinco operaciones consultan la señal tres veces: antes de tocar la red,
+ * al volver la respuesta y tras leer el cuerpo. Cada llamada necesita su propio
+ * oráculo, porque borrar cualquiera de ellas deja las demás verdes.
+ */
+const operations = [
+  {
+    name: "readGithubConnection",
+    ok: () => Response.json(connection),
+    call: (s: AbortSignal) => readGithubConnection(s),
+    decodes: true,
+  },
+  {
+    name: "connectGithub",
+    ok: () => Response.json(connection),
+    call: (s: AbortSignal) =>
+      connectGithub({ repository: "octocat/Hello-World", token: "t" }, s),
+    decodes: true,
+  },
+  {
+    name: "disconnectGithub",
+    ok: () => new Response(null, { status: 204 }),
+    call: (s: AbortSignal) => disconnectGithub(s),
+    decodes: false,
+  },
+  {
+    name: "startGithubImport",
+    ok: () => Response.json(receipt, { status: 201 }),
+    call: (s: AbortSignal) => startGithubImport(projectId, s),
+    decodes: true,
+  },
+  {
+    name: "readGithubImport",
+    ok: () => Response.json(receipt),
+    call: (s: AbortSignal) => readGithubImport(importId, s),
+    decodes: true,
+  },
+];
+
+for (const operation of operations) {
+  it(`@s41 ${operation.name} does not touch the network with an aborted signal`, async () => {
+    const controller = new AbortController();
+    const fetcher = stub(operation.ok());
+    controller.abort();
+
+    await expect(operation.call(controller.signal)).rejects.toThrow();
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it(`@s41 ${operation.name} stops when the abort lands while the request is in flight`, async () => {
+    const controller = new AbortController();
+    const fetcher = vi.fn(async () => {
+      controller.abort();
+      return operation.ok();
+    });
+    vi.stubGlobal("fetch", fetcher);
+
+    await expect(operation.call(controller.signal)).rejects.toThrow();
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  if (operation.decodes)
+    it(`@s41 ${operation.name} stops when the abort lands while the body is read`, async () => {
+      const controller = new AbortController();
+      const answer = operation.ok();
+      const late = {
+        status: answer.status,
+        json: async () => {
+          controller.abort();
+          return answer.json();
+        },
+      } as unknown as Response;
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => late),
+      );
+
+      await expect(operation.call(controller.signal)).rejects.toThrow();
+    });
+}
+
+// ------------------------------------------- @s41 la petición lleva señal y tipo de contenido
+
+it("@s41 every operation hands its signal to the transport", async () => {
+  for (const operation of operations) {
+    const controller = new AbortController();
+    const fetcher = stub(operation.ok());
+
+    await operation.call(controller.signal);
+
+    expect(fetcher.mock.calls[0][1].signal, operation.name).toBe(
+      controller.signal,
+    );
+    vi.unstubAllGlobals();
+  }
+});
+
+it("@s41 the two writes with a body declare application/json", async () => {
+  const writes = [
+    {
+      ok: () => Response.json(connection),
+      call: (s: AbortSignal) =>
+        connectGithub({ repository: "octocat/Hello-World", token: "t" }, s),
+    },
+    {
+      ok: () => Response.json(receipt, { status: 201 }),
+      call: (s: AbortSignal) => startGithubImport(projectId, s),
+    },
+  ];
+  for (const write of writes) {
+    const fetcher = stub(write.ok());
+
+    await write.call(signal());
+
+    const headers = new Headers(fetcher.mock.calls[0][1].headers);
+    expect(headers.get("Content-Type")).toBe("application/json");
+    vi.unstubAllGlobals();
+  }
+});

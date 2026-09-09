@@ -276,3 +276,94 @@ el exigido. Quedan anotadas para el `craftsman_lead`:
 - Ampliar `COLOR_DECLARATION` con `background-image` y con las custom
   properties declaradas fuera de los mixins.
 - Medir el tema **claro** con una pasada visual (aquí solo hay cálculo).
+
+## 8. El hueco de mutación: la rama SYSTEM (mutantes 417 y 432)
+
+Campaña `progress/mutation_darkmode_appearance.md`: **696/778 = 89,46 %**, por
+encima del umbral. Sobrevivían 417 y 432, ambos en el efecto que pinta el tema
+(`appearance-state.tsx`). `SYSTEM` es el valor por defecto —la rama por la que
+pasa la mayoría— y era la única sin oráculo.
+
+Base: `main` en `7ea682d`. Commit del cierre: `2a25154`.
+
+### 8.1 Mutante 417 — matable, y muerto
+
+`snapshot.theme === "SYSTEM"` → `true` en la creación de `media`
+(`appearance-state.tsx:139`). Comprobado a mano: **sobrevive** a la suite
+actual. Y no puede matarse por el tema resultante, porque no lo cambia: con el
+mutante, una preferencia `DARK` sigue dando `dark` y una `LIGHT` sigue dando
+`light` (la guarda de la línea 145 lo sigue filtrando). Lo único que cambia es
+que se **consulta al sistema** y se suscribe un listener cuando la preferencia
+es explícita.
+
+Ese es el oráculo, y además es conducta que merece fijarse: *una preferencia
+explícita no pregunta al sistema*. Rojo visto con el mutante puesto:
+
+```
+AssertionError: expected "vi.fn()" to not be called at all,
+but actually been called 1 times
+```
+
+| Aserción | Mata |
+|---|---|
+| `expect(matchMedia).not.toHaveBeenCalled()` con `theme: "DARK"` | 417 |
+| `expect(matchMedia).not.toHaveBeenCalled()` con `theme: "LIGHT"` | 417 |
+
+### 8.2 Mutante 432 — el informe describe uno y sobrevive otro
+
+El informe lo anota como `snapshot.theme === "SYSTEM" && media?.matches` →
+`true` (145:10). **Aplicado así, muere 12 veces** con la suite actual (entre
+otros, `@s24 refreshes the system scheme after suspension`, `@s24 follows a
+system color-scheme change` y `applying LIGHT paints theme-color…`): dejaría la
+condición en `DARK || true`, es decir, oscuro siempre.
+
+Lo comprobé, y el mutante que de verdad sobrevive es el que sustituye el
+**operando izquierdo**, dejando `snapshot.theme === "DARK" || (true &&
+media?.matches)`. Ese **sí** pasa la suite entera, y pasa porque es
+**equivalente**: `media` solo se crea cuando el tema es `SYSTEM`
+(línea 139), así que `snapshot.theme === "SYSTEM" && media?.matches` ≡
+`media?.matches`. Ningún test puede distinguirlos sin romper antes la línea 139.
+
+Escribir una prueba para un mutante equivalente es imposible por definición, así
+que la respuesta correcta es quitar la redundancia que lo hace equivalente:
+
+```ts
+const theme = snapshot.theme === "DARK" || media?.matches ? "dark" : "light";
+```
+
+Refactor en verde, sin cambio de conducta (58 casos verdes antes y después). El
+nodo condicional desaparece, y con él el mutante.
+
+### 8.3 Comprobación de que la región queda sin supervivientes
+
+Aplicados a mano, uno a uno, los **ocho** mutantes condicionales de la región y
+ejecutada la suite filtrada tras cada uno:
+
+| Mutante | Resultado |
+|---|---|
+| `theme === "SYSTEM"` → `true` (crear `media`) | **muerto** |
+| `theme === "SYSTEM"` → `false` (crear `media`) | **muerto** |
+| condición entera → `true` | **muerto** |
+| condición entera → `false` | **muerto** |
+| `theme === "DARK"` → `true` | **muerto** |
+| `theme === "DARK"` → `false` | **muerto** |
+| `media?.matches` → `true` | **muerto** |
+| `media?.matches` → `false` | **muerto** |
+
+Los cuatro últimos solo mueren gracias a los casos nuevos de `SYSTEM`: los dos
+que fijan el sistema en oscuro y en claro comprueban `data-theme`,
+`color-scheme`, el `--canvas` computado (`#111827` / `#f8f9f5`) y la etiqueta
+`theme-color`, y que se consulta `(prefers-color-scheme: dark)`.
+
+### 8.4 Lo que no toqué, a propósito
+
+- **Mutante 322** (borrar `.trim()` en `getPropertyValue("--canvas")`): el
+  informe lo declara inmatable con vitest porque el jsdom del proyecto ya
+  devuelve el valor recortado. No escribí ningún test para él; es flanco de
+  navegador.
+- No relancé la mutación (la relanza el `craftsman_lead`) ni ejecuté E2E ni la
+  suite completa. Solo `pnpm vitest run src/theme-color.test.tsx
+  src/appearance.test.tsx` → **58 pasados**, más `tsc --noEmit`, `prettier` y
+  `eslint` limpios sobre los dos ficheros tocados.
+- El `79,08 %` de `appearance-state.tsx` aislado debería subir al cerrarse estos
+  dos, pero **no lo he medido**: no me corresponde relanzar la campaña.

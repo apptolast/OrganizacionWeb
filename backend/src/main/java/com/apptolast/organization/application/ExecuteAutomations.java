@@ -17,7 +17,10 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
   private static final String SUCCEEDED = "succeeded";
   private static final String FAILED = "failed";
   private static final String ENDPOINT_NOT_FOUND = "ENDPOINT_NOT_FOUND";
+  private static final String RETRY = "retry";
+  private static final String STORAGE_UNAVAILABLE = "STORAGE_UNAVAILABLE";
   private static final int FIRST_ATTEMPT = 1;
+  private static final int MAX_ATTEMPTS = 3;
 
   private final AutomationWork work;
   private final AutomationRuleStore rules;
@@ -47,9 +50,9 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
   }
 
   private void walk(String owner) {
-    work.cursor(owner)
-        .or(() -> startCursorOf(owner))
-        .ifPresent(cursor -> work.after(owner, cursor).forEach(row -> process(owner, row)));
+    var cursor = work.cursor(owner).or(() -> startCursorOf(owner));
+    if (cursor.isEmpty()) return;
+    for (var candidate : work.after(owner, cursor.get())) if (!process(owner, candidate)) return;
   }
 
   /**
@@ -66,11 +69,37 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
     return start;
   }
 
-  private void process(String owner, AutomationCandidate candidate) {
+  /** False when the confirmation did not land, which strands the walk on this very event. */
+  private boolean process(String owner, AutomationCandidate candidate) {
     var event = candidate.event();
     // A blocked row is a deliberate skip: it produces nothing, but the walk still moves past it.
     var outcomes = candidate.blocked() ? List.<AutomationOutcome>of() : firedBy(owner, event);
-    work.commit(new AutomationCommit(owner, reachedBy(event), outcomes));
+    try {
+      work.commit(new AutomationCommit(owner, reachedBy(event), outcomes));
+      return true;
+    } catch (RuntimeException failure) {
+      // Whatever broke the confirmation, from here it is one thing: the write did not happen.
+      // Stranding an owner behind an unexpected failure would be worse than one coarse code.
+      outcomes.forEach(outcome -> work.record(unavailable(outcome.run())));
+      return false;
+    }
+  }
+
+  /** The only row that survives a rolled back confirmation, written outside it. */
+  private static AutomationRun unavailable(AutomationRun run) {
+    return new AutomationRun(
+        run.id(),
+        run.ruleId(),
+        run.ownerId(),
+        run.eventId(),
+        run.eventType(),
+        run.occurredAt(),
+        run.attempt(),
+        run.attempt() < MAX_ATTEMPTS ? RETRY : FAILED,
+        null,
+        null,
+        STORAGE_UNAVAILABLE,
+        run.executedAt());
   }
 
   private List<AutomationOutcome> firedBy(String owner, AutomationEvent event) {

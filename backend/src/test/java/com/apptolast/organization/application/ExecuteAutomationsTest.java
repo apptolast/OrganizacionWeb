@@ -278,6 +278,31 @@ class ExecuteAutomationsTest {
         .orElseThrow(() -> new AssertionError("no run for rule " + rule.id()));
   }
 
+  @Test
+  void s20_aFailedConfirmationLeavesNothingBehindAndStrandsTheWalkOnTheEvent() {
+    givenARuleThatCreatesTasks();
+    work.cursors.put(OWNER, new AutomationCursor(T0, E0));
+    work.outbox.add(taskCreated(E1, T0.plusSeconds(1)));
+    work.outbox.add(taskCreated(E2, T0.plusSeconds(2)));
+    work.failing = commit -> E1.equals(commit.reached().eventId());
+
+    execute.runCycle();
+
+    assertThat(work.commits).as("no task and no new event survive the rollback").isEmpty();
+    assertThat(work.recorded)
+        .extracting(
+            AutomationRun::eventId,
+            AutomationRun::attempt,
+            AutomationRun::status,
+            AutomationRun::errorCode,
+            AutomationRun::createdTaskId,
+            AutomationRun::deliveryId)
+        .containsExactly(tuple(E1, 1, "retry", "STORAGE_UNAVAILABLE", null, null));
+    assertThat(work.cursors.get(OWNER))
+        .as("the cursor never jumps over the event that did not confirm")
+        .isEqualTo(new AutomationCursor(T0, E0));
+  }
+
   private void givenARuleThatCreatesTasks() {
     work.owners.add(OWNER);
     rules.create(OWNER, rule(taskAction()));
@@ -381,6 +406,7 @@ class ExecuteAutomationsTest {
     final List<AutomationCommit> commits = new ArrayList<>();
     final List<AutomationRun> recorded = new ArrayList<>();
     final List<AutomationCursor> started = new ArrayList<>();
+    java.util.function.Predicate<AutomationCommit> failing = commit -> false;
 
     @Override
     public List<String> ownersWithRules() {
@@ -418,6 +444,8 @@ class ExecuteAutomationsTest {
 
     @Override
     public void commit(AutomationCommit commit) {
+      if (failing.test(commit))
+        throw new StorageUnavailableException(new IllegalStateException("induced"));
       commits.add(commit);
       if (commit.reached() != null) cursors.put(commit.owner(), commit.reached());
     }

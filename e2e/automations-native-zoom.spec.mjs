@@ -28,9 +28,11 @@ import { join, resolve } from "node:path";
  * Precio declarado, igual que en las otras: `headless: false` y `channel: "chromium"` hacen la
  * prueba dependiente de un entorno gráfico. Si el zoom no se aplica, **falla**; no se salta.
  *
- * Estado medido: lista con una regla y editor abierto. Los «resultados de simulación» que el
- * `Given` también nombra los cubre `automations-ux.spec.mjs`; aquí no se reproducen porque exigen
- * bloques planificados y alargarían la prueba sin añadir nada al reflujo.
+ * Estado medido: **editor abierto sobre la lista vacía**, que es el que más controles pone en
+ * pantalla de los que se alcanzan sin sembrar datos. Los otros dos estados del `Given` —lista con
+ * reglas y resultados de simulación— **no** se reproducen aquí: exigen reglas guardadas y bloques
+ * planificados, y los cubre `automations-ux.spec.mjs`. Queda dicho para que nadie lea esta spec
+ * como cobertura de los tres.
  */
 
 const WIDTHS = [320, 768, 1280, 1440];

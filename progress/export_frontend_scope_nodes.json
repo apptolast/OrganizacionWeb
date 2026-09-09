@@ -6,17 +6,17 @@
     "nodes": [
       {
         "kind": "VariableDeclaration",
-        "range": "29:8-29:45",
+        "range": "34:8-34:45",
         "text": "exportData = route === \"/exportacion\""
       },
       {
         "kind": "ConditionalExpression",
-        "range": "37:8-51:28",
+        "range": "51:16-65:34",
         "text": "exportData\n          ? \"Exportación\"\n          : appearance\n            ? \"Apariencia\"\n            : route === \"/\"\n              ? \"Hoy\"\n              : weeklyReview\n                ? \"Revisión semanal\"\n                : history\n                  ? \"Historial\"\n                  : availability\n                    ? \"Disponibilidad\"\n                    : route.startsWith(\"/proyectos\")\n                      ? \"Proyectos\"\n                      : null"
       },
       {
         "kind": "ConditionalExpression",
-        "range": "54:7-97:7",
+        "range": "82:10-125:7",
         "text": "exportData && username ? (\n        <ExportData owner={username} />\n      ) : appearance ? (\n        <Appearance />\n      ) : route === \"/\" ? (\n        <Today />\n      ) : route === \"/proyectos/nuevo\" ? (\n        <CreateProjectScreen />\n      ) : weeklyReview ? (\n        <WeeklyReview route={route} />\n      ) : history ? (\n        <History route={route} />\n      ) : availability ? (\n        <Availability />\n      ) : sessionRoute ? (\n        <WorkSessionReader\n          key={route}\n          projectId={sessionRoute[1]}\n          taskId={sessionRoute[2]}\n          id={sessionRoute[3]}\n        />\n      ) : taskRoute ? (\n        <TaskReader\n          key={route}\n          projectId={taskRoute[1]}\n          id={taskRoute[2]}\n          customization={customization}\n        />\n      ) : /^\\/proyectos\\/[^/?]+\\/editar$/.test(route) ? (\n        <ProjectEditor key={route} route={route} />\n      ) : /^\\/proyectos(?:\\?[^#]*|\\/[^/?]+)?$/.test(route) ? (\n        <ProjectReader\n          key={route}\n          route={route}\n          customization={customization}\n        />\n      ) : (\n        <main id=\"proyectos\" tabIndex={-1}>\n          <h1>Página no encontrada</h1>\n          <RouteLink href=\"/\">Hoy</RouteLink>\n          {\" · \"}\n          <RouteLink href=\"/proyectos\">Proyectos</RouteLink>\n        </main>\n      )"
       }
     ]
@@ -28,7 +28,7 @@
     "nodes": [
       {
         "kind": "JsxElement",
-        "range": "81:10-86:22",
+        "range": "84:10-89:22",
         "text": "<RouteLink\n            href=\"/exportacion\"\n            aria-current={section === \"Exportación\" ? \"page\" : undefined}\n          >\n            Exportación\n          </RouteLink>"
       }
     ]

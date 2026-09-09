@@ -239,6 +239,73 @@ Feature en curso: 30 — automations. Escenarios a recorrer en fase 1: @s1–@s1
   importación, historial e integraciones. Hay que volver a fijarlos en la
   integración; no lo hago desde este carril porque son de sus dueños.
 
+### Ciclo 16 — reasentamiento sobre `origin/main` (7ea682d)
+
+- `git rebase origin/main` intentaba **118 comits**: la rama salió de `01f80ab`
+  (`codex/integration-api`), no de main, y main recibió la 24 por *squash*, así que
+  git no reconoce esa historia como común. Se abortó y se replayaron **sólo los 20
+  comits del carril**: `git rebase --onto origin/main 01f80ab claude/automations`.
+- Conflictos resueltos: `project-spec.md` (se conservan las enmiendas de seguridad
+  de main, que mi comit de sincronización precedía), `feature_list.json` (feature
+  30 vuelve a `in_progress`; es la mía), `progress/gherkin_automations.md` (se
+  conservan las decisiones del coordinador del 8/9 añadidas en main) y
+  `progress/current.md` en los comits intermedios, reescrito al final.
+- **`App.tsx` NO dio conflicto**: ningún otro carril ha aterrizado todavía su
+  entrada de navegación en main. La mía es la única añadida; cuando lleguen
+  calendario, webhooks y conectores habrá que conservarlas todas.
+- **Regresión encontrada y corregida**: mi viejo comit de sincronización borraba de
+  `scripts/project.mjs` los tres objetivos `integration_api-*` que main ya tiene.
+  Restaurados. Eran la causa de dos de los tres fallos «preexistentes» que había
+  reportado: los había provocado mi propio carril, no main. Queda dicho.
+
+### Ciclo 17 — re-fijado de los rangos línea:columna de Stryker
+
+`App.tsx` creció (feature 24 más mi rama de ruta) y `workspace.tsx` ganó entradas,
+así que los rangos fijados por línea de cinco campañas apuntaban a código
+equivocado. Se re-derivaron leyendo el **fragmento que cada rango seleccionaba en
+el comit de referencia de su configuración** y localizándolo en el fichero actual;
+cada rango nuevo se valida con el mismo oráculo que usa
+`scripts/project.test.mjs` (empieza por el token esperado y contiene la cadena
+distintiva). Los 17 rangos validan.
+
+| Configuración | Antes | Después |
+| --- | --- | --- |
+| appearance | `App.tsx:32:8-32:44` | `App.tsx:33:8-33:44` |
+| appearance | `App.tsx:49:16-61:32` | `App.tsx:53:18-65:34` |
+| appearance | `App.tsx:78:10-119:7` | `App.tsx:84:10-125:7` |
+| appearance | `workspace.tsx:77:10-82:22` | `workspace.tsx:78:10-83:22` |
+| appearance | `session-gate.tsx:32:2-52:6` | sin cambio |
+| appearance | `use-session.ts:208:0-229:1` | sin cambio |
+| export-data | `App.tsx:29:8-29:45` | `App.tsx:34:8-34:45` |
+| export-data | `App.tsx:37:8-51:28` | `App.tsx:51:16-65:34` |
+| export-data | `App.tsx:54:7-97:7` | `App.tsx:82:10-125:7` |
+| export-data | `workspace.tsx:81:10-86:22` | `workspace.tsx:84:10-89:22` |
+| import-data | `App.tsx:28:8-28:41` | `App.tsx:29:8-29:41` |
+| import-data | `App.tsx:34:8-34:45` | `App.tsx:35:8-35:45` |
+| import-data | `App.tsx:45:12-61:32` | `App.tsx:49:14-65:34` |
+| import-data | `App.tsx:66:10-119:7` | `App.tsx:72:10-125:7` |
+| import-data | `workspace.tsx:89:10-97:22` | `workspace.tsx:90:10-98:22` |
+| history | `App.tsx:14:8-14:57` | `App.tsx:31:8-31:57` |
+| history | `App.tsx:25:12-31:22` | `App.tsx:59:24-65:34` |
+| history | `App.tsx:38:10-62:7` | `App.tsx:92:10-125:7` |
+| history | `workspace.tsx:55:10-60:22` | `workspace.tsx:66:10-71:22` |
+| integration-api | `App.tsx:35:8-35:55` | `App.tsx:36:8-36:55` |
+| integration-api | `App.tsx:43:8-61:32` | `App.tsx:47:12-65:34` |
+| integration-api | `App.tsx:64:7-119:7` | `App.tsx:70:10-125:7` |
+| integration-api | `workspace.tsx:98:10-105:22` | `workspace.tsx:99:10-106:22` |
+
+Se actualizaron también los tres tests que fijaban esas listas
+(`scripts/project.test.mjs`) y el fichero de evidencia
+`progress/export_frontend_scope_nodes.json`, del que el test de exportación deriva
+su expectativa. `scripts/project.test.mjs`: **75 pasan, 0 fallan** (antes 72/3).
+
+**Fuera de mi alcance, avisado**: los rangos de `use-session.ts`,
+`session-gate.tsx`, `appearance-state.tsx` y `customization-state.ts` de las
+campañas de importación e integraciones no los toqué; si han derivado por el
+trabajo de otros carriles en main, es deriva ajena y sus dueños deben revisarla.
+Los replay históricos (`*-replay`, `*.replay`) se dejan intactos a propósito:
+describen un estado pasado del código y re-fijarlos falsearía su evidencia.
+
 ## Discrepancia de contrato pendiente de dictamen (@s30 vs @s32)
 
 @s30 dice que cada coincidencia contiene «exactamente eventId, eventType, occurredAt

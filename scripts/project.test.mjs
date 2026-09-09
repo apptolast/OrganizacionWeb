@@ -1639,10 +1639,10 @@ test("history Stryker covers new modules and complete integration nodes with inh
   assert.deepEqual(config.mutate, [
     "src/history-api.ts",
     "src/history.tsx",
-    "src/App.tsx:14:8-14:57",
-    "src/App.tsx:25:12-31:22",
-    "src/App.tsx:38:10-62:7",
-    "src/workspace.tsx:55:10-60:22",
+    "src/App.tsx:31:8-31:57",
+    "src/App.tsx:59:24-65:34",
+    "src/App.tsx:92:10-125:7",
+    "src/workspace.tsx:66:10-71:22",
     "src/project-reader.tsx:111:10-116:22",
     "src/task-reader.tsx:112:10-117:22",
   ]);
@@ -1671,9 +1671,9 @@ test("default Stryker retains history modules and full new integration nodes", (
   for (const entry of [
     "src/history-api.ts",
     "src/history.tsx",
-    "src/App.tsx:25:12-31:22",
-    "src/App.tsx:38:10-62:7",
-    "src/workspace.tsx:55:10-60:22",
+    "src/App.tsx:59:24-65:34",
+    "src/App.tsx:92:10-125:7",
+    "src/workspace.tsx:66:10-71:22",
     "src/project-reader.tsx:111:10-116:22",
   ])
     assert.ok(

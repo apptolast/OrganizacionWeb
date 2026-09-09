@@ -350,3 +350,11 @@ la máquina. Queda listo para que el `mutation_tester` lance
 - Las dos especificaciones de extremo a extremo son código no ejecutado.
 - `node --test scripts/project.test.mjs` deja 2 fallos ajenos, de la feature 24,
   cuyo carril no está integrado en esta rama; ya fallaban antes de empezar.
+
+### Ciclo 21 — el registro de auditoría también se prueba (@s12, @s14)
+
+- ROJO: `ExternalCalendarAuditTest` no compilaba; el adaptador de registro era
+  la única clase del alcance de mutación sin prueba propia.
+- VERDE: sin cambios de producción; el test fija el formato exacto de la línea
+  (`host`, `status`, `code`, `durationMs`), que el éxito registra `code=NONE` y
+  que la línea nunca contiene la ruta de la dirección.

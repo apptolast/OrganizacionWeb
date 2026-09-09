@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -152,6 +153,43 @@ class HttpCalendarFeedTest {
     var slow = new HttpCalendarFeed(Duration.ofMillis(300));
     assertEquals(FeedError.FEED_UNREACHABLE, codeOf(slow.fetch(url("/cal.ics"))));
     released.countDown();
+  }
+
+  /**
+   * @s12: un proveedor que envía las cabeceras al instante y luego gotea el cuerpo sin cerrarlo
+   *     nunca. El plazo es del intercambio completo, no de las cabeceras: si sólo cubriera las
+   *     cabeceras esta prueba no terminaría jamás, y por eso lleva {@link Timeout}.
+   */
+  @Test
+  @Timeout(15)
+  void s12_aBodyThatDripsForeverIsUnreachable() throws InterruptedException {
+    var stopped = new CountDownLatch(1);
+    handler =
+        exchange -> {
+          exchange.getResponseHeaders().add("Content-Type", "text/calendar");
+          exchange.sendResponseHeaders(200, 0);
+          try (var out = exchange.getResponseBody()) {
+            while (!stopped.await(50, TimeUnit.MILLISECONDS)) {
+              out.write('X');
+              out.flush();
+            }
+          } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+          } catch (IOException cut) {
+            // El cliente cortó: es justo lo que la prueba quiere provocar.
+          }
+        };
+    var slow = new HttpCalendarFeed(Duration.ofMillis(300));
+    long started = System.nanoTime();
+    FeedError code;
+    try {
+      code = codeOf(slow.fetch(url("/cal.ics")));
+    } finally {
+      stopped.countDown();
+    }
+    long elapsed = Duration.ofNanos(System.nanoTime() - started).toMillis();
+    assertEquals(FeedError.FEED_UNREACHABLE, code);
+    assertTrue(elapsed < 5_000, "la lectura del cuerpo tardó " + elapsed + " ms en cortarse");
   }
 
   @Test

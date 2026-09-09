@@ -26,7 +26,7 @@ por clase concreta, nunca la suite entera.
 | 11 | alta | pendiente | — |
 | 12 | alta | pendiente | — |
 | 13 | alta | pendiente | — |
-| 14 | alta | pendiente | — |
+| 14 | alta | **CERRADO** (amplía contrato) | ciclo 4 |
 | 15 | media | **CERRADO** | ciclo 3 |
 | 16 | media | ya cerrado en la base | — |
 | 17 | media | ya cerrado en la base | — |
@@ -205,3 +205,93 @@ Restaurado `use-session.ts`: `Tests 5 passed (5)`.
 construcción (`session-gate.tsx` desmonta `<App/>`), así que esa aserción no
 discrimina por sí sola: lo que discrimina, y lo que el ciclo fija de verdad, es la
 ruta. Queda escrito para que nadie la lea como más de lo que es.
+
+---
+
+## Ciclo 4 — hallazgo 14: la lectura del cuerpo del feed no tenía ningún plazo
+
+### AMPLIACIÓN DE CONTRATO — léase entero antes de aprobar
+
+Este ciclo **añade una cláusula al contrato** `features/external_calendar.feature`.
+Se declara aquí en voz alta para que el propietario pueda revocarla si no la
+quiere, tal como pide REGLAS.md §8.
+
+**Qué había.** La cabecera del contrato (línea 12) prometía «timeout de 5 s» sin
+decir a qué se aplicaba, y el único ejemplo de plazo de @s12 era «200 tras 6 s sin
+enviar cabeceras → FEED_UNREACHABLE». `docs/external-calendar.md:41-44` iba más
+lejos y afirmaba **dos veces** un plazo de 5 s sobre lo que se hace con la
+respuesta, una de ellas como mitigación explícita del rebinding aceptado como
+riesgo residual.
+
+**Qué hacía el código.** `HttpCalendarFeed` usaba `BodyHandlers.ofInputStream()`.
+Con ese handler el temporizador de `HttpRequest.timeout` se cancela en cuanto
+llegan las cabeceras (`MultiExchange.responseAsyncImpl` llama a `cancelTimer()`
+antes de encadenar `readBodyAsync`), y el bucle de lectura sólo cortaba por
+tamaño. Es decir: **ni un byte del cuerpo estaba cubierto por plazo alguno**. La
+documentación afirmaba una protección inexistente.
+
+**Por qué se amplía el contrato en vez de dejarlo abierto.** El defecto no era
+sólo documental: cualquier cuenta autenticada con un host público propio podía
+dejar hilos de petición de Tomcat bloqueados para siempre, y @s35 lo amplifica
+porque `lastAttemptAt` sólo se escribe en `commit(...)`, después de que
+`feed.fetch` retorne — mientras una descarga cuelga la suscripción sigue
+eternamente «rancia» y **cada** carga de Hoy dispara otra que también cuelga. Es
+la misma familia que la enmienda de seguridad **B1 de los webhooks**: un receptor
+lento que agota recursos del emisor. Cerrarlo exige una obligación que el contrato
+no tenía escrita, así que se escribe.
+
+**Cambios exactos en el contrato.** En `features/external_calendar.feature`:
+
+1. Cabecera, se parte la línea 12 y se sustituye «timeout de 5 s» por:
+   «El plazo de 5 s es del intercambio completo: conexión, cabeceras y lectura del
+   cuerpo. Un proveedor que envía las cabeceras y luego gotea el cuerpo sin
+   cerrarlo se corta al vencer ese plazo con FEED_UNREACHABLE; ninguna descarga
+   puede retener un hilo más de 5 s.»
+2. `@s12`, fila nueva en el Examples:
+   `| 200 text/calendar que envía las cabeceras y luego gotea el cuerpo sin cerrar | FEED_UNREACHABLE |`
+
+**Si el propietario revoca la ampliación**, hay que revertir además el cambio de
+`docs/external-calendar.md` y dejar escrito que el plazo cubre sólo las cabeceras;
+lo que **no** puede quedarse es el estado anterior, en el que la documentación
+prometía un plazo que el código no daba.
+
+### El ciclo
+
+**ROJO.** Prueba nueva `s12_aBodyThatDripsForeverIsUnreachable` en
+`backend/src/test/java/.../feed/HttpCalendarFeedTest.java`: un `HttpServer` que
+envía `200 text/calendar` al instante y luego escribe un byte cada 50 ms sin
+cerrar nunca, contra un `HttpCalendarFeed` de 300 ms. Lleva `@Timeout(15)` porque
+contra el código anterior **no terminaría jamás**, y eso es precisamente la prueba
+de que el hueco era real:
+
+```
+gradlew test --tests "...HttpCalendarFeedTest" --no-daemon
+HttpCalendarFeedTest > s12_aBodyThatDripsForeverIsUnreachable() FAILED
+    java.util.concurrent.TimeoutException at ArrayList.java:1604
+32 tests completed, 1 failed
+```
+
+**VERDE.** En `HttpCalendarFeed`:
+
+- se calcula `deadline = System.nanoTime() + timeout.toNanos()` **antes** de
+  `send`, de modo que el plazo es del intercambio completo y lo que consuman las
+  cabeceras se descuenta del cuerpo;
+- el bucle de lectura comprueba el instante límite en cada trozo (caso del goteo);
+- y además se programa el cierre del cuerpo en ese instante con un
+  `ScheduledExecutorService` de un solo hilo demonio, porque un proveedor que se
+  calla del todo dejaría el `read` bloqueado sin llegar nunca a la comprobación.
+  Cerrar el `HttpResponseInputStream` desbloquea al lector con `IOException`, que
+  se traduce a `FEED_UNREACHABLE` cuando el plazo ya venció.
+
+`32 tests completed`, `BUILD SUCCESSFUL`. La prueba nueva afirma además que
+`fetch` retorna en menos de 5 s con un plazo de 300 ms, no sólo que el código sea
+`FEED_UNREACHABLE`: sin la cota de tiempo el oráculo no distinguiría un corte de
+una espera larga.
+
+**Documentación alineada.** `docs/external-calendar.md` deja de prometer un plazo
+que no existía y explica el mecanismo (por qué `HttpRequest.timeout` no basta con
+`ofInputStream`).
+
+**Alcance no invadido.** `JdkWebhookSender` (feature 25) usa
+`BodyHandlers.discarding()` con `EXCHANGE_TIMEOUT`, así que no comparte este
+defecto y no se ha tocado: es del carril de webhooks.

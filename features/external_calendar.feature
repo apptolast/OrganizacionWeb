@@ -9,7 +9,9 @@ Feature: Suscribirse en solo lectura a un calendario iCalendar externo y verlo e
   escrituras, JSON estricto, Cache-Control no-store y errores problem+json. Sin APP_CONNECTOR_KEY las cinco responden 503 CONNECTORS_DISABLED.
   DTO subscription cerrado de quince campos: id, label, urlHost, urlTail, lastAttemptAt, lastSyncAt, lastStatus, lastError, snapshotZoneId,
   imported, skippedRecurring, skippedCancelled, skippedInvalid, truncated y updatedAt. Instantes en el formato UTC de feature 11.
-  Descarga con redirecciones deshabilitadas, timeout de 5 s, Accept text/calendar, aborto al superar 1 MiB; solo HTTP 200 con Content-Type text/*.
+  Descarga con redirecciones deshabilitadas, Accept text/calendar, aborto al superar 1 MiB; solo HTTP 200 con Content-Type text/*.
+  El plazo de 5 s es del intercambio completo: conexión, cabeceras y lectura del cuerpo. Un proveedor que envía las cabeceras y luego
+  gotea el cuerpo sin cerrarlo se corta al vencer ese plazo con FEED_UNREACHABLE; ninguna descarga puede retener un hilo más de 5 s.
   Códigos cerrados de fallo: FEED_REJECTED, FEED_UNREACHABLE, FEED_HTTP_ERROR, FEED_TOO_LARGE, FEED_UNSUPPORTED_TYPE, FEED_MALFORMED, SECRET_UNREADABLE.
   Un fallo de sincronización es 200 con lastStatus FAILED y la instantánea anterior intacta; nunca una lista parcial.
   Parser propio: solo VEVENT; UID y DTSTART obligatorios; Z es UTC; TZID debe pertenecer al catálogo de zonas; flotantes y VALUE=DATE se
@@ -194,6 +196,7 @@ Feature: Suscribirse en solo lectura a un calendario iCalendar externo y verlo e
       | 500                                                                        | FEED_HTTP_ERROR       |
       | conexión rechazada                                                         | FEED_UNREACHABLE      |
       | 200 tras 6 s sin enviar cabeceras                                          | FEED_UNREACHABLE      |
+      | 200 text/calendar que envía las cabeceras y luego gotea el cuerpo sin cerrar | FEED_UNREACHABLE      |
       | 200 text/calendar con cuerpo de 1 MiB más 1 byte                           | FEED_TOO_LARGE        |
       | 200 application/json con un ICS válido                                     | FEED_UNSUPPORTED_TYPE |
       | 200 text/html con "<html>"                                                 | FEED_MALFORMED        |

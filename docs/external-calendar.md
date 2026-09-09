@@ -39,9 +39,13 @@ La dirección completa no aparece en ninguna respuesta, log ni error: solo `urlH
   se repite en **cada** sincronización, no solo al guardar.
   - *Riesgo residual aceptado*: entre la comprobación y la conexión el DNS puede cambiar (rebinding).
     Se mitiga repitiendo la comprobación y limitando lo que se puede hacer con la respuesta: solo se
-    lee, con 200, tipo textual, 1 MiB y 5 s.
+    lee, con 200, tipo textual, 1 MiB y un plazo total de 5 s que cubre también la lectura del
+    cuerpo (`HttpCalendarFeed` programa el cierre del cuerpo al vencer, no sólo el de las cabeceras).
 - **Descarga.** Redirecciones deshabilitadas, `Accept: text/calendar`, sin cookie ni `Authorization`,
-  plazo de 5 s, aborto al superar 1 MiB, y solo 200 con `Content-Type` `text/*`.
+  **plazo total de 5 s para el intercambio completo** —conexión, cabeceras y lectura del cuerpo—,
+  aborto al superar 1 MiB, y solo 200 con `Content-Type` `text/*`. El plazo del cuerpo no lo da
+  `HttpRequest.timeout`: con `BodyHandlers.ofInputStream()` ese temporizador se cancela al llegar
+  las cabeceras, así que la clase fija un instante límite propio y cierra el cuerpo al vencerlo.
 - **Secreto en reposo.** AES-256-GCM, nonce aleatorio de 12 bytes por escritura y `owner_id` como
   dato adicional autenticado. Formato almacenado: `nonce || sellado`. Una clave que ya no descifra se
   comunica como `SECRET_UNREADABLE` y pide volver a pegar la dirección.

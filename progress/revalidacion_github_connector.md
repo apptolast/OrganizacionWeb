@@ -159,3 +159,68 @@ necesitar. Es el mismo remedio que `github-connector-native-zoom.spec.mjs` ya ap
 
 **El rojo está acreditado por ejecución real**, no por construcción: la traza de arriba es de la
 campaña ejecutada, con su mensaje y su línea.
+
+---
+
+## Paso 3 — Segunda campaña: **16 de 16 en verde**
+
+Mismo comando, mismo puerto 18096, pila nueva (`organizationweb-e2e-66604`), `retries: 0`, un
+worker. Ésta es la evidencia que el juez pide.
+
+    Running 16 tests using 1 worker
+
+      ✓  1 github-connector-native-zoom.spec.mjs:37 › @s42 los tres anchos al 200 % de zoom nativo, sin recorte ni desplazamiento (7.1s)
+      ✓  2 github-connector.spec.mjs:124 › @s42 estado deshabilitado: el servidor sin clave de conectores (30.7s)
+      ✓  3 github-connector.spec.mjs:148 › @s42 estado sin conexión (6.2s)
+      ✓  4 github-connector.spec.mjs:157 › @s42 estado conectada, alcanzado conectando de verdad (7.0s)
+      ✓  5 github-connector.spec.mjs:182 › @s42 estado importando y estado resultado, importando de verdad (9.2s)
+      ✓  6 github-connector.spec.mjs:209 › @s42 reimportar omite lo ya importado (9.1s)
+      ✓  7 github-connector.spec.mjs:225 › @s42 estado de error recuperable: cuota agotada con su plazo (6.6s)
+      ✓  8 github-connector.spec.mjs:243 › @s42 estado inválida, tras un token que GitHub deja de aceptar (8.7s)
+      ✓  9 github-connector.spec.mjs:267 › @s42 el recorrido con Tab alcanza los controles en el orden en que se leen (5.6s)
+      ✓ 10 github-connector.spec.mjs:300 › @s42 el foco es visible en cada control del contenido (4.2s)
+      ✓ 11 github-connector.spec.mjs:348 › @s42 Escape cancela la confirmación de desconexión y devuelve el foco (6.5s)
+      ✓ 12 github-connector.spec.mjs:372 › @s42 desconectar desde el teclado borra la conexión y conserva lo importado (5.0s)
+      ✓ 13 github-connector.spec.mjs:399 › @s42 «/integraciones» enlaza el conector y el menú no gana ninguna entrada (5.4s)
+      ✓ 14 github-connector.spec.mjs:414 › @s34 @s42 el token no queda en ningún almacén del navegador (4.3s)
+      ✓ 15 github-connector.spec.mjs:434 › @s34 la respuesta de auditoría de sesión no lleva el token ni rastro del conector (6.5s)
+      ✓ 16 github-connector.spec.mjs:452 › @s37 un token rechazado se explica junto al campo y lo vacía (7.3s)
+
+      16 passed (2.2m)
+
+**16 pruebas, 16 verdes, 0 rojas, 2,2 minutos.** Exit code 0.
+
+Detalle que confirma el diagnóstico del paso 2 en lugar de taparlo: la prueba del estado
+`deshabilitado` tardó **30,7 s**. Con el presupuesto viejo de 30 s habría muerto **por siete
+décimas**. No era una prueba lenta ni un producto roto: era un presupuesto mal puesto, y la cifra lo
+dice sola.
+
+### Evidencia del zoom, regenerada sobre este árbol
+
+`.e2e-work/github-connector-zoom/organizationweb-e2e-66604/evidence.json`:
+
+| Ancho CSS | devicePixelRatio | scrollWidth | clientWidth | Controles | Violaciones axe |
+| --- | --- | --- | --- | --- | --- |
+| 320 | 3 | 312 | 312 | 5 | 0 |
+| 768 | 3 | 760 | 760 | 5 | 0 |
+| 1440 | 3 | 1432 | 1432 | 5 | 0 |
+
+`dpr` 3 = 1,5 (pantalla al 150 %) × 2 (el zoom nativo), medido contra la base tomada antes de
+ampliar. `scrollWidth == clientWidth` en los tres anchos: sin desplazamiento horizontal. Coincide
+fila a fila con la campaña anterior, que es lo esperable —quitar un byte del formato en reposo no
+cambia el pintado—, pero **ahora está medida sobre el árbol vigente**, que era justamente la
+objeción.
+
+`progress/ux_github_connector.md` queda actualizado con esta campaña y con la razón por la que la
+anterior no valía.
+
+### Lo que esto cierra del veredicto
+
+| Cambio requerido por el juez | Estado |
+| --- | --- |
+| 1 (BLOQUEANTE) `spec.mjs:168` → `String(12 + TOKEN.length + 16)` | **cerrado**: ya estaba en el árbol (`d418a5d`) y **verificado por ejecución**, no por lectura |
+| 2 (BLOQUEANTE) volver a pasar los dos specs sobre el árbol actual y regenerar la evidencia | **cerrado**: 16 de 16, `evidence.json` regenerado, matriz UX actualizada |
+| C6 «@s42 no revalidable» | **revalidado**: los dieciséis recorridos de @s42 pasan sobre el formato de hoy |
+
+El juez escribió (`:340`): «Cuando salga verde, esta feature está aprobada por mi parte: no tengo
+ninguna otra objeción pendiente.» Salió verde.

@@ -1969,3 +1969,44 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     );
   }
 });
+
+test("automations backend invokes only its fixed PIT scope", () => {
+  const { calls, project } = capture();
+  project("mutate", "automations-backend");
+  assert.deepEqual(calls, [
+    [
+      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+      ["pitest", "--no-daemon", "-PmutationScope=automations"],
+      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
+    ],
+  ]);
+});
+
+test("automations frontend runs only its Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "automations-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.automations.config.json",
+      ],
+    ],
+  ]);
+});
+
+test("automations Stryker configuration mutates only the feature files", () => {
+  const config = JSON.parse(
+    readFileSync(resolve(root, "frontend/stryker.automations.config.json"), "utf8"),
+  );
+  assert.deepEqual(config.mutate, [
+    "src/automations-api.ts",
+    "src/automations.tsx",
+  ]);
+  assert.equal(config.thresholds.break, 80);
+});

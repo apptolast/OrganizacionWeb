@@ -191,6 +191,54 @@ Feature en curso: 30 — automations. Escenarios a recorrer en fase 1: @s1–@s1
 - `ApplicationWiringTest` sigue en verde tras tocar la configuración compartida.
 - Focal verde: `AutomationWiringTest` 3/3, `ApplicationWiringTest` sin regresión.
 
+### Ciclos 12, 13, 14 — la interfaz (@s37, @s38, @s39, @s40, @s41, @s43)
+
+- **Ciclo 12 — cliente de la API**. Rojo: `automations-api.test.ts` (12 tests),
+  `Failed to resolve import "./automations-api"`. Verde: el módulo, que valida las
+  formas cerradas antes de creérselas, manda `If-Match`, y separa
+  `AutomationFieldErrors` (errors[] por campo) de `AutomationConflict` (412).
+  Focal verde 12/12, `tsc` limpio.
+- **Ciclo 13 — la página**. Rojo: `automations.test.tsx` (15 tests), import sin
+  resolver. Verde: `automations.tsx`. **Tres rojos legítimos** salieron del test:
+  el estado se pintaba dos veces (un `<span>` y el interruptor) y rompía la
+  lectura; «Cargar versión actual» cerraba el editor en vez de recargar la regla
+  dentro de él, que es lo que pide @s40; y la carga inicial llamaba a `setState`
+  de forma síncrona dentro de un efecto (`react-hooks/set-state-in-effect`), así
+  que se reescribió con el mismo patrón `.then()` que ya usa la lectura de
+  proyectos. Focal verde 15/15, `tsc` y ESLint limpios.
+- **Ciclo 14 — ruta y navegación**. Rojo: `automations-route.test.tsx` (3 tests),
+  sin encabezado ni enlace. Verde: rama de ruta en `App.tsx`, miembro de la unión
+  `section` y `RouteLink` en `workspace.tsx`, **tras** «API para integraciones»
+  como fija la propuesta, con «Hoy» intacto en cabeza.
+- **Toque entre carriles que el coordinador debe conocer**: tres tests hermanos
+  (`App.test.tsx`, `export-data.test.tsx`, `appearance.test.tsx`) anclaban su
+  aserción al **último** enlace del menú. Al añadir una entrada se desplazaron: se
+  corrigió el índice en uno, conservando exactamente su intención (el orden de esa
+  cola) y añadiendo la nueva entrada al final de cada cadena. Ninguna aserción se
+  debilitó. Verificado sin regresión en **los 21 ficheros de test que renderizan
+  `App` o `Workspace`**: 793 tests en verde.
+
+### Ciclo 15 — puertas de mutación y evidencia E2E
+
+- Ámbito PIT `automations` en `backend/build.gradle.kts` (dominio, casos de uso,
+  controlador, adaptadores y wiring), `frontend/stryker.automations.config.json`
+  con umbral 80 y los objetivos `automations-backend` y `automations-frontend` en
+  `scripts/project.mjs`, con tres tests nuevos en `scripts/project.test.mjs` que
+  fijan el ámbito, la configuración y los ficheros mutados. Los tres pasan.
+- **No se ha ejecutado ninguna mutación ni E2E**, por la disciplina de recursos
+  del carril. `e2e/automations.spec.mjs` queda **escrito y con sintaxis
+  verificada** (`node --check`) pero **sin ejecutar**: @s42 no está demostrado y
+  no debe darse por verde hasta que el coordinador le dé turno exclusivo.
+- **Tres fallos preexistentes en `scripts/project.test.mjs`** (targets
+  `integration_api-backend` / `integration_api-frontend` ausentes de la lista
+  blanca y rangos `línea:columna` de `stryker.appearance.config.json` ya
+  desalineados con `App.tsx`). Comprobado con `git stash` que fallaban **antes** de
+  tocar nada: 69 pasaban y 3 fallaban antes, 72 pasan y fallan los mismos 3 después.
+  No son míos, pero **mi inserción en `App.tsx` desplaza aún más esos rangos
+  fijados por línea** en las configuraciones Stryker de apariencia, exportación,
+  importación, historial e integraciones. Hay que volver a fijarlos en la
+  integración; no lo hago desde este carril porque son de sus dueños.
+
 ## Discrepancia de contrato pendiente de dictamen (@s30 vs @s32)
 
 @s30 dice que cada coincidencia contiene «exactamente eventId, eventType, occurredAt

@@ -73,6 +73,8 @@ export function createProject(runner = run) {
           "schedule_block-frontend",
           "schedule_block-frontend-replay",
           "export_data-persistence-backend",
+          "automations-backend",
+          "automations-frontend",
         ].includes(target))
     ) {
       throw new Error(`Invalid target: ${target}`);
@@ -83,6 +85,21 @@ export function createProject(runner = run) {
         [taskName, "--no-daemon", ...args],
         { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
       );
+    if (task === "mutate" && target === "automations-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.automations.config.json",
+      ]);
+      return;
+    }
+    if (task === "mutate" && target === "automations-backend") {
+      backend("pitest", ["-PmutationScope=automations"]);
+      return;
+    }
     if (task === "mutate" && target === "github_connector-frontend") {
       runner("pnpm", [
         "--dir",

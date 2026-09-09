@@ -39,6 +39,7 @@ pitest {
     val githubConnectorOnly = scope == "github_connector"
     val integrationApiOnly = scope == "integration_api"
     val integrationApiHttpOnly = scope == "integration_api_http"
+    val automationsOnly = scope == "automations"
     val importReaderOnly = scope == "import_data_reader"
     val importHttpOnly = scope == "import_data_http"
     val importPersistenceOnly = scope == "import_data_persistence"
@@ -460,7 +461,28 @@ pitest {
         "com.apptolast.organization.adapter.HistoryApiTest",
         "com.apptolast.organization.adapter.persistence.History*Test"
     )
+    val automationsClasses = setOf(
+        "com.apptolast.organization.domain.Automation*",
+        "com.apptolast.organization.domain.CreateTaskAction*",
+        "com.apptolast.organization.domain.NotifyWebhookAction*",
+        "com.apptolast.organization.domain.EventProject*",
+        "com.apptolast.organization.domain.EventTask*",
+        "com.apptolast.organization.domain.TemplateValues*",
+        "com.apptolast.organization.domain.UnknownEventTypeException*",
+        "com.apptolast.organization.application.Automation*",
+        "com.apptolast.organization.application.CreateAutomation*",
+        "com.apptolast.organization.application.ReadAutomation*",
+        "com.apptolast.organization.application.ReplaceAutomation*",
+        "com.apptolast.organization.application.DeleteAutomation*",
+        "com.apptolast.organization.application.SimulateAutomation*",
+        "com.apptolast.organization.application.WebhookEndpoint*",
+        "com.apptolast.organization.adapter.http.Automation*",
+        "com.apptolast.organization.adapter.persistence.PostgresAutomation*",
+        "com.apptolast.organization.adapter.persistence.AutomationActionJson*",
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration"
+    )
     targetClasses.set(when {
+        automationsOnly -> automationsClasses
         icsCalendarOnly -> icsCalendarClasses
         githubConnectorOnly -> githubConnectorClasses
         integrationApiOnly -> integrationApiClasses
@@ -486,9 +508,10 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses + integrationApiClasses + integrationApiHttpClasses + icsCalendarClasses + githubConnectorClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses + integrationApiClasses + integrationApiHttpClasses + icsCalendarClasses + githubConnectorClasses + automationsClasses
     })
     targetTests.set(when {
+        automationsOnly -> setOf("com.apptolast.organization.*")
         icsCalendarOnly -> setOf("com.apptolast.organization.*")
         githubConnectorOnly -> setOf("com.apptolast.organization.*")
         integrationApiOnly || integrationApiHttpOnly -> setOf("com.apptolast.organization.*")
@@ -519,6 +542,7 @@ pitest {
     if (githubConnectorOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-github-connector"))
     if (integrationApiOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-integration-api"))
     if (integrationApiHttpOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-integration-api-http"))
+    if (automationsOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-automations"))
     if (importReaderOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-reader"))
     if (importHttpOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-http"))
     if (importPersistenceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-persistence"))

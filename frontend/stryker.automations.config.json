@@ -3,7 +3,14 @@
   "testRunner": "vitest",
   "plugins": ["@stryker-mutator/vitest-runner"],
   "ignorePatterns": [".stryker-tmp-availability-replay"],
-  "mutate": ["src/automations-api.ts", "src/automations.tsx"],
+  "mutate": [
+    "src/App.tsx:47:8-47:51",
+    "src/App.tsx:55:8-56:30",
+    "src/App.tsx:84:7-85:40",
+    "src/workspace.tsx:128:10-133:22",
+    "src/automations-api.ts",
+    "src/automations.tsx"
+  ],
   "reporters": ["clear-text", "json", "html", "progress-append-only"],
   "thresholds": {
     "high": 90,

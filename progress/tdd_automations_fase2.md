@@ -85,3 +85,44 @@ se ha vuelto a pedir (2 GET) y que no queda nada en `localStorage` ni en
 `sessionStorage`.
 
 **Estado: cerrado.**
+
+---
+
+## Hallazgo 11 [MEDIA] — el ámbito de mutación dejaba fuera la integración con el armazón
+
+**Qué faltaba.** `frontend/stryker.automations.config.json` mutaba sólo
+`src/automations-api.ts` y `src/automations.tsx`. La feature también añadió
+producción en `src/App.tsx` (predicado de ruta, rama del ternario `section`,
+rama de render) y en `src/workspace.tsx` (el `RouteLink` con su
+`aria-current`), y ninguna configuración invocable las mutaba.
+`docs/mutation-testing.md` exige el umbral sobre las líneas nuevas o tocadas.
+
+**Ciclo.**
+
+1. ROJO: añadida al guardarraíl `automations Stryker configuration mutates only
+   the feature files` de `scripts/project.test.mjs` la lista de seis entradas y
+   la validación por contenido de los cuatro rangos.
+   `node --test scripts/project.test.mjs` → `not ok 88 … Expected values to be
+   strictly deep-equal`, con los cuatro rangos ausentes de la configuración.
+2. VERDE: los cuatro rangos añadidos a la configuración. 94/94.
+
+**Rangos, con la convención de `stryker.ics-calendar.config.json`** (columna
+inicial 0-indexada, columna final excluyente, sin el punto y coma final):
+`src/App.tsx:47:8-47:51`, `src/App.tsx:55:8-56:30`, `src/App.tsx:84:7-85:40`,
+`src/workspace.tsx:128:10-133:22`. El guardarraíl los recorta del fichero real
+y comprueba que empiezan por `automations = route`, `automations`,
+`automations && username` y `<RouteLink`, y que contienen
+`/automatizaciones`, `Automatizaciones`, `<Automations owner={username} />` y
+`/automatizaciones`. Así un desplazamiento de `App.tsx` rompe la prueba en vez
+de mutar en silencio otra pantalla.
+
+**Fichero compartido tocado** (REGLAS.md §6): `scripts/project.test.mjs`, sólo
+dentro del `test(...)` de automations. Punto de conflicto probable en la
+integración.
+
+**Deuda de lote anotada, fuera de mi ámbito:** `stryker.external-calendar`,
+`stryker.github-connector` y la feature 25 (sin configuración ni destino de
+mutación frontend) tienen la misma omisión.
+
+**Estado: cerrado.** No se ejecuta la campaña: el coordinador lo prohibió por
+plazo y carga de máquina.

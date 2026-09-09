@@ -2,11 +2,15 @@ package com.apptolast.organization.application;
 
 import static org.assertj.core.api.Assertions.*;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.apptolast.organization.domain.*;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -71,6 +75,41 @@ class ExecuteAutomationsTest {
   private final Clock clock = Clock.fixed(T0.plusSeconds(3600), ZoneOffset.UTC);
   private final ExecuteAutomations execute =
       new ExecuteAutomations(work, rules, matcher, facts, endpoints, clock);
+
+  private final ListAppender<ILoggingEvent> appender = new ListAppender<>();
+  private final ch.qos.logback.classic.Logger logger =
+      (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(ExecuteAutomations.class);
+
+  @BeforeEach
+  void captureTheLog() {
+    appender.start();
+    logger.addAppender(appender);
+  }
+
+  @AfterEach
+  void releaseTheLog() {
+    logger.detachAppender(appender);
+  }
+
+  @Test
+  void s19_theLogNamesTheRunByItsIdentifiersAndNeverByTheTitleOrTheProjectName() {
+    givenARuleThatCreatesTasks();
+    var rule = rules.list(OWNER).getFirst();
+    work.cursors.put(OWNER, new AutomationCursor(T0, E0));
+    work.outbox.add(taskCreated(E1, T0.plusSeconds(1)));
+
+    execute.runCycle();
+
+    assertThat(logged())
+        .contains(rule.id().toString(), E1.toString(), "succeeded", "attempt=1", "code=null")
+        .doesNotContain("Redactar informe", "Marketing");
+  }
+
+  private String logged() {
+    return appender.list.stream()
+        .map(ILoggingEvent::getFormattedMessage)
+        .collect(java.util.stream.Collectors.joining("\n"));
+  }
 
   @Test
   void s15_aCycleExecutesEveryEventAfterTheCursorAndLeavesTheCursorAtTheLast() {

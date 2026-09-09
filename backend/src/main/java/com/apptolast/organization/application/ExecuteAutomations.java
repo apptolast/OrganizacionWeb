@@ -11,9 +11,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Walks each owner's outbox and turns the events their rules match into runs and effects. */
 public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
+  private static final Logger LOG = LoggerFactory.getLogger(ExecuteAutomations.class);
+
   private static final String SUCCEEDED = "succeeded";
   private static final String FAILED = "failed";
   private static final String ENDPOINT_NOT_FOUND = "ENDPOINT_NOT_FOUND";
@@ -80,16 +84,33 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
             : firedBy(owner, candidate);
     try {
       work.commit(new AutomationCommit(owner, reachedBy(event), outcomes));
+      outcomes.forEach(ExecuteAutomations::log);
       return true;
     } catch (RuntimeException failure) {
       // Whatever broke the confirmation, from here it is one thing: the write did not happen.
       // Stranding an owner behind an unexpected failure would be worse than one coarse code.
       var rows = outcomes.stream().map(ExecuteAutomations::unavailable).toList();
       rows.forEach(work::record);
+      rows.forEach(row -> log(new AutomationOutcome(row, new AutomationEffect.None())));
       // An event with nothing left open no longer holds the walk back: only the cursor lags, and
       // the next cycle fixes that when it reads the event again and finds every rule settled.
       return !rows.isEmpty() && rows.stream().noneMatch(row -> RETRY.equals(row.status()));
     }
+  }
+
+  /**
+   * Identifiers only. A rendered title and a project name are the owner's content, and the worker
+   * log is not the place for them.
+   */
+  private static void log(AutomationOutcome outcome) {
+    var run = outcome.run();
+    LOG.info(
+        "Automation run; ruleId={} eventId={} outcome={} attempt={} code={}",
+        run.ruleId(),
+        run.eventId(),
+        run.status(),
+        run.attempt(),
+        run.errorCode());
   }
 
   /** The only row that survives a rolled back confirmation, written outside it. */

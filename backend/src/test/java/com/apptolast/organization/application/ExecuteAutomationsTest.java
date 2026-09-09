@@ -73,9 +73,32 @@ class ExecuteAutomationsTest {
     assertThat(work.cursors.get(OWNER)).isEqualTo(new AutomationCursor(T0.plusSeconds(2), E2));
   }
 
+  @Test
+  void s16_theFirstRuleStartsTheCursorAtItsOwnInstantAndLeavesTheFortyEarlierEventsAlone() {
+    work.owners.add(OWNER);
+    rules.create(OWNER, ruleAt(taskAction(), T0));
+    for (int age = 1; age <= 40; age++)
+      work.outbox.add(taskCreated(numbered(age), T0.minusSeconds(age)));
+    var e41 = numbered(41);
+    work.outbox.add(taskCreated(e41, T0.plusSeconds(1)));
+
+    execute.runCycle();
+
+    assertThat(work.started)
+        .containsExactly(new AutomationCursor(T0, AutomationCursor.START))
+        .as("the cursor of a brand new owner starts at the instant of their first rule");
+    assertThat(work.runs()).extracting(AutomationRun::eventId).containsExactly(e41);
+    assertThat(work.createdTasks()).hasSize(1);
+    assertThat(work.cursors.get(OWNER)).isEqualTo(new AutomationCursor(T0.plusSeconds(1), e41));
+  }
+
   private void givenARuleThatCreatesTasks() {
     work.owners.add(OWNER);
     rules.create(OWNER, rule(taskAction()));
+  }
+
+  private static UUID numbered(int index) {
+    return UUID.fromString("00000000-0000-4000-8000-%012d".formatted(index));
   }
 
   private static CreateTaskAction taskAction() {
@@ -83,12 +106,16 @@ class ExecuteAutomationsTest {
   }
 
   private static AutomationRule rule(AutomationAction action) {
+    return ruleAt(action, CREATED);
+  }
+
+  private static AutomationRule ruleAt(AutomationAction action, Instant createdAt) {
     return new AutomationRule(
         UUID.randomUUID(),
         new AutomationDraft("R", true, "TaskCreated.v1", null, action),
         1,
-        CREATED,
-        CREATED);
+        createdAt,
+        createdAt);
   }
 
   private static AutomationCandidate taskCreated(UUID eventId, Instant occurredAt) {
@@ -110,6 +137,7 @@ class ExecuteAutomationsTest {
     final List<AutomationCandidate> outbox = new ArrayList<>();
     final List<AutomationCommit> commits = new ArrayList<>();
     final List<AutomationRun> recorded = new ArrayList<>();
+    final List<AutomationCursor> started = new ArrayList<>();
 
     @Override
     public List<String> ownersWithRules() {
@@ -123,6 +151,7 @@ class ExecuteAutomationsTest {
 
     @Override
     public void startCursor(String owner, AutomationCursor present) {
+      started.add(present);
       cursors.put(owner, present);
     }
 

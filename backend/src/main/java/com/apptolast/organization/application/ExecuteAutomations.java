@@ -6,6 +6,8 @@ import com.apptolast.organization.domain.AutomationRule;
 import com.apptolast.organization.domain.AutomationRun;
 import com.apptolast.organization.domain.CreateTaskAction;
 import java.time.Clock;
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.UUID;
 
 /** Walks each owner's outbox and turns the events their rules match into runs and effects. */
@@ -41,7 +43,22 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
 
   private void walk(String owner) {
     work.cursor(owner)
+        .or(() -> startCursorOf(owner))
         .ifPresent(cursor -> work.after(owner, cursor).forEach(row -> process(owner, row)));
+  }
+
+  /**
+   * An owner with no cursor starts at the instant of their oldest rule, never at the beginning of
+   * the outbox: rules answer for what happens after they exist, never for the account's history.
+   */
+  private Optional<AutomationCursor> startCursorOf(String owner) {
+    var start =
+        rules.list(owner).stream()
+            .map(AutomationRule::createdAt)
+            .min(Comparator.naturalOrder())
+            .map(oldest -> new AutomationCursor(oldest, AutomationCursor.START));
+    start.ifPresent(cursor -> work.startCursor(owner, cursor));
+    return start;
   }
 
   private void process(String owner, AutomationCandidate candidate) {

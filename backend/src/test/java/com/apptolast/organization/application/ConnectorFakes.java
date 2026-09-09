@@ -241,6 +241,11 @@ final class ConnectorFakes {
           .max(java.util.Comparator.comparing(IssueImportReceipt::startedAt));
     }
 
+    @Override
+    public boolean importing(String ownerId, Instant staleBefore) {
+      return running(ownerId).filter(row -> !row.startedAt().isBefore(staleBefore)).isPresent();
+    }
+
     private Optional<IssueImportReceipt> running(String ownerId) {
       return rows.values().stream()
           .filter(row -> ownerId.equals(owners.get(row.id())) && "running".equals(row.status()))

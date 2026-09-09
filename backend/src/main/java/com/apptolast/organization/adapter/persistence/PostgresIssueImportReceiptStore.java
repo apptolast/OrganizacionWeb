@@ -167,6 +167,19 @@ public final class PostgresIssueImportReceiptStore implements IssueImportReceipt
                 .findFirst());
   }
 
+  @Override
+  public boolean importing(String ownerId, Instant staleBefore) {
+    return guarded(
+        () ->
+            Boolean.TRUE.equals(
+                jdbc.queryForObject(
+                    "SELECT EXISTS(SELECT 1 FROM issue_import_receipts"
+                        + " WHERE owner_id=? AND status='running' AND started_at >= ?)",
+                    Boolean.class,
+                    ownerId,
+                    Timestamp.from(staleBefore))));
+  }
+
   private Optional<IssueImportReceipt> read(String ownerId, UUID importId) {
     return jdbc
         .query(

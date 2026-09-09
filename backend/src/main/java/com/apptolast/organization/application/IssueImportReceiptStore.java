@@ -34,4 +34,11 @@ public interface IssueImportReceiptStore {
 
   /** El recibo más reciente del propietario para ese gestor, que es su última actividad. */
   Optional<IssueImportReceipt> latest(String ownerId, String source);
+
+  /**
+   * {@code true} si el propietario tiene una importación en curso que no está abandonada. Es el
+   * mismo guardián que arbitra {@code begin}, expuesto para las operaciones que no importan pero
+   * tampoco pueden ocurrir a la vez que una importación, como sustituir o soltar la conexión.
+   */
+  boolean importing(String ownerId, Instant staleBefore);
 }

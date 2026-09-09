@@ -22,10 +22,12 @@ class GitlabConnectionUseCasesTest {
   private static final String TOKEN = "glpat-xxxxxxxxxxxxxxxxWXYZ";
 
   private GitlabFakes fakes;
+  private ConnectorFakes.FakeReceipts receipts;
 
   @BeforeEach
   void setUp() {
     fakes = new GitlabFakes();
+    receipts = new ConnectorFakes.FakeReceipts();
   }
 
   private ReadGitlabConnectionUseCase read() {
@@ -135,7 +137,8 @@ class GitlabConnectionUseCasesTest {
   }
 
   private DisconnectGitlabUseCase disconnect() {
-    return new DisconnectGitlab(fakes.connections, fakes.cipher);
+    return new DisconnectGitlab(
+        fakes.connections, receipts, fakes.cipher, Clock.fixed(NOW, ZoneOffset.UTC));
   }
 
   @Test
@@ -183,6 +186,40 @@ class GitlabConnectionUseCasesTest {
     assertTrue(fakes.connections.find(OWNER).isEmpty());
   }
 
+  // -------------------------------------------- @s27 @s28 una sola importación por persona
+
+  @Test
+  void s27_aRunningImportOfEitherSourceBlocksConnectingAndDisconnectingGitlab() {
+    fakes.connections.put(OWNER, connected());
+    fakes.projects.accept("grupo/proyecto", 4821L);
+    receipts.seedRunning(OWNER, "github", NOW.minusSeconds(120));
+
+    assertThrows(
+        IssueImportInProgressException.class,
+        () -> connect().execute(OWNER, TOKEN, "grupo/proyecto"));
+    assertThrows(IssueImportInProgressException.class, () -> disconnect().execute(OWNER));
+
+    assertNull(fakes.projects.verifiedPath());
+    assertTrue(fakes.connections.find(OWNER).isPresent());
+  }
+
+  @Test
+  void s28_anAbandonedRunningImportStopsBlockingAfterFifteenMinutes() {
+    fakes.connections.put(OWNER, connected());
+    fakes.projects.accept("grupo/proyecto", 4821L);
+    receipts.seedRunning(OWNER, "gitlab", NOW.minusSeconds(16 * 60));
+
+    assertEquals("connected", connect().execute(OWNER, TOKEN, "grupo/proyecto").status());
+  }
+
+  @Test
+  void s28_aRunningImportOfFourteenMinutesStillBlocks() {
+    fakes.connections.put(OWNER, connected());
+    receipts.seedRunning(OWNER, "gitlab", NOW.minusSeconds(14 * 60));
+
+    assertThrows(IssueImportInProgressException.class, () -> disconnect().execute(OWNER));
+  }
+
   // ------------------------------------------------------- @s29 sin clave de conectores
 
   @Test
@@ -203,7 +240,12 @@ class GitlabConnectionUseCasesTest {
 
   private ConnectGitlabUseCase connect() {
     return new ConnectGitlab(
-        fakes.connections, fakes.projects, API_BASE, fakes.cipher, Clock.fixed(NOW, ZoneOffset.UTC));
+        fakes.connections,
+        fakes.projects,
+        receipts,
+        API_BASE,
+        fakes.cipher,
+        Clock.fixed(NOW, ZoneOffset.UTC));
   }
 
   private static GitlabConnection connected() {

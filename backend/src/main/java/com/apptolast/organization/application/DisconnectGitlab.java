@@ -7,16 +7,25 @@ package com.apptolast.organization.application;
  */
 public final class DisconnectGitlab implements DisconnectGitlabUseCase {
   private final GitlabConnectionStore connections;
+  private final IssueImportReceiptStore receipts;
   private final SecretCipher cipher;
+  private final java.time.Clock clock;
 
-  public DisconnectGitlab(GitlabConnectionStore connections, SecretCipher cipher) {
+  public DisconnectGitlab(
+      GitlabConnectionStore connections,
+      IssueImportReceiptStore receipts,
+      SecretCipher cipher,
+      java.time.Clock clock) {
     this.connections = connections;
+    this.receipts = receipts;
     this.cipher = cipher;
+    this.clock = clock;
   }
 
   @Override
   public void execute(String ownerId) {
     if (!cipher.enabled()) throw new ConnectorsDisabledException();
+    ImportGuard.requireIdle(receipts, ownerId, clock);
     connections.delete(ownerId);
   }
 }

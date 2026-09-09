@@ -19,6 +19,7 @@ public final class ConnectGitlab implements ConnectGitlabUseCase {
 
   private final GitlabConnectionStore connections;
   private final GitlabProjectDirectory directory;
+  private final IssueImportReceiptStore receipts;
   private final String apiBase;
   private final SecretCipher cipher;
   private final Clock clock;
@@ -26,11 +27,13 @@ public final class ConnectGitlab implements ConnectGitlabUseCase {
   public ConnectGitlab(
       GitlabConnectionStore connections,
       GitlabProjectDirectory directory,
+      IssueImportReceiptStore receipts,
       String apiBase,
       SecretCipher cipher,
       Clock clock) {
     this.connections = connections;
     this.directory = directory;
+    this.receipts = receipts;
     this.apiBase = apiBase;
     this.cipher = cipher;
     this.clock = clock;
@@ -40,6 +43,7 @@ public final class ConnectGitlab implements ConnectGitlabUseCase {
   public GitlabConnectionView execute(String ownerId, String token, String projectPath) {
     if (!cipher.enabled()) throw new ConnectorsDisabledException();
     var path = GitlabProjectPath.parse(projectPath);
+    ImportGuard.requireIdle(receipts, ownerId, clock);
     var secret = PersonalAccessToken.upTo(TOKEN_LIMIT, token);
     var project = verify(path, secret);
     var row =

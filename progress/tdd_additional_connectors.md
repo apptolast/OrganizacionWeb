@@ -96,7 +96,7 @@ Leyenda de la columna **estado**:
 | `@s29` | sin clave, `CONNECTORS_DISABLED` sin tocar nada | cerrado | `GitlabConnectionUseCasesTest:253`; `GitlabConnectorApiTest:458`; `GitlabConnectorWiringTest:63` |
 | `@s30` | el recibo ajeno equivale al inexistente | cerrado | `GitlabConnectorApiTest:421,431` |
 | `@s31` | sesión, CSRF y origen en todas las rutas | parcial | las de GitLab: `GitlabConnectorApiTest:480,488,507,522`. Las dos filas de `GET /api/v1/me/connectors` dependen de la mitad B |
-| `@s32` | el token nunca sale salvo en `PRIVATE-TOKEN` | parcial | cada ruta comprueba por su cuenta que no lo devuelve (`GitlabConnectorApiTest:211`, `HttpGitlabIssueSourceTest:57`, `GitlabConnectorPersistenceTest:138`). Falta el barrido único del escenario: logs de la aplicación en el mismo caso y `localStorage`/`sessionStorage`/cookies del navegador |
+| `@s32` | el token nunca sale salvo en `PRIVATE-TOKEN` | parcial (server cerrado) | el barrido único, con la auditoría real: `GitlabTokenConfinementTest` (4 pruebas). Falta **sólo** la última línea del escenario, la del navegador, que necesita el formulario de `@s34` |
 | `@s33` | pantalla `/conectores` | abierto | — (sin producción; mitad B) |
 | `@s34` | `/conectores/gitlab` sin conexión | abierto | — (sin producción de frontend) |
 | `@s35` | pantalla con conexión existente | abierto | — (sin producción de frontend) |
@@ -105,7 +105,8 @@ Leyenda de la columna **estado**:
 | `@s38` | responsive, texto ampliado, teclado y axe | abierto | — (sin producción de frontend) |
 
 **Recuento: 24 escenarios cerrados de 38** (20 al abrir la sesión, más `@s26`,
-`@s16`, `@s22` y `@s21`). Quedan 4 parciales, todos bloqueados por
+`@s16`, `@s22` y `@s21`). `@s32` queda cerrado por el lado del servidor y
+pendiente sólo de su línea del navegador, así que no se cuenta como cerrado. Quedan 4 parciales, todos bloqueados por
 el catálogo (`@s2`, `@s4`, `@s5`, `@s31`: su mitad de GitLab está cerrada y les
 falta la mitad de `GET /api/v1/me/connectors`), 1 parcial de seguridad (`@s32`,
 falta el barrido único con logs y almacenamiento del navegador) y 9 abiertos
@@ -129,8 +130,7 @@ que quedarse con la columna de la izquierda, no con el nombre del método.
 
 Por orden de coste creciente:
 
-1. `@s32` como barrido único incluyendo logs (frontera HTTP).
-2. `@s33`…`@s38`: la pantalla entera, que hoy no existe. Es la mitad del
+1. `@s33`…`@s38`: la pantalla entera, que hoy no existe. Es la mitad del
    trabajo que queda.
 3. `@s1`…`@s7` y `@s33`: el catálogo (mitad B), bloqueado hasta que 25, 26, 28
    y 30 estén integradas. Cerrarlo cierra de paso las cuatro parciales.
@@ -225,6 +225,36 @@ matara filas distintas de la tabla:
 
 Commits `c27a166`, `afb3a6e`, `b09e01a`.
 
+### El bloqueo del catálogo, revisado (la premisa había caducado a medias)
+
+La bitácora decía que la mitad B estaba bloqueada «hasta que 25, 26, 28 y 30
+estén integradas». **Eso ya no es cierto** y conviene no repetirlo: sus puertos
+están en `main` y se pueden usar hoy mismo desde
+`backend/src/main/java/com/apptolast/organization/application/`:
+`ApiCredentialQueries.java` (24), `WebhookDeliveries.java` y
+`EnqueueWebhookDeliveries.java` (25), `CalendarFeedTokens.java` y
+`CalendarFeedStatus.java` (26), `ExternalCalendarStore.java` (28), y para 29 el
+propio `GitlabConnectionStore` con `IssueImportReceiptStore`.
+
+Lo que bloquea de verdad a `@s2`, `@s4`, `@s5` y `@s31` es más simple y más
+caro: **el endpoint del catálogo no existe**. La evidencia, exacta:
+
+- No hay ningún caso de uso de catálogo en `application/`: el único fichero que
+  responde a `grep -i catalog` es `ZoneCatalog.java`, que no tiene relación.
+- No hay ninguna ruta `/api/v1/me/connectors` a secas. Las dos únicas
+  declaraciones son de subrecursos:
+  `adapter/http/GithubConnectorController.java:35` y
+  `adapter/http/GitlabConnectorController.java:38`, ambas con el sufijo del
+  gestor.
+
+Es decir: no es una espera, es trabajo por hacer. Y no es pequeño, porque `@s2`
+son doce filas y cada una deriva su estado de una fuente distinta, con las
+reglas de `@s3` (sin `APP_CONNECTOR_KEY`, las que cifran salen `disabled` sin
+intentar descifrar) y `@s6` (leer el catálogo no llama a terceros ni escribe)
+encima. Por eso no se ha empezado en los minutos que quedaban: a medias vale
+cero. Quien lo retome tiene arriba la lista de puertos y aquí la lista de lo
+que falta.
+
 ## Estado al cerrar la sesión del carril
 
 - El árbol **compila** (`compileJava` + `compileTestJava`, sin contenedores).
@@ -233,6 +263,9 @@ Commits `c27a166`, `afb3a6e`, `b09e01a`.
   todo el cambio vive en `backend/src/**` de GitLab, en `ImportIssues`
   (compartido con 27, pero restaurado a su forma original) y en este `progress/`.
 - `feature_list.json` sigue en `spec_ready`, como debe: quedan 14 escenarios
-  sin oráculo propio y la pantalla entera sin escribir.
-- `ImportIssues` y `ExternalIssue` se mutaron para acreditar rojos y se
-  restauraron byte a byte; `git diff` contra ambos queda vacío.
+  sin oráculo propio, el catálogo sin escribir y la pantalla entera sin escribir.
+- `ImportIssues`, `ExternalIssue` y `PersonalAccessToken` se mutaron para
+  acreditar rojos y se restauraron byte a byte; `git diff` contra los tres queda
+  vacío. **Ninguna línea de producción se ha modificado en esta sesión salvo el
+  ciclo de `@s15`**: todo lo demás son oráculos nuevos sobre producción que ya
+  estaba escrita.

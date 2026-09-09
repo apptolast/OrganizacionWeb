@@ -308,7 +308,7 @@
         "Cumplir @s1–@s42 de features/github_connector.feature con revisión, pruebas y mutación antes del cierre."
       ],
       "sdd": true,
-      "status": "spec_ready"
+      "status": "in_progress"
     },
     {
       "id": 28,

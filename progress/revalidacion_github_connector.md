@@ -224,3 +224,166 @@ anterior no valía.
 
 El juez escribió (`:340`): «Cuando salga verde, esta feature está aprobada por mi parte: no tengo
 ninguna otra objeción pendiente.» Salió verde.
+
+---
+
+## Paso 4 — Las clases de backend que el cambio de formato toca
+
+Por clase concreta y **nunca más de dos por invocación**, según `progress/carriles/REGLAS.md:24`.
+Ruta absoluta a `gradlew.bat`, `--no-daemon`.
+
+### Tanda A — cifrado y cableado
+
+    gradlew.bat test --tests "...adapter.connectors.AesGcmSecretCipherTest" \
+                     --tests "...adapter.config.GithubConnectorWiringTest" --no-daemon
+    BUILD SUCCESSFUL in 29s
+
+| Clase | Pruebas | Fallos | Errores | Omitidas | Tiempo |
+| --- | --- | --- | --- | --- | --- |
+| `AesGcmSecretCipherTest` | **18** | 0 | 0 | 0 | 0,054 s |
+| `GithubConnectorWiringTest` | **15** | 0 | 0 | 0 | 0,152 s |
+
+**33 en verde.** Cifras leídas de los XML de `build/test-results/test/`, no del resumen.
+
+Son las dos clases que fijan el formato en reposo por número:
+`AesGcmSecretCipherTest:38` afirma `assertEquals(12 + TOKEN.length() + 16, sealed.length)` y
+`GithubConnectorWiringTest:46` afirma `hasSize(12 + "ghp_secreto123".length() + 16)` —que es
+literalmente el `12 + 14 + 16` del contrato de @s1—. Ambas verdes: el productor y los dos oráculos
+del formato coinciden.
+
+### Tanda B — persistencia y caso de uso
+
+    gradlew.bat test --tests "...adapter.persistence.GithubConnectorPersistenceTest" \
+                     --tests "...application.ConnectGithubTest" --no-daemon
+
+    BUILD SUCCESSFUL in 30s
+
+| Clase | Pruebas | Fallos | Errores | Omitidas | Tiempo |
+| --- | --- | --- | --- | --- | --- |
+| `GithubConnectorPersistenceTest` | **26** | 0 | 0 | 0 | 12,922 s (PostgreSQL real) |
+| `ConnectGithubTest` | **16** | 0 | 0 | 0 | 0,341 s |
+
+**42 en verde.** `GithubConnectorPersistenceTest` es la que escribe contra la columna con el `CHECK`
+de `octet_length` y contra PostgreSQL de verdad: si la cota del `CHECK` chocara con lo que la
+aplicación guarda, saltaría aquí. No salta, y el porqué está en el paso 1 (usa un relleno de 43
+octetos, dentro de la cota, porque mide persistencia y no cifrado).
+
+`ConnectGithubTest` es la que cierra el círculo sin depender de longitudes: cifra, descifra de ida y
+vuelta, exige que el propietario ajeno **no** pueda descifrar (el AAD) y que dos escrituras del mismo
+token den textos cifrados distintos (el nonce nuevo por escritura). Verde.
+
+**Total del paso 4: 75 pruebas de backend, 75 verdes, 0 fallos, 0 errores, 0 omitidas.**
+Ninguna suite completa: cuatro clases en dos invocaciones, un solo contenedor PostgreSQL vivo por
+tanda.
+
+---
+
+## Paso 5 — La nota menor del `headless: false`: no se toca, y aquí está el porqué
+
+El juez la marcó **no bloqueante** (`:176-178`): `headless: false` y `channel: "chromium"` hacen la
+prueba de zoom dependiente de un entorno gráfico.
+
+**No la cambio, y el motivo no es la prisa: es que el cambio destruiría lo que la prueba mide.**
+
+El zoom nativo se aplica con `chrome.tabs.setZoom` desde una extensión MV3 efímera, y esa es la
+única forma de ampliar **de verdad**: `deviceScaleFactor` cambia la densidad de píxeles pero no
+produce el reflujo que @s42 quiere medir —«sin desplazamiento horizontal ni contenido recortado» a
+320 px con zoom 200 %—. Una extensión con `background.service_worker` y permiso `tabs` necesita un
+proceso de navegador real; el `--window-size` de 1440×1000 y la medida del cromo de la ventana
+(`width * 2 + chrome_`) también dependen de que haya ventana. Quitar `headless: false` convertiría
+una prueba que hoy **falla ruidosamente si el zoom no se aplica** (`expect(zoom).toBe(2)` sobre lo
+que devuelve `chrome.tabs.getZoom`) en una que no podría aplicarlo: el remedio sería peor que la
+nota.
+
+Tres hechos que acotan el riesgo real:
+
+1. **Es el precedente del repositorio, no una excepción**: `e2e/reschedule-native-zoom.spec.mjs`
+   paga el mismo precio por la misma razón, y el javadoc de la spec lo declara (`:13-16`).
+2. **Se ejecuta de verdad y no se salta en silencio**: no hay `test.skip`, ni `fixme`, ni condición
+   sobre `project.name`. Si no hay entorno gráfico, **falla**; no pasa fingiendo.
+3. **Está medida hoy, dos veces**: 12,2 s en la primera campaña y 7,1 s en la segunda, con
+   `evidence.json` regenerado.
+
+Si el CI acaba sin entorno gráfico, la decisión correcta no es volverla headless —perdería el
+oráculo— sino darle etiqueta propia y un runner con pantalla. Eso es política de pipeline, no de
+esta feature, y queda anotado para el orquestador.
+
+---
+
+## Paso 6 — `bin/harness init`: **deliberadamente no ejecutado**
+
+El juez dejó constancia (`:321`, `:357`) de que no llegó a ejecutarlo por la restricción de
+recursos, y lo dejó como puerta pendiente del cierre de sesión.
+
+**Yo tampoco lo ejecuto, y es una decisión, no un olvido.** `bin/harness init` arrastra la suite
+completa: **49 clases de test con su propio `PostgreSQLContainer` estático**, es decir 49
+contenedores PostgreSQL vivos a la vez. Hay **cuatro carriles más** trabajando en esta misma máquina
+ahora mismo, y `progress/carriles/REGLAS.md:7-11` lo prohíbe explícitamente por escrito: el 8 de
+septiembre siete carriles simultáneos dieron **rendimiento cero** por saturación con 130-170
+contenedores.
+
+**Le corresponde al orquestador, al integrar, con la máquina para él.** Los checkpoints C1 y C4
+siguen, por tanto, sin marcar por la misma razón por la que el juez no los marcó, y no por falta de
+cobertura.
+
+---
+
+## Mutación: **no ejecutada**, por instrucción expresa del coordinador
+
+Mi encargo original pedía reejecutar las dos campañas de mutación de la feature 27 (backend y
+frontend, umbral 0,80) sobre el árbol actual. **El coordinador retiró ese punto en mitad del
+trabajo**, con estas palabras: «**NO ejecutes campañas de mutación**: tardan demasiado y las corre el
+orquestador después.»
+
+Así que **no tengo dos puntuaciones de mutación que dar, y no las invento**. Lo que sí puedo dejar
+acotado para quien las corra:
+
+- **Siguen haciendo falta.** El razonamiento del juez sobre la campaña E2E vale igual aquí: las
+  campañas de mutación anteriores se midieron sobre el formato con byte de versión. Un mutante que
+  toque el desplazamiento del nonce o el corte del sellado en `AesGcmSecretCipher` se mata hoy con
+  aserciones distintas de las de entonces.
+- **Hay un aviso que el que las corra debe leer antes**: `progress/auditoria_colisiones_25_28_30.md`
+  documenta que `backend/build.gradle.kts` nombra en `targetClasses` dos globs muertos
+  (`...adapter.crypto.AesGcmSecretCipher*` y `...adapter.crypto.ConnectorCipher*`) que **ya no casan
+  con ninguna clase**: la unificación movió el adaptador a `adapter.connectors`. Si el alcance del
+  conector arrastra ese mismo error, la campaña saldría con una puntuación cómoda **sin generar un
+  solo mutante del cifrador**, que es justamente la clase que el cambio de formato tocó. Una
+  puntuación alta sobre cero mutantes no es una puerta: es un espejismo. Conviene comprobar el
+  recuento de mutantes generados, no sólo el porcentaje.
+
+**Puerta C7: pendiente**, correctamente después de ésta, tal como el juez la ordenó.
+
+---
+
+## Resumen para el juez
+
+| Lo que exigías | Cómo queda |
+| --- | --- |
+| BLOQUEANTE 1 — la constante de 48 octetos | **cerrado y verificado ejecutando** |
+| BLOQUEANTE 2 — los dos specs verdes sobre el árbol actual | **cerrado: 16 de 16, 2,2 min** |
+| Menor — nota del `headless: false` | **razonado por escrito**: no se toca porque el cambio destruiría el oráculo del zoom |
+| Menor — cota del `CHECK` de `V25` | **recalculada (29–283) y documentada**; no se aplica aquí porque exige migración nueva y colisionaría con otros carriles |
+| `bin/harness init` | **no ejecutado a propósito**; es del orquestador |
+| Mutación | **no ejecutada**: el coordinador la retiró del encargo y la corre él |
+
+Números medidos hoy, ninguno declarado de memoria:
+
+- **E2E**: 16 pruebas, **16 verdes**, 0 rojas, 2,2 min, `retries: 0`, un worker, puerto 18096.
+- **Backend**: 4 clases, 75 pruebas, **75 verdes**, 0 fallos, 0 errores.
+- **Zoom**: `dpr` 3 en 320/768/1440, `scrollWidth == clientWidth` en los tres, 0 violaciones axe.
+
+Lo único que cambia en el producto respecto a lo que ya juzgaste es **nada**: el único fichero de
+código que he tocado es la spec de E2E, y sólo para darle a una prueba el presupuesto de tiempo que
+su propio andamiaje declaraba necesitar. Ninguna aserción se ha relajado, ninguna cobertura se ha
+perdido.
+
+## Ficheros tocados
+
+| Fichero | Compartido con otros carriles |
+| --- | --- |
+| `e2e/github-connector.spec.mjs` | no, es de este carril |
+| `progress/revalidacion_github_connector.md` | no, nuevo |
+| `progress/ux_github_connector.md` | no, es de este carril |
+
+**Ningún fichero de la lista de conflictos de `REGLAS.md:69-78`.** No se ha tocado `src/`, ni
+`scripts/`, ni `docker-compose.yml`, ni `feature_list.json`, ni ninguna migración.

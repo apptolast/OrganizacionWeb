@@ -1,12 +1,14 @@
 # TDD del conector de GitHub (feature 27)
 
-Rama `claude/github-connector` (worktree `C:/Users/vhurt/ow-worktrees/github-connector`), partiendo de
-`codex/integration-api`. Contrato: `features/github_connector.feature`, 42 escenarios @s1–@s42.
-Puerto E2E reservado: 18093.
+Rama `claude/github-connector` (worktree `C:/Users/vhurt/ow-worktrees/github-connector`),
+reasentada sobre `origin/main` en `a6164e4`, que ya trae las features 24 y 26 y el contrato
+enmendado. Contrato: `features/github_connector.feature`, 42 escenarios @s1–@s42.
+Puerto E2E usado: 18094.
 
 ## Estado
 
-Feature en curso: 27 — `github_connector`. Escenarios a recorrer: @s1…@s42.
+Feature en curso: 27 — `github_connector`. Escenarios recorridos: @s1…@s42.
+E2E de @s42 ejecutado en el puerto 18094: **12 de 12 en verde**.
 No se marca `done`: falta `judge` y `mutation_tester`.
 
 ## Decisión de diseño para la feature 29
@@ -121,22 +123,23 @@ la base de la API (`GithubApiBase`, @s35/B11) ya había encontrado su verde ante
   3. Mi propio fixture de @s23 era inservible: `11111111-2222-3333-4444-555555555555` en mayúsculas
      es idéntico a sí mismo. Cambiado por uno con letras hexadecimales, que es lo que la prueba
      pretendía medir.
-  4. El canal Bearer: ver el desvío de abajo.
+  4. El canal Bearer: ver la sección de @s31, más abajo.
 - El recibo parcial (`importId`, `created`, `skipped`, `failed`) viaja dentro del problema para que
   la interfaz de @s39 no tenga que volver a preguntar.
 
-### Desvío documentado respecto a @s31 (pendiente de decisión del coordinador)
+### @s31: el contrato se enmendó y ya no hay desvío
 
-@s31 espera **401 UNAUTHENTICATED** cuando se usa una credencial Bearer del canal de integraciones
-contra el conector. El comportamiento real es **403 `API_SCOPE_DENIED`**: el
-`ApiCredentialBearerFilter` de la feature 24 autentica la credencial y sólo después comprueba su
-lista blanca de rutas, que —correctamente— no incluye ninguna ruta del conector.
+Lo que este carril levantó como desvío quedó resuelto el 9 de septiembre de 2026: el propietario
+ratificó que **403 `API_SCOPE_DENIED` es lo correcto** y el `.feature` se enmendó en `a6164e4`. El
+razonamiento, que ahora vive en el propio contrato: una credencial Bearer válida **sí** está
+autenticada, así que responder «no sé quién eres» a quien sí se ha identificado es falso; 403 dice
+la verdad, «sé quién eres y esto no es para ti».
 
-- La propiedad de seguridad que @s31 persigue se cumple entera: la credencial no abre el conector,
-  no se escribe nada y no se contacta con el servidor falso. La prueba lo comprueba así.
-- **No he tocado la lista blanca ni el filtro**: son de la feature 24, de otro carril.
-- Hace falta decidir: o el `.feature` acepta 403 `API_SCOPE_DENIED` para esta fila, o el carril de
-  la feature 24 cambia el filtro para responder 401 en rutas fuera de su lista blanca.
+- La implementación **no cambió**: era la correcta desde el principio, y el filtro de la feature 24
+  sigue sin tocarse.
+- `GithubConnectorApiTest` afirma ahora las seis filas tal y como las nombra el contrato: 401
+  `UNAUTHENTICATED` en las cinco sin credencial y 403 `API_SCOPE_DENIED` en la del canal Bearer,
+  comprobando el **código** del problema y no sólo el estado HTTP.
 
 ### Ciclo 10 — @s1 @s13 @s16 @s20 @s28 @s34 @s35 el adaptador HTTP de GitHub
 
@@ -327,7 +330,7 @@ carril.
 | @s28 | `HttpGithubIssueSourceTest`, `ImportGithubIssuesTest`, `ConnectGithubTest` |
 | @s29 | `ImportGithubIssuesTest`, `GithubConnectorApiTest` |
 | @s30 | `GithubConnectorQueriesTest`, `GithubConnectorApiTest`, `github-connector-client.test.ts` |
-| @s31 | `GithubConnectorApiTest` — **con desvío documentado en la fila Bearer** |
+| @s31 | `GithubConnectorApiTest` — las seis filas, con el 403 de la fila Bearer ya ratificado |
 | @s32 | `GithubConnectorApiTest` |
 | @s33 | `GithubConnectorQueriesTest`, `GithubConnectorPersistenceTest` |
 | @s34 | `ConnectorAuditTest`, `ConnectorExportExposureTest`, `GithubConnectorApiTest`, `HttpGithubIssueSourceTest`, `ConnectGithubTest`, `ImportGithubIssuesTest`, `github-connector.test.tsx`, `e2e/github-connector.spec.mjs` (no ejecutado) |
@@ -342,9 +345,65 @@ carril.
 
 ## Lo que falta para cerrar
 
-1. Ejecutar `e2e/github-connector.spec.mjs` (axe, teclado, anchos) cuando la máquina esté libre.
-2. Decidir el desvío de @s31: 403 `API_SCOPE_DENIED` frente a 401 `UNAUTHENTICATED`.
-3. `judge` y `mutation_tester`. **No marco la feature como `done`.**
+1. `judge` y `mutation_tester`. **No marco la feature como `done`.**
+
+Cerrado desde entonces: el E2E de @s42 se ejecutó en el puerto 18094 con **12 de 12 en verde**, y
+el desvío de @s31 dejó de serlo al enmendarse el contrato.
+
+### Ciclo 18 — el E2E ejecutado y los dos defectos que sólo él destapó
+
+`E2E_WEB_PORT=18094 pnpm test:e2e e2e/github-connector.spec.mjs`. Primera ejecución: **3 pasan, 9
+fallan**. Las dos causas eran reales, no del guion:
+
+1. **La pila de e2e nunca definía `APP_CONNECTOR_KEY`**, así que todas las rutas del conector
+   respondían 503 y la pantalla se quedaba en el estado deshabilitado. `docker-compose.yml` acepta
+   ahora `APP_CONNECTOR_KEY`, `APP_CONNECTOR_KEY_PREVIOUS` y `APP_GITHUB_API_BASE` como opcionales
+   —sin clave el conector sigue deshabilitado, que es lo correcto para un despliegue que no lo
+   usa— y `scripts/e2e.mjs` fija una clave de pruebas de 32 bytes y apunta la base de la API a
+   `http://127.0.0.1:9`, un puerto de descarte dentro del contenedor: ninguna salida llega a
+   api.github.com y el intento de conectar muere en el acto.
+2. **El selector de proyecto medía menos de 44 × 44.** Vive fuera de un formulario, así que no le
+   alcanzaban las reglas de campo del área de trabajo. Bloque `.github-connector` en `styles.scss`
+   con tokens del tema y ningún color fijo, así que las guardas de modo oscuro de `main` siguen
+   verdes.
+
+Dos aserciones mías eran además demasiado estrictas y se corrigieron con su razón escrita: los
+enlaces en línea dentro de un párrafo están exentos del tamaño mínimo por la excepción de
+WCAG 2.2 §2.5.8, y el selector necesita un proyecto para tener geometría real.
+
+Segunda ejecución: **12 de 12 en verde**, incluidos axe en tres estados, el recorrido con teclado,
+los anchos 320, 768 y 1440, el área mínima y la ausencia del token en `localStorage`,
+`sessionStorage` y cookies.
+
+### Ciclo 19 — reasentamiento sobre `a6164e4` (features 24 y 26)
+
+- Primero sobre `7ea682d`: la rama arrastraba la historia sin aplastar de la feature 24, que `main`
+  ya tenía aplastada en `0277c50`. Reasentar los 117 commits habría sido absurdo, así que se
+  reasentaron **sólo los del carril** con `--onto`. El commit del contrato se descarta porque
+  `main` ya tenía el `.feature` byte a byte; con él se perdía el paso a `in_progress`, restaurado
+  aparte.
+- Después sobre `a6164e4`, que trae la feature 26. Cuatro conflictos, todos aditivos y resueltos
+  conservando **los dos carriles**: `build.gradle.kts` (alcances `ics_calendar` y
+  `github_connector`, y ambos en la unión del perfil por defecto), `scripts/project.mjs` (los
+  cuatro objetivos), y los rangos de Stryker.
+- `App.tsx` y `workspace.tsx` no dieron conflicto: la ruta y la entrada de menú del calendario
+  conviven con las dos rutas del conector, que siguen sin añadir ninguna entrada al menú.
+- **Los rangos `línea:columna` de Stryker**: tras la fusión ni los de `main` ni los míos servían,
+  porque `App.tsx` tiene ahora las dos cosas. Recalculados y verificados con la misma extracción
+  que usan los guardianes, los tres de `stryker.appearance.config.json` y los tres de
+  `stryker.ics-calendar.config.json` —estos últimos los desplazaron mis rutas, así que me tocaba
+  arreglarlos—. `scripts/project.test.mjs`: 79 de 79 en verde.
+- La cuenta fija de entradas del menú en `github-connector-routing.test.tsx` era frágil y se rompió
+  con la entrada del calendario. Ahora la prueba compara el menú de una ruta ajena con el de las
+  rutas del conector: lo que el contrato exige es que el conector **no añada ninguna**, no que el
+  menú tenga un tamaño concreto. Así no volverá a romperse con webhooks ni automatizaciones.
+
+### Ciclo 20 — @s31 deja de ser un desvío
+
+El propietario ratificó el 403 y el contrato se enmendó en `a6164e4`. La implementación no cambió.
+`GithubConnectorApiTest` afirma ahora las seis filas como las nombra el contrato, comprobando el
+**código** del problema y no sólo el estado: 401 `UNAUTHENTICATED` en las cinco sin credencial y
+403 `API_SCOPE_DENIED` en la del canal Bearer. La bitácora ya no lo lista como desvío.
 
 ## Enmiendas al contrato aprobadas por el coordinador (9 de septiembre de 2026)
 

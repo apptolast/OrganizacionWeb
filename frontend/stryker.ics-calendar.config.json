@@ -4,9 +4,9 @@
   "plugins": ["@stryker-mutator/vitest-runner"],
   "ignorePatterns": [".stryker-tmp-availability-replay"],
   "mutate": [
-    "src/App.tsx:35:8-35:42",
-    "src/App.tsx:49:14-50:29",
-    "src/App.tsx:80:10-81:37",
+    "src/App.tsx:37:8-37:42",
+    "src/App.tsx:53:14-54:29",
+    "src/App.tsx:88:10-89:37",
     "src/workspace.tsx:90:10-95:22",
     "src/calendar-feed-api.ts",
     "src/calendar.tsx"

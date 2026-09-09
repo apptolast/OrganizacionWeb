@@ -606,24 +606,34 @@ class GithubConnectorApiTest {
 
   @Test
   void s31_withoutASessionEveryConnectorRouteIsUnauthenticated() throws Exception {
-    mvc.perform(get(CONNECTION)).andExpect(status().isUnauthorized());
-    mvc.perform(get(IMPORTS + "/" + IMPORT)).andExpect(status().isUnauthorized());
-    mvc.perform(delete(CONNECTION).with(csrf().asHeader())).andExpect(status().isUnauthorized());
-    mvc.perform(
+    // Las cinco filas de @s31 sin credencial: 401 UNAUTHENTICATED, que es lo correcto cuando de
+    // verdad no se sabe quién llama.
+    for (var request :
+        List.of(
+            get(CONNECTION),
+            get(IMPORTS + "/" + IMPORT),
+            delete(CONNECTION).with(csrf().asHeader()),
+            post(IMPORTS)
+                .with(csrf().asHeader())
+                .contentType("application/json")
+                .content("{\"projectId\":\"" + PROJECT + "\"}"),
             put(CONNECTION)
                 .with(csrf().asHeader())
                 .contentType("application/json")
-                .content(connectBody()))
-        .andExpect(status().isUnauthorized());
+                .content(connectBody()))) {
+      mvc.perform(request)
+          .andExpect(status().isUnauthorized())
+          .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
+    }
 
     verifyNoInteractions(read, connect, disconnect, importIssues, readImport);
   }
 
   /**
-   * Desvío documentado respecto a @s31: el filtro Bearer de la feature 24 responde 403
-   * API_SCOPE_DENIED, no 401, cuando la ruta no está en su lista blanca. La propiedad que @s31
-   * persigue —que una credencial de integraciones no abra el conector ni escriba nada— sí se
-   * cumple, y la lista blanca es de otro carril. Ver progress/tdd_github_connector.md.
+   * Última fila de @s31, enmendada el 9 de septiembre de 2026 y ratificada por el propietario: una
+   * credencial Bearer válida <em>sí</em> está autenticada, así que la respuesta correcta es 403
+   * API_SCOPE_DENIED —«sé quién eres y esto no es para ti»— y no 401. La credencial no abre el
+   * conector, no escribe nada y no contacta con el servidor falso.
    */
   @Test
   void s31_aBearerCredentialOfTheIntegrationChannelDoesNotOpenTheConnector() throws Exception {

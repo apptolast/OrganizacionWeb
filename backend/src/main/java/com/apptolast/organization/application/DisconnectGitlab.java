@@ -16,6 +16,7 @@ public final class DisconnectGitlab implements DisconnectGitlabUseCase {
 
   @Override
   public void execute(String ownerId) {
+    if (!cipher.enabled()) throw new ConnectorsDisabledException();
     connections.delete(ownerId);
   }
 }

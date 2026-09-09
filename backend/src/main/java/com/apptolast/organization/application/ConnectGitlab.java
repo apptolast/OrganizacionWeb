@@ -38,6 +38,7 @@ public final class ConnectGitlab implements ConnectGitlabUseCase {
 
   @Override
   public GitlabConnectionView execute(String ownerId, String token, String projectPath) {
+    if (!cipher.enabled()) throw new ConnectorsDisabledException();
     var path = GitlabProjectPath.parse(projectPath);
     var secret = PersonalAccessToken.upTo(TOKEN_LIMIT, token);
     var project = verify(path, secret);

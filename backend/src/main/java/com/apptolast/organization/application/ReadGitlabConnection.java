@@ -18,6 +18,7 @@ public final class ReadGitlabConnection implements ReadGitlabConnectionUseCase {
 
   @Override
   public GitlabConnectionView execute(String ownerId) {
+    if (!cipher.enabled()) throw new ConnectorsDisabledException();
     return connections
         .find(ownerId)
         .map(row -> GitlabConnectionView.of(row, apiBase))

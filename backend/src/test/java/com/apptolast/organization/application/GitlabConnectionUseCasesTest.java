@@ -183,6 +183,24 @@ class GitlabConnectionUseCasesTest {
     assertTrue(fakes.connections.find(OWNER).isEmpty());
   }
 
+  // ------------------------------------------------------- @s29 sin clave de conectores
+
+  @Test
+  void s29_withoutTheConnectorKeyEveryGitlabUseCaseRefusesWithoutTouchingAnything() {
+    var stored = connected();
+    fakes.connections.put(OWNER, stored);
+    fakes.projects.accept("grupo/proyecto", 4821L);
+    fakes.cipher.disable();
+
+    assertThrows(ConnectorsDisabledException.class, () -> read().execute(OWNER));
+    assertThrows(
+        ConnectorsDisabledException.class, () -> connect().execute(OWNER, TOKEN, "grupo/proyecto"));
+    assertThrows(ConnectorsDisabledException.class, () -> disconnect().execute(OWNER));
+
+    assertEquals(stored, fakes.connections.find(OWNER).orElseThrow());
+    assertNull(fakes.projects.verifiedPath());
+  }
+
   private ConnectGitlabUseCase connect() {
     return new ConnectGitlab(
         fakes.connections, fakes.projects, API_BASE, fakes.cipher, Clock.fixed(NOW, ZoneOffset.UTC));

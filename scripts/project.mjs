@@ -391,6 +391,9 @@ export function createProject(runner = run) {
         "playwright.config.mjs",
         "e2e/create-project.spec.mjs",
         "e2e/github-connector.spec.mjs",
+        "e2e/github-connector-native-zoom.spec.mjs",
+        "e2e/support/connector.mjs",
+        "e2e/fake-github/server.mjs",
       ]) {
         runner(process.execPath, ["--check", file]);
       }

@@ -2181,18 +2181,33 @@ button {
     margin: 0;
   }
   button,
-  select {
+  select,
+  input {
     box-sizing: border-box;
     min-width: 44px;
     min-height: 44px;
     max-width: 100%;
   }
-  select {
+  select,
+  input {
     color: var(--ink);
     background: var(--editable);
     border: 1px solid var(--control-border);
     border-radius: 8px;
     padding: 8px 12px;
+    font: inherit;
+  }
+  // Los dos enlaces de esta pantalla son el único contenido de su bloque, así que no caen bajo la
+  // excepción «Inline» de WCAG 2.2 §2.5.8: son destinos de puntero de pleno derecho y deben medir
+  // 44 × 44. Se les da altura sin estirarlos a todo el ancho.
+  a {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-width: 44px;
+    min-height: 44px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
   }
   label {
     display: block;

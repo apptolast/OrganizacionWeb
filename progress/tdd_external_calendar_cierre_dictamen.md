@@ -142,9 +142,11 @@ Además se añadió el recuento de POST a las otras dos filas del Examples (la d
 inspeccionaban el cuerpo con `find` sin contar nunca las peticiones.
 
 `pnpm --dir frontend exec vitest run src/external-calendar.test.tsx` →
-**25 pruebas, 25 en verde**. Medido, no declarado: `grep -c "^it(" ` da 25 `it(`
-en el fichero tras el ciclo; eran 24 antes de añadir la prueba nueva, y con los
-mutantes de arriba el marcador fue `1 failed | 24 passed`.
+**25 pruebas, 25 en verde**. Medido, no declarado: el fichero declara 24 bloques
+`it(`/`it.each(` (`grep -cE "^\s*it(\.each)?[(\[]"`), uno de ellos un `it.each`
+de dos filas, de donde salen las 25 que ejecuta vitest. Eran 24 antes de añadir
+la prueba nueva y con los mutantes de arriba el marcador fue
+`1 failed | 24 passed`.
 
 **Pendiente asociado, anotado y no silenciado.** La línea 84 de
 `e2e/external-calendar-ux-audit.spec.mjs`

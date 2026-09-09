@@ -1,7 +1,9 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "vitest",
-  "plugins": ["@stryker-mutator/vitest-runner"],
+  "plugins": [
+    "@stryker-mutator/vitest-runner"
+  ],
   "mutate": [
     "src/api-client.ts",
     "src/session-api.ts",
@@ -11,7 +13,11 @@
     "src/use-create-project.ts:40:0-46:100",
     "src/projects-api.ts:43:0-43:100"
   ],
-  "reporters": ["clear-text", "json", "html"],
+  "reporters": [
+    "clear-text",
+    "json",
+    "html"
+  ],
   "thresholds": {
     "high": 90,
     "low": 80,
@@ -27,5 +33,8 @@
   },
   "htmlReporter": {
     "fileName": "reports/mutation-authentication/mutation.html"
-  }
+  },
+  "ignorePatterns": [
+    ".stryker-tmp-*"
+  ]
 }

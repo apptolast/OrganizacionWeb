@@ -80,6 +80,7 @@ export function createProject(runner = run) {
           "webhooks-backend",
           "webhooks-frontend",
           "additional_connectors-backend",
+          "additional_connectors-frontend",
           "noche_cinco-backend",
         ].includes(target))
     ) {
@@ -225,6 +226,17 @@ export function createProject(runner = run) {
     }
     if (task === "mutate" && target === "noche_cinco-backend") {
       backend("pitest", ["-PmutationScope=noche_cinco"]);
+      return;
+    }
+    if (task === "mutate" && target === "additional_connectors-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.additional-connectors.config.json",
+      ]);
       return;
     }
     if (task === "mutate" && target === "additional_connectors-backend") {

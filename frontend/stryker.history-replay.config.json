@@ -1,8 +1,12 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "vitest",
-  "plugins": ["@stryker-mutator/vitest-runner"],
-  "ignorePatterns": [".stryker-tmp-availability-replay"],
+  "plugins": [
+    "@stryker-mutator/vitest-runner"
+  ],
+  "ignorePatterns": [
+    ".stryker-tmp-*"
+  ],
   "mutate": [
     "src/history-api.ts:66:8-70:21",
     "src/history-api.ts:86:11-87:40",
@@ -14,7 +18,11 @@
     "src/history.tsx:411:26-411:46",
     "src/history.tsx:416:26-416:54"
   ],
-  "reporters": ["clear-text", "json", "html"],
+  "reporters": [
+    "clear-text",
+    "json",
+    "html"
+  ],
   "thresholds": {
     "high": 90,
     "low": 80,

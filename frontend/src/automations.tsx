@@ -376,7 +376,7 @@ function AutomationsWorkspace() {
   }
 
   return (
-    <main className="automations">
+    <main id="proyectos" className="automations">
       <h1 ref={heading} tabIndex={-1}>
         Automatizaciones
       </h1>

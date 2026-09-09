@@ -370,6 +370,49 @@ limpio; frontend `tsc`, Prettier y 793 tests de los 21 ficheros que renderizan
 porque el menú ganó una entrada y eso afecta al desbordamiento a 320 px), pila
 retirada.
 
+### Ciclo 20 — tercer reasentamiento (9d81c17) y auditoría UX de los siete estados
+
+**Reasentamiento.** Entra la feature 27 (conector GitHub, dos rutas **sin** entrada
+de menú), el arreglo de la guarda de esquema aditivo y la corrección de @s31. Los
+seis conflictos anunciados se resuelven por unión: tres alcances PIT
+(`ics_calendar`, `github_connector`, `automations`), nueve objetivos en
+`project.mjs` y las tres ramas nuevas de `App.tsx` junto a la mía. **V28 no
+necesitaba ninguna exclusión** en la guarda aditiva: `ApiCredentialCompatibilityTest`
+pasa tal cual, comprobado ejecutándolo. Los 21 rangos por línea se recalculan
+otra vez contra el `App.tsx` fusionado y se validan uno a uno con el oráculo de
+contenido; `stryker.github-connector.config.json` **no fija ningún rango por
+línea**, así que no había nada que mover ahí. `scripts/project.test.mjs` 82/82.
+
+**Auditoría UX (`e2e/automations-ux.spec.mjs`, 4/4).** Cubre los siete estados:
+cuatro anchos, tema claro, tema oscuro, texto al 200 %, zoom nativo real de
+Chromium con extensión y `chrome.tabs.setZoom`, `forced-colors: active` y
+`prefers-reduced-motion: reduce`. axe sin **ninguna** violación (no sólo sin
+serias o críticas) salvo `color-contrast` en colores forzados, que decide el
+sistema operativo.
+
+**Dos defectos reales que sólo destapó ejecutarla**, ninguno visto por inspección:
+
+1. **La página no tenía estilos.** `automations.tsx` traía `className="automations"`
+   pero `styles.scss` no definía ese bloque: los `input` y `select` medían 27 px de
+   alto y el texto al 200 % desbordaba en horizontal. Se añadió el bloque
+   `.automations` con **sólo tokens del tema**, verificado por la guarda global
+   `theme-tokens.test.ts`.
+2. **El enlace «Saltar al contenido» estaba roto en `/automatizaciones`.** El
+   armazón apunta a `#proyectos` y mi `<main>` no llevaba ese `id`, así que axe
+   reportaba `skip-link` y `region`. Corregido como en el resto de páginas.
+
+El caso de zoom nativo se saltaba en silencio: su `test.skip` exigía
+`project.name === "chromium"`, pero la configuración por defecto no declara
+proyectos y `name` es cadena vacía. Ajustada la condición para que sólo se salte
+en un proyecto con nombre distinto de Chromium.
+
+La matriz de los 30 principios, con lo medido separado de lo heurístico y lo que
+**no** se declara, queda en `progress/ux_automations.md`.
+
+Reejecutado también `e2e/automations.spec.mjs`: 7/7. Aviso operativo: canalizar la
+salida del arnés E2E por `head` puede matarlo con SIGPIPE antes de su limpieza; se
+detectó una pila viva y se retiró a mano con `docker compose -p ... down --volumes`.
+
 ## Discrepancia de contrato @s30 vs @s32 — RATIFICADA por el propietario (a6164e4)
 
 @s30 dice que cada coincidencia contiene «exactamente eventId, eventType, occurredAt

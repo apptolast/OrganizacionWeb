@@ -408,6 +408,8 @@ export function createProject(runner = run) {
         "playwright.config.mjs",
         "e2e/create-project.spec.mjs",
         "e2e/github-connector.spec.mjs",
+        "e2e/automations.spec.mjs",
+        "e2e/automations-ux.spec.mjs",
       ]) {
         runner(process.execPath, ["--check", file]);
       }

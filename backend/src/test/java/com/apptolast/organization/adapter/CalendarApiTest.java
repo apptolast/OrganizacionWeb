@@ -199,6 +199,25 @@ class CalendarApiTest {
     assertThat(response.getHeaders("Set-Cookie")).isEmpty();
   }
 
+  /**
+   * Hallazgo A8 de la feature 24: la postura de cabeceras no depende del proxy y la emiten todas
+   * las cadenas de seguridad. La del feed público es una cadena más y no puede quedarse fuera.
+   */
+  private static final String CONTENT_SECURITY_POLICY =
+      "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:;"
+          + " connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'";
+
+  @Test
+  void s11_s15_thePublicChainAlsoEmitsTheSecurityHeadersOfTheWholeApi() throws Exception {
+    for (var address :
+        new String[] {"/calendar/" + TOKEN + ".ics", "/calendar/" + "z".repeat(43) + ".ics"}) {
+      var response = mvc.perform(get(address)).andReturn().getResponse();
+      assertThat(response.getHeader("Content-Security-Policy")).isEqualTo(CONTENT_SECURITY_POLICY);
+      assertThat(response.getHeader("Referrer-Policy")).isEqualTo("same-origin");
+      assertThat(response.getHeader("X-Content-Type-Options")).isEqualTo("nosniff");
+    }
+  }
+
   @Test
   void s11_headAnswersTheSameHeadersWithAnEmptyBody() throws Exception {
     var get = mvc.perform(get("/calendar/" + TOKEN + ".ics")).andReturn().getResponse();

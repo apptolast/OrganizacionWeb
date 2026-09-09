@@ -54,6 +54,7 @@ public class SecurityConfiguration {
   @org.springframework.core.annotation.Order(0)
   SecurityFilterChain publicCalendarSecurity(HttpSecurity http) throws Exception {
     return http.securityMatcher(com.apptolast.organization.adapter.http.CalendarPaths::isPublicFeed)
+        .headers(SecurityConfiguration::securityHeaders)
         .csrf(csrf -> csrf.disable())
         .logout(logout -> logout.disable())
         .requestCache(cache -> cache.disable())

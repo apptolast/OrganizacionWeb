@@ -381,3 +381,87 @@ Comprobado después del cambio: `ApplicationWiringTest` (24), `CalendarWiringTes
 `CalendarPersistenceTest`, `CalendarApiTest`, `ArchitectureTest` y `SecurityConfigurationTest`, más
 `ApiCredentialApiTest`, `ApiCredentialBearerTest`, `ApiCredentialBusinessCompatibilityTest` y
 `ExportDataApiTest` para descartar regresiones en los carriles vecinos. Todo verde.
+
+### Ciclo 11 — reasentamiento sobre `origin/main` (7ea682d) y lo que salió a la luz
+
+`main` se había reescrito (la feature 24 entró como squash `0277c50`), así que un
+`git rebase origin/main` intentaba reproducir 108 commits ya presentes aguas arriba. Se abortó y se
+reasentaron sólo los ocho commits propios:
+
+```
+git rebase --onto origin/main 4c58a5a claude/ics-calendar
+```
+
+Se descarta `4c58a5a` (contrato Gherkin): `features/ics_calendar.feature` y
+`progress/gherkin_ics_calendar.md` ya están en `main` byte a byte; lo único que aportaba era el
+cambio de estado en `feature_list.json`, que no me corresponde tocar.
+
+Dos conflictos, ambos resueltos conservando las dos partes:
+
+1. `SecurityConfiguration.java`. La feature 24 (hallazgo A8) añadió `securityHeaders(...)` con el
+   literal de CSP y `Referrer-Policy: same-origin` en sus dos cadenas; yo había cambiado el
+   `securityMatcher` de la cadena Bearer para dejar fuera las rutas de calendario. La resolución
+   mantiene **las dos**: el matcher excluye el calendario y la cadena sigue llamando a
+   `.headers(SecurityConfiguration::securityHeaders)`.
+2. `scripts/project.mjs`. La lista blanca de destinos de mutación: se conservan los tres de
+   `integration_api` y se añaden los dos de `ics_calendar`.
+
+`deploy/nginx.conf` no dio conflicto y el literal de CSP que la 24 dejó atado sigue intacto; lo
+único que añado es el bloque `location /calendar/` con `access_log off`.
+
+### Ciclo 12 — @s11 @s15: la cadena del feed también emite las cabeceras de la 24
+
+El reasentamiento destapó un hueco real que no estaba tapado por ninguna prueba: mi cadena
+`@Order(0)` para `/calendar/**` **no** emitía `Content-Security-Policy` ni `Referrer-Policy`. La
+postura de la 24 dice que la emiten todas las cadenas, no sólo dos; con mi cambio había tres.
+
+Rojo: `CalendarApiTest.s11_s15_thePublicChainAlsoEmitsTheSecurityHeadersOfTheWholeApi`, que pide
+las dos cabeceras sobre el feed servido y sobre su 404.
+
+```
+CalendarApiTest > s11_s15_thePublicChainAlsoEmitsTheSecurityHeadersOfTheWholeApi() FAILED
+29 tests completed, 1 failed
+```
+
+Verde: `.headers(SecurityConfiguration::securityHeaders)` en `publicCalendarSecurity`. No rompe
+nada del contrato: @s11 sólo prohíbe `Content-Disposition`, `ETag`, `Set-Cookie` y un
+`Content-Encoding` distinto de identity, y @s15 exige que el conjunto de cabeceras sea idéntico
+entre filas, cosa que se mantiene porque todas las respuestas de la cadena las reciben igual.
+
+Evidencia pedida por el coordinador, ejecutada tras la resolución:
+```
+--tests "…adapter.SecurityHeadersTest"        BUILD SUCCESSFUL
+--tests "…adapter.ApiCredentialBearer*"       BUILD SUCCESSFUL
+--tests "…adapter.CalendarApiTest"            BUILD SUCCESSFUL (29 pruebas)
+--tests "…ApplicationWiringTest"              BUILD SUCCESSFUL
+--tests "…CalendarWiringTest"                 BUILD SUCCESSFUL
+```
+
+### Ciclo 13 — rectificación: el fallo de `project.test.mjs` sí era mío
+
+Antes del reasentamiento informé de «3 fallos preexistentes» en `node --test
+scripts/project.test.mjs` y dije que ninguno era de este carril. **Me equivoqué en uno.** Dos eran
+de `integration_api` y `main` ya los ha arreglado, pero
+`appearance Stryker preserves all candidates and reviewed integration nodes` fallaba por mi culpa:
+esa prueba comprueba que los rangos `línea:columna` de `stryker.appearance.config.json` sobre
+`App.tsx` y `workspace.tsx` siguen apuntando al código de apariencia, y mi entrada de navegación y
+mi rama de ruta desplazaron esas líneas. La comprobación de base que hice con `git stash` no lo
+detectó porque esas ediciones ya estaban **commiteadas**, así que el «antes» también las tenía.
+
+Verde: recalculados los cuatro rangos de apariencia (`App.tsx:33:8-33:44`, `53:18-65:34`,
+`84:10-125:7`, `workspace.tsx:78:10-83:22`) en el config y en la expectativa de la prueba,
+verificando con la misma extracción que hace la prueba que cada uno empieza y contiene lo que debe.
+
+Además se recalcularon mis propios rangos, que se habían calculado antes del reasentamiento y
+habían quedado desplazados, y se añade `ics calendar Stryker selects its own nodes of the shared
+files`: la misma guarda que tiene apariencia, para que un desplazamiento futuro de `App.tsx` o
+`workspace.tsx` salga en rojo en vez de mutar código ajeno en silencio.
+
+`node --test scripts/project.test.mjs` → 76 pruebas, 0 fallos.
+
+Frontend tras el reasentamiento (modo oscuro incluido): `theme-tokens` 14, `theme-color` 4,
+`appearance` 50, `export-data` 22, `calendar` 26, `calendar-feed-api` 13, `App` 16; `eslint`,
+`prettier --check` y `tsc --noEmit` limpios. El bloque `.calendar-feed` de `styles.scss` pasa la
+guarda global de colores fijos del modo oscuro porque sólo usa tokens (`$ink`, `var(--panel)`,
+`var(--editable)`, `var(--control-border)`, `var(--accent)`, `var(--line)`, `var(--warning)`,
+`var(--error)`).

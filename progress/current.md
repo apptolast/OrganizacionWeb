@@ -117,13 +117,25 @@ Ninguna feature se marca `done` sin juez aprobado y mutación sobre 0,80. Hoy:
   `d418a5d`; falta la **evidencia ejecutada** que el juez exige para levantarlo.
 - **29 additional_connectors**: `spec_ready`.
 
-Auditoría de coherencia hecha de paso: de las 25 features en `done`, **dos no
-tienen ningún informe de juez ni de mutación en `progress/`** —14
-`start_work_session` y 15 `pause_resume_session`—. Otras tres los tienen con
-otro nombre (`judge_close_work_session_final.md`,
-`judge_end_time_notification_final.md`, `judge_import_data.md` y
-`mutation_import_persistence.md`). Las dos primeras son un hueco de evidencia
-que conviene mirar.
+Auditoría de coherencia hecha de paso, y **cerrada en falso positivo**: una
+búsqueda por nombre de fichero no encontraba puerta para 14 `start_work_session`
+ni para 15 `pause_resume_session`. Las dos la tienen, con otro nombre. Detalle
+en `progress/auditoria_puertas_14_15.md`:
+
+- 14: `judge_start_work_final.md:3` APPROVED; PIT 340/347 = 97,98 %
+  (`mutation_start_work_backend.md:3`); Stryker 483/539 = 89,61 %
+  (`mutation_start_work_frontend_final.md:3`); ámbito declarado en
+  `frontend/stryker.start-work-session.config.json` y en `scripts/project.mjs`.
+- 15: `judge_pause_resume_final.md:3` APPROVED; PIT 523/525 = 99,62 %; Stryker
+  741/861 = 86,06 %, y 738/861 = 85,71 % tras descontar de forma conservadora
+  tres muertes atribuidas a un fixture inestable
+  (`review_pause_resume_mutation_frontend.md:21`), que sigue por encima de 80.
+
+La causa era de nomenclatura: `CLAUDE.md:64` fija el patrón
+`progress/judge_<name>.md` y `progress/mutation_<name>.md`, y los agentes
+añadieron sufijos `_final`, `_backend` y `_frontend` porque cada feature tuvo
+campañas separadas por capa. **Las 25 `done` tienen sus dos puertas.** Conviene
+unificar los nombres, o el próximo barrido volverá a dar el mismo susto.
 
 ## Despliegue: sigue bloqueado por acceso, y no por trabajo
 

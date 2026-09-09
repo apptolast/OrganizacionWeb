@@ -126,3 +126,52 @@ mutación frontend) tienen la misma omisión.
 
 **Estado: cerrado.** No se ejecuta la campaña: el coordinador lo prohibió por
 plazo y carga de máquina.
+
+---
+
+## Hallazgo 5 [ALTA] — @s12: la conservación del historial tras el PUT no tenía oráculo
+
+**Contrato:** `features/automations.feature:170-181`. El Given es «una regla
+propia versión 1 enabled true **con 2 ejecuciones registradas**» y tres de las
+cuatro filas exigen que «las 2 ejecuciones siguen consultables» / «se
+conservan».
+
+**Qué faltaba.** Ninguno de los cinco tests asignados a @s12 creaba ejecución
+alguna. El único que ejercitaba un `replace` real contra Postgres,
+`AutomationWiringTest.s1_s11_s12_s14`, leía el historial después y afirmaba
+`isEmpty()` sobre una regla que nunca tuvo ejecuciones: un anti-oráculo que
+pasa igual si el replace conserva, borra u orfana el historial.
+
+**Ciclo.**
+
+1. ROJO por mutación: insertada en `PostgresAutomationStore.replace`, justo
+   antes del `UPDATE`, una sentencia que borra las filas de `automation_runs`
+   de la regla — el modo de fallo que el dictamen describe (replace por borrado
+   y reinserción, o una migración que cambiara el `ON DELETE SET NULL` de
+   `V28__automations.sql:18`). Resultado:
+   `s12_replacingARuleKeepsItsTwoRecordedRunsReadableAndUnchanged() FAILED`,
+   `Expecting actual: [] to contain exactly in any order: [AutomationRun[...]]`.
+   Producción restaurada, `BUILD SUCCESSFUL`.
+2. VERDE: el test nuevo pasa contra el `UPDATE` real.
+
+**Cambios (sólo pruebas), en
+`backend/src/test/java/com/apptolast/organization/adapter/config/AutomationWiringTest.java`:**
+- Helper `run(owner, rule)` que inserta una ejecución `succeeded` real.
+- Test nuevo `s12_replacingARuleKeepsItsTwoRecordedRunsReadableAndUnchanged`:
+  crea la regla, le inserta 2 ejecuciones, lee el historial, hace el `replace`
+  con `enabled false` y `trigger TaskStatusChanged.v1` (dos de las cuatro filas
+  del Examples a la vez), y afirma versión 2, `enabled false` en la lectura y
+  que el historial devuelve **los mismos dos objetos íntegros**, no sólo dos
+  filas.
+- Retirado el `assertThat(runs.read(...)).isEmpty()` posterior al replace en
+  `s1_s11_s12_s14`: era el anti-oráculo. Ese test conserva la comprobación de
+  historial vacío en la regla recién creada, donde sí significa algo, y pasa a
+  borrar con `If-Match "1"`.
+
+**Fuera de alcance, verificado y anotado:** la fila 4 de @s12 (PUT a acción
+`NOTIFY_WEBHOOK` hacia endpoint propio) sigue inalcanzable porque
+`ApplicationConfiguration` devuelve el stub `(owner, endpointId) -> false` para
+`WebhookEndpointLookup` pese a que la feature 25 ya está en `main`. Es cableado
+entre las features 25 y 30, no un hueco de oráculo de @s12.
+
+**Estado: cerrado** (salvo esa fila 4, que depende del cableado de 25).

@@ -3,6 +3,7 @@ package com.apptolast.organization.adapter.webhook;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.apptolast.organization.application.AddressPolicy;
+import com.apptolast.organization.application.WebhookDestinationGuard;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
@@ -10,6 +11,7 @@ import com.sun.net.httpserver.HttpsServer;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.time.Clock;
@@ -58,6 +60,11 @@ class JdkWebhookSenderTest {
     return new JdkWebhookSender(CLOCK, policy, InetAddress::getAllByName);
   }
 
+  /** The same sender, but resolving names through the fabricated zone of these tests. */
+  private static JdkWebhookSender senderInLoopbackZone() {
+    return new JdkWebhookSender(CLOCK, EVERY_ADDRESS_ALLOWED, LOOPBACK_ZONE);
+  }
+
   /** The same sender with the two deadlines shortened, so the timeout row is affordable. */
   private static JdkWebhookSender senderWithShortDeadlines() {
     return new JdkWebhookSender(
@@ -68,10 +75,29 @@ class JdkWebhookSenderTest {
         TEST_EXCHANGE_DEADLINE);
   }
 
+  /**
+   * A name that no real DNS can answer —{@code .invalid} is reserved by RFC 2606— mapped to the
+   * loopback by {@link #LOOPBACK_ZONE}. If the sender ever resolved it again through the system
+   * resolver instead of using the address already validated, the send would die with DNS.
+   */
+  private static final String PINNED_NAME = "receptor.webhooks.invalid";
+
+  /** The zone of these tests: the only name it knows answers the loopback. */
+  private static final WebhookDestinationGuard.HostResolver LOOPBACK_ZONE =
+      host -> {
+        if (!PINNED_NAME.equals(host)) throw new UnknownHostException(host);
+        return new InetAddress[] {InetAddress.getByName("127.0.0.1")};
+      };
+
   private record Receiver(String scheme, HttpServer server, List<HttpExchange> received)
       implements AutoCloseable {
     String url() {
-      return scheme + "://127.0.0.1:" + server.getAddress().getPort() + "/hooks";
+      return urlFor("127.0.0.1");
+    }
+
+    /** The same receiver reached by a name instead of by its literal address. */
+    String urlFor(String host) {
+      return scheme + "://" + host + ":" + server.getAddress().getPort() + "/hooks";
     }
 
     @Override
@@ -293,6 +319,50 @@ class JdkWebhookSenderTest {
       assertNull(outcome.httpStatus());
       assertFalse(outcome.succeeded());
       assertTrue(receiver.received().isEmpty(), "the handshake failed before any request arrived");
+    }
+  }
+
+  /**
+   * Amendment B3: the request must travel to the address already validated, not to the name again.
+   * The proof does not need a second answer from DNS: it is enough that the name has no answer at
+   * all outside the fabricated zone. If the client resolved on its own, the send would fail with
+   * DNS instead of reaching the receiver.
+   */
+  @Test
+  void s25_b3_theRequestTravelsToTheValidatedAddressInsteadOfResolvingTheNameAgain()
+      throws Exception {
+    var seen = new AtomicReference<HttpExchange>();
+    try (var receiver =
+        start(
+            exchange -> {
+              seen.set(exchange);
+              respond(exchange, 200, new byte[0]);
+            })) {
+      var outcome = senderInLoopbackZone().send(receiver.urlFor(PINNED_NAME), SECRET, EVENT, BODY);
+
+      assertTrue(
+          outcome.succeeded(),
+          "the send reached the validated address, got errorClass " + outcome.errorClass());
+      assertEquals(200, outcome.httpStatus());
+      assertEquals(1, receiver.received().size());
+    }
+  }
+
+  /** Anchoring must not lose the name: the receiver still has to see it in Host. */
+  @Test
+  void s25_b3_theOriginalNameStillTravelsInTheHostHeader() throws Exception {
+    var seen = new AtomicReference<HttpExchange>();
+    try (var receiver =
+        start(
+            exchange -> {
+              seen.set(exchange);
+              respond(exchange, 200, new byte[0]);
+            })) {
+      senderInLoopbackZone().send(receiver.urlFor(PINNED_NAME), SECRET, EVENT, BODY);
+
+      assertEquals(
+          PINNED_NAME + ":" + receiver.server().getAddress().getPort(),
+          seen.get().getRequestHeaders().getFirst("Host"));
     }
   }
 

@@ -2,11 +2,15 @@ package com.apptolast.organization.adapter.persistence;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.apptolast.organization.application.ManageWebhook;
 import com.apptolast.organization.application.WebhookOperationException;
+import com.apptolast.organization.application.WebhookSecrets;
 import com.apptolast.organization.domain.WebhookDelivery;
 import com.apptolast.organization.domain.WebhookEndpoint;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -38,6 +42,25 @@ class WebhookPersistenceTest {
         createdAt,
         createdAt);
   }
+
+  /** Los secretos están disponibles: lo que se juzga aquí es el aislamiento, no la clave. */
+  private static final WebhookSecrets KEYED =
+      new WebhookSecrets() {
+        @Override
+        public boolean available() {
+          return true;
+        }
+
+        @Override
+        public byte[] encrypt(String ownerId, UUID endpointId, String secret) {
+          return cipher(secret);
+        }
+
+        @Override
+        public String decrypt(String ownerId, UUID endpointId, byte[] ciphertext) {
+          return new String(ciphertext, StandardCharsets.UTF_8).replace("cipher:", "");
+        }
+      };
 
   private static byte[] cipher(String secret) {
     return ("cipher:" + secret).getBytes(StandardCharsets.UTF_8);
@@ -196,6 +219,46 @@ class WebhookPersistenceTest {
         List.of(survivor.id()),
         store.list(owner, kept.id()).stream().map(WebhookDelivery::id).toList());
     assertFalse(store.delete(owner, doomed.id()));
+  }
+
+  /**
+   * Última fila de @s30: una entrega terminal que SÍ existe, pero pertenece a otro webhook del
+   * mismo propietario. El aislamiento vive únicamente en el predicado {@code endpoint_id} de las
+   * consultas, así que sólo se puede ejercer contra la base real; con el doble de aplicación, que
+   * ignora el endpointId, esta fila es inconstruible.
+   */
+  @Test
+  void s30_aTerminalDeliveryOfAnotherWebhookOfTheSameOwnerIsNeitherFoundNorRedelivered() {
+    var owner = "isolation-" + UUID.randomUUID();
+    var store = store();
+    var asked = endpoint(NOW);
+    var owning = endpoint(NOW);
+    store.insert(owner, asked, cipher("whsec_x"));
+    store.insert(owner, owning, cipher("whsec_y"));
+    var delivery = WebhookDelivery.ping(UUID.randomUUID(), NOW);
+    store.enqueuePing(owner, owning.id(), delivery, "{}");
+    Database.JDBC.update(
+        "UPDATE webhook_deliveries SET status='succeeded', attempt=1, http_status=200,"
+            + " latency_ms=12, next_attempt_at=NULL WHERE id=?",
+        delivery.id());
+
+    assertTrue(store.find(owner, asked.id(), delivery.id()).isEmpty());
+    assertTrue(store.list(owner, asked.id()).isEmpty());
+    assertEquals(
+        List.of(delivery.id()),
+        store.list(owner, owning.id()).stream().map(WebhookDelivery::id).toList());
+
+    var manage =
+        new ManageWebhook(
+            store, store, KEYED, Clock.fixed(NOW, ZoneOffset.UTC));
+    var refused =
+        assertThrows(
+            WebhookOperationException.class,
+            () -> manage.redeliver(owner, asked.id(), delivery.id()));
+
+    assertEquals(WebhookOperationException.Code.NOT_FOUND, refused.code());
+    assertEquals(
+        "succeeded", store.find(owner, owning.id(), delivery.id()).orElseThrow().status());
   }
 
   private static int count(String owner) {

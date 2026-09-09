@@ -228,3 +228,44 @@ oráculo en la capa de unitarios, que es donde discrimina.
 —al pulsar «Desactivar», React desmonta el botón enfocado y el foco cae al
 `body`— no se toca: no forma parte del bloqueante y arreglarlo aquí, sin prueba
 de foco en E2E, sería producción sin test rojo que la pida.
+
+## Hallazgo 21 — @s30: la última fila (entrega de OTRO webhook → 404) no tenía oráculo — CERRADO
+
+**Cubre:** `features/webhooks.feature:372-385`, última fila del outline @s30.
+
+**Prueba:** `WebhookPersistenceTest.s30_aTerminalDeliveryOfAnotherWebhookOfTheSameOwnerIsNeitherFoundNorRedelivered`
+(contra Postgres real, que es donde vive la regla: el aislamiento por endpoint no
+está en el dominio —`WebhookDelivery` no lleva `endpointId`— sino en el predicado
+`endpoint_id=?` de la consulta).
+
+**Ciclo.**
+
+1. El test monta un único propietario con **dos** endpoints, encola una entrega en
+   el segundo y la lleva a terminal (`succeeded`, attempt 1, http 200). Luego
+   exige, preguntando por el **primero**: `find` vacío, `list` vacío, la entrega
+   sigue listada bajo su endpoint de verdad, `ManageWebhook.redeliver` lanza
+   `NOT_FOUND`, y la entrega ajena sigue `succeeded` (no se reencoló).
+2. Dos rojos intermedios, útiles y anotados:
+   `DataIntegrityViolationException ... violates check constraint
+   "webhook_deliveries_check"` (una fila `succeeded` exige attempt y httpStatus:
+   el esquema no admite terminales de mentira), y
+   `expected: <NOT_FOUND> but was: <CONNECTORS_DISABLED>` (con
+   `WebhookSecrets.DISABLED` el caso de uso corta antes; el test pasa a un doble
+   con clave disponible, porque lo que se juzga es el aislamiento, no la clave).
+3. VERDE: `BUILD SUCCESSFUL`.
+4. ROJO ACREDITADO. Rompo la producción invirtiendo el predicado de
+   `PostgresWebhookStore.find` (:180), de `AND endpoint_id=?` a
+   `AND endpoint_id<>?` —mismo número de parámetros, predicado invertido—.
+   Resultado:
+   `s30_aTerminalDeliveryOfAnotherWebhookOfTheSameOwnerIsNeitherFoundNorRedelivered() FAILED`.
+   Restaurado con `git checkout`.
+
+**Renombrado exigido por el hallazgo.** `ManageWebhookTest.s30_aDeliveryOfAnotherWebhookIsNotFound`
+pasa a `s30_anUnknownDeliveryIdIsNotFound`: su cuerpo pasa `UNKNOWN` como id de
+ENTREGA, así que fija «id de entrega desconocido → NOT_FOUND», no la fila del
+contrato. No se borra —es la única prueba que ejercita el `orElseThrow` del
+lookup de entrega—, sólo deja de prometer lo que no hace.
+
+**Ficheros cambiados.**
+- `backend/src/test/java/com/apptolast/organization/adapter/persistence/WebhookPersistenceTest.java`
+- `backend/src/test/java/com/apptolast/organization/application/ManageWebhookTest.java`

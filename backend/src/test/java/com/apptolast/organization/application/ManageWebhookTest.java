@@ -221,7 +221,7 @@ class ManageWebhookTest {
   }
 
   @Test
-  void s30_aDeliveryOfAnotherWebhookIsNotFound() {
+  void s30_anUnknownDeliveryIdIsNotFound() {
     var deliveries = new FakeWebhookDeliveries();
     deliveries.give(D, "succeeded", NOW);
     assertEquals(

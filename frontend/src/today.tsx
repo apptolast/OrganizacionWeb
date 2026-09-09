@@ -1,6 +1,7 @@
 import "./today.scss";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { readToday, type TodaySnapshot } from "./today-api";
+import { TodayExternalCalendar } from "./today-external-calendar";
 import { RouteLink } from "./navigation";
 function at(instant: string, zoneId: string) {
   try {
@@ -222,6 +223,12 @@ export function Today() {
               ))}
             </ol>
           )}
+          <TodayExternalCalendar
+            zoneId={snapshot.zoneId}
+            dayStartAt={snapshot.dayStartAt}
+            dayEndAt={snapshot.dayEndAt}
+            revision={snapshot.serverNow}
+          />
           <RouteLink href="/proyectos">Ver proyectos</RouteLink>
         </>
       )}

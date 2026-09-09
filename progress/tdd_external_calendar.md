@@ -229,3 +229,22 @@ incluidas las 37 pruebas MockMvc y la de Testcontainers.
 - La entrada se inserta antes de "Importación" a propósito: `App.test.tsx` del
   carril de importación afirma cuáles son los dos últimos enlaces, y así ese
   test sigue verde sin tocarlo.
+
+### Ciclo 18 — sección Calendario externo dentro de Hoy (@s35, @s36)
+
+- ROJO: `today-external-calendar.test.tsx` (11 casos) sin módulo, y después
+  `today-external-section.test.tsx` (2 casos) en rojo por no estar montada.
+- VERDE: `today-external-calendar.tsx`, montada al final del cuerpo de Hoy con
+  `zoneId`, `dayStartAt`, `dayEndAt` y `revision` (`serverNow`).
+- Orden garantizado por test: POST /sync con onlyIfStale true y después
+  GET /events con las fronteras del día. Como la sección se monta con la
+  instantánea de Hoy ya pintada, la agenda y sus resúmenes están completos antes
+  de que respondan.
+- Comprobación de que los tests muerden: al mutar la producción caen 2 de 3
+  mutaciones. La tercera —quitar el `abort` del desmontaje— sobrevivía porque
+  React 19 ya no avisa de un `setState` sobre una vista desmontada. Reescribí
+  el test para capturar las señales entregadas a `fetch` y exigir que todas
+  queden abortadas al desmontar; ahora esa mutación también muere.
+- `today.test.tsx` aísla la sección con `vi.mock`, como `App.test.tsx` hace con
+  `ProjectTasks`: sus 57 pruebas cuentan peticiones de Hoy y la sección añade
+  dos. La integración real la cubre `today-external-section.test.tsx`.

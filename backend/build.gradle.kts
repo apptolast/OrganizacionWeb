@@ -395,8 +395,11 @@ pitest {
         "com.apptolast.organization.application.PublicAddressPolicy*",
         "com.apptolast.organization.application.AddressPolicy*",
         "com.apptolast.organization.application.ExternalEventsView*",
-        "com.apptolast.organization.adapter.crypto.AesGcmSecretCipher*",
-        "com.apptolast.organization.adapter.crypto.ConnectorCipher*",
+        // El cifrado vive en adapter.connectors desde que las features 27 y 28 unificaron
+        // SecretCipher: el paquete adapter.crypto ya no existe y este ambito lo seguia
+        // nombrando, de modo que AES-256-GCM no recibia ni un mutante y la campana lo bendecia.
+        "com.apptolast.organization.adapter.connectors.AesGcmSecretCipher*",
+        "com.apptolast.organization.adapter.connectors.ConnectorKeyRing*",
         "com.apptolast.organization.adapter.feed.HttpCalendarFeed*",
         "com.apptolast.organization.adapter.net.SystemHostResolver*",
         "com.apptolast.organization.adapter.http.ExternalCalendarController*",

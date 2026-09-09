@@ -57,7 +57,7 @@ export function TodayExternalCalendar({
       let pending = false;
       try {
         await syncExternalCalendar(true, signal);
-      } catch (error) {
+      } catch {
         if (signal.aborted) return;
         pending = true;
       }

@@ -46,3 +46,41 @@ el merge 3.
   prueba roja; queda anotado por si se repite.
 - `node --test scripts/project.test.mjs`: 79/79.
 - `vitest`: 74 ficheros, **2625** pruebas (2622 + 3 del `Escape` real).
+## Merge 2 — `claude/webhooks` (feature 25)
+
+**Conflicto único: `backend/.../persistence/WeeklyReviewPersistenceTest.java`.**
+La rama parte de `9d81c17`, antes de la limpieza de fixtures, y parchea el
+`@BeforeEach` añadiendo ` CASCADE` a la lista de vaciados escrita a mano; `main`
+reescribió esa misma línea a `TestDatabase.empty(jdbc)`. Resuelto **con el lado de
+`main`**, como manda el hallazgo 17 de la auditoría: `TestDatabase.empty` descubre las
+tablas en `information_schema` y emite el vaciado con `RESTART IDENTITY CASCADE`, así
+que absorbe entera la intención del parche y además cubre las tablas futuras con clave
+ajena. Comprobado después: la búsqueda de listas de tablas escritas a mano en
+`backend/src/test` no devuelve nada.
+
+Todo lo demás entró limpio, incluidos los cuatro ficheros de prueba de navegación que
+la rama ya había reescrito a orden relativo por nombre (`App.test.tsx`,
+`appearance.test.tsx`, `export-data.test.tsx`, `integration-api.test.tsx`). Eso es
+justamente lo que exige la enmienda del orden canónico, así que no hubo que tocarlos.
+
+**Nota de trazabilidad.** Mientras el merge estaba resuelto y en el índice, pendiente de
+confirmar, el coordinador hizo un commit propio sobre `harness.config.json`
+(`one_feature_at_a_time` a `false`). Git tenía `MERGE_HEAD` puesto, así que ese commit
+se llevó consigo el merge entero: `1f898c1` es un commit de fusión de verdad (padres
+`fa49fd7` y `8389040`, la punta de `claude/webhooks`) con el árbol correcto, pero su
+mensaje solo habla de la regla del arnés. No se toca la historia ya escrita; queda
+explicado aquí. El `false` de `one_feature_at_a_time` se conserva.
+
+**Verificación tras el merge:**
+
+- backend: 197 clases, **4057 pruebas, 0 fallos** (+23 clases y +233 pruebas sobre las
+  3824 de la línea base). BUILD SUCCESSFUL.
+- `vitest`: 77 ficheros, **2669** pruebas en verde (+44).
+- `node --test scripts/project.test.mjs`: **77 de 79**. Los dos rojos son exactamente
+  los que la auditoría predijo (hallazgo 5, punto 2, y hallazgo 7, punto 3): los dos
+  únicos guardas *semánticos*, «ics calendar Stryker selects its own nodes of the shared
+  files» y «appearance Stryker preserves all candidates and reviewed integration
+  nodes», que recortan `App.tsx` por rango `línea:columna` y comprueban el texto
+  seleccionado. La rama 25 desplaza `App.tsx` sin recalcular ningún rango. **No se
+  tocan ahora**: los rangos se recalculan todos de una vez al final, contra el
+  `App.tsx` definitivo, como ordena el encargo.

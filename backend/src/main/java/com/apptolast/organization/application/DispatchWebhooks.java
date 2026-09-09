@@ -12,11 +12,14 @@ public final class DispatchWebhooks implements DispatchWebhooksUseCase {
 
   private final WebhookWork work;
   private final WebhookSender sender;
+  private final WebhookAudit audit;
   private final Clock clock;
 
-  public DispatchWebhooks(WebhookWork work, WebhookSender sender, Clock clock) {
+  public DispatchWebhooks(
+      WebhookWork work, WebhookSender sender, WebhookAudit audit, Clock clock) {
     this.work = work;
     this.sender = sender;
+    this.audit = audit;
     this.clock = clock;
   }
 
@@ -39,6 +42,8 @@ public final class DispatchWebhooks implements DispatchWebhooksUseCase {
     var now = CustomizationTime.capture(clock);
     var result = claimed.delivery().recorded(outcome, now);
     work.record(claimed, result, exhaustedEndpoint(claimed, result, now));
+    audit.attempt(
+        claimed.endpoint().id(), result.eventId(), result.status(), result.errorClass());
   }
 
   /** An exhausted delivery drags its endpoint into DELIVERY_EXHAUSTED in the same transaction. */

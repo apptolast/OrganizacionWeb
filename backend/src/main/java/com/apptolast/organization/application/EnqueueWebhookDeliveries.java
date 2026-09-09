@@ -24,10 +24,12 @@ public final class EnqueueWebhookDeliveries implements EnqueueWebhookDeliveriesU
   private static final String INVALID = "INVALID_EVENT";
 
   private final WebhookOutbox outbox;
+  private final WebhookAudit audit;
   private final Clock clock;
 
-  public EnqueueWebhookDeliveries(WebhookOutbox outbox, Clock clock) {
+  public EnqueueWebhookDeliveries(WebhookOutbox outbox, WebhookAudit audit, Clock clock) {
     this.outbox = outbox;
+    this.audit = audit;
     this.clock = clock;
   }
 
@@ -46,6 +48,8 @@ public final class EnqueueWebhookDeliveries implements EnqueueWebhookDeliveriesU
       var rejection = rejectionOf(candidate);
       if (rejection != null || candidate.isBlocked()) {
         outbox.skip(endpointId, reached, rejection);
+        // A blocked row is a deliberate skip, not a failure worth auditing.
+        if (rejection != null) audit.discarded(endpointId, candidate.eventId(), rejection);
         continue;
       }
       outbox.enqueue(endpointId, candidate, UUID.randomUUID(), now);

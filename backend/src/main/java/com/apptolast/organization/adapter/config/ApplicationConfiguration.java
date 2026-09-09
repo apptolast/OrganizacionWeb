@@ -465,17 +465,26 @@ public class ApplicationConfiguration {
   }
 
   @Bean
+  com.apptolast.organization.application.WebhookAudit webhookAudit() {
+    return new com.apptolast.organization.adapter.logging.Slf4jWebhookAudit();
+  }
+
+  @Bean
   com.apptolast.organization.application.DispatchWebhooks dispatchWebhooks(
       com.apptolast.organization.application.WebhookWork work,
       com.apptolast.organization.application.WebhookSender sender,
+      com.apptolast.organization.application.WebhookAudit audit,
       Clock clock) {
-    return new com.apptolast.organization.application.DispatchWebhooks(work, sender, clock);
+    return new com.apptolast.organization.application.DispatchWebhooks(work, sender, audit, clock);
   }
 
   @Bean
   com.apptolast.organization.application.EnqueueWebhookDeliveries enqueueWebhookDeliveries(
-      com.apptolast.organization.application.WebhookOutbox outbox, Clock clock) {
-    return new com.apptolast.organization.application.EnqueueWebhookDeliveries(outbox, clock);
+      com.apptolast.organization.application.WebhookOutbox outbox,
+      com.apptolast.organization.application.WebhookAudit audit,
+      Clock clock) {
+    return new com.apptolast.organization.application.EnqueueWebhookDeliveries(
+        outbox, audit, clock);
   }
 
   @Bean

@@ -68,6 +68,54 @@ class DispatchWebhooksTest {
     return new ClaimedDelivery(active(), OWNER, delivery, "{}", "whsec_x");
   }
 
+  /** Collects what the worker asked the audit to record. */
+  private static final class FakeAudit implements WebhookAudit {
+    final List<String> lines = new ArrayList<>();
+
+    @Override
+    public void attempt(UUID endpointId, UUID eventId, String status, String errorClass) {
+      lines.add("attempt " + endpointId + " " + eventId + " " + status + " " + errorClass);
+    }
+
+    @Override
+    public void discarded(UUID endpointId, UUID eventId, String code) {
+      lines.add("discarded " + code);
+    }
+
+    @Override
+    public void workerError(String code) {
+      lines.add("workerError " + code);
+    }
+  }
+
+  @Test
+  void s35_everyAttemptIsAuditedWithItsEndpointEventStatusAndErrorClass() {
+    var work = new FakeWork();
+    var sender = new FakeSender();
+    sender.outcome = WebhookAttempt.http(500, 9);
+    var delivery = pending(0);
+    work.claimable.add(claim(delivery));
+    var audit = new FakeAudit();
+
+    new DispatchWebhooks(work, sender, audit, CLOCK).runCycle();
+
+    assertEquals(
+        List.of("attempt " + W + " " + delivery.eventId() + " pending HTTP_ERROR"), audit.lines);
+  }
+
+  @Test
+  void s35_aSucceededAttemptIsAuditedWithoutAnErrorClass() {
+    var work = new FakeWork();
+    var delivery = pending(0);
+    work.claimable.add(claim(delivery));
+    var audit = new FakeAudit();
+
+    new DispatchWebhooks(work, new FakeSender(), audit, CLOCK).runCycle();
+
+    assertEquals(
+        List.of("attempt " + W + " " + delivery.eventId() + " succeeded null"), audit.lines);
+  }
+
   @Test
   void s20_aCycleSendsEachClaimedDeliveryInOrderAndRecordsTheOutcome() {
     var work = new FakeWork();
@@ -77,7 +125,7 @@ class DispatchWebhooksTest {
     work.claimable.add(claim(first));
     work.claimable.add(claim(second));
 
-    new DispatchWebhooks(work, sender, CLOCK).runCycle();
+    new DispatchWebhooks(work, sender, new FakeAudit(), CLOCK).runCycle();
 
     assertEquals(
         List.of(first.eventId().toString(), second.eventId().toString()), sender.sentEventIds);
@@ -94,7 +142,7 @@ class DispatchWebhooksTest {
     var sender = new FakeSender();
     for (var index = 0; index < 25; index++) work.claimable.add(claim(pending(0)));
 
-    var dispatch = new DispatchWebhooks(work, sender, CLOCK);
+    var dispatch = new DispatchWebhooks(work, sender, new FakeAudit(), CLOCK);
     dispatch.runCycle();
     assertEquals(20, sender.sentEventIds.size());
 
@@ -107,7 +155,7 @@ class DispatchWebhooksTest {
     var work = new FakeWork();
     var sender = new FakeSender();
 
-    new DispatchWebhooks(work, sender, CLOCK).runCycle();
+    new DispatchWebhooks(work, sender, new FakeAudit(), CLOCK).runCycle();
 
     assertEquals(1, work.claims);
     assertTrue(sender.sentEventIds.isEmpty());
@@ -121,7 +169,7 @@ class DispatchWebhooksTest {
     sender.outcome = WebhookAttempt.http(500, 9);
     work.claimable.add(claim(pending(5)));
 
-    new DispatchWebhooks(work, sender, CLOCK).runCycle();
+    new DispatchWebhooks(work, sender, new FakeAudit(), CLOCK).runCycle();
 
     assertEquals("exhausted", work.recorded.getFirst().status());
     assertEquals(6, work.recorded.getFirst().attempt());
@@ -139,7 +187,7 @@ class DispatchWebhooksTest {
     sender.outcome = WebhookAttempt.http(500, 9);
     work.claimable.add(claim(pending(0)));
 
-    new DispatchWebhooks(work, sender, CLOCK).runCycle();
+    new DispatchWebhooks(work, sender, new FakeAudit(), CLOCK).runCycle();
 
     assertEquals("pending", work.recorded.getFirst().status());
     assertTrue(work.disabled.isEmpty());
@@ -159,7 +207,7 @@ class DispatchWebhooksTest {
     var delivery = pending(0);
     work.claimable.add(new ClaimedDelivery(active(), OWNER, delivery, "{\"a\":1}", "whsec_real"));
 
-    new DispatchWebhooks(work, sender, CLOCK).runCycle();
+    new DispatchWebhooks(work, sender, new FakeAudit(), CLOCK).runCycle();
 
     assertEquals(List.of("https://example.com/h", "whsec_real", "{\"a\":1}"), seen);
   }

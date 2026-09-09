@@ -78,8 +78,51 @@ class EnqueueWebhookDeliveriesTest {
         eventId, type, occurredAt, status, schemaVersion, "{\"name\":\"x\"}", true);
   }
 
+  /** Collects the discards the enqueuer audited. */
+  private static final class FakeAudit implements WebhookAudit {
+    final List<String> discards = new ArrayList<>();
+
+    @Override
+    public void attempt(UUID endpointId, UUID eventId, String status, String errorClass) {}
+
+    @Override
+    public void discarded(UUID endpointId, UUID eventId, String code) {
+      discards.add(eventId + " " + code);
+    }
+
+    @Override
+    public void workerError(String code) {}
+  }
+
+  private static FakeAudit lastAudit;
+
   private static EnqueueWebhookDeliveries enqueuer(FakeOutbox outbox, Instant now) {
-    return new EnqueueWebhookDeliveries(outbox, Clock.fixed(now, ZoneOffset.UTC));
+    lastAudit = new FakeAudit();
+    return new EnqueueWebhookDeliveries(outbox, lastAudit, Clock.fixed(now, ZoneOffset.UTC));
+  }
+
+  @Test
+  void s21_s35_aDiscardedRowIsAuditedWithItsEventAndItsCode() {
+    var outbox = new FakeOutbox();
+    ready(outbox, endpoint(List.of("ProjectCreated.v1")), new WebhookCursor(CREATED, NIL));
+    outbox.candidates.add(
+        candidate(A, "ProjectCreated.v1", CREATED.plusSeconds(1), "pending", 2));
+
+    enqueuer(outbox, CREATED.plusSeconds(60)).runCycle();
+
+    assertEquals(List.of(A + " UNSUPPORTED_EVENT"), lastAudit.discards);
+  }
+
+  @Test
+  void s21_aBlockedRowIsNotAudited() {
+    var outbox = new FakeOutbox();
+    ready(outbox, endpoint(List.of("ProjectCreated.v1")), new WebhookCursor(CREATED, NIL));
+    outbox.candidates.add(
+        candidate(A, "ProjectCreated.v1", CREATED.plusSeconds(1), "blocked", 1));
+
+    enqueuer(outbox, CREATED.plusSeconds(60)).runCycle();
+
+    assertTrue(lastAudit.discards.isEmpty(), "a blocked row is skipped, not a failure to report");
   }
 
   private static void ready(FakeOutbox outbox, WebhookEndpoint endpoint, WebhookCursor cursor) {

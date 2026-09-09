@@ -182,6 +182,22 @@ lista blanca de rutas, que —correctamente— no incluye ninguna ruta del conec
 - Un rojo legítimo y era la prueba: construía un `ObjectMapper` pelado, incapaz de serializar
   `Instant`. Ahora usa el mismo Jackson que configura la aplicación.
 
+### Ciclo 12 — @s3 @s4 @s35 el cableado y la configuración
+
+- ROJO `GithubConnectorWiringTest` (no compilaba: faltaba `ConnectorConfiguration`).
+- VERDE `adapter/config/ConnectorConfiguration` y tres propiedades nuevas en
+  `application.properties`: `app.connectors.key`, `app.connectors.key-previous` y
+  `app.github.api-base`.
+- Las dos políticas de configuración, distintas a propósito y probadas por separado:
+  - **Clave ausente** (variable sin definir, que llega como cadena vacía) ⇒ conector deshabilitado,
+    503 `CONNECTORS_DISABLED`. Un despliegue que aún no usa conectores no debe dejar de arrancar.
+  - **Clave presente y mal formada** ⇒ la aplicación no arranca, nombrando la propiedad y **sin**
+    incluir el valor en el mensaje. Arrancar con una clave rota significaría escribir secretos que
+    luego no se pueden leer.
+- La base de la API se valida al construir el bean, no al usarla: es del servidor y nunca puede
+  venir de nada con alcance de petición.
+- `ArchitectureTest` (ArchUnit) sigue verde: dominio y aplicación no han ganado dependencias.
+
 ## Enmiendas al contrato aprobadas por el coordinador (9 de septiembre de 2026)
 
 Origen: `progress/security_review_connectors.md` (rama `main`). El coordinador actualiza

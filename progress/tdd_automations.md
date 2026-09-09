@@ -94,6 +94,19 @@ Feature en curso: 30 — automations. Escenarios a recorrer en fase 1: @s1–@s1
   `AutomationRendering` aísla el render para que lo reutilice la ejecución.
 - Focal verde: `SimulateAutomationTest` 11/11, `AutomationMatcherTest` 5/5.
 
+### Ciclo 7 — @s34, @s35 (auditoría por regla)
+
+- **Rojo visto fallar**: `ReadAutomationRunsTest` (5 tests), `compileTestJava FAILED`
+  por `AutomationRun`, `AutomationRunStore` y `AutomationRunCursor` inexistentes.
+- **Verde mínimo**: `AutomationRun` en dominio (con `ruleId` anulable, que es lo que
+  sostiene la guarda de bucles tras borrar la regla), el puerto `AutomationRunStore`,
+  el cursor `AutomationRunCursor` vinculado a su regla y `ReadAutomationRuns`, que
+  pide `PAGE_SIZE + 1` para saber si hay más y devuelve `nextCursor` null al agotar.
+  Un cursor de otra regla es `VALIDATION_ERROR` sobre `cursor`; una regla ajena o
+  inexistente es el mismo 404 que en @s11.
+- **Refactor**: ninguno.
+- Focal verde: `ReadAutomationRunsTest` 5/5.
+
 ## Discrepancia de contrato pendiente de dictamen (@s30 vs @s32)
 
 @s30 dice que cada coincidencia contiene «exactamente eventId, eventType, occurredAt

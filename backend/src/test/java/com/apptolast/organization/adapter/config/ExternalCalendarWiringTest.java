@@ -100,7 +100,13 @@ class ExternalCalendarWiringTest {
 
   @Test
   void s13_theFeedIsTheHttpOneWithTheContractTimeout() {
-    assertInstanceOf(HttpCalendarFeed.class, CONFIGURATION.calendarFeed());
+    // Enmienda B3: el feed recibe el mismo resolutor y la misma política que la guardia, porque es
+    // él quien resuelve una vez y conecta contra la dirección validada.
+    assertInstanceOf(
+        HttpCalendarFeed.class,
+        CONFIGURATION.calendarFeed(
+            CONFIGURATION.systemHostResolver(),
+            com.apptolast.organization.application.AddressPolicy.blockingPrivateAddresses()));
     assertEquals(java.time.Duration.ofSeconds(5), HttpCalendarFeed.TIMEOUT);
     assertEquals(1024 * 1024, HttpCalendarFeed.LIMIT);
   }

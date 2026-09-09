@@ -11,6 +11,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -22,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -35,7 +37,13 @@ class HttpCalendarFeedTest {
           + "DTSTART:20300108T090000Z\r\nDTEND:20300108T100000Z\r\nSUMMARY:Reunión\r\n"
           + "END:VEVENT\r\nEND:VCALENDAR\r\n";
 
-  record Received(String method, String uri, String accept, String cookie, String authorization) {}
+  record Received(
+      String method,
+      String uri,
+      String accept,
+      String cookie,
+      String authorization,
+      String host) {}
 
   HttpServer server;
   final List<Received> received = new CopyOnWriteArrayList<>();
@@ -54,7 +62,8 @@ class HttpCalendarFeedTest {
                   exchange.getRequestURI().toString(),
                   exchange.getRequestHeaders().getFirst("Accept"),
                   exchange.getRequestHeaders().getFirst("Cookie"),
-                  exchange.getRequestHeaders().getFirst("Authorization")));
+                  exchange.getRequestHeaders().getFirst("Authorization"),
+                  exchange.getRequestHeaders().getFirst("Host")));
           handler.handle(exchange);
         });
     server.start();
@@ -65,12 +74,26 @@ class HttpCalendarFeedTest {
     server.stop(0);
   }
 
+  int port() {
+    return server.getAddress().getPort();
+  }
+
   String url(String path) {
-    return "http://127.0.0.1:" + server.getAddress().getPort() + path;
+    return "http://127.0.0.1:" + port() + path;
   }
 
   HttpCalendarFeed feed() {
-    return new HttpCalendarFeed(HttpCalendarFeed.TIMEOUT);
+    return feed(HttpCalendarFeed.TIMEOUT);
+  }
+
+  /**
+   * Las pruebas hablan con un servidor en 127.0.0.1, que la política de producción bloquearía, así
+   * que aquí se admite; lo que se ejercita es el resto de la descarga. La guardia de direcciones
+   * tiene su propia prueba más abajo.
+   */
+  HttpCalendarFeed feed(Duration timeout) {
+    return new HttpCalendarFeed(
+        timeout, host -> List.of(InetAddress.getLoopbackAddress()), address -> true);
   }
 
   static void reply(HttpExchange exchange, int status, String contentType, byte[] body)
@@ -149,9 +172,92 @@ class HttpCalendarFeedTest {
           }
           reply(exchange, 200, "text/calendar", VALID_ICS);
         };
-    var slow = new HttpCalendarFeed(Duration.ofMillis(300));
+    var slow = feed(Duration.ofMillis(300));
     assertEquals(FeedError.FEED_UNREACHABLE, codeOf(slow.fetch(url("/cal.ics"))));
     released.countDown();
+  }
+
+  /**
+   * @s12: un proveedor que envía las cabeceras al instante y luego gotea el cuerpo sin cerrarlo
+   *     nunca. El plazo es del intercambio completo, no de las cabeceras: si sólo cubriera las
+   *     cabeceras esta prueba no terminaría jamás, y por eso lleva {@link Timeout}.
+   */
+  @Test
+  @Timeout(15)
+  void s12_aBodyThatDripsForeverIsUnreachable() throws InterruptedException {
+    var stopped = new CountDownLatch(1);
+    handler =
+        exchange -> {
+          exchange.getResponseHeaders().add("Content-Type", "text/calendar");
+          exchange.sendResponseHeaders(200, 0);
+          try (var out = exchange.getResponseBody()) {
+            while (!stopped.await(50, TimeUnit.MILLISECONDS)) {
+              out.write('X');
+              out.flush();
+            }
+          } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+          } catch (IOException cut) {
+            // El cliente cortó: es justo lo que la prueba quiere provocar.
+          }
+        };
+    var slow = feed(Duration.ofMillis(300));
+    long started = System.nanoTime();
+    FeedError code;
+    try {
+      code = codeOf(slow.fetch(url("/cal.ics")));
+    } finally {
+      stopped.countDown();
+    }
+    long elapsed = Duration.ofNanos(System.nanoTime() - started).toMillis();
+    assertEquals(FeedError.FEED_UNREACHABLE, code);
+    assertTrue(elapsed < 5_000, "la lectura del cuerpo tardó " + elapsed + " ms en cortarse");
+  }
+
+  /**
+   * Enmienda B3: se conecta contra la dirección ya validada, no contra el nombre. El nombre usado
+   * aquí no existe en ningún DNS; si el cliente volviera a resolverlo —que es lo que hacía antes—
+   * la descarga terminaría en FEED_UNREACHABLE. Que llegue, y que el servidor vea el nombre
+   * original en la cabecera Host, demuestra que no hubo segunda resolución.
+   */
+  @Test
+  void s13_connectsToTheValidatedAddressAndKeepsTheNameInHost() {
+    handler = exchange -> reply(exchange, 200, "text/calendar", VALID_ICS);
+    var resolutions = new java.util.concurrent.atomic.AtomicInteger();
+    var pinned =
+        new HttpCalendarFeed(
+            HttpCalendarFeed.TIMEOUT,
+            host -> {
+              resolutions.incrementAndGet();
+              return List.of(InetAddress.getLoopbackAddress());
+            },
+            address -> true);
+    var fetch =
+        pinned.fetch("http://nombre.que.no.resuelve.invalid:" + port() + "/cal.ics?tok=WXYZ");
+    assertInstanceOf(FeedFetch.Downloaded.class, fetch);
+    assertEquals(1, resolutions.get(), "el nombre debe resolverse exactamente una vez");
+    assertEquals(1, received.size());
+    assertEquals(
+        "nombre.que.no.resuelve.invalid:" + port(),
+        received.getFirst().host(),
+        "el proveedor debe seguir viendo su nombre en la cabecera Host");
+  }
+
+  /**
+   * El reenlace cerrado: la única resolución que existe ocurre dentro de la misma clase que abre la
+   * conexión, y si alguna de las direcciones devueltas está prohibida no se conecta en absoluto.
+   */
+  @Test
+  void s13_aNameThatResolvesToAForbiddenAddressNeverConnects() {
+    handler = exchange -> reply(exchange, 200, "text/calendar", VALID_ICS);
+    var rejecting =
+        new HttpCalendarFeed(
+            HttpCalendarFeed.TIMEOUT,
+            host -> List.of(InetAddress.getLoopbackAddress()),
+            address -> false);
+    assertEquals(
+        FeedError.FEED_REJECTED, codeOf(rejecting.fetch(url("/cal.ics"))));
+    assertTrue(received.isEmpty(), "no puede haber llegado ninguna petición al servidor");
   }
 
   @Test

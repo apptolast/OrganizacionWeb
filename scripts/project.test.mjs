@@ -2102,9 +2102,60 @@ test("external calendar Stryker configuration mutates only its own files", () =>
     "src/external-calendar-api.ts",
     "src/external-calendar.tsx",
     "src/today-external-calendar.tsx",
+    "src/App.tsx:46:8-46:58",
+    "src/App.tsx:59:14-81:40",
+    "src/App.tsx:92:10-151:7",
+    "src/workspace.tsx:81:10-86:22",
   ]);
   assert.equal(configuration.thresholds.break, 80);
   assert.equal(configuration.testRunner, "vitest");
+});
+
+// Hallazgo 18 del dictamen: los cuatro rangos de arriba solo valen si siguen
+// apuntando al tramo que @s37 exige (la ruta, su rama de seccion, su rama de
+// render y la entrada de navegacion). Un rango desfasado mutaria codigo ajeno en
+// silencio, asi que aqui se recorta el fuente por el rango y se comprueba que lo
+// recortado es de verdad ese tramo.
+test("external calendar Stryker ranges still cover the route and the navigation entry (@s37)", () => {
+  const configuration = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.external-calendar.config.json"),
+      "utf8",
+    ),
+  );
+  const slice = (range) => {
+    const parsed = /^(.+):(\d+):(\d+)-(\d+):(\d+)$/.exec(range);
+    assert.ok(parsed, `rango ilegible: ${range}`);
+    const [, file, startLine, startColumn, endLine, endColumn] = parsed.map(
+      (part, index) => (index > 1 ? Number(part) : part),
+    );
+    const lines = readFileSync(resolve(root, "frontend", file), "utf8").split(
+      "\n",
+    );
+    if (startLine === endLine)
+      return lines[startLine - 1].slice(startColumn, endColumn);
+    return [
+      lines[startLine - 1].slice(startColumn),
+      ...lines.slice(startLine, endLine - 1),
+      lines[endLine - 1].slice(0, endColumn),
+    ].join("\n");
+  };
+  const ranges = configuration.mutate.filter((entry) => /:\d+:/.test(entry));
+  assert.equal(ranges.length, 4, "faltan tramos de App.tsx o workspace.tsx");
+  const [route, section, render, navigation] = ranges.map(slice);
+  assert.equal(route, 'externalCalendar = route === "/calendario-externo"');
+  assert.match(section, /^externalCalendar\n\s+\? "Calendario externo"/);
+  assert.match(section, /: null$/);
+  assert.match(
+    render,
+    /^externalCalendar && username \? \(\n\s+<ExternalCalendar \/>/,
+  );
+  assert.match(navigation, /^<RouteLink\n\s+href="\/calendario-externo"/);
+  assert.match(
+    navigation,
+    /aria-current=\{section === "Calendario externo" \? "page" : undefined\}/,
+  );
+  assert.match(navigation, /<\/RouteLink>$/);
 });
 
 test("the end to end stack enables the connectors with an explicit key and keeps the SSRF guard", () => {
@@ -2160,7 +2211,10 @@ test("automations frontend runs only its Stryker configuration", () => {
 
 test("automations Stryker configuration mutates only the feature files", () => {
   const config = JSON.parse(
-    readFileSync(resolve(root, "frontend/stryker.automations.config.json"), "utf8"),
+    readFileSync(
+      resolve(root, "frontend/stryker.automations.config.json"),
+      "utf8",
+    ),
   );
   assert.deepEqual(config.mutate, [
     "src/automations-api.ts",
@@ -2270,7 +2324,10 @@ test("webhooks PIT scope covers the whole slice and extends the default", () => 
   assert.doesNotMatch(selected, /AddressPolicy/);
   // WebhookEndpointLookup, WebhookEndpointNotFoundException y NotifyWebhookAction
   // son de la feature 30, no de esta: las cubre automationsClasses.
-  assert.doesNotMatch(selected, /WebhookEndpointLookup|WebhookEndpointNotFound/);
+  assert.doesNotMatch(
+    selected,
+    /WebhookEndpointLookup|WebhookEndpointNotFound/,
+  );
   assert.doesNotMatch(selected, /NotifyWebhookAction/);
   assert.match(build, /val webhooksOnly = scope == "webhooks"/);
   assert.match(build, /webhooksOnly -> webhooksClasses/);

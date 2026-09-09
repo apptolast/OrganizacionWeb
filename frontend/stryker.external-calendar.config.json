@@ -6,7 +6,11 @@
   "mutate": [
     "src/external-calendar-api.ts",
     "src/external-calendar.tsx",
-    "src/today-external-calendar.tsx"
+    "src/today-external-calendar.tsx",
+    "src/App.tsx:46:8-46:58",
+    "src/App.tsx:59:14-81:40",
+    "src/App.tsx:92:10-151:7",
+    "src/workspace.tsx:81:10-86:22"
   ],
   "reporters": ["clear-text", "json", "html", "progress-append-only"],
   "thresholds": { "high": 90, "low": 80, "break": 80 },

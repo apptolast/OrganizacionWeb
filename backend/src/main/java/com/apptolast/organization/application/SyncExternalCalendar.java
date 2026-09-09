@@ -3,8 +3,8 @@ package com.apptolast.organization.application;
 import com.apptolast.organization.domain.Availability;
 import com.apptolast.organization.domain.ExternalCalendarSnapshot;
 import com.apptolast.organization.domain.FeedError;
-import com.apptolast.organization.domain.IcsCalendar;
-import com.apptolast.organization.domain.IcsMalformedException;
+import com.apptolast.organization.domain.IcsFeed;
+import com.apptolast.organization.domain.IcsFeedMalformedException;
 import com.apptolast.organization.domain.SyncStatus;
 import com.apptolast.organization.domain.SyncSummary;
 import java.time.Clock;
@@ -88,10 +88,10 @@ public final class SyncExternalCalendar implements ExternalCalendarUseCases.Sync
     var fetched = feed.fetch(url.get());
     if (fetched instanceof FeedFetch.Failed failed) return Attempt.failed(failed.code());
     var zone = snapshotZone(ownerId);
-    IcsCalendar calendar;
+    IcsFeed calendar;
     try {
-      calendar = IcsCalendar.parse(((FeedFetch.Downloaded) fetched).text(), zone, zones.zones());
-    } catch (IcsMalformedException malformed) {
+      calendar = IcsFeed.parse(((FeedFetch.Downloaded) fetched).text(), zone, zones.zones());
+    } catch (IcsFeedMalformedException malformed) {
       return Attempt.failed(FeedError.FEED_MALFORMED);
     }
     var snapshot = ExternalCalendarSnapshot.select(calendar.events(), now);

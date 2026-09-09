@@ -60,7 +60,7 @@ Códigos cerrados de fallo: `FEED_REJECTED`, `FEED_UNREACHABLE`, `FEED_HTTP_ERRO
 
 ## Análisis del iCalendar
 
-Analizador propio (`domain/IcsCalendar`), sin dependencias nuevas. Solo `VEVENT`; `UID` y `DTSTART`
+Analizador propio (`domain/IcsFeed`), sin dependencias nuevas. Solo `VEVENT`; `UID` y `DTSTART`
 obligatorios; `Z` es UTC; `TZID` debe pertenecer al catálogo de zonas; flotantes y `VALUE=DATE` se
 resuelven en la zona de instantánea (la de disponibilidad si es resoluble, si no UTC), guardada en
 `snapshotZoneId`. `RRULE`, `RDATE` y `RECURRENCE-ID` se cuentan en `skippedRecurring` y no se

@@ -107,8 +107,7 @@ class IcsFeedTest {
   void s17_durationComputesTheEndAndNonPositiveEndsAreInvalid(
       String rest, int imported, int invalid, String endAt) {
     var parsed =
-        IcsFeed.parse(
-            calendar(event("UID:d1", "DTSTART:20300108T090000Z", rest)), MADRID, ZONES);
+        IcsFeed.parse(calendar(event("UID:d1", "DTSTART:20300108T090000Z", rest)), MADRID, ZONES);
     assertEquals(imported, parsed.events().size());
     assertEquals(invalid, parsed.skippedInvalid());
     if (endAt != null) assertEquals(Instant.parse(endAt), parsed.events().getFirst().endAt());

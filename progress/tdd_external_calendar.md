@@ -20,11 +20,11 @@ Contrato: `features/external_calendar.feature` (@s1…@s40). Ponytail full / Cav
 
 ### Ciclo 1 — parser iCalendar puro (@s14…@s22, @s12 malformado)
 
-- ROJO: `IcsCalendarTest` cubre instantes UTC, TZID con DST real, VALUE=DATE y
+- ROJO: `IcsFeedTest` cubre instantes UTC, TZID con DST real, VALUE=DATE y
   flotantes en la zona de instantánea, DURATION, cancelados y recurrentes,
   desplegado de líneas y escapes, UID duplicado, inválidos y componentes ajenos.
   Fixtures reales en `backend/src/test/resources/ics/`.
-- VERDE: `IcsCalendar`, `ExternalEvent`, `IcsMalformedException`.
+- VERDE: `IcsFeed`, `ExternalEvent`, `IcsFeedMalformedException` (renombrados en el reasentamiento sobre `main`: `IcsCalendar` es el escritor de la feature 26).
 - Detalle de escapes: `\n`/`\N` → salto de línea, `\\` → barra, `\,` y `\;` →
   literales. El desplegado quita `CRLF`/`LF` seguidos de espacio o tabulador.
 
@@ -42,7 +42,7 @@ Contrato: `features/external_calendar.feature` (@s1…@s40). Ponytail full / Cav
   esquema `https` y hacía fallar el caso frontera. Se separó en dos tests:
   2049 → `TOO_LONG` y 2048 exactos → aceptado con `urlTail` "WXYZ".
 
-Comando: `backend\gradlew.bat test --no-daemon --tests '...domain.IcsCalendarTest'
+Comando: `backend\gradlew.bat test --no-daemon --tests '...domain.IcsFeedTest'
 --tests '...domain.ExternalCalendar*'` → 77 tests, 0 fallos.
 
 ### Ciclo 4 — direcciones prohibidas (@s4, @s11)
@@ -314,15 +314,15 @@ la máquina. Queda listo para que el `mutation_tester` lance
 | s11 | `OutboundHostGuardTest.s11_*`, `SyncExternalCalendarTest.s11_*`, `ExternalCalendarApiTest.s11_*` |
 | s12 | `HttpCalendarFeedTest.s12_*`, `SyncExternalCalendarTest.s12_*`, `ExternalCalendarPersistenceTest.s12_*` |
 | s13 | `HttpCalendarFeedTest.s13_*`, `SyncExternalCalendarTest.s13_*` |
-| s14 | `IcsCalendarTest`, `SyncExternalCalendarTest.s14_*` |
-| s15 | `IcsCalendarTest` (TZID con DST real) |
-| s16 | `IcsCalendarTest`, `SyncExternalCalendarTest.s16_*`, `ExternalCalendarPersistenceTest.s16_*` |
-| s17 | `IcsCalendarTest` (DURATION y fines no posteriores) |
-| s18 | `IcsCalendarTest` (cancelados y recurrentes) |
-| s19 | `IcsCalendarTest` (desplegado y escapes) |
-| s20 | `IcsCalendarTest` (UID repetido) |
-| s21 | `IcsCalendarTest` (inválidos) |
-| s22 | `IcsCalendarTest` (componentes ajenos) |
+| s14 | `IcsFeedTest`, `SyncExternalCalendarTest.s14_*` |
+| s15 | `IcsFeedTest` (TZID con DST real) |
+| s16 | `IcsFeedTest`, `SyncExternalCalendarTest.s16_*`, `ExternalCalendarPersistenceTest.s16_*` |
+| s17 | `IcsFeedTest` (DURATION y fines no posteriores) |
+| s18 | `IcsFeedTest` (cancelados y recurrentes) |
+| s19 | `IcsFeedTest` (desplegado y escapes) |
+| s20 | `IcsFeedTest` (UID repetido) |
+| s21 | `IcsFeedTest` (inválidos) |
+| s22 | `IcsFeedTest` (componentes ajenos) |
 | s23 | `ExternalCalendarSnapshotTest`, `SyncExternalCalendarTest.s23_*` |
 | s24 | `ExternalCalendarSnapshotTest`, `SyncExternalCalendarTest.s24_*`, `ExternalCalendarPersistenceTest.s24_*` |
 | s25 | `ExternalCalendarPersistenceTest.s25_*` |
@@ -358,3 +358,58 @@ la máquina. Queda listo para que el `mutation_tester` lance
 - VERDE: sin cambios de producción; el test fija el formato exacto de la línea
   (`host`, `status`, `code`, `durationMs`), que el éxito registra `code=NONE` y
   que la línea nunca contiene la ruta de la dirección.
+
+## Reasentamiento sobre `main` (a6164e4)
+
+La rama tenía 118 commits fuera de `origin/main` porque la importación entró en
+`main` por *squash* (`#28`): rebasar todo habría replicado historia ya integrada.
+Se reasentaron solo los 17 commits propios del carril:
+`git rebase --onto origin/main 67699cc HEAD`. Resultado: 17 commits sobre
+`a6164e4`, árbol limpio.
+
+### Conflictos y cómo se resolvieron
+
+1. **`feature_list.json`** — `main` traía la 28 como `spec_ready` y mi commit la
+   pone `in_progress`. Se conserva `in_progress`: el carril está en curso.
+2. **`domain/IcsCalendar` (add/add)** — colisión real de nombres: la feature 26
+   creó un **escritor** de iCalendar con ese nombre; el mío es un **analizador**.
+   Se conserva el de la 26 intacto y el mío se renombra a `IcsFeed`
+   (`IcsFeed.parse`), con `IcsMalformedException` → `IcsFeedMalformedException` y
+   `IcsCalendarTest` → `IcsFeedTest`. Arrastres actualizados:
+   `SyncExternalCalendar`, `ExternalCalendarIsolationTest`, el alcance PIT y su
+   espejo en `scripts/project.test.mjs`, y `docs/external-calendar.md`.
+3. **`App.tsx`** — se conservan las dos ramas: `externalCalendar` y `calendar` de
+   la 26, en la cadena de `section` y en la de render.
+4. **`workspace.tsx`** (dos veces) — se conservan las dos entradas de navegación.
+   La mía va **antes de "Apariencia"**, y la premisa sigue siendo válida tras el
+   rebase: `appearance.test.tsx` fija ahora las **cinco últimas** posiciones
+   contadas desde el final (Apariencia, Exportación, Calendario, Importación, API
+   para integraciones) y `App.test.tsx` las dos últimas. Insertar antes de
+   "Apariencia" no mueve ninguna de ellas. Se verificó ejecutando ambos tests.
+5. **`backend/build.gradle.kts`** — la unión `else ->` de `targetClasses` se
+   queda con `icsCalendarClasses + externalCalendarClasses`, ambos.
+6. **`SecurityConfiguration`** — sin conflicto textual, pero se revisó a mano que
+   convivan las tres cosas: la cadena `@Order(0)` del feed público de la 26 (sin
+   guardia de conectores, no es ruta de conector), la `@Order(1)` Bearer de la 24
+   —que ahora excluye las rutas de calendario— y la `@Order(2)` de sesión; el
+   `ConnectorsGate` va detrás de `AuthorizationFilter` en las dos últimas.
+   `CalendarPaths.isCalendar` no solapa con `/api/v1/me/external-calendar`.
+   Verde: `SecurityHeadersTest`, `ApiCredentialBearerTest`,
+   `ApiCredentialBearerAdmissionTest`, `CalendarApiTest`, `CalendarWiringTest`,
+   `domain.Calendar*`, `IcsCalendarTest` y `CalendarFeedUseCasesTest`.
+7. **`docker-compose.yml` y `scripts/e2e.mjs`** — mi cableado de
+   `APP_CONNECTOR_KEY` sobrevivió sin conflicto junto a los cambios de la 26.
+
+### Rangos por línea recalculados
+
+`App.tsx` y `workspace.tsx` volvieron a moverse, así que se recalcularon los
+selectores de **los dos** configs afectados y sus espejos en
+`scripts/project.test.mjs`:
+
+- `stryker.appearance.config.json`: `App.tsx` 34:8-34:44, 57:20-69:36,
+  90:10-131:7 y `workspace.tsx` 85:10-90:22.
+- `stryker.ics-calendar.config.json`: `App.tsx` 36:8-36:42, 53:16-54:30,
+  86:10-87:37 y `workspace.tsx` 97:10-102:22.
+
+`node --test scripts/project.test.mjs`: 82 pasan, 0 fallan (los dos fallos
+ajenos de la 24 desaparecen porque su carril ya está en `main`).

@@ -30,10 +30,18 @@ class ExternalCalendarIsolationTest {
           "com.apptolast.organization.domain.ExternalCalendarInput",
           "com.apptolast.organization.domain.ExternalEvent",
           "com.apptolast.organization.domain.ExternalEventsRange",
-          "com.apptolast.organization.domain.IcsCalendar",
+          "com.apptolast.organization.domain.IcsFeed",
           "com.apptolast.organization.application.ExternalCalendarStore",
           "com.apptolast.organization.application.SyncExternalCalendar",
           "com.apptolast.organization.application.ReadExternalCalendarEvents");
+
+  /**
+   * El analizador del carril se llama {@code IcsFeed}; {@code IcsCalendar} es el escritor de la
+   * feature 26 y no entra en esta regla.
+   */
+  private static final String SLICE_NAMES =
+      ".*\\.(ExternalCalendar|ExternalEvent|IcsFeed|CalendarFeed|FeedFetch|FeedError"
+          + "|SyncExternalCalendar|SecretCipher).*";
 
   @ParameterizedTest
   @ValueSource(
@@ -49,7 +57,7 @@ class ExternalCalendarIsolationTest {
         .haveFullyQualifiedName(isolated)
         .should()
         .dependOnClassesThat()
-        .haveNameMatching(".*\\.(ExternalCalendar|ExternalEvent|Ics|Feed|Sync|SecretCipher).*")
+        .haveNameMatching(SLICE_NAMES)
         .check(CLASSES);
   }
 
@@ -58,7 +66,7 @@ class ExternalCalendarIsolationTest {
     noClasses()
         .that()
         .haveNameNotMatching(
-            ".*(ExternalCalendar|ExternalEvent|IcsCalendar|Ics|SyncSummary|SyncStatus|FeedError|SecretCipher|CalendarFeed|FeedFetch|StoredSubscription|OutboundGuard|OutboundHostGuard|AddressPolicy|HostResolver|SyncOutcome|ConnectorsGate|ConnectorCipher|AesGcmSecretCipher|SystemHostResolver|SecretUrl).*")
+            ".*(ExternalCalendar|ExternalEvent|IcsFeed|SyncSummary|SyncStatus|FeedError|SecretCipher|CalendarFeed|FeedFetch|StoredSubscription|OutboundGuard|OutboundHostGuard|AddressPolicy|HostResolver|SyncOutcome|ConnectorsGate|ConnectorCipher|AesGcmSecretCipher|SystemHostResolver|SecretUrl).*")
         .and()
         .haveNameNotMatching(".*(ApplicationConfiguration|SecurityConfiguration|ApiErrors).*")
         .should()

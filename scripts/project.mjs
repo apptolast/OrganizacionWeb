@@ -37,6 +37,8 @@ export function createProject(runner = run) {
           "integration_api-frontend",
           "integration_api-backend",
           "integration_api-http-backend",
+          "ics_calendar-frontend",
+          "ics_calendar-backend",
           "import_data-frontend",
           "import_data-reader-backend",
           "import_data-http-backend",
@@ -110,6 +112,21 @@ export function createProject(runner = run) {
         "run",
         "stryker.import-data.config.json",
       ]);
+      return;
+    }
+    if (task === "mutate" && target === "ics_calendar-frontend") {
+      runner("pnpm", [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.ics-calendar.config.json",
+      ]);
+      return;
+    }
+    if (task === "mutate" && target === "ics_calendar-backend") {
+      backend("pitest", ["-PmutationScope=ics_calendar"]);
       return;
     }
     if (task === "mutate" && target === "export_data-frontend") {

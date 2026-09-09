@@ -288,6 +288,39 @@ public class ApplicationConfiguration {
     return new com.apptolast.organization.application.CreateSubtask(commit, clock);
   }
 
+  /** One adapter answers both calendar ports so a feed read stays inside one snapshot. */
+  @Bean
+  com.apptolast.organization.adapter.persistence.PostgresCalendarStore calendarStore(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager manager) {
+    return new com.apptolast.organization.adapter.persistence.PostgresCalendarStore(jdbc, manager);
+  }
+
+  @Bean
+  com.apptolast.organization.application.ManageCalendarFeedUseCase manageCalendarFeed(
+      com.apptolast.organization.application.CalendarFeedTokens tokens,
+      @org.springframework.beans.factory.annotation.Value("${app.public-origin}")
+          String publicOrigin,
+      Clock clock) {
+    return new com.apptolast.organization.application.ManageCalendarFeed(
+        tokens, publicOrigin, clock, new java.security.SecureRandom());
+  }
+
+  /** Wrapped so the token, the zone and the blocks of one feed come out of a single snapshot. */
+  @Bean
+  com.apptolast.organization.application.RenderCalendarUseCase renderCalendar(
+      com.apptolast.organization.application.CalendarFeedTokens tokens,
+      com.apptolast.organization.application.CalendarQueries calendars,
+      @org.springframework.beans.factory.annotation.Value("${app.public-origin}")
+          String publicOrigin,
+      Clock clock,
+      org.springframework.transaction.PlatformTransactionManager manager) {
+    return new com.apptolast.organization.adapter.persistence.SnapshotRenderCalendar(
+        new com.apptolast.organization.application.RenderCalendar(
+            tokens, calendars, publicOrigin, clock),
+        manager);
+  }
+
   @Bean
   com.apptolast.organization.application.ReadSubtasks readSubtasks(
       com.apptolast.organization.application.SubtaskQueries queries) {

@@ -140,11 +140,10 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
         ? window.matchMedia?.("(prefers-color-scheme: dark)")
         : undefined;
     const apply = () => {
+      // media solo existe cuando la preferencia es SYSTEM, así que consultarlo
+      // ya implica esa rama: repetir la comprobación aquí sería redundante.
       const theme =
-        snapshot.theme === "DARK" ||
-        (snapshot.theme === "SYSTEM" && media?.matches)
-          ? "dark"
-          : "light";
+        snapshot.theme === "DARK" || media?.matches ? "dark" : "light";
       document.documentElement.dataset.theme = theme;
       document.documentElement.style.colorScheme = theme;
       paintThemeColor();

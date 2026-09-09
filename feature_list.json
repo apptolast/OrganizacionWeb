@@ -271,9 +271,11 @@
       "name": "integration_api",
       "title": "API para integraciones",
       "description": "Credenciales personales revocables con seis permisos, cuotas compartidas, API existente y OpenAPI: contrato de 42 escenarios aprobado.",
-      "acceptance": ["Cumplir @s1–@s42 de features/integration_api.feature con revisión independiente, pruebas y mutación antes del cierre."],
+      "acceptance": [
+        "Cumplir @s1–@s42 de features/integration_api.feature con revisión independiente, pruebas y mutación antes del cierre."
+      ],
       "sdd": true,
-      "status": "spec_ready"
+      "status": "done"
     },
     {
       "id": 25,
@@ -295,7 +297,7 @@
         "Cumplir @s1–@s38 de features/ics_calendar.feature con revisión, pruebas y mutación antes del cierre."
       ],
       "sdd": true,
-      "status": "spec_ready"
+      "status": "in_progress"
     },
     {
       "id": 27,
@@ -306,7 +308,7 @@
         "Cumplir @s1–@s42 de features/github_connector.feature con revisión, pruebas y mutación antes del cierre."
       ],
       "sdd": true,
-      "status": "spec_ready"
+      "status": "in_progress"
     },
     {
       "id": 28,
@@ -317,7 +319,7 @@
         "Cumplir @s1–@s40 de features/external_calendar.feature con revisión, pruebas y mutación antes del cierre."
       ],
       "sdd": true,
-      "status": "spec_ready"
+      "status": "in_progress"
     },
     {
       "id": 29,
@@ -339,7 +341,7 @@
         "Cumplir @s1–@s43 de features/automations.feature con revisión, pruebas y mutación antes del cierre."
       ],
       "sdd": true,
-      "status": "spec_ready"
+      "status": "in_progress"
     }
   ]
 }

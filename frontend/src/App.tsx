@@ -14,6 +14,7 @@ import { WeeklyReview } from "./weekly-review";
 import { Appearance } from "./appearance";
 import { ExportData } from "./export-data";
 import { ImportData } from "./import-data";
+import { Calendar } from "./calendar";
 import { IntegrationApi } from "./integration-api";
 import { Webhooks } from "./webhooks";
 import { useAppearance } from "./appearance-state";
@@ -32,6 +33,7 @@ export function App({
   const availability = route === "/disponibilidad";
   const appearance = route === "/apariencia";
   const exportData = route === "/exportacion";
+  const calendar = route === "/calendario";
   const importData = route === "/importacion";
   const integrationApi = route === "/integraciones/api";
   const webhooks = route === "/webhooks";
@@ -48,21 +50,23 @@ export function App({
             ? "API para integraciones"
             : importData
               ? "Importación"
-              : exportData
-                ? "Exportación"
-                : appearance
-                  ? "Apariencia"
-                  : route === "/"
-                    ? "Hoy"
-                    : weeklyReview
-                      ? "Revisión semanal"
-                      : history
-                        ? "Historial"
-                        : availability
-                          ? "Disponibilidad"
-                          : route.startsWith("/proyectos")
-                            ? "Proyectos"
-                            : null
+              : calendar
+                ? "Calendario"
+                : exportData
+                  ? "Exportación"
+                  : appearance
+                    ? "Apariencia"
+                    : route === "/"
+                      ? "Hoy"
+                      : weeklyReview
+                        ? "Revisión semanal"
+                        : history
+                          ? "Historial"
+                          : availability
+                            ? "Disponibilidad"
+                            : route.startsWith("/proyectos")
+                              ? "Proyectos"
+                              : null
       }
     >
       {webhooks && username ? (
@@ -79,6 +83,8 @@ export function App({
             }
           }}
         />
+      ) : calendar && username ? (
+        <Calendar owner={username} />
       ) : exportData && username ? (
         <ExportData owner={username} />
       ) : appearance ? (

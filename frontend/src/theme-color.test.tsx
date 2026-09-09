@@ -72,6 +72,60 @@ it("applying LIGHT paints theme-color with the computed light canvas (audit #5)"
   expect(meta.content).toBe(LIGHT_CANVAS);
 });
 
+// SYSTEM es el valor por defecto: la rama por la que pasa casi todo el mundo.
+const SYSTEM_DARK_QUERY = "(prefers-color-scheme: dark)";
+const systemPrefers = (dark: boolean) => {
+  const media = Object.assign(new EventTarget(), { matches: dark });
+  const matchMedia = vi.fn().mockReturnValue(media);
+  vi.stubGlobal("matchMedia", matchMedia);
+  return matchMedia;
+};
+
+it.each([
+  { os: "dark", dark: true, theme: "dark", canvas: DARK_CANVAS },
+  { os: "light", dark: false, theme: "light", canvas: LIGHT_CANVAS },
+])(
+  "SYSTEM follows a $os operating system for canvas, data-theme and theme-color (@s24)",
+  async ({ dark, theme, canvas }) => {
+    const matchMedia = systemPrefers(dark);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(() => snapshot("SYSTEM")),
+    );
+    render(<AppearanceProvider>{null}</AppearanceProvider>);
+    await waitFor(() =>
+      expect(document.documentElement.dataset.theme).toBe(theme),
+    );
+    expect(matchMedia).toHaveBeenCalledWith(SYSTEM_DARK_QUERY);
+    expect(document.documentElement.style.colorScheme).toBe(theme);
+    expect(
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--canvas")
+        .trim(),
+    ).toBe(canvas);
+    expect(meta.content).toBe(canvas);
+  },
+);
+
+it.each([
+  { preference: "DARK", theme: "dark" },
+  { preference: "LIGHT", theme: "light" },
+])(
+  "an explicit $preference preference never consults the operating system (@s24)",
+  async ({ preference, theme }) => {
+    const matchMedia = systemPrefers(preference === "LIGHT");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(() => snapshot(preference)),
+    );
+    render(<AppearanceProvider>{null}</AppearanceProvider>);
+    await waitFor(() =>
+      expect(document.documentElement.dataset.theme).toBe(theme),
+    );
+    expect(matchMedia).not.toHaveBeenCalled();
+  },
+);
+
 it("leaving the session returns theme-color to the system canvas (@s32)", async () => {
   vi.stubGlobal(
     "fetch",

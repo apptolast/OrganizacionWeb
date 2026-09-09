@@ -218,6 +218,86 @@ test("export Stryker keeps its complete modules and reviewed integration nodes w
     "reports/mutation-export-data/mutation.html",
   );
 });
+test("ics calendar Stryker selects its own nodes of the shared files", () => {
+  const config = JSON.parse(
+    readFileSync(
+      resolve(root, "frontend/stryker.ics-calendar.config.json"),
+      "utf8",
+    ),
+  );
+  assert.deepEqual(config.mutate, [
+    "src/App.tsx:35:8-35:42",
+    "src/App.tsx:49:14-50:29",
+    "src/App.tsx:80:10-81:37",
+    "src/workspace.tsx:90:10-95:22",
+    "src/calendar-feed-api.ts",
+    "src/calendar.tsx",
+  ]);
+  assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
+  assert.equal(config.tempDirName, ".stryker-tmp-ics-calendar");
+  assert.equal(
+    config.jsonReporter.fileName,
+    "reports/mutation-ics-calendar/mutation.json",
+  );
+  const expected = [
+    ["calendar = route", "/calendario"],
+    ["calendar", "Calendario"],
+    ["calendar && username", "<Calendar owner={username} />"],
+    ["<RouteLink", "/calendario"],
+  ];
+  for (const [index, selector] of config.mutate.slice(0, 4).entries()) {
+    const [, path, startLine, startColumn, endLine, endColumn] = selector.match(
+      /^(.+):(\d+):(\d+)-(\d+):(\d+)$/,
+    );
+    const lines = readFileSync(resolve(root, "frontend", path), "utf8").split(
+      /\r?\n/,
+    );
+    const selected = lines.slice(Number(startLine) - 1, Number(endLine));
+    selected[selected.length - 1] = selected.at(-1).slice(0, Number(endColumn));
+    selected[0] = selected[0].slice(Number(startColumn));
+    assert.ok(selected.join("\n").startsWith(expected[index][0]), selector);
+    assert.ok(selected.join("\n").includes(expected[index][1]), selector);
+  }
+});
+test("ics calendar frontend invokes only its fixed Stryker configuration", () => {
+  const { calls, project } = capture();
+  project("mutate", "ics_calendar-frontend");
+  assert.deepEqual(calls, [
+    [
+      "pnpm",
+      [
+        "--dir",
+        "frontend",
+        "exec",
+        "stryker",
+        "run",
+        "stryker.ics-calendar.config.json",
+      ],
+    ],
+  ]);
+});
+test("ics calendar backend runs PIT on its own scope and nothing else", () => {
+  const { calls, project } = capture();
+  project("mutate", "ics_calendar-backend");
+  assert.equal(calls.length, 1);
+  assert.deepEqual(calls[0][1], [
+    "pitest",
+    "--no-daemon",
+    "-PmutationScope=ics_calendar",
+  ]);
+});
+test("ics calendar targets reject other tasks and injected options", () => {
+  const { calls, project } = capture();
+  for (const target of ["ics_calendar-frontend", "ics_calendar-backend"]) {
+    assert.throws(() => project("test", target), /Invalid target/);
+    assert.throws(
+      () => project("mutate", `${target} -PmutationScope=other`),
+      /Invalid target/,
+    );
+    assert.throws(() => project("mutate", `${target}-extra`), /Invalid target/);
+  }
+  assert.deepEqual(calls, []);
+});
 test("export frontend invokes only its fixed Stryker configuration", () => {
   const { calls, project } = capture();
   project("mutate", "export_data-frontend");
@@ -1783,10 +1863,10 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     "src/appearance-api.ts",
     "src/appearance-state.tsx",
     "src/appearance.tsx",
-    "src/App.tsx:32:8-32:44",
-    "src/App.tsx:49:16-61:32",
-    "src/App.tsx:78:10-119:7",
-    "src/workspace.tsx:77:10-82:22",
+    "src/App.tsx:33:8-33:44",
+    "src/App.tsx:53:18-65:34",
+    "src/App.tsx:84:10-125:7",
+    "src/workspace.tsx:78:10-83:22",
     "src/session-gate.tsx:32:2-52:6",
     "src/use-session.ts:208:0-229:1",
   ]);

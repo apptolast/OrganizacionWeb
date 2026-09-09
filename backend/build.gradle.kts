@@ -35,6 +35,7 @@ pitest {
     pitestVersion.set("1.22.0")
     junit5PluginVersion.set("1.2.3")
     val scope = providers.gradleProperty("mutationScope").orNull
+    val icsCalendarOnly = scope == "ics_calendar"
     val integrationApiOnly = scope == "integration_api"
     val integrationApiHttpOnly = scope == "integration_api_http"
     val importReaderOnly = scope == "import_data_reader"
@@ -72,6 +73,24 @@ pitest {
         "com.apptolast.organization.application.ApiUnauthenticatedException*",
         "com.apptolast.organization.adapter.persistence.PostgresApiCredentialStore*",
         "com.apptolast.organization.adapter.config.ApplicationConfiguration*"
+    )
+    val icsCalendarClasses = setOf(
+        "com.apptolast.organization.domain.IcsCalendar*",
+        "com.apptolast.organization.domain.CalendarWindow*",
+        "com.apptolast.organization.domain.CalendarFeedSecret*",
+        "com.apptolast.organization.domain.CalendarEntry*",
+        "com.apptolast.organization.domain.CalendarSnapshot*",
+        "com.apptolast.organization.application.ManageCalendarFeed*",
+        "com.apptolast.organization.application.RenderCalendar*",
+        "com.apptolast.organization.application.CalendarFeedAddress*",
+        "com.apptolast.organization.adapter.http.CalendarFeedController*",
+        "com.apptolast.organization.adapter.http.PublicCalendarController*",
+        "com.apptolast.organization.adapter.http.CalendarDocuments*",
+        "com.apptolast.organization.adapter.http.CalendarProblems*",
+        "com.apptolast.organization.adapter.http.CalendarPaths*",
+        "com.apptolast.organization.adapter.persistence.PostgresCalendarStore*",
+        "com.apptolast.organization.adapter.persistence.SnapshotRenderCalendar*",
+        "com.apptolast.organization.adapter.config.ApplicationConfiguration"
     )
     val integrationApiHttpClasses = setOf(
         "com.apptolast.organization.adapter.http.ApiCredentialController*",
@@ -419,6 +438,7 @@ pitest {
         "com.apptolast.organization.adapter.persistence.History*Test"
     )
     targetClasses.set(when {
+        icsCalendarOnly -> icsCalendarClasses
         integrationApiOnly -> integrationApiClasses
         integrationApiHttpOnly -> integrationApiHttpClasses
         importReaderOnly -> importReaderClasses
@@ -442,9 +462,10 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses + integrationApiClasses + integrationApiHttpClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses + integrationApiClasses + integrationApiHttpClasses + icsCalendarClasses
     })
     targetTests.set(when {
+        icsCalendarOnly -> setOf("com.apptolast.organization.*")
         integrationApiOnly || integrationApiHttpOnly -> setOf("com.apptolast.organization.*")
         importReaderOnly -> importReaderTests
         importHttpOnly -> importHttpTests
@@ -469,6 +490,7 @@ pitest {
         taskOnly -> taskTests
         else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests + weeklyReviewAdapterTests + appearanceAdapterTests + customizationAdapterTests + exportAdapterTests + importAdapterTests
     })
+    if (icsCalendarOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-ics-calendar"))
     if (integrationApiOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-integration-api"))
     if (integrationApiHttpOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-integration-api-http"))
     if (importReaderOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-reader"))

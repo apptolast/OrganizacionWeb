@@ -786,13 +786,14 @@ it("@s20 opens appearance through the principal navigation at its stable route",
   );
   expect(navigation.getAllByRole("link")[0]).toHaveAccessibleName("Hoy");
   // Later features append entries, so assert the tail order by name and not by
-  // index: Apariencia, Exportación, Importación and API keep their relative order.
+  // index: these keep their relative order however many entries exist.
   const names = navigation
     .getAllByRole("link")
     .map((link) => link.textContent?.replace(/[^\p{L}\s]/gu, "").trim() ?? "");
   const order = [
     "Apariencia",
     "Exportación",
+    "Calendario",
     "Importación",
     "API para integraciones",
   ].map((name) => names.indexOf(name));

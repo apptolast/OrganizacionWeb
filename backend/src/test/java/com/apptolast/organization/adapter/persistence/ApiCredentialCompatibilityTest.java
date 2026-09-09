@@ -48,13 +48,21 @@ class ApiCredentialCompatibilityTest {
       var original = new ByteArrayOutputStream();
       export.prepare(owner).writeTo(original);
       Flyway.configure().dataSource(source).load().migrate();
+      // The claim is that the upgrade is ADDITIVE: no table that already existed at V21
+      // loses or moves a column. Comparing against the tables captured before the upgrade
+      // says exactly that, and does not need a denylist that every later feature has to
+      // edit (V22 credentials, V23 webhooks, V24 calendar...) and that fails whenever
+      // someone forgets.
+      var priorTables =
+          columns.stream().map(row -> (String) row.get("table_name")).distinct().toList();
       assertEquals(
           columns,
-          jdbc.queryForList(
-              // The tables each later feature adds are excluded on purpose: what this
-              // asserts is that the upgrade is additive, so no pre-existing column moved.
-              // V22 added the three api_credential tables and V23 the two webhook ones.
-              "SELECT table_name,column_name,data_type FROM information_schema.columns WHERE table_schema='public' AND table_name NOT IN ('api_credentials','api_owner_quotas','api_credential_quotas','webhook_endpoints','webhook_deliveries') ORDER BY table_name,ordinal_position"));
+          jdbc
+              .queryForList(
+                  "SELECT table_name,column_name,data_type FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name,ordinal_position")
+              .stream()
+              .filter(row -> priorTables.contains((String) row.get("table_name")))
+              .toList());
       assertEquals(
           before,
           jdbc.queryForObject(

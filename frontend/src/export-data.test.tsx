@@ -401,9 +401,12 @@ it("@s22 opens Exportación from the final navigation link without fetching an a
   const names = links.map(
     (item) => item.textContent?.replace(/[^\p{L}\s]/gu, "").trim() ?? "",
   );
-  const order = ["Exportación", "Importación", "API para integraciones"].map(
-    (name) => names.indexOf(name),
-  );
+  const order = [
+    "Exportación",
+    "Calendario",
+    "Importación",
+    "API para integraciones",
+  ].map((name) => names.indexOf(name));
   expect(order.every((index) => index > 0)).toBe(true);
   expect(order).toEqual([...order].sort((left, right) => left - right));
   await userEvent.click(link);

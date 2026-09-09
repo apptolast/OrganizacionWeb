@@ -575,3 +575,44 @@ hasta los seis en verde; (4) sólo entonces acreditar el rojo del oráculo con l
 mutación que el dictamen nombra —`li span { white-space: nowrap; overflow: hidden;
 text-overflow: clip; }`— que debe fallar en `${state}:${width} contenido
 recortado`; (5) restaurar, verde y commit.
+
+## Hallazgo 18 — NO empezado, por conflicto de instrucciones que no me toca resolver
+
+El último encargo del coordinador dice dos cosas que no se pueden cumplir a la vez:
+
+- «Con lo que sobre, el **hallazgo 18** (`@s28`: la reactivación no llega a los dos
+  eventos posteriores al cursor que el escenario exige), que es de dominio y cabe
+  entero.»
+- «**No toques** `frontend/src/github-connector*` ni **ningún fichero de backend de
+  webhooks**: hay otros dos carriles ahí.»
+
+El hallazgo 18 **es** backend de webhooks. Su cierre, tal como lo redacta el
+propio dictamen, exige editar
+`backend/src/test/java/com/apptolast/organization/adapter/persistence/WebhookRecoveryPersistenceTest.java`
+(montar D2 como entrega real de outbox usando el helper `outbox()` de la línea 92,
+insertar dos filas en `outbox_events` posteriores al cursor y afirmar la secuencia
+`List.of(D2, E1, E2)`), y probablemente también un caso nuevo sobre la compuerta
+`e.status='active'` de `PostgresWebhookOutbox.readyEndpoints()`. No es «de
+dominio» en el sentido de dominio puro: es persistencia contra Postgres real.
+
+**Decido no tocarlo.** Entre una asignación de trabajo y una prohibición explícita
+de tocar ficheros que otros dos carriles tienen abiertos, la prohibición es la que
+protege trabajo ajeno: un conflicto en ese fichero durante la integración puede
+costar el trabajo de otro carril, y eso no es reversible desde aquí. Prefiero
+devolver el conflicto que resolverlo por mi cuenta.
+
+**Qué necesito para desbloquearlo:** una sola frase del coordinador confirmando
+que ningún otro carril tiene abierto `WebhookRecoveryPersistenceTest.java` ni
+`PostgresWebhookOutbox`, o bien reasignando el hallazgo 18 al carril que ya esté
+dentro de esos ficheros —que además lo cerrará más barato, porque ya tiene el
+contexto y los contenedores calientes.
+
+**Lo que sí quedaba en mi ámbito y tampoco empiezo:** el hallazgo 4 (recorrido de
+teclado) vive en `e2e/webhooks-ux.spec.mjs`, que no está prohibido. No lo empiezo
+porque acreditarlo bien exige **dos** ejecuciones de E2E —una para el verde y otra
+para el rojo con la mutación— a ~2,5 min cada una más la escritura, y no caben
+antes de la hora de parada. Empezarlo sería repetir exactamente el error del
+hallazgo 2: dejar una spec a medias que hay que revertir. El trabajo pendiente
+está descrito arriba, con el precedente concreto a copiar
+(`e2e/github-connector.spec.mjs:261-291` para el orden y `:302-340` para el anillo
+de foco).

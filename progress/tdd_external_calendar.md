@@ -78,3 +78,14 @@ Comando: `backend\gradlew.bat test --no-daemon --tests '...domain.IcsCalendarTes
   se conserva en lo que no contradice el contrato: sigue admitiéndose una
   clave anterior opcional, pero se prueba a ciegas y decide la etiqueta GCM,
   no un byte de versión. Con una sola clave configurada, @s29 se cumple.
+
+### Ciclo 7 — guardia de direcciones con resolución DNS (@s4, @s11)
+
+- ROJO: `OutboundHostGuardTest` con una zona DNS falsa inyectada por el puerto
+  `HostResolver`: público permitido, sin direcciones `UNRESOLVABLE`, cada
+  familia prohibida `BLOCKED`, y una sola prohibida entre públicas bloquea el
+  host entero. Un resolutor que revienta también es `UNRESOLVABLE`, nunca
+  permitido.
+- VERDE: `HostResolver` y `OutboundHostGuard`.
+- Riesgo residual anotado en el javadoc: rebinding DNS entre la comprobación y
+  la conexión. Se mitiga repitiendo la comprobación en cada sincronización.

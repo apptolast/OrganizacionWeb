@@ -439,6 +439,46 @@ public class ApplicationConfiguration {
   }
 
   @Bean
+  com.apptolast.organization.adapter.persistence.PostgresWebhookWork webhookWork(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions,
+      com.apptolast.organization.application.WebhookSecrets secrets) {
+    return new com.apptolast.organization.adapter.persistence.PostgresWebhookWork(
+        jdbc, transactions, secrets::decrypt);
+  }
+
+  @Bean
+  com.apptolast.organization.adapter.persistence.PostgresWebhookOutbox webhookOutbox(
+      org.springframework.jdbc.core.JdbcTemplate jdbc,
+      org.springframework.transaction.PlatformTransactionManager transactions,
+      com.fasterxml.jackson.databind.ObjectMapper json) {
+    return new com.apptolast.organization.adapter.persistence.PostgresWebhookOutbox(
+        jdbc, transactions, json);
+  }
+
+  @Bean
+  com.apptolast.organization.application.WebhookSender webhookSender(Clock clock) {
+    return new com.apptolast.organization.adapter.webhook.JdkWebhookSender(
+        clock,
+        com.apptolast.organization.application.AddressPolicy::isBlocked,
+        java.net.InetAddress::getAllByName);
+  }
+
+  @Bean
+  com.apptolast.organization.application.DispatchWebhooks dispatchWebhooks(
+      com.apptolast.organization.application.WebhookWork work,
+      com.apptolast.organization.application.WebhookSender sender,
+      Clock clock) {
+    return new com.apptolast.organization.application.DispatchWebhooks(work, sender, clock);
+  }
+
+  @Bean
+  com.apptolast.organization.application.EnqueueWebhookDeliveries enqueueWebhookDeliveries(
+      com.apptolast.organization.application.WebhookOutbox outbox, Clock clock) {
+    return new com.apptolast.organization.application.EnqueueWebhookDeliveries(outbox, clock);
+  }
+
+  @Bean
   com.apptolast.organization.application.ManageWebhook manageWebhook(
       com.apptolast.organization.application.WebhookEndpoints endpoints,
       com.apptolast.organization.application.WebhookDeliveries deliveries,

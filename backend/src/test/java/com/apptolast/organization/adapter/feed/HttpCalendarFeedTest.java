@@ -19,7 +19,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -174,32 +173,67 @@ class HttpCalendarFeedTest {
     assertEquals(FeedError.FEED_TOO_LARGE, codeOf(feed().fetch(url("/cal.ics"))));
   }
 
+  /** Un cuerpo anunciado que el proveedor nunca termina de emitir. */
+  static final long ENDLESS_LENGTH = 4L * HttpCalendarFeed.LIMIT;
+
+  /** Lo único que el servidor llega a emitir: el límite más el margen para cruzarlo. */
+  static final long EMITTED_BEFORE_GOING_SILENT = HttpCalendarFeed.LIMIT + 64L * 1024;
+
+  static final int SERVER_CHUNK = 8 * 1024;
+
+  /** Margen para que un cliente que no corta delate su espera sin colgar la suite. */
+  static final int SILENCE_BEFORE_HANGING_UP_SECONDS = 5;
+
+  /**
+   * El servidor anuncia {@link #ENDLESS_LENGTH} pero solo emite {@link
+   * #EMITTED_BEFORE_GOING_SILENT} y enmudece: el resto del cuerpo no llega nunca. Así, la única
+   * forma de obtener FEED_TOO_LARGE es dictar el veredicto habiendo consumido a lo sumo ese
+   * prefijo; quien agote el cuerpo se queda esperando los MiB que faltan y acaba en
+   * FEED_UNREACHABLE cuando el servidor cuelga. El oráculo no mide cuánto alcanzó a escribir el
+   * servidor —eso depende de los búferes del socket y de la carrera entre ambos extremos— sino que
+   * acota por construcción cuánto puede llegar a leer el cliente.
+   *
+   * <p>El colgado final es imprescindible: {@code HttpRequest.timeout} no cubre la lectura del
+   * cuerpo con {@code BodyHandlers.ofInputStream}, de modo que sin él un cliente sin corte por
+   * tamaño se quedaría bloqueado para siempre en vez de fallar.
+   */
   @Test
-  void s13_abortsAnEndlessBodyLongBeforeTwoMebibytes() throws InterruptedException {
-    var written = new AtomicLong();
-    var finished = new CountDownLatch(1);
+  void s13_abortsAnEndlessBodyAfterReadingJustPastTheLimit() {
+    var clientHasAborted = new CountDownLatch(1);
     handler =
         exchange -> {
           exchange.getResponseHeaders().add("Content-Type", "text/calendar");
-          exchange.sendResponseHeaders(200, 4L * HttpCalendarFeed.LIMIT);
-          var chunk = new byte[8 * 1024];
+          exchange.sendResponseHeaders(200, ENDLESS_LENGTH);
+          var chunk = new byte[SERVER_CHUNK];
           java.util.Arrays.fill(chunk, (byte) 'x');
-          try (var out = exchange.getResponseBody()) {
-            for (int i = 0; i < 4 * 128; i++) {
+          try {
+            var out = exchange.getResponseBody();
+            for (long emitted = 0; emitted < EMITTED_BEFORE_GOING_SILENT; emitted += SERVER_CHUNK) {
               out.write(chunk);
-              written.addAndGet(chunk.length);
+              out.flush();
             }
+            clientHasAborted.await(SILENCE_BEFORE_HANGING_UP_SECONDS, TimeUnit.SECONDS);
           } catch (IOException aborted) {
-            // la lectura se cortó: es exactamente lo que se espera
+            // el cliente cerró la conexión: es exactamente lo que se espera
+          } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
           } finally {
-            finished.countDown();
+            // Sin cerrar antes el flujo: así el cuerpo queda incompleto y se corta la conexión.
+            exchange.close();
           }
         };
-    assertEquals(FeedError.FEED_TOO_LARGE, codeOf(feed().fetch(url("/cal.ics"))));
-    finished.await(10, TimeUnit.SECONDS);
-    assertTrue(
-        written.get() < 2L * HttpCalendarFeed.LIMIT,
-        "el servidor llegó a escribir " + written.get() + " bytes antes del corte");
+    try {
+      assertEquals(
+          FeedError.FEED_TOO_LARGE,
+          codeOf(feed().fetch(url("/cal.ics"))),
+          "el servidor enmudece tras "
+              + EMITTED_BEFORE_GOING_SILENT
+              + " bytes de los "
+              + ENDLESS_LENGTH
+              + " anunciados: quien no corte por tamaño se queda esperando el resto del cuerpo");
+    } finally {
+      clientHasAborted.countDown();
+    }
   }
 
   @ParameterizedTest

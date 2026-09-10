@@ -69,7 +69,6 @@ test("export: real owner snapshot downloads original bytes twice without another
       "Exportación",
       "Calendario",
       "Importación",
-      "Conectores",
       "API para integraciones",
       "Webhooks",
       "Automatizaciones",

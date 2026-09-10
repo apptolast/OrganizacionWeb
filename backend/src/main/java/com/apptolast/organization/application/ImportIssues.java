@@ -35,7 +35,10 @@ public final class ImportIssues implements ImportIssuesUseCase {
   /** El fallo no vino del gestor externo, así que no hay código HTTP suyo que anotar. */
   private static final int NOT_THE_PROVIDER = 0;
 
-  /** El mismo código que el adaptador HTTP da como 503 cuando el llavero no abre el secreto. */
+  /**
+   * Ninguna clave del llavero abre el texto cifrado guardado: la del servidor cambió. Es el mismo
+   * código que el adaptador HTTP traduce a 503.
+   */
   private static final String KEY_MISMATCH = "CONNECTOR_KEY_MISMATCH";
 
   private final IssueConnections connections;
@@ -115,9 +118,11 @@ public final class ImportIssues implements ImportIssuesUseCase {
     } catch (StorageUnavailableException error) {
       throw failed(ownerId, connection, receipt, "STORAGE_UNAVAILABLE", 0, NOT_THE_PROVIDER);
     } catch (SecretUndecipherableException error) {
-      // El recibo ya está insertado como running: si esto se escapa sin cerrarlo, el propietario
-      // se queda con una importación fantasma que bloquea las siguientes con un 409 mentiroso.
-      // Se cierra failed y se relanza tal cual, para que el adaptador siga dando su 503.
+      // El recibo ya está insertado como en curso, así que hay que cerrarlo antes de propagar: un
+      // fallo de la clave del servidor no puede dejar al propietario con una importación fantasma
+      // que bloquee las siguientes quince minutos con un IMPORT_IN_PROGRESS —un 409 mentiroso—
+      // que no corresponde a ninguna importación viva. La excepción sigue subiendo tal cual para
+      // que el adaptador la traduzca a 503 CONNECTOR_KEY_MISMATCH.
       failed(ownerId, connection, receipt, KEY_MISMATCH, 0, NOT_THE_PROVIDER);
       throw error;
     }

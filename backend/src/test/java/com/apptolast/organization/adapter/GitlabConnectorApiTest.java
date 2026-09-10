@@ -401,9 +401,20 @@ class GitlabConnectorApiTest {
                     .content("{\"projectId\":\"" + PROJECT + "\"}"))
             .andExpect(status().isCreated())
             .andExpect(header().string("Location", IMPORTS + "/" + IMPORT))
+            // La fila 185 del contrato, valor a valor: un conjunto de claves no distingue un campo
+            // presente con su dato de un campo presente con null.
+            .andExpect(jsonPath("$.id").value(IMPORT.toString()))
             .andExpect(jsonPath("$.source").value("gitlab"))
+            .andExpect(jsonPath("$.projectId").value(PROJECT.toString()))
             .andExpect(jsonPath("$.projectPath").value("grupo/proyecto"))
+            .andExpect(jsonPath("$.status").value("completed"))
             .andExpect(jsonPath("$.created").value(2))
+            .andExpect(jsonPath("$.skipped").value(0))
+            .andExpect(jsonPath("$.failed").value(0))
+            .andExpect(jsonPath("$.truncated").value(false))
+            .andExpect(jsonPath("$.startedAt").value("2026-09-09T12:00:00Z"))
+            .andExpect(jsonPath("$.finishedAt").value("2026-09-09T12:00:04Z"))
+            .andExpect(content().json("{\"errorCode\":null}"))
             .andReturn()
             .getResponse()
             .getContentAsString();
@@ -434,13 +445,125 @@ class GitlabConnectorApiTest {
     var body =
         mvc.perform(get(IMPORTS + "/" + IMPORT).with(user("owner")))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(IMPORT.toString()))
+            .andExpect(jsonPath("$.projectId").value(PROJECT.toString()))
+            .andExpect(jsonPath("$.status").value("completed"))
             .andExpect(jsonPath("$.created").value(2))
+            .andExpect(jsonPath("$.startedAt").value("2026-09-09T12:00:00Z"))
+            .andExpect(jsonPath("$.finishedAt").value("2026-09-09T12:00:04Z"))
             .andReturn()
             .getResponse()
             .getContentAsString();
 
     org.assertj.core.api.Assertions.assertThat(keysOf(body))
         .containsExactlyInAnyOrder(RECEIPT_FIELDS);
+  }
+
+  /**
+   * Contadores y banderas del recibo, fila a fila del contrato: @s16 (la cuarta fila del outline,
+   * doscientas creadas y truncated true), @s17 (la excluida cuenta como omitida), @s21 (la del
+   * título en blanco falla sola) y @s26 (la página 2 caída deja errorCode GITLAB_UNAVAILABLE). Sin
+   * afirmar el valor, sustituir cualquiera de estos accesores por null, 0 o "" pasa inadvertido.
+   */
+  @ParameterizedTest
+  @CsvSource(
+      nullValues = "nulo",
+      value = {
+        "completed, 200, 0, 0, true, nulo",
+        "completed, 2, 1, 0, false, nulo",
+        "completed, 0, 0, 1, false, nulo",
+        "failed, 100, 0, 0, false, GITLAB_UNAVAILABLE"
+      })
+  void s16_s17_s21_s26_everyCounterAndFlagOfTheReceiptTravelsWithItsValue(
+      String status, int created, int skipped, int failed, boolean truncated, String errorCode)
+      throws Exception {
+    when(readImport.execute("owner", IMPORT))
+        .thenReturn(
+            new IssueImportReceipt(
+                IMPORT,
+                "gitlab",
+                PROJECT,
+                "grupo/proyecto",
+                status,
+                created,
+                skipped,
+                failed,
+                truncated,
+                errorCode,
+                STARTED,
+                STARTED.plusSeconds(4)));
+
+    mvc.perform(get(IMPORTS + "/" + IMPORT).with(user("owner")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.status").value(status))
+        .andExpect(jsonPath("$.created").value(created))
+        .andExpect(jsonPath("$.skipped").value(skipped))
+        .andExpect(jsonPath("$.failed").value(failed))
+        .andExpect(jsonPath("$.truncated").value(truncated))
+        .andExpect(
+            content()
+                .json(
+                    "{\"errorCode\":"
+                        + (errorCode == null ? "null" : "\"" + errorCode + "\"")
+                        + "}"));
+  }
+
+  // ------------------------------------------- @s12 los tres manejadores sin cobertura
+
+  @ParameterizedTest
+  @CsvSource({"'{'", "'no soy json'", "''"})
+  void s12_abodyThatIsNotReadableJsonIsAMalformedBodyAndNotAValidationError(String raw)
+      throws Exception {
+    mvc.perform(
+            post(IMPORTS)
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .contentType("application/json")
+                .content(raw))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+        .andExpect(jsonPath("$.code").value("MALFORMED_JSON"));
+
+    verifyNoInteractions(importIssues);
+  }
+
+  /**
+   * @s24: una importación que muere por cuota lleva el problema de RATE_LIMITED <em>y</em> los
+   *     contadores parciales de su recibo, para que la pantalla no tenga que volver a preguntar.
+   */
+  @Test
+  void s24_animportKilledByTheQuotaCarriesRetryAfterAndItsPartialCounters() throws Exception {
+    var exhausted =
+        new IssueImportReceipt(
+            IMPORT,
+            "gitlab",
+            PROJECT,
+            "grupo/proyecto",
+            "failed",
+            7,
+            1,
+            0,
+            false,
+            "RATE_LIMITED",
+            STARTED,
+            STARTED.plusSeconds(3));
+    when(importIssues.execute("owner", PROJECT))
+        .thenThrow(new IssueImportFailedException(exhausted, 60));
+
+    mvc.perform(
+            post(IMPORTS)
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .contentType("application/json")
+                .content("{\"projectId\":\"" + PROJECT + "\"}"))
+        .andExpect(status().is(503))
+        .andExpect(jsonPath("$.code").value("RATE_LIMITED"))
+        .andExpect(jsonPath("$.retryAfterSeconds").value(60))
+        .andExpect(header().string("Retry-After", "60"))
+        .andExpect(jsonPath("$.importId").value(IMPORT.toString()))
+        .andExpect(jsonPath("$.created").value(7))
+        .andExpect(jsonPath("$.skipped").value(1))
+        .andExpect(jsonPath("$.failed").value(0));
   }
 
   // ------------------------------------------------------------------- @s14 @s29 @s31 resto
@@ -476,14 +599,51 @@ class GitlabConnectorApiTest {
         .andExpect(jsonPath("$.code").value("CONNECTORS_DISABLED"));
   }
 
+  /**
+   * @s12: un texto cifrado que ninguna clave del llavero abre —tras rotar APP_CONNECTOR_KEY sin
+   *     conservar la anterior— es un fallo de configuración del servidor con código estable, no un
+   *     500 mudo. El gemelo de GitHub ya lo respondía; esta ruta lo dejaba caer en el catch-all.
+   */
+  @Test
+  void s12_anUndecipherableStoredTokenIsAnExplicitProblemAndNotAGenericFailure() throws Exception {
+    when(importIssues.execute(any(), any())).thenThrow(new SecretUndecipherableException());
+
+    var body =
+        mvc.perform(
+                post(IMPORTS)
+                    .with(user("owner"))
+                    .with(csrf().asHeader())
+                    .contentType("application/json")
+                    .content("{\"projectId\":\"" + PROJECT + "\"}"))
+            .andExpect(status().isServiceUnavailable())
+            .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+            .andExpect(jsonPath("$.code").value("CONNECTOR_KEY_MISMATCH"))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    org.assertj.core.api.Assertions.assertThat(body).doesNotContain(TOKEN).doesNotContain("glpat");
+  }
+
+  /**
+   * El estado por sí solo no dice cuál de las ocho filas de @s31 se está midiendo: el código sí.
+   */
   @Test
   void s31_withoutASessionNoGitlabRouteAnswersAnything() throws Exception {
-    mvc.perform(get(CONNECTION)).andExpect(status().isUnauthorized());
-    mvc.perform(get(IMPORTS + "/" + IMPORT)).andExpect(status().isUnauthorized());
+    mvc.perform(get(CONNECTION))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
+    mvc.perform(get(IMPORTS + "/" + IMPORT))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
 
     verifyNoInteractions(read, connect, disconnect, importIssues, readImport);
   }
 
+  /**
+   * Las tres filas de CSRF_INVALID y la de UNTRUSTED_ORIGIN devuelven el mismo 403: sin afirmar el
+   * código, cualquiera de las dos causas pasaría por la otra y la prueba seguiría verde.
+   */
   @Test
   void s31_withoutACsrfTokenNothingIsWritten() throws Exception {
     mvc.perform(
@@ -491,14 +651,18 @@ class GitlabConnectorApiTest {
                 .with(user("owner"))
                 .contentType("application/json")
                 .content(connectBody()))
-        .andExpect(status().isForbidden());
-    mvc.perform(delete(CONNECTION).with(user("owner"))).andExpect(status().isForbidden());
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("CSRF_INVALID"));
+    mvc.perform(delete(CONNECTION).with(user("owner")))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("CSRF_INVALID"));
     mvc.perform(
             post(IMPORTS)
                 .with(user("owner"))
                 .contentType("application/json")
                 .content("{\"projectId\":\"" + PROJECT + "\"}"))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("CSRF_INVALID"));
 
     verifyNoInteractions(connect, disconnect, importIssues);
   }

@@ -464,6 +464,58 @@ it("@s35 shows the hint, the path and the identifier next to the three buttons",
     expect(within(panel).getByRole("button", { name })).toBeTruthy();
 });
 
+/*
+ * @s5 @s8: hasta aqui todos los fixtures del carril traian lastError null, asi que el lastError que
+ * el servidor si publica no llegaba nunca al decodificador desde la pantalla. El conector no pinta
+ * el codigo —eso es la fila del catalogo, @s33— pero si tiene que aceptarlo y decir «Error», y
+ * sobre todo no sacar por pantalla nada que venga del proveedor.
+ */
+it("@s5 accepts a connection whose lastError comes from the server and says Error", async () => {
+  stub(
+    Response.json({
+      ...connected,
+      status: "error",
+      lastError: {
+        code: "CONNECTION_INVALID",
+        at: "2026-09-09T10:00:00.123456Z",
+      },
+    }),
+    Response.json(projects),
+  );
+
+  render(<GitlabConnector owner="owner" />);
+
+  expect(await screen.findByText("Error")).toBeTruthy();
+  expect(screen.getByText("••••WXYZ")).toBeTruthy();
+  expect(document.body.textContent).not.toContain(TOKEN);
+  expect(document.body.textContent).not.toContain("glpat");
+});
+
+it("@s5 refuses a lastError that carries anything beyond a code and an instant", async () => {
+  stub(
+    Response.json({
+      ...connected,
+      status: "error",
+      lastError: {
+        code: "CONNECTION_INVALID",
+        at: "2026-09-09T10:00:00.123456Z",
+        detail: "invalid_token: glpat-abcdef1234",
+      },
+    }),
+    Response.json(projects),
+  );
+
+  render(<GitlabConnector owner="owner" />);
+
+  await waitFor(() =>
+    expect(
+      screen.queryByRole("button", { name: "Importar issues" }),
+    ).toBeNull(),
+  );
+  expect(document.body.textContent).not.toContain("glpat");
+  expect(document.body.textContent).not.toContain("invalid_token");
+});
+
 it("@s35 lists only the open projects in the native selector", async () => {
   openConnected();
 
@@ -1014,6 +1066,53 @@ it("@s37 leaving the screen cancels the read of the projects as well", async () 
   view.unmount();
 
   expect(inFlight.aborted).toBe(true);
+});
+
+/*
+ * @s37: la respuesta tardia no modifica la vista. Sin abortar la peticion anterior al empezar una
+ * nueva, dos operaciones del propietario conviven y gana la que llega ultima, no la que pidio
+ * ultima: una importacion lenta repinta «Creadas/Omitidas/Fallidas» sobre una pantalla que el
+ * propietario ya desconecto, y el aviso aria-live sigue diciendo que importa algo que ya no existe.
+ */
+it("@s37 a slow import does not repaint its receipt over an already disconnected screen", async () => {
+  const user = userEvent.setup();
+  setCsrfToken("csrf-1");
+  let settleImport: (value: Response) => void = () => {};
+  const fetcher = vi.fn();
+  fetcher.mockResolvedValueOnce(Response.json(connected));
+  fetcher.mockResolvedValueOnce(Response.json(projects));
+  fetcher.mockReturnValueOnce(
+    new Promise<Response>((resolve) => {
+      settleImport = resolve;
+    }),
+  );
+  fetcher.mockResolvedValueOnce(new Response(null, { status: 204 }));
+  vi.stubGlobal("fetch", fetcher);
+
+  render(<GitlabConnector owner="owner" />);
+  await screen.findByRole("button", { name: "Importar issues" });
+  await user.click(screen.getByRole("button", { name: "Importar issues" }));
+  const inFlight = (fetcher.mock.calls[2][1] as RequestInit).signal!;
+
+  await user.click(screen.getByRole("button", { name: "Desconectar" }));
+  await user.click(
+    screen.getByRole("button", { name: "Confirmar desconexión" }),
+  );
+  await waitFor(() =>
+    expect(
+      screen.queryByRole("button", { name: "Importar issues" }),
+    ).toBeNull(),
+  );
+
+  // Empezar la desconexion cancela la importacion: no basta con ignorar su respuesta despues.
+  expect(inFlight.aborted).toBe(true);
+  settleImport(Response.json(receipt(), { status: 201 }));
+  await waitFor(() => expect(screen.getByRole("status").textContent).toBe(""));
+
+  expect(
+    screen.queryByRole("region", { name: "Resultado de la importación" }),
+  ).toBeNull();
+  expect(document.body.textContent).not.toContain("Creadas");
 });
 
 it("@s37 closing the session leaves neither the token nor the path anywhere", async () => {

@@ -181,6 +181,19 @@ public final class GitlabConnectorController {
         503, "CONNECTORS_DISABLED", "Los conectores no están configurados en este servidor.");
   }
 
+  /**
+   * El texto cifrado guardado no lo abre ninguna clave del llavero: la clave del servidor cambió
+   * sin conservar la anterior. Es un fallo de configuración, no de quien llama, y sale con el mismo
+   * código que la ruta de GitHub porque el caso de uso que la lanza es el mismo.
+   */
+  @ExceptionHandler(SecretUndecipherableException.class)
+  ResponseEntity<Map<String, Object>> undecipherable() {
+    return problem(
+        503,
+        "CONNECTOR_KEY_MISMATCH",
+        "La clave de conectores del servidor no puede leer el token guardado. Vuelve a conectar.");
+  }
+
   @ExceptionHandler(ConnectionNotFoundException.class)
   ResponseEntity<Map<String, Object>> noConnection() {
     return problem(404, "CONNECTION_NOT_FOUND", "No hay ninguna conexión de GitLab configurada.");

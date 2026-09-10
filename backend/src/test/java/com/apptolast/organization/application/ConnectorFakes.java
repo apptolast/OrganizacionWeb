@@ -409,7 +409,7 @@ final class ConnectorFakes {
   static final class FakeImportedTaskCommit implements ImportedTaskCommit {
     private final Map<String, UUID> links = new LinkedHashMap<>();
     private final List<com.apptolast.organization.domain.Task> tasks = new ArrayList<>();
-    private final List<UUID> events = new ArrayList<>();
+    private final List<TaskCreationEvent> events = new ArrayList<>();
     private String projectStatus = "idea";
     private String storageFailureOn;
     private String completedOn;
@@ -447,6 +447,10 @@ final class ConnectorFakes {
       return events.size();
     }
 
+    TaskCreationEvent lastEvent() {
+      return events.getLast();
+    }
+
     int links() {
       return links.size();
     }
@@ -465,7 +469,7 @@ final class ConnectorFakes {
       if (links.containsKey(key)) return false;
       var creation = operation.apply(projectStatus);
       tasks.add(creation.task());
-      events.add(creation.event().eventId());
+      events.add(creation.event());
       links.put(key, creation.task().id());
       return true;
     }

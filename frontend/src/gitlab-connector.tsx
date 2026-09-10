@@ -104,9 +104,30 @@ function GitlabConnectorScreen() {
   const live = (controller: AbortController) =>
     mounted.current && !controller.signal.aborted;
 
-  const loadConnection = useCallback(async () => {
+  /**
+   * Empezar una operacion releva a la que hubiera en vuelo. Sin este aborto, dos peticiones del
+   * propietario conviven y la vista se queda con la que responde ultima, no con la que pidio
+   * ultima: una importacion lenta llegaba a repintar su recibo sobre una pantalla ya desconectada.
+   */
+  const relieve = () => {
+    pending.current?.abort();
     const controller = new AbortController();
     pending.current = controller;
+    return controller;
+  };
+
+  /**
+   * El indicador de «estoy trabajando» pertenece a la operacion que lo encendio, asi que se apaga
+   * aunque a esa operacion la hayan relevado: si no, el aviso aria-live seguiria anunciando una
+   * importacion que ya nadie espera. Lo que no se aplica nunca tras un relevo son los datos.
+   */
+  const settled = (controller: AbortController) => {
+    if (pending.current === controller) pending.current = null;
+    return mounted.current;
+  };
+
+  const loadConnection = useCallback(async () => {
+    const controller = relieve();
     try {
       const view = await readGitlabConnection(controller.signal);
       if (!live(controller)) return;
@@ -121,10 +142,7 @@ function GitlabConnectorScreen() {
         setDisabled(true);
       setConnection(null);
     } finally {
-      if (live(controller)) {
-        setLoading(false);
-        if (pending.current === controller) pending.current = null;
-      }
+      if (settled(controller)) setLoading(false);
     }
   }, []);
 
@@ -186,8 +204,7 @@ function GitlabConnectorScreen() {
     // Mismo motivo que en startImport: el boton de enviar queda `disabled` y sin esto el
     // foco se cae al body mientras se guarda.
     focusStatus.current = true;
-    const controller = new AbortController();
-    pending.current = controller;
+    const controller = relieve();
     try {
       const view = await connectGitlab(
         { token: tokenField.current?.value ?? "", projectPath },
@@ -206,10 +223,7 @@ function GitlabConnectorScreen() {
           : new GitlabConnectorError({}),
       );
     } finally {
-      if (live(controller)) {
-        setConnecting(false);
-        if (pending.current === controller) pending.current = null;
-      }
+      if (settled(controller)) setConnecting(false);
     }
   }
 
@@ -223,8 +237,7 @@ function GitlabConnectorScreen() {
     // pasa al aviso, que es donde se cuenta. Lo lee dos veces —por region viva y por foco—, que
     // es mucho menos malo que no leer nada.
     focusStatus.current = true;
-    const controller = new AbortController();
-    pending.current = controller;
+    const controller = relieve();
     try {
       const started = await startGitlabImport(selected, controller.signal);
       if (!live(controller)) return;
@@ -254,18 +267,14 @@ function GitlabConnectorScreen() {
         focusReplace.current = true;
       }
     } finally {
-      if (live(controller)) {
-        setImporting(false);
-        if (pending.current === controller) pending.current = null;
-      }
+      if (settled(controller)) setImporting(false);
     }
   }
 
   async function confirmDisconnect() {
     setConfirming(false);
     setActionError(null);
-    const controller = new AbortController();
-    pending.current = controller;
+    const controller = relieve();
     try {
       await disconnectGitlab(controller.signal);
       if (!live(controller)) return;
@@ -283,9 +292,7 @@ function GitlabConnectorScreen() {
           : new GitlabConnectorError({}),
       );
     } finally {
-      if (live(controller)) {
-        if (pending.current === controller) pending.current = null;
-      }
+      settled(controller);
     }
   }
 

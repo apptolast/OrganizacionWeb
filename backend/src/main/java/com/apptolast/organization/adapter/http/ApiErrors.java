@@ -208,7 +208,7 @@ public final class ApiErrors {
   }
 
   @ExceptionHandler(com.apptolast.organization.application.WebhookEndpointNotFoundException.class)
-  ResponseEntity<Map<String, Object>> automationEndpoint(
+  ResponseEntity<Map<String, Object>> webhookEndpointNotFound(
       com.apptolast.organization.application.WebhookEndpointNotFoundException error) {
     var body = problem(422, "ENDPOINT_NOT_FOUND", error.getMessage());
     body.put(

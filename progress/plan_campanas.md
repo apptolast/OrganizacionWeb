@@ -80,6 +80,24 @@ diferencia son unas tres horas.
 
 </details>
 
+## Tampoco se solapa Stryker con PIT, y el motivo no es la velocidad
+
+Stryker corre en node y no levanta contenedores, así que **parece** que cabe
+junto a una campaña de PIT y ahorraría más de una hora de reloj. No se hace, y la
+razón es de integridad de la medida, no de recursos:
+
+PIT cuenta **`TIMED_OUT` como muerto**. Un mutante marcado así es uno que hizo
+entrar al código en un bucle infinito. Pero si la máquina está famélica de CPU,
+una prueba simplemente **lenta** puede pasarse del plazo (`timeoutConstInMillis`
+= 15 s) y quedar marcada igual. O sea: **competir por CPU sube la puntuación**.
+
+Es exactamente el fallo que este repositorio lleva un día entero corrigiendo —una
+puerta que mide algo que se parece a lo que quería medir— sólo que disfrazado de
+optimización. Una cifra rápida y falsa cuesta más que una lenta y cierta: hoy hay
+73 motivos bloqueantes que lo demuestran.
+
+**Las campañas van de una en una. Sin excepción.**
+
 ## Lo que NO se va a hacer, y por qué
 
 **No se van a excluir pruebas del cálculo de cobertura.** La tentación es

@@ -106,6 +106,10 @@ pitest {
         "com.apptolast.organization.application.ConnectorCatalog*",
         "com.apptolast.organization.application.ReadConnectorCatalog*",
         "com.apptolast.organization.adapter.http.ConnectorCatalogController*",
+        // La creo esta feature para el techo de 5 MiB del @s25 y la usan los DOS
+        // origenes HTTP; sin nombrarla se quedaba fuera de todo ambito al dejar de
+        // existir el comodin de paquete en el de la 27.
+        "com.apptolast.organization.adapter.connectors.BoundedResponse*",
         "com.apptolast.organization.adapter.connectors.GitlabApiBase*",
         "com.apptolast.organization.adapter.connectors.HttpGitlabIssueSource*",
         "com.apptolast.organization.adapter.http.GitlabConnectorController*",
@@ -134,7 +138,16 @@ pitest {
         "com.apptolast.organization.application.IssuePage*",
         "com.apptolast.organization.application.StoredConnection*",
         "com.apptolast.organization.application.ConnectionView*",
-        "com.apptolast.organization.adapter.connectors.*",
+        // El comodin del paquete arrastraba GitlabApiBase y HttpGitlabIssueSource, que
+        // son produccion de la feature 29 y ya estan declaradas en su ambito: inflaban
+        // esta puntuacion con 81 mutantes que no son de esta feature. Lo caza el panel
+        // de precierre. Se enumera lo que si es de la 27, mas las dos piezas de cifrado
+        // compartidas (que ya estan tambien en el ambito de la 28, mismo criterio).
+        "com.apptolast.organization.adapter.connectors.AesGcmSecretCipher*",
+        "com.apptolast.organization.adapter.connectors.ConnectorKeyRing*",
+        "com.apptolast.organization.adapter.connectors.BoundedResponse*",
+        "com.apptolast.organization.adapter.connectors.GithubApiBase*",
+        "com.apptolast.organization.adapter.connectors.HttpGithubIssueSource*",
         "com.apptolast.organization.adapter.http.GithubConnectorController*",
         "com.apptolast.organization.adapter.persistence.PostgresConnectorConnectionStore*",
         "com.apptolast.organization.adapter.persistence.PostgresIssueImportReceiptStore*",

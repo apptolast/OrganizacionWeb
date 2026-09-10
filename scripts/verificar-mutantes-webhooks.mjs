@@ -468,6 +468,41 @@ const MUTANTS = [
     `  if (false) throw incompatible();`,
     "client",
   ],
+  // ── Racimo 5: las doce etiquetas y su emparejamiento con los tipos ─────
+  ["290 StringLiteral Editar proyecto -> ''", VIEW, `  "Editar proyecto",`, `  "",`, "view"],
+  [
+    "291 StringLiteral Cambiar estado de proyecto -> ''",
+    VIEW,
+    `  "Cambiar estado de proyecto",`,
+    `  "",`,
+    "view",
+  ],
+  [
+    "294 StringLiteral Cambiar estado de tarea -> ''",
+    VIEW,
+    `  "Cambiar estado de tarea",`,
+    `  "",`,
+    "view",
+  ],
+  ["295 StringLiteral Planificar bloque -> ''", VIEW, `  "Planificar bloque",`, `  "",`, "view"],
+  ["299 StringLiteral Extender sesion -> ''", VIEW, `  "Extender sesión",`, `  "",`, "view"],
+  [
+    "300 StringLiteral Cerrar sesion de trabajo -> ''",
+    VIEW,
+    `  "Cerrar sesión de trabajo",`,
+    `  "",`,
+    "view",
+  ],
+  [
+    "DEFECTO desalineamiento de las dos listas paralelas",
+    VIEW,
+    `  "Crear proyecto",
+  "Editar proyecto",`,
+    `  "Crear proyecto",
+  "Archivar proyecto",
+  "Editar proyecto",`,
+    "view",
+  ],
 ];
 
 const suites = {
@@ -481,7 +516,7 @@ let rojos = 0;
 let verdes = 0;
 
 for (const [nombre, fichero, buscar, reemplazo, suite] of MUTANTS) {
-  if (filtro && !nombre.includes(filtro)) continue;
+  if (filtro && !new RegExp(filtro, "i").test(nombre)) continue;
   const original = readFileSync(fichero, "utf8");
   if (!original.includes(buscar)) {
     console.log(`?? ${nombre}: el texto a mutar no aparece en ${fichero}`);

@@ -195,6 +195,68 @@ it("@s39 shows an exhausted webhook with its date and the same value in ARIA", a
   expect(screen.getByLabelText(label)).toBeInTheDocument();
 });
 
+/**
+ * `eventLabels` (la vista) y `webhookEventTypes` (el cliente) son dos listas
+ * paralelas emparejadas por índice. Nada las ata: insertar un tipo nuevo en una
+ * y no en la otra desplaza todas las etiquetas siguientes, y quien marque
+ * «Crear subtarea» se suscribe a otra cosa con la suite en verde. Esta tabla
+ * literal es la atadura: vive fuera de las dos listas y las fija a las dos.
+ */
+const catalogue: [label: string, type: string][] = [
+  ["Crear proyecto", "ProjectCreated.v1"],
+  ["Editar proyecto", "ProjectUpdated.v1"],
+  ["Cambiar estado de proyecto", "ProjectStatusChanged.v1"],
+  ["Crear tarea", "TaskCreated.v1"],
+  ["Crear subtarea", "SubtaskCreated.v1"],
+  ["Cambiar estado de tarea", "TaskStatusChanged.v1"],
+  ["Planificar bloque", "BlockPlanned.v1"],
+  ["Cambiar bloque", "BlockChanged.v1"],
+  ["Iniciar sesión de trabajo", "WorkSessionStarted.v1"],
+  ["Cambiar estado de sesión", "WorkSessionStateChanged.v1"],
+  ["Extender sesión", "WorkSessionExtended.v1"],
+  ["Cerrar sesión de trabajo", "WorkSessionClosed.v1"],
+];
+
+it("@s37 offers exactly the twelve labels of the catalogue, in catalogue order", async () => {
+  stubApi([]);
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+
+  const names = screen
+    .getAllByRole("checkbox")
+    .map((box) => box.closest("label")!.textContent);
+
+  expect(names).toEqual([
+    "Seleccionar todos",
+    ...catalogue.map(([label]) => label),
+  ]);
+});
+
+it.each(catalogue)(
+  "@s37 subscribing to «%s» sends exactly %s",
+  async (label, type) => {
+    const { other } = stubApi([], () =>
+      Promise.resolve(
+        Response.json({ endpoint: endpoint(), secret }, { status: 201 }),
+      ),
+    );
+    const user = userEvent.setup();
+
+    render(<Webhooks owner="Ana" />);
+    await shown();
+    await user.type(
+      screen.getByRole("textbox", { name: "URL" }),
+      "https://example.com/hooks",
+    );
+    await user.click(screen.getByRole("checkbox", { name: label }));
+    await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+
+    await waitFor(() => expect(other).toHaveBeenCalledTimes(1));
+    expect(bodyOf(other).eventTypes).toEqual([type]);
+  },
+);
+
 it("@s37 sends one POST with the twelve types and shows the secret once", async () => {
   let reply!: (response: Response) => void;
   const { other } = stubApi(

@@ -241,3 +241,58 @@ Dos contraejemplos que hubo que afinar:
   contraejemplo es un secreto válido **con basura delante**: `"xx" + secreto`.
 
 **Previsión de muertes del racimo 4: 19.** Acumulado acreditado: 58.
+
+---
+
+## Racimo 6 — las doce etiquetas de evento y su emparejamiento (defecto de producto)
+
+**Causa común.** `eventLabels` (en `webhooks.tsx`) y `webhookEventTypes` (en
+`webhooks-client.ts`) son **dos listas paralelas emparejadas por índice**:
+
+```tsx
+{webhookEventTypes.map((type, index) => ( … {eventLabels[index]} … ))}
+```
+
+Sólo se ejercía **una** de las doce parejas —«Crear tarea» / `TaskCreated.v1`—
+porque todas las pruebas marcaban esa casilla. Las once restantes se pintaban sin
+que nadie las mirara.
+
+### Defecto de producto: nada ata las dos listas
+
+No hay ningún error hoy, pero **no hay forma de que se note si mañana lo hay**.
+Insertar un tipo nuevo en una lista y no en la otra desplaza todas las etiquetas
+siguientes: quien marque «Crear subtarea» se suscribe a `TaskStatusChanged.v1`,
+y la suite sigue verde. Un webhook suscrito a lo que no se pidió es exactamente
+lo que la feature promete no hacer.
+
+El arreglo es la **atadura que faltaba**: una tabla literal de las doce parejas,
+escrita en la prueba, que vive fuera de las dos listas y las fija a las dos. Dos
+oráculos la usan:
+
+- los nombres accesibles de las trece casillas, en orden, contra la tabla;
+- doce casos —uno por pareja— que marcan **esa** casilla y afirman que el POST
+  lleva **exactamente** ese tipo.
+
+Simulando el defecto (insertando `"Archivar proyecto"` en el índice 1 de
+`eventLabels`, que es lo que pasaría al añadir un tipo a mitad del catálogo):
+
+```
+ROJO DEFECTO desalineamiento de las dos listas paralelas
+     12 rojas · @s37 offers exactly the twelve labels of the catalogue, in catalogue order
+```
+
+Doce pruebas en rojo. Antes de esta tabla, ese desalineamiento no rompía ninguna.
+
+**Evidencia del rojo de los mutantes: 6 muertos** (los tres restantes de las doce
+etiquetas ya morían por *timeout*).
+
+```
+ROJO 290 "Editar proyecto" -> ""            · offers exactly the twelve labels…
+ROJO 291 "Cambiar estado de proyecto" -> "" · idem
+ROJO 294 "Cambiar estado de tarea" -> ""    · idem
+ROJO 295 "Planificar bloque" -> ""          · idem
+ROJO 299 "Extender sesión" -> ""            · idem
+ROJO 300 "Cerrar sesión de trabajo" -> ""   · idem
+```
+
+**Previsión de muertes: 6.** Acumulado acreditado: 64.

@@ -435,3 +435,64 @@ Contrato: el `.feature` **no** cubre el fallo de las acciones de la lista —@s3
 y @s40 sólo describen el camino feliz, y @s41 habla sólo del POST de creación—,
 así que el arreglo llena un silencio del contrato, no lo contradice. Queda
 anotado para el juez por si quiere una fila explícita en @s39.
+
+---
+
+## Racimo 9 — las entregas de un webhook bajo el nombre de otro (defecto de producto)
+
+**Causa común.** `openDeliveries` y `ping` abren el panel con
+`setDeliveriesOf(endpoint.id)` **antes** de tener las filas, y no tocaban
+`deliveries`. Ninguna prueba abría el panel de un **segundo** webhook, así que
+el estado intermedio no lo miraba nadie.
+
+### Defecto de producto: el panel de B enseñando las entregas de A
+
+Entre el clic en «Ver entregas» de B y la llegada de su respuesta —y **para
+siempre** si esa respuesta falla— la tabla seguía mostrando las entregas de A
+mientras el panel ya decía B. Y el botón «Reenviar» de esas filas hace
+`POST /api/v1/me/webhooks/B/deliveries/{id-de-una-entrega-de-A}/redeliver`:
+reenviar la entrega de un webhook desde otro. Lo mismo con `ping(B)`, que
+antepone su entrega nueva a las filas de A.
+
+Escritas las tres pruebas contra la producción de partida, salieron las tres en
+rojo.
+
+**Arreglo**, en el único sitio donde se decide de quién es el panel:
+
+```tsx
+function showDeliveriesOf(endpointId: string) {
+  if (deliveriesOf !== endpointId) setDeliveries([]);
+  setDeliveriesOf(endpointId);
+}
+```
+
+Cambiar de webhook vacía la tabla; refrescar el mismo la conserva, así que
+«Actualizar» sigue comportándose igual. Rehecho el defecto a mano (quitando la
+línea que vacía), caen **3 pruebas**.
+
+Seis pruebas nuevas, tres del defecto y tres de las ramas huérfanas: el ping que
+**sustituye** su propia fila sin borrar las demás (con dos filas en pantalla, que
+es lo que separa «quitar la repetida» de «quitar todas»), «Actualizar» pidiendo
+las entregas del webhook cuyo panel está abierto y no las del primero de la
+lista, y «Actualizar» sin hacer nada cuando ese webhook ya no existe.
+
+**Evidencia del rojo: 7 mutantes muertos.**
+
+```
+ROJO 489 filtro del ping -> current          · pinging the webhook already on screen replaces its row…
+ROJO 490 predicado del filtro -> undefined   · idem
+ROJO 491 d.id !== sent.id -> true            · idem
+ROJO 492 d.id !== sent.id -> false           · idem
+ROJO 493 d.id !== sent.id -> ===             · idem
+ROJO 609 item.id === deliveriesOf -> true    · Actualizar asks for the deliveries of the webhook whose panel is open
+ROJO 612 if (endpoint) -> true               · Actualizar does nothing when the webhook of the open panel is gone
+ROJO DEFECTO la tabla conserva las filas del webhook anterior · 3 rojas
+```
+
+**Previsión de muertes: 7.** Acumulado acreditado: 99.
+
+Observación anotada y **no** arreglada, por estar fuera del encargo: eliminar un
+webhook no cierra su panel de entregas, así que quedan en pantalla las filas de
+algo que ya no existe. El guarda `if (endpoint)` de «Actualizar» impide que eso
+reviente, y cerrarlo por mi cuenta convertiría ese guarda en código muerto. Es
+una decisión de contrato (@s39 no dice nada del panel), no mía.

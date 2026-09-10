@@ -737,6 +737,63 @@ const MUTANTS = [
     "      if (!controller.signal.aborted) await report(error);",
     "view",
   ],
+  // -- Racimo 9: la fuga de entregas entre webhooks
+  [
+    "489 MethodExpression filtro del ping -> current",
+    VIEW,
+    "        ...current.filter((d) => d.id !== sent.id),",
+    "        ...current,",
+    "view",
+  ],
+  [
+    "490 ArrowFunction predicado del filtro -> undefined",
+    VIEW,
+    "        ...current.filter((d) => d.id !== sent.id),",
+    "        ...current.filter((() => undefined) as never),",
+    "view",
+  ],
+  [
+    "491 ConditionalExpression d.id !== sent.id -> true",
+    VIEW,
+    "        ...current.filter((d) => d.id !== sent.id),",
+    "        ...current.filter(() => true),",
+    "view",
+  ],
+  [
+    "492 ConditionalExpression d.id !== sent.id -> false",
+    VIEW,
+    "        ...current.filter((d) => d.id !== sent.id),",
+    "        ...current.filter(() => false),",
+    "view",
+  ],
+  [
+    "493 EqualityOperator d.id !== sent.id -> ===",
+    VIEW,
+    "        ...current.filter((d) => d.id !== sent.id),",
+    "        ...current.filter((d) => d.id === sent.id),",
+    "view",
+  ],
+  [
+    "609 ConditionalExpression item.id === deliveriesOf -> true",
+    VIEW,
+    "              const endpoint = items.find((item) => item.id === deliveriesOf);",
+    "              const endpoint = items.find(() => true);",
+    "view",
+  ],
+  [
+    "612 ConditionalExpression if (endpoint) -> true",
+    VIEW,
+    "              if (endpoint) openDeliveries(endpoint);",
+    "              openDeliveries(endpoint as WebhookEndpoint);",
+    "view",
+  ],
+  [
+    "DEFECTO la tabla conserva las filas del webhook anterior",
+    VIEW,
+    "    if (deliveriesOf !== endpointId) setDeliveries([]);\n    setDeliveriesOf(endpointId);",
+    "    setDeliveriesOf(endpointId);",
+    "view",
+  ],
 ];
 
 const suites = {

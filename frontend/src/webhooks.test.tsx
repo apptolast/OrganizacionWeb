@@ -782,6 +782,243 @@ it("@s40 opens the deliveries panel on demand, without polling, and redelivers t
   vi.useRealTimers();
 });
 
+const otherDeliveryId = "66666666-6666-4666-8666-666666666666";
+
+/** Dos webhooks, cada uno con una entrega reconocible por su tipo de evento. */
+function stubTwoWebhooks(handler: typeof fetch) {
+  return stubApi(
+    [
+      endpoint(),
+      endpoint({
+        id: second,
+        url: "https://otro.example/h",
+        description: "Otro",
+      }),
+    ],
+    handler,
+  );
+}
+
+const deliveryOfFirst = () =>
+  Response.json({ items: [delivery({ eventType: "TaskCreated.v1" })] });
+
+async function openDeliveriesOf(
+  user: ReturnType<typeof userEvent.setup>,
+  index: number,
+) {
+  await user.click(
+    screen.getAllByRole("button", { name: "Ver entregas" })[index],
+  );
+}
+
+// Las entregas de un webhook no se enseñan nunca bajo el nombre de otro. El
+// panel se abre en cuanto se pulsa, así que si la tabla conserva las filas
+// anteriores mientras llega la respuesta —o para siempre, si falla— el usuario
+// ve entregas ajenas y su botón Reenviar apunta al webhook equivocado.
+it("@s40 opening another webhook's deliveries never shows the first one's rows", async () => {
+  let hold!: (response: Response) => void;
+  let asked = 0;
+  stubTwoWebhooks((url) => {
+    if (!String(url).includes("/deliveries"))
+      return Promise.reject(new Error("no"));
+    asked += 1;
+    return asked === 1
+      ? Promise.resolve(deliveryOfFirst())
+      : new Promise<Response>((resolve) => (hold = resolve));
+  });
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await openDeliveriesOf(user, 0);
+  await waitFor(() => expect(screen.getByText("TaskCreated.v1")).toBeVisible());
+
+  await openDeliveriesOf(user, 1);
+
+  expect(screen.queryByText("TaskCreated.v1")).not.toBeInTheDocument();
+  expect(screen.queryAllByRole("button", { name: "Reenviar" })).toEqual([]);
+
+  hold(
+    Response.json({
+      items: [
+        delivery({
+          id: otherDeliveryId,
+          eventId: otherDeliveryId,
+          eventType: "BlockPlanned.v1",
+        }),
+      ],
+    }),
+  );
+  await waitFor(() =>
+    expect(screen.getByText("BlockPlanned.v1")).toBeVisible(),
+  );
+});
+
+it("@s40 a failed deliveries load leaves no rows from the previous webhook", async () => {
+  let asked = 0;
+  stubTwoWebhooks((url) => {
+    if (!String(url).includes("/deliveries"))
+      return Promise.reject(new Error("no"));
+    asked += 1;
+    return Promise.resolve(asked === 1 ? deliveryOfFirst() : boom());
+  });
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await openDeliveriesOf(user, 0);
+  await waitFor(() => expect(screen.getByText("TaskCreated.v1")).toBeVisible());
+
+  await openDeliveriesOf(user, 1);
+
+  await waitFor(() =>
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      /no se han podido cargar las entregas/i,
+    ),
+  );
+  expect(screen.queryByText("TaskCreated.v1")).not.toBeInTheDocument();
+});
+
+it("@s39 a ping on another webhook does not prepend its delivery to the first one's rows", async () => {
+  stubTwoWebhooks((url) =>
+    String(url).endsWith("/ping")
+      ? Promise.resolve(
+          Response.json(
+            {
+              delivery: delivery({
+                id: otherDeliveryId,
+                eventId: otherDeliveryId,
+                eventType: "webhook.ping.v1",
+                status: "pending",
+                attempt: 0,
+                httpStatus: null,
+                latencyMs: null,
+                nextAttemptAt: "2026-09-08T10:00:00.000000Z",
+              }),
+            },
+            { status: 202 },
+          ),
+        )
+      : Promise.resolve(deliveryOfFirst()),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await openDeliveriesOf(user, 0);
+  await waitFor(() => expect(screen.getByText("TaskCreated.v1")).toBeVisible());
+
+  await user.click(screen.getAllByRole("button", { name: "Enviar ping" })[1]);
+
+  await waitFor(() =>
+    expect(screen.getByText("webhook.ping.v1")).toBeVisible(),
+  );
+  expect(screen.queryByText("TaskCreated.v1")).not.toBeInTheDocument();
+  expect(screen.getAllByRole("row")).toHaveLength(2);
+});
+
+// Un ping sobre el webhook cuyo panel ya está abierto sí sustituye su propia
+// entrega en vez de duplicarla: es la otra rama del mismo filtro.
+it("@s39 pinging the webhook already on screen replaces its row instead of doubling it", async () => {
+  const pinged = () =>
+    Response.json(
+      {
+        delivery: delivery({
+          eventType: "webhook.ping.v1",
+          status: "pending",
+          attempt: 0,
+          httpStatus: null,
+          latencyMs: null,
+          nextAttemptAt: "2026-09-08T10:00:00.000000Z",
+        }),
+      },
+      { status: 202 },
+    );
+  stubApi([endpoint()], (url) =>
+    Promise.resolve(
+      String(url).endsWith("/ping")
+        ? pinged()
+        : Response.json({
+            items: [
+              delivery({ eventType: "TaskCreated.v1" }),
+              delivery({
+                id: otherDeliveryId,
+                eventId: otherDeliveryId,
+                eventType: "BlockPlanned.v1",
+              }),
+            ],
+          }),
+    ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.click(screen.getByRole("button", { name: "Ver entregas" }));
+  await waitFor(() => expect(screen.getByText("TaskCreated.v1")).toBeVisible());
+
+  // La entrega del ping trae el mismo id que la primera fila, y sólo esa se
+  // sustituye: la otra sigue en la tabla.
+  await user.click(screen.getByRole("button", { name: "Enviar ping" }));
+
+  await waitFor(() =>
+    expect(screen.getByText("webhook.ping.v1")).toBeVisible(),
+  );
+  expect(screen.queryByText("TaskCreated.v1")).not.toBeInTheDocument();
+  expect(screen.getByText("BlockPlanned.v1")).toBeVisible();
+  expect(screen.getAllByRole("row")).toHaveLength(3);
+});
+
+it("@s40 Actualizar asks for the deliveries of the webhook whose panel is open", async () => {
+  const { other } = stubTwoWebhooks(() => Promise.resolve(deliveryOfFirst()));
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await openDeliveriesOf(user, 1);
+  await waitFor(() => expect(screen.getByRole("table")).toBeVisible());
+
+  await user.click(screen.getByRole("button", { name: "Actualizar" }));
+
+  await waitFor(() => expect(other).toHaveBeenCalledTimes(2));
+  expect(
+    callsOf(other).every(([url]) =>
+      String(url).startsWith(`/api/v1/me/webhooks/${second}/deliveries`),
+    ),
+  ).toBe(true);
+});
+
+it("@s40 Actualizar does nothing when the webhook of the open panel is gone", async () => {
+  const { other } = stubApi([endpoint()], (url) =>
+    Promise.resolve(
+      String(url).includes("/deliveries")
+        ? deliveryOfFirst()
+        : new Response(null, { status: 204 }),
+    ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.click(screen.getByRole("button", { name: "Ver entregas" }));
+  await waitFor(() => expect(screen.getByRole("table")).toBeVisible());
+  await user.click(screen.getByRole("button", { name: "Eliminar" }));
+  await user.click(
+    screen.getByRole("button", { name: "Confirmar eliminación" }),
+  );
+  await waitFor(() =>
+    expect(
+      screen.queryByText("https://example.com/hooks"),
+    ).not.toBeInTheDocument(),
+  );
+  const before = other.mock.calls.length;
+
+  await user.click(screen.getByRole("button", { name: "Actualizar" }));
+
+  expect(other.mock.calls.length).toBe(before);
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+});
+
 it("@s40 the Actualizar button repeats a single deliveries GET", async () => {
   const { other } = stubApi([endpoint()], () =>
     Promise.resolve(Response.json({ items: [delivery()] })),

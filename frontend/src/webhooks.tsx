@@ -238,11 +238,23 @@ function WebhookPanel() {
     );
   }
 
+  /**
+   * Las entregas de un webhook no se enseñan nunca bajo el nombre de otro. El
+   * panel se abre en cuanto se pulsa, así que si la tabla conservara las filas
+   * del webhook anterior mientras llega la respuesta —o para siempre, si esa
+   * respuesta falla— el usuario vería entregas ajenas, y su botón Reenviar
+   * haría el POST contra el webhook que está mirando, no contra el suyo.
+   */
+  function showDeliveriesOf(endpointId: string) {
+    if (deliveriesOf !== endpointId) setDeliveries([]);
+    setDeliveriesOf(endpointId);
+  }
+
   function ping(endpoint: WebhookEndpoint) {
     void act(async (signal) => {
       const sent = await pingWebhook(endpoint.id, signal);
       if (signal.aborted) return;
-      setDeliveriesOf(endpoint.id);
+      showDeliveriesOf(endpoint.id);
       setDeliveries((current) => [
         sent,
         ...current.filter((d) => d.id !== sent.id),
@@ -263,7 +275,7 @@ function WebhookPanel() {
   }
 
   function openDeliveries(endpoint: WebhookEndpoint) {
-    setDeliveriesOf(endpoint.id);
+    showDeliveriesOf(endpoint.id);
     void act(async (signal) => {
       const rows = await listWebhookDeliveries(endpoint.id, signal);
       if (!signal.aborted) setDeliveries(rows);

@@ -87,6 +87,9 @@ pitest {
         "com.apptolast.organization.application.ReadGitlabConnection*",
         "com.apptolast.organization.application.GitlabConnection*",
         "com.apptolast.organization.application.GitlabIssueConnections*",
+        // ImportGuard solo lo invocan ConnectGitlab y DisconnectGitlab, asi que vive
+        // aqui y no en el ambito de la 27, donde estaba por error.
+        "com.apptolast.organization.application.ImportGuard*",
         "com.apptolast.organization.application.GitlabProject*",
         "com.apptolast.organization.domain.GitlabProjectPath*",
         "com.apptolast.organization.application.GitlabUnavailableException*",
@@ -118,7 +121,11 @@ pitest {
         // quedo muerto y con el ImportIssues no recibia mutantes en NINGUNA campana del
         // repositorio. Tercer patron muerto de la noche; lo caza el juez de cierre de la 29.
         "com.apptolast.organization.application.ImportIssues*",
-        "com.apptolast.organization.application.ImportGuard*",
+        // No aparecia en NINGUN targetClasses del repositorio, mientras su gemela de
+        // GitLab si estaba declarada. Fija source()="github", que acaba en cada recibo y
+        // en cada fila de task_external_links, y su invalidate descarta dos argumentos a
+        // proposito. Quinto ambito mal apuntado de la noche; lo caza el panel de precierre.
+        "com.apptolast.organization.application.GithubIssueConnections*",
         "com.apptolast.organization.application.ReadGithubConnection*",
         "com.apptolast.organization.application.DisconnectGithub*",
         "com.apptolast.organization.application.ReadIssueImport*",

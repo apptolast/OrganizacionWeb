@@ -39,8 +39,6 @@ export function createProject(runner = run) {
           "integration_api-http-backend",
           "ics_calendar-frontend",
           "ics_calendar-backend",
-          "github_connector-frontend",
-          "github_connector-backend",
           "import_data-frontend",
           "import_data-reader-backend",
           "import_data-http-backend",
@@ -75,12 +73,8 @@ export function createProject(runner = run) {
           "export_data-persistence-backend",
           "external_calendar-backend",
           "external_calendar-frontend",
-          "automations-backend",
-          "automations-frontend",
           "webhooks-backend",
           "webhooks-frontend",
-          "additional_connectors-backend",
-          "additional_connectors-frontend",
           "noche_cinco-backend",
         ].includes(target))
     ) {
@@ -92,32 +86,6 @@ export function createProject(runner = run) {
         [taskName, "--no-daemon", ...args],
         { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
       );
-    if (task === "mutate" && target === "automations-frontend") {
-      runner("pnpm", [
-        "--dir",
-        "frontend",
-        "exec",
-        "stryker",
-        "run",
-        "stryker.automations.config.json",
-      ]);
-      return;
-    }
-    if (task === "mutate" && target === "automations-backend") {
-      backend("pitest", ["-PmutationScope=automations"]);
-      return;
-    }
-    if (task === "mutate" && target === "github_connector-frontend") {
-      runner("pnpm", [
-        "--dir",
-        "frontend",
-        "exec",
-        "stryker",
-        "run",
-        "stryker.github-connector.config.json",
-      ]);
-      return;
-    }
     if (task === "mutate" && target === "appearance-frontend") {
       runner("pnpm", [
         "--dir",
@@ -208,10 +176,6 @@ export function createProject(runner = run) {
       backend("pitest", ["-PmutationScope=integration_api_http"]);
       return;
     }
-    if (task === "mutate" && target === "github_connector-backend") {
-      backend("pitest", ["-PmutationScope=github_connector"]);
-      return;
-    }
     if (task === "mutate" && target === "import_data-reader-backend") {
       backend("pitest", ["-PmutationScope=import_data_reader"]);
       return;
@@ -226,21 +190,6 @@ export function createProject(runner = run) {
     }
     if (task === "mutate" && target === "noche_cinco-backend") {
       backend("pitest", ["-PmutationScope=noche_cinco"]);
-      return;
-    }
-    if (task === "mutate" && target === "additional_connectors-frontend") {
-      runner("pnpm", [
-        "--dir",
-        "frontend",
-        "exec",
-        "stryker",
-        "run",
-        "stryker.additional-connectors.config.json",
-      ]);
-      return;
-    }
-    if (task === "mutate" && target === "additional_connectors-backend") {
-      backend("pitest", ["-PmutationScope=additional_connectors"]);
       return;
     }
     if (task === "mutate" && target === "webhooks-backend") {
@@ -462,16 +411,12 @@ export function createProject(runner = run) {
         "scripts/project.test.mjs",
         "scripts/e2e.mjs",
         "playwright.config.mjs",
+        // Siete entradas de esta lista murieron el 10 de septiembre de 2026 al
+        // retirar las features 27, 29 y 30, y `node --check` sobre un fichero que
+        // no existe deja el lint en rojo. Se quedan las de las features vivas.
         "e2e/create-project.spec.mjs",
-        "e2e/github-connector.spec.mjs",
-        "e2e/github-connector-native-zoom.spec.mjs",
         "e2e/webhooks-native-zoom.spec.mjs",
         "e2e/external-calendar-native-zoom.spec.mjs",
-        "e2e/automations-native-zoom.spec.mjs",
-        "e2e/support/connector.mjs",
-        "e2e/fake-github/server.mjs",
-        "e2e/automations.spec.mjs",
-        "e2e/automations-ux.spec.mjs",
       ]) {
         runner(process.execPath, ["--check", file]);
       }

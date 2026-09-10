@@ -197,3 +197,36 @@ a su único consumidor interno. Los webhooks siguen sirviendo para lo que fueron
 diseñados —notificar a terceros los eventos del outbox— pero ya no hay ninguna
 regla dentro del producto que los dispare. No es un defecto; es un cambio en para
 qué sirve la feature, y quien la lea dentro de seis meses merece saberlo.
+
+---
+
+## R10 — 10 de septiembre de 2026 — el dato adicional autenticado ata también al propietario
+
+**Pregunta:** «El escenario `@s8` dice que el dato adicional autenticado del
+cifrado es "el id del endpoint", pero producción usa el id del propietario más el
+del endpoint. La línea del contrato, leída al pie, es falsa.»
+
+**Opción elegida:** «Enmendar la línea», descrita así: _el contrato pasa a nombrar
+propietario + endpoint; es la política que ya ratificaste en `project-spec.md`, y
+el `.feature` nunca recibió su nota fechada. Producción no se toca: es más segura
+que lo que el contrato pide._
+
+**Alcanza a:** `features/webhooks.feature`, cláusulas del `@s8`. Se añade además
+la fila que faltaba —descifrar con el id de **otro propietario** falla—, que es el
+oráculo de la mitad que el contrato no cubría.
+
+---
+
+## R11 — 10 de septiembre de 2026 — una clave malformada impide arrancar
+
+**Pregunta:** «El escenario `@s9` promete que "la aplicación queda disponible" con
+una clave de cifrado malformada ("base64 de 31 bytes" y "texto no base64"). El
+código lanza en los dos casos y el contexto ni arranca. Dos filas del contrato
+describen algo que no ocurre.»
+
+**Opción elegida:** «Enmendar las dos filas», descrita así: _el contrato pasa a
+decir lo que el código hace: una clave **presente pero inválida** impide arrancar,
+que es un error del operador y debe verse al instante. El modo degradado se
+reserva para la clave **ausente**, que ya está descrito y ratificado._
+
+**Alcanza a:** las dos filas del `Examples` del `@s9`, que pasan a `ausente`.

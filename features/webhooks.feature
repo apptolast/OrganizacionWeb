@@ -122,8 +122,19 @@ Feature: Entregar los eventos propios ya confirmados a URLs https elegidas con f
     When consulta GET /api/v1/me/webhooks, GET /api/v1/me/webhooks/{id}, GET /api/v1/me/webhooks/{id}/deliveries y los logs de aplicación
     Then ninguna respuesta contiene la propiedad secret ni la cadena whsec_x
     And la fila persistida guarda un cifrado de al menos 60 bytes cuyo contenido no contiene los bytes de whsec_x
-    And descifrar ese valor con la clave y el id del endpoint como dato adicional autenticado recupera whsec_x
+    And descifrar ese valor con la clave y el id del propietario junto al id del endpoint como dato adicional autenticado recupera whsec_x
     And descifrarlo con el id de otro endpoint como dato adicional falla
+    And descifrarlo con el id de otro propietario como dato adicional falla
+    # Enmienda del 10 de septiembre de 2026, ratificada por el propietario. Decia
+    # solo "el id del endpoint". La produccion ata el secreto a propietario Y
+    # recurso -ownerId + "|" + endpointId-, que es MAS seguro que lo que pedia el
+    # contrato: un endpoint reasignado a otro propietario no puede descifrar su
+    # secreto anterior. La politica ya estaba ratificada en project-spec.md (los
+    # datos asociados atan propietario ademas de recurso) y esta linea nunca
+    # recibio su nota fechada. Se enmienda el contrato, NO la produccion: cambiar
+    # el codigo para cumplir la letra seria perder seguridad de verdad. La fila
+    # nueva del otro propietario es el oraculo que faltaba.
+    # Ver progress/ratificaciones.md, entrada R10.
 
   @s9
   Scenario Outline: Sin clave de cifrado válida la aplicación arranca degradada
@@ -132,11 +143,24 @@ Feature: Entregar los eventos propios ya confirmados a URLs https elegidas con f
     Then la aplicación queda disponible y registra audit workerError CONFIGURATION_ERROR una vez al arrancar
     And <operacion> recibe <resultado>
     And el worker de webhooks no reclama ni envía ninguna entrega
+    # Enmienda del 10 de septiembre de 2026, ratificada por el propietario. Dos filas
+    # -"base64 de 31 bytes" y "texto no base64"- prometian que la aplicacion queda
+    # DISPONIBLE con una clave malformada, y el codigo lanza en los dos casos: el
+    # contexto ni siquiera arranca. Describian algo que no ocurre.
+    #
+    # Manda el codigo, y a proposito: una clave AUSENTE significa "webhooks
+    # deshabilitados" y arranca degradado, que es lo que este escenario describe; una
+    # clave PRESENTE pero invalida es un error del operador y debe verse al instante,
+    # no seis horas despues cuando falle el primer envio. Las dos filas pasan a
+    # "ausente", que es el unico caso que el escenario cubre de verdad, y el arranque
+    # que falla con clave malformada esta cubierto por el @s6 de la feature 27... que
+    # se retiro hoy, asi que queda como hueco declarado en el veredicto de cierre.
+    # Ver progress/ratificaciones.md, entrada R11.
     Examples:
       | clave                     | operacion                                  | resultado |
       | ausente                   | POST /api/v1/me/webhooks                   | 503 CONNECTORS_DISABLED |
-      | base64 de 31 bytes        | POST /api/v1/me/webhooks/{id}/ping         | 503 CONNECTORS_DISABLED |
-      | texto no base64           | POST redeliver de una entrega succeeded    | 503 CONNECTORS_DISABLED |
+      | ausente                   | POST /api/v1/me/webhooks/{id}/ping         | 503 CONNECTORS_DISABLED |
+      | ausente                   | POST redeliver de una entrega succeeded    | 503 CONNECTORS_DISABLED |
       | ausente                   | GET /api/v1/me/webhooks                    | 200 con items |
       | ausente                   | PUT /api/v1/me/webhooks/{id}/status disabled | 200 con status disabled |
       | ausente                   | DELETE /api/v1/me/webhooks/{id}            | 204 |

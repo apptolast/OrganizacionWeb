@@ -229,10 +229,10 @@ test("ics calendar Stryker selects its own nodes of the shared files", () => {
     ),
   );
   assert.deepEqual(config.mutate, [
-    "src/App.tsx:40:8-40:42",
-    "src/App.tsx:65:20-66:34",
-    "src/App.tsx:106:10-107:37",
-    "src/workspace.tsx:99:10-104:22",
+    "src/App.tsx:42:8-42:42",
+    "src/App.tsx:71:22-72:36",
+    "src/App.tsx:116:10-117:37",
+    "src/workspace.tsx:100:10-105:22",
     "src/calendar-feed-api.ts",
     "src/calendar.tsx",
   ]);
@@ -1931,10 +1931,10 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
     "src/appearance-api.ts",
     "src/appearance-state.tsx",
     "src/appearance.tsx",
-    "src/App.tsx:38:8-38:44",
-    "src/App.tsx:69:24-81:40",
-    "src/App.tsx:110:10-151:7",
-    "src/workspace.tsx:87:10-92:22",
+    "src/App.tsx:40:8-40:44",
+    "src/App.tsx:75:26-87:42",
+    "src/App.tsx:120:10-161:7",
+    "src/workspace.tsx:88:10-93:22",
     "src/session-gate.tsx:32:2-52:6",
     "src/use-session.ts:208:0-229:1",
   ]);
@@ -2102,10 +2102,10 @@ test("external calendar Stryker configuration mutates only its own files", () =>
     "src/external-calendar-api.ts",
     "src/external-calendar.tsx",
     "src/today-external-calendar.tsx",
-    "src/App.tsx:46:8-46:58",
-    "src/App.tsx:59:14-81:40",
-    "src/App.tsx:92:10-151:7",
-    "src/workspace.tsx:81:10-86:22",
+    "src/App.tsx:48:8-48:58",
+    "src/App.tsx:65:16-87:42",
+    "src/App.tsx:102:10-161:7",
+    "src/workspace.tsx:82:10-87:22",
   ]);
   assert.equal(configuration.thresholds.break, 80);
   assert.equal(configuration.testRunner, "vitest");
@@ -2217,10 +2217,10 @@ test("automations Stryker configuration mutates only the feature files", () => {
     ),
   );
   assert.deepEqual(config.mutate, [
-    "src/App.tsx:47:8-47:51",
-    "src/App.tsx:55:8-56:30",
-    "src/App.tsx:84:7-85:40",
-    "src/workspace.tsx:128:10-133:22",
+    "src/App.tsx:49:8-49:51",
+    "src/App.tsx:61:12-62:32",
+    "src/App.tsx:94:10-95:40",
+    "src/workspace.tsx:138:10-143:22",
     "src/automations-api.ts",
     "src/automations.tsx",
   ]);

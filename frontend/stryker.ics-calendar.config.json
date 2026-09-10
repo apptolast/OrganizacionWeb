@@ -1,17 +1,26 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "vitest",
-  "plugins": ["@stryker-mutator/vitest-runner"],
-  "ignorePatterns": [".stryker-tmp-*"],
+  "plugins": [
+    "@stryker-mutator/vitest-runner"
+  ],
+  "ignorePatterns": [
+    ".stryker-tmp-*"
+  ],
   "mutate": [
-    "src/App.tsx:40:8-40:42",
-    "src/App.tsx:65:20-66:34",
-    "src/App.tsx:106:10-107:37",
-    "src/workspace.tsx:99:10-104:22",
+    "src/App.tsx:42:8-42:42",
+    "src/App.tsx:71:22-72:36",
+    "src/App.tsx:116:10-117:37",
+    "src/workspace.tsx:100:10-105:22",
     "src/calendar-feed-api.ts",
     "src/calendar.tsx"
   ],
-  "reporters": ["clear-text", "json", "html", "progress-append-only"],
+  "reporters": [
+    "clear-text",
+    "json",
+    "html",
+    "progress-append-only"
+  ],
   "thresholds": {
     "high": 90,
     "low": 80,

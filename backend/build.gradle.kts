@@ -556,6 +556,11 @@ pitest {
         "com.apptolast.organization.adapter.config.AutomationConfiguration*",
         "com.apptolast.organization.application.WebhookEndpoint*",
         "com.apptolast.organization.adapter.http.Automation*",
+        // El juez de cierre los exige explicitamente: la persistencia del trabajo, el cursor y
+        // el adaptador de bitacora del ejecutor. Sin ellos la campana mide el motor a medias.
+        "com.apptolast.organization.adapter.persistence.PostgresAutomation*",
+        "com.apptolast.organization.domain.AutomationCursor*",
+        "com.apptolast.organization.adapter.logging.Slf4jAutomationAudit*",
         // Los seis manejadores de error de la feature viven en ApiErrors, que quedaba fuera del
         // ambito: sus mutantes no se generaban y la campana daba por cubierto un codigo que nadie
         // habia tocado. Mismo criterio que taskStatusAdapters y availabilityAdapters.

@@ -496,3 +496,73 @@ webhook no cierra su panel de entregas, así que quedan en pantalla las filas de
 algo que ya no existe. El guarda `if (endpoint)` de «Actualizar» impide que eso
 reviente, y cerrarlo por mi cuenta convertiría ese guarda en código muerto. Es
 una decisión de contrato (@s39 no dice nada del panel), no mía.
+
+---
+
+## Racimo 10 — las guardas de aborto y la aserción que no podía fallar
+
+### Defecto de método: `webhooks.test.tsx:314` afirmaba la ausencia de algo que nunca llegó
+
+La prueba de @s38 retenía el POST **para siempre** (`new Promise(() => {})`),
+desmontaba la vista y afirmaba que el secreto no estaba en el DOM. Como la
+respuesta no llegaba nunca, **no había secreto que pudiera aparecer**: la
+aserción no podía fallar. Es el mismo patrón cazado ya cuatro veces esta noche.
+
+Arreglado: se guarda el `resolve`, se desmonta, y **sólo entonces** se resuelve
+con un 201 y su secreto. Ahora hay algo que podría aparecer, y se afirma que no
+aparece —ni en el campo ni en ningún sitio del `body`—. Tres pruebas hermanas
+para la lista, para el PUT de estado y para una acción que **falla** tarde.
+
+### Las siete puertas y sus comprobaciones de arranque
+
+Sólo `listWebhooks` tenía prueba de señal ya abortada. Las otras seis salían a
+la red con la señal muerta sin que nadie lo notara. Un caso por función, todos
+afirmando que **`fetch` no se llama**. Y tres de aborto **en vuelo**: durante la
+petición, durante el parseo del cuerpo, y en el `DELETE`.
+
+Un contraejemplo que hubo que afinar: quitar el primer `throwIfAborted()` de
+`json()` **no** deja pasar la respuesta, porque el segundo la caza igual. Sólo
+se distingue si el servidor contesta un estado inesperado: entonces el original
+avisa del abandono y el mutante propaga el `409` del servidor como si fuera un
+problema de la vista actual, que es justo lo que @s38 prohíbe. El oráculo afirma
+el `name` del rechazo, no sólo que hay rechazo.
+
+**Evidencia del rojo: 9 mutantes muertos**, todos del cliente.
+
+```
+ROJO 204 throwIfAborted de json (1) -> ;   · an aborted read reports the abort, not the late error of the server
+ROJO 208 throwIfAborted de json (2) -> ;   · abandons a read whose signal aborts while the body is being parsed
+ROJO 215 arranque de createWebhook -> ;    · createWebhook refuses to start once the signal is already aborted
+ROJO 239 arranque de setWebhookStatus -> ; · idem
+ROJO 255 arranque de deleteWebhook -> ;    · idem
+ROJO 258 throwIfAborted tras el DELETE -> ;· abandons a delete whose signal aborts while the request is in flight
+ROJO 269 arranque de pingWebhook -> ;      · idem
+ROJO 274 arranque de listWebhookDeliveries -> ; · idem
+ROJO 279 arranque de redeliverWebhook -> ; · idem
+```
+
+### Hallazgo medido: las ocho guardas de aborto **de la vista** son equivalentes
+
+Escritas las cuatro pruebas de «resuelve después de abortar» que el mapa pedía,
+medí los ocho mutantes de guarda de `webhooks.tsx` uno a uno. **Los ocho siguen
+vivos**, y no por falta de oráculo:
+
+```
+VIVO 365 !aborted (setItems) -> true          VIVO 415 aborted -> false (submit fallo)
+VIVO 370 !aborted (setLoadFailed) -> true     VIVO 418 !aborted (setCreating) -> true
+VIVO 376 !aborted (setLoading) -> true        VIVO 462 guarda de act -> true
+VIVO 402 aborted -> false (submit éxito)      VIVO 467 aborted -> false (changeStatus)
+```
+
+Motivo: en esta vista **abortar y desmontar son el mismo suceso** —el único
+`abort()` está en la limpieza del `useEffect`—, y React descarta por su cuenta
+los `setState` sobre un componente desmontado. Ejecutar la rama de más no cambia
+ni un carácter del DOM, así que **ningún oráculo sobre el DOM puede
+distinguirlos**. Son equivalentes por la superficie pública del componente.
+
+Las guardas no sobran: son la defensa correcta y el contrato de @s38 en el
+cliente, donde **sí** se acreditan las nueve de arriba. Pero como puerta de
+mutación, esos ocho no se pueden ganar sin exponer estado interno, y no lo voy a
+hacer. Se anotan aquí para que la campaña no los persiga.
+
+**Previsión de muertes: 9.** Acumulado acreditado: 108.

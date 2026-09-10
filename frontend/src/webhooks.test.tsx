@@ -491,11 +491,16 @@ it("@s37 hides the secret only when Cerrar is activated", async () => {
   expect(screen.queryByDisplayValue(secret)).not.toBeInTheDocument();
 });
 
-it("@s38 aborts the pending creation when the view goes away and never shows its secret", async () => {
+// @s38 pide que «la respuesta tardía no muestre su secreto». Comprobar la
+// ausencia del secreto cuando la respuesta **no ha llegado nunca** es una
+// aserción que no puede fallar: no prueba nada. La respuesta tiene que llegar
+// —tarde, con su 201 y su secreto— y sólo entonces se afirma la ausencia.
+it("@s38 aborts the pending creation when the view goes away and its late 201 shows no secret", async () => {
   let signal!: AbortSignal;
+  let reply!: (response: Response) => void;
   const { other } = stubApi([], (_url, options) => {
     signal = options!.signal!;
-    return new Promise<Response>(() => {});
+    return new Promise<Response>((resolve) => (reply = resolve));
   });
   const user = userEvent.setup();
 
@@ -510,9 +515,81 @@ it("@s38 aborts the pending creation when the view goes away and never shows its
   expect(other).toHaveBeenCalledTimes(1);
 
   view.unmount();
-
   expect(signal.aborted).toBe(true);
+
+  reply(Response.json({ endpoint: endpoint(), secret }, { status: 201 }));
+  await Promise.resolve();
+
   expect(screen.queryByDisplayValue(secret)).not.toBeInTheDocument();
+  expect(document.body.textContent).not.toContain(secret);
+  // La respuesta tardía tampoco resucita la vista ni vuelve a pedir la lista.
+  expect(other).toHaveBeenCalledTimes(1);
+});
+
+it("@s38 a late list answer after leaving the view paints nothing", async () => {
+  let reply!: (response: Response) => void;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() => new Promise<Response>((resolve) => (reply = resolve))),
+  );
+
+  const view = render(<Webhooks owner="Ana" />);
+  expect(screen.getByText("Cargando webhooks…")).toBeVisible();
+
+  view.unmount();
+  reply(Response.json({ items: [endpoint()] }));
+  await Promise.resolve();
+
+  expect(
+    screen.queryByText("https://example.com/hooks"),
+  ).not.toBeInTheDocument();
+  expect(document.body.textContent).toBe("");
+});
+
+it("@s38 a late status answer after leaving the view changes nothing", async () => {
+  let signal!: AbortSignal;
+  let reply!: (response: Response) => void;
+  stubApi([endpoint()], (_url, options) => {
+    signal = options!.signal!;
+    return new Promise<Response>((resolve) => (reply = resolve));
+  });
+  const user = userEvent.setup();
+
+  const view = render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.click(screen.getByRole("button", { name: "Desactivar" }));
+
+  view.unmount();
+  expect(signal.aborted).toBe(true);
+
+  reply(
+    Response.json(
+      endpoint({
+        status: "disabled",
+        disabledReason: "MANUAL",
+        disabledAt: "2026-09-08T11:00:00.000000Z",
+      }),
+    ),
+  );
+  await Promise.resolve();
+
+  expect(document.body.textContent).toBe("");
+});
+
+it("@s38 a late failure of an action after leaving the view raises no alert", async () => {
+  let reply!: (response: Response) => void;
+  stubApi([endpoint()], () => new Promise<Response>((r) => (reply = r)));
+  const user = userEvent.setup();
+
+  const view = render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.click(screen.getByRole("button", { name: "Desactivar" }));
+
+  view.unmount();
+  reply(boom());
+  await Promise.resolve();
+
+  expect(document.body.textContent).toBe("");
 });
 
 it("@s38 shows the secret for one identity and starts clean for another", async () => {

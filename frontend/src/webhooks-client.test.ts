@@ -757,6 +757,107 @@ it("@s38 refuses to start once the signal is already aborted", async () => {
   expect(fetcher).not.toHaveBeenCalled();
 });
 
+// La comprobación de arranque estaba probada en una sola de las siete puertas.
+// Las otras seis podían salir a la red con la señal ya abortada.
+it.each([
+  [
+    "createWebhook",
+    (signal: AbortSignal) =>
+      createWebhook(
+        { url: "https://example.com/hooks", description: "", eventTypes: [] },
+        signal,
+      ),
+  ],
+  [
+    "setWebhookStatus",
+    (signal: AbortSignal) => setWebhookStatus(id, "active", signal),
+  ],
+  ["deleteWebhook", (signal: AbortSignal) => deleteWebhook(id, signal)],
+  ["pingWebhook", (signal: AbortSignal) => pingWebhook(id, signal)],
+  [
+    "listWebhookDeliveries",
+    (signal: AbortSignal) => listWebhookDeliveries(id, signal),
+  ],
+  [
+    "redeliverWebhook",
+    (signal: AbortSignal) => redeliverWebhook(id, other, signal),
+  ],
+])(
+  "@s38 %s refuses to start once the signal is already aborted",
+  async (_name, call) => {
+    const fetcher = stub({ items: [] });
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(call(controller.signal)).rejects.toThrow();
+    expect(fetcher).not.toHaveBeenCalled();
+  },
+);
+
+/** Aborta en cuanto se pide la respuesta, con la petición ya emitida. */
+function stubAbortingOnFlight(
+  controller: AbortController,
+  response: () => Response,
+) {
+  const fetcher = vi.fn(() => {
+    controller.abort();
+    return Promise.resolve(response());
+  });
+  vi.stubGlobal("fetch", fetcher);
+  return fetcher;
+}
+
+it("@s38 abandons a read whose signal aborts while the request is in flight", async () => {
+  const controller = new AbortController();
+  stubAbortingOnFlight(controller, () =>
+    Response.json({ items: [endpoint()] }),
+  );
+
+  await expect(listWebhooks(controller.signal)).rejects.toThrow();
+});
+
+it("@s38 abandons a delete whose signal aborts while the request is in flight", async () => {
+  const controller = new AbortController();
+  stubAbortingOnFlight(controller, () => new Response(null, { status: 204 }));
+
+  await expect(deleteWebhook(id, controller.signal)).rejects.toThrow();
+});
+
+// Con la señal ya abortada, el abandono manda sobre el diagnóstico del
+// servidor: si no, una respuesta tardía de error se propagaría como problema de
+// la vista actual, que es justo lo que @s38 prohíbe.
+it("@s38 an aborted read reports the abort, not the late error of the server", async () => {
+  const controller = new AbortController();
+  stubAbortingOnFlight(controller, () =>
+    Response.json({ code: "WEBHOOK_LIMIT" }, { status: 409 }),
+  );
+
+  const rejection: unknown = await listWebhooks(controller.signal).then(
+    () => null,
+    (reason: unknown) => reason,
+  );
+
+  expect(rejection).not.toBeInstanceOf(Response);
+  expect((rejection as Error).name).toBe("AbortError");
+});
+
+it("@s38 abandons a read whose signal aborts while the body is being parsed", async () => {
+  const controller = new AbortController();
+  const fetcher = vi.fn(() =>
+    Promise.resolve({
+      status: 200,
+      json: () => {
+        controller.abort();
+        return Promise.resolve({ items: [] });
+      },
+    } as unknown as Response),
+  );
+  vi.stubGlobal("fetch", fetcher);
+
+  await expect(listWebhooks(controller.signal)).rejects.toThrow();
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});
+
 it("@s37 exposes the twelve subscribable types in catalogue order", () => {
   expect(webhookEventTypes).toEqual([
     "ProjectCreated.v1",

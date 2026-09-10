@@ -421,5 +421,140 @@ petición de más.
 
 Acreditación: **6 de 7 mutantes mueren**.
 
-Estado final: **158 pruebas verdes** en los cuatro ficheros del ámbito (83 de
+---
+
+## Racimo H — el foco, la asociación del error y el salto al contenido
+
+Cinco mutantes que ninguna prueba distinguía y que son contrato de @s38 y @s40:
+
+- `focusOn.current = null` en el efecto de foco. Sin él, cada cambio de
+  `fieldErrors` vuelve a mover el foco: al reintentar con éxito, el foco saltaría
+  del botón que el propietario acaba de pulsar al campo de dirección. @s40 pide
+  que los estados se anuncien **sin mover el foco**.
+- El `aria-describedby` del campo y el `id` del párrafo de error. «El error se
+  asocia al campo» (@s38 fila 2) es una asociación programática, no una proximidad
+  visual: la prueba comprueba que el mensaje está entre los elementos que describen
+  al campo.
+- El `id="proyectos"` y el `tabIndex={-1}` del `<main>`. El «Saltar al contenido»
+  del espacio de trabajo apunta a `#proyectos`; si esta vista perdiera el id, el
+  salto no llevaría a ninguna parte. La prueba vive en
+  `external-calendar-route.test.tsx`, que es donde existe el enlace, y **deriva** el
+  destino del `href` en vez de escribirlo a mano (regla 2 del reparto).
+
+**5 de 5 mueren.**
+
+## Racimo I — el andamiaje de la pantalla
+
+Textos y cableado de accesibilidad que no afirmaba nadie: la promesa «solo se lee:
+esta aplicación nunca escribe en tu proveedor», los nombres accesibles de las dos
+secciones (`aria-labelledby` más los `id` de sus encabezados), el `type`,
+`autoComplete` y `spellCheck` de los campos, el `aria-atomic` de la región viva, la
+ayuda de Google Calendar como descripción del campo de dirección, el
+`<h3>Eventos</h3>`, el `role="note"` y el texto del aviso de truncado, el nombre y
+el texto del diálogo de confirmación, y en Hoy el `aria-live` de la sección y su
+`<h2>`.
+
+**15 de 15 mueren.**
+
+---
+
+## Previsión de puntuación — es una PREVISIÓN, no una medida
+
+**No he ejecutado Stryker**: había dos campañas corriendo y la mide el orquestador.
+
+Lo que sí está medido: **119 mutantes aplicados a mano al fichero de producción
+real, ejecutados contra las pruebas y restaurados**, con el detalle en
+`progress/verificacion_mutantes_external_calendar.json`. De ellos **111 mueren** y
+**8 sobreviven**, y los ocho están declarados abajo con su razón.
+
+**Previsión: 88-94 %**, con lo que quede vivo concentrado en dos sitios conocidos.
+
+### Los ocho supervivientes que conozco, y por qué son equivalentes
+
+| Mutante | Razón |
+|---|---|
+| `setEvents([])` del catch de `loadEvents` | con `invalidList` en `true` la lista no se pinta: el estado es invisible por ese camino |
+| `save`: `if (signal.aborted) return` del catch | una escritura solo se aborta al desmontar —el guardián de reentrada impide la otra vía— y en React 19 un `setState` sobre un árbol desmontado es un no-op silencioso |
+| `save`: `if (!signal.aborted) setBusy("")` del finally | ídem |
+| `synchronise`: `if (signal.aborted) return` del catch | ídem |
+| `confirmRemoval`: `if (signal.aborted) return` del catch | ídem |
+| `confirmRemoval`: `if (!signal.aborted) setBusy("")` del finally | ídem |
+| `json()`: el `catch` que llama a `invalid()` | todos los llamadores revalidan el cuerpo, así que `undefined` acaba lanzando el mismo error |
+| Hoy: `if (signal.aborted) return` del catch de la sincronización | quitándolo, `readExternalEvents` lanza en su primer `throwIfAborted` antes de pedir nada y el catch siguiente vuelve a cortar |
+
+A ellos hay que sumar los dos guardianes de reentrada de `save` y `synchronise`
+(`if (busy) return`), no alcanzables desde la interfaz porque sus botones llevan
+`disabled={locked}`. Lo comprobé con una sonda que **borré** por ser una aserción
+que no puede fallar.
+
+### El suelo que no he intentado tocar, y por qué
+
+**~26 mutantes de `className`.** Stryker muta cada literal de `className` a cadena
+vacía. La única forma de matarlos en vitest es afirmar el nombre de la clase de
+vuelta, y **ninguna prueba de este repositorio lo hace**: `grep toHaveClass` en
+`frontend/src` da cero ficheros. Fijar la lista de clases de un subárbol es además
+la clase de constante caduca que prohíbe la regla 2 del reparto: caduca en cuanto
+alguien añade un elemento. Lo dejo declarado en vez de subir la puntuación con
+aserciones que solo se repiten a sí mismas. Si se prefiere lo contrario, son 26
+líneas y media hora.
+
+Intenté un oráculo mejor —«toda clase que se pinta tiene regla en la hoja de
+estilos», derivado del `.scss` y por tanto no caduco— y **no se puede escribir hoy,
+porque fallaría contra la producción actual**: ver el hallazgo siguiente.
+
+### Hallazgo fuera de mi ámbito (regla 9: lo anoto y sigo)
+
+Cuatro clases que la vista pinta **no tienen ninguna regla** en `styles.scss` ni en
+`today.scss`:
+
+- `danger`, en el botón «Eliminar suscripción»: la acción destructiva se ve
+  exactamente igual que las demás. Es el único de los cuatro con consecuencia de
+  producto.
+- `external-calendar-counters`, `external-calendar-when` y
+  `today-external-calendar-stamp`: ganchos muertos, inofensivos.
+
+No los toco: la hoja de estilos no es de mi carril y el brief pide no refactorizar
+de paso.
+
+---
+
+## Resumen
+
+| | |
+|---|---|
+| Racimos atacados | 9 (A-I), que cubren los 13 racimos de la predicción y sus 20 «omitidos» |
+| Defectos de producto encontrados y arreglados | **2** |
+| Pruebas | 83 → **161** |
+| Mutantes acreditados a mano | 119 aplicados: **111 mueren**, 8 equivalentes declarados |
+| Producción tocada | solo por los dos defectos, ambos en `external-calendar.tsx`. `git diff` de producción **vacío** al terminar |
+| Puertas | `vitest` 161 verdes · `tsc --noEmit` limpio · `eslint src` limpio · `prettier --check` limpio |
+
+### Los dos defectos, en una línea cada uno
+
+1. **La ventana vacía que nadie había leído**: con un 500 o un 503 en `GET /events`
+   la pantalla decía «No hay eventos en la ventana guardada», porque `refuse()`
+   relanza una `Response` y la guarda exigía un `Error`. Le decía al propietario que
+   su calendario estaba vacío cuando no lo había podido leer.
+2. **Salir de la pantalla no cancelaba ninguna escritura**: la limpieza del efecto
+   abortaba el controlador del montaje, capturado en el closure, y no el de
+   `inFlight`. Un `PUT`, un `POST /sync` o un `DELETE` en vuelo seguían vivos al
+   navegar a otra ruta, contra @s39 fila 3.
+
+### Correcciones a la predicción, todas comprobadas ejecutando
+
+- **Racimo 9 (cabeceras), `posibleDefecto` falso**, como decían sus dos
+  refutaciones: perder el spread de `options.headers` no puede quitar el
+  `X-CSRF-TOKEN`; quita el `Content-Type`. El oráculo que la predicción proponía
+  habría dado verde con la producción rota.
+- **Racimo 2, «el doble clic de synchronise ya tiene oráculo»: falso.** Lo garantiza
+  el atributo `disabled`, no el guardián. El guardián alcanzable de verdad es el de
+  `confirmRemoval`, cuyo botón **no** está deshabilitado.
+- **La guarda de aborto de `today:66` no es código muerto**, contra lo que sostenía
+  el refutador: se alcanza cuando la cancelación llega mientras se lee el cuerpo,
+  porque `json()` ya pasó su `throwIfAborted`. Tiene prueba, y observable, con
+  rerender en vez de desmontaje.
+- **Racimo 3, oráculo (a): el refutador tenía razón** —con un 500 no aparece ningún
+  aviso—, solo que eso no era una corrección al oráculo: era el defecto.
+
+Estado final: **161 pruebas verdes** en los cuatro ficheros del ámbito (83 de
 partida). `tsc --noEmit`, `eslint src` y `prettier --check` limpios.

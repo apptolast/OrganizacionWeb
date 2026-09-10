@@ -16,9 +16,12 @@ const originals = new Map(
 );
 
 const SPECS = {
-  [VIEW]: "src/external-calendar.test.tsx",
-  [API]: "src/external-calendar-api.test.ts",
-  [TODAY]: "src/today-external-calendar.test.tsx",
+  [VIEW]: [
+    "src/external-calendar.test.tsx",
+    "src/external-calendar-route.test.tsx",
+  ],
+  [API]: ["src/external-calendar-api.test.ts"],
+  [TODAY]: ["src/today-external-calendar.test.tsx"],
 };
 
 /** [racimo, nombre, fichero, texto exacto a buscar, texto de reemplazo] */
@@ -773,6 +776,146 @@ const MUTANTS = [
     `      } catch {\n        if (signal.aborted) return;\n        pending = true;`,
     `      } catch {\n        if (false) return;\n        pending = true;`,
   ],
+  [
+    "H",
+    "vista: focusOn.current = null -> se borra",
+    VIEW,
+    `    focusOn.current = null;\n    field?.focus();`,
+    `    field?.focus();`,
+  ],
+  [
+    "H",
+    "vista: aria-describedby de la etiqueta -> ''",
+    VIEW,
+    `              aria-describedby="external-calendar-label-error"`,
+    `              aria-describedby=""`,
+  ],
+  [
+    "H",
+    "vista: id del parrafo de error de etiqueta -> ''",
+    VIEW,
+    `            <p className="field-error" id="external-calendar-label-error">`,
+    `            <p className="field-error" id="">`,
+  ],
+  [
+    "H",
+    "vista: id del main -> ''",
+    VIEW,
+    `    <main id="proyectos" tabIndex={-1} className="external-calendar">`,
+    `    <main id="" tabIndex={-1} className="external-calendar">`,
+  ],
+  [
+    "H",
+    "vista: tabIndex del main -> +1",
+    VIEW,
+    `    <main id="proyectos" tabIndex={-1} className="external-calendar">`,
+    `    <main id="proyectos" tabIndex={+1} className="external-calendar">`,
+  ],
+  [
+    "I",
+    "vista: aria-labelledby del formulario -> ''",
+    VIEW,
+    `      <section className="form-card" aria-labelledby="external-calendar-form">`,
+    `      <section className="form-card" aria-labelledby="">`,
+  ],
+  [
+    "I",
+    "vista: aria-labelledby de la ficha -> ''",
+    VIEW,
+    `          aria-labelledby="external-calendar-state"`,
+    `          aria-labelledby=""`,
+  ],
+  [
+    "I",
+    "vista: parrafo de solo lectura -> ''",
+    VIEW,
+    `          Muestra en Hoy los eventos de un calendario que ya usas. Solo se lee:\n          esta aplicación nunca escribe en tu proveedor.`,
+    ``,
+  ],
+  [
+    "I",
+    "vista: autoComplete de la etiqueta -> ''",
+    VIEW,
+    `              type="text"\n              autoComplete="off"`,
+    `              type="text"\n              autoComplete=""`,
+  ],
+  [
+    "I",
+    "vista: type de la etiqueta -> ''",
+    VIEW,
+    `              type="text"\n              autoComplete="off"`,
+    `              type=""\n              autoComplete="off"`,
+  ],
+  [
+    "I",
+    "vista: spellCheck del campo de direccion -> true",
+    VIEW,
+    `              spellCheck={false}`,
+    `              spellCheck={true}`,
+  ],
+  [
+    "I",
+    "vista: aria-describedby del campo de direccion pierde la ayuda",
+    VIEW,
+    `              aria-describedby="external-calendar-url-help external-calendar-url-error"`,
+    `              aria-describedby="external-calendar-url-error"`,
+  ],
+  [
+    "I",
+    "vista: aria-atomic de la region viva -> ''",
+    VIEW,
+    `        aria-atomic="true"`,
+    `        aria-atomic=""`,
+  ],
+  [
+    "I",
+    "vista: h3 'Eventos' -> ''",
+    VIEW,
+    `          <h3>Eventos</h3>`,
+    `          <h3></h3>`,
+  ],
+  [
+    "I",
+    "vista: aria-label del dialogo -> ''",
+    VIEW,
+    `            <div role="alertdialog" aria-label="Confirmar la eliminación">`,
+    `            <div role="alertdialog" aria-label="">`,
+  ],
+  [
+    "I",
+    "vista: texto del dialogo -> ''",
+    VIEW,
+    `              <p>Se borrarán la suscripción y los eventos guardados.</p>`,
+    `              <p></p>`,
+  ],
+  [
+    "I",
+    "vista: role='note' del aviso de truncado -> ''",
+    VIEW,
+    `            <p className="notice" role="note">`,
+    `            <p className="notice" role="">`,
+  ],
+  [
+    "I",
+    "vista: texto del aviso de truncado -> ''",
+    VIEW,
+    `              Solo se conservan los 500 primeros eventos de la ventana.`,
+    ``,
+  ],
+  [
+    "I",
+    "hoy: aria-live de la seccion -> ''",
+    TODAY,
+    `      aria-live="polite"`,
+    `      aria-live=""`,
+  ],
+  [
+    "I",
+    "hoy: h2 'Calendario externo' -> ''",
+    TODAY,
+    `      <h2>Calendario externo</h2>`,
+    `      <h2></h2>`,
+  ],
 ];
 
 function failedTests(output) {
@@ -798,7 +941,7 @@ for (const [cluster, name, source, search, replacement] of MUTANTS) {
   try {
     output = execFileSync(
       "pnpm",
-      ["--dir", "frontend", "exec", "vitest", "run", SPECS[source]],
+      ["--dir", "frontend", "exec", "vitest", "run", ...SPECS[source]],
       { encoding: "utf8", shell: true },
     );
   } catch (error) {

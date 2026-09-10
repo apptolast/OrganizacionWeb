@@ -111,6 +111,56 @@ it("@s37 muestra el formulario de alta cuando no hay suscripción", async () => 
   ).not.toBeInTheDocument();
 });
 
+// El andamiaje de la pantalla —la promesa de solo lectura, los nombres accesibles
+// de las dos secciones y los atributos de los campos— no lo afirmaba nadie.
+it("@s37 el formulario se anuncia por su título y promete que solo se lee", async () => {
+  withoutSubscription();
+  render(<ExternalCalendar />);
+  expect(
+    await screen.findByRole("region", { name: "Suscribirte a un calendario" }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "Muestra en Hoy los eventos de un calendario que ya usas. Solo se lee: esta aplicación nunca escribe en tu proveedor.",
+    ),
+  ).toBeInTheDocument();
+  const label = screen.getByLabelText("Etiqueta");
+  expect(label).toHaveAttribute("type", "text");
+  expect(label).toHaveAttribute("autocomplete", "off");
+  const address = screen.getByLabelText("Dirección secreta iCal");
+  expect(address).toHaveAttribute("autocomplete", "off");
+  expect(address).toHaveAttribute("spellcheck", "false");
+  const described = (address.getAttribute("aria-describedby") ?? "").split(" ");
+  expect(
+    described.map((id) => document.getElementById(id)?.textContent),
+  ).toContain(
+    "En Google Calendar: Configuración del calendario, Integrar calendario, Dirección secreta en formato iCal. Trátala como una contraseña.",
+  );
+  const status = screen.getByRole("status");
+  expect(status).toHaveAttribute("aria-atomic", "true");
+});
+
+it("@s39 la ficha y su diálogo se nombran solos", async () => {
+  withSubscription(synced, [meeting]);
+  const user = userEvent.setup();
+  render(<ExternalCalendar />);
+  const card = await screen.findByRole("region", { name: "Trabajo" });
+  expect(
+    within(card).getByRole("heading", { level: 3, name: "Eventos" }),
+  ).toBeInTheDocument();
+  await user.click(
+    within(card).getByRole("button", { name: "Eliminar suscripción" }),
+  );
+  const dialog = screen.getByRole("alertdialog", {
+    name: "Confirmar la eliminación",
+  });
+  expect(
+    within(dialog).getByText(
+      "Se borrarán la suscripción y los eventos guardados.",
+    ),
+  ).toBeInTheDocument();
+});
+
 it("@s37 muestra host y cola pero nunca la dirección completa", async () => {
   withSubscription(subscription);
   render(<ExternalCalendar />);
@@ -192,9 +242,10 @@ it("@s37 sin zona de instantánea se usa la del navegador", async () => {
 it("@s37 avisa cuando la instantánea quedó truncada, y solo entonces", async () => {
   withSubscription({ ...synced, truncated: true });
   render(<ExternalCalendar />);
-  expect(
-    await screen.findByText(/solo se conservan los 500 primeros eventos/i),
-  ).toBeInTheDocument();
+  const notice = await screen.findByRole("note");
+  expect(notice).toHaveTextContent(
+    "Solo se conservan los 500 primeros eventos de la ventana.",
+  );
 });
 
 it("@s37 no avisa de truncado cuando la instantánea está completa", async () => {
@@ -424,6 +475,15 @@ it("@s38 un error de etiqueta se asocia a Etiqueta y le devuelve el foco", async
   expect(labelField).toHaveAttribute("aria-invalid", "true");
   expect(address).toHaveAttribute("aria-invalid", "false");
   await waitFor(() => expect(labelField).toHaveFocus());
+  // «El error se asocia al campo» (@s38 fila 2) es una asociación programática, no
+  // una proximidad visual: el mensaje tiene que estar entre los descritos por el
+  // campo. Sin esto, vaciar el aria-describedby no rompía ninguna prueba.
+  const described = (labelField.getAttribute("aria-describedby") ?? "").split(
+    " ",
+  );
+  expect(
+    described.map((id) => document.getElementById(id)?.textContent),
+  ).toContain("La etiqueta es demasiado larga.");
 });
 
 // La guarda es `instanceof Response && status === 401`: con el mutante && -> ||
@@ -480,6 +540,10 @@ it("@s38 al reintentar se limpian el error de campo y el aviso anterior", async 
     "aria-invalid",
     "false",
   );
+  // @s40: los estados se anuncian sin mover el foco. Al limpiar los errores el
+  // efecto de foco vuelve a dispararse, y solo el `focusOn.current = null` impide
+  // que le robe el foco al botón que el propietario acaba de pulsar.
+  expect(screen.getByRole("button", { name: "Guardar" })).toHaveFocus();
 });
 
 it("@s38 un reintento con éxito retira el aviso de estado incierto", async () => {

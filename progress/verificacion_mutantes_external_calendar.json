@@ -1,62 +1,122 @@
 [
   {
-    "cluster": "G",
-    "name": "hoy: literal 'No se ha podido consultar…' -> ''",
+    "cluster": "I",
+    "name": "vista: aria-labelledby del formulario -> ''",
     "verdict": "MUERE",
     "tests": [
-      "@s36 un fallo de red dice que no se ha podido consultar, no que no se ha podido leer"
+      "@s37 el formulario se anuncia por su título y promete que solo se lee"
     ]
   },
   {
-    "cluster": "G",
-    "name": "hoy: el startsWith se compara con ''",
+    "cluster": "I",
+    "name": "vista: aria-labelledby de la ficha -> ''",
     "verdict": "MUERE",
     "tests": [
-      "@s36 un fallo de red dice que no se ha podido consultar, no que no se ha podido leer"
+      "@s39 la ficha y su diálogo se nombran solos"
     ]
   },
   {
-    "cluster": "G",
-    "name": "hoy: clock() sin try/catch -> se pierde la zona cruda",
+    "cluster": "I",
+    "name": "vista: parrafo de solo lectura -> ''",
     "verdict": "MUERE",
     "tests": [
-      "@s35 con la zona de la instantánea sin resolver se muestra el instante crudo"
+      "@s37 el formulario se anuncia por su título y promete que solo se lee"
     ]
   },
   {
-    "cluster": "G",
-    "name": "hoy: clock() con value null -> no devuelve cadena vacia",
+    "cluster": "I",
+    "name": "vista: autoComplete de la etiqueta -> ''",
     "verdict": "MUERE",
     "tests": [
-      "@s35 sin última sincronización la marca queda sin hora"
+      "@s37 el formulario se anuncia por su título y promete que solo se lee"
     ]
   },
   {
-    "cluster": "G",
-    "name": "hoy: summary === '' -> !==",
+    "cluster": "I",
+    "name": "vista: type de la etiqueta -> ''",
     "verdict": "MUERE",
     "tests": [
-      "@s35 sincroniza con onlyIfStale y luego pide el día completo, en ese orden",
-      "@s35 muestra el evento en hora local y la marca de la última sincronización",
-      "@s35 avisa de la sincronización fallida y sigue mostrando los datos anteriores",
-      "@s36 un 503 en la sincronización deja ver los eventos con el aviso de pendiente",
-      "@s19 un evento sin resumen se muestra como Sin título",
-      "@s36 una actualización nueva cancela la anterior y su respuesta tardía no repinta",
-      "@s36 una cancelación mientras se lee el cuerpo tampoco repinta la sección"
+      "@s37 el formulario se anuncia por su título y promete que solo se lee"
     ]
   },
   {
-    "cluster": "G",
-    "name": "hoy: la guarda de aborto tras leer el cuerpo -> false",
+    "cluster": "I",
+    "name": "vista: spellCheck del campo de direccion -> true",
     "verdict": "MUERE",
     "tests": [
-      "@s36 una cancelación mientras se lee el cuerpo tampoco repinta la sección"
+      "@s37 el formulario se anuncia por su título y promete que solo se lee"
     ]
   },
   {
-    "cluster": "G",
-    "name": "hoy: la guarda de aborto del catch de sync -> false",
-    "verdict": "SOBREVIVE",
-    "tests": []
+    "cluster": "I",
+    "name": "vista: aria-describedby del campo de direccion pierde la ayuda",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 el formulario se anuncia por su título y promete que solo se lee"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: aria-atomic de la region viva -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 el formulario se anuncia por su título y promete que solo se lee"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: h3 'Eventos' -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 la ficha y su diálogo se nombran solos"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: aria-label del dialogo -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 la ficha y su diálogo se nombran solos"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: texto del dialogo -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 la ficha y su diálogo se nombran solos"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: role='note' del aviso de truncado -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 avisa cuando la instantánea quedó truncada, y solo entonces"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: texto del aviso de truncado -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 avisa cuando la instantánea quedó truncada, y solo entonces"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "hoy: aria-live de la seccion -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 muestra el evento en hora local y la marca de la última sincronización"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "hoy: h2 'Calendario externo' -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 muestra el evento en hora local y la marca de la última sincronización"
+    ]
   }
 ]

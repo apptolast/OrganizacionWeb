@@ -98,6 +98,10 @@ it("@s35 muestra el evento en hora local y la marca de la última sincronizació
   // Lo que sí distingue este estado del de fallo es que no hay enlace de rescate,
   // y lo que distingue el camino feliz es que no se anuncia sincronización
   // pendiente: las dos sí caen si la producción se rompe.
+  expect(section).toHaveAttribute("aria-live", "polite");
+  expect(
+    within(section).getByRole("heading", { name: "Calendario externo" }),
+  ).toBeInTheDocument();
   expect(within(section).queryByRole("link")).not.toBeInTheDocument();
   expect(
     within(section).queryByText("Sincronización pendiente."),

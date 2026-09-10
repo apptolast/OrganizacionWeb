@@ -8,7 +8,6 @@ disciplina del repo dice que los firmas tú.
 
 ## 1. Feature 27 — enmienda del recibo, sin contrafirma
 
-
 **Qué pasó.** El commit `a1b0d20b` (10 de septiembre, 00:19) cambió dos filas de
 `features/github_connector.feature` **sin pasar por ti**. Lo caza el panel de
 precierre (motivo M13 de `progress/carriles/bloqueantes_27.md`).
@@ -17,9 +16,9 @@ precierre (motivo M13 de `progress/carriles/bloqueantes_27.md`).
 
 - Línea 146: «con sus **once** campos» → «con sus **doce** campos».
 - Líneas 165-166: el recibo pasa de contener `id, projectId, repository, status,
-  created, skipped, failed, truncated, errorCode, startedAt, finishedAt` a
+created, skipped, failed, truncated, errorCode, startedAt, finishedAt` a
   contener `id, **source**, projectId, **projectPath**, status, created, skipped,
-  failed, truncated, errorCode, startedAt, finishedAt`. Y la cláusula siguiente
+failed, truncated, errorCode, startedAt, finishedAt`. Y la cláusula siguiente
   pasa a exigir `source` es "github" y `projectPath` es "octocat/Hello-World".
 
 **Por qué se hizo.** Al unificar la importación de GitHub y GitLab en la feature
@@ -46,7 +45,6 @@ rompería el `@s20` de la 29).
 
 ## 2. Feature 29 — el `@s9` nombra una columna que no existe
 
-
 **Qué pasa.** `@s9` de `features/additional_connectors.feature` dice «token_nonce
 de 12 bytes». Esa columna **no existe**:
 `V29__additional_connectors.sql:37` declara sólo `token_ciphertext`, con el nonce
@@ -67,7 +65,6 @@ migrar, que es trabajo real y sin ganancia de seguridad que yo vea.
 
 ## 3. Feature 30 — `@s43` no describe la carrera entre escrituras
 
-
 **Qué pasa.** Los `Examples` de `@s43` son «navega a /proyectos», «cierra sesión»
 y «cambia a otra regla». El camino donde vivía un defecto **real** que se arregló
 hoy —«otra escritura la supera», que dejaba `Guardar` y el interruptor inertes
@@ -86,7 +83,6 @@ carrera entre escrituras, o basta con la lectura de `@s40` fila 1?
 
 ## 4. Feature 30 — el enlace del historial cuando la regla ya no crea tareas
 
-
 **Qué pasa.** En `automations.tsx:577-585`, si la regla es `NOTIFY_WEBHOOK` el
 segmento de proyecto se resuelve a `""` y el `href` sale `/proyectos//tareas/<id>`.
 
@@ -104,7 +100,6 @@ algo más? El carril **no inventó comportamiento**, que es lo correcto.
 ---
 
 ## 5. Feature 30 — `upsert` puede pisar una confirmación buena
-
 
 **Qué pasa.** `PostgresAutomationWork.upsert` (`:204-212`) hace
 `ON CONFLICT (rule_id, event_id) DO UPDATE` **sin guarda de estado**, a diferencia
@@ -127,7 +122,6 @@ declara que el último que escribe manda? Es el punto H6 que el juez pidió
 
 ## 6. Feature 30 — qué muestra el editor al abrir una regla de webhook
 
-
 **Qué pasa.** Ni `@s37`, ni `@s38`, ni `@s40` dicen nada sobre qué debe mostrar
 el editor al abrir una regla `NOTIFY_WEBHOOK`. Hay dos mutantes vivos ahí y el
 oráculo que los mataría está escrito y listo, pero afirmarlo sería **fijar como
@@ -144,7 +138,6 @@ mide 84,60 % y el ámbito 91,18 %.
 ---
 
 ## 7. Feature 25 — el `@s9` promete modo degradado y el código muere al arrancar
-
 
 **Qué pasa.** `features/webhooks.feature:129-142` dice «Sin clave de cifrado
 válida la aplicación arranca degradada / Then la aplicación queda disponible» y
@@ -192,7 +185,6 @@ comparten?
 
 ## 8. Feature 25 — el plazo de `@s32` no cuadra con el del `@Scheduled`
 
-
 **Qué pasa.** El When de `@s32` dice «transcurren 1500 ms desde el arranque» y su
 tercera fila exige 20 entregas `succeeded` tras el primer ciclo y las 5 restantes
 tras el segundo. La producción es
@@ -220,7 +212,6 @@ como está escrito?
 
 ## 9. Feature 25 — una clase de error nueva: `SECRET_UNREADABLE`
 
-
 **Qué pasa.** Al cerrar el bloqueante **B10** —un secreto que no se puede abrir
 detenía la cola de entrega de **todos** los propietarios, en silencio y para
 siempre— la entrega afectada pasa a liquidarse como un intento fallido más. Eso
@@ -242,3 +233,96 @@ para una clave rotada: «se requiere recrear endpoints».
 alternativa que veo —dejar la entrega pendiente y sólo arrendarla— hace que el
 propietario nunca se entere y que la fila vuelva cada cinco minutos para siempre,
 que es una versión más lenta del mismo defecto.
+
+---
+
+## 10. Feature 28 — el plazo de 5 s pasa a cubrir el intercambio completo
+
+**Qué cambió, sin contrafirma.** El commit `baf5ab1f` reescribió
+`features/external_calendar.feature:13-14`. Antes: «Descarga con redirecciones
+deshabilitadas, **timeout de 5 s**, Accept text/calendar…». Después, el plazo pasa
+a ser del **intercambio completo** —conexión, cabeceras y lectura del cuerpo— y se
+añade esta fila al `@s12`:
+
+> `| 200 text/calendar que envía las cabeceras y luego gotea el cuerpo sin cerrar | FEED_UNREACHABLE |`
+
+**Por qué se hizo.** Sin ese plazo total, un proveedor que manda las cabeceras y
+luego gotea el cuerpo sin cerrarlo **retiene un hilo indefinidamente**. Es un
+agujero de recursos real, y el propio texto lo dice: «ninguna descarga puede
+retener un hilo más de 5 s».
+
+**Nota:** esto puede ser lo que ya ratificaste como «la de la 28 amplía su
+contrato con el plazo de lectura del cuerpo del feed» en la entrada R1 de
+`progress/ratificaciones.md`. Si es así, dilo y lo doy por cerrado citando esa
+ratificación; lo pregunto porque **no lo puedo afirmar yo**.
+
+---
+
+## 11. Feature 28 — el certificado que no vale para su nombre
+
+**Qué cambió, sin contrafirma.** El commit `78dca3a6` añadió esta fila al
+`@s12`:
+
+> `| presenta un certificado que no es válido para su nombre | FEED_UNREACHABLE |`
+
+**Mi lectura.** Es la consecuencia directa de la decisión que **sí** tomaste
+—«Anclar, y probar el TLS»— aplicada al calendario externo: si se ancla la
+dirección, hay que comprobar que el certificado corresponde al nombre, o el
+anclaje no sirve de nada. Pero es una fila nueva del contrato y la firma es tuya.
+
+---
+
+## 12. Feature 28 — el sitio de «Calendario externo» en el menú
+
+**Qué pasa.** La enmienda de navegación que ratificaste fija el orden de las
+entradas del menú, y «Calendario externo» aparece en `workspace.tsx` en una
+posición que esa enmienda no nombra explícitamente.
+
+**Lo que hay que decidir:** confirmar la posición actual, o decir cuál es la
+correcta. Es de dos minutos y cierra la última puerta humana de esta feature.
+
+---
+
+## 13. Feature 29 — `@s11` describe una instancia que producción rechaza
+
+**Qué pasa.** El `@s11` exige que `https://gitlab.example.com/api/v4` sea
+**aceptada** y devuelva 200. La prueba que lleva esa etiqueta la lista entre las
+**rechazadas**. El escenario, tal como está escrito, **no puede pasar**:
+`GitlabApiBase.of` sólo admite bases de bucle local, que es lo que el servidor
+falso puede servir.
+
+**Lo que hay que decidir:** o se enmienda el `@s11` (y el `@s9`) para que el
+Given nombre una base de bucle local —media hora—, o `GitlabApiBase` gana una
+**lista blanca de instancia autoalojada configurada** —medio día, y es superficie
+de ataque nueva: una lista blanca mal puesta es reenlace DNS por la puerta grande—.
+
+Mi recomendación es la primera: el contrato describe una capacidad que nunca se
+implementó, y añadirla ahora por fidelidad al texto es caro y arriesgado.
+
+---
+
+## 14. Feature 29 — la contrafirma del `@s31`, fuera del carril que la escribió
+
+**Qué pasa.** La enmienda del `@s31` (las dos filas Bearer pasan de 401
+`UNAUTHENTICATED` a 403 `API_SCOPE_DENIED`) **la ratificaste**: está la
+pregunta y tu respuesta citadas literalmente en `progress/ratificaciones.md`,
+entrada R1. Pero el juez objeta —con razón en la forma— que quien lo escribió en
+el `.feature` fui yo, y que no hay una línea tuya fuera de ese carril.
+
+**Lo que hay que hacer:** una línea tuya confirmándolo. Diez segundos, y cierra la
+puerta de aprobación humana sobre ese contrato de forma auditable.
+
+---
+
+## 15. Feature 29 — qué ve el propietario con un recibo en curso
+
+**Qué pasa.** El componente `Receipt` de `gitlab-connector.tsx` pinta cuatro
+cifras y la bandera de truncado, y **nunca el estado del recibo**. Así que una
+importación en curso (`running`) se presenta **idéntica** a una terminada sin
+resultados: el usuario no puede distinguir «va por la mitad» de «no encontró
+nada». El contrato no cubre el hueco — el `@s35` modela la importación como
+síncrona.
+
+**Lo que hay que decidir:** o la 29 muestra el estado del recibo (se añade la
+cláusula al Then del `@s35` y se pinta), o se deja escrito como límite conocido
+y se quita la exportación sin uso de `readGitlabImport`.

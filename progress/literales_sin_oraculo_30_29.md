@@ -238,3 +238,44 @@ Ninguno de la lista de `REGLAS.md` §6 ni del reparto de `REPARTO_NOCHE.md` §3.
 noche; `frontend/src/external-calendar-api.ts` **no** se toca: sólo se le
 importa el tipo `FeedError`. No se ha creado ninguna migración, así que no gasto
 ninguno de los números reservados.
+
+## Previsión de mutantes, para contrastar con la campaña
+
+No he corrido ni Stryker ni PIT (REPARTO §4: las corre el orquestador, en
+serie). Lo que espero:
+
+**Frontend, `connectors-catalog.tsx`.** Aquí sí hay ganancia medible, porque
+Stryker —al revés que PIT— **sí** muta literales de cadena y objetos:
+
+- los **veintidós** mutantes de cadena de `ERROR_TEXT` (once claves y once
+  valores; antes sólo estaban cubiertos los dos de `CONNECTION_INVALID`) pasan a
+  morir: cada código se comprueba por su texto exacto y por su clave;
+- el mutante que sustituye el respaldo `"Hay un problema con esta integración"`
+  por `""`, y el que borra el `??` dejando `ERROR_TEXT[code]`, mueren con la
+  prueba del código desconocido;
+- el `BlockStatement` de `describeError` muere por cualquiera de las doce.
+
+Dos entradas nuevas en el mapa añaden cuatro mutantes que antes no existían, y
+los cuatro nacen cubiertos.
+
+**Backend, `PostgresAutomationWork`.** Aquí la ganancia de puntuación será
+**pequeña o nula, y eso es exactamente el punto del informe**: los cuatro
+hallazgos son literales de cadena dentro de SQL, que PIT no muta. Lo que cambia
+no es la cifra sino que la conducta pasa a estar ejercida contra PostgreSQL. Lo
+poco que sí debería moverse:
+
+- `event()` y `withTheirRuns()` dejan de tener líneas sin cobertura de
+  integración, así que los mutantes de `removeCall`/`returnValue` sobre ellas
+  pasan a tener quien los mate;
+- `claim()` cubre por fin su rama de `attempt != 1`, con lo que el mutante de
+  frontera sobre `run.attempt() == 1` (`>=`, `!=`) tiene ahora oráculo por los
+  dos lados.
+
+Si la campaña contradice esta previsión, gana la campaña.
+
+## Base de la rama
+
+Rama `claude/github-connector`, con base en `a39a5409` (`origin/main` en el
+momento del arranque). Durante la sesión `origin/main` avanzó hasta `1bc1dca3`
+por otro carril; **no he rebasado ni fusionado**, para no pisarle el trabajo a
+nadie. Cinco commits, uno por hallazgo.

@@ -1,5 +1,11 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { observeAccess, setCsrfToken } from "./api-client";
 import { ConnectorsCatalog } from "./connectors-catalog";
@@ -92,6 +98,26 @@ it("@s34 does not announce success before there is any", async () => {
   expect(screen.queryByText("Conectado")).toBeNull();
 });
 
+/**
+ * Hasta que la conexión no se conoce no se puede ofrecer nada. Con `loading` arrancando en
+ * falso, un propietario ya conectado vería parpadear el formulario «Conectar» antes de que
+ * llegue el GET: una invitación a reescribir el token que ya tiene guardado.
+ */
+it("@s34 shows neither the form nor the panel until the connection is known", async () => {
+  const fetcher = vi.fn();
+  fetcher.mockReturnValueOnce(new Promise<Response>(() => {}));
+  fetcher.mockResolvedValueOnce(Response.json(projects));
+  vi.stubGlobal("fetch", fetcher);
+
+  render(<GitlabConnector owner="owner" />);
+
+  await screen.findByRole("heading", { level: 1 });
+  expect(screen.queryByLabelText(/Token de acceso personal/)).toBeNull();
+  expect(screen.queryByRole("button")).toBeNull();
+  // Tampoco se acusa a nadie mientras no se sabe: el aviso de configuración vendría después.
+  expect(screen.queryByRole("alert")).toBeNull();
+});
+
 // ---------------------------------------------------- @s34 mientras la petición viaja
 
 it("@s34 disables the button and says «Guardando…» while the request is in flight", async () => {
@@ -137,6 +163,57 @@ it("@s34 shows «Conectado», the masked hint and the project only after the 200
   await waitFor(() => expect(screen.getByText("Conectado")).toBeTruthy());
   expect(screen.getByText("••••WXYZ")).toBeTruthy();
   expect(screen.getByText("grupo/proyecto")).toBeTruthy();
+});
+
+/**
+ * Atar lo tecleado con lo enviado. El cuerpo del PUT sólo lo afirmaba la prueba del cliente,
+ * que no renderiza nada: la pantalla podía mandar el token vacío y todo seguía verde, porque el
+ * servidor doble responde `connected` pase lo que pase.
+ */
+it("@s34 sends exactly the token and the path that were typed", async () => {
+  const user = userEvent.setup();
+  const fetcher = stub(
+    Response.json(notConnected),
+    Response.json(projects),
+    Response.json(connected),
+  );
+
+  render(<GitlabConnector owner="owner" />);
+  await screen.findByLabelText(/Token de acceso personal/);
+  await fillAndSubmit(user);
+
+  await waitFor(() => expect(screen.getByText("Conectado")).toBeTruthy());
+  const put = fetcher.mock.calls.find(
+    (call) => (call[1] as RequestInit | undefined)?.method === "PUT",
+  )!;
+  expect(JSON.parse(String((put[1] as RequestInit).body))).toEqual({
+    token: TOKEN,
+    projectPath: "grupo/proyecto",
+  });
+});
+
+/**
+ * El botón se deshabilita mientras la petición viaja, pero un envío por teclado no pasa por el
+ * botón. Sin la guarda, un doble intro manda el token dos veces.
+ */
+it("@s34 does not send the token twice when the form is submitted again in flight", async () => {
+  const user = userEvent.setup();
+  const fetcher = vi.fn();
+  fetcher.mockResolvedValueOnce(Response.json(notConnected));
+  fetcher.mockResolvedValueOnce(Response.json(projects));
+  fetcher.mockReturnValue(new Promise<Response>(() => {}));
+  vi.stubGlobal("fetch", fetcher);
+
+  render(<GitlabConnector owner="owner" />);
+  await screen.findByLabelText(/Token de acceso personal/);
+  await fillAndSubmit(user);
+  await waitFor(() => expect(connectButton()).toBeDisabled());
+  fireEvent.submit(tokenField().closest("form")!);
+
+  const sent = fetcher.mock.calls.filter(
+    (call) => (call[1] as RequestInit | undefined)?.method === "PUT",
+  );
+  expect(sent).toHaveLength(1);
 });
 
 it("@s34 empties the token field once the connection is confirmed", async () => {
@@ -195,6 +272,10 @@ it("@s34 marks the field the server complained about", async () => {
     expect(pathField().getAttribute("aria-invalid")).toBe("true"),
   );
   expect(tokenField().getAttribute("aria-invalid")).not.toBe("true");
+  // Marcar el campo en rojo sin una frase que diga qué revisar no explica nada.
+  expect(screen.getByRole("alert").textContent).toBe(
+    "Revisa la ruta del proyecto y el token",
+  );
 });
 
 /**
@@ -373,11 +454,14 @@ it("@s35 shows the hint, the path and the identifier next to the three buttons",
 
   await renderConnected();
 
-  expect(screen.getByText("••••WXYZ")).toBeTruthy();
-  expect(screen.getByText("grupo/proyecto")).toBeTruthy();
-  expect(screen.getByText("4821")).toBeTruthy();
+  // El panel se consulta por su nombre accesible: si lo perdiera, dejaría de ser una región y
+  // las pruebas que afirman su ausencia pasarían por el motivo equivocado.
+  const panel = screen.getByRole("region", { name: "Conexión" });
+  expect(within(panel).getByText("••••WXYZ")).toBeTruthy();
+  expect(within(panel).getByText("grupo/proyecto")).toBeTruthy();
+  expect(within(panel).getByText("4821")).toBeTruthy();
   for (const name of ["Importar issues", "Actualizar token", "Desconectar"])
-    expect(screen.getByRole("button", { name })).toBeTruthy();
+    expect(within(panel).getByRole("button", { name })).toBeTruthy();
 });
 
 it("@s35 lists only the open projects in the native selector", async () => {
@@ -390,6 +474,25 @@ it("@s35 lists only the open projects in the native selector", async () => {
     "Primero",
     "Segundo",
   ]);
+});
+
+/** Sin lista de proyectos no hay destino que ofrecer: el selector no puede inventarse uno. */
+it("@s35 offers no destination when the list of projects cannot be read", async () => {
+  stub(Response.json(connected), problem(503, { code: "STORAGE_UNAVAILABLE" }));
+
+  await renderConnected();
+
+  expect(screen.queryAllByRole("option")).toHaveLength(0);
+});
+
+it("@s38 opens with the focus on the heading, not on one of the actions", async () => {
+  openConnected();
+
+  await renderConnected();
+
+  expect(document.activeElement).toBe(
+    screen.getByRole("heading", { level: 1 }),
+  );
 });
 
 it("@s35 announces progress without a percentage while the import travels", async () => {
@@ -547,8 +650,37 @@ it("@s35 keeps the connection when the disconnection fails", async () => {
     screen.getByRole("button", { name: "Confirmar desconexión" }),
   );
 
-  await screen.findByRole("alert");
+  const alert = await screen.findByRole("alert");
+  expect(alert.textContent).toBe("No se pudo completar. Inténtalo más tarde");
   expect(screen.getByText("••••WXYZ")).toBeTruthy();
+  // La confirmación se cierra: dejarla abierta taparía el aviso que explica el fallo.
+  expect(
+    screen.queryByRole("group", { name: "Confirmar desconexión" }),
+  ).toBeNull();
+  expect(screen.getByRole("button", { name: "Desconectar" })).toBeTruthy();
+});
+
+/** Tras el 204 no puede quedar residuo de la conexión anterior: ni recibo ni ruta escrita. */
+it("@s35 the disconnection leaves neither the receipt nor the path of the previous connection", async () => {
+  const user = userEvent.setup();
+  openConnected(
+    Response.json(receipt(), { status: 201 }),
+    new Response(null, { status: 204 }),
+  );
+
+  await renderConnected();
+  await user.click(importButton());
+  await screen.findByRole("region", { name: "Resultado de la importación" });
+  await user.click(screen.getByRole("button", { name: "Desconectar" }));
+  await user.click(
+    screen.getByRole("button", { name: "Confirmar desconexión" }),
+  );
+
+  await screen.findByLabelText(/Token de acceso personal/);
+  expect(
+    screen.queryByRole("region", { name: "Resultado de la importación" }),
+  ).toBeNull();
+  expect((pathField() as HTMLInputElement).value).toBe("");
 });
 
 /**
@@ -648,6 +780,42 @@ it("@s36 names the seconds of a rate limit and leaves the button usable again", 
   expect(
     screen.queryByRole("region", { name: "Resultado de la importación" }),
   ).toBeNull();
+  // Un límite de peticiones no es un token roto: la conexión sigue siendo válida.
+  expect(screen.getByText("Conectado")).toBeTruthy();
+});
+
+it("@s36 a new import clears the failure of the previous one before asking", async () => {
+  const user = userEvent.setup();
+  openConnected(
+    problem(503, { code: "RATE_LIMITED", retryAfterSeconds: 30 }),
+    Response.json(receipt(), { status: 201 }),
+  );
+
+  await renderConnected();
+  await user.click(importButton());
+  await screen.findByRole("alert");
+  await user.click(importButton());
+
+  await screen.findByRole("region", { name: "Resultado de la importación" });
+  expect(screen.queryByRole("alert")).toBeNull();
+});
+
+it("@s36 a new import clears the result of the previous one before asking", async () => {
+  const user = userEvent.setup();
+  openConnected(
+    Response.json(receipt(), { status: 201 }),
+    problem(503, { code: "RATE_LIMITED", retryAfterSeconds: 30 }),
+  );
+
+  await renderConnected();
+  await user.click(importButton());
+  await screen.findByRole("region", { name: "Resultado de la importación" });
+  await user.click(importButton());
+
+  await screen.findByRole("alert");
+  expect(
+    screen.queryByRole("region", { name: "Resultado de la importación" }),
+  ).toBeNull();
 });
 
 it("@s36 turns the state into «Error» and suggests replacing the token, with the focus on it", async () => {
@@ -685,6 +853,64 @@ it("@s36 offers «Actualizar estado» for an import already running, and it rere
   });
 });
 
+/**
+ * «Actualizar estado» relee: cuando la lectura vuelve, el aviso de lo que falló antes ya no
+ * describe la pantalla, y dejarlo puesto haría creer que el problema sigue.
+ */
+it("@s36 «Actualizar estado» clears the notice of what failed before", async () => {
+  const user = userEvent.setup();
+  openConnected(
+    problem(409, { code: "IMPORT_IN_PROGRESS" }),
+    Response.json(connected),
+    Response.json({ connectors: [] }),
+  );
+
+  await renderConnected();
+  await user.click(importButton());
+  await screen.findByRole("alert");
+  await user.click(screen.getByRole("button", { name: "Actualizar estado" }));
+
+  await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+});
+
+/** Y si la relectura falla, la vista no puede seguir enseñando la conexión que ya no confirma. */
+it("@s36 a reread that fails stops showing the connection it can no longer confirm", async () => {
+  const user = userEvent.setup();
+  openConnected(
+    problem(409, { code: "IMPORT_IN_PROGRESS" }),
+    problem(503, { code: "STORAGE_UNAVAILABLE" }),
+    problem(503, { code: "STORAGE_UNAVAILABLE" }),
+  );
+
+  await renderConnected();
+  await user.click(importButton());
+  await screen.findByRole("alert");
+  await user.click(screen.getByRole("button", { name: "Actualizar estado" }));
+
+  await screen.findByLabelText(/Token de acceso personal/);
+  expect(screen.queryByText("••••WXYZ")).toBeNull();
+});
+
+/** Desconectar cierra el asunto: el aviso de la importación que falló antes ya no aplica. */
+it("@s35 the disconnection clears the notice left by a failed import", async () => {
+  const user = userEvent.setup();
+  openConnected(
+    problem(503, { code: "RATE_LIMITED", retryAfterSeconds: 30 }),
+    new Response(null, { status: 204 }),
+  );
+
+  await renderConnected();
+  await user.click(importButton());
+  await screen.findByRole("alert");
+  await user.click(screen.getByRole("button", { name: "Desconectar" }));
+  await user.click(
+    screen.getByRole("button", { name: "Confirmar desconexión" }),
+  );
+
+  await screen.findByLabelText(/Token de acceso personal/);
+  expect(screen.queryByRole("alert")).toBeNull();
+});
+
 it("@s36 warns that the provider is unavailable and keeps the path for a manual retry", async () => {
   const user = userEvent.setup();
   stub(
@@ -715,6 +941,9 @@ it("@s36 after a network failure offers «Actualizar estado» and retries nothin
   await renderConnected();
   await user.click(importButton());
 
+  const alert = await screen.findByRole("alert");
+  // El texto de reserva: el propietario no puede quedarse con un párrafo en blanco.
+  expect(alert.textContent).toBe("No se pudo completar. Inténtalo más tarde");
   await screen.findByRole("button", { name: "Actualizar estado" });
   const asked = fetcher.mock.calls.length;
   await new Promise((resolve) => setTimeout(resolve, 60));
@@ -766,6 +995,25 @@ it("@s37 leaving for the catalogue drops the import: the list loads on its own a
     screen.queryByRole("region", { name: "Resultado de la importación" }),
   ).toBeNull();
   expect(fetcher.mock.calls.at(-1)?.[0]).toBe("/api/v1/me/connectors");
+});
+
+/**
+ * La petición de la lista de proyectos no pasa por `pending.current`, así que su cancelación
+ * depende sólo de la limpieza de su propio efecto, y nadie la afirmaba: salir de la pantalla
+ * podía dejarla en vuelo.
+ */
+it("@s37 leaving the screen cancels the read of the projects as well", async () => {
+  const fetcher = vi.fn();
+  fetcher.mockResolvedValueOnce(Response.json(connected));
+  fetcher.mockReturnValueOnce(new Promise<Response>(() => {}));
+  vi.stubGlobal("fetch", fetcher);
+
+  const view = render(<GitlabConnector owner="owner" />);
+  await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(2));
+  const inFlight = (fetcher.mock.calls[1][1] as RequestInit).signal!;
+  view.unmount();
+
+  expect(inFlight.aborted).toBe(true);
 });
 
 it("@s37 closing the session leaves neither the token nor the path anywhere", async () => {

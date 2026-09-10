@@ -412,3 +412,108 @@ La misma prueba derivada que en la pantalla de GitLab.
 `progress/verificacion_mutantes_additional_connectors6.json`.
 
 **Previsión acumulada: 137 mutantes muertos.**
+
+---
+
+## Racimo 7 — lo que quedaba de la pantalla, con sus defectos (12 mutantes)
+
+| Oráculo nuevo | Defecto que tapaba |
+|---|---|
+| `@s34 shows neither the form nor the panel until the connection is known` | con `loading` en falso, un propietario ya conectado vería parpadear el formulario «Conectar»: una invitación a reescribir el token que ya tiene |
+| `@s35 offers no destination when the list of projects cannot be read` | un destino inventado en el selector cuando la lista no se puede leer |
+| `@s37 leaving the screen cancels the read of the projects as well` | la petición de proyectos no pasa por `pending.current`: sólo la limpieza de su efecto la cancela, y nadie lo afirmaba |
+| `@s34 does not send the token twice when the form is submitted again in flight` | el botón se deshabilita, pero un envío por teclado no pasa por el botón: doble intro, token enviado dos veces |
+| `@s34 sends exactly the token and the path that were typed` | la pantalla podía mandar el token vacío y todo seguía verde |
+| `@s36 a new import clears the failure / the result of the previous one` | el recibo viejo o el aviso viejo sobre una importación nueva |
+| `@s36 names the seconds of a rate limit…` (+1 aserción) | un límite de peticiones marcaba la conexión como «Error»: un límite no es un token roto |
+| `@s35 keeps the connection when the disconnection fails` (+2 aserciones) | la confirmación se quedaba abierta tapando el aviso que explica el fallo |
+| `@s35 the disconnection leaves neither the receipt nor the path…` | la ruta del proyecto anterior seguía escrita en el formulario que se reabre — el residuo que @s32 y @s37 prohíben |
+
+Verificación: 12 de 13 mueren. El que sobrevive es `focusReplace = useRef(false) → true`, y con
+él sus dos hermanos (`focusReceipt`, `focusHeading`): **equivalentes**, porque el efecto de foco
+corre por primera vez con `loading` todavía en cierto, cuando el único elemento montado es el
+`<h1>` —que ya tiene el foco por el `useLayoutEffect`— y las otras dos referencias son nulas. La
+bandera se consume en ese primer paso, antes de que su botón exista.
+
+## Racimo 8 — los avisos que no dicen nada y los restos de estado (5 mutantes)
+
+Misma familia que el defecto de la noche: un `role="alert"` que aparece sin decir nada.
+
+- El texto de reserva de `describeFailure` no lo afirmaba nadie (la prueba de fallo de red lo
+  alcanzaba sin mirarlo).
+- Los textos de `STORAGE_UNAVAILABLE` y `VALIDATION_ERROR` se disparaban sin afirmarse: marcar
+  un campo en rojo sin una frase que diga qué revisar no explica nada.
+- `disabled` arrancando en cierto acusaba a la instalación antes de saber nada.
+- Una relectura que falla dejaba de limpiar la conexión que ya no puede confirmar.
+- «Actualizar estado» y la desconexión no limpiaban el aviso de lo que falló antes.
+
+Y dos roturas a mano más, para acreditar que dos oráculos nuevos **pueden** fallar: quitar
+`heading.current?.focus()` pone roja la prueba de foco de apertura de cada pantalla, y vaciar el
+`aria-label="Conexión"` pone roja la prueba del panel — que ahora lo consulta por su nombre
+accesible, de modo que las aserciones de ausencia no puedan pasar por el motivo equivocado.
+
+---
+
+## Recuento y previsión
+
+| Racimo | Mutantes muertos |
+|---|---|
+| 1 · los 17 sin cobertura | 15 |
+| 1 · de propina (`110`, `124`, verificados en el racimo 2) | 2 |
+| 2 · tabla de rechazo de `decodeConnection` | 29 |
+| 3 · tabla de rechazo del recibo | 20 |
+| 4 · abortos, cabeceras, error tipado y mapa de campos | 32 |
+| 5 · la pantalla de GitLab | 20 |
+| 6 · el catálogo y su cliente | 19 |
+| 7 · lo que quedaba de la pantalla | 12 |
+| 8 · los avisos y los restos de estado | 5 |
+| **Total** | **154** |
+
+Hacían falta **85**. La previsión queda en **(507 + 154) / 740 = 661 / 740 ≈ 89 %**, con 69
+muertes de margen sobre el umbral.
+
+Por fichero, previsto:
+
+| Fichero | Antes | Muertes nuevas | Previsión |
+|---|---|---|---|
+| `gitlab-connector-client.ts` | 66,0 % | 94 | ≈ 98 % (quedan los 5 equivalentes declarados) |
+| `connectors-catalog-client.ts` | 83,3 % | 12 | ≈ 98 % |
+| `connectors-catalog.tsx` | 76,6 % | 7 | ≈ 86 % |
+| `gitlab-connector.tsx` | 64,6 % | 40 | ≈ 78 % |
+
+`gitlab-connector.tsx` se queda por debajo del 80 **por sí solo**, y no por falta de oráculos:
+**29 de sus supervivientes son el racimo de la escritura tardía** (`live(controller)` y
+`pending.current === controller`, líneas 103-272). Bajo React 19 un `setState` sobre un árbol
+desmontado es un no-op silencioso, y **no existe ningún camino en el que una petición se aborte
+con la pantalla viva**, porque `pending.current` se sobrescribe sin abortar la anterior. Sin
+cambiar producción no hay prueba que pueda distinguirlos, y el encargo prohíbe cambiarla. Quedan
+declarados aquí, con su causa, como pide la sección 7 del dictamen. El umbral que mide la puerta
+es el agregado de la feature, que queda en el 89 %.
+
+## Defectos anotados y fuera de alcance
+
+`pending.current = controller` se asigna **sin abortar la anterior** (líneas 107, 180, 212, 253).
+Dos operaciones solapadas escriben las dos, y gana la que llega última, no la que el propietario
+pidió última: una importación lenta puede repintar «Creadas/Omitidas/Fallidas» sobre una pantalla
+ya desconectada. Arreglarlo es un cambio de producción —abortar la petición anterior al empezar
+una nueva— y de paso haría matables esos 29 mutantes. Queda anotado para quien decida el
+contrato; aquí no se toca.
+
+Segundo, menor: `readGitlabImport` está exportada y **no la llama nadie en producción**, sólo su
+prueba. Una importación que el servidor devuelva en `running` no tiene hoy forma de completarse
+en pantalla: el componente `Receipt` pinta cuatro cifras y nunca el estado, así que un recibo en
+curso se presenta idéntico a una importación terminada sin resultados.
+
+## Cómo reproducir la acreditación
+
+```
+node scripts/verificar-mutantes-additional-connectors.mjs <racimo>   # 1..8
+pnpm --dir frontend exec vitest run src/gitlab-connector src/connectors-catalog
+```
+
+179 pruebas verdes (eran 83). `git diff` sobre los cuatro ficheros de producción y sobre
+`backend/` queda vacío: no se ha tocado producción para matar un solo mutante.
+
+**Aviso sobre el verificador**: sólo ejecuta las cinco suites de la feature, así que un
+«SOBREVIVE» suyo no prueba que el mutante sobreviva a la campaña completa —otra suite puede
+matarlo—. Un «MUERE», en cambio, es concluyente.

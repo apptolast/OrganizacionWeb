@@ -1,0 +1,104 @@
+[
+  {
+    "racimo": 7,
+    "name": "screen 66 BooleanLiteral loading inicial -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 shows neither the form nor the panel until the connection is known"
+    ]
+  },
+  {
+    "racimo": 7,
+    "name": "screen 73 ArrayDeclaration projects inicial",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 offers no destination when the list of projects cannot be read"
+    ]
+  },
+  {
+    "racimo": 7,
+    "name": "screen 86 BooleanLiteral focusReplace inicial -> true",
+    "verdict": "SOBREVIVE",
+    "tests": []
+  },
+  {
+    "racimo": 7,
+    "name": "screen 171 ArrowFunction limpieza de proyectos",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 leaving the screen cancels the read of the projects as well"
+    ]
+  },
+  {
+    "racimo": 7,
+    "name": "screen 176 CE if (connecting) return -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 does not send the token twice when the form is submitted again in flight"
+    ]
+  },
+  {
+    "racimo": 7,
+    "name": "screen 183 ObjectLiteral cuerpo del PUT -> {}",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 sends exactly the token and the path that were typed"
+    ]
+  },
+  {
+    "racimo": 7,
+    "name": "screen 183 LogicalOperator ?? -> &&",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 sends exactly the token and the path that were typed"
+    ]
+  },
+  {
+    "racimo": 7,
+    "name": "screen 209 CallExpression setActionError(null) -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 a new import clears the failure of the previous one before asking"
+    ]
+  },
+  {
+    "racimo": 7,
+    "name": "screen 210 CallExpression setReceipt(null) -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 a new import clears the result of the previous one before asking"
+    ]
+  },
+  {
+    "racimo": 7,
+    "name": "screen 225 CE code === CONNECTION_INVALID -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 names the seconds of a rate limit and leaves the button usable again"
+    ]
+  },
+  {
+    "racimo": 7,
+    "name": "screen 250 BooleanLiteral setConfirming(false) -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 keeps the connection when the disconnection fails"
+    ]
+  },
+  {
+    "racimo": 7,
+    "name": "screen 259 CallExpression setReceipt(null) tras el 204 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 the disconnection leaves neither the receipt nor the path of the previous connection"
+    ]
+  },
+  {
+    "racimo": 7,
+    "name": "screen 260 StringLiteral setProjectPath('') tras el 204",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 the disconnection leaves neither the receipt nor the path of the previous connection"
+    ]
+  }
+]

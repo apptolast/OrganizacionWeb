@@ -16,7 +16,10 @@ const SOURCES = {
 };
 
 const originals = Object.fromEntries(
-  Object.entries(SOURCES).map(([key, path]) => [key, readFileSync(path, "utf8")]),
+  Object.entries(SOURCES).map(([key, path]) => [
+    key,
+    readFileSync(path, "utf8"),
+  ]),
 );
 
 /** [racimo, nombre, fichero, texto exacto a buscar, texto de reemplazo] */
@@ -775,6 +778,171 @@ const MUTANTS = [
     `        </span>{" "}`,
     `        </span>{""}`,
   ],
+
+  // ----------------------------- racimo 7: lo que quedaba de la pantalla, con sus defectos
+  [
+    7,
+    "screen 66 BooleanLiteral loading inicial -> false",
+    "screen",
+    `  const [loading, setLoading] = useState(true);`,
+    `  const [loading, setLoading] = useState(false);`,
+  ],
+  [
+    7,
+    "screen 73 ArrayDeclaration projects inicial",
+    "screen",
+    `useState<ProjectSummary[]>([]);`,
+    `useState<ProjectSummary[]>(["Stryker was here"]);`,
+  ],
+  [
+    7,
+    "screen 86 BooleanLiteral focusReplace inicial -> true",
+    "screen",
+    `  const focusReplace = useRef(false);`,
+    `  const focusReplace = useRef(true);`,
+  ],
+  [
+    7,
+    "screen 171 ArrowFunction limpieza de proyectos",
+    "screen",
+    `    return () => controller.abort();`,
+    `    return () => undefined;`,
+  ],
+  [
+    7,
+    "screen 176 CE if (connecting) return -> false",
+    "screen",
+    `    if (connecting) return;`,
+    `    if (false) return;`,
+  ],
+  [
+    7,
+    "screen 183 ObjectLiteral cuerpo del PUT -> {}",
+    "screen",
+    `        { token: tokenField.current?.value ?? "", projectPath },`,
+    `        {},`,
+  ],
+  [
+    7,
+    "screen 183 LogicalOperator ?? -> &&",
+    "screen",
+    `        { token: tokenField.current?.value ?? "", projectPath },`,
+    `        { token: (tokenField.current?.value && "") as string, projectPath },`,
+  ],
+  [
+    7,
+    "screen 209 CallExpression setActionError(null) -> ;",
+    "screen",
+    `    setImporting(true);\n    setActionError(null);\n    setReceipt(null);`,
+    `    setImporting(true);\n    setReceipt(null);`,
+  ],
+  [
+    7,
+    "screen 210 CallExpression setReceipt(null) -> ;",
+    "screen",
+    `    setImporting(true);\n    setActionError(null);\n    setReceipt(null);`,
+    `    setImporting(true);\n    setActionError(null);`,
+  ],
+  [
+    7,
+    "screen 225 CE code === CONNECTION_INVALID -> true",
+    "screen",
+    `      if (failure.code === "CONNECTION_INVALID") {`,
+    `      if (true) {`,
+  ],
+  [
+    7,
+    "screen 250 BooleanLiteral setConfirming(false) -> true",
+    "screen",
+    `  async function confirmDisconnect() {\n    setConfirming(false);`,
+    `  async function confirmDisconnect() {\n    setConfirming(true);`,
+  ],
+  [
+    7,
+    "screen 259 CallExpression setReceipt(null) tras el 204 -> ;",
+    "screen",
+    `      setConnection(null);\n      setReceipt(null);\n      setProjectPath("");`,
+    `      setConnection(null);\n      setProjectPath("");`,
+  ],
+  [
+    7,
+    "screen 260 StringLiteral setProjectPath('') tras el 204",
+    "screen",
+    `      setConnection(null);\n      setReceipt(null);\n      setProjectPath("");`,
+    `      setConnection(null);\n      setReceipt(null);\n      setProjectPath("Stryker was here!");`,
+  ],
+
+  // ------- racimo 8: roturas a mano para acreditar que los oraculos nuevos pueden fallar
+  [
+    8,
+    "screen 94 el foco de apertura no se mueve al h1",
+    "screen",
+    `    mounted.current = true;\n    heading.current?.focus();`,
+    `    mounted.current = true;`,
+  ],
+  [
+    8,
+    "screen 320 aria-label de la seccion del panel -> ''",
+    "screen",
+    `        <section aria-label="Conexión">`,
+    `        <section aria-label="">`,
+  ],
+  [
+    8,
+    "catalogo 93 el foco de apertura del catalogo",
+    "catalog",
+    `    heading.current?.focus();`,
+    `    ;`,
+  ],
+  [
+    8,
+    "screen 55 StringLiteral texto de reserva -> ''",
+    "screen",
+    `  return MESSAGES[error.code] ?? "No se pudo completar. Inténtalo más tarde";`,
+    `  return MESSAGES[error.code] ?? "";`,
+  ],
+  [
+    8,
+    "screen 36 StringLiteral STORAGE_UNAVAILABLE -> ''",
+    "screen",
+    `  STORAGE_UNAVAILABLE: "No se pudo completar. Inténtalo más tarde",`,
+    `  STORAGE_UNAVAILABLE: "",`,
+  ],
+  [
+    8,
+    "screen 37 StringLiteral VALIDATION_ERROR -> ''",
+    "screen",
+    `  VALIDATION_ERROR: "Revisa la ruta del proyecto y el token",`,
+    `  VALIDATION_ERROR: "",`,
+  ],
+  [
+    8,
+    "screen 65 BooleanLiteral disabled inicial -> true",
+    "screen",
+    `  const [disabled, setDisabled] = useState(false);`,
+    `  const [disabled, setDisabled] = useState(true);`,
+  ],
+  [
+    8,
+    "screen 120 CallExpression setConnection(null) del catch -> ;",
+    "screen",
+    `        setDisabled(true);\n      setConnection(null);`,
+    `        setDisabled(true);\n      ;`,
+  ],
+  [
+    8,
+    "screen 251 CallExpression setActionError(null) al desconectar -> ;",
+    "screen",
+    `    setConfirming(false);\n    setActionError(null);`,
+    `    setConfirming(false);\n    ;`,
+  ],
+  [
+    8,
+    "screen 282 CallExpression setActionError(null) al releer -> ;",
+    "screen",
+    `  async function refreshStatus() {\n    setActionError(null);`,
+    `  async function refreshStatus() {\n    ;`,
+  ],
 ];
 
 /**
@@ -833,10 +1001,14 @@ function absentChainMutants() {
   ];
   const operands = fields.map((field) => `value.${field} !== null`);
   const search = `      ? ${operands.join(" ||\n        ")}\n      : !nonEmpty(value.apiBase) ||`;
-  const wrap = (chain) => `      ? ${chain}\n      : !nonEmpty(value.apiBase) ||`;
+  const wrap = (chain) =>
+    `      ? ${chain}\n      : !nonEmpty(value.apiBase) ||`;
   const prefix = (upTo) => operands.slice(0, upTo).join(" || ");
   const rest = (from) =>
-    operands.slice(from).map((each) => ` || ${each}`).join("");
+    operands
+      .slice(from)
+      .map((each) => ` || ${each}`)
+      .join("");
   const mutants = [];
   for (let node = 1; node <= 7; node++)
     mutants.push([

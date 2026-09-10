@@ -274,7 +274,10 @@ it("@s33 falls back to a plain explanation when the code is one it does not know
   stub(
     Response.json(
       catalog({
-        github: { status: "error", lastError: { code: "CODIGO_NUEVO", at: AT } },
+        github: {
+          status: "error",
+          lastError: { code: "CODIGO_NUEVO", at: AT },
+        },
       }),
     ),
   );

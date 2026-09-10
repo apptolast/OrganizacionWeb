@@ -370,9 +370,12 @@ const running = {
 
 it("@s27 refuses a running receipt that already carries an error", async () => {
   stub(
-    Response.json({ ...running, errorCode: "CONNECTION_INVALID" }, {
-      status: 201,
-    }),
+    Response.json(
+      { ...running, errorCode: "CONNECTION_INVALID" },
+      {
+        status: 201,
+      },
+    ),
   );
 
   await expect(startGitlabImport(projectId, signal())).rejects.toThrow(
@@ -450,9 +453,7 @@ it("@s15 accepts a receipt that ends in the very microsecond it started", async 
 });
 
 it("@s15 refuses a receipt carrying a thirteenth field", async () => {
-  stub(
-    Response.json({ ...receipt, tokenHint: "WXYZ" }, { status: 201 }),
-  );
+  stub(Response.json({ ...receipt, tokenHint: "WXYZ" }, { status: 201 }));
 
   await expect(startGitlabImport(projectId, signal())).rejects.toThrow(
     "Confirmación incompatible",
@@ -596,7 +597,9 @@ it("@s34 keeps out of the map the entries that are not a field and a code", asyn
 });
 
 it("@s34 ignores an errors that is not even a list", async () => {
-  stub(problem(400, { code: "VALIDATION_ERROR", errors: { token: "REQUIRED" } }));
+  stub(
+    problem(400, { code: "VALIDATION_ERROR", errors: { token: "REQUIRED" } }),
+  );
 
   const error = (await connectGitlab(
     { token: "", projectPath: "x" },
@@ -632,7 +635,12 @@ it("@s37 does not decode anything once the caller aborted", async () => {
  * otra: bastaba con que la promesa acabara rechazando, y eso lo consigue cualquiera de las tres.
  * Aquí se afirma qué NO llegó a pasar en cada parada, que es lo que el aborto promete.
  */
-type Call = [string, (signal: AbortSignal) => Promise<unknown>, number, unknown];
+type Call = [
+  string,
+  (signal: AbortSignal) => Promise<unknown>,
+  number,
+  unknown,
+];
 
 const CALLS: Call[] = [
   ["readGitlabConnection", (as) => readGitlabConnection(as), 200, connected],

@@ -727,7 +727,11 @@ pitest {
     mutationThreshold.set(80)
     outputFormats.set(setOf("HTML", "XML"))
     timestampedReports.set(false)
-    threads.set(if (integrationApiOnly || integrationApiHttpOnly) 8 else 4)
+    // El ambito conjunto de las cinco features es mucho mas grande que uno solo y con
+    // cuatro hilos el sistema se quedo sin memoria y mato la campana. Dos hilos tardan
+    // mas pero terminan, que es lo unico que cuenta a estas horas.
+    threads.set(
+        if (integrationApiOnly || integrationApiHttpOnly) 8 else if (nightFiveOnly) 2 else 4)
 }
 
 spotless { java { googleJavaFormat("1.31.0") } }

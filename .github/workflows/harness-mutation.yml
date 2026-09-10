@@ -10,9 +10,39 @@ name: Prueba de mutación
 # esa feature. Este workflow es la red de seguridad periódica sobre todo el
 # repositorio, no el sustituto de aquella.
 
+# ── POR QUÉ AQUÍ NO HAY CRON, 11 de septiembre de 2026 ──────────────────────
+#
+# Había uno diario ("0 2 * * *") y NUNCA completó una campaña. Los runs del 7,
+# 8 y 9 de septiembre duran exactamente 4 h 00 m: son el `timeout-minutes: 240`
+# de abajo matándolos. Medido en el log del run 34322164783: init verde en
+# 10 min 39 s, PIT calculó cobertura en 470 s, creó 254 unidades de mutación a
+# las 07:24:57 y siguió analizando 3 h 41 min 26 s sin terminar el backend. La
+# campaña de frontend no llegó a arrancar ni una sola vez.
+#
+# No es un timeout mal puesto: NO CABE. Doce de los ámbitos documentados en
+# progress/ suman 6 h 37 m ellos solos, y el techo duro de un job hospedado son
+# 360 min. Subir el timeout sólo cambia "cancelado a las 4 h" por "cancelado a
+# las 6 h".
+#
+# Tampoco vale trocear por ámbitos con nombre, que es la salida que parece
+# obvia: está medido en progress/medicion_ambito_mutacion.md que el objetivo
+# vacío muta 456 clases y la unión de los ámbitos con nombre sólo 308. Esa
+# matriz dejaría 148 clases sin mutar —Project, Task, CreateTaskUseCase,
+# ValidationException entre ellas— y encima en verde. Poner el semáforo en
+# verde midiendo menos es justo lo que CLAUDE.md prohíbe.
+#
+# Así que la red de seguridad queda A PETICIÓN, y se dice en voz alta en vez de
+# fallar cada noche hasta que nadie la mire. La puerta que de verdad cierra una
+# feature no es ésta: es la mutación POR FEATURE que exige CHECKPOINTS.md C7,
+# ejecutada por `mutation_tester` sobre el ámbito de esa feature, y sigue viva.
+#
+# PARA DEVOLVERLE EL CRON hace falta antes trocear de verdad: partición mecánica
+# del universo (`-PmutationShard=k/N`), que preserva la cobertura por
+# construcción en vez de por revisión humana, más un job de veredicto que se
+# ponga rojo si falta una clase. Diseñado y verificado, sin aplicar. No vuelvas
+# a poner un cron aquí sin eso: volvería a morir cada noche.
+
 on:
-  schedule:
-    - cron: "0 2 * * *"
   workflow_dispatch:
 
 permissions:

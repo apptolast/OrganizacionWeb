@@ -566,3 +566,39 @@ mutación, esos ocho no se pueden ganar sin exponer estado interno, y no lo voy 
 hacer. Se anotan aquí para que la campaña no los persiga.
 
 **Previsión de muertes: 9.** Acumulado acreditado: 108.
+
+---
+
+## Racimo 11 — las ocho celdas de la tabla de entregas, pintadas y nunca miradas
+
+**Causa común.** La prueba de @s40 comprobaba **cuántas** filas hay y el
+**estado** de cada una, y nada más. Las ocho celdas se pintaban sin oráculo: ni
+el guion de los tres campos que pueden faltar, ni la unidad de la latencia, ni
+la fecha recortada a diez caracteres, ni el `data-label` que cada celda lleva
+para cuando la cabecera se apila fuera de la vista a 320 px (@s42).
+
+En vez de un oráculo por celda, **una fila entera contra una tabla literal**, con
+la etiqueta de columna emparejada con su contenido. Dos filas: una completa y una
+agotada con los tres campos opcionales vacíos, que es donde vive el guion.
+
+Eso ata además los ocho `data-label`: simulando un desalineamiento (`Latencia`
+etiquetada como `Intento`) la prueba cae. Sin la tabla literal, ese
+desalineamiento dejaba a quien navega a 320 px leyendo «Intento: 12 ms» sin que
+nada se pusiera rojo.
+
+Y la traducción de tipos a etiquetas de la lista —el **otro** sitio donde viven
+las dos listas paralelas del racimo 6— con un webhook suscrito a tres tipos.
+
+**Evidencia del rojo: 12 mutantes muertos**, más el desalineamiento simulado.
+
+```
+ROJO 617 httpStatus ?? -> &&        ROJO 623 plantilla de ms -> ""
+ROJO 618 guion de httpStatus -> ""  ROJO 624 errorClass ?? -> &&
+ROJO 619 latencyMs === null -> true ROJO 625 guion de errorClass -> ""
+ROJO 620 latencyMs === null -> false ROJO 626 updatedAt.slice -> updatedAt
+ROJO 621 latencyMs === null -> !==  ROJO 586 traducción de tipos -> undefined
+ROJO 622 guion de latencia -> ""    ROJO 587 join(", ") -> ""
+ROJO DEFECTO data-label de Latencia desalineado
+```
+
+**Previsión de muertes: 12.** Acumulado acreditado: 120.

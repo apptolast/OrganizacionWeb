@@ -1096,6 +1096,89 @@ it("@s40 Actualizar does nothing when the webhook of the open panel is gone", as
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });
 
+/** Cada celda de una fila, emparejada con la columna que la etiqueta. */
+function cellsOf(row: HTMLElement) {
+  return within(row)
+    .getAllByRole("cell")
+    .map((cell) => [cell.getAttribute("data-label"), cell.textContent]);
+}
+
+// Las ocho celdas se pintaban y nadie las miraba: ni el guion de los tres
+// campos que pueden faltar, ni la unidad de la latencia, ni la fecha recortada,
+// ni la etiqueta que cada celda lleva para cuando la cabecera se apila fuera de
+// la vista a 320 px (@s42).
+it("@s40 every delivery cell says what it says, labelled column by column", async () => {
+  stubApi([endpoint()], () =>
+    Promise.resolve(
+      Response.json({
+        items: [
+          delivery({ updatedAt: "2026-09-08T18:45:00.000000Z" }),
+          delivery({
+            id: otherDeliveryId,
+            eventId: otherDeliveryId,
+            eventType: "BlockPlanned.v1",
+            status: "exhausted",
+            attempt: 6,
+            httpStatus: null,
+            latencyMs: null,
+            errorClass: "TIMEOUT",
+            updatedAt: "2026-09-09T07:05:00.000000Z",
+          }),
+        ],
+      }),
+    ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.click(screen.getByRole("button", { name: "Ver entregas" }));
+  await waitFor(() => expect(screen.getByRole("table")).toBeVisible());
+
+  const [, succeeded, exhausted] = screen.getAllByRole("row");
+  expect(cellsOf(succeeded)).toEqual([
+    ["Tipo", "TaskCreated.v1"],
+    ["Intento", "1"],
+    ["Código HTTP", "200"],
+    ["Latencia", "12 ms"],
+    ["Clase de error", "—"],
+    ["Estado", "Entregada"],
+    ["Fecha", "2026-09-08"],
+    ["Acciones", "Reenviar"],
+  ]);
+  // La fila agotada trae vacíos los tres campos que pueden faltar: los tres
+  // salen como guion, no en blanco ni como «null ms».
+  expect(cellsOf(exhausted)).toEqual([
+    ["Tipo", "BlockPlanned.v1"],
+    ["Intento", "6"],
+    ["Código HTTP", "—"],
+    ["Latencia", "—"],
+    ["Clase de error", "TIMEOUT"],
+    ["Estado", "Agotada"],
+    ["Fecha", "2026-09-09"],
+    ["Acciones", "Reenviar"],
+  ]);
+});
+
+// El mismo emparejamiento por índice del racimo 6, en el otro sitio donde se
+// usa: la lista traduce los tipos suscritos a sus etiquetas.
+it("@s36 spells out the subscribed types of a webhook with their labels", async () => {
+  stubApi([
+    endpoint({
+      eventTypes: ["TaskCreated.v1", "BlockPlanned.v1", "WorkSessionClosed.v1"],
+    }),
+  ]);
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+
+  expect(
+    screen.getByText(
+      "Crear tarea, Planificar bloque, Cerrar sesión de trabajo",
+    ),
+  ).toBeVisible();
+});
+
 it("@s40 the Actualizar button repeats a single deliveries GET", async () => {
   const { other } = stubApi([endpoint()], () =>
     Promise.resolve(Response.json({ items: [delivery()] })),

@@ -278,3 +278,73 @@ guardián de reentrada.
 | Hoy: el ternario de fallo → `true` | siete pruebas |
 
 Estado tras el racimo: **96 pruebas verdes**.
+
+---
+
+## Racimo E — los validadores de la capa API (predicción: racimo 1 `oraculo_debil` 24 mutantes, racimo 5 `oraculo_debil` 8, racimo 12 `sin_cobertura` 7, racimo 9 `oraculo_debil` 5, más cuatro huecos «omitidos»)
+
+`external-calendar-api.ts`. La enfermedad es una sola y está en los **cuatro**
+validadores del fichero, no solo en `subscriptionOf`: una cadena de guardas de la
+que solo unas pocas tienen fixture roto; las demás se evalúan **siempre en falso**,
+así que el mutante que las apaga sobrevive sin que nada se ponga rojo.
+
+De `external-calendar-api.test.ts` se pasa de 40 a **81 pruebas**. Lo añadido:
+
+- **`subscriptionOf`**: 15 filas nuevas en el `it.each`, una por guarda muda
+  (etiqueta vacía y no-texto, host y cola no-texto, id no-texto, último intento
+  inválido, zona no-texto, truncado no-booleano, `updatedAt` inválido y los tres
+  contadores que solo tenían fixture en `imported`). Y las **dos filas de anclaje
+  del regex de uuid** —`x1111…` y `…5555x`—, que son las que en la campaña de
+  automatizaciones sobrevivieron cuando todo lo demás murió.
+- **`eventOf`**: `endAt` malformado, `uid` no-texto y `allDay` no-booleano. Ojo con
+  el último: el fixture `{...item, allDay: undefined}` que ya existía **pierde la
+  clave** al serializarse con `Response.json`, así que cae en `exact()` y no llega
+  nunca al `typeof`. Confirmado por el refutador y por la ejecución.
+- **El sobre de `readExternalEvents`**: `configured` no-booleano, `lastSyncAt`
+  inválido, `lastStatus` desconocido e `items` que no es lista.
+- **`snapshotOf`**: campo de más en la instantánea (el que ya había rompía el
+  **subobjeto**, no el sobre) y `configured` no-booleano.
+- **`syncExternalCalendar`**: campo de más y `subscription` ausente, para el
+  `exact(body, "performed subscription")`.
+- **`refuse()`**: seis casos que separan las dos mitades de cada conjunción
+  estado+código (503/404/400 con otro código, y 500/400/404 con el código ajeno),
+  más uno que vuelve a leer el cuerpo de la respuesta relanzada, que es lo único
+  que fija el `.clone()` de `problem()`.
+- **Cabeceras**: `Accept` en el GET, `Accept` + `Content-Type` + `X-CSRF-TOKEN` en
+  el PUT, `Content-Type` en el POST `/sync`. **Corrijo aquí a la predicción**: su
+  `posibleDefecto` («si el spread de `options.headers` se perdiera, el PUT viajaría
+  sin `X-CSRF-TOKEN`») es falso, y las dos refutaciones tenían razón:
+  `api-client.ts:22-27` construye `new Headers(options.headers)` y hace
+  `headers.set("X-CSRF-TOKEN", …)` **después** de la mezcla, así que el token se
+  añade pase lo que pase. El oráculo escrito sobre esa premisa habría dado verde
+  con la producción rota. Lo que sí se pierde con ese mutante es el
+  `Content-Type` —y eso es lo que afirman las pruebas nuevas—.
+- **Cuerpo 200 que no es JSON**, **PUT que responde `configured:false`** (la única
+  protección contra que `saveExternalCalendar` devuelva `null` y la vista deje al
+  propietario en el formulario de alta tras un guardado con éxito) y las **dos
+  señales abortadas del DELETE**, antes y durante.
+
+### Acreditación por mutante (racimo E) — 40 de 41 mueren
+
+Todos los de `subscriptionOf`, `eventOf`, el sobre de `readExternalEvents`,
+`snapshotOf`, `exact` de sync, las tres conjunciones de `refuse`, el `.clone()` de
+`problem`, las tres cabeceras, el `if (!snapshot.configured) invalid()` y los dos
+`throwIfAborted` del DELETE: **mueren**, con la prueba concreta que los mata
+anotada en `progress/verificacion_mutantes_external_calendar.json`.
+
+Tres apuntes de método:
+
+1. Los anclajes `^` y `$` del regex mueren **solo** por las dos filas de prefijo y
+   sufijo. Sin ellas, las otras quince no los tocan. La predicción acertó de lleno.
+2. Cuatro «supervivientes» de mi primera pasada eran artefacto **del mutante que
+   escribí yo**, no de Stryker: apagar una guarda entera no es un operador que
+   Stryker genere. Repetidos con los operadores reales
+   (`!==` → `===` y `"string"` → `""`) los cuatro **mueren**, casi siempre por el
+   camino feliz. Queda anotado para que la campaña no se lea mal.
+3. **Superviviente equivalente declarado**: `response.json().catch(() => invalid())`
+   mutado a `catch(() => undefined)`. Todos los llamadores revalidan el cuerpo
+   (`snapshotOf`, `exact`, el sobre de eventos), así que `undefined` acaba lanzando
+   exactamente el mismo «Respuesta de calendario externo inválida». No hay oráculo
+   posible sin cambiar la producción.
+
+Estado tras el racimo: **135 pruebas verdes** (83 de partida → 135).

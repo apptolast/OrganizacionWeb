@@ -1,106 +1,28 @@
 [
   {
-    "cluster": "D",
-    "name": "failed(): se borra el bloque de ConnectorsDisabledError",
+    "cluster": "E",
+    "name": "snapshotOf: typeof configured !== -> ===",
     "verdict": "MUERE",
     "tests": [
-      "@s38 deja estado incierto y conserva el borrador con 503"
+      "acepta la ausencia de suscripción",
+      "acepta una suscripción completa",
+      "no envía nada más que un GET sin cuerpo",
+      "pide JSON en la cabecera Accept",
+      "envía exactamente la etiqueta y la dirección",
+      "viaja como JSON, pide JSON y conserva el token CSRF"
     ]
   },
   {
-    "cluster": "D",
-    "name": "failed(): el prefijo de conectores se pierde al componer",
+    "cluster": "E",
+    "name": "snapshotOf: typeof configured contra ''",
     "verdict": "MUERE",
     "tests": [
-      "@s38 deja estado incierto y conserva el borrador con 503"
-    ]
-  },
-  {
-    "cluster": "D",
-    "name": "save: setAnnouncement('') del catch -> se borra",
-    "verdict": "MUERE",
-    "tests": [
-      "@s38 deja estado incierto y conserva el borrador con 503",
-      "@s38 deja estado incierto y conserva el borrador con red"
-    ]
-  },
-  {
-    "cluster": "D",
-    "name": "vista: separador ' … ' -> ''",
-    "verdict": "MUERE",
-    "tests": [
-      "@s37 muestra host y cola pero nunca la dirección completa"
-    ]
-  },
-  {
-    "cluster": "D",
-    "name": "vista: aria-hidden='true' -> ''",
-    "verdict": "MUERE",
-    "tests": [
-      "@s37 muestra host y cola pero nunca la dirección completa"
-    ]
-  },
-  {
-    "cluster": "D",
-    "name": "montaje: setLabel(subscription.label) -> ''",
-    "verdict": "MUERE",
-    "tests": [
-      "@s37 muestra host y cola pero nunca la dirección completa"
-    ]
-  },
-  {
-    "cluster": "D",
-    "name": "synchronise: literal 'Sincronización fallida.' -> ''",
-    "verdict": "MUERE",
-    "tests": [
-      "@s38 muestra el mensaje del código y conserva la lista cuando la sincronización falla"
-    ]
-  },
-  {
-    "cluster": "D",
-    "name": "synchronise: el ternario del anuncio -> siempre 'Sincronizado.'",
-    "verdict": "MUERE",
-    "tests": [
-      "@s38 muestra el mensaje del código y conserva la lista cuando la sincronización falla"
-    ]
-  },
-  {
-    "cluster": "D",
-    "name": "synchronise: la guarda de recarga -> recarga siempre",
-    "verdict": "MUERE",
-    "tests": [
-      "@s38 muestra el mensaje del código y conserva la lista cuando la sincronización falla"
-    ]
-  },
-  {
-    "cluster": "D",
-    "name": "synchronise: la guarda de recarga -> no recarga nunca",
-    "verdict": "MUERE",
-    "tests": [
-      "@s38 sincroniza, actualiza contadores y refresca la lista",
-      "@s38 una sincronización correcta sí vuelve a pedir la lista y lo anuncia"
-    ]
-  },
-  {
-    "cluster": "D",
-    "name": "hoy: pendingSync ? ... : null -> true",
-    "verdict": "MUERE",
-    "tests": [
-      "@s35 muestra el evento en hora local y la marca de la última sincronización"
-    ]
-  },
-  {
-    "cluster": "D",
-    "name": "hoy: el ternario de fallo -> true",
-    "verdict": "MUERE",
-    "tests": [
-      "@s35 sincroniza con onlyIfStale y luego pide el día completo, en ese orden",
-      "@s35 muestra el evento en hora local y la marca de la última sincronización",
-      "@s35 un evento de todo el día se muestra sin horas",
-      "@s35 avisa de la sincronización fallida y sigue mostrando los datos anteriores",
-      "@s35 con lista vacía muestra la ausencia y la marca de sincronización",
-      "@s36 un 503 en la sincronización deja ver los eventos con el aviso de pendiente",
-      "@s36 una actualización nueva cancela la anterior y su respuesta tardía no repinta"
+      "acepta la ausencia de suscripción",
+      "acepta una suscripción completa",
+      "no envía nada más que un GET sin cuerpo",
+      "pide JSON en la cabecera Accept",
+      "envía exactamente la etiqueta y la dirección",
+      "viaja como JSON, pide JSON y conserva el token CSRF"
     ]
   }
 ]

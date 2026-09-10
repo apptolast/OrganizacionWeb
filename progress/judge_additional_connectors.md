@@ -479,3 +479,70 @@ Que se contraste con esa previsión y que **cualquier superviviente no previsto 
 `GitlabProjectPath`, `ImportIssues`, `ImportGuard` o las seis `*StatusSource` se
 explique una a una**. Un porcentaje agregado no vale como evidencia en las clases
 donde vive la seguridad.
+
+---
+
+## Condiciones (bloqueantes para pasar la feature a `done`)
+
+1. **C1 — Prueba de ruta.** Una prueba que renderice `App`, navegue a
+   `/conectores` y a `/conectores/gitlab` y compruebe que aparecen el h1
+   «Conectores» y la pantalla de GitLab, y que el enlace del menú apunta a
+   `/conectores`. Patrón ya existente en
+   `frontend/src/github-connector-routing.test.tsx`. Sin esto,
+   `App.tsx:50-51` y `:90-93` es producción sin oráculo y `@s33` queda parcial.
+2. **C2 — `@s38` en navegador.** El spec de Playwright para las dos pantallas:
+   320/768/1280 px, texto al 200 %, zoom nativo 200 %, 44 x 44, recorrido de
+   teclado con foco visible y axe en los tres anchos, más la nota de límites que
+   pide la última línea del escenario. Ya no está bloqueado por nada.
+3. **C3 — `@s25`, la fila de 5 MiB.** Techo de tamaño en la lectura del cuerpo de
+   `HttpGitlabIssueSource.java:128` con su prueba, o —si el propietario decide que
+   el techo no procede— enmienda razonada de la fila en el `.feature`. Lo que no
+   vale es dejar el escenario declarado cerrado sin ninguna de las dos cosas.
+   Aplica igual a `HttpGithubIssueSource.java:101`.
+4. **C4 — La prueba de contrato, donde hacía falta.** Replicarla sobre
+   `GithubConnectorController` (`ImportResponse` y `ConnectionResponse`) contra
+   `RECEIPT_FIELDS` y `CONNECTION_FIELDS` de `github-connector-client.ts:11,14`, y
+   extender la de GitLab al `record ErrorResponse` (F2). De paso, comparar
+   conjuntos y no listas (F3).
+5. **C5 — Ámbito de mutación.** Los tres patrones de la sección 7: añadir
+   `domain.GitlabProjectPath*` y `application.ImportGuard*` al ámbito de la 29, y
+   arreglar el patrón muerto `application.ImportGithubIssues*`
+   (`build.gradle.kts:115`) para que `ImportIssues` reciba mutantes en alguna
+   campaña.
+6. **C6 — Los dos oráculos flojos.** Dar dientes a
+   `ConnectorCatalogApiTest:130-150` metiendo en la fila algo que el contrato
+   prohíba publicar (H1), y afirmar el código `UNAUTHENTICATED` en `:216` (H2).
+7. **C7 — Contrafirma de la enmienda del `@s31`** en
+   `features/additional_connectors.feature:388`, como la de 27.
+
+**No condiciono** el mérito de la feature a nada de esto: el conector GitLab, el
+catálogo de seis fuentes y las dos pantallas están bien diseñados, bien probados y
+mejor razonados que la media de este repositorio. Lo que falta es cerrar tres
+escenarios, apuntar una guarda al blanco correcto y arreglar tres patrones de
+mutación que hoy puntúan sin medir.
+
+---
+
+## Checkpoints
+
+- **CP1 — el contrato existe y está aprobado**: [x]
+  (`features/additional_connectors.feature`, 38 escenarios, autorización global en
+  `feature_list.json`).
+- **CP2 — cada `@s` tiene test que lo verifica**: [ ] 35 de 38.
+  `@s25`, `@s33` y `@s38` parciales.
+- **CP3 — disciplina TDD acreditada**: [x] Ocho ciclos con ocho commits y rojo
+  acreditado en cada uno; tres casos en que una prueba verde a la primera fue
+  rechazada por no discriminar. Es la mejor bitácora que he leído en este
+  proyecto.
+- **CP4 — no hay producción que ningún test exija**: [ ]
+  `App.tsx:50-51` y `:90-93`, el cableado del orquestador. Ver C1.
+- **CP5 — arquitectura y contrato de errores**: [x] Capas respetadas,
+  `problem+json` con código estable, `Cache-Control: no-store` en todo lo que
+  describe una credencial, y ningún texto libre del proveedor en ninguna salida.
+- **CP6 — `bin/harness init` en verde**: [ ] **no ejecutado por indicación
+  expresa** (22 contenedores en vuelo y otro juez trabajando). Queda como
+  verificación pendiente del orquestador; el artesano declara verde por clase y
+  `tsc`, `eslint` y `prettier` limpios, y yo no lo he contrastado.
+- **CP7 — mutación por encima del umbral**: [ ] pendiente, y **con los ámbitos de
+  la sección 7 corregidos antes de correrla**. Correrla hoy mediría de menos: tres
+  clases con la lógica más sensible de la feature no recibirían un solo mutante.

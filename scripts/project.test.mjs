@@ -2068,6 +2068,8 @@ test("external calendar PIT scope covers the whole slice and extends the default
       "application.PublicAddressPolicy*",
       "application.AddressPolicy*",
       "application.ExternalEventsView*",
+      "application.ExternalCalendarUseCases*",
+      "application.ExternalCalendarNotConfiguredException*",
       "adapter.connectors.AesGcmSecretCipher*",
       "adapter.connectors.ConnectorKeyRing*",
       "adapter.feed.HttpCalendarFeed*",

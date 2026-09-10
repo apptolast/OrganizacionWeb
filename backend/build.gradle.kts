@@ -93,6 +93,11 @@ pitest {
         "com.apptolast.organization.application.GitlabProject*",
         "com.apptolast.organization.domain.GitlabProjectPath*",
         "com.apptolast.organization.application.GitlabUnavailableException*",
+        // Compartidas con la 27 y huerfanas hasta hoy: el catalogo de esta feature es
+        // quien decide que error sale por cada conector.
+        "com.apptolast.organization.application.ConnectorError*",
+        "com.apptolast.organization.application.ConnectorRateLimitedException*",
+        "com.apptolast.organization.application.ConnectorsDisabledException*",
         // ConnectorStatusSource* solo resuelve a la INTERFAZ, que no tiene mutantes:
         // las seis implementaciones no empiezan por ese prefijo y quedaban fuera.
         "com.apptolast.organization.application.ConnectorStatusSource*",
@@ -134,6 +139,12 @@ pitest {
         "com.apptolast.organization.application.DisconnectGithub*",
         "com.apptolast.organization.application.ReadIssueImport*",
         "com.apptolast.organization.application.ConnectorFailures*",
+        // Huerfanas: ningun ambito nombrado las alcanzaba. ConnectorError lo dijo el
+        // panel de la 29 y lo confirma el barrido de clases sin ambito.
+        "com.apptolast.organization.application.ConnectorError*",
+        "com.apptolast.organization.application.ConnectorRateLimitedException*",
+        "com.apptolast.organization.application.IssueImportFailedException*",
+        "com.apptolast.organization.application.IssueConnection*",
         "com.apptolast.organization.application.IssueSourceException*",
         "com.apptolast.organization.application.IssuePage*",
         "com.apptolast.organization.application.StoredConnection*",
@@ -464,6 +475,10 @@ pitest {
         "com.apptolast.organization.application.PublicAddressPolicy*",
         "com.apptolast.organization.application.AddressPolicy*",
         "com.apptolast.organization.application.ExternalEventsView*",
+        // Ningun ambito nombrado las alcanzaba: 22 lineas de casos de uso y su
+        // excepcion, produccion de esta feature que ninguna campana suya puntuaba.
+        "com.apptolast.organization.application.ExternalCalendarUseCases*",
+        "com.apptolast.organization.application.ExternalCalendarNotConfiguredException*",
         // El cifrado vive en adapter.connectors desde que las features 27 y 28 unificaron
         // SecretCipher: el paquete adapter.crypto ya no existe y este ambito lo seguia
         // nombrando, de modo que AES-256-GCM no recibia ni un mutante y la campana lo bendecia.

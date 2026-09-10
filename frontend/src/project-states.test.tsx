@@ -164,7 +164,11 @@ it("@s15 anuncia espera y bloquea acciones hasta confirmación sin anticipar est
   const activate = await screen.findByRole("button", { name: "Activar" });
   fireEvent.click(activate);
   fireEvent.click(activate);
-  expect(screen.getByRole("status")).toHaveTextContent("Cambiando estado");
+  expect(
+    within(
+      screen.getByRole("region", { name: "Estado del proyecto" }),
+    ).getByRole("status"),
+  ).toHaveTextContent("Cambiando estado");
   expect(screen.getByText("Idea", { selector: "span" })).toBeVisible();
   expect(activate).toBeDisabled();
   expect(
@@ -179,7 +183,11 @@ it("@s15 anuncia espera y bloquea acciones hasta confirmación sin anticipar est
       ),
     ),
   );
-  expect(screen.getByRole("status")).toHaveTextContent("Estado actualizado");
+  expect(
+    within(
+      screen.getByRole("region", { name: "Estado del proyecto" }),
+    ).getByRole("status"),
+  ).toHaveTextContent("Estado actualizado");
   expect(screen.getByRole("button", { name: "Pausar" })).toBeEnabled();
 });
 

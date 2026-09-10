@@ -199,3 +199,77 @@ Mutantes que espero que **sobrevivan**, y por qué:
   un retardo negativo ya dispara inmediatamente.
 - `guillotine.cancel(false)` → `cancel(true)`: no cambia nada observable.
 - el tamaño de `CHUNK`: cualquier valor razonable da el mismo desenlace.
+
+---
+
+## C6 — los dos oráculos flojos — **CERRADA**
+
+### H1 — el oráculo que no podía fallar
+
+`ConnectorCatalogApiTest.s5_thewholeBodyCarriesNoSecretNoUrlAndNoProjectPath`
+afirmaba que el cuerpo no contenía `glpat`, `invalid_token`, `WXYZ`,
+`grupo/proyecto` ni `http`. El doble devolvía seis `ConnectorRow` cuyos únicos
+datos eran `"gitlab"`, `"CONNECTION_INVALID"` y un `Instant`: **ninguna de las
+cinco cadenas entraba jamás en el caso de prueba**. El controlador podía
+serializar todo lo que recibiera y la prueba seguía verde.
+
+Ahora la fila la deriva el `GitlabStatusSource` **de verdad**, a partir de un
+`GitlabConnectionView` con los ocho campos poblados, incluidos los cinco que
+`@s5` prohíbe publicar: base de la API, ruta del proyecto, identificador del
+proyecto, pista del token y versión. La prueba pasa a cubrir **derivación y
+serialización de punta a punta**, que es lo que pide «el cuerpo completo de la
+respuesta» y lo que ninguna de las dos pruebas que sí mordían cubría entera
+(`ConnectorStatusSourcesTest:378-395` mira el `toString()` de la fila, no el
+JSON; `HttpGitlabIssueSourceTest:93-99` mira el mensaje de la excepción).
+
+Y lleva la construcción que hace no-vacua una prueba de ausencia, la misma que
+el dictamen elogia en `gitlab-connector.test.tsx:241`: **primero se afirma que lo
+prohibido está en la entrada**, y sólo entonces significa algo que no esté en la
+salida. Si alguien vuelve a vaciar el fixture, esa mitad se cae.
+
+**Rojo acreditado.** Con la prueba nueva verde, inyecté en
+`GitlabStatusSource.read` una fuga por un campo legítimo —el código del error
+pasa a ser `view.projectPath()`, que es exactamente la clase de «mejora» que
+provoca este fallo—:
+
+```
+FAILED: s5_thewholeBodyCarriesNoTokenHintNoApiBaseAndNoProjectPath()
+org.opentest4j.AssertionFailedError: {"connectors":[ ... ,
+  {"id":"gitlab","status":"error","lastActivityAt":"2026-09-10T08:30:00Z",
+   "lastError":{"code":"grupo/proyecto","at":"2026-09-10T08:30:00Z"}}]}
+==> expected: <false> but was: <true>
+```
+
+El mensaje de fallo lleva el cuerpo entero, así que la fuga se lee de un vistazo.
+Producción restaurada y verde.
+
+**Lo que este oráculo sigue sin poder decir, y queda escrito en su javadoc:** el
+token entero nunca llega al catálogo, porque `GitlabConnectionView` no tiene
+hueco para él —está bien diseñado—, y el texto libre del proveedor tampoco. Por
+eso las dos aserciones sobre `glpat` e `invalid_token` **se retiran** de esta
+prueba en vez de dejarse como decoración: donde muerden es en
+`HttpGitlabIssueSourceTest:93-99`, que sí tiene el cuerpo real
+`"invalid_token: glpat-abcdef1234"` en su fixture. Prefiero cinco aserciones que
+pueden fallar a siete de las que dos no pueden.
+
+### H2 — la asimetría del `@s31`
+
+`s31_withoutASessionTheCatalogAnswersNothing` afirmaba `isUnauthorized()` y
+`verifyNoInteractions`, pero no el código `UNAUTHENTICATED` que fija la fila del
+escenario; su hermana de Bearer sí afirma `$.code`. Añadido.
+
+**Rojo acreditado.** Mutante en `SecurityConfiguration.java:123`,
+`"UNAUTHENTICATED"` → `"UNAUTHORIZED"`:
+
+```
+FAILED: s31_withoutASessionTheCatalogAnswersNothing()
+java.lang.AssertionError: JSON path "$.code" expected:<UNAUTHENTICATED> but was:<UNAUTHORIZED>
+```
+
+Producción restaurada y verde. Diez pruebas de la clase en verde.
+
+### Ficheros
+
+- `backend/src/test/java/com/apptolast/organization/adapter/ConnectorCatalogApiTest.java`
+
+Sin cambios de producción: los dos hallazgos eran de oráculo, no de conducta.

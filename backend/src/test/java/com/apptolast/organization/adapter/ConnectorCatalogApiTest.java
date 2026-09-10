@@ -42,6 +42,13 @@ class ConnectorCatalogApiTest {
   private static final List<String> ROW_FIELDS =
       List.of("id", "status", "lastActivityAt", "lastError");
 
+  /** Los cuatro datos que @s5 prohíbe publicar y que el fixture de @s5 sí tiene que llevar. */
+  private static final String API_BASE = "https://gitlab.example.com/api/v4";
+
+  private static final String PROJECT_PATH = "grupo/proyecto";
+  private static final String TOKEN_HINT = "WXYZ";
+  private static final long PROJECT_ID = 4821L;
+
   @Autowired MockMvc mvc;
   @Autowired com.fasterxml.jackson.databind.ObjectMapper mapper;
   @MockitoBean ReadConnectorCatalogUseCase catalog;
@@ -126,27 +133,60 @@ class ConnectorCatalogApiTest {
     assertEquals(AT.toString(), gitlab.get("lastError").get("at").asText());
   }
 
+  /**
+   * @s5, y esta vez con dientes. Antes este oráculo no podía fallar: el doble devolvía filas cuyos
+   *     únicos datos eran «gitlab», «CONNECTION_INVALID» y un instante, de modo que ninguna de las
+   *     cadenas prohibidas entraba jamás en el caso de prueba. El controlador podía serializar todo
+   *     lo que recibiera y la prueba seguía verde.
+   *     <p>Ahora la fila la deriva el {@link GitlabStatusSource} de verdad, a partir de una vista
+   *     que sí lleva los cinco campos que @s5 prohíbe publicar —base de la API, ruta del proyecto,
+   *     identificador del proyecto, pista del token y versión—, así que la ausencia en la respuesta
+   *     significa algo: cubre la derivación y la serialización de punta a punta, que es lo que pide
+   *     «el cuerpo completo de la respuesta».
+   *     <p>Lo que este oráculo <b>no</b> puede decir, y conviene que esté escrito: el token entero
+   *     no llega hasta aquí porque {@link GitlabConnectionView} no tiene hueco para él, y el texto
+   *     libre del proveedor tampoco. Que «invalid_token: glpat-abcdef1234» no salga lo afirma
+   *     {@code HttpGitlabIssueSourceTest:93-99}, que sí lo tiene en su fixture.
+   */
   @Test
-  void s5_thewholeBodyCarriesNoSecretNoUrlAndNoProjectPath() throws Exception {
+  void s5_thewholeBodyCarriesNoTokenHintNoApiBaseAndNoProjectPath() throws Exception {
+    var view =
+        new GitlabConnectionView(
+            "error",
+            API_BASE,
+            PROJECT_PATH,
+            PROJECT_ID,
+            TOKEN_HINT,
+            AT,
+            new ConnectorError("CONNECTION_INVALID", AT),
+            2L);
+    // Primero se afirma que lo prohibido ESTÁ en la entrada. Sin esta mitad la prueba volvería a
+    // ser decorativa el día que alguien vacíe el fixture, que es exactamente lo que pasó.
+    assertTrue(view.toString().contains(TOKEN_HINT));
+    assertTrue(view.toString().contains(PROJECT_PATH));
+    assertTrue(view.toString().contains(API_BASE));
     when(catalog.execute("owner"))
-        .thenReturn(
-            new ConnectorCatalog(
-                List.of(
-                    ConnectorRow.notConnected("api_credentials"),
-                    ConnectorRow.notConnected("webhooks"),
-                    ConnectorRow.notConnected("ics_calendar"),
-                    ConnectorRow.notConnected("github"),
-                    ConnectorRow.notConnected("external_calendar"),
-                    ConnectorRow.error(
-                        "gitlab", AT, new ConnectorError("CONNECTION_INVALID", AT)))));
+        .thenReturn(withGitlab(new GitlabStatusSource(owner -> view).read("owner")));
 
     var body = body();
 
-    assertFalse(body.contains("glpat"));
-    assertFalse(body.contains("invalid_token"));
-    assertFalse(body.contains("WXYZ"));
-    assertFalse(body.contains("grupo/proyecto"));
-    assertFalse(body.contains("http"));
+    assertFalse(body.contains(TOKEN_HINT), body);
+    assertFalse(body.contains(PROJECT_PATH), body);
+    assertFalse(body.contains(API_BASE), body);
+    assertFalse(body.contains("gitlab.example.com"), body);
+    assertFalse(body.contains("http"), body);
+    assertFalse(body.contains(String.valueOf(PROJECT_ID)), body);
+    var gitlab = mapper.readTree(body).get("connectors").get(5);
+    assertEquals("CONNECTION_INVALID", gitlab.get("lastError").get("code").asText());
+  }
+
+  /** Las cinco primeras filas sin conectar y la de GitLab tal como la derivó su fuente. */
+  private static ConnectorCatalog withGitlab(ConnectorRow gitlab) {
+    var rows =
+        new java.util.ArrayList<ConnectorRow>(
+            ORDER.subList(0, ORDER.size() - 1).stream().map(ConnectorRow::notConnected).toList());
+    rows.add(gitlab);
+    return new ConnectorCatalog(rows);
   }
 
   // ------------------------------------------------------------------------------------- @s3
@@ -214,7 +254,11 @@ class ConnectorCatalogApiTest {
 
   @Test
   void s31_withoutASessionTheCatalogAnswersNothing() throws Exception {
-    mvc.perform(get(CATALOG)).andExpect(status().isUnauthorized());
+    // El código del cuerpo se afirma igual que en la hermana de Bearer: la fila del @s31 fija
+    // UNAUTHENTICATED, no sólo el 401, y afirmar la mitad era una asimetría gratuita.
+    mvc.perform(get(CATALOG))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
 
     verifyNoInteractions(catalog);
   }

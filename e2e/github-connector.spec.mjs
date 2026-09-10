@@ -7,6 +7,10 @@ import {
   COMPOSE_TIMEOUT_MS,
   RECREATIONS_PER_RUN,
 } from "./support/connector.mjs";
+import {
+  restartBackend,
+  RESTART_READY_TIMEOUT_MS,
+} from "./support/backend.mjs";
 
 /**
  * @s42 el recorrido del conector de GitHub es accesible en sus siete estados y en los tres anchos.
@@ -19,6 +23,8 @@ import {
  */
 
 const PAGE = "/integraciones/github";
+/** La ruta que la pantalla usa para conectar; se vigila su respuesta, no sólo lo que se pinta. */
+const CONNECTION_PATH = "/api/v1/me/connectors/github";
 const OWNER = "e2e-user";
 const TOKEN = "ghp_token_de_pruebas";
 
@@ -191,6 +197,41 @@ test("@s42 estado conectada, alcanzado conectando de verdad", async ({
   ).toBe(String(12 + TOKEN.length + 16));
   await auditAxe(page, "conectada");
   await assertLayout(page, "conectada");
+});
+
+/**
+ * @s42 el estado conectada sigue siendo alcanzable después de que otra prueba reinicie el backend.
+ *
+ * El servicio falso comparte el espacio de red del backend (`network_mode: service:backend`). Al
+ * reiniciar el backend, Docker le da un espacio de red nuevo y el falso se queda hablando con el
+ * viejo: desde ese instante el backend no lo alcanza en 127.0.0.1:9000 y **conectar** —que verifica
+ * repositorio y cuenta contra GitHub antes de guardar nada— responde 503 GITHUB_UNAVAILABLE.
+ *
+ * Siete specs reinician el backend con `restartBackend`, y ninguna vuelve a tocar el conector: la
+ * avería viajaba hasta la primera prueba del conector que corriera después sin que nadie supiera de
+ * dónde venía. Aquí queda fijada donde se ve, en la pantalla.
+ */
+test("@s42 conectar sobrevive al reinicio del backend que hacen otras pruebas", async ({
+  page,
+  request,
+}, testInfo) => {
+  // El presupuesto normal de la suite más lo que el propio reinicio se concede para volver: no un
+  // número a mano, sino los dos plazos que ya existen.
+  test.setTimeout(testInfo.timeout + RESTART_READY_TIMEOUT_MS);
+  await restartBackend(request);
+  await create(request, "Proyecto destino");
+
+  const connecting = page.waitForResponse(
+    (response) =>
+      response.request().method() === "PUT" &&
+      new URL(response.url()).pathname === CONNECTION_PATH,
+  );
+  await connectThrough(page, REPOSITORY.ok);
+
+  // Se mira el estado del PUT, no sólo el texto de la pantalla. Cuando esto se rompió en CI, la
+  // única pista fue «no encuentro el texto Conectada», que no dice nada de quién falló.
+  expect((await connecting).status()).toBe(200);
+  await expect(page.getByText("Conectada")).toBeVisible();
 });
 
 test("@s42 estado importando y estado resultado, importando de verdad", async ({

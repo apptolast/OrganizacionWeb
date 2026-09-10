@@ -122,6 +122,83 @@ it("@s39 accepts a disabled endpoint with its reason and instant", async () => {
   expect(items[0].disabledReason).toBe("DELIVERY_EXHAUSTED");
 });
 
+// El orden de catálogo, la ausencia de repetidos y el catálogo cerrado son tres
+// reglas distintas de la misma expresión (@s3). Con un solo tipo por lista son
+// indistinguibles: hacen falta listas de dos o más para separarlas.
+it("@s36 accepts the twelve types when they arrive in catalogue order", async () => {
+  stub({ items: [endpoint({ eventTypes: [...webhookEventTypes] })] });
+
+  const items = await listWebhooks(new AbortController().signal);
+
+  expect(items[0].eventTypes).toEqual([...webhookEventTypes]);
+});
+
+it("@s36 accepts two types that respect catalogue order", async () => {
+  stub({
+    items: [endpoint({ eventTypes: ["TaskCreated.v1", "BlockPlanned.v1"] })],
+  });
+
+  const items = await listWebhooks(new AbortController().signal);
+
+  expect(items[0].eventTypes).toEqual(["TaskCreated.v1", "BlockPlanned.v1"]);
+});
+
+it("@s36 rejects two known types delivered out of catalogue order", async () => {
+  stub({
+    items: [endpoint({ eventTypes: ["SubtaskCreated.v1", "TaskCreated.v1"] })],
+  });
+
+  await expect(listWebhooks(new AbortController().signal)).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s36 rejects the same type repeated", async () => {
+  stub({
+    items: [endpoint({ eventTypes: ["TaskCreated.v1", "TaskCreated.v1"] })],
+  });
+
+  await expect(listWebhooks(new AbortController().signal)).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s36 rejects a type outside the catalogue when it is the only one", async () => {
+  stub({ items: [endpoint({ eventTypes: ["taskcreated.v1"] })] });
+
+  await expect(listWebhooks(new AbortController().signal)).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s36 rejects a single unknown type hidden after valid ones", async () => {
+  stub({
+    items: [
+      endpoint({ eventTypes: ["TaskCreated.v1", "ProjectCreated.v2"] }),
+    ],
+  });
+
+  await expect(listWebhooks(new AbortController().signal)).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s36 rejects an endpoint subscribed to no type at all", async () => {
+  stub({ items: [endpoint({ eventTypes: [] })] });
+
+  await expect(listWebhooks(new AbortController().signal)).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s36 rejects eventTypes that is not an array", async () => {
+  stub({ items: [endpoint({ eventTypes: "TaskCreated.v1" })] });
+
+  await expect(listWebhooks(new AbortController().signal)).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
 it("@s37 creates a webhook and returns the one-time secret", async () => {
   const fetcher = stub({ endpoint: endpoint(), secret }, 201);
 

@@ -1,7 +1,8 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import { ConnectorsCatalog, CONNECTOR_ROUTES } from "./connectors-catalog";
-import { CONNECTOR_ORDER } from "./connectors-catalog-client";
+import { CONNECTOR_ORDER, type ConnectorId } from "./connectors-catalog-client";
+import type { FeedError } from "./external-calendar-api";
 
 const AT = "2026-09-10T08:30:00.123456Z";
 
@@ -259,4 +260,76 @@ it("@s37 a response that lands after the screen is gone changes nothing", async 
   console.error = previous;
   expect(failures).toHaveLength(0);
   expect(screen.queryAllByRole("listitem")).toHaveLength(0);
+});
+
+// ---------------------- @s33 el mapa de códigos frente a lo que el backend sabe emitir
+
+/**
+ * Los siete errores de feed, declarados como `Record<FeedError, string>` a propósito: así el
+ * compilador exige la lista entera y añadir un octavo error de calendario rompe este fichero en
+ * vez de degradar la pantalla en silencio.
+ */
+const FEED_TEXT: Record<FeedError, string> = {
+  FEED_REJECTED: "La dirección del calendario ya no es válida",
+  FEED_UNREACHABLE: "El calendario no responde",
+  FEED_HTTP_ERROR: "El calendario respondió con un error",
+  FEED_TOO_LARGE: "El calendario es demasiado grande",
+  FEED_UNSUPPORTED_TYPE: "El calendario no es un archivo de texto",
+  FEED_MALFORMED: "El calendario no se pudo interpretar",
+  SECRET_UNREADABLE: "Hay que volver a introducir la dirección",
+};
+
+/**
+ * Todo lo que el catálogo puede recibir de verdad en `lastError.code`, con la fila donde aparece
+ * y el emisor al lado. Los códigos viven repetidos en sitios independientes y nada los ata: si el
+ * backend emite uno que el mapa no conoce, el propietario lee el texto genérico y nadie se entera.
+ * Es lo que llevaba pasando con los dos de GitLab, y @s33 promete «el último error como código
+ * traducido».
+ */
+const TRANSLATED: Array<[ConnectorId, string, string]> = [
+  // GithubStatusSource: la única cosa que puede ir mal en una conexión de 27.
+  ["github", "CONNECTION_INVALID", "La conexión ya no es válida"],
+  // WebhookStatusSource, con WebhookEndpoint.DELIVERY_EXHAUSTED.
+  ["webhooks", "DELIVERY_EXHAUSTED", "Se agotaron los reintentos de entrega"],
+  // ConnectorFailures.gitlabImportErrorCode: los tres que una importación de GitLab deja escritos.
+  ["gitlab", "CONNECTION_INVALID", "La conexión ya no es válida"],
+  ["gitlab", "RATE_LIMITED", "El proveedor limitó las peticiones"],
+  ["gitlab", "GITLAB_UNAVAILABLE", "GitLab no responde"],
+  // ExternalCalendarStatusSource, con el nombre del FeedError.
+  ...(Object.entries(FEED_TEXT).map(([code, text]) => [
+    "external_calendar",
+    code,
+    text,
+  ]) as Array<[ConnectorId, string, string]>),
+];
+
+const GENERIC = "Hay un problema con esta integración";
+
+function withError(id: ConnectorId, code: string) {
+  return catalog({ [id]: { status: "error", lastError: { code, at: AT } } });
+}
+
+it.each(TRANSLATED)(
+  "@s33 the %s row translates %s instead of falling back to the generic text",
+  async (id, code, text) => {
+    stub(Response.json(withError(id, code)));
+
+    render(<ConnectorsCatalog />);
+
+    await waitFor(() => expect(rows()).toHaveLength(6));
+    const item = rows()[CONNECTOR_ORDER.indexOf(id)];
+    expect(within(item).getByText(text)).toBeTruthy();
+    expect(within(item).queryByText(code)).toBeNull();
+    expect(within(item).queryByText(GENERIC)).toBeNull();
+  },
+);
+
+it("@s33 a code this version does not know still says something honest", async () => {
+  stub(Response.json(withError("gitlab", "UNKNOWN_TO_THIS_VERSION")));
+
+  render(<ConnectorsCatalog />);
+
+  await waitFor(() => expect(rows()).toHaveLength(6));
+  expect(within(rows()[5]).getByText(GENERIC)).toBeTruthy();
+  expect(within(rows()[5]).queryByText("UNKNOWN_TO_THIS_VERSION")).toBeNull();
 });

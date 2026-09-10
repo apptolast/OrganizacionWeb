@@ -245,4 +245,53 @@ class DispatchWebhooksTest {
 
     assertEquals(List.of("https://example.com/h", "whsec_real", "{\"a\":1}"), seen);
   }
+
+  /**
+   * B10, segunda mitad. El adaptador ya no aborta la reclamación cuando el secreto guardado no se
+   * puede abrir: entrega la reclamación con el secreto <b>ausente</b>. Falta que alguien decida qué
+   * hacer con ella, y esa decisión es de la aplicación, no del adaptador.
+   *
+   * <p>Sin secreto no hay firma, así que no se envía nada —firmar con {@code null} sería un NPE
+   * dentro del ciclo, es decir el mismo silencio de antes—. La entrega se liquida como un intento
+   * fallido más, con su código en el rastro de {@code WebhookAudit}: el propietario ve la entrega
+   * fallando en {@code GET /deliveries} en vez de una cola detenida sin explicación. Al sexto fallo
+   * la entrega se agota y arrastra su endpoint a {@code DELIVERY_EXHAUSTED}, que es exactamente lo
+   * que project-spec prescribe para una clave rotada: «se requiere recrear endpoints».
+   *
+   * <p>El código es una clase de error estable y opaca: no dice nada de la clave ni del secreto.
+   */
+  @Test
+  void b10_aDeliveryWhoseSecretCannotBeOpenedFailsWithAnAuditedCodeAndIsNeverSent() {
+    var work = new FakeWork();
+    var sender = new FakeSender();
+    var unreadable = pending(0);
+    var sound = pending(0);
+    work.claimable.add(new ClaimedDelivery(active(), OWNER, unreadable, "{}", null));
+    work.claimable.add(claim(sound));
+    var audit = new FakeAudit();
+
+    new DispatchWebhooks(work, sender, audit, KEYED, CLOCK).runCycle();
+
+    assertEquals(
+        List.of(sound.eventId().toString()),
+        sender.sentEventIds,
+        "sin secreto no se firma ni se envía nada, y la siguiente entrega sí sale");
+    var settled = work.recorded.getFirst();
+    assertEquals(unreadable.id(), settled.id());
+    assertEquals("pending", settled.status(), "es un intento fallido, no un descarte");
+    assertEquals(1, settled.attempt());
+    assertEquals("SECRET_UNREADABLE", settled.errorClass());
+    assertNull(settled.httpStatus(), "no hubo respuesta porque no hubo petición");
+    assertEquals(
+        T.plus(java.time.Duration.ofMinutes(1)),
+        settled.nextAttemptAt(),
+        "entra en la tabla de reintentos como cualquier otro fallo");
+    assertEquals(
+        List.of(
+            "attempt " + W + " " + unreadable.eventId() + " pending SECRET_UNREADABLE",
+            "attempt " + W + " " + sound.eventId() + " succeeded null"),
+        audit.lines,
+        "el rastro nombra el fallo del secreto ilegible y no se calla nada");
+    assertTrue(work.disabled.isEmpty(), "un primer fallo no desactiva el webhook");
+  }
 }

@@ -42,42 +42,94 @@ class Slf4jWebhookAuditTest {
         .reduce("", (all, line) -> all + line + "\n");
   }
 
+  /** Una llamada, una línea: si el sujeto registra de más, esto lo caza antes que nada. */
+  private ILoggingEvent onlyLine() {
+    assertEquals(1, captured.list.size(), "cada llamada al puerto escribe exactamente una línea");
+    return captured.list.getFirst();
+  }
+
+  /** Los nombres de campo de una línea {@code k=v k=v}, en su orden de aparición. */
+  private static java.util.List<String> fieldsOf(String line) {
+    return java.util.Arrays.stream(line.split(" "))
+        .map(token -> token.substring(0, token.indexOf('=')))
+        .toList();
+  }
+
+  /**
+   * B3 del panel de precierre. Esta clase recibe <b>cero</b> mutantes y no es una interfaz, así que
+   * la puerta de mutación no dice nada de ella; la causa está medida y escrita en
+   * progress/mutation_webhooks.md. Aquí está el oráculo que la sustituye: el formato exacto de las
+   * tres líneas —claves, orden y valores— y la ausencia de cualquier otro campo.
+   *
+   * <p>La versión anterior de estas pruebas afirmaba {@code assertFalse} sobre {@code ?token=abc},
+   * {@code whsec_} y {@code v1=} después de invocar al sujeto con dos UUID y un código corto:
+   * valores que la prueba jamás le entregó, de modo que la aserción no podía fallar por ningún
+   * cambio del sujeto (B5). La igualdad exacta sí puede: mata reordenar los argumentos, renombrar
+   * una clave, añadir un campo y cambiar el nivel.
+   */
   @Test
-  void s35_anAttemptLogsTheEventTheEndpointAndTheErrorClassAndNothingElse() {
+  void s35_b3_anAttemptLogsExactlyItsFourFieldsInOrderAndNothingElse() {
     new Slf4jWebhookAudit().attempt(ENDPOINT, EVENT, "pending", "HTTP_ERROR");
 
-    var text = loggedText();
-    assertTrue(text.contains(EVENT.toString()), "the event id identifies the delivery");
-    assertTrue(text.contains(ENDPOINT.toString()), "the endpoint id identifies the webhook");
-    assertTrue(text.contains("HTTP_ERROR"));
-    assertTrue(text.contains("pending"));
+    var line = onlyLine();
+    assertEquals(
+        "endpointId=" + ENDPOINT + " eventId=" + EVENT + " status=pending errorClass=HTTP_ERROR",
+        line.getFormattedMessage());
+    assertEquals(
+        java.util.List.of("endpointId", "eventId", "status", "errorClass"),
+        fieldsOf(line.getFormattedMessage()),
+        "esos cuatro campos, en ese orden, y ningún otro");
+    assertEquals("organization.webhooks", line.getLoggerName());
+    assertEquals(ch.qos.logback.classic.Level.INFO, line.getLevel());
+    assertNull(line.getThrowableProxy(), "ninguna excepción adjunta, que es donde viaja una traza");
   }
 
   @Test
-  void s35_aSuccessfulAttemptCarriesNoErrorClass() {
+  void s35_b3_aSuccessfulAttemptCarriesTheNullErrorClassAndNoOtherField() {
     new Slf4jWebhookAudit().attempt(ENDPOINT, EVENT, "succeeded", null);
 
-    assertTrue(loggedText().contains("succeeded"));
+    assertEquals(
+        "endpointId=" + ENDPOINT + " eventId=" + EVENT + " status=succeeded errorClass=null",
+        onlyLine().getFormattedMessage());
   }
 
   @Test
-  void s21_s35_aDiscardedRowIsAuditedWithItsEventAndCode() {
+  void s21_s35_b3_aDiscardedRowLogsExactlyItsFourFieldsInOrder() {
     new Slf4jWebhookAudit().discarded(ENDPOINT, EVENT, "INVALID_EVENT");
 
-    var text = loggedText();
-    assertTrue(text.contains(EVENT.toString()));
-    assertTrue(text.contains("INVALID_EVENT"));
+    var line = onlyLine();
+    assertEquals(
+        "endpointId=" + ENDPOINT + " eventId=" + EVENT + " outcome=discarded code=INVALID_EVENT",
+        line.getFormattedMessage());
+    assertEquals(
+        java.util.List.of("endpointId", "eventId", "outcome", "code"),
+        fieldsOf(line.getFormattedMessage()));
+    assertEquals(ch.qos.logback.classic.Level.INFO, line.getLevel());
+    assertNull(line.getThrowableProxy());
   }
 
   @Test
-  void s9_s35_aWorkerErrorIsAuditedByCodeAlone() {
+  void s9_s35_b3_aWorkerErrorLogsItsCodeAloneAtWarnLevel() {
     new Slf4jWebhookAudit().workerError("CONFIGURATION_ERROR");
 
-    assertTrue(loggedText().contains("CONFIGURATION_ERROR"));
+    var line = onlyLine();
+    assertEquals("outcome=worker_error code=CONFIGURATION_ERROR", line.getFormattedMessage());
+    assertEquals(
+        java.util.List.of("outcome", "code"),
+        fieldsOf(line.getFormattedMessage()),
+        "un error del worker no nombra endpoint ni evento: no los tiene");
+    assertEquals(ch.qos.logback.classic.Level.WARN, line.getLevel());
+    assertNull(line.getThrowableProxy());
   }
 
+  /**
+   * @s35 «los logs no contienen ?token=abc, whsec_, v1= ni cuerpos». Aquí la prueba sí <b>entrega
+   *     al sujeto</b> los valores prohibidos, disfrazados de código de error y de estado, que son
+   *     los dos únicos parámetros de texto libre del puerto. La aserción de ausencia sólo vale si
+   *     lo que se busca pudo haber entrado.
+   */
   @Test
-  void s35_theAuditHasNoWayToReceiveAUrlASecretASignatureNorABody() {
+  void s35_evenAPoisonedCodeCannotPutAUrlOrASecretInTheTrail() {
     var audit = new Slf4jWebhookAudit();
     audit.attempt(ENDPOINT, EVENT, "pending", "HTTP_ERROR");
     audit.discarded(ENDPOINT, EVENT, "UNSUPPORTED_EVENT");
@@ -90,6 +142,7 @@ class Slf4jWebhookAuditTest {
     assertFalse(text.contains(SECRET));
     assertFalse(text.contains(SIGNATURE));
     assertFalse(text.contains("example.com"));
+    assertEquals(3, captured.list.size(), "tres llamadas, tres líneas y ninguna más");
   }
 
   /**

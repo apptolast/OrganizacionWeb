@@ -350,4 +350,94 @@ class WebhookPersistenceTest {
       TRANSACTIONS = new DataSourceTransactionManager(source);
     }
   }
+
+  /**
+   * @s13 «la outbox no pierde ni cambia ninguna fila». La prueba del borrado en cascada no creaba
+   *     ni una fila de {@code outbox_events} ni afirmaba nada sobre esa tabla (B8.c del panel): la
+   *     cláusula estaba declarada cubierta y medida en ningún sitio.
+   *     <p>La cascada del esquema va de {@code webhook_endpoints} a {@code webhook_deliveries}. Que
+   *     no alcance a la outbox es lo que separa «borrar mi webhook» de «perder mis eventos», que
+   *     son de otro dueño: el publicador de RabbitMQ. Se compara la fila entera antes y después, no
+   *     sólo su presencia, porque el daño que importa —cambiar status, attempts o published_at— no
+   *     cambia el recuento.
+   */
+  @Test
+  void s13_deletingAWebhookLeavesEveryOutboxRowExactlyAsItWas() {
+    var owner = "cascade-" + UUID.randomUUID();
+    var store = store();
+    var doomed = endpoint(NOW);
+    store.insert(owner, doomed, cipher("whsec_x"));
+    store.enqueuePing(owner, doomed.id(), WebhookDelivery.ping(UUID.randomUUID(), NOW), "{}");
+    var project = givenProject(owner);
+    var events =
+        List.of(givenEvent(owner, project, NOW), givenEvent(owner, project, NOW.plusSeconds(1)));
+    var before = outboxRows(owner);
+    assertEquals(2, before.size(), "hay filas de outbox que perder");
+
+    assertTrue(store.delete(owner, doomed.id()));
+
+    assertEquals(before, outboxRows(owner), "ni una fila de la outbox se pierde ni cambia");
+    assertEquals(
+        events,
+        outboxRows(owner).stream().map(row -> (UUID) row.get("event_id")).toList(),
+        "las mismas filas, en el mismo orden");
+  }
+
+  private static List<java.util.Map<String, Object>> outboxRows(String owner) {
+    return Database.JDBC.queryForList(
+        """
+        SELECT event_id, aggregate_id, owner_id, event_type, schema_version, occurred_at,
+               payload::text AS payload, status, attempts, published_at
+          FROM outbox_events WHERE owner_id=? ORDER BY occurred_at, event_id
+        """,
+        owner);
+  }
+
+  private static UUID givenProject(String owner) {
+    var id = UUID.randomUUID();
+    Database.JDBC.update(
+        """
+        INSERT INTO projects (id, owner_id, name, description, status, version, created_at,
+          updated_at)
+        VALUES (?,?,?,?,?,?,?,?)
+        """,
+        id,
+        owner,
+        "Proyecto",
+        "",
+        "active",
+        1L,
+        java.sql.Timestamp.from(NOW),
+        java.sql.Timestamp.from(NOW));
+    return id;
+  }
+
+  private static UUID givenEvent(String owner, UUID project, Instant occurredAt) {
+    var eventId = UUID.randomUUID();
+    var payload =
+        "{\"eventId\":\""
+            + eventId
+            + "\",\"aggregateId\":\""
+            + project
+            + "\",\"ownerId\":\""
+            + owner
+            + "\",\"occurredAt\":\""
+            + occurredAt
+            + "\",\"schemaVersion\":1,\"type\":\"ProjectCreated.v1\",\"name\":\"Proyecto\"}";
+    Database.JDBC.update(
+        """
+        INSERT INTO outbox_events (
+          event_id, aggregate_id, owner_id, event_type, schema_version, occurred_at, payload, status)
+        VALUES (?,?,?,?,?,?,?::jsonb,?)
+        """,
+        eventId,
+        project,
+        owner,
+        "ProjectCreated.v1",
+        1,
+        java.sql.Timestamp.from(occurredAt),
+        payload,
+        "pending");
+    return eventId;
+  }
 }

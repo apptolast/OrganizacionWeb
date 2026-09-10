@@ -212,11 +212,10 @@ class WebhookOutboxPersistenceTest {
    *     FakeOutbox} <b>que se ordena a sí mismo</b>, así que demuestra que el caso de uso respeta
    *     el orden que le den, no que el adaptador lo produzca.
    *     <p>Lo que está en juego no es la estética del orden: {@code enqueueFirstEligible} adelanta
-   *     el cursor al candidato que encola, y {@code WebhookCursor.precedes} excluye para siempre lo
-   *     que quede por detrás. Si el desempate se cae, el hermano de identificador menor se pierde
-   *     en silencio y de forma permanente. Por eso la segunda mitad de la prueba vuelve a pedir
-   *     candidatos con el cursor ya movido: el oráculo del orden y el de la no pérdida son cosas
-   *     distintas.
+   *     el cursor al candidato que encola, y el propio SQL excluye para siempre lo que quede por
+   *     detrás. Si el desempate se cae, el hermano de identificador menor se pierde en silencio y
+   *     de forma permanente. Por eso la segunda mitad de la prueba vuelve a pedir candidatos con el
+   *     cursor ya movido: el oráculo del orden y el de la no pérdida son cosas distintas.
    *     <p>El mayor se inserta primero a propósito: sin desempate, el orden que devuelve la tabla
    *     es el de escritura, y entonces la primera aserción cae. Con dos identificadores fijos,
    *     además, «menor» significa lo mismo en PostgreSQL y en Java.
@@ -299,5 +298,68 @@ class WebhookOutboxPersistenceTest {
     var copy = new java.util.HashMap<>(row);
     copy.values().removeIf(java.util.Objects::isNull);
     return copy;
+  }
+
+  /**
+   * @s21, fila «un ProjectCreated.v1 propio cuyo payload carece de name». La línea que decide es
+   *     {@code return message.validationCode() == null} de {@code
+   *     PostgresWebhookOutbox.deliverable}, y sobrevivía a la mutación: el único payload inválido
+   *     de esta clase ni siquiera <b>parsea</b> —le falta {@code aggregateId}—, así que ejercitaba
+   *     el {@code catch} y nunca esa línea (B8.e del panel). Con la línea neutralizada a {@code
+   *     return true}, un evento que incumple el contrato del publicador se entregaría al receptor
+   *     externo como si fuera bueno.
+   *     <p>Este payload parsea entero y sólo falla la comprobación de contrato, y su hermano válido
+   *     va en la misma prueba: sin él, un {@code return false} constante también pasaría.
+   */
+  @Test
+  void s21_aPayloadThatParsesButBreaksTheContractIsRejectedByTheCheckAndNotByTheCatch() {
+    var owner = "contract-" + UUID.randomUUID();
+    var project = givenProject(owner);
+    var nameless = UUID.randomUUID();
+    givenPayload(
+        owner,
+        project,
+        nameless,
+        T.plusSeconds(1),
+        "{\"eventId\":\""
+            + nameless
+            + "\",\"aggregateId\":\""
+            + project
+            + "\",\"ownerId\":\""
+            + owner
+            + "\",\"occurredAt\":\""
+            + T.plusSeconds(1)
+            + "\",\"schemaVersion\":1,\"type\":\"ProjectCreated.v1\"}");
+    var sound = givenEvent(owner, project, "ProjectCreated.v1", T.plusSeconds(2), "pending", 1);
+
+    var candidates = outbox().after(owner, new WebhookCursor(T, NIL), T.plusSeconds(60));
+
+    var invalid =
+        candidates.stream().filter(c -> c.eventId().equals(nameless)).findFirst().orElseThrow();
+    assertTrue(invalid.isSupported(), "el tipo y la versión sí están en catálogo");
+    assertFalse(
+        invalid.payloadValid(),
+        "un ProjectCreated.v1 sin name incumple el contrato del publicador");
+    var valid =
+        candidates.stream().filter(c -> c.eventId().equals(sound)).findFirst().orElseThrow();
+    assertTrue(valid.payloadValid(), "y el hermano completo sí es entregable");
+  }
+
+  private static void givenPayload(
+      String owner, UUID project, UUID eventId, Instant occurredAt, String payload) {
+    WebhookPersistenceTest.Database.JDBC.update(
+        """
+        INSERT INTO outbox_events (
+          event_id, aggregate_id, owner_id, event_type, schema_version, occurred_at, payload, status)
+        VALUES (?,?,?,?,?,?,?::jsonb,?)
+        """,
+        eventId,
+        project,
+        owner,
+        "ProjectCreated.v1",
+        1,
+        java.sql.Timestamp.from(occurredAt),
+        payload,
+        "pending");
   }
 }

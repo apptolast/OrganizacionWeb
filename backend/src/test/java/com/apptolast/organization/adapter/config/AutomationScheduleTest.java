@@ -29,9 +29,21 @@ class AutomationScheduleTest {
     Thread.sleep(1500);
     assertEquals(List.of(), cycles, "a disabled worker must not read nor write anything");
 
+    // `containsBean` devuelve true tambien para un bean que vale null, asi que por si
+    // solo no distingue una fabrica rota de una sana: hay que PEDIRLO y USARLO. Sin
+    // esto, sustituir el cuerpo de la fabrica por `return null` no rompia ninguna
+    // prueba, y eso significa el planificador ausente y el motor de automatizaciones
+    // sin correr en produccion.
     runner
         .withPropertyValues("app.automations.enabled=true")
-        .run(context -> assertTrue(context.containsBean("automationSchedule")));
+        .run(
+            context -> {
+              assertTrue(context.containsBean("automationSchedule"));
+              var schedule = context.getBean(AutomationSchedule.class);
+              assertNotNull(schedule, "la fabrica del planificador devolvio null");
+              schedule.tick();
+              assertEquals(List.of("cycle"), cycles, "el planificador cableado no corre");
+            });
   }
 
   @Test

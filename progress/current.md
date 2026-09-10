@@ -19,6 +19,66 @@ catorce entradas, con «Conectores» tras «Importación» porque lo fija @s33) 
 contradicción 50/52 de webhooks (se persisten 52, se sirven 50). Y una tercera,
 el anclaje del reenlace DNS en las dos features con su prueba de TLS.
 
+## Lo que hay que saber hoy, 10 de septiembre al mediodía
+
+**Ninguna de las cinco está `done`, y el motivo cambió esta mañana.** Hasta hoy
+la cuenta pendiente era «que suban los números de mutación». Un panel de siete
+jueces independientes, lanzado justo antes de marcar como `done` las dos
+features que ya tenían **las tres puertas verdes y por encima del umbral**,
+rechazó las dos: **20 motivos bloqueantes en la 27 y 22 en la 30**, todos
+escritos con fichero y línea en `progress/carriles/bloqueantes_27.md` y
+`progress/carriles/bloqueantes_30.md`.
+
+Es el hallazgo más caro de la semana y conviene entenderlo bien: **los números
+salían y el trabajo no estaba**. Ejemplos del propio panel:
+
+- La 27 **incumple su contrato** en la primera fila del `@s41`: salir de la
+  pantalla y volver debía conservar el repositorio, y no lo conserva, porque
+  `App.tsx` la desmonta. Ninguna prueba lo medía.
+- El **96,00 %** publicado de la 30 no está medido: el `mutations.xml` da
+  581/607 = **95,72 %**. El 96 salía del entero redondeado de un HTML.
+- `queue()` de automatizaciones confunde «el endpoint ya no está activo» con
+  «otro worker se me adelantó» y **descarta el evento en silencio**, sin dejar
+  fila de ejecución. Pérdida permanente de datos, con las puertas en verde.
+
+La causa es siempre la misma que ya se anotó anoche: **una puerta que mide algo
+que se parece a lo que quería medir**. Ámbitos de mutación mal apuntados,
+oráculos que no pueden fallar, cifras copiadas en vez de calculadas.
+
+### Lo que está corriendo ahora mismo
+
+Siete carriles, **cada uno en su propio worktree** —esta madrugada asigné dos al
+mismo y el segundo borró el trabajo del primero, que hubo que rescatar por SHA;
+ya está en `main` y no puede volver a pasar—:
+
+| Carril | Encargo |
+|---|---|
+| `webhooks` | mutación de frontend de la 25 (iba por 71,40 %) |
+| `additional-connectors` | mutación de frontend de la 29 (iba por 68,51 %) |
+| `github-connector` | el bloqueante `@s41` de la 27 y los oráculos U+00A0 |
+| `gh-resto` | los otros 17 motivos del panel sobre la 27 |
+| `auto-contrato` | motivos 1-7 de la 30: cobertura del contrato |
+| `auto-datos` | motivos 8-12 de la 30: seguridad y pérdida de datos |
+| `auto-mutantes` | motivos 13-22 de la 30: supervivientes y cifras honestas |
+
+Más dos campañas midiéndose en el centro: **PIT de la 29** (que no se había
+corrido nunca) y **Stryker de la 28**, recién integrada con 83 → 161 pruebas y
+**dos defectos de producto** que encontró su carril: una lista ilegible que
+decía «no hay eventos», y una limpieza de efecto que abortaba el controlador
+equivocado y dejaba escrituras vivas al salir de la pantalla.
+
+### Lo que ya se cerró hoy
+
+- Rescate y merge del trabajo que el reset borró (cuatro oráculos de
+  automatizaciones contra la base real, y un defecto vivo de la 29: el catálogo
+  no traducía los dos errores de GitLab).
+- Condición **C7** de la 29: contrafirma del propietario sobre la enmienda del
+  `@s31`, verificada contra el transcript antes de escribirla.
+- Ámbitos de mutación de la 27 y la 29 reapuntados (`GithubIssueConnections`
+  entra, `ImportGuard` se muda). 442 patrones, 0 muertos. 95/95 guardas verdes.
+
+---
+
 ## Cierre: dónde está cada puerta (10 de septiembre, mañana)
 
 Las cinco features están **implementadas e integradas**. Ninguna está `done`

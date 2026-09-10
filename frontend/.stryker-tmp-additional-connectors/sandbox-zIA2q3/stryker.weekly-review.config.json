@@ -1,0 +1,32 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "ignorePatterns": [".stryker-tmp-*"],
+  "mutate": [
+    "src/weekly-review-api.ts",
+    "src/weekly-review.tsx",
+    "src/App.tsx:15:8-15:69",
+    "src/App.tsx:27:12-35:24",
+    "src/App.tsx:42:10-68:7",
+    "src/workspace.tsx:67:10-72:22"
+  ],
+  "reporters": ["clear-text", "json", "html"],
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 80
+  },
+  "concurrency": 8,
+  "coverageAnalysis": "perTest",
+  "vitest": {
+    "configFile": "vite.config.ts"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation-weekly-review/mutation.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation-weekly-review/mutation.html"
+  },
+  "tempDirName": ".stryker-tmp-weekly-review"
+}

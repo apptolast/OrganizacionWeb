@@ -1162,3 +1162,64 @@ Nada de esto es un escenario sin oráculo. Son, por este orden: un defecto de
 usabilidad real (1), un límite de navegador declarado (2), una discrepancia
 contrato-código de una palabra (3), una decisión pendiente del propietario (4) y
 una puerta del coordinador (5).
+
+---
+
+## Ciclo del cronómetro inyectado — 10 de septiembre de 2026, orquestador
+
+Cierra la tercera exigencia del juez de cierre (`progress/judge_webhooks_cierre.md`):
+`features/webhooks.feature:320` dice que `latencyMs` se mide «con el reloj
+inyectado» y el código usaba `System.nanoTime()` directamente.
+
+### La decisión, y por qué no fue usar el `Clock`
+
+Medir **tiempo transcurrido** con un reloj de pared es un defecto conocido: un
+ajuste de NTP a mitad de intento da latencias negativas o absurdas. Así que se
+inyecta un cronómetro **monótono** (`java.util.function.LongSupplier` de nanos),
+distinto del `Clock` a propósito. Producción entra por el constructor público,
+que cablea `System::nanoTime`; la prueba entra por el de siete argumentos.
+
+Esto satisface la **intención** de la cláusula —nada ambiente, todo controlable
+por la prueba— pero no su **letra**, que dice «reloj». Queda anotado como punto
+para el propietario en la sección de abajo.
+
+### Rojo acreditado
+
+Mutación aplicada al fichero de producción real, ejecutada y restaurada.
+
+| Mutación aplicada a `JdkWebhookSender.java` | Resultado |
+|---|---|
+| `elapsedMillis` vuelve a `System.nanoTime()` en el extremo final | `s25_latencyMsComesFromTheInjectedTickerAndNotFromTheAmbientClock` **FAILED** |
+
+Salida literal de la ejecución:
+
+```
+JdkWebhookSenderTest > s25_latencyMsComesFromTheInjectedTickerAndNotFromTheAmbientClock() FAILED
+> Task :test FAILED
+BUILD FAILED in 15s
+```
+
+Producción restaurada y verificada con `git diff` vacío sobre `backend/src/main`.
+
+### Por qué el oráculo discrimina
+
+Inyecta 1 000 000 y 1 251 000 000 nanos y afirma **1250 ms exactos** contra un
+receptor real en `127.0.0.1`. Son inalcanzables por casualidad: ese receptor
+responde en microsegundos y el plazo de intercambio de la prueba es de 300 ms.
+Si cualquiera de los dos extremos vuelve al reloj ambiente, la resta da un
+número enorme —o negativo, que `Math.max` clava en 0— y la aserción cae. Con el
+código anterior ni siquiera compila, porque el constructor de siete argumentos
+no existía.
+
+Ninguna otra prueba del fichero pasa por `senderTicking`, así que no hay verde
+por arrastre.
+
+### Punto abierto para el propietario
+
+La cláusula del contrato dice «reloj inyectado» y lo que hay es un **cronómetro
+monótono inyectado**. El juez ofrecía dos puertas: cambiar el código con su rojo,
+o enmendar la línea por la puerta humana. Se ha usado la primera, pero la letra
+sigue diciendo algo que el código no hace literalmente. Hace falta **o** que el
+juez ratifique esta lectura, **o** enmendar `features/webhooks.feature:320` y
+`project-spec.md:2038` a «cronómetro monótono inyectado». No se ha tocado el
+contrato sin ratificación.

@@ -456,6 +456,48 @@ it("@s36 avisa de lectura inválida sin perder el resto de la pantalla", async (
   expect(screen.getByText("calendar.google.com")).toBeInTheDocument();
 });
 
+// @s8 exige que las cinco rutas respondan 503 CONNECTORS_DISABLED cuando falta
+// APP_CONNECTOR_KEY: es el estado de un despliegue real sin clave. Hasta ahora
+// ninguna prueba hacía fallar el GET de montaje, así que el catch entero
+// —incluido el mensaje que distingue ese estado— no se ejecutaba nunca.
+it("@s8 la carga con conectores deshabilitados lo dice, sin el mensaje genérico", async () => {
+  answer(ROUTE, "GET", { status: 503, code: "CONNECTORS_DISABLED" }, 503);
+  render(<ExternalCalendar />);
+  expect(
+    await screen.findByText("Los conectores externos no están disponibles."),
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByText("No se ha podido cargar tu calendario externo."),
+  ).not.toBeInTheDocument();
+});
+
+it("@s37 una carga que falla deja la pantalla usable, no un vacío permanente", async () => {
+  answer(ROUTE, "GET", {}, 500);
+  render(<ExternalCalendar />);
+  expect(
+    await screen.findByText("No se ha podido cargar tu calendario externo."),
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByText("Los conectores externos no están disponibles."),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByText("Todavía no tienes ningún calendario externo."),
+  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Guardar" })).toBeEnabled();
+});
+
+it("@s37 mientras la carga no ha respondido no promete que no haya suscripción", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() => new Promise<Response>(() => {})),
+  );
+  render(<ExternalCalendar />);
+  await screen.findByLabelText("Etiqueta");
+  expect(
+    screen.queryByText("Todavía no tienes ningún calendario externo."),
+  ).not.toBeInTheDocument();
+});
+
 it("@s37 dice que la ventana está vacía solo cuando la lectura sí ha llegado", async () => {
   withSubscription(synced);
   render(<ExternalCalendar />);

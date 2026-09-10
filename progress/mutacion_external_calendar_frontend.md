@@ -73,3 +73,52 @@ Mutantes que pasan a estar cubiertos: el literal de `:390`, el ternario
 mutantes de la conjunción que se ha eliminado.
 
 Estado tras el racimo: **87 pruebas verdes** en los cuatro ficheros.
+
+### Acreditación por mutante (racimo A)
+
+`node scripts/verificar-mutantes-external-calendar.mjs A` — cada mutante se aplica
+al fichero de producción real, se ejecuta `src/external-calendar.test.tsx`, se anota
+el rojo y se restaura.
+
+| Mutante | Veredicto | Quién lo mata |
+|---|---|---|
+| `setInvalidList(true)` → `false` (catch) | MUERE | las tres filas de `@s36 no afirma que la ventana esté vacía…` y `@s36 avisa de lectura inválida…` |
+| `setEvents([])` → lista no vacía (catch) | **SOBREVIVE** | nadie: con `invalidList` en `true` la lista no se pinta, así que el estado de eventos es invisible por ese camino. Superviviente **equivalente**, declarado aquí antes de la campaña |
+| `setInvalidList(false)` del camino feliz → `true` | MUERE | cinco pruebas |
+| literal «No hay eventos en la ventana guardada.» → `""` | MUERE | `@s37 dice que la ventana está vacía solo cuando la lectura sí ha llegado` |
+| `events.length === 0` → `!==` | MUERE | cinco pruebas |
+
+---
+
+## Racimo B — el catch del efecto de montaje (predicción: racimo 4, `sin_cobertura`, 8 mutantes)
+
+`external-calendar.tsx:147-158`. Ninguna prueba hacía fallar el `GET` de montaje,
+así que el catch entero —incluido el mensaje de conectores deshabilitados y el
+`setLoaded(true)`— no se ejecutaba nunca.
+
+**No hay defecto aquí**: las tres pruebas nuevas pasaron a la primera. Por eso, y
+porque una prueba que pasa a la primera no demuestra nada, se acredita mutante a
+mutante contra la producción real (regla 5 del reparto: ejecutar, no razonar).
+
+Pruebas nuevas:
+
+- `@s8 la carga con conectores deshabilitados lo dice, sin el mensaje genérico`
+  (503 `CONNECTORS_DISABLED` en el `GET`) — afirma el texto propio **y la ausencia
+  del genérico**, que es lo que distingue las dos ramas del ternario.
+- `@s37 una carga que falla deja la pantalla usable, no un vacío permanente`
+  (500) — genérico presente, el de conectores ausente, «Todavía no tienes ningún
+  calendario externo.» visible y Guardar habilitado: eso fija `setLoaded(true)`.
+- `@s37 mientras la carga no ha respondido no promete que no haya suscripción`
+  (fetch que no resuelve) — fija la rama falsa del ternario `loaded ? … : null`,
+  que nadie afirmaba: sin ella, mutarlo a `true` sobrevive.
+
+| Mutante | Veredicto | Quién lo mata |
+|---|---|---|
+| ternario de conectores → siempre el genérico | MUERE | `@s8 la carga con conectores deshabilitados…` |
+| ternario de conectores → siempre el de conectores | MUERE | `@s37 una carga que falla…` |
+| literal genérico → `""` | MUERE | `@s37 una carga que falla…` |
+| `setLoaded(true)` del catch → `false` | MUERE | `@s37 una carga que falla…` |
+| `loaded ? … : null` → `true` | MUERE | `@s37 mientras la carga no ha respondido…` |
+| literal «Todavía no tienes ningún calendario externo.» → `""` | MUERE | `@s37 una carga que falla…` |
+
+Estado tras el racimo: **90 pruebas verdes**.

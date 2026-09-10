@@ -1,0 +1,99 @@
+[
+  {
+    "cluster": "A",
+    "name": "loadEvents setInvalidList(true) -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 avisa de lectura inválida sin perder el resto de la pantalla",
+      "@s36 no afirma que la ventana esté vacía cuando la lista falla con 500 sin cuerpo reconocible",
+      "@s36 no afirma que la ventana esté vacía cuando la lista falla con 503 de conectores",
+      "@s36 no afirma que la ventana esté vacía cuando la lista falla con fallo de red"
+    ]
+  },
+  {
+    "cluster": "A",
+    "name": "loadEvents setEvents([]) -> lista no vacia",
+    "verdict": "SOBREVIVE",
+    "tests": []
+  },
+  {
+    "cluster": "A",
+    "name": "loadEvents setInvalidList(false) del camino feliz -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 resume los contadores y lista los eventos en hora local",
+      "@s38 sincroniza, actualiza contadores y refresca la lista",
+      "@s38 muestra el mensaje del código y conserva la lista cuando la sincronización falla",
+      "@s38 vuelve al formulario vacío cuando la suscripción ya no existe",
+      "@s37 dice que la ventana está vacía solo cuando la lectura sí ha llegado"
+    ]
+  },
+  {
+    "cluster": "A",
+    "name": "vista literal 'No hay eventos en la ventana guardada.' -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 dice que la ventana está vacía solo cuando la lectura sí ha llegado"
+    ]
+  },
+  {
+    "cluster": "A",
+    "name": "vista events.length === 0 -> !==",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 resume los contadores y lista los eventos en hora local",
+      "@s38 sincroniza, actualiza contadores y refresca la lista",
+      "@s38 muestra el mensaje del código y conserva la lista cuando la sincronización falla",
+      "@s38 vuelve al formulario vacío cuando la suscripción ya no existe",
+      "@s37 dice que la ventana está vacía solo cuando la lectura sí ha llegado"
+    ]
+  },
+  {
+    "cluster": "B",
+    "name": "montaje ternario de conectores -> siempre generico",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 la carga con conectores deshabilitados lo dice, sin el mensaje genérico"
+    ]
+  },
+  {
+    "cluster": "B",
+    "name": "montaje ternario de conectores -> siempre el de conectores",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 una carga que falla deja la pantalla usable, no un vacío permanente"
+    ]
+  },
+  {
+    "cluster": "B",
+    "name": "montaje literal generico -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 una carga que falla deja la pantalla usable, no un vacío permanente"
+    ]
+  },
+  {
+    "cluster": "B",
+    "name": "montaje setLoaded(true) del catch -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 una carga que falla deja la pantalla usable, no un vacío permanente"
+    ]
+  },
+  {
+    "cluster": "B",
+    "name": "vista loaded ? ... : null -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 mientras la carga no ha respondido no promete que no haya suscripción"
+    ]
+  },
+  {
+    "cluster": "B",
+    "name": "vista literal 'Todavia no tienes ningun calendario externo.' -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 una carga que falla deja la pantalla usable, no un vacío permanente"
+    ]
+  }
+]

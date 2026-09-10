@@ -22,7 +22,7 @@ borrarlos habría dejado esa feature sin cifrado.
 |                           | Mutación backend | Mutación frontend | `harness init`      | Juez        |
 | ------------------------- | ---------------- | ----------------- | ------------------- | ----------- |
 | **25** webhooks           | **92,81 %** ✅   | **94,57 %** ✅    | **verde entero** ✅ | re-juzgando |
-| **28** calendario externo | **95,29 %** ✅ | **92,54 %** ✅ | **verde entero** ✅ | confirmando |
+| **28** calendario externo | **95,29 %** ✅   | **92,54 %** ✅    | **verde entero** ✅ | confirmando |
 
 La 25 tiene **las tres puertas acreditadas** y ninguna condición pendiente de
 nadie. Sólo espera el visto bueno del juez sobre cuatro correcciones.
@@ -813,3 +813,59 @@ condición 2 del juez exige y que no existía). Resumen:
 
 Nada de producción se tocó: `git status` sobre `backend/src/main` y
 `frontend/src` quedó vacío al cerrar.
+
+---
+
+## 10 de septiembre, 23:30 — el CI rojo del run #259, y lo que sigue abierto
+
+**Qué pasaba.** `Application CI` falló en la puerta de tests del frontend con
+`Found multiple elements with the role "status"`, en
+`src/project-states.test.tsx` → `@s15 anuncia espera y bloquea acciones hasta
+confirmación sin anticipar estado`.
+
+**No era una regresión de producto.** Era una carrera del propio test. El
+escenario afirmaba con `screen.getByRole("status")` —sobre **toda** la página—
+que el aviso de espera dice «Cambiando estado». Pero mientras el cambio de
+estado viaja, `CustomFieldsPanel` puede seguir sin su snapshot, y en ese estado
+pinta su propia región viva: `<p role="status">Consultando campos
+personales</p>` (`src/custom-fields.tsx:126`). Dos `role="status"` legítimos a la
+vez, y la consulta global revienta. En local ganaba la carrera el fetch de
+personalización; en el runner de CI, no.
+
+**Cómo se comprobó, en vez de suponerlo.** Se retrasó 25 ms la fixture
+`test-fixtures/customization.ts` —la lentitud de CI, hecha determinista— y con
+la aserción vieja el fallo salió **idéntico** al del run #259. Con la nueva,
+verde.
+
+**El arreglo.** La aserción se acota a la región del control de estado, que es
+el idiom que este mismo fichero ya usaba en la línea 92:
+
+```
+within(screen.getByRole("region", { name: "Estado del proyecto" }))
+  .getByRole("status")
+```
+
+Es **más** exigente que la anterior, no menos: ahora el oráculo afirma también
+que el aviso vive dentro del control de estado. Un mutante que lo saque de ahí
+antes pasaba y ahora cae. Ningún fichero de `src/` de producción se tocó.
+
+**Barrido, por si había más de la misma familia.** Con la fixture retrasada se
+corrió la suite entera: **79 ficheros, 2.961 tests, todos verdes**. Era el único
+escenario que suponía una sola región viva en la página. Después, sobre árbol
+limpio: lint verde y los 2.961 otra vez.
+
+## Lo que queda abierto de verdad
+
+`feature_list.json` está en **27 de 27 en `done`**, pero eso no es lo mismo que
+«cerrado»:
+
+1. **La contrafirma del `@s43`** de `features/webhooks.feature` (el enlace del
+   formulario a la guía de firma) y de la nueva redacción de
+   `project-spec.md:2044`. Es la puerta de aprobación humana, y sólo la puede
+   dar el propietario. Detalle en `progress/decisiones_pendientes.md`.
+2. **La mutación de frontend de la feature 25 está por remedir.** El 94,57 %
+   se calculó sobre el SHA `1239ad0e`; `frontend/src/webhooks.tsx` se tocó
+   después, en `095d6d56`. La cifra publicada ya no describe el árbol de hoy.
+
+Aviso de lectura: la cabecera de este documento («quedan dos features») es del
+19:30 y ha quedado atrás.

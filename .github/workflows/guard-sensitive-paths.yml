@@ -13,6 +13,17 @@ name: Guardián de rutas sensibles
 # permiso de escritura para etiquetar incluso PRs desde forks. SEGURIDAD: este
 # job NO hace checkout ni ejecuta el código del PR — solo lista nombres de
 # ficheros por API y aplica una etiqueta, así que no hay riesgo de RCE.
+#
+# 11-sep-2026: la lista se amplía con `harness.config.json` —ahí viven
+# `mutation.threshold` y `require_mutation_to_close`, o sea la puerta de
+# calidad entera—, `harness.schema.json` y `scripts/*.mjs`, que son los
+# comandos que el motor agnóstico ejecuta de verdad. Sin ellos se podía bajar
+# el umbral de mutación sin que el guardián dijera una palabra.
+#
+# AVISO HONESTO: esto es una PEGATINA, no una cerradura. El bloqueo que este
+# cabecero invoca —CODEOWNERS + protección de rama— HOY NO EXISTE: la API
+# responde 404 `Branch not protected`, `rulesets` está vacío, y GitHub rechaza
+# las tres reglas de CODEOWNERS porque uno de sus dueños no es colaborador.
 
 on:
   pull_request_target:
@@ -43,7 +54,7 @@ jobs:
           # solo la ruta nueva en .filename — sin esto, mover el mandato, la CI
           # o el motor escaparía al guardián.
           files="$(gh api --paginate "repos/$REPO/pulls/$PR/files" --jq '.[] | .filename, (.previous_filename // empty)')"
-          sensitive="$(printf '%s\n' "$files" | grep -E '^(\.github/workflows/|\.github/AUTONOMOUS\.md$|\.github/CODEOWNERS$|docs/autonomous\.md$|\.harness/.*\.(mjs|js|cjs|ts)$|\.claude/)' || true)"
+          sensitive="$(printf '%s\n' "$files" | grep -E '^(\.github/workflows/|\.github/AUTONOMOUS\.md$|\.github/CODEOWNERS$|docs/autonomous\.md$|\.harness/.*\.(mjs|js|cjs|ts)$|\.claude/|harness\.config\.json$|harness\.schema\.json$|scripts/.*\.(mjs|js|cjs|ts)$)' || true)"
           if [ -z "$sensitive" ]; then
             echo "Sin rutas sensibles tocadas en este PR."
             echo "- Sin rutas sensibles en este PR." >> "$GITHUB_STEP_SUMMARY"

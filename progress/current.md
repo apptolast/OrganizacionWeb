@@ -912,3 +912,49 @@ se le ocultaron:
 
 **Aviso de lectura:** la cabecera de este documento («quedan dos features») es
 del 10 de septiembre a las 19:30 y quedó atrás hace mucho. Este bloque manda.
+
+### Nota de método: el `harness init` local dio una falsa alarma de 67 tests
+
+A las 01:50 del 11 de septiembre, `node .harness/harness.mjs init` sobre el árbol
+de cierre reportó **67 tests de frontend rotos** de 2.961. No había regresión: es
+la máquina.
+
+`init` encadena la suite de backend —que levanta 23 contenedores PostgreSQL— y a
+continuación vitest, y con la máquina todavía saturada caen los escenarios
+sensibles al tiempo (conteos de llamadas a `fetch`, focos, esperas). Reejecutada
+la misma suite sola, con `docker ps` a cero: **2.961 de 2.961 en verde**, sin
+tocar una línea.
+
+Es la misma ley que ya obliga a drenar la máquina antes de una campaña de
+mutación, y conviene tenerla escrita también para `init`: **en esta máquina, la
+verificación local sólo vale con la máquina vacía**. El veredicto que manda para
+cerrar es el del CI, que corre en un runner limpio y sin nada más encima.
+
+### El barrido de regiones vivas: 61 aserciones con la misma forma, ninguna rota
+
+Aprovechando la instrumentación de un subagente (un `MutationObserver` en
+`test-setup.ts` que contaba cuántos `role="status"`/`"alert"` coexistían en cada
+prueba), se midió el alcance real de la familia de defectos que tumbó el CI:
+
+- **24 ficheros de prueba** llegan a tener **dos o más regiones vivas a la vez**
+  en algún momento; 388 casos en total.
+- De ellos, **61 aserciones** en 15 ficheros son `screen.getByRole("status"|"alert")`
+  **global y sin `waitFor`** — exactamente la forma que reventó en el run #259.
+
+**Y ninguna de las 61 falla hoy.** La suite entera se corrió con el retraso de
+25 ms inyectado en la fixture de personalización —la perturbación que reproduce
+de forma determinista el fallo original— y salieron **2.961 de 2.961 en verde**.
+O sea: son **riesgo latente, no defecto presente**. La coexistencia ocurre en el
+fichero, pero no en el instante exacto de esas aserciones.
+
+Se deja anotado porque es de donde saldrá, con bastante probabilidad, el próximo
+rojo aleatorio de CI. La receta, cuando pase, ya está probada: acotar la consulta
+a su región con `within(screen.getByRole("region", { name: ... }))`, que deja el
+oráculo **más** exigente, nunca menos. Las 61 están en: appearance (8),
+work-session-reader (8), work-session-state (7), authentication (6), calendar (5),
+customization (5), weekly-review (5), import-data (4), work-session (4),
+availability (2), import-data-refresh (2), task-blocks (2), import-data.mutation,
+reschedule-block y split-task (1 cada uno).
+
+La instrumentación se retiró: `test-setup.ts` y la fixture están byte a byte como
+en HEAD. Nada de esto llegó a `main`.

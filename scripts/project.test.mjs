@@ -2143,7 +2143,15 @@ test("external calendar Stryker ranges still cover the route and the navigation 
   const [route, section, render, navigation] = ranges.map(slice);
   assert.equal(route, 'externalCalendar = route === "/calendario-externo"');
   assert.match(section, /^externalCalendar\n\s+\? "Calendario externo"/);
-  assert.match(section, /: null$/);
+  // El tramo se para en la rama de ESTA feature. Antes se exigia aqui que llegara
+  // hasta el `: null` del final del ternario, y esa exigencia obligaba a puntuar
+  // 16 mutantes de las ramas de otras diez features como si fueran de esta: la
+  // guarda no vigilaba el ambito, lo ensanchaba. Lo caza el juez de cierre.
+  assert.doesNotMatch(section, /: null/);
+  assert.doesNotMatch(
+    section,
+    /integrationApi|importData|exportData|appearance/,
+  );
   assert.match(
     render,
     /^externalCalendar && username \? \(\n\s+<ExternalCalendar \/>/,

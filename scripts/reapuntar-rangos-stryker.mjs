@@ -60,8 +60,11 @@ const PLAN = {
     ],
     [
       "src/App.tsx",
+      // El tramo se para en la RAMA de esta feature, no en el `: null` del final del
+      // ternario: llegar hasta alli arrastraba 16 mutantes de otras diez features y
+      // los puntuaba como si fueran de esta. Lo caza el juez de cierre de la 28.
       'externalCalendar\n            ? "Calendario externo"',
-      ": null",
+      '? "Calendario externo"',
     ],
     ["src/App.tsx", "externalCalendar && username ? (", "<ExternalCalendar />"],
     [

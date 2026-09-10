@@ -8,7 +8,7 @@
     "src/external-calendar.tsx",
     "src/today-external-calendar.tsx",
     "src/App.tsx:43:8-43:58",
-    "src/App.tsx:53:12-75:38",
+    "src/App.tsx:53:12-54:34",
     "src/App.tsx:82:10-83:28",
     "src/workspace.tsx:80:10-85:22"
   ],

@@ -348,3 +348,78 @@ Tres apuntes de método:
    posible sin cambiar la producción.
 
 Estado tras el racimo: **135 pruebas verdes** (83 de partida → 135).
+
+---
+
+## Racimo F — la presentacion de /calendario-externo (predicción: racimos 7, 8, 10, 11 y 13, más cinco huecos «omitidos»)
+
+- **`formatMoment` y `formatClock`** (racimo 7 + el gemelo que añadió el refutador):
+  ninguna prueba fijaba una fecha formateada. Ahora hay dos: con
+  `snapshotZoneId: "Asia/Tokyo"` las dos fechas de la ficha valen exactamente
+  «7 ene 2030, 20:00» y «7 ene 2030, 21:00» y el evento sale «17:00–18:00»; y con
+  `snapshotZoneId: null` las horas coinciden con las del navegador, derivadas con
+  `new Date(...).getHours()` en vez de con literales.
+  **Se eligió Asia/Tokyo a propósito**: la máquina que ejecuta la suite está en
+  `Europe/Madrid`, así que un fixture en Madrid habría hecho indistinguible «zona de
+  la instantánea» de «zona del navegador» aquí y distinguible en otra máquina. Es
+  justo la clase de constante caduca que prohíbe la regla 2 del reparto.
+- **Los siete mensajes de `FEED_MESSAGES`** (racimo 8): `it.each` de siete filas,
+  cuatro de las cuales no se renderizaban en ninguna prueba, afirmando un fragmento
+  distintivo **y** que el texto no se agota en él (un `role="alert"` vacío es peor
+  que no mostrarlo, @s12). Más dos filas negativas —`OK` con código, `FAILED` sin
+  código— que fijan la conjunción de `:352`.
+- **`failed()`** (racimo 10): un 400 `VALIDATION_ERROR` en `label` que afirma la
+  asociación, el `aria-invalid` de los **dos** campos y el foco en Etiqueta; y un
+  PUT 500 que afirma que la suscripción **no** se retira, que es lo que cae si el
+  `&& error.status === 401` se relaja.
+- **Resumen vacío** (racimo 11): un evento con `summary: ""` en las dos vistas,
+  afirmando el `<li>` completo («Sin título 09:00–10:00»), que además fija que la
+  fila no queda sin nombre accesible. @s19.
+- **`truncated` en falso**, **Cancelar cierra el diálogo**, **`aria-busy` del
+  formulario** en los dos sentidos y **el `<h2>` que cambia con la suscripción**
+  (racimo 13 y tres «omitidos»).
+- **Los reinicios de estado**: dos pruebas de error-y-reintento, una para
+  `setFieldErrors({})` y otra para `setFailure("")`, que no existían.
+- **`forget()` cierra el diálogo**: el `setConfirming(false)` sobrevivía porque al
+  borrar desaparece la sección entera. La prueba que lo mata recorre el camino
+  completo —eliminar, confirmar, volver a suscribirse— y afirma que el diálogo de
+  eliminación **no reaparece solo**. Sin ese `setConfirming(false)` el propietario
+  se encontraría, tras dar de alta un calendario nuevo, con el diálogo de borrado
+  abierto sin haberlo pedido.
+
+Acreditación: **24 de 24 mutantes mueren** (dos exigieron una prueba más, escrita
+después de ver el superviviente; un tercero tenía el ancla ambigua porque el
+ternario de zona aparece dos veces, y se desambiguó).
+
+## Racimo G — la sección de Hoy (predicción: racimo 6, ya refutado dos veces)
+
+Las dos refutaciones tenían razón: el racimo valía 2-3 mutantes, no 8, porque
+`today-external-calendar.test.tsx:194-210` ya mataba el mutante que apaga el
+`startsWith`. Lo que de verdad no tenía oráculo, y ahora sí:
+
+- El literal «No se ha podido consultar el calendario externo.»: la prueba de fallo
+  de red solo miraba el `href` del enlace, que los **dos** mensajes comparten. Ahora
+  afirma su texto y niega el del otro.
+- El `catch` de `clock()`: una zona no resoluble (`Marte/Base`) devuelve el instante
+  crudo. Nunca se ejecutaba.
+- La rama de `lastSyncAt` nulo: el único fixture con `lastSyncAt: null` pertenecía a
+  la prueba de desmontaje, que nunca llega a pintar.
+- `summary: ""` en Hoy.
+- **La guarda de aborto de después de leer el cuerpo** (`today:66`). El refutador la
+  daba por código muerto; **no lo es**, y lo demuestro ejecutando: `json()` hace su
+  `throwIfAborted` y **luego** espera a `response.json()`, así que una cancelación
+  que llega durante la lectura del cuerpo vuelve por el camino feliz. La prueba
+  nueva retiene el `json()` (no el `fetch`), rerenderiza con otra revisión —lo que
+  aborta la anterior con la sección **viva**, así que sí es observable— y afirma que
+  la respuesta tardía no repinta «Vieja».
+
+**Superviviente equivalente declarado**: la guarda de aborto del `catch` de la
+sincronización (`today:61`). Quitándola, el flujo sigue a `readExternalEvents`, que
+lanza en su primer `throwIfAborted` **antes de pedir nada**, y el `catch` siguiente
+vuelve a cortar por `signal.aborted`. No hay diferencia observable: ni pintado, ni
+petición de más.
+
+Acreditación: **6 de 7 mutantes mueren**.
+
+Estado final: **158 pruebas verdes** en los cuatro ficheros del ámbito (83 de
+partida). `tsc --noEmit`, `eslint src` y `prettier --check` limpios.

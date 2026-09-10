@@ -150,12 +150,71 @@ it("@s37 resume los contadores y lista los eventos en hora local", async () => {
   expect(within(list).getByText("09:00–10:00")).toBeInTheDocument();
 });
 
-it("@s37 avisa cuando la instantánea quedó truncada", async () => {
+// Ninguna prueba fijaba una fecha formateada: el único oráculo era «no es cadena
+// vacía», que pasa igual con el objeto de opciones vacío o con la zona ignorada.
+// Se usa Asia/Tokyo a propósito, para que el resultado no dependa de la zona de la
+// máquina que ejecuta la suite.
+it("@s37 las dos fechas de la ficha y las horas de la lista van en la zona de la instantánea", async () => {
+  withSubscription(
+    {
+      ...synced,
+      snapshotZoneId: "Asia/Tokyo",
+      lastSyncAt: "2030-01-07T11:00:00Z",
+      lastAttemptAt: "2030-01-07T12:00:00Z",
+    },
+    [meeting],
+  );
+  render(<ExternalCalendar />);
+  const sync = await screen.findByText("Última sincronización correcta");
+  expect(sync.nextElementSibling?.textContent).toBe("7 ene 2030, 20:00");
+  expect(
+    screen.getByText("Último intento").nextElementSibling?.textContent,
+  ).toBe("7 ene 2030, 21:00");
+  expect(screen.getByText("17:00–18:00")).toBeInTheDocument();
+});
+
+it("@s37 sin zona de instantánea se usa la del navegador", async () => {
+  withSubscription({ ...synced, snapshotZoneId: null }, [meeting]);
+  render(<ExternalCalendar />);
+  const hour = (value: string) =>
+    String(new Date(value).getHours()).padStart(2, "0");
+  const attempt = await screen.findByText("Último intento");
+  expect(attempt.nextElementSibling?.textContent).toContain(
+    `${hour("2030-01-07T11:00:00Z")}:00`,
+  );
+  expect(
+    screen.getByText(
+      `${hour("2030-01-07T08:00:00Z")}:00–${hour("2030-01-07T09:00:00Z")}:00`,
+    ),
+  ).toBeInTheDocument();
+});
+
+it("@s37 avisa cuando la instantánea quedó truncada, y solo entonces", async () => {
   withSubscription({ ...synced, truncated: true });
   render(<ExternalCalendar />);
   expect(
     await screen.findByText(/solo se conservan los 500 primeros eventos/i),
   ).toBeInTheDocument();
+});
+
+it("@s37 no avisa de truncado cuando la instantánea está completa", async () => {
+  withSubscription({ ...synced, truncated: false });
+  render(<ExternalCalendar />);
+  await screen.findByText("calendar.google.com");
+  expect(screen.queryByRole("note")).not.toBeInTheDocument();
+  expect(
+    screen.queryByText(/solo se conservan los 500 primeros eventos/i),
+  ).not.toBeInTheDocument();
+});
+
+// @s19: un VEVENT sin SUMMARY se guarda como "". La API ya lo declara válido; el
+// hueco estaba solo en la vista, que nunca pintó un resumen vacío.
+it("@s19 un evento sin resumen se lista como Sin título", async () => {
+  withSubscription(synced, [{ ...meeting, summary: "" }]);
+  render(<ExternalCalendar />);
+  const item = await screen.findByRole("listitem");
+  expect(item).toHaveTextContent("Sin título");
+  expect(item.textContent).toBe("Sin título 09:00–10:00");
 });
 
 it("@s37 muestra el mensaje accionable de FEED_HTTP_ERROR con la fecha del último intento", async () => {
@@ -172,6 +231,38 @@ it("@s37 muestra el mensaje accionable de FEED_HTTP_ERROR con la fecha del últi
   const attempt = screen.getByText("Último intento");
   expect(attempt.nextElementSibling?.textContent).not.toBe("");
 });
+
+// @s12 y la línea 15 del contrato: los siete códigos son un contrato cerrado. Si
+// FEED_MESSAGES perdiera una clave, el role="alert" saldría vacío, que es peor que
+// no mostrarlo. Cuatro de los siete no se renderizaban en ninguna prueba.
+it.each([
+  ["FEED_REJECTED", "apunta a una red interna"],
+  ["FEED_UNREACHABLE", "no se ha podido contactar con el proveedor"],
+  ["FEED_HTTP_ERROR", "vuelve a generar la dirección secreta"],
+  ["FEED_TOO_LARGE", "ocupa más de 1 mib"],
+  ["FEED_UNSUPPORTED_TYPE", "esa dirección no devuelve un calendario"],
+  ["FEED_MALFORMED", "no es un calendario icalendar"],
+  ["SECRET_UNREADABLE", "ya no se puede leer la dirección guardada"],
+])("@s12 explica qué hacer ante %s", async (lastError, fragment) => {
+  withSubscription({ ...synced, lastStatus: "FAILED", lastError });
+  render(<ExternalCalendar />);
+  const alert = await screen.findByRole("alert");
+  expect(alert.textContent?.toLowerCase()).toContain(fragment);
+  expect(alert.textContent?.length).toBeGreaterThan(fragment.length);
+});
+
+it.each([
+  ["un estado correcto con código de fallo", "OK", "FEED_MALFORMED"],
+  ["un fallo sin código", "FAILED", null],
+])(
+  "@s12 no pinta ninguna alerta con %s",
+  async (_name, lastStatus, lastError) => {
+    withSubscription({ ...synced, lastStatus, lastError });
+    render(<ExternalCalendar />);
+    await screen.findByText("calendar.google.com");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  },
+);
 
 it("@s37 pide volver a pegar la dirección cuando el secreto ya no se lee", async () => {
   withSubscription({
@@ -211,10 +302,21 @@ it("@s38 anuncia Guardando, envía una sola petición y bloquea los controles", 
   expect(await screen.findByText("Guardando…")).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Guardar" })).toBeDisabled();
   expect(calls.filter((call) => call.method === "PUT")).toHaveLength(1);
+  // @s40: aria-busy es la única señal programática de que el formulario está
+  // ocupado, y hasta ahora solo se comprobaba la región role="status".
+  const form = screen.getByLabelText("Etiqueta").closest("form")!;
+  expect(form).toHaveAttribute("aria-busy", "true");
+  expect(
+    screen.getByRole("heading", { name: "Suscribirte a un calendario" }),
+  ).toBeInTheDocument();
   release?.();
   expect(await screen.findByText("Guardado.")).toBeInTheDocument();
+  expect(form).toHaveAttribute("aria-busy", "false");
   expect(screen.getByLabelText("Dirección secreta iCal")).toHaveValue("");
   expect(screen.getByText("calendar.google.com")).toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: "Cambiar la suscripción" }),
+  ).toBeInTheDocument();
 });
 
 it("@s38 conserva el borrador y enfoca el campo cuando la dirección se rechaza", async () => {
@@ -287,6 +389,145 @@ it.each([
     expect(screen.getByRole("status").textContent).toBe("");
   },
 );
+
+// @s4 tiene cinco filas de label. El ternario de failed() solo se ejercía por la
+// rama url, así que un error de etiqueta podía estar enfocando el campo de
+// dirección sin que nadie se enterara.
+it("@s38 un error de etiqueta se asocia a Etiqueta y le devuelve el foco", async () => {
+  withoutSubscription();
+  answer(
+    ROUTE,
+    "PUT",
+    {
+      status: 400,
+      code: "VALIDATION_ERROR",
+      errors: [
+        {
+          field: "label",
+          code: "TOO_LONG",
+          message: "La etiqueta es demasiado larga.",
+        },
+      ],
+    },
+    400,
+  );
+  const user = userEvent.setup();
+  render(<ExternalCalendar />);
+  const labelField = await screen.findByLabelText("Etiqueta");
+  await user.type(labelField, "Trabajo");
+  const address = screen.getByLabelText("Dirección secreta iCal");
+  await user.type(address, "https://calendar.google.com/a.ics");
+  await user.click(screen.getByRole("button", { name: "Guardar" }));
+  expect(
+    await screen.findByText("La etiqueta es demasiado larga."),
+  ).toBeInTheDocument();
+  expect(labelField).toHaveAttribute("aria-invalid", "true");
+  expect(address).toHaveAttribute("aria-invalid", "false");
+  await waitFor(() => expect(labelField).toHaveFocus());
+});
+
+// La guarda es `instanceof Response && status === 401`: con el mutante && -> ||
+// cualquier respuesta de error borraría la suscripción de la pantalla.
+it("@s38 un 500 al guardar deja el estado incierto sin retirar la suscripción", async () => {
+  withSubscription(synced, [meeting]);
+  answer(ROUTE, "PUT", {}, 500);
+  const user = userEvent.setup();
+  render(<ExternalCalendar />);
+  await screen.findByText("calendar.google.com");
+  await user.type(
+    screen.getByLabelText("Dirección secreta iCal"),
+    "https://x.test/a.ics",
+  );
+  await user.click(screen.getByRole("button", { name: "Guardar" }));
+  expect(await screen.findByText(UNCERTAIN)).toBeInTheDocument();
+  expect(screen.getByText("calendar.google.com")).toBeInTheDocument();
+  expect(screen.getByText(".ics")).toBeInTheDocument();
+  expect(screen.getByText("Reunión")).toBeInTheDocument();
+});
+
+// Ninguna prueba encadenaba error y reintento, así que se podían borrar los
+// reinicios de estado (setFieldErrors({}), setFailure("")) sin romper nada.
+it("@s38 al reintentar se limpian el error de campo y el aviso anterior", async () => {
+  withoutSubscription();
+  answer(
+    ROUTE,
+    "PUT",
+    {
+      status: 400,
+      code: "VALIDATION_ERROR",
+      errors: [
+        { field: "url", code: "BLOCKED_ADDRESS", message: "Red interna." },
+      ],
+    },
+    400,
+  );
+  answer(ROUTE, "PUT", { configured: true, subscription: synced });
+  answer(`${ROUTE}/events`, "GET", emptyEvents);
+  const user = userEvent.setup();
+  render(<ExternalCalendar />);
+  await user.type(await screen.findByLabelText("Etiqueta"), "Trabajo");
+  const address = screen.getByLabelText("Dirección secreta iCal");
+  await user.type(address, "https://10.0.0.5/a.ics");
+  await user.click(screen.getByRole("button", { name: "Guardar" }));
+  expect(await screen.findByText("Red interna.")).toBeInTheDocument();
+  await user.clear(address);
+  await user.type(address, "https://calendar.google.com/a.ics");
+  await user.click(screen.getByRole("button", { name: "Guardar" }));
+  await waitFor(() =>
+    expect(screen.queryByText("Red interna.")).not.toBeInTheDocument(),
+  );
+  expect(screen.getByLabelText("Dirección secreta iCal")).toHaveAttribute(
+    "aria-invalid",
+    "false",
+  );
+});
+
+it("@s38 un reintento con éxito retira el aviso de estado incierto", async () => {
+  withoutSubscription();
+  answer(ROUTE, "PUT", { status: 503, code: "CONNECTORS_DISABLED" }, 503);
+  answer(ROUTE, "PUT", { configured: true, subscription: synced });
+  answer(`${ROUTE}/events`, "GET", emptyEvents);
+  const user = userEvent.setup();
+  render(<ExternalCalendar />);
+  await user.type(await screen.findByLabelText("Etiqueta"), "Trabajo");
+  await user.type(
+    screen.getByLabelText("Dirección secreta iCal"),
+    "https://calendar.google.com/a.ics",
+  );
+  const save = screen.getByRole("button", { name: "Guardar" });
+  await user.click(save);
+  expect(await screen.findByRole("alert")).toBeInTheDocument();
+  await user.click(save);
+  expect(await screen.findByText("Guardado.")).toBeInTheDocument();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+});
+
+// forget() cierra el diálogo además de vaciar la ficha. Que lo cierre no se nota
+// al borrar —la sección entera desaparece— pero sí después: si el estado se
+// quedara en «confirmando», al dar de alta una suscripción nueva la pantalla
+// aparecería con el diálogo de eliminación abierto sin que nadie lo pidiera.
+it("@s39 tras eliminar y volver a suscribirse no reaparece el diálogo de confirmación", async () => {
+  withSubscription(synced, [meeting]);
+  answer(ROUTE, "DELETE", null, 204);
+  answer(ROUTE, "PUT", { configured: true, subscription: synced });
+  const user = userEvent.setup();
+  render(<ExternalCalendar />);
+  await user.click(
+    await screen.findByRole("button", { name: "Eliminar suscripción" }),
+  );
+  await user.click(screen.getByRole("button", { name: "Sí, eliminar" }));
+  await waitFor(() =>
+    expect(screen.queryByText("calendar.google.com")).not.toBeInTheDocument(),
+  );
+  await user.type(await screen.findByLabelText("Etiqueta"), "Trabajo");
+  await user.type(
+    screen.getByLabelText("Dirección secreta iCal"),
+    "https://calendar.google.com/a.ics",
+  );
+  await user.click(screen.getByRole("button", { name: "Guardar" }));
+  expect(await screen.findByText("calendar.google.com")).toBeInTheDocument();
+  expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+});
 
 it("@s38 retira los datos privados cuando la sesión ha caducado", async () => {
   withSubscription(synced, [meeting]);
@@ -453,9 +694,13 @@ it("@s39 no envía DELETE si se cancela la confirmación", async () => {
   await user.click(
     await screen.findByRole("button", { name: "Eliminar suscripción" }),
   );
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument();
   await user.click(screen.getByRole("button", { name: "Cancelar" }));
   expect(calls.some((call) => call.method === "DELETE")).toBe(false);
   expect(screen.getByText("calendar.google.com")).toBeInTheDocument();
+  // Sin esto, borrar el setConfirming(false) de Cancelar deja el diálogo abierto
+  // y la prueba seguía verde porque solo miraba que no se enviara el DELETE.
+  expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
 });
 
 it("@s39 elimina con una sola petición y deja el formulario vacío", async () => {

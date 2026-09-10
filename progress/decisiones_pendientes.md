@@ -72,3 +72,35 @@ migrar, que es trabajo real y sin ganancia de seguridad que yo vea.
 Ya no hace falta preguntarte por esto: las ratificaciones que sí diste están
 ahora escritas con su cita exacta en `progress/ratificaciones.md`, para que un
 juez que sólo lee el repositorio pueda comprobarlas sin la conversación.
+
+---
+
+## 4. Feature 30 — `@s43` no describe la carrera entre escrituras
+
+**Qué pasa.** Los `Examples` de `@s43` son «navega a /proyectos», «cierra sesión»
+y «cambia a otra regla». El camino donde vivía un defecto **real** que se arregló
+hoy —«otra escritura la supera», que dejaba `Guardar` y el interruptor inertes
+para siempre con el borrador atrapado— **no está en ese Outline ni en ningún
+otro**; sólo lo roza `@s40` fila 1 por el lado del botón.
+
+El carril movió las tres pruebas a `@s40`, porque ahí es donde el contrato dice
+algo aplicable («deshabilitado **hasta** la respuesta»), y **no enmendó** nada.
+
+**Lo que hay que decidir:** ¿gana `@s43` una cuarta fila de `Examples` para la
+carrera entre escrituras, o basta con la lectura de `@s40` fila 1?
+
+---
+
+## 5. Feature 30 — el enlace del historial cuando la regla ya no crea tareas
+
+**Qué pasa.** En `automations.tsx:577-585`, si la regla es `NOTIFY_WEBHOOK` el
+segmento de proyecto se resuelve a `""` y el `href` sale `/proyectos//tareas/<id>`.
+
+Hoy es inalcanzable por el camino normal —una regla de webhook no crea tareas—
+pero **sí** es alcanzable tras un PUT que cambie una regla `CREATE_TASK` a
+`NOTIFY_WEBHOOK`: sus ejecuciones antiguas conservan `createdTaskId` y pintarían
+un enlace roto. `@s41` dice «un enlace a la tarea creada» y no dice qué hacer
+aquí.
+
+**Lo que hay que decidir:** ¿ocultar el enlace, apuntar a la tarea sin proyecto, o
+algo más? El carril **no inventó comportamiento**, que es lo correcto.

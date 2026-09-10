@@ -1896,6 +1896,7 @@ test("github connector Stryker mutates its three own modules and nothing else", 
   );
   assert.deepEqual(config.mutate, [
     "src/github-connector-client.ts",
+    "src/github-connector-draft.ts",
     "src/github-connector.tsx",
     "src/integrations-index.tsx",
   ]);
@@ -2227,7 +2228,11 @@ test("automations Stryker configuration mutates only the feature files", () => {
   // Lo pide el juez de cierre de la feature 30 en su condicion 1.
   assert.equal(config.mutate.length, 6);
   for (const selector of config.mutate.slice(0, 4))
-    assert.match(selector, /^src\/(App|workspace)\.tsx:\d+:\d+-\d+:\d+$/, selector);
+    assert.match(
+      selector,
+      /^src\/(App|workspace)\.tsx:\d+:\d+-\d+:\d+$/,
+      selector,
+    );
   assert.deepEqual(config.mutate.slice(4), [
     "src/automations-api.ts",
     "src/automations.tsx",

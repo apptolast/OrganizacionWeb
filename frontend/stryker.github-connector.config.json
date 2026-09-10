@@ -5,6 +5,7 @@
   "ignorePatterns": [".stryker-tmp-*"],
   "mutate": [
     "src/github-connector-client.ts",
+    "src/github-connector-draft.ts",
     "src/github-connector.tsx",
     "src/integrations-index.tsx"
   ],

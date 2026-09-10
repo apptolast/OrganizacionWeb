@@ -2217,17 +2217,24 @@ test("automations Stryker configuration mutates only the feature files", () => {
       "utf8",
     ),
   );
-  assert.deepEqual(config.mutate, [
-    "src/App.tsx:49:8-49:51",
-    "src/App.tsx:61:12-62:32",
-    "src/App.tsx:94:10-95:40",
-    "src/workspace.tsx:138:10-143:22",
+  // La forma del ambito, SIN repetir las coordenadas: los cuatro primeros son
+  // rangos sobre los dos ficheros compartidos y los dos ultimos son ficheros
+  // enteros. Antes habia aqui una lista literal de rangos que decia lo mismo que
+  // la validacion por contenido de abajo, y solo la literal se desplazaba: al
+  // reparar los rangos, la guarda se quedaba roja sin que nada estuviera mal.
+  // Lo pide el juez de cierre de la feature 30 en su condicion 1.
+  assert.equal(config.mutate.length, 6);
+  for (const selector of config.mutate.slice(0, 4))
+    assert.match(selector, /^src\/(App|workspace)\.tsx:\d+:\d+-\d+:\d+$/, selector);
+  assert.deepEqual(config.mutate.slice(4), [
     "src/automations-api.ts",
     "src/automations.tsx",
   ]);
   assert.equal(config.thresholds.break, 80);
-  // Los cuatro rangos se validan por contenido: App.tsx se desplaza con cada
-  // feature y un rango obsoleto mutaria lineas de otra pantalla en silencio.
+  // Los cuatro rangos se validan por CONTENIDO, que es la propiedad que importa:
+  // App.tsx se desplaza con cada feature y un rango obsoleto mutaria lineas de
+  // otra pantalla en silencio. Esta comprobacion sobrevive al desplazamiento; una
+  // lista de coordenadas, no.
   const expected = [
     ["automations = route", "/automatizaciones"],
     ["automations", "Automatizaciones"],

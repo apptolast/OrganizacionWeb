@@ -235,3 +235,83 @@ Verde final: `BUILD SUCCESSFUL`, y `spotlessCheck` conforme.
 **Nota sobre mutación**: PIT no muta literales de cadena, así que este regex nunca
 va a tener un mutante que lo delate. Estas tres filas son el único guardián que
 tiene. Merece la pena que no vuelvan a ser invisibles.
+
+---
+
+## 2. `GithubIssueConnections` fuera de todo ámbito — PARA EL ORQUESTADOR
+
+`backend/build.gradle.kts` no es mío, así que **no lo he tocado**. Confirmado el
+hallazgo y dejada aquí la línea exacta.
+
+### Verificado
+
+```
+$ grep -rn "GithubIssueConnections" --include=*.kts --include=*.json --include=*.mjs .
+(ningún resultado)
+
+$ grep -rn "GitlabIssueConnections" --include=*.kts .
+./backend/build.gradle.kts:89:    "com.apptolast.organization.application.GitlabIssueConnections*",
+```
+
+**Cero apariciones en todo el repositorio.** La gemela de GitLab sí está, en el
+ámbito de la 29. El único glob que alcanzaría a la de GitHub es el `else ->` de
+la corrida completa, y `bin/harness mutate github_connector` pasa
+`-PmutationScope=github_connector`. La cifra 468/502 = 93,23 % no mide esta clase.
+
+### Lo que hay dentro (no es un portador de datos)
+
+`backend/src/main/java/com/apptolast/organization/application/GithubIssueConnections.java`:
+
+- `source()` → `"github"`, la constante que acaba en cada recibo y en cada fila de
+  `task_external_links`.
+- `find()` traduce la fila almacenada a `IssueConnection` decidiendo `projectPath`,
+  `reference`, texto cifrado y validez.
+- `invalidate(ownerId, errorCode, at)` **descarta a propósito dos argumentos** y
+  llama a `connections.invalidate(ownerId)`. Un `VOID_METHOD_CALLS` ahí significa
+  «el token rechazado sigue considerándose válido y se reenvía en cada
+  importación» (@s22).
+
+### La línea a añadir
+
+En `githubConnectorClasses` (`backend/build.gradle.kts:111-136`), junto al resto
+de `application.*`:
+
+```
+"com.apptolast.organization.application.GithubIssueConnections*",
+```
+
+### Previsión de mutantes (REPARTO_NOCHE, regla 4)
+
+La clase **sí está ejercitada**: `ImportGithubIssuesTest.java:42` monta el
+`GithubIssueConnections` real sobre el doble de almacén, no un fake. Espero que
+salgan **pocos mutantes y casi todos muertos**:
+
+| Mutante | Previsión | Quién lo mata |
+|---|---|---|
+| `source()` → `NullReturnVals` / vacío | **KILLED** | `ImportGithubIssuesTest:96`, `assertEquals("github", receipt.source())` |
+| `find()` → `Optional.empty` / lambda a `null` | **KILLED** | toda la ruta feliz de importación se cae sin conexión |
+| `invalidate()` → `VOID_METHOD_CALLS` | **KILLED** | `ImportGithubIssuesTest:336`, `assertEquals("invalid", …status())` tras el 401 de @s22 |
+| `recordFailure()` (cuerpo vacío) | **sin mutantes** | PIT no muta un cuerpo vacío |
+
+Si `invalidate` sobreviviera, el oráculo de :336 no estaría discriminando y eso
+sería un hallazgo nuevo. **Contrástese la campaña contra esta tabla.**
+
+### Lo demás del mismo motivo del panel, no tocado
+
+Sigue en pie, y tampoco es mío: `ImportGuard*` está dentro del ámbito de la 27
+(`:121`) pero sólo lo usan `ConnectGitlab.java:46` y `DisconnectGitlab.java:28`;
+y `adapter.connectors.*` (`:130`) arrastra `GitlabApiBase` y `HttpGitlabIssueSource`
+a la campaña de la 27.
+
+---
+
+## Cierre
+
+- Punto 1: **cerrado**, con arreglo de producción y dos oráculos acreditados.
+- Punto 2: **en tu tejado** — una línea en `backend/build.gradle.kts` y volver a medir.
+- Punto 3: **ya estaba cubierto**; el rojo lo acredita y ahora además se lee.
+
+No se ha ejecutado ninguna campaña de mutación (REPARTO_NOCHE, regla 4) ni
+`bin/harness test` completo (REGLAS, regla 1). Backend por clase concreta,
+frontend por fichero.
+

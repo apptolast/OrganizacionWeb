@@ -2072,6 +2072,7 @@ test("external calendar PIT scope covers the whole slice and extends the default
       "adapter.connectors.ConnectorKeyRing*",
       "adapter.feed.HttpCalendarFeed*",
       "adapter.net.SystemHostResolver*",
+      "adapter.net.AnchoredConnection*",
       "adapter.http.ExternalCalendarController*",
       "adapter.http.ConnectorsGate*",
       "adapter.persistence.PostgresExternalCalendarStore*",
@@ -2342,6 +2343,7 @@ test("webhooks PIT scope covers the whole slice and extends the default", () => 
       "adapter.config.WebhookConfiguration*",
       "adapter.config.WebhookConnectorStartup*",
       "adapter.config.WebhookSchedule*",
+      "adapter.net.AnchoredConnection*",
     ].map((name) => `com.apptolast.organization.${name}`),
   );
   // AddressPolicy y PublicAddressPolicy son compartidas y ya viven en el ambito

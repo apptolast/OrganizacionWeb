@@ -451,6 +451,7 @@ pitest {
         "com.apptolast.organization.adapter.connectors.ConnectorKeyRing*",
         "com.apptolast.organization.adapter.feed.HttpCalendarFeed*",
         "com.apptolast.organization.adapter.net.SystemHostResolver*",
+        "com.apptolast.organization.adapter.net.AnchoredConnection*",
         "com.apptolast.organization.adapter.http.ExternalCalendarController*",
         "com.apptolast.organization.adapter.http.ConnectorsGate*",
         "com.apptolast.organization.adapter.persistence.PostgresExternalCalendarStore*",
@@ -619,7 +620,12 @@ pitest {
         "com.apptolast.organization.adapter.logging.Slf4jWebhookAudit*",
         "com.apptolast.organization.adapter.config.WebhookConfiguration*",
         "com.apptolast.organization.adapter.config.WebhookConnectorStartup*",
-        "com.apptolast.organization.adapter.config.WebhookSchedule*"
+        "com.apptolast.organization.adapter.config.WebhookSchedule*",
+        // La clase que implementa la decision B3 -conectar a la direccion ya validada-
+        // no estaba en NINGUN ambito: cero mutantes. Lo caza el juez de cierre de la 25,
+        // tres lineas por debajo del comentario que conmemora el mismo defecto en el
+        // cifrador. Cuarto ambito incompleto de la noche.
+        "com.apptolast.organization.adapter.net.AnchoredConnection*"
     )
     targetClasses.set(when {
         nightFiveOnly -> webhooksClasses + githubConnectorClasses + externalCalendarClasses + automationsClasses + additionalConnectorsClasses

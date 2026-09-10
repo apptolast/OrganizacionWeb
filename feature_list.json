@@ -300,17 +300,6 @@
       "status": "done"
     },
     {
-      "id": 27,
-      "name": "github_connector",
-      "title": "GitHub",
-      "description": "Conector GitHub: PAT cifrado AES-GCM, validación del repositorio, importación idempotente de issues abiertas como tareas con task_external_links y recibos; contrato de 42 escenarios en features/github_connector.feature aprobado por autorización global.",
-      "acceptance": [
-        "Cumplir @s1–@s42 de features/github_connector.feature con revisión, pruebas y mutación antes del cierre."
-      ],
-      "sdd": true,
-      "status": "in_progress"
-    },
-    {
       "id": 28,
       "name": "external_calendar",
       "title": "Calendario externo",

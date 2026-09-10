@@ -140,3 +140,31 @@ tablas, también renombró `issue_import_receipts.repository` a `project_path` y
 añadió `source`. Esas dos **no se revierten** por lo dicho en el punto 3. La
 migración de retirada se limita a `gitlab_connections` y al `CHECK` de
 `task_external_links`.
+
+---
+
+## R8 — 10 de septiembre de 2026 — la feature 27 también se retira
+
+**Instrucción del propietario, literal:** «ya no la quiero ni que se implemente ni
+que exista», sobre la entrada `27 github_connector` de `feature_list.json`, que
+pegó entera en el mensaje.
+
+**Alcance:** desaparece el conector de GitHub y, con él, **toda la infraestructura
+de conectores**: el caso de uso de importación, el puerto `IssueSource`, los
+recibos, los enlaces externos, el token cifrado y sus adaptadores. Se retira junto
+con la feature 29 en una sola cirugía, porque compartían casi todo y hacerlo en
+dos rondas obligaría a conservar piezas que después habría que borrar.
+
+`feature_list.json` pasa de 30 features a **28**. Quedan tres por cerrar: la
+**25** (webhooks), la **28** (calendario externo) y la **30** (automatizaciones).
+
+**Lo que se queda, verificado con `grep` y no de memoria:** `SecretCipher`,
+`AesGcmSecretCipher`, `ConnectorKeyRing` y `ConnectorsGate`. **No son de los
+conectores**: los usa la feature 28 para cifrar en reposo la URL del feed del
+calendario externo — están en `SaveExternalCalendar` y `SyncExternalCalendar`.
+Borrarlos habría dejado esa feature sin cifrado. Pasan a ser código de la 28.
+
+También se conserva la variable `APP_CONNECTOR_KEY` y su cableado, por lo mismo.
+El nombre queda desafortunado sin conectores, y se deja escrito aquí en vez de
+renombrarlo: renombrar una variable de entorno es otra cirugía y toca el
+despliegue.

@@ -6,46 +6,8 @@ disciplina del repo dice que los firmas tú.
 
 ---
 
-## 1. Feature 27 — enmienda del recibo, sin contrafirma
+## 1. Feature 30 — `@s43` no describe la carrera entre escrituras
 
-**Qué pasó.** El commit `a1b0d20b` (10 de septiembre, 00:19) cambió dos filas de
-`features/github_connector.feature` **sin pasar por ti**. Lo caza el panel de
-precierre (motivo M13 de `progress/carriles/bloqueantes_27.md`).
-
-**Qué cambió, exactamente:**
-
-- Línea 146: «con sus **once** campos» → «con sus **doce** campos».
-- Líneas 165-166: el recibo pasa de contener `id, projectId, repository, status,
-created, skipped, failed, truncated, errorCode, startedAt, finishedAt` a
-  contener `id, **source**, projectId, **projectPath**, status, created, skipped,
-failed, truncated, errorCode, startedAt, finishedAt`. Y la cláusula siguiente
-  pasa a exigir `source` es "github" y `projectPath` es "octocat/Hello-World".
-
-**Por qué se hizo.** Al unificar la importación de GitHub y GitLab en la feature
-29, el recibo HTTP dejó de llevar `repository` y pasó a llevar `source` +
-`projectPath`. El `@s20` de `features/additional_connectors.feature:242` exige
-que **los dos recibos tengan las mismas claves**. Las dos filas de la 27 habían
-caducado, y mientras tanto la región «Resultado de la importación» **no pintaba
-ningún contador** en el producto: `decodeReceipt` rechazaba el recibo entero por
-`exact(value, RECEIPT_FIELDS)` y el componente caía al catch. O sea que no es un
-contador a cero: la sección no existía.
-
-**Mi lectura.** Es coherencia con un contrato que ya existía, no una ampliación:
-sin ella, dos contratos aprobados se contradicen. Es del mismo tipo que las dos
-enmiendas que ya ratificaste («alinear el `@s31` de la 29 con el de la 27»).
-Pero es un cambio de contrato y no lo firmo yo.
-
-**Lo que hay que decidir:** ratificarla, o revertirla y arreglar el desacuerdo
-por el otro lado (que el recibo de GitHub vuelva a llevar `repository`, lo que
-rompería el `@s20` de la 29).
-
----
-
----
-
----
-
-## 2. Feature 30 — `@s43` no describe la carrera entre escrituras
 
 **Qué pasa.** Los `Examples` de `@s43` son «navega a /proyectos», «cierra sesión»
 y «cambia a otra regla». El camino donde vivía un defecto **real** que se arregló
@@ -65,7 +27,10 @@ carrera entre escrituras, o basta con la lectura de `@s40` fila 1?
 
 ---
 
-## 3. Feature 30 — el enlace del historial cuando la regla ya no crea tareas
+---
+
+## 2. Feature 30 — el enlace del historial cuando la regla ya no crea tareas
+
 
 **Qué pasa.** En `automations.tsx:577-585`, si la regla es `NOTIFY_WEBHOOK` el
 segmento de proyecto se resuelve a `""` y el `href` sale `/proyectos//tareas/<id>`.
@@ -85,7 +50,10 @@ algo más? El carril **no inventó comportamiento**, que es lo correcto.
 
 ---
 
-## 4. Feature 30 — `upsert` puede pisar una confirmación buena
+---
+
+## 3. Feature 30 — `upsert` puede pisar una confirmación buena
+
 
 **Qué pasa.** `PostgresAutomationWork.upsert` (`:204-212`) hace
 `ON CONFLICT (rule_id, event_id) DO UPDATE` **sin guarda de estado**, a diferencia
@@ -108,7 +76,10 @@ declara que el último que escribe manda? Es el punto H6 que el juez pidió
 
 ---
 
-## 5. Feature 30 — qué muestra el editor al abrir una regla de webhook
+---
+
+## 4. Feature 30 — qué muestra el editor al abrir una regla de webhook
+
 
 **Qué pasa.** Ni `@s37`, ni `@s38`, ni `@s40` dicen nada sobre qué debe mostrar
 el editor al abrir una regla `NOTIFY_WEBHOOK`. Hay dos mutantes vivos ahí y el
@@ -127,7 +98,10 @@ mide 84,60 % y el ámbito 91,18 %.
 
 ---
 
-## 6. Feature 25 — el `@s9` promete modo degradado y el código muere al arrancar
+---
+
+## 5. Feature 25 — el `@s9` promete modo degradado y el código muere al arrancar
+
 
 **Qué pasa.** `features/webhooks.feature:129-142` dice «Sin clave de cifrado
 válida la aplicación arranca degradada / Then la aplicación queda disponible» y
@@ -175,7 +149,10 @@ comparten?
 
 ---
 
-## 7. Feature 28 — el plazo de 5 s pasa a cubrir el intercambio completo
+---
+
+## 6. Feature 28 — el plazo de 5 s pasa a cubrir el intercambio completo
+
 
 **Qué cambió, sin contrafirma.** El commit `baf5ab1f` reescribió
 `features/external_calendar.feature:13-14`. Antes: «Descarga con redirecciones
@@ -199,7 +176,10 @@ ratificación; lo pregunto porque **no lo puedo afirmar yo**.
 
 ---
 
-## 8. Feature 28 — el certificado que no vale para su nombre
+---
+
+## 7. Feature 28 — el certificado que no vale para su nombre
+
 
 **Qué cambió, sin contrafirma.** El commit `78dca3a6` añadió esta fila al
 `@s12`:
@@ -215,7 +195,10 @@ anclaje no sirve de nada. Pero es una fila nueva del contrato y la firma es tuya
 
 ---
 
-## 9. Feature 28 — el sitio de «Calendario externo» en el menú
+---
+
+## 8. Feature 28 — el sitio de «Calendario externo» en el menú
+
 
 **Qué pasa.** La enmienda de navegación que ratificaste fija el orden de las
 entradas del menú, y «Calendario externo» aparece en `workspace.tsx` en una

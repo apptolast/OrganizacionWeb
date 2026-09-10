@@ -416,3 +416,47 @@ desplazan nada. Comprobado, por el hallazgo de `progress/hallazgo_rangos_stryker
 - `gradlew spotlessCheck compileTestJava` verde: los dos controladores quedaron
   restaurados byte a byte tras las roturas (`git diff` de
   `adapter/http/` vacío).
+
+---
+
+## Resumen
+
+| Condición | Estado | Rojos acreditados |
+|---|---|---|
+| **C3** — techo de 5 MiB en los dos orígenes | **cerrada** | 4 |
+| **C4** — prueba de contrato sobre GitHub, `ErrorResponse`, conjuntos | **cerrada** | 2 + 1 verde de F3 |
+| **C6** — los dos oráculos flojos (H1 y H2) | **cerrada** | 2 |
+
+Tres commits, uno por condición: `11b46de`, `4401108`, `b33cc47`.
+
+### Mapa escenario → prueba
+
+| Escenario | Prueba |
+|---|---|
+| `@s25`, fila «200 con cuerpo JSON de más de 5 MiB» | `HttpGitlabIssueSourceTest.s25_abodyOverFiveMebibytesIsUnavailableInsteadOfEatingTheMemory` + `.s25_abodyOfExactlyFiveMebibytesStillImports` |
+| `@s25`, fila «sin respuesta dentro del tiempo de lectura» | `HttpGitlabIssueSourceTest.s25_aproviderThatOpensTheBodyAndGoesSilentIsCutByTheReadDeadline` (nueva; la que había no medía tiempo) |
+| `@s25`, el desenlace completo | `ImportGitlabIssuesTest.s25_anUnavailableProviderAnnotates...` (ya existía) |
+| `@s28` de la 27, con el techo de la 29 | `HttpGithubIssueSourceTest.s28_abodyOverFiveMebibytes...` + `.s28_abodyOfExactlyFiveMebibytesStillImports` |
+| `@s5` | `ConnectorCatalogApiTest.s5_thewholeBodyCarriesNoTokenHintNoApiBaseAndNoProjectPath` (rehecha) |
+| `@s31`, sin sesión | `ConnectorCatalogApiTest.s31_withoutASessionTheCatalogAnswersNothing` (con el código) |
+| `@s15` / `@s16` recibo, `@s5` / `@s8` conexión, `@s2` error | las cinco pruebas de contrato de los dos `*-connector-client.test.ts` |
+
+### Lo que queda abierto, y no es mío
+
+- **C1, C2, C5, C7** del dictamen: fuera de este encargo.
+- **`bin/harness init`**: no ejecutado. La suite completa levanta 49 contenedores
+  y `REGLAS.md` sección 1 lo prohíbe con otros carriles vivos; además hay una
+  campaña de Stryker corriendo. Verificado por clase concreta y por fichero.
+- **`backend/build.gradle.kts`**: no tocado, es del orquestador.
+  `BoundedResponse` recibe mutantes por el comodín
+  `adapter.connectors.*` del ámbito `github_connector`, no por el de la 29.
+  Está razonado arriba; si se prefiere lo contrario, es una línea.
+
+### Un defecto fuera de ámbito, anotado y no arreglado
+
+`HttpGitlabIssueSourceTest.s25_aprovidearThatNeverFinishesAnsweringIsUnavailable`
+tiene una errata en el nombre (`aprovidear`) y, sobre todo, **no discriminaba**:
+pasaba con y sin plazo de lectura. La dejo donde está —sigue cubriendo el caso
+«el proveedor tarda y luego cierra»— y le he puesto al lado la que sí mide. Su
+hermana de GitHub, `s28_aServerThatNeverSendsTheBodyGivesUpWellUnderFiveSeconds`,
+está bien hecha desde el principio: afirma sobre el tiempo transcurrido.

@@ -95,6 +95,7 @@
     "name": "client 167 EqualityOperator errorCode === null",
     "verdict": "MUERE",
     "tests": [
+      "@s27 refuses a running receipt that already carries an error",
       "@s30 reads back an import still running, with no ending and no error"
     ]
   },
@@ -127,7 +128,7 @@
     "name": "catalogo 67 StringLiteral texto de reserva -> ''",
     "verdict": "MUERE",
     "tests": [
-      "@s33 falls back to a plain explanation when the code is one it does not know"
+      "@s33 a code this version does not know still says something honest"
     ]
   },
   {
@@ -135,7 +136,7 @@
     "name": "catalogo 54 StringLiteral FEED_UNREACHABLE -> ''",
     "verdict": "MUERE",
     "tests": [
-      "@s33 shows FEED_UNREACHABLE as words the owner can act on, never as the raw code"
+      "@s33 the external_calendar row translates FEED_UNREACHABLE instead of falling back to the generic text"
     ]
   },
   {

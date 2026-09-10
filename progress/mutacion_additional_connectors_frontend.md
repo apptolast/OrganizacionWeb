@@ -517,3 +517,57 @@ pnpm --dir frontend exec vitest run src/gitlab-connector src/connectors-catalog
 **Aviso sobre el verificador**: sólo ejecuta las cinco suites de la feature, así que un
 «SOBREVIVE» suyo no prueba que el mutante sobreviva a la campaña completa —otra suite puede
 matarlo—. Un «MUERE», en cambio, es concluyente.
+
+---
+
+## Reajuste sobre `origin/main` movido (auditoría B1)
+
+El panel avisó de que el informe de las 11:47 ya no describe el árbol: `connectors-catalog.tsx`
+cambió a las 12:42 en `99b4d028`, que **no estaba en la base de este carril** (`5b019343`).
+Rebasado el carril sobre `origin/main` (`2a209efc`), sin conflictos, y reconciliado a mano lo que
+se solapaba:
+
+- `99b4d028` ya había arreglado el mismo defecto que mi racimo 1.5 —el mapa `ERROR_TEXT` tenía
+  nueve entradas y los códigos que un `ConnectorStatusSource` puede publicar son **once**: le
+  faltaban `RATE_LIMITED` y `GITLAB_UNAVAILABLE`, los dos de GitLab— y con una tabla mejor que la
+  mía: once filas con su emisor anotado y los siete de calendario declarados
+  `Record<FeedError, string>`, que da error de compilación si falta uno.
+- Por eso **borro mis dos pruebas duplicadas** (la paramétrica de nueve códigos y mi prueba del
+  texto de reserva): son un subconjunto estricto de las suyas y sólo añadían tiempo de suite.
+  Es la única excepción a «no borres pruebas», y ésta es la razón.
+- **Conservo** la derivada del enum, reescrita contra su tabla: `Record<FeedError, string>` obliga
+  a que estén los siete del **tipo de TypeScript**, pero nada ata ese tipo al enum de Java. Una
+  constante nueva en `FeedError.java` entraría sin que el compilador dijera nada. Es la única
+  prueba del árbol que lee la fuente Java (comprobado por grep).
+
+Racimos 1 y 6 **reverificados sobre el árbol rebasado**: 17 de 17 y 19 de 19 siguen muriendo.
+Los otros seis racimos no se tocan porque ni `gitlab-connector.tsx` ni `gitlab-connector-client.ts`
+cambiaron entre `5b019343` y `2a209efc`.
+
+Efecto en el recuento: de las 154 muertes, **una** (`connectors-catalog.tsx:67`, el texto de
+reserva) ya la mataba `99b4d028`, así que la aportación neta de este carril sobre el informe de
+las 11:47 son **153**. Y como ese commit añadió dos literales al mapa, el denominador de
+`connectors-catalog.tsx` sube un poco: la previsión del agregado se mantiene **en torno al 89 %**,
+con 68 muertes de margen sobre las 85 que pedía la puerta.
+
+Los dos ficheros que hunden la campaña son, como midió el panel, los de GitLab, y ahí es donde
+está el esfuerzo: **94 muertes** en `gitlab-connector-client.ts` y **40** en `gitlab-connector.tsx`,
+134 de las 153.
+
+## Los tres hallazgos que el panel me pasó de refilón
+
+Los tres son de backend y este carril es la puerta de mutación de **frontend**; no toco `backend/`
+salvo para romperlo a mano y restaurarlo en el verificador. Quedan anotados, sin tocar (regla 9):
+
+1. `ImportIssues.java:196` fija `"TaskCreated.v1"` sin oráculo que lo lea. **Despáchalo aparte**:
+   es la frontera con la 30 y cambiarlo dejaría de disparar sus automatizaciones en silencio. Aquí
+   sí hay un espejo en el frontend que lo hace visible —`webhooks-client.ts` valida `eventTypes`
+   contra su catálogo— pero es de la 25, no de este carril.
+2. `HttpGitlabIssueSourceTest:232` (`s25_aprovidearThatNeverFinishesAnsweringIsUnavailable`), el
+   oráculo que no discrimina: es backend, no me cruzo con él. Cae dentro de B11, que ya pide
+   precisamente añadir casos discriminantes en ese fichero.
+3. `ConnectGitlab.java:51` persiste el `path_with_namespace` sin revalidar y el fallo sale como
+   503 `STORAGE_UNAVAILABLE`: backend, tampoco lo toco. Nota de frontera por si sirve: el
+   decodificador del cliente **sí** rechazaría una ruta vacía (racimo 2), pero no una de más de
+   255 caracteres, porque el contrato de frontend no fija longitud máxima para `projectPath`. Si
+   se decide el límite, la fila entra en la tabla de rechazo de `decodeConnection` en una línea.

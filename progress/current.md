@@ -19,6 +19,47 @@ catorce entradas, con «Conectores» tras «Importación» porque lo fija @s33) 
 contradicción 50/52 de webhooks (se persisten 52, se sirven 50). Y una tercera,
 el anclaje del reenlace DNS en las dos features con su prueba de TLS.
 
+## Cuadro de puertas — 10 de septiembre, 16:30
+
+Todas las cifras de aquí están **calculadas** del `mutations.xml` o del
+`mutation.json`, sobre árbol limpio y máquina drenada, y cada una lleva su acta
+con la lista **nominal** de los mutantes sin matar. Ninguna se ha leído de un
+HTML: ésa fue la lección de la 30, que publicó «96,00 %» cuando el XML daba
+95,72 %.
+
+| Feature                   | Backend                     | Frontend                        | Juez              |
+| ------------------------- | --------------------------- | ------------------------------- | ----------------- |
+| 25 webhooks               | **92,81 %** ✅ remedido hoy | pendiente (previsión ~90 %)     | corriendo         |
+| 27 conector GitHub        | **95,90 %** ✅ remedido hoy | pendiente (ámbito cambiado hoy) | corriendo         |
+| 28 calendario externo     | midiéndose                  | **91,32 %** ✅                  | corriendo         |
+| 29 conectores adicionales | **96,50 %** ✅ primera vez  | pendiente (previsión ~89 %)     | corriendo         |
+| 30 automatizaciones       | pendiente (era 95,72 %)     | **90,29 %** ✅ remedido hoy     | **8 condiciones** |
+
+### Lo que las tres campañas de backend de hoy han cerrado
+
+No son sólo números: cada una cerró un bloqueante duro que llevaba días.
+
+- **La 25** cerró **B2 y B3**. El «89,88 %» describía un árbol inexistente —situaba
+  una línea en la 237 y no está en la 237 en ningún commit—; ahora casa con el
+  fuente, y el test que el juez obligó a escribir aparece por fin como
+  `killingTest`, cuando antes no aparecía ni una vez.
+- **La 27** medía **81 mutantes de la feature 29** por un comodín de paquete. Al
+  quitarlos **subió** de 93,23 a 95,90: la feature estaba mejor probada de lo que
+  decía su número.
+- **La 29** **no se había medido nunca**. Su ámbito era el único de 34 sin
+  directorio de informe propio, así que escribía donde la siguiente campaña lo
+  habría pisado sin dejar rastro.
+
+### Y una cosa que se creía imposible y no lo era
+
+Los cinco adaptadores de bitácora salían con **cero mutantes** estando en su
+ámbito, y se explicaba como «una propiedad de los mutadores». La causa real era
+el `avoidCallsTo` **por defecto** de PIT. Quitado `org.slf4j` de esa lista,
+`Slf4jWebhookAudit` recibe 3 y `Slf4jConnectorAudit` 4, **verificado en dos
+campañas independientes**. Era condición bloqueante en cuatro features a la vez.
+
+---
+
 ## 10 de septiembre, 14:25 — todos los carriles aterrizados, midiendo
 
 **Los nueve carriles han cerrado.** Ninguno quedó parado ni en error. La máquina
@@ -31,17 +72,17 @@ cayeran tres campañas.
 
 No huecos de prueba: cosas que le pasaban al usuario.
 
-| Feature | Defecto |
-|---|---|
-| 25 | Un secreto ilegible **paraba la cola de entregas de todos los propietarios**, en silencio y para siempre. Ninguna prueba lo tocaba. |
-| 25 | El panel de entregas de un webhook **enseñaba las de otro**, con su «Reenviar» apuntando a la entrega ajena. |
-| 25 | Cualquier fallo decía «No se ha podido crear el webhook», y el error se encendía en un campo que no era. |
-| 27 | `hint()` devolvía el **token entero** si medía cuatro caracteres o menos. |
-| 27 | El recibo de importación se buscaba sin filtrar por origen: uno de GitHub salía por la ruta de GitLab. |
-| 29 | Las dos pantallas **no tenían bloque de estilos**: enlaces a 21 px y desbordamiento con el texto al 200 %. |
-| 29 | Una importación lenta **repintaba su recibo sobre una pantalla ya desconectada**. |
-| 30 | `queue()` **descartaba el evento entero en silencio** cuando el endpoint dejaba de estar activo. |
-| 30 | `Guardar` y el interruptor quedaban **inertes para siempre** si una escritura adelantaba a otra. |
+| Feature | Defecto                                                                                                                             |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 25      | Un secreto ilegible **paraba la cola de entregas de todos los propietarios**, en silencio y para siempre. Ninguna prueba lo tocaba. |
+| 25      | El panel de entregas de un webhook **enseñaba las de otro**, con su «Reenviar» apuntando a la entrega ajena.                        |
+| 25      | Cualquier fallo decía «No se ha podido crear el webhook», y el error se encendía en un campo que no era.                            |
+| 27      | `hint()` devolvía el **token entero** si medía cuatro caracteres o menos.                                                           |
+| 27      | El recibo de importación se buscaba sin filtrar por origen: uno de GitHub salía por la ruta de GitLab.                              |
+| 29      | Las dos pantallas **no tenían bloque de estilos**: enlaces a 21 px y desbordamiento con el texto al 200 %.                          |
+| 29      | Una importación lenta **repintaba su recibo sobre una pantalla ya desconectada**.                                                   |
+| 30      | `queue()` **descartaba el evento entero en silencio** cuando el endpoint dejaba de estar activo.                                    |
+| 30      | `Guardar` y el interruptor quedaban **inertes para siempre** si una escritura adelantaba a otra.                                    |
 
 ### Dos cifras remedidas, y las dos bajan
 
@@ -128,15 +169,15 @@ Siete carriles, **cada uno en su propio worktree** —esta madrugada asigné dos
 mismo y el segundo borró el trabajo del primero, que hubo que rescatar por SHA;
 ya está en `main` y no puede volver a pasar—:
 
-| Carril | Encargo |
-|---|---|
-| `webhooks` | mutación de frontend de la 25 (iba por 71,40 %) |
-| `additional-connectors` | mutación de frontend de la 29 (iba por 68,51 %) |
-| `github-connector` | el bloqueante `@s41` de la 27 y los oráculos U+00A0 |
-| `gh-resto` | los otros 17 motivos del panel sobre la 27 |
-| `auto-contrato` | motivos 1-7 de la 30: cobertura del contrato |
-| `auto-datos` | motivos 8-12 de la 30: seguridad y pérdida de datos |
-| `auto-mutantes` | motivos 13-22 de la 30: supervivientes y cifras honestas |
+| Carril                  | Encargo                                                  |
+| ----------------------- | -------------------------------------------------------- |
+| `webhooks`              | mutación de frontend de la 25 (iba por 71,40 %)          |
+| `additional-connectors` | mutación de frontend de la 29 (iba por 68,51 %)          |
+| `github-connector`      | el bloqueante `@s41` de la 27 y los oráculos U+00A0      |
+| `gh-resto`              | los otros 17 motivos del panel sobre la 27               |
+| `auto-contrato`         | motivos 1-7 de la 30: cobertura del contrato             |
+| `auto-datos`            | motivos 8-12 de la 30: seguridad y pérdida de datos      |
+| `auto-mutantes`         | motivos 13-22 de la 30: supervivientes y cifras honestas |
 
 Más dos campañas midiéndose en el centro: **PIT de la 29** (que no se había
 corrido nunca) y **Stryker de la 28**, recién integrada con 83 → 161 pruebas y
@@ -146,13 +187,13 @@ equivocado y dejaba escrituras vivas al salir de la pantalla.
 
 ### Puertas de mutación, medidas (13:25)
 
-| Feature | Backend | Frontend |
-|---|---|---|
-| 25 webhooks | 89,88 % ✅ | carril trabajando (iba por 71,40 %) |
-| 27 conector GitHub | **caducada** ⚠️ | **caducada** ⚠️ |
-| 28 calendario externo | **91,71 %** ✅ | **91,32 %** ✅ |
+| Feature                   | Backend                 | Frontend                            |
+| ------------------------- | ----------------------- | ----------------------------------- |
+| 25 webhooks               | 89,88 % ✅              | carril trabajando (iba por 71,40 %) |
+| 27 conector GitHub        | **caducada** ⚠️         | **caducada** ⚠️                     |
+| 28 calendario externo     | **91,71 %** ✅          | **91,32 %** ✅                      |
 | 29 conectores adicionales | midiéndose, primera vez | carril trabajando (iba por 68,51 %) |
-| 30 automatizaciones | 95,72 % ✅ (no 96,00) | 91,18 % ✅ |
+| 30 automatizaciones       | 95,72 % ✅ (no 96,00)   | 91,18 % ✅                          |
 
 **La 28 tiene ya las dos puertas de mutación.** Su cifra de frontend está
 calculada del `mutation.json` (663 de 726), no copiada de un HTML, y va con la
@@ -181,13 +222,13 @@ volver a medirlas.
 Las cinco features están **implementadas e integradas**. Ninguna está `done`
 todavía, y esto es exactamente lo que falta, con cifras medidas:
 
-| Feature | Juez | Mutación backend | Mutación frontend |
-|---|---|---|---|
-| 25 webhooks | **APPROVED** condicionado, 3 condiciones **cerradas** | midiéndose | pendiente |
-| 27 conector GitHub | **APPROVED** condicionado | pendiente | midiéndose (era 75,55 %, +44 oráculos) |
-| 28 calendario externo | **APPROVED** condicionado | pendiente | pendiente |
-| 29 conectores adicionales | **APPROVED** condicionado, 7 condiciones, 3 cerradas | pendiente | pendiente |
-| 30 automatizaciones | **APPROVED** condicionado, 2 condiciones **cerradas** | **96 %** ✅ | **52,74 %** ❌ |
+| Feature                   | Juez                                                  | Mutación backend | Mutación frontend                      |
+| ------------------------- | ----------------------------------------------------- | ---------------- | -------------------------------------- |
+| 25 webhooks               | **APPROVED** condicionado, 3 condiciones **cerradas** | midiéndose       | pendiente                              |
+| 27 conector GitHub        | **APPROVED** condicionado                             | pendiente        | midiéndose (era 75,55 %, +44 oráculos) |
+| 28 calendario externo     | **APPROVED** condicionado                             | pendiente        | pendiente                              |
+| 29 conectores adicionales | **APPROVED** condicionado, 7 condiciones, 3 cerradas  | pendiente        | pendiente                              |
+| 30 automatizaciones       | **APPROVED** condicionado, 2 condiciones **cerradas** | **96 %** ✅      | **52,74 %** ❌                         |
 
 ### El cuello de botella no es la máquina, son los huecos que destapa
 
@@ -306,13 +347,13 @@ commit por ciclo).
 El dictamen del juez está partido por feature para que cada carril lea solo lo
 suyo: `progress/carriles/dictamen_f25.md`, `dictamen_f28.md`, `dictamen_f30.md`.
 
-| Carril | Feature | Puerto E2E | Encargo |
-|---|---|---|---|
-| A | 25 webhooks | 18090 | 15 hallazgos abiertos del dictamen, 5 bloqueantes |
-| B | 28 calendario externo | 18092 | 15 hallazgos abiertos, 5 bloqueantes, más el plazo de lectura del cuerpo del feed |
-| C | 30 automatizaciones | 18094 | 10 hallazgos abiertos, 4 bloqueantes |
-| D | 27 conector GitHub | 18096 | revalidar el único bloqueante del juez, ya corregido en `d418a5d` |
-| E | 29 conectores adicionales | 18098 | terminar el ciclo a medias, inventario de oráculos por escenario |
+| Carril | Feature                   | Puerto E2E | Encargo                                                                           |
+| ------ | ------------------------- | ---------- | --------------------------------------------------------------------------------- |
+| A      | 25 webhooks               | 18090      | 15 hallazgos abiertos del dictamen, 5 bloqueantes                                 |
+| B      | 28 calendario externo     | 18092      | 15 hallazgos abiertos, 5 bloqueantes, más el plazo de lectura del cuerpo del feed |
+| C      | 30 automatizaciones       | 18094      | 10 hallazgos abiertos, 4 bloqueantes                                              |
+| D      | 27 conector GitHub        | 18096      | revalidar el único bloqueante del juez, ya corregido en `d418a5d`                 |
+| E      | 29 conectores adicionales | 18098      | terminar el ciclo a medias, inventario de oráculos por escenario                  |
 
 ## Resultado de la cosecha (20:45)
 
@@ -320,13 +361,13 @@ Los cinco carriles se integraron en `main` **sin un solo conflicto** —comproba
 antes con `git merge-tree` sobre los diez pares—. En total, **más de setenta
 commits**.
 
-| Feature | Hallazgos cerrados hoy | Abiertos |
-|---|---|---|
-| 25 webhooks | 6 (1, 5, 15, 16, 17, 21) + 9 y 10 desde otro carril | 6 |
-| 28 calendario externo | 8 (3, 6, 8, 12, 14, 15, 18, 19) | 5 |
-| 30 automatizaciones | 9 (2, 3, 4, 5, 6, 7, 8, 9, 11) | 1 |
+| Feature                   | Hallazgos cerrados hoy                                           | Abiertos |
+| ------------------------- | ---------------------------------------------------------------- | -------- |
+| 25 webhooks               | 6 (1, 5, 15, 16, 17, 21) + 9 y 10 desde otro carril              | 6        |
+| 28 calendario externo     | 8 (3, 6, 8, 12, 14, 15, 18, 19)                                  | 5        |
+| 30 automatizaciones       | 9 (2, 3, 4, 5, 6, 7, 8, 9, 11)                                   | 1        |
 | 29 conectores adicionales | 24 de 38 escenarios con oráculo, más el caso de uso del catálogo | endpoint |
-| Las tres a la vez | zoom nativo al 200 %, en tres ficheros nuevos y verdes | — |
+| Las tres a la vez         | zoom nativo al 200 %, en tres ficheros nuevos y verdes           | —        |
 
 ### Tres defectos de producto reales, no deuda de pruebas
 
@@ -398,12 +439,12 @@ Pero la puerta de mutación **no la pasa**, y este es el dato duro del día:
 69,44 % → 75,55 %.** Sigue por debajo de 80, pero el movimiento está donde se
 predijo:
 
-| Fichero | Antes | Después | Supervivientes |
-|---|---|---|---|
-| `github-connector-client.ts` | 73,17 % | **85,37 %** | 66 → 36 |
-| `github-connector.tsx` | 66,86 % | 68,62 % | 108 → 107 |
-| `integrations-index.tsx` | 50,00 % | 50,00 % | 1 → 1 |
-| **Total** | **69,44 %** | **75,55 %** | 175 → 144 |
+| Fichero                      | Antes       | Después     | Supervivientes |
+| ---------------------------- | ----------- | ----------- | -------------- |
+| `github-connector-client.ts` | 73,17 %     | **85,37 %** | 66 → 36        |
+| `github-connector.tsx`       | 66,86 %     | 68,62 %     | 108 → 107      |
+| `integrations-index.tsx`     | 50,00 %     | 50,00 %     | 1 → 1          |
+| **Total**                    | **69,44 %** | **75,55 %** | 175 → 144      |
 
 Los **5 mutantes sin cobertura pasan a cero**. La previsión del carril era «74-75 %
 en el total»; la medida da 75,55 %, así que la previsión era honesta. Lo que
@@ -492,13 +533,13 @@ días sin alcanzar, y aparecieron cinco roturas. Ninguna la trajo el trabajo de
 hoy: todas llevaban ahí desde la integración de las features 25 a 30, y todas
 son **una constante escrita a mano que dependía de algo que crece**:
 
-| Rotura | La constante | Qué la hizo caducar |
-|---|---|---|
-| `TRUNCATE` sin `CASCADE` | la lista de tablas enumerada | la `V25` añadió tablas con clave ajena |
-| Migración `V29` duplicada | el número elegido a mano | dos carriles a la vez |
-| `nth(-3)` en la navegación | posiciones desde el final | tres rutas nuevas |
-| 12 pulsaciones de `Shift+Tab` | el presupuesto de pasos | tres entradas de navegación nuevas |
-| Ventana del zoom nativo | una pantalla que se da por hecha | el xvfb de CI no la tiene |
+| Rotura                        | La constante                     | Qué la hizo caducar                    |
+| ----------------------------- | -------------------------------- | -------------------------------------- |
+| `TRUNCATE` sin `CASCADE`      | la lista de tablas enumerada     | la `V25` añadió tablas con clave ajena |
+| Migración `V29` duplicada     | el número elegido a mano         | dos carriles a la vez                  |
+| `nth(-3)` en la navegación    | posiciones desde el final        | tres rutas nuevas                      |
+| 12 pulsaciones de `Shift+Tab` | el presupuesto de pasos          | tres entradas de navegación nuevas     |
+| Ventana del zoom nativo       | una pantalla que se da por hecha | el xvfb de CI no la tiene              |
 
 Las cinco fusionaban limpio, porque ninguna es un choque textual. Las cinco
 están arregladas **de forma derivada** —`CASCADE`, número comprobado, lista
@@ -551,13 +592,13 @@ de uso y la frontera HTTP, o en la forma del recibo.
 `project-spec.md:2504` fija el orden canónico de la navegación principal en doce
 entradas. La aplicación sirve **trece**, y en otro orden:
 
-| # | Ratificado | Servido |
-|---|---|---|
-| 6 | Apariencia | **Calendario externo** |
-| 7 | Calendario | Apariencia |
-| 8 | Exportación | Exportación |
-| 9 | Importación | **Calendario** |
-| 10 | API para integraciones | Importación |
+| #   | Ratificado             | Servido                |
+| --- | ---------------------- | ---------------------- |
+| 6   | Apariencia             | **Calendario externo** |
+| 7   | Calendario             | Apariencia             |
+| 8   | Exportación            | Exportación            |
+| 9   | Importación            | **Calendario**         |
+| 10  | API para integraciones | Importación            |
 
 Es decir: **«Calendario externo» (feature 28) no aparece en la enmienda** —que
 sólo resolvió el choque entre la 25 y la 30— y **«Calendario» y «Exportación»

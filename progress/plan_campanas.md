@@ -39,6 +39,28 @@ condiciones de arranque y acta.
 - **Barrer patrones muertos**: ninguna clase del ámbito puede salir con cero
   mutantes sin explicación. Hoy han aparecido seis ámbitos mal apuntados.
 
+## El atajo combinado NO existe. Probado cuatro veces, muerto cuatro veces
+
+**Tachado el 10 de septiembre a las 14:45.** Lo que sigue en esta sección era el
+plan de medir las cinco features en una pasada con el ámbito `noche_cinco`. **No
+funciona en esta máquina**, y ya estaba escrito que no funcionaba:
+`backend/build.gradle.kts` lo dice desde anoche —«probado con cuatro hilos y con
+dos, y el sistema lo mató por memoria las dos veces»— y aun así se volvió a
+intentar. Tercer y cuarto intento, muertos igual: el de las 14:22 llegó a superar
+la fase de cobertura, creó las 195 unidades de mutación, subió a 62 contenedores
+de Testcontainers y el sistema lo mató a los 23 minutos.
+
+**La lección, que es la misma de todo el día:** había un hallazgo escrito, con su
+razón, y se ignoró porque el atajo era atractivo. Exactamente lo que produjo los
+siete ámbitos mal apuntados y la cifra irreproducible.
+
+**Las campañas van UNA POR FEATURE.** Está probado que caben: la de la 28 dio
+91,71 % y la de la 27 dio 93,23 % en esta misma máquina. Son ~35 min cada una y
+no hay forma de bajar de ahí.
+
+<details>
+<summary>El razonamiento del atajo, conservado por si alguna vez hay máquina</summary>
+
 ## Un atajo legítimo para las cinco de PIT
 
 PIT gasta **~17 minutos calculando cobertura** sea cual sea el ámbito, porque
@@ -55,6 +77,8 @@ una**.
 Ya murió dos veces por memoria, pero las dos con carriles trabajando encima. Se
 intenta primero combinada y, si vuelve a caer, se baja a una por feature. La
 diferencia son unas tres horas.
+
+</details>
 
 ## Lo que NO se va a hacer, y por qué
 

@@ -15,25 +15,25 @@ visto, lo digo.
 Refuté por defecto. **Los 23 están cerrados de verdad.** No he encontrado ni un
 solo «declarado y no hecho». Evidencia por hallazgo:
 
-| # | Cerrado por | Comprobado en |
-|---|---|---|
-| 1, 17 | TIMEOUT y TLS contra receptor real | `JdkWebhookSenderTest.java:355` (receptor que acepta y no responde; `accepted.await` prueba que la conexión se aceptó, `latencyMs >= plazo-5` prueba que el plazo transcurrió) y `:386` (certificado no confiable). Plazo de producción cableado y afirmado en `:347-351` leyendo el `connectTimeout` del cliente real, no el campo |
-| 2 | Recorte por elemento, conjunto nombrado, dos dimensiones | `e2e/webhooks-ux.spec.mjs:208-226` (selector `main li span, main .webhook-secret textarea, main .webhook-secret input, main tbody td`; filtro por `scrollWidth` **y** `scrollHeight`) y la aserción real en `:262-264`. El `input` sigue en el selector aunque el producto sea hoy `textarea`: si alguien lo devuelve, el oráculo no deja de mirar. Producto cambiado a `textarea` en `frontend/src/webhooks.tsx:309-315` |
-| 3 | Zoom nativo | `e2e/webhooks-native-zoom.spec.mjs:316-322` (`chrome.tabs.setZoom(tab.id, 2)`, `expect(zoom).toBe(2)`, `expect.poll(devicePixelRatio)`), con recorte `:334`, foco visible `:231`, axe `:376` |
-| 4, 12B, 13 | Recorrido de teclado real | `e2e/webhooks-ux.spec.mjs:438-451` (expectativa derivada del DOM, dos listas para que un tabindex negativo no se autoexcluya), `:524` reachable == visible, `:528` nombres únicos, `:536` orden exacto de ida, `:547` orden exacto de vuelta rotado, `:537` y `:548` foco visible en CADA parada con `matches(":focus-visible")` más el estilo del producto (`:480-487`). El no-op de `getComputedStyle(el, ":focus-visible")` está muerto y explicado en `:466-469` |
-| 5 | Anclaje implementado (ver §3) | `JdkWebhookSender.java:128-131`, `adapter/net/AnchoredConnection.java` |
-| 6, 7, 8 | Puertas de mutación cableadas | `backend/build.gradle.kts:44` webhooksOnly, `:583-622` webhooksClasses (38 patrones, incluidas las 13 clases de adapter), `:625`, `:658`, `:689`; `scripts/project.mjs:80-81` y `:246-257`; `frontend/stryker.webhooks.config.json` (ficheros enteros, sin rangos línea:columna — decisión correcta a la luz de `progress/hallazgo_rangos_stryker.md`) |
-| 9 | Las dos filas de @s22, con conteo de copias | `WebhookRecoveryPersistenceTest.java:405` (1 copia) y `:443` (2 copias, mismo eventId) |
-| 10 | SKIP LOCKED con oráculo que discrimina | `WebhookWorkPersistenceTest.java:204-260`. El artesano hizo bien en NO seguir la propuesta del dictamen: el oráculo temporal (elapsed < 3000) no discriminaba con cola. El suyo pregunta por la identidad de la fila reclamada mientras otra transacción retiene la primera: con SKIP LOCKED devuelve otra, con FOR UPDATE devuelve justo la retenida. Sin cronómetro |
-| 11, 19 | @s29 (ver §3) | `WebhookWorkPersistenceTest.java:339-382` |
-| 14 | @s38 monta la precondición antes de afirmar la ausencia | `frontend/src/webhooks.test.tsx:317-362`: crea el webhook, afirma presencia del secreto y de la lista de Ana (`:348-350`), y sólo entonces cambia de identidad y afirma las tres ausencias más la lista de Bea. El mutante de key constante muere |
-| 15 | Región role=status propia y anunciada | `frontend/src/webhooks.tsx:279-286`, escrita desde changeStatus `:212`, ping `:227`, remove `:237`, redeliver `:257`; unitario `webhooks.test.tsx:580`; E2E `webhooks-ux.spec.mjs:551-567` con el ciclo vacío→texto. El defecto que el propio E2E destapó (la región no se exponía) está corregido |
-| 16 | Filas Bearer de @s33 | `WebhookApiTest.java:411-433`, con la enmienda a 403 API_SCOPE_DENIED ya reconciliada en `features/webhooks.feature:403-406, 417-418` |
-| 18 | @s28 completo | `WebhookRecoveryPersistenceTest.java:197` afirma la secuencia exacta D2, E1, E2 (`:260-263`), y la compuerta de estado activo tiene test propio en `:299-312` |
-| 20 | @s40 por fila, no por conteo | `webhooks.test.tsx:538-553` (within(fila) para succeeded y exhausted, queryByRole null para pending), URL exacta con el id de la fila `:570-572`, y el efecto visible «Pendiente / intento 0» `:575-579`. El mutante de invertir la guarda muere |
-| 21 | @s30 aislamiento entre webhooks | `WebhookPersistenceTest.java:231` |
-| 22 | Portapapeles | `webhooks.test.tsx:205`, `:238` not.toHaveBeenCalled() con el panel visible, `:242` toHaveBeenCalledExactlyOnceWith(secret) tras el gesto |
-| 23 | Cifra de unitarios | `progress/ux_webhooks.md` corregida a 44 con desglose (commit ae3a56d) |
+| #          | Cerrado por                                              | Comprobado en                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1, 17      | TIMEOUT y TLS contra receptor real                       | `JdkWebhookSenderTest.java:355` (receptor que acepta y no responde; `accepted.await` prueba que la conexión se aceptó, `latencyMs >= plazo-5` prueba que el plazo transcurrió) y `:386` (certificado no confiable). Plazo de producción cableado y afirmado en `:347-351` leyendo el `connectTimeout` del cliente real, no el campo                                                                                                                                  |
+| 2          | Recorte por elemento, conjunto nombrado, dos dimensiones | `e2e/webhooks-ux.spec.mjs:208-226` (selector `main li span, main .webhook-secret textarea, main .webhook-secret input, main tbody td`; filtro por `scrollWidth` **y** `scrollHeight`) y la aserción real en `:262-264`. El `input` sigue en el selector aunque el producto sea hoy `textarea`: si alguien lo devuelve, el oráculo no deja de mirar. Producto cambiado a `textarea` en `frontend/src/webhooks.tsx:309-315`                                            |
+| 3          | Zoom nativo                                              | `e2e/webhooks-native-zoom.spec.mjs:316-322` (`chrome.tabs.setZoom(tab.id, 2)`, `expect(zoom).toBe(2)`, `expect.poll(devicePixelRatio)`), con recorte `:334`, foco visible `:231`, axe `:376`                                                                                                                                                                                                                                                                         |
+| 4, 12B, 13 | Recorrido de teclado real                                | `e2e/webhooks-ux.spec.mjs:438-451` (expectativa derivada del DOM, dos listas para que un tabindex negativo no se autoexcluya), `:524` reachable == visible, `:528` nombres únicos, `:536` orden exacto de ida, `:547` orden exacto de vuelta rotado, `:537` y `:548` foco visible en CADA parada con `matches(":focus-visible")` más el estilo del producto (`:480-487`). El no-op de `getComputedStyle(el, ":focus-visible")` está muerto y explicado en `:466-469` |
+| 5          | Anclaje implementado (ver §3)                            | `JdkWebhookSender.java:128-131`, `adapter/net/AnchoredConnection.java`                                                                                                                                                                                                                                                                                                                                                                                               |
+| 6, 7, 8    | Puertas de mutación cableadas                            | `backend/build.gradle.kts:44` webhooksOnly, `:583-622` webhooksClasses (38 patrones, incluidas las 13 clases de adapter), `:625`, `:658`, `:689`; `scripts/project.mjs:80-81` y `:246-257`; `frontend/stryker.webhooks.config.json` (ficheros enteros, sin rangos línea:columna — decisión correcta a la luz de `progress/hallazgo_rangos_stryker.md`)                                                                                                               |
+| 9          | Las dos filas de @s22, con conteo de copias              | `WebhookRecoveryPersistenceTest.java:405` (1 copia) y `:443` (2 copias, mismo eventId)                                                                                                                                                                                                                                                                                                                                                                               |
+| 10         | SKIP LOCKED con oráculo que discrimina                   | `WebhookWorkPersistenceTest.java:204-260`. El artesano hizo bien en NO seguir la propuesta del dictamen: el oráculo temporal (elapsed < 3000) no discriminaba con cola. El suyo pregunta por la identidad de la fila reclamada mientras otra transacción retiene la primera: con SKIP LOCKED devuelve otra, con FOR UPDATE devuelve justo la retenida. Sin cronómetro                                                                                                |
+| 11, 19     | @s29 (ver §3)                                            | `WebhookWorkPersistenceTest.java:339-382`                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 14         | @s38 monta la precondición antes de afirmar la ausencia  | `frontend/src/webhooks.test.tsx:317-362`: crea el webhook, afirma presencia del secreto y de la lista de Ana (`:348-350`), y sólo entonces cambia de identidad y afirma las tres ausencias más la lista de Bea. El mutante de key constante muere                                                                                                                                                                                                                    |
+| 15         | Región role=status propia y anunciada                    | `frontend/src/webhooks.tsx:279-286`, escrita desde changeStatus `:212`, ping `:227`, remove `:237`, redeliver `:257`; unitario `webhooks.test.tsx:580`; E2E `webhooks-ux.spec.mjs:551-567` con el ciclo vacío→texto. El defecto que el propio E2E destapó (la región no se exponía) está corregido                                                                                                                                                                   |
+| 16         | Filas Bearer de @s33                                     | `WebhookApiTest.java:411-433`, con la enmienda a 403 API_SCOPE_DENIED ya reconciliada en `features/webhooks.feature:403-406, 417-418`                                                                                                                                                                                                                                                                                                                                |
+| 18         | @s28 completo                                            | `WebhookRecoveryPersistenceTest.java:197` afirma la secuencia exacta D2, E1, E2 (`:260-263`), y la compuerta de estado activo tiene test propio en `:299-312`                                                                                                                                                                                                                                                                                                        |
+| 20         | @s40 por fila, no por conteo                             | `webhooks.test.tsx:538-553` (within(fila) para succeeded y exhausted, queryByRole null para pending), URL exacta con el id de la fila `:570-572`, y el efecto visible «Pendiente / intento 0» `:575-579`. El mutante de invertir la guarda muere                                                                                                                                                                                                                     |
+| 21         | @s30 aislamiento entre webhooks                          | `WebhookPersistenceTest.java:231`                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 22         | Portapapeles                                             | `webhooks.test.tsx:205`, `:238` not.toHaveBeenCalled() con el panel visible, `:242` toHaveBeenCalledExactlyOnceWith(secret) tras el gesto                                                                                                                                                                                                                                                                                                                            |
+| 23         | Cifra de unitarios                                       | `progress/ux_webhooks.md` corregida a 44 con desglose (commit ae3a56d)                                                                                                                                                                                                                                                                                                                                                                                               |
 
 Los tres patrones que esta noche ha cazado el proyecto —oráculos que no pueden
 fallar, verde por suerte de carga, oráculo que no discrimina— los he buscado
@@ -83,8 +83,23 @@ relativas a `backend/src/test/java/com/apptolast/organization/` y a `frontend/sr
 @s40 `webhooks.test.tsx:475,584` · @s41 `webhooks.test.tsx:601,631,653` ·
 @s42 `webhooks.test.tsx:92,675,691` + `e2e/webhooks-ux.spec.mjs:374,388,506,551,570` + `e2e/webhooks-native-zoom.spec.mjs:234`.
 
-Ninguno queda sin oráculo. La única cláusula del contrato que hoy NO se cumple
-es media línea de @s25 (ver §6.3).
+Ninguno queda sin oráculo. ~~La única cláusula del contrato que hoy NO se cumple
+es media línea de @s25 (ver §6.3).~~
+
+> **Corregido el 10 de septiembre de 2026.** Esa frase **ya no es cierta y no lo
+> era del todo cuando se escribió**. El panel de precierre y el juez de cierre
+> encontraron, entre las dos rondas, al menos **cuatro** cláusulas que el código
+> incumple, no una: la de `@s25`, las dos filas de `@s9` —que prometen
+> «la aplicación queda disponible» donde `AesGcmWebhookSecrets.versioned` lanza
+> y el contexto no arranca—, el plazo de `@s32` —«transcurren 1500 ms» no cabe
+> en un `@Scheduled` de `initialDelay=1000, fixedDelay=1000`, que a los
+> 1500 ms sólo ha corrido un ciclo cuando la fila 3 exige dos— y la línea
+> `@s8:125-126`, que dice «el id del endpoint» cuando el dato adicional
+> autenticado es `ownerId + "|" + endpointId`.
+>
+> Se tacha en vez de borrarse porque **la frase hizo de puerta**: mientras estuvo
+> escrita, cualquiera que leyera este veredicto daba por cerrado lo que no lo
+> estaba. Las cuatro están hoy encoladas en `progress/decisiones_pendientes.md`.
 
 Observación acotada, no bloqueante: el recorrido de teclado de
 `e2e/webhooks-ux.spec.mjs:506` se ejecuta en un solo estado (lista con el
@@ -231,15 +246,24 @@ de carril: pertenece a «### Límites explícitos» de la feature 25 en
 siguiente revisor.
 
 **6.3 `latencyMs` no usa el reloj inyectado.** `features/webhooks.feature:320` dice
-«medido con el reloj inyectado» y `JdkWebhookSender.java:123` y `:209-211` lo miden
-con `System.nanoTime()`; el `Clock` sólo alimenta el `t` de la firma. La mitad
-verificable de la cláusula («entero no negativo») sí tiene oráculo
-(`JdkWebhookSenderTest:285` y `:379-381`); la otra mitad es falsa. Es la ÚNICA
-cláusula del contrato que el código incumple, y no puede cerrarse callando: o se
-cambia el código con su rojo primero, o se enmienda la línea 320 pasando por la
-puerta de aprobación humana, como se hizo con las filas Bearer de @s33. Queda como
-condición y no como rechazo porque es decisión del propietario, y porque el
-artesano hizo lo correcto al no tocar producción sin un test que la pidiera.
+«medido con el cronómetro monótono inyectado» —enmendado y **ratificado**, ver
+`progress/ratificaciones.md` entrada **R4**— y `JdkWebhookSender.java:161-168`
+lo mide con el cronómetro;
+
+> **Corregido el 10 de septiembre de 2026.** Este párrafo citaba la línea 320 con
+> un texto que **ya no dice** y situaba la medición en `:123` y `:209-211`,
+> que **no son las líneas**: `elapsedMillis` se usa en `:161-168` y se
+> declara en `:238`. Se corrigen las tres citas. El fondo del hallazgo era
+> correcto y se resolvió: el propietario eligió enmendar la línea al cronómetro
+> monótono, y la contrafirma está escrita en el propio `.feature`. el `Clock` sólo alimenta el `t` de la firma. La mitad
+> verificable de la cláusula («entero no negativo») sí tiene oráculo
+> (`JdkWebhookSenderTest:285` y `:379-381`); la otra mitad era falsa. ~~Es la ÚNICA
+> cláusula del contrato que el código incumple~~ —ver la corrección de §5, son al
+> menos cuatro—, y no podía cerrarse callando: o se
+> cambia el código con su rojo primero, o se enmienda la línea 320 pasando por la
+> puerta de aprobación humana, como se hizo con las filas Bearer de @s33. Queda como
+> condición y no como rechazo porque es decisión del propietario, y porque el
+> artesano hizo lo correcto al no tocar producción sin un test que la pidiera.
 
 ---
 
@@ -300,14 +324,14 @@ El artesano anota que los literales SQL sobrevivirán porque PIT no muta cadenas
 Es cierto, y **acepto su acreditación**, porque la he verificado uno a uno en el
 fichero de prueba y no en su bitácora. Son seis, no cuatro:
 
-| Literal | Oráculo que lo sujeta |
-|---|---|
-| `LIMIT ?` de `PostgresWebhookStore.list:130` | `WebhookWorkPersistenceTest.java:377` |
-| `ORDER BY updated_at DESC, id DESC` de `list:129` | `WebhookWorkPersistenceTest.java:378-381` |
-| `ORDER BY updated_at DESC, id DESC` del prune de `PostgresWebhookWork` | `WebhookWorkPersistenceTest.java:363-369` |
-| `FOR UPDATE OF d SKIP LOCKED` de `PostgresWebhookWork:68` | `WebhookWorkPersistenceTest.java:204-260`, por identidad de fila y sin cronómetro |
-| `e.status = 'active'` de `PostgresWebhookOutbox:46` | `WebhookRecoveryPersistenceTest.java:299-312` |
-| `ORDER BY occurred_at, event_id` del `after()` | `WebhookRecoveryPersistenceTest.java:260-263` |
+| Literal                                                                | Oráculo que lo sujeta                                                             |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `LIMIT ?` de `PostgresWebhookStore.list:130`                           | `WebhookWorkPersistenceTest.java:377`                                             |
+| `ORDER BY updated_at DESC, id DESC` de `list:129`                      | `WebhookWorkPersistenceTest.java:378-381`                                         |
+| `ORDER BY updated_at DESC, id DESC` del prune de `PostgresWebhookWork` | `WebhookWorkPersistenceTest.java:363-369`                                         |
+| `FOR UPDATE OF d SKIP LOCKED` de `PostgresWebhookWork:68`              | `WebhookWorkPersistenceTest.java:204-260`, por identidad de fila y sin cronómetro |
+| `e.status = 'active'` de `PostgresWebhookOutbox:46`                    | `WebhookRecoveryPersistenceTest.java:299-312`                                     |
+| `ORDER BY occurred_at, event_id` del `after()`                         | `WebhookRecoveryPersistenceTest.java:260-263`                                     |
 
 Supervivientes también aceptables sin discusión: los de
 `JdkWebhookSender.classify()` (`:153-159`), que es red por defecto para

@@ -141,7 +141,145 @@ const MUTANTS = [
     `  SECRET_UNREADABLE\n}`,
     `  SECRET_UNREADABLE,\n  FEED_NUEVO\n}`,
   ],
+  // ------------------------------------ racimo 2: la tabla de rechazo de decodeConnection
+  [
+    2,
+    "client 106 CE value.length > 0 -> true",
+    "client",
+    `return typeof value === "string" && value.length > 0;`,
+    `return typeof value === "string" && true;`,
+  ],
+  [
+    2,
+    "client 106 EqualityOperator length >= 0",
+    "client",
+    `return typeof value === "string" && value.length > 0;`,
+    `return typeof value === "string" && value.length >= 0;`,
+  ],
+  [
+    2,
+    "client 88 CE typeof && isInteger -> true",
+    "client",
+    `  return typeof value === "number" && Number.isInteger(value) && value >= 0`,
+    `  return true && value >= 0`,
+  ],
+  [
+    2,
+    "client 88 LogicalOperator typeof || isInteger",
+    "client",
+    `  return typeof value === "number" && Number.isInteger(value) && value >= 0`,
+    `  return (typeof value === "number" || Number.isInteger(value)) && value >= 0`,
+  ],
+  [
+    2,
+    "client 94 CE isCount -> true",
+    "client",
+    `  return counter(value) !== null;`,
+    `  return true;`,
+  ],
+  [
+    2,
+    "client 99 CE uuid(value) -> true",
+    "client",
+    `    uuid(value) &&`,
+    `    true &&`,
+  ],
+  [
+    2,
+    "client 100 CE minusculas -> true",
+    "client",
+    `    value === (value as string).toLowerCase() &&`,
+    `    true &&`,
+  ],
+  [
+    2,
+    "client 110 CE value === null -> true",
+    "client",
+    `  if (value === null) return null;`,
+    `  if (true) return null;`,
+  ],
+  [
+    2,
+    "client 124 StringLiteral 'error' -> ''",
+    "client",
+    `    !["connected", "error", "not_connected"].includes(value.status as string)`,
+    `    !["connected", "", "not_connected"].includes(value.status as string)`,
+  ],
+  [
+    2,
+    "client 142 CE (null || instant) -> true",
+    "client",
+    `        !(value.lastActivityAt === null || instant(value.lastActivityAt))`,
+    `        !(true)`,
+  ],
+  [
+    2,
+    "client 142 CE lastActivityAt === null -> false",
+    "client",
+    `        !(value.lastActivityAt === null || instant(value.lastActivityAt))`,
+    `        !(false || instant(value.lastActivityAt))`,
+  ],
+  [
+    2,
+    "client 142 EqualityOperator lastActivityAt !== null",
+    "client",
+    `        !(value.lastActivityAt === null || instant(value.lastActivityAt))`,
+    `        !(value.lastActivityAt !== null || instant(value.lastActivityAt))`,
+  ],
+  ...absentChainMutants(),
 ];
+
+/**
+ * Los 19 mutantes de la cadena `absent` de decodeConnection (líneas 130-136), generados en vez
+ * de escritos a mano: siete `||` encadenados dan siete nodos con su ConditionalExpression, seis
+ * operandos más y seis LogicalOperator. Escribirlos a mano invita a olvidar uno.
+ */
+function absentChainMutants() {
+  const fields = [
+    "apiBase",
+    "projectPath",
+    "projectId",
+    "tokenHint",
+    "lastActivityAt",
+    "lastError",
+    "version",
+  ];
+  const operands = fields.map((field) => `value.${field} !== null`);
+  const search = `      ? ${operands.join(" ||\n        ")}\n      : !nonEmpty(value.apiBase) ||`;
+  const wrap = (chain) => `      ? ${chain}\n      : !nonEmpty(value.apiBase) ||`;
+  const prefix = (upTo) => operands.slice(0, upTo).join(" || ");
+  const rest = (from) =>
+    operands.slice(from).map((each) => ` || ${each}`).join("");
+  const mutants = [];
+  for (let node = 1; node <= 7; node++)
+    mutants.push([
+      2,
+      `client 130 CE nodo 1..${node} (${fields[node - 1]}) -> false`,
+      "client",
+      search,
+      wrap(`false${rest(node)}`),
+    ]);
+  for (let operand = 2; operand <= 7; operand++) {
+    const copy = [...operands];
+    copy[operand - 1] = "false";
+    mutants.push([
+      2,
+      `client 130 CE operando ${fields[operand - 1]} -> false`,
+      "client",
+      search,
+      wrap(copy.join(" || ")),
+    ]);
+  }
+  for (let node = 2; node <= 7; node++)
+    mutants.push([
+      2,
+      `client 130 LogicalOperator nodo ${node} (${fields[node - 1]}) -> &&`,
+      "client",
+      search,
+      wrap(`(${prefix(node - 1)}) && ${operands[node - 1]}${rest(node)}`),
+    ]);
+  return mutants;
+}
 
 function failedTests(output) {
   return [...output.matchAll(/^\s+×\s+(.+?)\s+\d+ms$/gm)].map(

@@ -116,6 +116,83 @@ it("@s8 refuses a connection carrying a ninth field", async () => {
   );
 });
 
+/**
+ * Los siete campos que @s8 exige nulos sin conexión. Una fila `not_connected` que arrastre uno
+ * solo de ellos es el residuo de la conexión anterior que @s32 y @s37 prohíben: la pantalla no
+ * lo pintaría hoy —el panel exige `status !== "not_connected"`— pero el decodificador es la
+ * única guarda que hay, y ninguna prueba la falsificaba.
+ */
+const RESIDUES: [string, unknown][] = [
+  ["apiBase", "https://gitlab.example.com/api/v4"],
+  ["projectPath", "grupo/proyecto"],
+  ["projectId", 4821],
+  ["tokenHint", "WXYZ"],
+  ["lastActivityAt", AT],
+  ["lastError", { code: "CONNECTION_INVALID", at: AT }],
+  ["version", 1],
+];
+
+it.each(RESIDUES)(
+  "@s8 refuses a not_connected row still dragging %s from the previous connection",
+  async (field, residue) => {
+    stub(Response.json({ ...notConnected, [field]: residue }));
+
+    await expect(readGitlabConnection(signal())).rejects.toThrow(
+      "Confirmación incompatible",
+    );
+  },
+);
+
+it("@s34 refuses a connected row whose project path is empty", async () => {
+  stub(Response.json({ ...connected, projectPath: "" }));
+
+  await expect(readGitlabConnection(signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+/** Con la pista vacía el panel enseñaría «••••» y nada más: una pista que no distingue nada. */
+it("@s35 refuses a connected row whose token hint is empty", async () => {
+  stub(Response.json({ ...connected, tokenHint: "" }));
+
+  await expect(readGitlabConnection(signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s8 refuses a project identifier that is not a whole number", async () => {
+  stub(Response.json({ ...connected, projectId: 4821.5 }));
+
+  await expect(readGitlabConnection(signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s8 refuses a version that is not a whole number", async () => {
+  stub(Response.json({ ...connected, version: 1.5 }));
+
+  await expect(readGitlabConnection(signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s8 accepts a connection that has not been used yet", async () => {
+  stub(Response.json({ ...connected, lastActivityAt: null }));
+
+  await expect(readGitlabConnection(signal())).resolves.toEqual({
+    ...connected,
+    lastActivityAt: null,
+  });
+});
+
+it("@s8 refuses a last activity that is not an instant", async () => {
+  stub(Response.json({ ...connected, lastActivityAt: "ayer" }));
+
+  await expect(readGitlabConnection(signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
 it("@s8 refuses a connected row that forgot its project", async () => {
   stub(Response.json({ ...connected, projectPath: null }));
 
@@ -237,6 +314,34 @@ it("@s15 starts an import with exactly the destination project", async () => {
   expect(options.method).toBe("POST");
   expect(JSON.parse(String(options.body))).toEqual({ projectId });
   expect(started).toEqual(receipt);
+});
+
+/**
+ * Los identificadores del recibo son UUID en minúsculas: así es como el contrato los publica y
+ * como se comparan los enlaces. Ninguna prueba mandaba uno en mayúsculas ni uno con la forma de
+ * un UUID que no lo es.
+ */
+it("@s15 refuses a receipt whose identifier comes in upper case", async () => {
+  stub(
+    Response.json({ ...receipt, id: importId.toUpperCase() }, { status: 201 }),
+  );
+
+  await expect(startGitlabImport(projectId, signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s15 refuses an identifier with the shape of a uuid that is not one", async () => {
+  stub(
+    Response.json(
+      { ...receipt, id: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeez" },
+      { status: 201 },
+    ),
+  );
+
+  await expect(startGitlabImport(projectId, signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
 });
 
 it("@s15 refuses a receipt whose source is not gitlab", async () => {

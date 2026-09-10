@@ -1,0 +1,316 @@
+[
+  {
+    "racimo": 2,
+    "name": "client 106 CE value.length > 0 -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 refuses a connected row whose project path is empty",
+      "@s35 refuses a connected row whose token hint is empty",
+      "@s8 refuses a lastError with no code, which would leave «Error» without a reason"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 106 EqualityOperator length >= 0",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 refuses a connected row whose project path is empty",
+      "@s35 refuses a connected row whose token hint is empty",
+      "@s8 refuses a lastError with no code, which would leave «Error» without a reason"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 88 CE typeof && isInteger -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a project identifier that is not a whole number",
+      "@s8 refuses a version that is not a whole number"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 88 LogicalOperator typeof || isInteger",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a project identifier that is not a whole number",
+      "@s8 refuses a version that is not a whole number"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 94 CE isCount -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a project identifier that is not a whole number",
+      "@s8 refuses a version that is not a whole number"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 99 CE uuid(value) -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s15 refuses an identifier with the shape of a uuid that is not one",
+      "@s36 keeps the seconds of a rate limit so the screen can name them",
+      "@s36 turns an unreadable problem body into a code the screen can still act on",
+      "@s36 refuses a negative retry, which would make the screen promise the past",
+      "@s34 shows the translated code, keeps the path and says nothing about being connected",
+      "@s34 marks the field the server complained about",
+      "@s34 marks the token field when the server is the one complaining about the token",
+      "@s29 without the server key it explains the missing configuration and offers no form",
+      "@s35 keeps the connection when the disconnection fails",
+      "@s36 names the seconds of a rate limit and leaves the button usable again",
+      "@s36 turns the state into «Error» and suggests replacing the token, with the focus on it",
+      "@s36 offers «Actualizar estado» for an import already running, and it rereads both",
+      "@s36 warns that the provider is unavailable and keeps the path for a manual retry",
+      "@s36 after a network failure offers «Actualizar estado» and retries nothing on its own"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 100 CE minusculas -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s15 refuses a receipt whose identifier comes in upper case"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 110 CE value === null -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 decodes a connection that is broken, keeping the code and the instant of the failure",
+      "@s5 refuses a lastError that smuggles the provider's words in a third field",
+      "@s8 refuses a lastError with no code, which would leave «Error» without a reason",
+      "@s8 refuses a lastError whose instant is not one"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 124 StringLiteral 'error' -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 decodes a connection that is broken, keeping the code and the instant of the failure"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 142 CE (null || instant) -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a last activity that is not an instant"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 142 CE lastActivityAt === null -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 accepts a connection that has not been used yet"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 142 EqualityOperator lastActivityAt !== null",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 accepts a connection that has not been used yet",
+      "@s8 refuses a last activity that is not an instant"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 CE nodo 1..1 (apiBase) -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging apiBase from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 CE nodo 1..2 (projectPath) -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging apiBase from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectPath from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 CE nodo 1..3 (projectId) -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging apiBase from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectPath from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectId from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 CE nodo 1..4 (tokenHint) -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging apiBase from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectPath from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectId from the previous connection",
+      "@s8 refuses a not_connected row still dragging tokenHint from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 CE nodo 1..5 (lastActivityAt) -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging apiBase from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectPath from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectId from the previous connection",
+      "@s8 refuses a not_connected row still dragging tokenHint from the previous connection",
+      "@s8 refuses a not_connected row still dragging lastActivityAt from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 CE nodo 1..6 (lastError) -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging apiBase from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectPath from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectId from the previous connection",
+      "@s8 refuses a not_connected row still dragging tokenHint from the previous connection",
+      "@s8 refuses a not_connected row still dragging lastActivityAt from the previous connection",
+      "@s8 refuses a not_connected row still dragging lastError from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 CE nodo 1..7 (version) -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging apiBase from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectPath from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectId from the previous connection",
+      "@s8 refuses a not_connected row still dragging tokenHint from the previous connection",
+      "@s8 refuses a not_connected row still dragging lastActivityAt from the previous connection",
+      "@s8 refuses a not_connected row still dragging lastError from the previous connection",
+      "@s8 refuses a not_connected row still dragging version from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 CE operando projectPath -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging projectPath from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 CE operando projectId -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging projectId from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 CE operando tokenHint -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging tokenHint from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 CE operando lastActivityAt -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging lastActivityAt from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 CE operando lastError -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging lastError from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 CE operando version -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging version from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 LogicalOperator nodo 2 (projectPath) -> &&",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging apiBase from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectPath from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 LogicalOperator nodo 3 (projectId) -> &&",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging apiBase from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectPath from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectId from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 LogicalOperator nodo 4 (tokenHint) -> &&",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging apiBase from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectPath from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectId from the previous connection",
+      "@s8 refuses a not_connected row still dragging tokenHint from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 LogicalOperator nodo 5 (lastActivityAt) -> &&",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging apiBase from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectPath from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectId from the previous connection",
+      "@s8 refuses a not_connected row still dragging tokenHint from the previous connection",
+      "@s8 refuses a not_connected row still dragging lastActivityAt from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 LogicalOperator nodo 6 (lastError) -> &&",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging apiBase from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectPath from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectId from the previous connection",
+      "@s8 refuses a not_connected row still dragging tokenHint from the previous connection",
+      "@s8 refuses a not_connected row still dragging lastActivityAt from the previous connection",
+      "@s8 refuses a not_connected row still dragging lastError from the previous connection"
+    ]
+  },
+  {
+    "racimo": 2,
+    "name": "client 130 LogicalOperator nodo 7 (version) -> &&",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 refuses a not_connected row still dragging apiBase from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectPath from the previous connection",
+      "@s8 refuses a not_connected row still dragging projectId from the previous connection",
+      "@s8 refuses a not_connected row still dragging tokenHint from the previous connection",
+      "@s8 refuses a not_connected row still dragging lastActivityAt from the previous connection",
+      "@s8 refuses a not_connected row still dragging lastError from the previous connection",
+      "@s8 refuses a not_connected row still dragging version from the previous connection"
+    ]
+  }
+]

@@ -136,3 +136,56 @@ Los tres son consecuencia de que el decodificador cierre el DTO: el `?? ""` es d
 **Previsión del racimo: 17 mutantes muertos** (14 sin cobertura + 3 que ya estaban vivos y
 caen de paso: los dos de «Cancelar» cuentan como sin cobertura, y `FEED_UNREACHABLE` estaba
 marcado `Timeout`). 3 declarados equivalentes.
+
+---
+
+## Racimo 2 — la tabla de rechazo de `decodeConnection` (31 mutantes)
+
+Causa común: **ninguna prueba falsificaba las guardas del decodificador**. La fixture
+`notConnected` traía los siete campos nulos a la vez, así que con todos los operandos en falso
+cambiar cualquier `||` por `&&` daba el mismo resultado; y la fixture `connected` era siempre
+válida, así que `nonEmpty`, `counter` e `identifier` sólo se ejercían por su rama verdadera.
+
+### 2.1 La cadena `absent` (19 mutantes, líneas 130-136)
+
+Siete `||` encadenados: siete nodos con su `ConditionalExpression`, seis operandos y seis
+`LogicalOperator`. Una paramétrica de siete filas —`not_connected` con exactamente un campo no
+nulo— los mata todos:
+
+`@s8 refuses a not_connected row still dragging <campo> from the previous connection`.
+
+Es la guarda que sostiene @s32 y @s37: una fila sin conexión que arrastre el `projectPath` o el
+`tokenHint` de la conexión anterior se aceptaba hoy sin que nada se pusiera rojo. La pantalla no
+lo pintaría —el panel exige `status !== "not_connected"`— pero el decodificador es la única
+guarda que hay, y era un adorno.
+
+Los 19 se generan en el verificador (`absentChainMutants()`) en vez de escribirse a mano: con
+siete cláusulas, escribir 19 anclas a mano es invitar a olvidar una.
+
+### 2.2 Las guardas de la rama con conexión (12 mutantes)
+
+| Guarda | Oráculo nuevo | Mata |
+|---|---|---|
+| `nonEmpty` (106) | ruta vacía y pista vacía se rechazan | 2 |
+| `counter`/`isCount` (88, 94) | `projectId` y `version` no enteros se rechazan | 3 |
+| `identifier` (99, 100) | id del recibo en mayúsculas, e id con forma de UUID que no lo es | 2 |
+| `lastActivityAt` (142) | conexión sin usar todavía se acepta; «ayer» se rechaza | 3 |
+| `decodeFailure` (110) y lista blanca de estados (124) | ya los mata la fixture `broken` del racimo 1 | 2 |
+
+La pista vacía tiene consecuencia visible: el panel enseñaría «••••» y nada más, una pista que
+no distingue ninguna cuenta de ninguna otra.
+
+### Equivalentes declarados en este racimo
+
+| Mutante | Por qué no puede matarse |
+|---|---|
+| `88:10-35 CE typeof value === "number" → true` | `Number.isInteger(x)` sólo devuelve `true` para números, así que `true && Number.isInteger(v)` es exactamente `typeof v === "number" && Number.isInteger(v)`. |
+| `101:5 value.length === 36 → true` | La expresión regular de `uuid()` está anclada (`^…$`) y sólo casa cadenas de exactamente 36 caracteres; la comprobación de longitud es redundante. |
+
+### Acreditación del rojo (31 de 31 mueren)
+
+`node scripts/verificar-mutantes-additional-connectors.mjs 2` →
+`progress/verificacion_mutantes_additional_connectors2.json`, con la prueba que cae por cada
+mutante aplicado a `frontend/src/gitlab-connector-client.ts`.
+
+**Previsión acumulada: 46 mutantes muertos** (15 del racimo 1 + 2 de propina + 29 nuevos).

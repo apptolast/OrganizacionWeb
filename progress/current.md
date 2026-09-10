@@ -19,6 +19,62 @@ catorce entradas, con «Conectores» tras «Importación» porque lo fija @s33) 
 contradicción 50/52 de webhooks (se persisten 52, se sirven 50). Y una tercera,
 el anclaje del reenlace DNS en las dos features con su prueba de TLS.
 
+## Cierre: dónde está cada puerta (10 de septiembre, mañana)
+
+Las cinco features están **implementadas e integradas**. Ninguna está `done`
+todavía, y esto es exactamente lo que falta, con cifras medidas:
+
+| Feature | Juez | Mutación backend | Mutación frontend |
+|---|---|---|---|
+| 25 webhooks | **APPROVED** condicionado, 3 condiciones **cerradas** | midiéndose | pendiente |
+| 27 conector GitHub | **APPROVED** condicionado | pendiente | midiéndose (era 75,55 %, +44 oráculos) |
+| 28 calendario externo | **APPROVED** condicionado | pendiente | pendiente |
+| 29 conectores adicionales | **APPROVED** condicionado, 7 condiciones, 3 cerradas | pendiente | pendiente |
+| 30 automatizaciones | **APPROVED** condicionado, 2 condiciones **cerradas** | **96 %** ✅ | **52,74 %** ❌ |
+
+### El cuello de botella no es la máquina, son los huecos que destapa
+
+La primera medición de frontend, la de automatizaciones, dio **52,74 %** con
+**337 mutantes vivos y 77 sin cobertura**. «Sin cobertura» significa que ninguna
+prueba ejecuta esa rama: es producto que nadie ha ejercido nunca. Esta noche, de
+sitios así, han salido tres defectos de producto reales.
+
+Conclusión honesta: las features que nunca han pasado por mutación de frontend
+necesitan **trabajo de oráculos**, no sólo tiempo de máquina.
+
+### Cuatro ámbitos de mutación incompletos, encontrados en una noche
+
+Todos con el mismo efecto: la campaña daba una puntuación estupenda **sin mutar
+la clase que importaba**, y no avisaba.
+
+1. `adapter.crypto.*` — paquete borrado al unificar el cifrado. El AES-256-GCM
+   no recibía ni un mutante.
+2. `ConnectorStatusSource*` — sólo resolvía a la **interfaz**; las seis
+   implementaciones del catálogo quedaban fuera.
+3. `ImportGithubIssues*` — clase borrada al unificar la importación, de modo que
+   `ImportIssues`, que hace **todas** las importaciones del producto, llevaba sin
+   recibir un mutante en **ninguna** campaña del repositorio.
+4. `AnchoredConnection` — la clase que implementa el anclaje del reenlace DNS no
+   estaba en ningún ámbito, tres líneas por debajo del comentario que conmemora
+   el caso 1.
+
+Queda una herramienta que barre los dos árboles de fuentes y exige que todo
+patrón resuelva a una clase real: **441 patrones, cero muertos**. Va antes de
+cada campaña.
+
+### Diez roturas, una sola causa
+
+Nueve de las diez roturas de esta madrugada fueron **una constante escrita a
+mano que dependía de algo que crece**: la lista de tablas de un `TRUNCATE`, un
+número de migración, `nth(-3)` en el menú, doce pulsaciones de `Tab`, un ancho de
+ventana, el nombre de un arenero de Stryker, ocho rangos `línea:columna` de
+mutación, la línea de hilos de PIT que fijan nueve guardas, y el
+`.prettierignore` que hacía imposible tener el lint verde mientras corría una
+campaña.
+
+Todas están arregladas **de forma derivada** —contar, filtrar, comodín,
+`CASCADE`— y no con un número más grande.
+
 ---
 
 ## La sesión de tarde del 9 de septiembre (antecedente)

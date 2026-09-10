@@ -74,3 +74,55 @@ está entre **95 y 115 mutantes** de `automations-api.ts` (los ~155 vivos menos 
 de mensajes, cabeceras y abortos, que van en los racimos 2 y 3).
 
 `git diff` sobre producción: vacío.
+
+---
+
+## Racimo 2 — el cliente HTTP tampoco comprobó su conversación (`automations-api.ts`)
+
+**Causa común.** Las pruebas del cliente miraban el **valor devuelto** pero nunca
+**la petición** ni **el cuerpo de error**. De ahí tres familias enteras vivas:
+
+1. **La petición**: nadie afirmaba la URL, el método, el `Accept`, el
+   `Content-Type`, el cuerpo JSON, el `If-Match` ni el `signal`. Cambiar el objeto
+   de opciones entero por `{}` no rompía nada: el cliente podía dejar de propagar
+   la señal de aborto y las pruebas seguían verdes.
+2. **El cuerpo de error**: `failure()` recorre `body.errors` con siete guardas
+   (`body`, `typeof body === "object"`, `"errors" in body`, `Array.isArray`,
+   `error`, `typeof error === "object"`, `"field" in error`, tipos de `field` y
+   `code`, y `length > 0`). Sólo se alimentaba **un** cuerpo bien formado, así que
+   ninguna guarda era jamás la única que decidía.
+3. **Los abortos**: los seis `signal.throwIfAborted()` podían borrarse sin que
+   nadie se quejara, salvo el primero. Es exactamente lo que @s43 exige («la
+   respuesta tardía no modifica la interfaz visible»).
+
+**Oráculos que faltaban.** Once pruebas nuevas y una completada:
+
+- `@s38 gives each failure of its own a name and a message for the editor`.
+- `@s38 names the field for every code the contract publishes` — completada: le
+  faltaban `UNKNOWN_PLACEHOLDER`, `UNKNOWN_EVENT_TYPE`, `TOO_LONG`, `REQUIRED` y
+  `OUT_OF_RANGE`, y además no exigía que la promesa rechazara (si el cliente
+  hubiera resuelto, el `catch` no se ejecutaba y la prueba pasaba en vacío).
+- `@s38 surfaces the response itself when the error body is not the published list`
+  — 12 cuerpos deformes, incluido uno con un elemento de texto que hace estallar
+  al operador `in` si se relaja la guarda de tipo.
+- `@s36 only reads field errors out of a 400 or a 422` — un 409, un 500 y un 503
+  con lista de errores siguen siendo la respuesta cruda.
+- `@s38 keeps the first message when the server repeats a field`.
+- `@s37 asks for JSON and carries the caller's signal on every read`.
+- `@s41 asks for the page of runs with its cursor escaped, its Accept and its signal`.
+- `@s40 sends the draft as JSON and only carries If-Match when there is a version`
+  — el POST de creación **no** puede llevar `If-Match`, y el de simulación tampoco.
+- `@s40 returns the created rule only on a 201 that carries the closed shape`.
+- `@s14 names the rule in the delete URL and surfaces a refusal`.
+- `@s43 throws instead of handing back a body when the signal was cut mid-flight`
+  — seis operaciones, con un `fetch` que corta la señal antes de responder.
+- `@s43 never touches the network when the signal was already cut` — cinco
+  operaciones; antes sólo se comprobaba la lectura.
+
+**Previsión (no medida): los 74 mutantes verificados a mano MUEREN los 74**
+(`TOTAL: 74 mueren de 74` entre las dos pasadas). Con los hermanos que Stryker
+cuenta por separado en las mismas cadenas, la previsión razonada para
+`automations-api.ts` es de **135 a 150 de los 155** vivos, es decir pasar de
+58,22 % a ~95 %.
+
+`git diff` sobre producción: vacío.

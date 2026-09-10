@@ -116,13 +116,18 @@ describe("automations api", () => {
 
   it("@s38 names the field for every code the contract publishes", async () => {
     const codes = [
+      ["UNKNOWN_PLACEHOLDER", "Revisa los marcadores de esta plantilla."],
       ["UNCLOSED_PLACEHOLDER", "Falta cerrar un marcador con dos llaves."],
       [
         "PLACEHOLDER_NOT_AVAILABLE",
         "Ese marcador no existe para este disparador.",
       ],
+      ["UNKNOWN_EVENT_TYPE", "Elige uno de los tipos de evento publicados."],
       ["TARGET_NOT_FOUND", "Elige un proyecto propio existente."],
       ["ENDPOINT_NOT_FOUND", "Elige un endpoint propio y activo."],
+      ["TOO_LONG", "El valor es demasiado largo."],
+      ["REQUIRED", "Este campo es obligatorio."],
+      ["OUT_OF_RANGE", "El valor está fuera del rango permitido."],
       ["INVALID_VALUE", "Revisa el valor de este campo."],
     ] as const;
     for (const [code, message] of codes) {
@@ -132,10 +137,14 @@ describe("automations api", () => {
           errors: [{ field: "name", code, message: "x" }],
         }),
       );
-      await createAutomation(draft, new AbortController().signal).catch(
-        (error: AutomationFieldErrors) =>
-          expect(error.fields).toEqual({ name: message }),
-      );
+      const error = await createAutomation(
+        draft,
+        new AbortController().signal,
+      ).catch((reason: unknown) => reason);
+      expect(error, code).toBeInstanceOf(AutomationFieldErrors);
+      expect((error as AutomationFieldErrors).fields, code).toEqual({
+        name: message,
+      });
     }
   });
 
@@ -540,6 +549,227 @@ describe("automations api", () => {
     ];
     for (const [what, body] of broken)
       await expect(paged(body), what).rejects.toThrow(INCOMPATIBLE);
+  });
+
+  it("@s38 gives each failure of its own a name and a message for the editor", async () => {
+    stub(answer(412, { code: "AUTOMATION_CONFLICT" }));
+    const clash = await replaceAutomation(
+      RULE,
+      2,
+      draft,
+      new AbortController().signal,
+    ).catch((reason: unknown) => reason);
+    expect(clash).toBeInstanceOf(AutomationConflict);
+    expect((clash as Error).name).toBe("AutomationConflict");
+    expect((clash as Error).message).toBe("Otra pestaña cambió esta regla.");
+
+    stub(answer(400, { errors: [{ field: "name", code: "REQUIRED" }] }));
+    const invalid = await createAutomation(
+      draft,
+      new AbortController().signal,
+    ).catch((reason: unknown) => reason);
+    expect(invalid).toBeInstanceOf(AutomationFieldErrors);
+    expect((invalid as Error).name).toBe("AutomationFieldErrors");
+    expect((invalid as Error).message).toBe("Revisa los campos indicados.");
+  });
+
+  const refused = async (status: number, body: unknown) => {
+    stub(answer(status, body));
+    return createAutomation(draft, new AbortController().signal);
+  };
+
+  it("@s38 surfaces the response itself when the error body is not the published list", async () => {
+    const bodies: [string, number, unknown][] = [
+      ["sin lista de errores", 400, { code: "VALIDATION_ERROR" }],
+      ["errors que no es una lista", 400, { errors: { field: "name" } }],
+      ["lista de errores vacía", 400, { errors: [] }],
+      ["error nulo dentro de la lista", 422, { errors: [null] }],
+      ["error que es texto y no objeto", 400, { errors: ["name"] }],
+      ["error sin campo ni código", 422, { errors: [{}] }],
+      ["campo que no es texto", 400, { errors: [{ field: 5, code: "X" }] }],
+      ["error sin código", 400, { errors: [{ field: "name" }] }],
+      ["código que no es texto", 400, { errors: [{ field: "name", code: 5 }] }],
+      ["cuerpo que no es un objeto", 400, "texto"],
+      ["cuerpo nulo", 422, null],
+      ["cuerpo vacío", 400, undefined],
+    ];
+    for (const [what, status, body] of bodies)
+      await expect(refused(status, body), what).rejects.toBeInstanceOf(Response);
+  });
+
+  it("@s36 only reads field errors out of a 400 or a 422", async () => {
+    const errors = [{ field: "name", code: "REQUIRED", message: "x" }];
+    for (const status of [409, 500, 503])
+      await expect(
+        refused(status, { errors }),
+        `${status}`,
+      ).rejects.toBeInstanceOf(Response);
+  });
+
+  it("@s38 keeps the first message when the server repeats a field", async () => {
+    const error = await refused(422, {
+      errors: [
+        { field: "name", code: "REQUIRED" },
+        { field: "name", code: "TOO_LONG" },
+      ],
+    }).catch((reason: unknown) => reason);
+    expect((error as AutomationFieldErrors).fields).toEqual({
+      name: "Este campo es obligatorio.",
+    });
+  });
+
+  it("@s37 asks for JSON and carries the caller's signal on every read", async () => {
+    const controller = new AbortController();
+    const fetcher = stub(answer(200, { items: [] }));
+    await readAutomations(controller.signal);
+    const [url, options] = fetcher.mock.calls[0];
+    expect(url).toBe("/api/v1/me/automations");
+    expect(options.method ?? "GET").toBe("GET");
+    expect(new Headers(options.headers).get("Accept")).toBe("application/json");
+    expect(options.signal).toBe(controller.signal);
+  });
+
+  it("@s41 asks for the page of runs with its cursor escaped, its Accept and its signal", async () => {
+    const controller = new AbortController();
+    const fetcher = stub(answer(200, { items: [], nextCursor: null }));
+    await readAutomationRuns(RULE, "dos palabras//", controller.signal);
+    const [url, options] = fetcher.mock.calls[0];
+    expect(url).toBe(
+      `/api/v1/me/automations/${RULE}/runs?cursor=dos%20palabras%2F%2F`,
+    );
+    expect(new Headers(options.headers).get("Accept")).toBe("application/json");
+    expect(options.signal).toBe(controller.signal);
+  });
+
+  it("@s40 sends the draft as JSON and only carries If-Match when there is a version", async () => {
+    const controller = new AbortController();
+    const created = stub(answer(201, rule));
+    await createAutomation(draft, controller.signal);
+    const [url, options] = created.mock.calls[0];
+    expect(url).toBe("/api/v1/me/automations");
+    expect(options.method).toBe("POST");
+    expect(options.body).toBe(JSON.stringify(draft));
+    expect(options.signal).toBe(controller.signal);
+    expect(new Headers(options.headers).get("Accept")).toBe("application/json");
+    expect(new Headers(options.headers).get("Content-Type")).toBe(
+      "application/json",
+    );
+    expect(new Headers(options.headers).has("If-Match")).toBe(false);
+
+    const replaced = stub(answer(200, rule));
+    await replaceAutomation(RULE, 7, draft, controller.signal);
+    const [, put] = replaced.mock.calls[0];
+    expect(put.body).toBe(JSON.stringify(draft));
+    expect(new Headers(put.headers).get("If-Match")).toBe('"7"');
+
+    const simulate = stub(answer(200, { evaluatedEvents: 0, matches: [] }));
+    await simulateAutomation(draft, controller.signal);
+    const [simulateUrl, post] = simulate.mock.calls[0];
+    expect(simulateUrl).toBe("/api/v1/me/automations/simulate");
+    expect(new Headers(post.headers).has("If-Match")).toBe(false);
+  });
+
+  it("@s40 returns the created rule only on a 201 that carries the closed shape", async () => {
+    stub(answer(201, rule));
+    await expect(
+      createAutomation(draft, new AbortController().signal),
+    ).resolves.toEqual(rule);
+
+    stub(answer(200, rule));
+    await expect(
+      createAutomation(draft, new AbortController().signal),
+    ).rejects.toBeInstanceOf(Response);
+
+    stub(answer(201, { ...rule, extra: 1 }));
+    await expect(
+      createAutomation(draft, new AbortController().signal),
+    ).rejects.toThrow(INCOMPATIBLE);
+
+    stub(answer(200, { ...rule, extra: 1 }));
+    await expect(
+      replaceAutomation(RULE, 2, draft, new AbortController().signal),
+    ).rejects.toThrow(INCOMPATIBLE);
+  });
+
+  it("@s14 names the rule in the delete URL and surfaces a refusal", async () => {
+    const fetcher = stub(new Response(null, { status: 204 }));
+    await deleteAutomation(RULE, 2, new AbortController().signal);
+    expect(fetcher.mock.calls[0][0]).toBe(`/api/v1/me/automations/${RULE}`);
+
+    stub(answer(412, { code: "AUTOMATION_CONFLICT" }));
+    await expect(
+      deleteAutomation(RULE, 2, new AbortController().signal),
+    ).rejects.toBeInstanceOf(AutomationConflict);
+
+    stub(answer(503, { code: "STORAGE_UNAVAILABLE" }));
+    await expect(
+      deleteAutomation(RULE, 2, new AbortController().signal),
+    ).rejects.toBeInstanceOf(Response);
+  });
+
+  const cutDuring = (controller: AbortController, response: Response) => {
+    const fetcher = vi.fn(async () => {
+      controller.abort();
+      return Promise.resolve(response);
+    });
+    vi.stubGlobal("fetch", fetcher);
+    return fetcher;
+  };
+
+  it("@s43 throws instead of handing back a body when the signal was cut mid-flight", async () => {
+    const cases: [
+      string,
+      Response,
+      (signal: AbortSignal) => Promise<unknown>,
+    ][] = [
+      ["leer", answer(200, { items: [rule] }), (s) => readAutomations(s)],
+      ["crear", answer(201, rule), (s) => createAutomation(draft, s)],
+      [
+        "reemplazar",
+        answer(200, rule),
+        (s) => replaceAutomation(RULE, 2, draft, s),
+      ],
+      [
+        "simular",
+        answer(200, { evaluatedEvents: 0, matches: [] }),
+        (s) => simulateAutomation(draft, s),
+      ],
+      [
+        "historial",
+        answer(200, { items: [], nextCursor: null }),
+        (s) => readAutomationRuns(RULE, null, s),
+      ],
+      [
+        "borrar",
+        new Response(null, { status: 204 }),
+        (s) => deleteAutomation(RULE, 2, s),
+      ],
+    ];
+    for (const [what, response, call] of cases) {
+      const controller = new AbortController();
+      cutDuring(controller, response);
+      await expect(call(controller.signal), what).rejects.toThrow();
+    }
+  });
+
+  it("@s43 never touches the network when the signal was already cut", async () => {
+    const cut = () => {
+      const controller = new AbortController();
+      controller.abort();
+      return controller.signal;
+    };
+    const calls: [string, (signal: AbortSignal) => Promise<unknown>][] = [
+      ["crear", (s) => createAutomation(draft, s)],
+      ["reemplazar", (s) => replaceAutomation(RULE, 2, draft, s)],
+      ["simular", (s) => simulateAutomation(draft, s)],
+      ["historial", (s) => readAutomationRuns(RULE, null, s)],
+      ["borrar", (s) => deleteAutomation(RULE, 2, s)],
+    ];
+    for (const [what, call] of calls) {
+      const fetcher = stub(answer(200, { items: [] }));
+      await expect(call(cut()), what).rejects.toThrow();
+      expect(fetcher, what).not.toHaveBeenCalled();
+    }
   });
 });
 

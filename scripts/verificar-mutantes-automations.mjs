@@ -313,6 +313,271 @@ const MUTANTS = [
     `    !(body.nextCursor === null || typeof body.nextCursor === "string")`,
     `    false`,
   ],
+  [
+    CLIENT,
+    "94 mensaje de AutomationFieldErrors -> ''",
+    `    super("Revisa los campos indicados.");`,
+    `    super("");`,
+  ],
+  [
+    CLIENT,
+    "95 nombre de AutomationFieldErrors -> ''",
+    `    this.name = "AutomationFieldErrors";`,
+    `    this.name = "";`,
+  ],
+  [
+    CLIENT,
+    "102 mensaje de AutomationConflict -> ''",
+    `    super("Otra pestaña cambió esta regla.");`,
+    `    super("");`,
+  ],
+  [
+    CLIENT,
+    "103 nombre de AutomationConflict -> ''",
+    `    this.name = "AutomationConflict";`,
+    `    this.name = "";`,
+  ],
+  [
+    CLIENT,
+    "111 mensaje UNKNOWN_EVENT_TYPE -> ''",
+    `  UNKNOWN_EVENT_TYPE: "Elige uno de los tipos de evento publicados.",`,
+    `  UNKNOWN_EVENT_TYPE: "",`,
+  ],
+  [
+    CLIENT,
+    "114 mensaje TOO_LONG -> ''",
+    `  TOO_LONG: "El valor es demasiado largo.",`,
+    `  TOO_LONG: "",`,
+  ],
+  [
+    CLIENT,
+    "116 mensaje OUT_OF_RANGE -> ''",
+    `  OUT_OF_RANGE: "El valor está fuera del rango permitido.",`,
+    `  OUT_OF_RANGE: "",`,
+  ],
+  [
+    CLIENT,
+    "235 puerta de estado 400/422 -> true",
+    `  if (response.status === 400 || response.status === 422) {`,
+    `  if (true) {`,
+  ],
+  [
+    CLIENT,
+    "238 body -> true",
+    `      body &&
+      typeof body === "object" &&`,
+    `      true &&
+      typeof body === "object" &&`,
+  ],
+  [
+    CLIENT,
+    "239 typeof body object -> true",
+    `      typeof body === "object" &&
+      "errors" in body &&`,
+    `      true &&
+      "errors" in body &&`,
+  ],
+  [
+    CLIENT,
+    "246 error -> true",
+    `          error &&
+          typeof error === "object" &&`,
+    `          true &&
+          typeof error === "object" &&`,
+  ],
+  [
+    CLIENT,
+    "247 typeof error object -> true",
+    `          typeof error === "object" &&
+          "field" in error &&`,
+    `          true &&
+          "field" in error &&`,
+  ],
+  [
+    CLIENT,
+    "249 typeof error.field string -> true",
+    `          typeof error.field === "string" &&`,
+    `          true &&`,
+  ],
+  [
+    CLIENT,
+    "251 typeof error.code string -> true",
+    `          typeof error.code === "string"`,
+    `          true`,
+  ],
+  [
+    CLIENT,
+    "255 length > 0 -> >= 0",
+    `      if (Object.keys(fields).length > 0)`,
+    `      if (Object.keys(fields).length >= 0)`,
+  ],
+  [
+    CLIENT,
+    "263 json throwIfAborted -> ;",
+    `async function json(response: Response, signal: AbortSignal) {
+  signal.throwIfAborted();
+`,
+    `async function json(response: Response, signal: AbortSignal) {
+`,
+  ],
+  [
+    CLIENT,
+    "271 opciones del read -> {}",
+    `    await apiRequest("/api/v1/me/automations", {
+      signal,
+      headers: { Accept: "application/json" },
+    }),`,
+    `    await apiRequest("/api/v1/me/automations", {}),`,
+  ],
+  [
+    CLIENT,
+    "273 Accept del read -> ''",
+    `    await apiRequest("/api/v1/me/automations", {
+      signal,
+      headers: { Accept: "application/json" },
+    }),`,
+    `    await apiRequest("/api/v1/me/automations", {
+      signal,
+      headers: { Accept: "" },
+    }),`,
+  ],
+  [
+    CLIENT,
+    "293 write throwIfAborted -> ;",
+    `  version?: number,
+) {
+  signal.throwIfAborted();
+`,
+    `  version?: number,
+) {
+`,
+  ],
+  [
+    CLIENT,
+    "294 cabeceras de escritura -> {}",
+    `  const headers: Record<string, string> = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  };`,
+    `  const headers: Record<string, string> = {};`,
+  ],
+  [
+    CLIENT,
+    "295 Accept de escritura -> ''",
+    `    Accept: "application/json",
+    "Content-Type": "application/json",`,
+    `    Accept: "",
+    "Content-Type": "application/json",`,
+  ],
+  [
+    CLIENT,
+    "296 Content-Type de escritura -> ''",
+    `    "Content-Type": "application/json",`,
+    `    "Content-Type": "",`,
+  ],
+  [
+    CLIENT,
+    "298 If-Match siempre",
+    `  if (version !== undefined) headers["If-Match"] = \`"\${version}"\`;`,
+    `  if (true) headers["If-Match"] = \`"\${version}"\`;`,
+  ],
+  [
+    CLIENT,
+    "312 create throwIfAborted -> ;",
+    `  const response = await write("/api/v1/me/automations", "POST", draft, signal);
+  signal.throwIfAborted();
+`,
+    `  const response = await write("/api/v1/me/automations", "POST", draft, signal);
+`,
+  ],
+  [
+    CLIENT,
+    "313 puerta del 201 -> true",
+    `  if (response.status !== 201) await failure(response);`,
+    `  if (true) await failure(response);`,
+  ],
+  [
+    CLIENT,
+    "315 create shape -> false",
+    `  const body: unknown = await response.json();
+  if (!automation(body)) throw incompatible();`,
+    `  const body: unknown = await response.json();
+  if (false) throw incompatible();`,
+  ],
+  [
+    CLIENT,
+    "329 replace shape -> false",
+    `  if (!automation(body)) throw incompatible();
+  return body;
+}
+
+export async function deleteAutomation(`,
+    `  if (false) throw incompatible();
+  return body;
+}
+
+export async function deleteAutomation(`,
+  ],
+  [
+    CLIENT,
+    "338 delete throwIfAborted -> ;",
+    `) {
+  signal.throwIfAborted();
+  const response = await apiRequest(`,
+    `) {
+  const response = await apiRequest(`,
+  ],
+  [
+    CLIENT,
+    "339 URL del delete -> ''",
+    `  const response = await apiRequest(\`/api/v1/me/automations/\${id}\`, {`,
+    `  const response = await apiRequest(\`\`, {`,
+  ],
+  [
+    CLIENT,
+    "344 delete throwIfAborted tras la respuesta -> ;",
+    `  });
+  signal.throwIfAborted();
+  if (response.status !== 204)`,
+    `  });
+  if (response.status !== 204)`,
+  ],
+  [
+    CLIENT,
+    "345 puerta del 204 -> false",
+    `  if (response.status !== 204) await failure(response);`,
+    `  if (false) await failure(response);`,
+  ],
+  [
+    CLIENT,
+    "371 runs throwIfAborted -> ;",
+    `) {
+  signal.throwIfAborted();
+  const query = `,
+    `) {
+  const query = `,
+  ],
+  [
+    CLIENT,
+    "374 opciones del historial -> {}",
+    `    await apiRequest(\`/api/v1/me/automations/\${id}/runs\${query}\`, {
+      signal,
+      headers: { Accept: "application/json" },
+    }),`,
+    `    await apiRequest(\`/api/v1/me/automations/\${id}/runs\${query}\`, {}),`,
+  ],
+  [
+    CLIENT,
+    "376 Accept del historial -> ''",
+    `    await apiRequest(\`/api/v1/me/automations/\${id}/runs\${query}\`, {
+      signal,
+      headers: { Accept: "application/json" },
+    }),`,
+    `    await apiRequest(\`/api/v1/me/automations/\${id}/runs\${query}\`, {
+      signal,
+      headers: { Accept: "" },
+    }),`,
+  ],
 ];
 
 function failedTests(output) {

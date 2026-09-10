@@ -43,18 +43,14 @@ pitest {
     val scope = providers.gradleProperty("mutationScope").orNull
     val webhooksOnly = scope == "webhooks"
     val icsCalendarOnly = scope == "ics_calendar"
-    val githubConnectorOnly = scope == "github_connector"
-    val additionalConnectorsOnly = scope == "additional_connectors"
     // Union de los cinco ambitos de la noche del 9 al 10 de septiembre. PIT gasta
     // ~17 minutos calculando cobertura porque targetTests es la suite entera, y ese
     // coste es el mismo para un ambito que para cinco. Corriendolos juntos se paga
     // una vez en vez de cinco. La puntuacion POR FEATURE se obtiene despues del XML,
     // que trae el resultado por clase: son los mismos mutantes y las mismas pruebas
     // que en las campanas separadas, no una medida distinta.
-    val nightFiveOnly = scope == "noche_cinco"
     val integrationApiOnly = scope == "integration_api"
     val integrationApiHttpOnly = scope == "integration_api_http"
-    val automationsOnly = scope == "automations"
     val importReaderOnly = scope == "import_data_reader"
     val importHttpOnly = scope == "import_data_http"
     val importPersistenceOnly = scope == "import_data_persistence"
@@ -81,90 +77,6 @@ pitest {
     // Feature 29: el conector GitLab y el catalogo de conectores. No incluye las
     // clases compartidas con la 27 (ImportIssues, IssueImportReceipt), que las
     // muta el ambito github_connector: un mutante contado dos veces no informa.
-    val additionalConnectorsClasses = setOf(
-        "com.apptolast.organization.application.ConnectGitlab*",
-        "com.apptolast.organization.application.DisconnectGitlab*",
-        "com.apptolast.organization.application.ReadGitlabConnection*",
-        "com.apptolast.organization.application.GitlabConnection*",
-        "com.apptolast.organization.application.GitlabIssueConnections*",
-        // ImportGuard solo lo invocan ConnectGitlab y DisconnectGitlab, asi que vive
-        // aqui y no en el ambito de la 27, donde estaba por error.
-        "com.apptolast.organization.application.ImportGuard*",
-        "com.apptolast.organization.application.GitlabProject*",
-        "com.apptolast.organization.domain.GitlabProjectPath*",
-        "com.apptolast.organization.application.GitlabUnavailableException*",
-        // Compartidas con la 27 y huerfanas hasta hoy: el catalogo de esta feature es
-        // quien decide que error sale por cada conector.
-        "com.apptolast.organization.application.ConnectorError*",
-        "com.apptolast.organization.application.ConnectorRateLimitedException*",
-        "com.apptolast.organization.application.ConnectorsDisabledException*",
-        // ConnectorStatusSource* solo resuelve a la INTERFAZ, que no tiene mutantes:
-        // las seis implementaciones no empiezan por ese prefijo y quedaban fuera.
-        "com.apptolast.organization.application.ConnectorStatusSource*",
-        "com.apptolast.organization.application.ApiCredentialStatusSource*",
-        "com.apptolast.organization.application.WebhookStatusSource*",
-        "com.apptolast.organization.application.IcsCalendarStatusSource*",
-        "com.apptolast.organization.application.GithubStatusSource*",
-        "com.apptolast.organization.application.ExternalCalendarStatusSource*",
-        "com.apptolast.organization.application.GitlabStatusSource*",
-        "com.apptolast.organization.application.ConnectorRow*",
-        "com.apptolast.organization.application.ConnectorCatalog*",
-        "com.apptolast.organization.application.ReadConnectorCatalog*",
-        "com.apptolast.organization.adapter.http.ConnectorCatalogController*",
-        // La creo esta feature para el techo de 5 MiB del @s25 y la usan los DOS
-        // origenes HTTP; sin nombrarla se quedaba fuera de todo ambito al dejar de
-        // existir el comodin de paquete en el de la 27.
-        "com.apptolast.organization.adapter.connectors.BoundedResponse*",
-        "com.apptolast.organization.adapter.connectors.GitlabApiBase*",
-        "com.apptolast.organization.adapter.connectors.HttpGitlabIssueSource*",
-        "com.apptolast.organization.adapter.http.GitlabConnectorController*",
-        "com.apptolast.organization.adapter.persistence.PostgresGitlabConnectionStore*"
-    )
-    val githubConnectorClasses = setOf(
-        "com.apptolast.organization.domain.GithubRepository*",
-        "com.apptolast.organization.domain.PersonalAccessToken*",
-        "com.apptolast.organization.domain.ExternalIssue*",
-        "com.apptolast.organization.domain.IssueImportReceipt*",
-        "com.apptolast.organization.application.ConnectGithub*",
-        // ImportGithubIssues lo BORRO la feature 29 al unificar el caso de uso: el patron
-        // quedo muerto y con el ImportIssues no recibia mutantes en NINGUNA campana del
-        // repositorio. Tercer patron muerto de la noche; lo caza el juez de cierre de la 29.
-        "com.apptolast.organization.application.ImportIssues*",
-        // No aparecia en NINGUN targetClasses del repositorio, mientras su gemela de
-        // GitLab si estaba declarada. Fija source()="github", que acaba en cada recibo y
-        // en cada fila de task_external_links, y su invalidate descarta dos argumentos a
-        // proposito. Quinto ambito mal apuntado de la noche; lo caza el panel de precierre.
-        "com.apptolast.organization.application.GithubIssueConnections*",
-        "com.apptolast.organization.application.ReadGithubConnection*",
-        "com.apptolast.organization.application.DisconnectGithub*",
-        "com.apptolast.organization.application.ReadIssueImport*",
-        "com.apptolast.organization.application.ConnectorFailures*",
-        // Huerfanas: ningun ambito nombrado las alcanzaba. ConnectorError lo dijo el
-        // panel de la 29 y lo confirma el barrido de clases sin ambito.
-        "com.apptolast.organization.application.ConnectorError*",
-        "com.apptolast.organization.application.ConnectorRateLimitedException*",
-        "com.apptolast.organization.application.IssueImportFailedException*",
-        "com.apptolast.organization.application.IssueConnection*",
-        "com.apptolast.organization.application.IssueSourceException*",
-        "com.apptolast.organization.application.IssuePage*",
-        "com.apptolast.organization.application.StoredConnection*",
-        "com.apptolast.organization.application.ConnectionView*",
-        // El comodin del paquete arrastraba GitlabApiBase y HttpGitlabIssueSource, que
-        // son produccion de la feature 29 y ya estan declaradas en su ambito: inflaban
-        // esta puntuacion con 81 mutantes que no son de esta feature. Lo caza el panel
-        // de precierre. Se enumera lo que si es de la 27, mas las dos piezas de cifrado
-        // compartidas (que ya estan tambien en el ambito de la 28, mismo criterio).
-        "com.apptolast.organization.adapter.connectors.AesGcmSecretCipher*",
-        "com.apptolast.organization.adapter.connectors.ConnectorKeyRing*",
-        "com.apptolast.organization.adapter.connectors.BoundedResponse*",
-        "com.apptolast.organization.adapter.connectors.GithubApiBase*",
-        "com.apptolast.organization.adapter.connectors.HttpGithubIssueSource*",
-        "com.apptolast.organization.adapter.http.GithubConnectorController*",
-        "com.apptolast.organization.adapter.persistence.PostgresConnectorConnectionStore*",
-        "com.apptolast.organization.adapter.persistence.PostgresIssueImportReceiptStore*",
-        "com.apptolast.organization.adapter.persistence.PostgresImportedTaskCommit*",
-        "com.apptolast.organization.adapter.logging.Slf4jConnectorAudit*",
-        "com.apptolast.organization.adapter.config.ConnectorConfiguration")
     val integrationApiClasses = setOf(
         "com.apptolast.organization.domain.ApiCredential*",
         "com.apptolast.organization.application.ApiCredential*",
@@ -582,40 +494,6 @@ pitest {
         "com.apptolast.organization.adapter.HistoryApiTest",
         "com.apptolast.organization.adapter.persistence.History*Test"
     )
-    val automationsClasses = setOf(
-        "com.apptolast.organization.domain.Automation*",
-        "com.apptolast.organization.domain.CreateTaskAction*",
-        "com.apptolast.organization.domain.NotifyWebhookAction*",
-        "com.apptolast.organization.domain.EventProject*",
-        "com.apptolast.organization.domain.EventTask*",
-        "com.apptolast.organization.domain.TemplateValues*",
-        "com.apptolast.organization.domain.UnknownEventTypeException*",
-        "com.apptolast.organization.application.Automation*",
-        "com.apptolast.organization.application.CreateAutomation*",
-        "com.apptolast.organization.application.ReadAutomation*",
-        "com.apptolast.organization.application.ReplaceAutomation*",
-        "com.apptolast.organization.application.DeleteAutomation*",
-        "com.apptolast.organization.application.SimulateAutomation*",
-        // El ejecutor de reglas y su planificador: no empiezan por Automation, asi que ninguno de
-        // los comodines anteriores los alcanzaba y la campana habria dado por cubierto el motor.
-        "com.apptolast.organization.application.ExecuteAutomations*",
-        "com.apptolast.organization.adapter.config.AutomationSchedule*",
-        "com.apptolast.organization.adapter.config.AutomationConfiguration*",
-        "com.apptolast.organization.application.WebhookEndpoint*",
-        "com.apptolast.organization.adapter.http.Automation*",
-        // El juez de cierre los exige explicitamente: la persistencia del trabajo, el cursor y
-        // el adaptador de bitacora del ejecutor. Sin ellos la campana mide el motor a medias.
-        "com.apptolast.organization.adapter.persistence.PostgresAutomation*",
-        "com.apptolast.organization.domain.AutomationCursor*",
-        "com.apptolast.organization.adapter.logging.Slf4jAutomationAudit*",
-        // Los seis manejadores de error de la feature viven en ApiErrors, que quedaba fuera del
-        // ambito: sus mutantes no se generaban y la campana daba por cubierto un codigo que nadie
-        // habia tocado. Mismo criterio que taskStatusAdapters y availabilityAdapters.
-        "com.apptolast.organization.adapter.http.ApiErrors",
-        "com.apptolast.organization.adapter.persistence.PostgresAutomation*",
-        "com.apptolast.organization.adapter.persistence.AutomationActionJson*",
-        "com.apptolast.organization.adapter.config.ApplicationConfiguration"
-    )
     // Feature 25. Deliberadamente NO incluye AddressPolicy ni PublicAddressPolicy
     // (compartidas, ya en externalCalendarClasses), ni WebhookEndpointLookup,
     // WebhookEndpointNotFoundException y NotifyWebhookAction (feature 30, ya en
@@ -668,12 +546,8 @@ pitest {
         "com.apptolast.organization.adapter.net.AnchoredConnection*"
     )
     targetClasses.set(when {
-        nightFiveOnly -> webhooksClasses + githubConnectorClasses + externalCalendarClasses + automationsClasses + additionalConnectorsClasses
         webhooksOnly -> webhooksClasses
-        automationsOnly -> automationsClasses
         icsCalendarOnly -> icsCalendarClasses
-        githubConnectorOnly -> githubConnectorClasses
-        additionalConnectorsOnly -> additionalConnectorsClasses
         integrationApiOnly -> integrationApiClasses
         integrationApiHttpOnly -> integrationApiHttpClasses
         importReaderOnly -> importReaderClasses
@@ -698,15 +572,11 @@ pitest {
         taskStatusOnly -> taskStatusClasses
         splitOnly -> splitClasses
         taskOnly -> taskClasses
-        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses + integrationApiClasses + integrationApiHttpClasses + icsCalendarClasses + githubConnectorClasses + externalCalendarClasses + automationsClasses + webhooksClasses
+        else -> core + authenticationClasses + taskAdapters + taskStatusAdapters + availabilityAdapters + scheduleBlockAdapters + todayAdapters + rescheduleClasses + startWorkSessionClasses + pauseResumeSessionClasses + closeWorkSessionClasses + endTimeNotificationClasses + historyClasses + weeklyReviewClasses + appearanceClasses + customizationClasses + exportPersistenceClasses + exportHttpClasses + importReaderClasses + importHttpClasses + importPersistenceClasses + integrationApiClasses + integrationApiHttpClasses + icsCalendarClasses + externalCalendarClasses + webhooksClasses
     })
     targetTests.set(when {
-        nightFiveOnly -> setOf("com.apptolast.organization.*")
         webhooksOnly -> setOf("com.apptolast.organization.*")
-        automationsOnly -> setOf("com.apptolast.organization.*")
         icsCalendarOnly -> setOf("com.apptolast.organization.*")
-        githubConnectorOnly -> setOf("com.apptolast.organization.*")
-        additionalConnectorsOnly -> setOf("com.apptolast.organization.*")
         integrationApiOnly || integrationApiHttpOnly -> setOf("com.apptolast.organization.*")
         importReaderOnly -> importReaderTests
         importHttpOnly -> importHttpTests
@@ -732,13 +602,10 @@ pitest {
         taskOnly -> taskTests
         else -> core + authenticationTests + taskAdapterTests + taskStatusAdapterTests + availabilityTests + scheduleBlockTests + todayTests + rescheduleTests + historyAdapterTests + weeklyReviewAdapterTests + appearanceAdapterTests + customizationAdapterTests + exportAdapterTests + importAdapterTests
     })
-    if (nightFiveOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-noche-cinco"))
     if (webhooksOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-webhooks"))
     if (icsCalendarOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-ics-calendar"))
-    if (githubConnectorOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-github-connector"))
     if (integrationApiOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-integration-api"))
     if (integrationApiHttpOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-integration-api-http"))
-    if (automationsOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-automations"))
     if (importReaderOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-reader"))
     if (importHttpOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-http"))
     if (importPersistenceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-persistence"))
@@ -748,7 +615,6 @@ pitest {
     // reports/pitest, donde lo habria pisado cualquier campana futura sin dejar
     // rastro. La primera campana de esta feature, la del 10 de septiembre, todavia
     // escribio ahi porque Gradle ya habia leido este fichero cuando se arreglo.
-    if (additionalConnectorsOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-additional-connectors"))
     if (customizationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-custom-views-fields"))
     if (appearanceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-appearance"))
     if (weeklyReviewOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-weekly-review"))

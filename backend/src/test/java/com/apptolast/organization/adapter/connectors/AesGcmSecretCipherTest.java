@@ -90,6 +90,26 @@ class AesGcmSecretCipherTest {
     assertTrue(cipher.decrypt(OWNER, truncated).isEmpty());
   }
 
+  /**
+   * La frontera de {@code SHORTEST} exige un caso donde {@code <=} y {@code <} se distingan, y con
+   * un array de ceros de 28 octetos no se distinguen: uno lo rechaza la guarda y al otro le falla
+   * la etiqueta de GCM, y los dos devuelven vacío. El caso que sí discrimina es un texto cifrado
+   * <b>válido</b> de exactamente 28 octetos, que es lo que produce cifrar la cadena vacía: nonce de
+   * 12 más etiqueta de 16 y cero de carga. Con la guarda tal cual se rechaza; relajada a {@code <}
+   * se descifraría con éxito y devolvería la cadena vacía, que es justo lo que la V30 prohíbe al
+   * fijar la cota inferior del texto cifrado en 29 octetos.
+   */
+  @Test
+  void b5_aValidCiphertextOfExactlyTheShortestLengthIsStillRejected() {
+    var cipher = cipher(KEY, null);
+    var empty = cipher.encrypt(OWNER, "");
+
+    assertEquals(28, empty.length, "cifrar la cadena vacía debe dar justo la longitud mínima");
+    assertTrue(
+        cipher.decrypt(OWNER, empty).isEmpty(),
+        "un texto cifrado de la longitud mínima exacta se rechaza, no se descifra");
+  }
+
   @ParameterizedTest
   @ValueSource(strings = {"", "no-es-base64!!", "AAAAAAAAAAAAAAAAAAAAAA==", "clave-de-32-mas-uno"})
   void s4_aMalformedKeyStopsTheStartupWithoutRevealingItsValue(String raw) {

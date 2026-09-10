@@ -247,6 +247,16 @@ Mitad de configuración, **rojo por mutación**: borrado el
 FAILED; restaurado, verde. La prueba además duerme 1,5 s con el contexto
 deshabilitado y afirma cero ciclos: «no se lee ni se escribe nada».
 
+> **Corregido el 10 de septiembre de 2026 (condición 3 del veredicto anterior,
+> H4/H5 del final).** El sueño de 1,5 s **no es** la evidencia de `@s15`, y
+> presentarlo como tal era engañoso: lo que acredita el escenario es el rojo por
+> mutación de arriba —borrar el `@ConditionalOnProperty` pone
+> `s15_withoutTheFlagThereIsNoWorkerAndNothingIsEverRead` en FAILED—, que sí
+> discrimina. Dormir 1,5 s y contar cero ciclos no distingue «el worker no
+> existe» de «el worker existe y aún no ha corrido». La cláusula temporal del
+> `@s32` —«transcurren 1500 ms desde el arranque»— sigue **sin medir** y está
+> anotada como pregunta al propietario en `progress/decisiones_pendientes.md`.
+
 ### @s16 — `84dac60`
 
 El cursor ausente ya no significa «no hacer nada»: se inicializa en el
@@ -374,6 +384,10 @@ una tarea por cada regla activa sobre el evento de la tarea automatizada.
 Nota: @s28 y @s29 no estaban en la lista de nueve del inventario, pero el
 agujero era real y lo abría el propio ejecutor nuevo.
 
+> **Corregido el 10 de septiembre de 2026.** Los dos quedaron cerrados en esta
+> misma pasada y con oráculo propio; la redacción anterior los dejaba en el aire
+> como si sólo se hubiera detectado el agujero.
+
 ### @s19 (bitácora) — `e0765da`
 
 La única cláusula de @s19 medible sin contenedor: el log lleva `ruleId`,
@@ -470,8 +484,16 @@ dos de la guarda contra bucles.
 
 ## Lo que sigue abierto, y no se silencia
 
-1. **Las filas `NOTIFY_WEBHOOK` de @s5, @s12, @s21, @s32 y @s33.** Ya son
-   alcanzables —el stub cayó en `9951147`— pero sus oráculos no están escritos.
+1. ~~**Las filas `NOTIFY_WEBHOOK` de @s5, @s12, @s21, @s32 y @s33.** Ya son
+   alcanzables —el stub cayó en `9951147`— pero sus oráculos no están escritos.~~
+
+   > **Corregido el 10 de septiembre de 2026.** Declarar abierto lo que estaba
+   > cerrado es la misma infracción de `AGENTS.md:51` que declarar cerrado lo
+   > que no se midió, y así lo dijo el veredicto. De las cinco, **cuatro ya
+   > estaban cerradas** cuando se escribió esta línea, y los motivos M1 y M5 de
+   > la ronda del 10 de septiembre cerraron más. La única que sigue sin medir es
+   > la **cláusula temporal** del `@s32` (los 1500 ms), que es pregunta al
+   > propietario, no trabajo pendiente de un carril.
 2. **La puerta de mutación**, no ejecutada por instrucción del coordinador. El
    ámbito ya está corregido (`60a3a4e` en backend, hallazgo 11 en frontend).
    Umbral 0,80, y hay que registrar la **lista de supervivientes**.

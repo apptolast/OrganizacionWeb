@@ -230,7 +230,7 @@ Feature: Entregar los eventos propios ya confirmados a URLs https elegidas con f
     Given un webhook activo con id W del propietario owner-a y un ping encolado con delivery.id D en 2026-09-08T10:00:00.000000Z
     When el worker ejecuta el intento y el receptor responde 200
     Then el cuerpo recibido es un objeto con exactamente eventId D, aggregateId W, ownerId owner-a, occurredAt 2026-09-08T10:00:00.000000Z, schemaVersion 1 y type webhook.ping.v1
-    And la entrega queda succeeded con attempt 1, httpStatus 200 y latencyMs medido con el reloj inyectado
+    And la entrega queda succeeded con attempt 1, httpStatus 200 y latencyMs medido con el cronómetro monótono inyectado
     And no se inserta ninguna fila en la outbox ni avanza el cursor del webhook
 
   @s18
@@ -317,7 +317,7 @@ Feature: Entregar los eventos propios ya confirmados a URLs https elegidas con f
     Given una entrega pendiente hacia un receptor de prueba que <comportamiento>
     When el worker ejecuta el intento
     Then la entrega queda pending con attempt 1, errorClass <clase> y httpStatus <http>
-    And latencyMs es un entero no negativo medido con el reloj inyectado
+    And latencyMs es un entero no negativo medido con el cronómetro monótono inyectado
     And el receptor de la redirección, si existe, no recibe ninguna petición
     Examples:
       | comportamiento                                           | clase           | http |

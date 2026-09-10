@@ -104,3 +104,38 @@ aquí.
 
 **Lo que hay que decidir:** ¿ocultar el enlace, apuntar a la tarea sin proyecto, o
 algo más? El carril **no inventó comportamiento**, que es lo correcto.
+
+---
+
+## 6. Feature 30 — `upsert` puede pisar una confirmación buena
+
+**Qué pasa.** `PostgresAutomationWork.upsert` (`:204-212`) hace
+`ON CONFLICT (rule_id, event_id) DO UPDATE` **sin guarda de estado**, a diferencia
+de `claim` (`:192`), que sí exige `AND status = 'retry'`.
+
+El camino es concreto: el worker A calcula su resultado; el worker B confirma
+`succeeded` sobre la misma `(regla, evento)`; la transacción de A revierte y A
+llama a `record()`, que **pisa el `succeeded` de B** con un `retry`/`failed`.
+
+El carril **no fijó ese defecto como esperado** en la prueba nueva, y eso está
+bien: congelarlo en un oráculo habría sido convertir un fallo en contrato.
+
+**Lo que hay que decidir:** ¿se le añade la guarda de estado a `upsert`, o se
+declara que el último que escribe manda? Es el punto H6 que el juez pidió
+«arreglar o justificar», y ninguna de las dos salidas la puede elegir un carril.
+
+---
+
+## 7. Feature 30 — qué muestra el editor al abrir una regla de webhook
+
+**Qué pasa.** Ni `@s37`, ni `@s38`, ni `@s40` dicen nada sobre qué debe mostrar
+el editor al abrir una regla `NOTIFY_WEBHOOK`. Hay dos mutantes vivos ahí y el
+oráculo que los mataría está escrito y listo, pero afirmarlo sería **fijar como
+esperado un comportamiento que nadie ha aprobado**.
+
+**Texto propuesto** para los `Examples` de `@s37`, si te parece bien:
+
+> `| una regla NOTIFY_WEBHOOK | pulsa «Editar» | los campos de tarea del editor aparecen vacíos y el endpoint se conserva |`
+
+Con esa fila los dos mutantes caen en una sola prueba. **No bloquea**: el fichero
+mide 84,60 % y el ámbito 91,18 %.

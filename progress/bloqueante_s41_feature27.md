@@ -1,0 +1,317 @@
+# Bloqueante @s41 y dos ámbitos de la feature 27 — 10 de septiembre de 2026
+
+Carril `github-connector`, worktree `C:/Users/vhurt/ow-worktrees/github-connector`,
+rama `claude/github-connector` reseteada a `origin/main` (`1bc1dca3`).
+
+> Nota de arranque: la rama traía seis commits de carriles anteriores
+> (`automations` @s17/@s22 y `fix(29)`) que el reset descartaba. Antes de mover el
+> puntero los dejé a salvo en la rama local `backup/pre-s41-lane` (`bcf176f6`).
+> No se ha perdido nada.
+
+Encargo: tres puntos del `progress/panel_precierre_27_30.md`. Estado final:
+
+| Punto | Estado |
+|---|---|
+| 1. `@s41` fila 1: el repositorio no sobrevive al remontaje | **cerrado** (oráculo + arreglo) |
+| 2. `GithubIssueConnections` fuera de todo `targetClasses` | **delegado** (el fichero no es mío) |
+| 3. Espacios Unicode de `@s14`/`@s15` | **ya estaba cubierto**: el rojo lo acredita |
+
+---
+
+## 1. `@s41`, primera fila — el bloqueante real
+
+### La cláusula
+
+`features/github_connector.feature:525`:
+
+> `| navego a otra pantalla y vuelvo con la misma sesión | repository conserva "octocat/Hello-World" y el campo token está vacío |`
+
+Dos obligaciones. La del token se cumplía y estaba medida. La del repositorio
+**ni se cumplía ni la medía nadie**, y la prueba que la nombra en su título
+—`@s41 forgets the token but keeps the repository when the screen is remounted`—
+tras el `unmount()` + `render()` sólo tenía dos aserciones, las dos del token.
+
+### ROJO 1 — el oráculo que faltaba
+
+Añadido a `frontend/src/github-connector.test.tsx`:
+
+```
+expect(screen.getByLabelText(/repositorio/i)).toHaveValue("octocat/Hello-World");
+```
+
+Sin tocar producción, `pnpm --dir frontend exec vitest run src/github-connector.test.tsx`:
+
+```
+FAIL  src/github-connector.test.tsx > @s41 forgets the token but keeps the repository...
+Error: expect(element).toHaveValue(octocat/Hello-World)
+Expected the element to have value:
+  octocat/Hello-World
+Received:
+
+  ❯ src/github-connector.test.tsx:557:49
+Tests  1 failed | 61 passed (62)
+```
+
+Ese rojo **es el defecto**: no hubo que romper nada para provocarlo. Causa:
+`App.tsx:90-99` renderiza `<GithubConnector>` dentro de la cadena de ternarios
+por ruta, así que salir de `/integraciones/github` lo desmonta, y
+`github-connector.tsx:61` volvía a nacer con `useState("")`.
+
+### El mecanismo elegido, y por qué
+
+Descartados:
+
+- **Estado elevado a `App.tsx`.** Es la solución "natural" en React, pero
+  `frontend/src/App.tsx` es del orquestador esta noche
+  (`progress/carriles/REPARTO_NOCHE.md`, regla 3) y la regla dice pedirlo, no
+  tocarlo. Además obliga a que el contenedor conozca un detalle interno del
+  formulario del conector.
+- **Variable de módulo en memoria.** Sobrevive al remontaje, sí, pero no muere
+  con la pestaña ni se puede inspeccionar ni limpiar; y en la suite se filtraría
+  de una prueba a la siguiente sin que `sessionStorage.clear()` pueda evitarlo.
+- **Guardar el formulario entero.** Prohibido explícitamente: la misma fila
+  exige que el token quede vacío, y `@s34` que no aparezca en ningún almacén.
+
+Elegido: **`sessionStorage`, con alcance de propietario y sólo el repositorio**,
+en un módulo nuevo `frontend/src/github-connector-draft.ts` calcado de
+`frontend/src/import-data-intent.ts`, que es lo que el proyecto ya usa para el
+caso equivalente (un dato de interfaz que debe sobrevivir dentro de la sesión y
+no heredarse entre propietarios: clave única, validación defensiva al leer,
+borrado cuando el `owner` no casa).
+
+Dos razones para `sessionStorage` y no otra cosa:
+
+1. El contrato dice literalmente **«con la misma sesión»**, y `sessionStorage`
+   es exactamente eso: muere con la pestaña.
+2. El repositorio es un nombre **público** (`octocat/Hello-World`), el mismo que
+   ya se pinta en el `<dd>` de la conexión y viaja en cada recibo. El secreto es
+   el token, y el módulo **no tiene forma de recibirlo**: su firma es
+   `saveRepositoryDraft(owner, repository)`.
+
+Reglas del borrador:
+
+- Se escribe en cada pulsación, por el único camino `editRepository(value)`.
+- Un valor vacío **borra** la clave: un borrador vacío no es un borrador. Por eso
+  conectar con éxito (`submitConnection`) y desconectar (`confirmDisconnect`),
+  que ya hacían `setRepository("")`, ahora limpian también la sesión sin ninguna
+  línea extra.
+- Al leer, si el `owner` no casa, se borra y se devuelve `""`: iniciar sesión
+  como otra persona en la misma pestaña no hereda nada (`@s41`, fila 2).
+
+### ROJO 2 — que el arreglo no se pase de listo
+
+El riesgo del arreglo es justo el que el encargo señala: que alguien "arregle"
+esto guardando el formulario entero. Oráculo añadido a la misma prueba:
+
+```
+expect(JSON.stringify(sessionStorage)).toContain("octocat/Hello-World");
+expect(JSON.stringify(sessionStorage)).not.toContain("ghp_secreto123");
+expect(JSON.stringify(localStorage)).not.toContain("ghp_secreto123");
+```
+
+**Acreditación (dos intentos, el primero no valía):**
+
+- *Primer intento*: hacer que el `onChange` del token llamara a
+  `saveRepositoryDraft`. Rojo, sí, pero en la línea **557** (`innerHTML` no
+  contiene el token), porque el token acababa pintado en el campo Repositorio.
+  Ese rojo lo daba una aserción vieja, no la mía: **no acredita nada**.
+- *Segundo intento*, quirúrgico — el `onChange` del token escribe una clave
+  aparte en la sesión (`organizationweb.github.form.v1`), sin ensuciar ningún
+  campo. Dos rojos, los dos correctos:
+
+```
+FAIL > @s41 forgets the token but keeps the repository when the screen is remounted
+AssertionError: expected '{"organizationweb.github.repository.v…' not to contain 'ghp_secreto123'
+Received: "{"organizationweb.github.repository.v1":"{\"owner\":\"owner\",\"repository\":\"octocat/Hello-World\"}",
+           "organizationweb.github.form.v1":"{\"owner\":\"owner\",\"token\":\"ghp_secreto123\"}"}"
+  ❯ src/github-connector.test.tsx:564:46
+
+FAIL > @s37 keeps the token field a password that never autocompletes nor survives a send
+AssertionError: expected 1 to be +0
+  ❯ src/github-connector.test.tsx:241:33   (expect(sessionStorage.length).toBe(0))
+```
+
+El segundo es **la prueba de `@s34` que el encargo pedía ejecutar**: salta sola
+en cuanto algo se queda en el almacén tras conectar. Producción restaurada.
+
+### VERDE
+
+```
+pnpm --dir frontend exec vitest run src/github-connector.test.tsx
+Test Files  1 passed (1)
+     Tests  62 passed (62)
+```
+
+`pnpm --dir frontend exec tsc --noEmit` sin salida; `prettier --check` conforme.
+
+### Ficheros
+
+- `frontend/src/github-connector-draft.ts` **(nuevo)**
+- `frontend/src/github-connector.tsx` — `owner` baja a la pantalla, `useState`
+  inicializado desde el borrador, `editRepository()` como único camino.
+- `frontend/src/github-connector.test.tsx` — cuatro aserciones nuevas y
+  `sessionStorage.clear()` en el `beforeEach` (precedente: `calendar.test.tsx:77`),
+  para que el borrador no se filtre entre pruebas.
+
+Ninguno de ellos es compartido: `frontend/src/github-connector*` es de este
+carril (REPARTO_NOCHE, regla 3). **`App.tsx` no se ha tocado.**
+
+### Fuera de ámbito, anotado y no ejecutado
+
+`e2e/github-connector.spec.mjs` no se ha corrido: levantar la pila no entraba en
+el encargo y las otras tres filas de `@s41` viven ahí. Merece una pasada del
+orquestador antes de cerrar.
+
+---
+
+## 3. Los espacios Unicode de `@s14` y `@s15` — el encargo partía de un hecho falso
+
+El encargo decía: «tres filas del contrato nombran `U+00A0` y **ninguna prueba
+mete jamás un espacio duro**». **Es falso, y lo dice la ejecución** (REPARTO_NOCHE,
+regla 5: si la ejecución contradice el brief, gana la ejecución).
+
+Comprobado byte a byte sobre `origin/main` antes de escribir nada:
+
+```
+$ grep -nP "[^\x00-\x7F]" ExternalIssueTest.java | cat -A
+20:        Arguments.of(" M-bM-^@M-^CArreglar loginM-BM- ", "Arreglar login"),$
+21:        Arguments.of(" M-BM-  ", ""),$
+```
+
+`M-BM- ` es `C2 A0` = **U+00A0**; `M-bM-^@M-^C` es `E2 80 83` = **U+2003**. Lo
+mismo en `ExternalIssueCriterionTest.java:23`. Los oráculos existían. El propio
+`progress/panel_precierre_27_30.md` ya lo había desmentido en su síntesis
+(«El hallazgo del U+00A0 en `ExternalIssue` es FALSO»); el encargo recogió el
+motivo de un juez, no la síntesis.
+
+### ROJO — acreditado igualmente, que es lo que decide
+
+Sustituido `ExternalIssue.java:29` por `String.strip()`. Mueren **exactamente las
+tres filas del contrato**, ni una más:
+
+```
+16 tests completed, 3 failed
+ExternalIssueTest > [5] raw=  Arreglar login , expected=Arreglar login FAILED
+    expected: <Arreglar login> but was: <Arreglar loginM-BM- >
+ExternalIssueTest > [6] raw=   , expected= FAILED
+    expected: <> but was: <M-BM- >
+ExternalIssueCriterionTest.java:25 FAILED
+    expected: <https://github.com/octocat/Hello-World/issues/7>
+    but  was: <https://github.com/octocat/Hello-World/issues/7&#10;&#10;M-BM- >
+```
+
+El sobrante es siempre `C2 A0`: `Character.isWhitespace('\u00a0')` es `false`, así
+que `strip()` no lo quita y `(?U)\s` sí. **El oráculo discrimina.** Producción
+restaurada; `git diff backend/src/main/` vacío.
+
+### Lo que sí faltaba: que se vieran
+
+Los caracteres iban como **bytes literales invisibles**. Ése es justo el motivo de
+que dos jueces independientes leyeran los ficheros y concluyeran que la cobertura
+no existía, y de que este encargo llegara con la premisa equivocada. Un byte
+invisible también es lo primero que un formateador o un editor normaliza sin que
+nadie lo note.
+
+Aplicado lo que el encargo pedía —**copiar el patrón del gemelo**—, que es
+exactamente lo que hace `GithubRepositoryTest.java:12-13`: escapes `\uXXXX`
+explícitos en vez de bytes crudos.
+
+```
+ExternalIssueTest.java:23   Arguments.of(" \u2003Arreglar login\u00a0", "Arreglar login"),
+ExternalIssueTest.java:24   Arguments.of(" \u00a0 ", ""),
+ExternalIssueCriterionTest.java:27  @ValueSource(strings = {"", "   ", "\u00a0\u2003\n\r\n\t"})
+```
+
+Mismo valor para el compilador, cero cambio de comportamiento, y ahora la fila se
+lee. Con un comentario en cada sitio que nombra `@s14` / `@s15` y el porqué.
+
+**Rojo re-acreditado tras la reescritura** (para que no quedara duda de que los
+escapes siguen discriminando): otra vez `String.strip()`, otra vez
+`16 tests completed, 3 failed`, mismas tres filas, ahora en
+`ExternalIssueTest.java:34` y `ExternalIssueCriterionTest.java:27`. Restaurado.
+
+Verde final: `BUILD SUCCESSFUL`, y `spotlessCheck` conforme.
+
+**Nota sobre mutación**: PIT no muta literales de cadena, así que este regex nunca
+va a tener un mutante que lo delate. Estas tres filas son el único guardián que
+tiene. Merece la pena que no vuelvan a ser invisibles.
+
+---
+
+## 2. `GithubIssueConnections` fuera de todo ámbito — PARA EL ORQUESTADOR
+
+`backend/build.gradle.kts` no es mío, así que **no lo he tocado**. Confirmado el
+hallazgo y dejada aquí la línea exacta.
+
+### Verificado
+
+```
+$ grep -rn "GithubIssueConnections" --include=*.kts --include=*.json --include=*.mjs .
+(ningún resultado)
+
+$ grep -rn "GitlabIssueConnections" --include=*.kts .
+./backend/build.gradle.kts:89:    "com.apptolast.organization.application.GitlabIssueConnections*",
+```
+
+**Cero apariciones en todo el repositorio.** La gemela de GitLab sí está, en el
+ámbito de la 29. El único glob que alcanzaría a la de GitHub es el `else ->` de
+la corrida completa, y `bin/harness mutate github_connector` pasa
+`-PmutationScope=github_connector`. La cifra 468/502 = 93,23 % no mide esta clase.
+
+### Lo que hay dentro (no es un portador de datos)
+
+`backend/src/main/java/com/apptolast/organization/application/GithubIssueConnections.java`:
+
+- `source()` → `"github"`, la constante que acaba en cada recibo y en cada fila de
+  `task_external_links`.
+- `find()` traduce la fila almacenada a `IssueConnection` decidiendo `projectPath`,
+  `reference`, texto cifrado y validez.
+- `invalidate(ownerId, errorCode, at)` **descarta a propósito dos argumentos** y
+  llama a `connections.invalidate(ownerId)`. Un `VOID_METHOD_CALLS` ahí significa
+  «el token rechazado sigue considerándose válido y se reenvía en cada
+  importación» (@s22).
+
+### La línea a añadir
+
+En `githubConnectorClasses` (`backend/build.gradle.kts:111-136`), junto al resto
+de `application.*`:
+
+```
+"com.apptolast.organization.application.GithubIssueConnections*",
+```
+
+### Previsión de mutantes (REPARTO_NOCHE, regla 4)
+
+La clase **sí está ejercitada**: `ImportGithubIssuesTest.java:42` monta el
+`GithubIssueConnections` real sobre el doble de almacén, no un fake. Espero que
+salgan **pocos mutantes y casi todos muertos**:
+
+| Mutante | Previsión | Quién lo mata |
+|---|---|---|
+| `source()` → `NullReturnVals` / vacío | **KILLED** | `ImportGithubIssuesTest:96`, `assertEquals("github", receipt.source())` |
+| `find()` → `Optional.empty` / lambda a `null` | **KILLED** | toda la ruta feliz de importación se cae sin conexión |
+| `invalidate()` → `VOID_METHOD_CALLS` | **KILLED** | `ImportGithubIssuesTest:336`, `assertEquals("invalid", …status())` tras el 401 de @s22 |
+| `recordFailure()` (cuerpo vacío) | **sin mutantes** | PIT no muta un cuerpo vacío |
+
+Si `invalidate` sobreviviera, el oráculo de :336 no estaría discriminando y eso
+sería un hallazgo nuevo. **Contrástese la campaña contra esta tabla.**
+
+### Lo demás del mismo motivo del panel, no tocado
+
+Sigue en pie, y tampoco es mío: `ImportGuard*` está dentro del ámbito de la 27
+(`:121`) pero sólo lo usan `ConnectGitlab.java:46` y `DisconnectGitlab.java:28`;
+y `adapter.connectors.*` (`:130`) arrastra `GitlabApiBase` y `HttpGitlabIssueSource`
+a la campaña de la 27.
+
+---
+
+## Cierre
+
+- Punto 1: **cerrado**, con arreglo de producción y dos oráculos acreditados.
+- Punto 2: **en tu tejado** — una línea en `backend/build.gradle.kts` y volver a medir.
+- Punto 3: **ya estaba cubierto**; el rojo lo acredita y ahora además se lee.
+
+No se ha ejecutado ninguna campaña de mutación (REPARTO_NOCHE, regla 4) ni
+`bin/harness test` completo (REGLAS, regla 1). Backend por clase concreta,
+frontend por fichero.
+

@@ -74,6 +74,7 @@ function serve(url: string, method: string, route: Route) {
 }
 
 beforeEach(() => {
+  sessionStorage.clear();
   calls = [];
   routes = {};
   serve("/api/v1/projects", "GET", () => Response.json(projects));
@@ -554,6 +555,14 @@ it("@s41 forgets the token but keeps the repository when the screen is remounted
 
   expect(await screen.findByLabelText(/token/i)).toHaveValue("");
   expect(document.body.innerHTML).not.toContain("ghp_secreto123");
+  expect(screen.getByLabelText(/repositorio/i)).toHaveValue(
+    "octocat/Hello-World",
+  );
+  // Lo que sobrevive es el repositorio y sólo el repositorio: @s34 prohíbe el token en cualquier
+  // almacén del navegador, así que conservar el formulario entero no vale como arreglo.
+  expect(JSON.stringify(sessionStorage)).toContain("octocat/Hello-World");
+  expect(JSON.stringify(sessionStorage)).not.toContain("ghp_secreto123");
+  expect(JSON.stringify(localStorage)).not.toContain("ghp_secreto123");
 });
 
 it("@s41 starts from scratch when another person signs in", async () => {

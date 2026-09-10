@@ -9,15 +9,29 @@ import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class CreateWebhookTest {
   private static final Clock CLOCK =
       Clock.fixed(Instant.parse("2026-09-08T10:00:00.000000Z"), ZoneOffset.UTC);
-  static final WebhookDestinationGuard PUBLIC_ONLY =
-      new WebhookDestinationGuard(
-          CreateWebhookTest::resolve, AddressPolicy.blockingPrivateAddresses());
+
+  /**
+   * Cada host que la producción pidió resolver, en orden de petición. Sin este contador, «no se
+   * resuelve DNS» (@s2:26) no lo afirmaba nadie: el resolutor era un método estático mudo y una
+   * creación que resolviera antes de validar habría pasado la suite entera en verde.
+   */
+  private final List<String> resolved = new ArrayList<>();
+
+  private final WebhookDestinationGuard publicOnly =
+      new WebhookDestinationGuard(this::recordAndResolve, AddressPolicy.blockingPrivateAddresses());
+
+  private InetAddress[] recordAndResolve(String host) throws UnknownHostException {
+    resolved.add(host);
+    return resolve(host);
+  }
 
   private static InetAddress[] resolve(String host) throws UnknownHostException {
     return switch (host) {
@@ -30,8 +44,8 @@ class CreateWebhookTest {
     };
   }
 
-  private static CreateWebhook create(FakeWebhookEndpoints endpoints, WebhookSecrets secrets) {
-    return new CreateWebhook(endpoints, secrets, PUBLIC_ONLY, CLOCK, new SecureRandom());
+  private CreateWebhook create(FakeWebhookEndpoints endpoints, WebhookSecrets secrets) {
+    return new CreateWebhook(endpoints, secrets, publicOnly, CLOCK, new SecureRandom());
   }
 
   @Test
@@ -82,6 +96,32 @@ class CreateWebhookTest {
     assertNotEquals(first.endpoint().id(), second.endpoint().id());
   }
 
+  /**
+   * @s2 «no se inserta ningún endpoint ni se resuelve DNS». La mitad de la inserción ya estaba
+   *     medida; la de la resolución no la afirmaba nadie, y es la que dice que una URL que ni
+   *     siquiera es https no llega a provocar una consulta al exterior. El orden importa: la
+   *     intención se valida antes de tocar la red.
+   */
+  @Test
+  void s2_anInvalidUrlIsRejectedBeforeResolvingAnyHost() {
+    var endpoints = new FakeWebhookEndpoints();
+    var create = create(endpoints, FakeWebhookSecrets.KEYED);
+    for (var url :
+        List.of(
+            "http://example.com/hooks",
+            "HTTPS://example.com/hooks",
+            "https://user:pw@example.com/hooks",
+            "https://example.com/hooks#frag",
+            "https://example.com:0/hooks"))
+      assertThrows(
+          WebhookInvalidException.class,
+          () -> create.create("owner-a", url, "", List.of("TaskCreated.v1")),
+          url);
+
+    assertEquals(List.of(), resolved, "una url inválida se rechaza sin resolver ningún host");
+    assertTrue(endpoints.stored.isEmpty());
+  }
+
   @Test
   void s5_blockedOrUnresolvableDestinationsAreRejectedWithoutInserting() {
     var endpoints = new FakeWebhookEndpoints();
@@ -107,6 +147,12 @@ class CreateWebhookTest {
                     "owner-a", "https://missing.example/h", "", List.of("TaskCreated.v1")));
     assertEquals(WebhookOperationException.Code.URL_UNRESOLVABLE, unresolvable.code());
     assertTrue(endpoints.stored.isEmpty());
+    // @s5: el veredicto sale de una resolución de verdad, una por destino con nombre. Las cuatro
+    // direcciones literales no preguntan a nadie: se deciden sobre la propia dirección.
+    assertEquals(
+        List.of("mixed.example", "missing.example"),
+        resolved,
+        "sólo los hosts con nombre llegan al resolutor, y cada uno exactamente una vez");
   }
 
   @Test
@@ -139,5 +185,33 @@ class CreateWebhookTest {
                     keyed.create("owner-a", "https://example.com/h", "", List.of("TaskCreated.v1")))
             .code());
     assertTrue(full.stored.isEmpty());
+  }
+
+  /**
+   * Los colaboradores declarados en los constructores de un caso de uso: con qué puede contar para
+   * hacer su trabajo, y sobre todo con qué no.
+   */
+  private static List<Class<?>> collaboratorsOf(Class<?> useCase) {
+    return Arrays.stream(useCase.getDeclaredConstructors())
+        .<Class<?>>flatMap(constructor -> Arrays.stream(constructor.getParameterTypes()))
+        .toList();
+  }
+
+  /**
+   * @s5 «no se inserta ningún endpoint ni se abre conexión saliente». La mitad de la conexión es
+   *     estructural, y la condición 13 del cierre pedía dejarla escrita en vez de implícita: crear
+   *     un webhook no recibe {@link WebhookSender}, de modo que lo único que sale de aquí es la
+   *     consulta de resolución que mide {@code
+   *     s5_blockedOrUnresolvableDestinationsAreRejectedWithoutInserting}.
+   *     <p>La segunda aserción es el control, para que la primera no pueda quedarse vacía.
+   */
+  @Test
+  void s5_creatingHasNoSenderToOpenAnOutgoingConnectionWith() {
+    assertFalse(
+        collaboratorsOf(CreateWebhook.class).contains(WebhookSender.class),
+        "CreateWebhook no recibe con qué enviar");
+    assertTrue(
+        collaboratorsOf(DispatchWebhooks.class).contains(WebhookSender.class),
+        "control: el único que sí envía es el worker");
   }
 }

@@ -151,3 +151,42 @@ informe, `ORDER BY d.next_attempt_at, d.id` en `PostgresWebhookWork.java:67` (el
 FIFO por vencimiento), sigue sin oráculo. Con `DESC` el worker serviría siempre
 lo más nuevo primero y las entregas viejas se quedarían sin enviar. La prueba del
 hallazgo 1 no lo cubre: sólo hay una entrega reclamable a la vez.
+
+---
+
+## Adenda del 10 de septiembre — las dos garantías estructurales de la condición 13
+
+Escritas aquí porque la condición 13 de `progress/cierre_25.md` pedía justamente
+eso: no dejarlas implícitas, nombrando **el colaborador que no existe** en el
+caso de uso. Ahora, además de escritas, están sujetas por una prueba.
+
+| Cláusula del contrato | Colaborador ausente | Prueba que lo sujeta |
+|---|---|---|
+| @s5:80 «ni se abre conexión saliente» (`features/webhooks.feature`) | `CreateWebhook` no recibe `WebhookSender` | `CreateWebhookTest#s5_creatingHasNoSenderToOpenAnOutgoingConnectionWith` |
+| @s14:198 «el receptor no ha recibido ninguna petición al terminar la respuesta HTTP» | `ManageWebhook` no recibe `WebhookSender` | `ManageWebhookTest#s14_thePingHasNoSenderToReachTheReceiverWithOnTheHttpThread` |
+
+El argumento es de forma, no de conducta: el caso de uso que atiende la petición
+HTTP —crear un webhook, o encolar un ping— **no tiene con qué salir a la red**,
+porque el único que declara `WebhookSender` entre sus colaboradores es
+`DispatchWebhooks`, y a `DispatchWebhooks` sólo lo llama `WebhookSchedule.tick()`
+fuera del hilo HTTP. Un doble no puede demostrar esto: demostraría que hoy no se
+llamó, no que no se pueda llamar.
+
+Para que la aserción no pueda quedarse vacía —el defecto que la condición 12
+destapó en otra prueba— cada una lleva una **aserción de control** sobre
+`DispatchWebhooks`, donde el colaborador sí está. Medido en la misma ejecución:
+el mismo predicado da `false` sobre `CreateWebhook` y `ManageWebhook` y `true`
+sobre `DispatchWebhooks`. Si alguien inyecta un emisor en cualquiera de los dos
+primeros, la prueba se pone roja; si el predicado se estropeara y dejara de
+encontrar nada, el control se pone rojo.
+
+**Lo que estas dos pruebas NO dicen:** que la respuesta HTTP no espere a nada
+lento, ni que el worker envíe cuando debe. Sólo que por estos dos caminos no
+sale una petición al receptor.
+
+### La otra mitad de la condición 13, la que sí es de conducta
+
+«No se resuelve DNS» (@s2:26) ya no es una promesa: el resolutor de
+`CreateWebhookTest` lleva un contador de los hosts que se le piden, y las dos
+pruebas afirman sobre esa lista. Evidencia del rojo en
+`progress/cierre_25_carril.md`.

@@ -23,8 +23,22 @@ class SimulateAutomationTest {
   private final AutomationEventTail events =
       (owner, limit) -> {
         requestedLimit = limit;
-        return owner.equals("a") ? List.copyOf(tail) : List.of();
+        return owner.equals("a") ? newest(limit) : List.of();
       };
+
+  private static final Comparator<AutomationEvent> NEWEST_FIRST =
+      Comparator.comparing(AutomationEvent::occurredAt)
+          .thenComparing(AutomationEvent::eventId)
+          .reversed();
+
+  /**
+   * The tail as the real adapter serves it: {@code ORDER BY occurred_at DESC, event_id DESC LIMIT
+   * n}. Honouring the limit is what lets the window of @s31 be measured instead of echoed.
+   */
+  private List<AutomationEvent> newest(int limit) {
+    var kept = new HashSet<>(tail.stream().sorted(NEWEST_FIRST).limit(limit).toList());
+    return tail.stream().filter(kept::contains).toList();
+  }
 
   private final AutomationFacts facts =
       new AutomationFacts() {
@@ -159,6 +173,58 @@ class SimulateAutomationTest {
     var noMatches = simulate.simulate("a", rule(P, "{{task.title}}", null));
     assertThat(noMatches.evaluatedEvents()).isEqualTo(5);
     assertThat(noMatches.matches()).isEmpty();
+  }
+
+  /** A deterministic id whose natural order follows the index, so the window is unambiguous. */
+  private static UUID eventId(int index) {
+    return new UUID(0x4000L, index);
+  }
+
+  /**
+   * @s31 row 3: 130 events of which the 100 most recent are ProjectUpdated.v1 and the 30 oldest are
+   *     TaskCreated.v1 leaves «evaluados 100, coincidencias []». The 100 is measured here, not
+   *     echoed from the constant: were the window 130 the matches would stop being empty, and were
+   *     it any smaller than 100 the count would drop with it.
+   */
+  @Test
+  void s31_looksAtTheHundredMostRecentEventsAndLeavesTheOlderMatchesOut() {
+    for (int index = 0; index < 30; index++)
+      tail.add(taskCreated(eventId(index), T1.minusSeconds(1000 - index), TASK));
+    for (int index = 0; index < 100; index++)
+      tail.add(
+          new AutomationEvent(
+              eventId(100 + index),
+              "a",
+              "ProjectUpdated.v1",
+              P,
+              T1.minusSeconds(500 - index),
+              Map.of("name", "Marketing")));
+
+    var result = simulate.simulate("a", rule(P, "Revisar {{task.title}}", null));
+
+    assertThat(result.evaluatedEvents()).isEqualTo(100);
+    assertThat(result.matches()).isEmpty();
+  }
+
+  /**
+   * @s31 row 4: 101 matching events leave «evaluados 100, 100 coincidencias sin el más antiguo».
+   *     The oldest one is named, so the boundary of the window is asserted and not just its size.
+   */
+  @Test
+  void s31_theHundredAndFirstEventFallsOutsideTheWindow() {
+    for (int index = 0; index < 101; index++)
+      tail.add(taskCreated(eventId(index), T1.minusSeconds(200 - index), TASK));
+    var oldest = eventId(0);
+    var secondOldest = eventId(1);
+
+    var result = simulate.simulate("a", rule(P, "Revisar {{task.title}}", null));
+
+    assertThat(result.evaluatedEvents()).isEqualTo(100);
+    assertThat(result.matches()).hasSize(100);
+    assertThat(result.matches())
+        .extracting(AutomationMatch::eventId)
+        .doesNotContain(oldest)
+        .contains(secondOldest);
   }
 
   @Test

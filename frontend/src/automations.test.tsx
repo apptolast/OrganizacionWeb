@@ -7,6 +7,9 @@ import type { Automation, AutomationRun, EventType } from "./automations-api";
 const RULE = "22222222-2222-4222-8222-222222222222";
 const OTHER_RULE = "66666666-6666-4666-8666-666666666666";
 const PROJECT = "11111111-1111-4111-8111-111111111111";
+// La tarea creada NO es el proyecto: con el mismo UUID en los dos segmentos
+// del enlace de @s41 el oraculo no distingue cual va en cual.
+const CREATED_TASK = "77777777-7777-4777-8777-777777777777";
 
 const rule: Automation = {
   id: RULE,
@@ -433,7 +436,7 @@ describe("automations page", () => {
       occurredAt: "2026-09-08T10:15:30.123456Z",
       attempt: 1,
       status,
-      createdTaskId: status === "succeeded" ? PROJECT : null,
+      createdTaskId: status === "succeeded" ? CREATED_TASK : null,
       deliveryId: null,
       errorCode: status === "failed" ? "PROJECT_COMPLETED" : null,
       executedAt: "2026-09-08T10:15:30.123456Z",
@@ -462,7 +465,7 @@ describe("automations page", () => {
     expect(rows[2].querySelectorAll("span")).toHaveLength(3);
     expect(within(history).getAllByRole("link")[0]).toHaveAttribute(
       "href",
-      `/proyectos/${PROJECT}/tareas/${PROJECT}`,
+      `/proyectos/${PROJECT}/tareas/${CREATED_TASK}`,
     );
     await userEvent.click(screen.getByRole("button", { name: "Cargar más" }));
     await waitFor(() =>

@@ -183,3 +183,61 @@ con un `nextAttemptAt` que no es un instante: así la invariante se cumple y la
 única defensa que queda es la guarda mutada.
 
 **Previsión de muertes del racimo 3: 13.** Acumulado acreditado: 39.
+
+---
+
+## Racimo 4 — identidad, forma de la petición y contrato de la respuesta
+
+**Causa común.** Las pruebas del cliente comprobaban **qué se pide** (la ruta, el
+método, el cuerpo) pero no **cómo** se pide ni **qué se acepta de vuelta**.
+Tres huecos con la misma raíz:
+
+1. **La guarda de identidad.** Las cinco rutas que llevan un id en el camino lo
+   validan antes de salir a la red (`webhookUrl`, y el `deliveryId` de
+   `redeliverWebhook`). Un `grep` de «Identidad incompatible» en las suites no
+   devolvía nada: cero pruebas con un id malo. Es la defensa contra construir una
+   ruta con lo que venga —`"../otro"` sale de `/api/v1/me/webhooks/` y apunta a
+   otro recurso—, así que el oráculo afirma además que **no se toca la red**.
+2. **La cabecera `Content-Type` y el `{ signal }`.** Se leían `method` y `body`
+   de las llamadas registradas, nunca `headers` ni `signal`.
+3. **El crosscheck de `setWebhookStatus`.** `endpoint.id !== id || endpoint.status
+   !== status` es la única defensa contra que el servidor confirme el cambio del
+   webhook equivocado, o un estado distinto del pedido. Ninguna respuesta de
+   prueba descuadraba, así que la condición nunca era verdadera. Como en el
+   racimo 2, hay que romper **cada mitad por separado**: rompiendo las dos a la
+   vez, el `||` y el `&&` coinciden.
+
+**Evidencia del rojo: 19 mutantes muertos.**
+
+```
+ROJO 199 !identifier(id) -> false          · setWebhookStatus refuses an id that is not a uuid…
+ROJO 201 "Identidad incompatible" -> ""    · idem
+ROJO 282 !identifier(deliveryId) -> false  · redeliver refuses a delivery id that is not a uuid…
+ROJO 284 "Identidad incompatible" -> ""    · idem
+ROJO 219 headers de createWebhook -> {}    · declares the JSON media type on both bodies it sends
+ROJO 220 "application/json" -> ""          · idem
+ROJO 243 headers de setWebhookStatus -> {} · idem
+ROJO 244 "application/json" -> ""          · idem
+ROJO 212 { signal } de listWebhooks -> {}  · hands its own signal to every read it starts
+ROJO 276 { signal } de deliveries -> {}    · idem
+ROJO 224 !exact(endpoint secret) -> false  · rejects a creation body that carries anything beyond endpoint and secret
+ROJO 229 typeof secret !== string -> false · rejects a secret that is not a string even if it reads like one
+ROJO 233 ancla ^ del secreto               · rejects a secret with anything in front of the whsec_ prefix
+ROJO 248 crosscheck -> false               · rejects a status change confirmed for another webhook
+ROJO 249 crosscheck || -> &&               · idem
+ROJO 250 endpoint.id !== id -> false       · idem
+ROJO 252 endpoint.status !== status -> false · rejects a status change confirmed with a status nobody asked for
+ROJO 260 status !== 204 -> false           · treats any DELETE answer other than 204 as a failure
+ROJO 266 !exact(delivery) -> false         · rejects an accepted ping that carries anything beyond delivery
+```
+
+Dos contraejemplos que hubo que afinar:
+
+- **El secreto no-cadena.** `secret: 42` no sirve: al quitar la guarda de tipo,
+  `/^whsec_…$/.test(42)` coacciona a `"42"`, no casa, y el mutante **rechaza
+  igual**. El contraejemplo tiene que *leerse* como un secreto válido sin serlo:
+  `secret: [secretoVálido]`, cuyo `toString` devuelve la cadena buena.
+- **El ancla `^`.** El mutante quita sólo el ancla inicial, así que el
+  contraejemplo es un secreto válido **con basura delante**: `"xx" + secreto`.
+
+**Previsión de muertes del racimo 4: 19.** Acumulado acreditado: 58.

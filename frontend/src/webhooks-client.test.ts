@@ -51,6 +51,8 @@ function delivery(overrides: Record<string, unknown> = {}) {
   };
 }
 
+const signalOf = () => new AbortController().signal;
+
 function stub(response: unknown, status = 200) {
   const fetcher = vi
     .fn()
@@ -604,6 +606,140 @@ it("@s40 redelivers a terminal delivery", async () => {
   expect(reopened.attempt).toBe(0);
   expect(fetcher.mock.calls[0][0]).toBe(
     `/api/v1/me/webhooks/${id}/deliveries/${other}/redeliver`,
+  );
+});
+
+// Las cinco rutas que llevan un id en el camino lo comprueban antes de salir a
+// la red. Ninguna prueba pasaba un id malo, así que la guarda entera y su
+// diagnóstico estaban sin ejercer en los dos sitios donde vive.
+it.each([
+  ["setWebhookStatus", () => setWebhookStatus("../otro", "active", signalOf())],
+  ["deleteWebhook", () => deleteWebhook("../otro", signalOf())],
+  ["pingWebhook", () => pingWebhook("../otro", signalOf())],
+  ["listWebhookDeliveries", () => listWebhookDeliveries("../otro", signalOf())],
+])("@s38 %s refuses an id that is not a uuid before touching the network", async (
+  _name,
+  call,
+) => {
+  const fetcher = stub({ items: [] });
+
+  await expect(call()).rejects.toThrow("Identidad incompatible");
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it("@s40 redeliver refuses a delivery id that is not a uuid before touching the network", async () => {
+  const fetcher = stub({ items: [] });
+
+  await expect(redeliverWebhook(id, "../otra", signalOf())).rejects.toThrow(
+    "Identidad incompatible",
+  );
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it("@s37 declares the JSON media type on both bodies it sends", async () => {
+  const created = stub({ endpoint: endpoint(), secret }, 201);
+  await createWebhook(
+    { url: "https://example.com/hooks", description: "", eventTypes: [] },
+    signalOf(),
+  );
+  expect(created.mock.calls[0][1].headers).toEqual({
+    "Content-Type": "application/json",
+  });
+
+  const changed = stub(endpoint());
+  await setWebhookStatus(id, "active", signalOf());
+  expect(changed.mock.calls[0][1].headers).toEqual({
+    "Content-Type": "application/json",
+  });
+});
+
+it("@s38 hands its own signal to every read it starts", async () => {
+  const listing = stub({ items: [] });
+  const first = new AbortController().signal;
+  await listWebhooks(first);
+  expect(listing.mock.calls[0][1].signal).toBe(first);
+
+  const deliveries = stub({ items: [] });
+  const second = new AbortController().signal;
+  await listWebhookDeliveries(id, second);
+  expect(deliveries.mock.calls[0][1].signal).toBe(second);
+});
+
+it("@s37 rejects a creation body that carries anything beyond endpoint and secret", async () => {
+  stub({ endpoint: endpoint(), secret, warning: "guárdalo" }, 201);
+
+  await expect(
+    createWebhook(
+      { url: "https://example.com/hooks", description: "", eventTypes: [] },
+      signalOf(),
+    ),
+  ).rejects.toThrow("Confirmación incompatible");
+});
+
+it("@s37 rejects a secret that is not a string even if it reads like one", async () => {
+  stub({ endpoint: endpoint(), secret: [secret] }, 201);
+
+  await expect(
+    createWebhook(
+      { url: "https://example.com/hooks", description: "", eventTypes: [] },
+      signalOf(),
+    ),
+  ).rejects.toThrow("Confirmación incompatible");
+});
+
+it("@s37 rejects a secret with anything in front of the whsec_ prefix", async () => {
+  stub({ endpoint: endpoint(), secret: `xx${secret}` }, 201);
+
+  await expect(
+    createWebhook(
+      { url: "https://example.com/hooks", description: "", eventTypes: [] },
+      signalOf(),
+    ),
+  ).rejects.toThrow("Confirmación incompatible");
+});
+
+// La única defensa contra que el servidor confirme el cambio del webhook
+// equivocado, o un estado distinto del pedido. Hay que romper cada mitad por
+// separado: rompiendo las dos a la vez, el `||` y el `&&` coinciden.
+it("@s39 rejects a status change confirmed for another webhook", async () => {
+  stub(endpoint({ id: other }));
+
+  await expect(setWebhookStatus(id, "active", signalOf())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s39 rejects a status change confirmed with a status nobody asked for", async () => {
+  stub(endpoint());
+
+  await expect(setWebhookStatus(id, "disabled", signalOf())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s39 treats any DELETE answer other than 204 as a failure", async () => {
+  stub({ ok: true }, 200);
+
+  await expect(deleteWebhook(id, signalOf())).rejects.toBeInstanceOf(Response);
+});
+
+it("@s39 rejects an accepted ping that carries anything beyond delivery", async () => {
+  stub(
+    {
+      delivery: delivery({
+        status: "pending",
+        attempt: 0,
+        httpStatus: null,
+        latencyMs: null,
+        nextAttemptAt: "2026-09-08T10:00:00.000000Z",
+      }),
+      queued: 1,
+    },
+    202,
+  );
+
+  await expect(pingWebhook(id, signalOf())).rejects.toThrow(
+    "Confirmación incompatible",
   );
 });
 

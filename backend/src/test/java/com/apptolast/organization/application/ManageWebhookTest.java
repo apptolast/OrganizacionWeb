@@ -232,4 +232,33 @@ class ManageWebhookTest {
                     .redeliver(OWNER, W, UNKNOWN)));
     assertNull(deliveries.requeued);
   }
+
+  /**
+   * Los colaboradores declarados en los constructores de un caso de uso: con qué puede contar para
+   * hacer su trabajo, y sobre todo con qué no.
+   */
+  private static List<Class<?>> collaboratorsOf(Class<?> useCase) {
+    return Arrays.stream(useCase.getDeclaredConstructors())
+        .<Class<?>>flatMap(constructor -> Arrays.stream(constructor.getParameterTypes()))
+        .toList();
+  }
+
+  /**
+   * @s14 «el receptor no ha recibido ninguna petición al terminar la respuesta HTTP». La garantía
+   *     es estructural y hasta ahora estaba implícita, que es lo que rechazó la condición 13 del
+   *     cierre: este caso de uso —el que atiende el ping en el hilo HTTP— no recibe {@link
+   *     WebhookSender}, así que no tiene con qué salir a la red por mucho que se le pida. Quien
+   *     envía es {@link DispatchWebhooks}, y a ése sólo lo llama el worker.
+   *     <p>La segunda aserción es el control: si el predicado dejara de encontrar al colaborador
+   *     allí donde sí está, la primera se volvería vacía sin que nadie lo notara.
+   */
+  @Test
+  void s14_thePingHasNoSenderToReachTheReceiverWithOnTheHttpThread() {
+    assertFalse(
+        collaboratorsOf(ManageWebhook.class).contains(WebhookSender.class),
+        "ManageWebhook no recibe con qué enviar: el ping sólo puede encolarse");
+    assertTrue(
+        collaboratorsOf(DispatchWebhooks.class).contains(WebhookSender.class),
+        "control: el único que sí envía es el worker");
+  }
 }

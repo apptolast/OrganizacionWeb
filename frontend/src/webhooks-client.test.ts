@@ -7,6 +7,7 @@ import {
   pingWebhook,
   redeliverWebhook,
   setWebhookStatus,
+  webhookErrorClasses,
   webhookEventTypes,
 } from "./webhooks-client";
 
@@ -498,12 +499,39 @@ it("@s40 rejects a negative latency", async () => {
   ).rejects.toThrow("Confirmación incompatible");
 });
 
-it("@s40 rejects an error class outside the seven the contract defines", async () => {
-  stub({ items: [delivery({ status: "exhausted", errorClass: "BOOM" })] });
+it("@s40 accepts every error class of the catalogue and rejects any other", async () => {
+  const invented = "BOOM";
+  expect(webhookErrorClasses).not.toContain(invented);
 
-  await expect(
-    listWebhookDeliveries(id, new AbortController().signal),
-  ).rejects.toThrow("Confirmación incompatible");
+  for (const errorClass of webhookErrorClasses) {
+    stub({ items: [delivery({ status: "exhausted", errorClass })] });
+
+    const items = await listWebhookDeliveries(id, signalOf());
+
+    expect(items[0].errorClass).toBe(errorClass);
+  }
+  stub({ items: [delivery({ status: "exhausted", errorClass: invented })] });
+
+  await expect(listWebhookDeliveries(id, signalOf())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s25 decodes SECRET_UNREADABLE, the class the backend already writes", async () => {
+  stub({
+    items: [
+      delivery({
+        status: "exhausted",
+        httpStatus: null,
+        latencyMs: null,
+        errorClass: "SECRET_UNREADABLE",
+      }),
+    ],
+  });
+
+  const items = await listWebhookDeliveries(id, signalOf());
+
+  expect(items[0].errorClass).toBe("SECRET_UNREADABLE");
 });
 
 it("@s40 rejects an eventType that is not a string", async () => {

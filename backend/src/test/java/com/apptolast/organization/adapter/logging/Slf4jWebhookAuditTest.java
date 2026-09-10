@@ -122,27 +122,55 @@ class Slf4jWebhookAuditTest {
     assertNull(line.getThrowableProxy());
   }
 
+  /** Los cuatro textos libres del puerto: status y errorClass de attempt, y los dos code. */
+  private static final int FREE_TEXT_ARGUMENTS = 2 + 1 + 1;
+
+  /** Todo lo que @s35 prohíbe, en un solo valor, para entregárselo al sujeto de verdad. */
+  private static final String POISON =
+      "https://example.com/hooks" + QUERY + " " + SECRET + " " + SIGNATURE;
+
+  private static int occurrencesOfPoison(String text) {
+    var count = 0;
+    for (var from = text.indexOf(POISON); from >= 0; from = text.indexOf(POISON, from + 1)) count++;
+    return count;
+  }
+
   /**
-   * @s35 «los logs no contienen ?token=abc, whsec_, v1= ni cuerpos». Aquí la prueba sí <b>entrega
-   *     al sujeto</b> los valores prohibidos, disfrazados de código de error y de estado, que son
-   *     los dos únicos parámetros de texto libre del puerto. La aserción de ausencia sólo vale si
-   *     lo que se busca pudo haber entrado.
+   * Condición 12 del cierre. La versión anterior de esta prueba llevaba un javadoc que afirmaba
+   * entregar al sujeto los valores prohibidos y le pasaba «pending», «HTTP_ERROR» y
+   * «UNSUPPORTED_EVENT»: los seis {@code assertFalse} buscaban cadenas que la prueba nunca entregó
+   * y no podían fallar. Medido: con los tres métodos del adaptador vaciados, los seis pasaban igual
+   * y sólo caía el recuento de líneas.
+   *
+   * <p>Este adaptador es un formateador fiel y no censura: la ausencia de URL, secreto, firma y
+   * cuerpo en el rastro real la sostienen sus llamadores, y eso se mide en {@code
+   * WebhookScheduleTest.s35_neitherASuccessfulNorAFailedWorkerTick…}, que engancha un appender al
+   * logger ROOT y hace pasar por el worker la URL con {@code ?token=abc}, el secreto y el cuerpo.
+   * Lo que aquí se sujeta es lo único que depende de esta clase, y sí puede fallar: que cada texto
+   * libre se repita <b>una sola vez</b> —un eco de más es un campo de más por el que sale un
+   * secreto— y que el adaptador no añada de su cosecha nada de lo prohibido ni adjunte un
+   * throwable, que es la otra vía por la que viajaría una traza.
    */
   @Test
-  void s35_evenAPoisonedCodeCannotPutAUrlOrASecretInTheTrail() {
+  void s35_b12_aPoisonedFreeTextIsEchoedOnceAndTheAdapterAddsNothingOfItsOwn() {
     var audit = new Slf4jWebhookAudit();
-    audit.attempt(ENDPOINT, EVENT, "pending", "HTTP_ERROR");
-    audit.discarded(ENDPOINT, EVENT, "UNSUPPORTED_EVENT");
-    audit.workerError("CONFIGURATION_ERROR");
+    audit.attempt(ENDPOINT, EVENT, POISON, POISON);
+    audit.discarded(ENDPOINT, EVENT, POISON);
+    audit.workerError(POISON);
 
-    var text = loggedText();
-    assertFalse(text.contains(QUERY), "no full URL, so no query string either");
-    assertFalse(text.contains("whsec_"), "no secret, not even a prefix");
-    assertFalse(text.contains("v1="), "no signature");
-    assertFalse(text.contains(SECRET));
-    assertFalse(text.contains(SIGNATURE));
-    assertFalse(text.contains("example.com"));
     assertEquals(3, captured.list.size(), "tres llamadas, tres líneas y ninguna más");
+    var text = loggedText();
+    assertEquals(
+        FREE_TEXT_ARGUMENTS,
+        occurrencesOfPoison(text),
+        "un eco por argumento entregado, ni uno más: " + text);
+    var addedByTheAdapter = text.replace(POISON, "");
+    for (var forbidden : java.util.List.of(QUERY, "whsec_", "v1=", "example.com"))
+      assertFalse(
+          addedByTheAdapter.contains(forbidden),
+          "el adaptador no pone de su cosecha «" + forbidden + "»");
+    for (var line : captured.list)
+      assertNull(line.getThrowableProxy(), "ninguna línea adjunta un throwable con su traza");
   }
 
   /**

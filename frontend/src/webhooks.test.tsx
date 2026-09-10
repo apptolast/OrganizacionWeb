@@ -1349,6 +1349,51 @@ it("@s40 every delivery cell says what it says, labelled column by column", asyn
   ]);
 });
 
+// Condición 3 del cierre. Producción escribe una octava clase, SECRET_UNREADABLE
+// (V31 y WebhookAttempt.java), y el decodificador cerraba el catálogo en siete:
+// decodeDelivery lanzaba, la llamada caía en act(…, "No se han podido cargar las
+// entregas.") y el panel de ESE endpoint —no el de la cuenta entera, que sigue
+// listando— quedaba ciego para siempre y sin decir por qué.
+it("@s25 shows the delivery whose secret could not be read instead of going blind", async () => {
+  stubApi([endpoint()], () =>
+    Promise.resolve(
+      Response.json({
+        items: [
+          delivery({
+            status: "exhausted",
+            attempt: 6,
+            httpStatus: null,
+            latencyMs: null,
+            errorClass: "SECRET_UNREADABLE",
+            updatedAt: "2026-09-09T07:05:00.000000Z",
+          }),
+        ],
+      }),
+    ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.click(screen.getByRole("button", { name: "Ver entregas" }));
+  await waitFor(() => expect(screen.getByRole("table")).toBeVisible());
+
+  expect(
+    screen.queryByText(/no se han podido cargar las entregas/i),
+  ).toBeNull();
+  const [, unreadable] = screen.getAllByRole("row");
+  expect(cellsOf(unreadable)).toEqual([
+    ["Tipo", "TaskCreated.v1"],
+    ["Intento", "6"],
+    ["Código HTTP", "—"],
+    ["Latencia", "—"],
+    ["Clase de error", "SECRET_UNREADABLE"],
+    ["Estado", "Agotada"],
+    ["Fecha", "2026-09-09"],
+    ["Acciones", "Reenviar"],
+  ]);
+});
+
 // El mismo emparejamiento por índice del racimo 6, en el otro sitio donde se
 // usa: la lista traduce los tipos suscritos a sus etiquetas.
 it("@s36 spells out the subscribed types of a webhook with their labels", async () => {

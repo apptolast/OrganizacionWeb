@@ -19,7 +19,12 @@ export const webhookEventTypes = [
 
 const disabledReasons = ["MANUAL", "DELIVERY_EXHAUSTED"] as const;
 const deliveryStatuses = ["pending", "succeeded", "exhausted"] as const;
-const errorClasses = [
+/**
+ * Las clases de error que el backend puede escribir en una entrega, tal cual las restringe la
+ * columna error_class. SECRET_UNREADABLE (V31) es la octava: el secreto guardado no se pudo abrir,
+ * así que no hubo envío, ni respuesta ni tiempo transcurrido.
+ */
+export const webhookErrorClasses = [
   "HTTP_ERROR",
   "REDIRECT",
   "TIMEOUT",
@@ -27,6 +32,7 @@ const errorClasses = [
   "TLS",
   "DNS",
   "BLOCKED_ADDRESS",
+  "SECRET_UNREADABLE",
 ] as const;
 
 export type WebhookEndpoint = {
@@ -135,7 +141,9 @@ function decodeDelivery(value: unknown): WebhookDelivery {
     ) ||
     !(
       value.errorClass === null ||
-      (errorClasses as readonly string[]).includes(value.errorClass as string)
+      (webhookErrorClasses as readonly string[]).includes(
+        value.errorClass as string,
+      )
     ) ||
     !(value.nextAttemptAt === null || instant(value.nextAttemptAt)) ||
     !instant(value.createdAt) ||

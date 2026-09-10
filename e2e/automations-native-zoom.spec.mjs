@@ -14,7 +14,15 @@ import { join, resolve } from "node:path";
  * **Qué añade esta spec, y qué no.** A diferencia de las otras dos features del encargo, aquí el
  * zoom nativo **sí** se ejecutaba ya: `automations-ux.spec.mjs:201` lo aplica con
  * `chrome.tabs.setZoom`. Lo que le falta es el barrido: mide **un solo ancho, 320 px**. El contrato
- * nombra cuatro. Esta spec cubre los cuatro con el zoom nativo puesto.
+ * nombra cuatro. Esta spec barre **los que caben en la pantalla**, con el zoom nativo puesto, y
+ * registra los omitidos en `evidence.json`.
+ *
+ * **Límite, dicho aquí para que no haya que deducirlo.** El zoom nativo sólo se puede aplicar a
+ * un ancho que quepa de verdad en la pantalla, así que en el xvfb de 1280 px de CI el ancho de
+ * 1440 se omite y sólo se recorren los que caben. La guarda de no-vacío impide que la prueba
+ * quede vacía y verde, pero no convierte la cobertura en total: en CI esto es **parcial**.
+ * Lo que @s42 pide **en su letra** —los cuatro anchos al 100 % y 1440 con el texto al 200 %— sí
+ * se cubre entero, con `setViewportSize`, y por la puerta de CI, no por `bin/harness verify`.
  *
  * Conviene decir también lo que el contrato **no** dice, para que nadie lea de más: la tabla de
  * `Examples` del escenario empareja los cuatro anchos con «100 %» y sólo 1440 con «texto 200 %»;
@@ -147,7 +155,7 @@ async function assertFocusIsVisible(page, width) {
   expect(invisible, `foco no visible a ${width} px al 200 %`).toEqual([]);
 }
 
-test("@s42 los cuatro anchos al 200 % de zoom nativo, sin desplazamiento horizontal ni contenido cortado", async ({
+test("@s42 los anchos que caben en la pantalla, al 200 % de zoom nativo, sin desplazamiento horizontal ni contenido cortado", async ({
   baseURL,
 }) => {
   test.setTimeout(240_000);

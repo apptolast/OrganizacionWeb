@@ -208,7 +208,7 @@ a medias:
   como `node --check`.
 - **Falso** que no se ejecute: `.github/workflows/harness-ci.yml:53` corre
   `xvfb-run -a pnpm test:e2e` en cada CI, tras `pnpm exec playwright install
-  --with-deps chromium`. Verificado leyendo el fichero.
+--with-deps chromium`. Verificado leyendo el fichero.
 
 Así que M6 no es un agujero de evidencia sino un **reparto de puertas**: la
 puerta local no ejecuta @s42; la de CI sí.
@@ -219,14 +219,14 @@ en la lista que corre `scripts/e2e.mjs` (`playwright.config.mjs` declara
 directorio corren), y las cinco cosas de @s42 tienen aserciones que pueden
 fallar:
 
-| Cláusula de @s42 | Dónde | ¿Puede fallar? |
-|---|---|---|
-| Sin desplazamiento horizontal ni contenido cortado | `automations-ux.spec.mjs`, `assertUsable()`: `scroll <= client` y `clipped == []`, medido **por elemento y en los dos ejes** | Sí |
-| Controles >= 44x44 px CSS | `assertUsable()` (cuatro anchos x dos temas) y `automations-native-zoom.spec.mjs`, `assertNoClipping()` con `MIN_TARGET = 44` | Sí |
-| Alcanzables por teclado en orden lógico | `automations-ux.spec.mjs:456`: lee el **orden del DOM** y lo compara contra el recorrido real con `Tab`, ida y vuelta rotada | Sí |
-| Foco visible en cada parada | El mismo test: `ringIsVisible()` exige `:focus-visible`, `outline-style: solid`, `>= 3px` y color no transparente, **una medida por parada**; y `assertFocusIsVisible()` en los cuatro anchos al 200 % | Sí |
-| axe sin serious ni critical | `violations).toEqual([])` con `wcag2a/2aa/21aa/22aa` en cada ancho, cada tema, texto al 200 % y zoom nativo. Más estricto que la letra del contrato | Sí |
-| Texto al 200 % y zoom nativo | El test de texto al 200 % dobla el `font-size` calculado **y verifica que se dobló**; `automations-native-zoom.spec.mjs` usa `chrome.tabs.setZoom(2)` y **falla** si el zoom no se aplica, en vez de saltarse | Sí |
+| Cláusula de @s42                                   | Dónde                                                                                                                                                                                                         | ¿Puede fallar?                                                          |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Sin desplazamiento horizontal ni contenido cortado | `automations-ux.spec.mjs`, `assertUsable()`: `scroll <= client` y `clipped == []`, medido **por elemento y en los dos ejes**                                                                                  | Sí                                                                      |
+| Controles >= 44x44 px CSS                          | `assertUsable()` (cuatro anchos x dos temas) y `automations-native-zoom.spec.mjs`, `assertNoClipping()` con `MIN_TARGET = 44`                                                                                 | Sí                                                                      |
+| Alcanzables por teclado en orden lógico            | `automations-ux.spec.mjs:456`: lee el **orden del DOM** y lo compara contra el recorrido real con `Tab`, ida y vuelta rotada                                                                                  | Sí                                                                      |
+| Foco visible en cada parada                        | El mismo test: `ringIsVisible()` exige `:focus-visible`, `outline-style: solid`, `>= 3px` y color no transparente, **una medida por parada**; y `assertFocusIsVisible()` en los cuatro anchos al 200 %        | Sí                                                                      |
+| axe sin serious ni critical                        | `violations).toEqual([])` con `wcag2a/2aa/21aa/22aa` en cada ancho, cada tema, texto al 200 % y zoom nativo. Más estricto que la letra del contrato                                                           | Sí                                                                      |
+| Texto al 200 % y zoom nativo                       | El test de texto al 200 % dobla el `font-size` calculado **y verifica que se dobló**; `automations-native-zoom.spec.mjs` usa `chrome.tabs.setZoom(2)` y **falla** si el zoom no se aplica, en vez de saltarse | Sí en su letra; el barrido de zoom nativo, **parcial en CI** (ver nota) |
 
 No son «navegar y sacar captura»: las capturas son evidencia adjunta, las
 aserciones son las de arriba. El `Given` de @s42 («lista, editor abierto y
@@ -398,3 +398,19 @@ frontend 49 + 35 pruebas, `tsc`, `eslint` y `prettier` limpios.
   ningún `.feature`.
 - No he hecho `push`, ni `fetch`, ni `reset`, ni he cambiado de rama.
 - Ninguna credencial en pruebas, registros ni commits.
+
+### Nota sobre el alcance de `@s42` en zoom nativo (condición 4 del juez final)
+
+El barrido de zoom nativo recorre **los anchos que caben en la pantalla**, no
+siempre los cuatro: el zoom nativo sólo se puede aplicar a un ancho que quepa de
+verdad. En el xvfb de **1280 px** de CI, el de 1440 se omite y queda registrado
+en `evidence.json`. La guarda de no-vacío impide que la prueba quede vacía y
+verde, pero no convierte la cobertura en total.
+
+Lo que `@s42` pide **en su letra** —los cuatro anchos al 100 % y 1440 con el
+texto al 200 %— **sí se cubre entero**, con `setViewportSize`, y por la puerta de
+CI, no por `bin/harness verify`.
+
+Se escribe porque el título del spec prometía «los cuatro anchos» y eso, en CI,
+no era verdad. Lo que había que corregir era la afirmación, no la prueba: forzar
+1440 px en una pantalla de 1280 sería fingir una medida.

@@ -286,7 +286,7 @@
         "Cumplir @s1–@s42 de features/webhooks.feature con revisión, pruebas y mutación antes del cierre."
       ],
       "sdd": true,
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 26,

@@ -61,7 +61,7 @@ de exactamente 209 bytes UTF-8:
 ```
 
 **Cópialo tal cual, en una sola línea.** La firma es sobre **bytes**, no sobre el
-JSON como estructura: si lo reindentas, pasa de 209 bytes a 238 y las firmas de
+JSON como estructura: si lo reindentas, pasa de 209 bytes a 234 y las firmas de
 abajo dejan de cuadrar aunque el contenido sea el mismo. Es el mismo motivo por
 el que hay que firmar los bytes crudos de lo que recibes.
 

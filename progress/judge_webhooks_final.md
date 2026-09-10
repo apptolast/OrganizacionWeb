@@ -1,187 +1,155 @@
 # Review — feature 25 webhooks (`features/webhooks.feature`)
 
-**Veredicto: CHANGES_REQUESTED** — cuarta pasada, 10 de septiembre de 2026. Encargo acotado:
-comprobar las **cinco correcciones de markdown** de la tercera pasada. **Tres están bien y
-cerradas. Dos no**: la 1 se entregó a medias y la 4 se entregó **rota** — el vector de firma que
-publica la página **no verifica**. Sustituye al veredicto de la tercera pasada de este fichero.
+**Veredicto: APPROVED — sin condiciones.** Quinta pasada, 10 de septiembre de 2026, noche.
+Las dos bloqueantes de la cuarta pasada (B1, el vector de firma que no verificaba; B2, las claves
+de `SubtaskCreated.v1`) están **cerradas y comprobadas con cálculo, no de palabra**. Sustituye a
+todos los veredictos anteriores de este fichero.
 
-No se reaudita nada más. `git diff --name-only 17b823f9 HEAD` sigue sin devolver **ni un fuente
-ni una prueba**: `backend/build.gradle.kts`, `docs/webhooks.md`, `project-spec.md` y cuatro
-ficheros de `progress/`. Las puertas siguen acreditadas y ninguna se ve rozada por esto: backend
-**92,81 %**, frontend **94,57 %**, `harness init` verde. No ejecuté nada pesado.
+La 25 puede pasar a `done`.
 
 ---
 
-## Las cinco correcciones, una por una
+## B1 — el vector de firma: CERRADA, verificada con HMAC real
 
-### 2. Rotación del secreto — CERRADA
+`docs/webhooks.md:58-61` publica ahora el cuerpo en **una sola línea compacta**, precedida de
+`<!-- prettier-ignore -->` para que el formateador no vuelva a romperlo. Recalculé desde el
+fichero tal como está hoy, con la clave que la propia página declara:
 
-`docs/webhooks.md:48-51` ya no manda rotar: «elimina el endpoint y crea otro: **no hay rotación
-de secreto**, y el contrato la deja expresamente fuera de alcance». Concuerda con
-`project-spec.md:1999` (fuera de alcance), la decisión 8 de `:2054` y con las ocho rutas de
-`WebhookController`, ninguna de las cuales rota nada. Bien.
+| Comprobación | Resultado |
+|---|---|
+| Longitud de `docs/webhooks.md:60` | **209 bytes UTF-8**, como anuncia `:55-56` |
+| ¿Idéntica al contrato? | **Sí, carácter a carácter** con `features/webhooks.feature:235` (salvo la sangría de 6 espacios del docstring de Gherkin) |
+| `t=1788861600` | `47db42f51507bea71512fc26bef335a304b9382b45b590a774cfc977d6cd708f` |
+| `t=1788861660` | `fc161fb2f63428f0680cae6871216284bb420af9917ee794c8159d0400abe460` |
 
-### 3. El ping atado al alta — CERRADA
+Las dos coinciden **al carácter** con lo que el documento publica en `:71` y `:76`, con lo que el
+`@s15` fija en `features/webhooks.feature:239,241`, y con lo que produce
+`WebhookSignature.header` (clave = `secret.getBytes(UTF_8)` sobre la cadena entera,
+`WebhookSignature.java:16`; mensaje = `t + "." + body`, `:17-18`).
 
-`:163-166`: «**en cualquier momento** puedes lanzar un ping de prueba a **cualquier endpoint
-activo**, desde su botón en la aplicación». Es exactamente `POST /{id}/ping`
-(`WebhookController:124-127`), el botón por fila de `frontend/src/webhooks.tsx:461-462` y el
-«sólo se emite por acción explícita» de `project-spec.md:1999`. Bien.
+**El ejemplo ya se puede usar para lo que dice que sirve.** Quien lo copie y obtenga `47db42f5…`
+sabrá que su verificador está bien; antes obtenía `ff3d3fd0…` y habría ido a depurar código sano.
 
-### 5. La línea falsa del spec — CERRADA, y NO bloquea
+Y la corrección hace algo mejor que arreglar el número: `:63-66` explica **por qué** —«la firma es
+sobre bytes, no sobre el JSON como estructura»— y lo enlaza con la lección que la página ya daba
+en `:36-40` para el cuerpo que se recibe. La misma regla, dicha dos veces en los dos sitios donde
+muerde. Eso es enseñar, no parchear.
 
-`project-spec.md:2044` lleva la nota fechada, con el hecho, la comprobación (`grep` sobre
-`frontend/src/webhooks.tsx`), el motivo de no clavarlo con un oráculo y la mención de la
-contrafirma pendiente. `progress/decisiones_pendientes.md:48-62` la registra con la forma de
-siempre. Es lo que pedí, en el fondo y en la forma.
+## B2 — las nueve claves de `SubtaskCreated.v1`: CERRADA
 
-**Respondo sin rodeos a tu pregunta directa: esa contrafirma pendiente NO bloquea el cierre de la
-25.** Tres razones, y las dejo escritas para que nadie tenga que reconstruirlas:
+`docs/webhooks.md:92-95` distingue ahora los dos tipos: `TaskCreated.v1` lleva **ocho** —los seis
+comunes más `taskId` y `title`— y `SubtaskCreated.v1` lleva **nueve**, «porque añade además
+`parentTaskId`». Es exactamente `OutboxMessage.java:45-55` más el `expected.add("parentTaskId")`
+de `:78-81`, y la clave extra está además exigida en `:342-346` con formato de UUID y distinta de
+`taskId`. El ejemplo de `:97-108` sigue siendo un `TaskCreated.v1` con sus ocho campos correctos,
+y el aviso de `:110-112` contra las listas cerradas sigue en su sitio.
 
-1. **No toca ninguna puerta.** Las puertas de este repositorio son cobertura de los `@s`,
-   disciplina TDD, `harness init` y umbral de mutación. La nota no mueve ni un `@s`, ni una
-   prueba, ni una línea de `src/`: el árbol de código es idéntico al que ya aprobé.
-2. **Corrige el documento hacia la verdad, no la aleja.** Antes `:2044` afirmaba un enlace que no
-   existe; ahora dice lo que el árbol dice. El riesgo de dejarlo pendiente es cero: lo que espera
-   contrafirma es la forma de cerrarlo, no un hecho en disputa.
-3. **Es una decisión que sobrevive a la feature.** Si el propietario prefiere el enlace de verdad,
-   eso será una fila de contrato nueva y su prueba —trabajo futuro con su propio ciclo—, no una
-   reapertura de la 25. La 25 no promete ese enlace en ninguno de sus 42 escenarios.
+## El punto 5, ya fallado y sin cambios
 
-Queda como asunto abierto de gobierno, viajando por su carril en
-`progress/decisiones_pendientes.md`. No retiene la feature.
-
-### 1. El cuerpo de ejemplo — entregada a medias
-
-Lo principal está bien y lo doy por bueno: `:97-108` publica un `TaskCreated.v1` con los **ocho**
-campos, y los ocho son **exactamente** los que exige `OutboxMessage.validationCode():45-55`
-—`eventId, aggregateId, ownerId, occurredAt, schemaVersion, type, taskId, title`—, comprobados
-uno a uno. Los valores pasan además el resto de la validación: `taskId` casa el regex de UUID
-(`:338-341`), `schemaVersion` es el entero 1 (`:175`), `occurredAt` parsea a `Instant`
-(`:176-178`) y `title` no está vacío, no llega a 160 puntos de código ni tiene blancos en los
-extremos (`:363-367`). El aviso de `:110-112` —«no valides con una lista cerrada de seis
-campos»— es el remedio correcto y está bien argumentado.
-
-Pero la frase que los presenta introduce un dato falso nuevo. Ver B2.
-
-### 4. La clave del HMAC y el ejemplo verificable — la mitad buena, la mitad rota
-
-**La clave: correcta y cerrada.** `:42-46` lo dice aparte y con su propio encabezado: los **bytes
-UTF-8 del literal completo, `whsec_` incluido**, no los 32 que esconde el base64. Es literalmente
-`WebhookSignature.java:16`, `secret.getBytes(StandardCharsets.UTF_8)`, y lo confirma el javadoc de
-la clase, «keyed by the whole whsec_ secret». Cierra la duda abierta 3 de
-`progress/gherkin_webhooks.md:66` y la decisión del 8 de septiembre (`:87`), que asignó por escrito
-este dato a este fichero.
-
-**El ejemplo verificable: no verifica.** Ver B1. Es lo que más me preocupa de toda la pasada.
+La contrafirma pendiente de `project-spec.md:2044` **no bloquea**, por las tres razones que dejé
+escritas en la pasada anterior: no toca ninguna puerta, corrige el documento hacia la verdad y es
+una decisión que sobrevive a la feature. Vive por su carril en
+`progress/decisiones_pendientes.md:48-62`. **No retiene el cierre.**
 
 ---
 
-# Lo que sigue abierto — dos correcciones, ambas de markdown
+## Lo único que apareció al comprobar, y es mío: la cifra «238» está mal, son **234**
 
-## B1. BLOQUEANTE — `docs/webhooks.md:53-77`: el vector de firma que se publica no cuadra, y la página promete que sí
+Me pediste saberlo ahora antes que cerrar mal, así que lo digo con todas las letras.
+`docs/webhooks.md:63-65` dice «si lo reindentas, pasa de 209 bytes a **238**». **Son 234.** El
+bloque reindentado que había antes mide 234 bytes; los 4 que sobran son la valla de cierre del
+bloque de código y su salto de línea, que **se colaron en mi medición** de la cuarta pasada al
+recortar el fichero por líneas. Publicaste 238 porque yo te di 238. El error es mío y lo firmo.
 
-`:55-56` anuncia «este cuerpo de **exactamente 209 bytes UTF-8**» y a continuación, en `:58-67`,
-imprime el JSON **reformateado, con saltos de línea y sangría de dos espacios**. Ese bloque no
-mide 209 bytes: **mide 238**. Lo medí, y calculé el HMAC de las dos formas con la clave que la
-propia página declara:
+**No lo hago bloqueante, y explico por qué no me estoy siendo indulgente:**
 
-| Cuerpo | Bytes | t=1788861600 | t=1788861660 |
-|---|---|---|---|
-| La línea compacta de `features/webhooks.feature:235` | **209** | `47db42f5...d6cd708f` | `fc161fb2...00abe460` |
-| **El bloque tal como está impreso en `:58-67`** | **238** | `ff3d3fd0e716164a1c8d6e2c1130c34e58763bc91552ad0c1bdd86931f39c38e` | `083f5bcf6fa387f5b4e69142b71e60778c4d9cb4ecfc619073a8c29313261e75` |
+1. **No puede engañar a nadie en la práctica.** Ningún receptor calcula nada con esa cifra: es
+   ilustrativa dentro de una frase cuyo mensaje —reindentar rompe la firma— es **cierto** con 234
+   igual que con 238. Lo que un integrador ejecuta es el vector, y el vector está exacto.
+2. **La lección no depende del número.** La frase funciona entera si se quita la cifra.
+3. **Bloquear cuatro veces una página por cuatro bytes que introduje yo sería mal criterio**, no
+   rigor. El rigor era detectar que el ejemplo no verificaba; eso ya está hecho y arreglado.
 
-Las dos firmas publicadas en `:72` y `:77` son las de la **primera** fila: correctas, bien copiadas
-del `@s15` (`features/webhooks.feature:239,241`) y coincidentes con `WebhookSignature.header`. El
-cuerpo impreso es el de la **segunda**. El ejemplo se contradice consigo mismo.
+**Corrígelo cuando toques el fichero por cualquier otro motivo:** «pasa de 209 bytes a 234», o
+sencillamente «crece» sin cifra. No hace falta un commit para esto solo, y no condiciona el `done`.
 
-Por qué es bloqueante y no cosmético, en tres pasos:
+## Las otras dos no bloqueantes que quedan vivas
 
-1. **El encabezado dice para qué existe:** «Un ejemplo que puedes usar para **probar tu
-   verificador**». Quien lo use copiará el bloque de `:58-67`, obtendrá `ff3d3fd0...` donde la
-   página promete `47db42f5...`, y concluirá que su verificador correcto está mal. Un ejemplo que
-   falla es peor que no dar ejemplo: manda a depurar código sano.
-2. **Contradice la advertencia que está treinta líneas más arriba, en esta misma página.**
-   `:36-40` ordena: «el cuerpo en **bytes exactos, tal como llega**. No lo reserialices para
-   firmarlo: si tu framework parsea el JSON y lo vuelve a generar, el orden de las claves o los
-   espacios pueden cambiar y la firma dejará de cuadrar. **Guarda los bytes crudos**». La página
-   comete en su propio ejemplo el error del que avisa: reserializó el vector al maquetarlo. Es la
-   peor forma posible de fallar aquí.
-3. **No cierra la promesa que decía cerrar.** `project-spec.md:2058` promete «ejemplo de
-   verificación de firma». Un ejemplo cuyas firmas no se reproducen desde el cuerpo que enseña no
-   es un ejemplo de verificación.
+- **`:68` arrastra un «y» huérfano.** El párrafo nuevo de `:63-66` se metió entre el bloque del
+  cuerpo y la frase «y `t=1788861600`, la cabecera es exactamente:», que ahora empieza una sección
+  de texto con una conjunción colgando. Cosmético.
+- **El bloque «Hueco conocido» de `:198-208` sigue desfasado.** Su última frase —«Cerrarlo bien
+  pide una fila de contrato y su oráculo»— es justo la vía que `project-spec.md:2044` y
+  `progress/decisiones_pendientes.md:54-58` descartaron por escrito con mi ratificación. Ya no hay
+  hueco que declarar: el spec dice la verdad. El bloque sobra o se reduce a un puntero.
 
-**Remedio, y es de una línea:** imprimir el cuerpo tal como está en el contrato, en **una sola
-línea compacta**, copiada literalmente de `features/webhooks.feature:235`, sin reformatear; y, ya
-que la página avisa de esto, decir en una frase que el salto de línea final del bloque no forma
-parte del cuerpo. Si se quiere conservar la versión legible, que vaya aparte y rotulada como **no
-firmable**, nunca bajo la promesa de los 209 bytes.
-
-## B2. BLOQUEANTE — `docs/webhooks.md:95`: `SubtaskCreated.v1` no lleva ocho campos, lleva nueve
-
-La frase dice: «Por ejemplo, `TaskCreated.v1` y `SubtaskCreated.v1` llevan **ocho**».
-
-Cierto para `TaskCreated.v1`. **Falso para `SubtaskCreated.v1`:** `OutboxMessage.java:78-81` toma
-el conjunto de ocho y le **añade `parentTaskId`** —nueve—, y `:342-346` lo exige presente, con
-formato de UUID y **distinto de `taskId`**. Una fila de subtarea con ocho claves no se entrega
-jamás: `expected.equals(payload.keySet())` falla en `:170` y sale `INVALID_EVENT`.
-
-Es el mismo error que la corrección 1 vino a arreglar —anunciar un recuento cerrado que el código
-desmiente—, reintroducido una línea por encima del arreglo. El aviso de `:110-112` lo amortigua,
-pero no lo vuelve verdadero, y esta página se lee como referencia.
-
-**Remedio:** dejar el ejemplo sólo con `TaskCreated.v1`, o decir «nueve, porque además lleva
-`parentTaskId`».
+Siguen vigentes, sin cambios, la nota del plazo (5 s de conexión y 10 s de intercambio,
+`JdkWebhookSender.java:48-49`, que la página no cifra) y las no bloqueantes 1 a 5 de la segunda
+pasada.
 
 ---
 
-## Nota no bloqueante nueva
+## Estado de las puertas
 
-**El bloque «Hueco conocido» de `:198-208` quedó desfasado y ahora contradice al spec.** Su última
-frase —«Cerrarlo bien pide una fila de contrato y su oráculo»— es justo la vía que
-`project-spec.md:2044` y `progress/decisiones_pendientes.md:54-58` descartaron por escrito, con mi
-ratificación. Ya dije en la pasada anterior que, enmendado el spec, este bloque «sobra o se reduce
-a un puntero». Sigue sin bloquear, pero conviene alinearlo en la misma edición que B1 y B2.
+**Ninguna necesita repetirse, y esto no es fiarme: es comprobable.** Desde el verde acreditado
+`17b823f9`, `git diff --name-only` devuelve `backend/build.gradle.kts`, `docs/webhooks.md`,
+`project-spec.md` y cuatro ficheros de `progress/`. **Ni un fuente, ni una prueba, ni un `.feature`.**
+`git status --porcelain` está limpio.
 
-Siguen vigentes, sin cambios: la página no da la cifra del plazo —5 s de conexión y 10 s de
-intercambio, `JdkWebhookSender.java:48-49`— y las no bloqueantes 1 a 5 de la segunda pasada.
+Y comprobé lo único que un cambio de markdown **podría** haber roto: la puerta de lint. El `lint`
+del arnés es `node scripts/project.mjs lint` = `spotlessCheck` de Gradle, `node --check` sobre
+siete `.mjs` listados, y `pnpm --dir frontend lint` (`eslint . && prettier --check .`), que corre
+**dentro de `frontend/`**. `docs/` no entra en ninguno de los tres. El Prettier que reindentó la
+página era el del editor, no una guarda. La edición no puede teñir el lint.
+
+- **Mutación backend:** 400/431 = **92,81 %** (umbral 80 %).
+- **Mutación frontend:** 592/626 = **94,57 %** (umbral 80 %).
+- **`harness init`:** verde entero — lint sin errores, 89/89 guardas, backend completo, 2960
+  pruebas de frontend, «Entorno listo».
 
 ## Checkpoints
 
-- **C1** [x] — sin cambios; desde `17b823f9` no se ha tocado ni un fuente ni una prueba.
-- **C2** [x] — sin cambios.
+- **C1** [x] — lint y 89/89 guardas verificados sobre este mismo árbol de código, intacto desde
+  `17b823f9`, y `docs/` queda fuera del alcance del lint.
+- **C2** [x] — 27 features; 25 y 28 en `in_progress`, permitido por `one_feature_at_a_time: false`.
 - **C3** [x] — ninguna producción de la 25 sin test que la pida.
 - **C4** [x] — misma base que C1.
-- **C5** [x] — `git status --porcelain` vacío al abrir esta revisión.
-- **C6** [ ] — los 42 `@s` tienen test, B4 está entregada y tres de las cinco correcciones están
-  cerradas, pero la guía pública publica un vector de firma que no verifica (B1) y un recuento de
-  campos falso para `SubtaskCreated.v1` (B2).
-- **C7** [x] — backend 400/431 = **92,81 %**, frontend 592/626 = **94,57 %**. Nada las invalida:
-  desde entonces sólo cambió markdown.
+- **C5** [x] — `git status --porcelain` vacío.
+- **C6** [x] — **los 42 `@s` tienen test y la guía pública ya no afirma nada que el código
+  desmienta.** Era el último en rojo.
+- **C7** [x] — las dos mutaciones por encima del umbral, recomputadas por mí sobre informes que
+  coinciden con el árbol.
 
 ## Cobertura de escenarios (@s ↔ test)
 
-- @s1..@s42: **[x]**, sin cambios. Esta entrega es markdown puro.
+- @s1..@s42: **[x]**. Sin cambios: las tres últimas entregas son markdown puro.
 
 ## Disciplina TDD
 
-- **Rojo-Verde-Refactor:** SÍ, sin cambios.
-- **¿Producción sin test que la pida?** NO.
+- **Rojo-Verde-Refactor:** SÍ.
+- **¿Producción sin test que la pida?** **NO.** Y lo subrayo por última vez: la decisión de **no**
+  colar el `<a>` en `webhooks.tsx` para hacer verdadera una línea de prosa fue disciplina bien
+  aplicada. Se corrigió el documento, que era lo que estaba mal.
 
 ---
 
 ## Resumen
 
-Tres de las cinco están cerradas y bien cerradas: la rotación, el ping y la enmienda del spec. La
-cuarta trae la mitad que más importaba —la clave del HMAC, dicha aparte y exacta contra
-`WebhookSignature.java:16`— y la primera trae los ocho campos correctos de `TaskCreated.v1`,
-verificados uno a uno contra `OutboxMessage`, con el aviso adecuado contra las listas cerradas.
+Cierro la 25. Costó cinco pasadas y la última tuvo su gracia: la bloqueante final fue un ejemplo
+de firma que no verificaba porque un formateador lo reindentó al guardar, en una página cuyo tema
+central es **firmar los bytes exactos y no reserializar**. El documento se tropezó con su propia
+lección; ahora la enseña dos veces y trae el `<!-- prettier-ignore -->` que impide que vuelva a
+pasar.
 
-Lo que la retiene son dos frases. La del vector es seria: la página publica un cuerpo de 238 bytes
-bajo el rótulo de 209 y con las firmas del de 209, de modo que **el único ejemplo comprobable de
-todo el documento falla si alguien lo comprueba**, y falla por reserialización, que es justo lo que
-la página prohíbe treinta líneas antes. La otra es un recuento de campos que el código desmiente
-para `SubtaskCreated.v1`.
+Lo que queda entregado es una guía pública que dice la verdad en todo lo comprobable: las cuatro
+exigencias de la enmienda B4 con el número 300 y su porqué, los doce tipos en su orden canónico
+con las etiquetas reales de la interfaz, la escalera de reintentos, el sexto intento y la
+desactivación, las cabeceras exactas, la clave del HMAC —el dato sin el cual nada de esto se puede
+verificar— y un vector que **cualquiera puede reproducir en treinta segundos y le cuadrará**.
 
-Ni una línea de `src/`, ni una prueba, ni una campaña que repetir. **La contrafirma pendiente del
-propietario NO retiene nada.** Corregidas B1 y B2, la 25 pasa a `done` sin condiciones.
+Detrás siguen las dos puertas de mutación por encima del umbral, `harness init` verde y los 42
+escenarios con test. La contrafirma del propietario sobre `project-spec.md:2044` viaja aparte y no
+retiene nada. La única corrección que dejo abierta es una cifra ilustrativa de cuatro bytes que
+introduje yo, y que se arregla la próxima vez que alguien abra el fichero.
+
+**APPROVED. Sin condiciones.**

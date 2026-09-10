@@ -49,7 +49,12 @@ const projects = {
 
 type Route = { status: number; body?: unknown; delay?: Promise<void> };
 let routes: Map<string, Route[]>;
-let calls: { url: string; method: string; headers: Headers }[];
+let calls: {
+  url: string;
+  method: string;
+  headers: Headers;
+  body?: string;
+}[];
 
 function key(url: string, method: string) {
   return `${method} ${url.split("?")[0]}`;
@@ -73,7 +78,12 @@ beforeEach(() => {
   route("GET", "/api/v1/projects", 200, projects);
   vi.stubGlobal("fetch", async (url: string, options: RequestInit = {}) => {
     const method = options.method ?? "GET";
-    calls.push({ url, method, headers: new Headers(options.headers) });
+    calls.push({
+      url,
+      method,
+      headers: new Headers(options.headers),
+      body: typeof options.body === "string" ? options.body : undefined,
+    });
     const list = routes.get(key(url, method));
     const next = list && list.length > 1 ? list.shift()! : list?.[0];
     if (!next) return new Response(null, { status: 404 });
@@ -91,6 +101,11 @@ afterEach(() => vi.unstubAllGlobals());
 
 const listed = (...items: Automation[]) =>
   route("GET", "/api/v1/me/automations", 200, { items });
+
+const sent = (method: string, url: string) =>
+  calls
+    .filter((call) => call.method === method && call.url === url)
+    .map((call) => JSON.parse(call.body ?? "null") as unknown);
 
 describe("automations page", () => {
   it("@s37 heads the page and announces the load before anything else", async () => {
@@ -663,6 +678,190 @@ describe("automations page", () => {
       );
       view.unmount();
     }
+  });
+
+  const CREATE = "/api/v1/me/automations";
+
+  it("@s40 sends a brand new rule exactly as the editor shows it", async () => {
+    listed();
+    route("POST", CREATE, 201, { ...rule, name: "Seguimiento" });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    expect(screen.getByLabelText("Nombre")).toHaveValue("");
+    expect(screen.getByLabelText("Disparador")).toHaveValue("TaskCreated.v1");
+    expect(screen.getByLabelText("Sólo en el proyecto")).toHaveValue("");
+    expect(screen.getByLabelText("Título de la tarea")).toHaveValue(
+      "Revisar {{task.title}}",
+    );
+    expect(screen.getByLabelText("Criterio de la tarea")).toHaveValue("");
+    await userEvent.type(screen.getByLabelText("Nombre"), "Seguimiento");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(sent("POST", CREATE)).toHaveLength(1));
+    expect(sent("POST", CREATE)[0]).toEqual({
+      name: "Seguimiento",
+      enabled: true,
+      trigger: { eventType: "TaskCreated.v1" },
+      condition: null,
+      action: {
+        type: "CREATE_TASK",
+        projectId: PROJECT,
+        titleTemplate: "Revisar {{task.title}}",
+        criterionTemplate: null,
+        estimatedMinutes: null,
+      },
+    });
+  });
+
+  it("@s40 sends the trigger, the condition and the criterion the owner picked", async () => {
+    listed();
+    route("POST", CREATE, 201, rule);
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.type(screen.getByLabelText("Nombre"), "Seguimiento");
+    await userEvent.selectOptions(
+      screen.getByLabelText("Disparador"),
+      "BlockPlanned.v1",
+    );
+    await userEvent.selectOptions(
+      screen.getByLabelText("Sólo en el proyecto"),
+      PROJECT,
+    );
+    await userEvent.type(
+      screen.getByLabelText("Criterio de la tarea"),
+      "Con el informe enviado",
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(sent("POST", CREATE)).toHaveLength(1));
+    expect(sent("POST", CREATE)[0]).toMatchObject({
+      trigger: { eventType: "BlockPlanned.v1" },
+      condition: { projectId: PROJECT },
+      action: { criterionTemplate: "Con el informe enviado" },
+    });
+  });
+
+  it("@s40 gives back untouched the parts of the rule the editor does not show", async () => {
+    listed({ ...rule, version: 2 }, disabled);
+    route("PUT", `${CREATE}/${RULE}`, 200, {
+      ...rule,
+      version: 3,
+      name: "Renombrada",
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Editar Seguimiento" }),
+    );
+    const name = screen.getByLabelText("Nombre");
+    await userEvent.clear(name);
+    await userEvent.type(name, "Renombrada");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(sent("PUT", `${CREATE}/${RULE}`)).toHaveLength(1));
+    expect(sent("PUT", `${CREATE}/${RULE}`)[0]).toEqual({
+      name: "Renombrada",
+      enabled: true,
+      trigger: { eventType: "TaskCreated.v1" },
+      condition: null,
+      action: {
+        type: "CREATE_TASK",
+        projectId: PROJECT,
+        titleTemplate: "Revisar {{task.title}}",
+        criterionTemplate: null,
+        estimatedMinutes: 30,
+      },
+    });
+    // La regla guardada sustituye a la de la lista, no se añade otra.
+    expect(await screen.findByText("Renombrada")).toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+    expect(screen.getByText("Pausada")).toBeInTheDocument();
+    expect(screen.queryByText("Seguimiento")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Nombre")).not.toBeInTheDocument();
+  });
+
+  it("@s40 carries the condition and the criterion of the rule it is editing", async () => {
+    listed({
+      ...rule,
+      enabled: false,
+      condition: { projectId: PROJECT },
+      action: {
+        type: "CREATE_TASK",
+        projectId: PROJECT,
+        titleTemplate: "Revisar {{task.title}}",
+        criterionTemplate: "Con el informe enviado",
+        estimatedMinutes: null,
+      },
+    });
+    route("PUT", `${CREATE}/${RULE}`, 200, rule);
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Editar Seguimiento" }),
+    );
+    expect(screen.getByLabelText("Sólo en el proyecto")).toHaveValue(PROJECT);
+    expect(screen.getByLabelText("Criterio de la tarea")).toHaveValue(
+      "Con el informe enviado",
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(sent("PUT", `${CREATE}/${RULE}`)).toHaveLength(1));
+    expect(sent("PUT", `${CREATE}/${RULE}`)[0]).toMatchObject({
+      enabled: false,
+      condition: { projectId: PROJECT },
+      action: {
+        criterionTemplate: "Con el informe enviado",
+        estimatedMinutes: null,
+      },
+    });
+  });
+
+  it("@s37 adds the new rule to the list instead of replacing it", async () => {
+    listed(rule);
+    route("POST", CREATE, 201, { ...rule, id: OTHER_RULE, name: "Otra" });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.type(screen.getByLabelText("Nombre"), "Otra");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(screen.getAllByRole("listitem")).toHaveLength(2));
+    expect(screen.getByText("Seguimiento")).toBeInTheDocument();
+    expect(screen.getByText("Otra")).toBeInTheDocument();
+  });
+
+  it("@s37 still lets a rule be written when the projects could not be read", async () => {
+    for (const existing of [[], [rule]]) {
+      routes = new Map();
+      calls = [];
+      route("GET", "/api/v1/projects", 503, { code: "STORAGE_UNAVAILABLE" });
+      listed(...existing);
+      route("POST", CREATE, 201, { ...rule, id: OTHER_RULE, name: "Otra" });
+      const view = render(<Automations owner="owner" />);
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Nueva regla" }),
+      );
+      expect(
+        within(screen.getByLabelText("Sólo en el proyecto"))
+          .getAllByRole("option")
+          .map((option) => option.textContent),
+        `${existing.length} reglas`,
+      ).toEqual(["Cualquiera"]);
+      await userEvent.type(screen.getByLabelText("Nombre"), "Otra");
+      await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+      await waitFor(() => expect(sent("POST", CREATE)).toHaveLength(1));
+      expect(sent("POST", CREATE)[0], `${existing.length} reglas`).toMatchObject(
+        { action: { type: "CREATE_TASK", projectId: "" } },
+      );
+      view.unmount();
+    }
+  });
+
+  it("@s37 shows the identifier of a destination it cannot name", async () => {
+    listed({
+      ...rule,
+      action: { ...rule.action, projectId: OTHER_RULE } as Automation["action"],
+    });
+    render(<Automations owner="owner" />);
+    expect(await screen.findByText(OTHER_RULE)).toBeInTheDocument();
   });
 
   it("@s43 drops the history of the rule the owner just left", async () => {

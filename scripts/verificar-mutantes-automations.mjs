@@ -626,6 +626,300 @@ export async function deleteAutomation(`,
   ],
   [
     VIEW,
+    "R4 93 nombre en blanco -> Stryker",
+    `    name: "",`,
+    `    name: "Stryker was here!",`,
+  ],
+  [
+    VIEW,
+    "R4 95 conditionProjectId en blanco -> Stryker",
+    `    conditionProjectId: "",`,
+    `    conditionProjectId: "Stryker was here!",`,
+  ],
+  [
+    VIEW,
+    "R4 97 titleTemplate por omisión -> ''",
+    `    titleTemplate: "Revisar {{task.title}}",`,
+    `    titleTemplate: "",`,
+  ],
+  [
+    VIEW,
+    "R4 98 criterionTemplate en blanco -> Stryker",
+    `    criterionTemplate: "",`,
+    `    criterionTemplate: "Stryker was here!",`,
+  ],
+  [
+    VIEW,
+    "R4 99 estimatedMinutes en blanco -> Stryker",
+    `    estimatedMinutes: "",`,
+    `    estimatedMinutes: "Stryker was here!",`,
+  ],
+  [
+    VIEW,
+    "R4 108 conditionProjectId LogicalOperator",
+    `    conditionProjectId: rule.condition?.projectId ?? "",`,
+    `    conditionProjectId: (rule.condition?.projectId && "") as string,`,
+  ],
+  [
+    VIEW,
+    "R4 108 conditionProjectId StringLiteral",
+    `    conditionProjectId: rule.condition?.projectId ?? "",`,
+    `    conditionProjectId: rule.condition?.projectId ?? "Stryker was here!",`,
+  ],
+  [
+    VIEW,
+    "R4 109 projectId ternario -> false",
+    `    projectId: rule.action.type === "CREATE_TASK" ? rule.action.projectId : "",`,
+    `    projectId: false ? (rule.action as never) : "",`,
+  ],
+  [
+    VIEW,
+    "R4 111 titleTemplate ternario -> false",
+    `      rule.action.type === "CREATE_TASK" ? rule.action.titleTemplate : "",`,
+    `      false ? (rule.action as never) : "",`,
+  ],
+  [
+    VIEW,
+    "R4 113 criterionTemplate ternario -> false",
+    `      rule.action.type === "CREATE_TASK"
+        ? (rule.action.criterionTemplate ?? "")
+        : "",`,
+    `      false
+        ? ((rule.action as never) ?? "")
+        : "",`,
+  ],
+  [
+    VIEW,
+    "R4 114 criterionTemplate LogicalOperator",
+    `        ? (rule.action.criterionTemplate ?? "")`,
+    `        ? ((rule.action.criterionTemplate && "") as string)`,
+  ],
+  [
+    VIEW,
+    "R4 114 criterionTemplate StringLiteral",
+    `        ? (rule.action.criterionTemplate ?? "")`,
+    `        ? (rule.action.criterionTemplate ?? "Stryker was here!")`,
+  ],
+  [
+    VIEW,
+    "R4 117 estimatedMinutes ternario -> false",
+    `      rule.action.type === "CREATE_TASK" &&
+      rule.action.estimatedMinutes !== null`,
+    `      false &&
+      (rule.action as never) !== null`,
+  ],
+  [
+    VIEW,
+    "R4 118 estimatedMinutes !== -> ===",
+    `      rule.action.estimatedMinutes !== null`,
+    `      rule.action.estimatedMinutes === null`,
+  ],
+  [
+    VIEW,
+    "R4 125 objeto de draftOf -> {}",
+    `function draftOf(editing: Editing): AutomationDraft {
+  return {`,
+    `function draftOf(editing: Editing): AutomationDraft {
+  return {} as never;
+  return {`,
+  ],
+  [
+    VIEW,
+    "R4 127 enabled -> false",
+    `    enabled: editing.rule?.enabled ?? true,`,
+    `    enabled: editing.rule?.enabled ?? false,`,
+  ],
+  [
+    VIEW,
+    "R4 127 enabled LogicalOperator",
+    `    enabled: editing.rule?.enabled ?? true,`,
+    `    enabled: (editing.rule?.enabled && true) as boolean,`,
+  ],
+  [
+    VIEW,
+    "R4 128 trigger -> {}",
+    `    trigger: { eventType: editing.eventType },`,
+    `    trigger: {} as never,`,
+  ],
+  [
+    VIEW,
+    "R4 130 condición === '' -> true",
+    `      editing.conditionProjectId === ""
+        ? null
+        : { projectId: editing.conditionProjectId },`,
+    `      true
+        ? null
+        : { projectId: editing.conditionProjectId },`,
+  ],
+  [
+    VIEW,
+    "R4 130 condición === '' -> !==",
+    `      editing.conditionProjectId === ""
+        ? null`,
+    `      editing.conditionProjectId !== ""
+        ? null`,
+  ],
+  [
+    VIEW,
+    "R4 133 acción -> {}",
+    `    action: {
+      type: "CREATE_TASK",
+      projectId: editing.projectId,
+      titleTemplate: editing.titleTemplate,
+      criterionTemplate:
+        editing.criterionTemplate === "" ? null : editing.criterionTemplate,
+      estimatedMinutes:
+        editing.estimatedMinutes === ""
+          ? null
+          : Number(editing.estimatedMinutes),
+    },`,
+    `    action: {} as never,`,
+  ],
+  [
+    VIEW,
+    "R4 134 tipo de acción -> ''",
+    `      type: "CREATE_TASK",`,
+    `      type: "" as never,`,
+  ],
+  [
+    VIEW,
+    "R4 138 criterio === '' -> true",
+    `        editing.criterionTemplate === "" ? null : editing.criterionTemplate,`,
+    `        true ? null : editing.criterionTemplate,`,
+  ],
+  [
+    VIEW,
+    "R4 138 criterio === '' -> !==",
+    `        editing.criterionTemplate === "" ? null : editing.criterionTemplate,`,
+    `        editing.criterionTemplate !== "" ? null : editing.criterionTemplate,`,
+  ],
+  [
+    VIEW,
+    "R4 140 minutos === '' -> true",
+    `        editing.estimatedMinutes === ""
+          ? null
+          : Number(editing.estimatedMinutes),`,
+    `        true
+          ? null
+          : Number(editing.estimatedMinutes),`,
+  ],
+  [
+    VIEW,
+    "R4 140 minutos === '' -> !==",
+    `        editing.estimatedMinutes === ""
+          ? null`,
+    `        editing.estimatedMinutes !== ""
+          ? null`,
+  ],
+  [
+    VIEW,
+    "R4 243 nombre de proyecto OptionalChaining",
+    `  return projects.find((project) => project.id === id)?.name ?? id;`,
+    `  return projects.find((project) => project.id === id).name ?? id;`,
+  ],
+  [
+    VIEW,
+    "R4 243 nombre de proyecto -> true",
+    `  return projects.find((project) => project.id === id)?.name ?? id;`,
+    `  return projects.find(() => true)?.name ?? id;`,
+  ],
+  [
+    VIEW,
+    "R4 403 destino por omisión (vacío) OptionalChaining",
+    `          <button
+            type="button"
+            onClick={() => setEditing(blank(projects[0]?.id ?? ""))}
+          >
+            Nueva regla
+          </button>
+        </div>`,
+    `          <button
+            type="button"
+            onClick={() => setEditing(blank(projects[0].id ?? ""))}
+          >
+            Nueva regla
+          </button>
+        </div>`,
+  ],
+  [
+    VIEW,
+    "R4 449 destino por omisión (lista) OptionalChaining",
+    `          <button
+            type="button"
+            onClick={() => setEditing(blank(projects[0]?.id ?? ""))}
+          >
+            Nueva regla
+          </button>
+        </>`,
+    `          <button
+            type="button"
+            onClick={() => setEditing(blank(projects[0].id ?? ""))}
+          >
+            Nueva regla
+          </button>
+        </>`,
+  ],
+  [
+    VIEW,
+    "R4 449 botón de nueva regla (lista) -> undefined",
+    `            onClick={() => setEditing(blank(projects[0]?.id ?? ""))}
+          >
+            Nueva regla
+          </button>
+        </>`,
+    `            onClick={() => undefined}
+          >
+            Nueva regla
+          </button>
+        </>`,
+  ],
+  [
+    VIEW,
+    "R4 468 cambio de disparador -> undefined",
+    `            onChange={(event) =>
+              setEditing({
+                ...editing,
+                eventType: event.target.value as EventType,
+              })
+            }`,
+    `            onChange={() => undefined}`,
+  ],
+  [
+    VIEW,
+    "R4 485 cambio de condición -> undefined",
+    `            onChange={(event) =>
+              setEditing({ ...editing, conditionProjectId: event.target.value })
+            }`,
+    `            onChange={() => undefined}`,
+  ],
+  [
+    VIEW,
+    "R4 510 cambio de criterio -> undefined",
+    `            onChange={(value) =>
+              setEditing({ ...editing, criterionTemplate: value })
+            }`,
+    `            onChange={() => undefined}`,
+  ],
+  [
+    VIEW,
+    "R4 272 lista tras crear -> []",
+    `            : [...current, saved],`,
+    `            : [],`,
+  ],
+  [
+    VIEW,
+    "R4 270 some -> every",
+    `          : current.some((rule) => rule.id === saved.id)`,
+    `          : current.every((rule) => rule.id === saved.id)`,
+  ],
+  [
+    VIEW,
+    "R4 271 sustitución en la lista -> undefined",
+    `            ? current.map((rule) => (rule.id === saved.id ? saved : rule))`,
+    `            ? current.map(() => undefined as never)`,
+  ],
+  [
+    VIEW,
     "490 opciones de proyecto -> undefined",
     `            {projects.map((project) => (
               <option key={project.id} value={project.id}>

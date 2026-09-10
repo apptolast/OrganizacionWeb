@@ -160,3 +160,46 @@ alguien mira la fila concreta.
 racimo, contando hermanos: **25 a 30**.
 
 `git diff` sobre producción: vacío.
+
+---
+
+## Racimo 4 — nadie miraba lo que el editor manda (`automations.tsx`)
+
+**Causa común.** Las pruebas de la vista contaban las peticiones («exactamente
+una POST») pero **jamás abrían el cuerpo**. Por eso vivían enteros `blank()`,
+`draftOf()` y la mitad de `editingOf()`: el editor podía mandar el disparador
+equivocado, perder el criterio, convertir los minutos en `null` o mandar
+`enabled: true` sobre una regla desactivada, y la barra seguía verde.
+
+El arnés de pruebas ni siquiera **guardaba** el cuerpo de la petición: había que
+añadirlo (`calls[].body`) antes de poder afirmar nada.
+
+**Oráculos que faltaban.** Siete pruebas nuevas:
+
+- `@s40 sends a brand new rule exactly as the editor shows it` — primero afirma los
+  cinco valores por omisión **en pantalla** y después el cuerpo JSON **entero**
+  (`toEqual`, no `toMatchObject`): nombre, `enabled: true`, disparador, `condition:
+  null` y la acción completa con `criterionTemplate` y `estimatedMinutes` nulos.
+- `@s40 sends the trigger, the condition and the criterion the owner picked` — los
+  tres `onChange` que nadie había ejercido nunca (eran mutantes **sin cobertura**).
+- `@s40 gives back untouched the parts of the rule the editor does not show` —
+  renombrar una regla devuelve intactos el destino, la plantilla y los 30 minutos
+  estimados, que el editor **no muestra por ningún sitio**. Con dos reglas en la
+  lista, para que sustituir y añadir se distingan.
+- `@s40 carries the condition and the criterion of the rule it is editing`.
+- `@s37 adds the new rule to the list instead of replacing it`.
+- `@s37 still lets a rule be written when the projects could not be read` — desde
+  el estado vacío y desde la lista. Sin esta prueba, quitar el `?.` de
+  `projects[0]?.id` no rompía nada: la página **reventaba** con un `TypeError` en
+  cuanto la lectura de proyectos fallaba y nadie se enteraba.
+- `@s37 shows the identifier of a destination it cannot name`.
+
+**Previsión (no medida): 37 mutantes verificados, 36 MUEREN.** El único que
+sobrevive, `blank().estimatedMinutes: ""` → `"Stryker was here!"`, es **equivalente**:
+no hay ningún control para los minutos estimados en el editor, y `Number("lo que
+sea")` es `NaN`, que `JSON.stringify` serializa como `null`, exactamente igual que
+la cadena vacía. Queda anotado, no perseguido.
+
+Previsión razonada del racimo, contando hermanos: **55 a 65**.
+
+`git diff` sobre producción: vacío.

@@ -9,6 +9,10 @@ build/
 
 # Mutación / tests
 .stryker-tmp/
+# Por comodin y no por nombre: cada feature crea su propio arenero y enumerarlos
+# uno a uno caduca en cuanto entra una feature mas. El 10 de septiembre de 2026 se
+# colaron 244 ficheros de un arenero en un commit por esto mismo.
+/frontend/.stryker-tmp-*/
 /frontend/.stryker-tmp-pause-resume-session/
 /frontend/.stryker-tmp-pause-resume-session-replay/
 .coverage

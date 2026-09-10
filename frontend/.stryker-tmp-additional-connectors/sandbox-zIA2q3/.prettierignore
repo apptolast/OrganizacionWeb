@@ -1,6 +1,0 @@
-node_modules
-dist
-reports
-.stryker-tmp
-.stryker-tmp-*
-pnpm-lock.yaml

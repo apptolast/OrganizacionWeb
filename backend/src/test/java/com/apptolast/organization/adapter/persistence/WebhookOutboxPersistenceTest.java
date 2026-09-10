@@ -17,6 +17,11 @@ class WebhookOutboxPersistenceTest {
   private static final Instant T = Instant.parse("2026-09-08T10:00:00.000000Z");
   private static final UUID NIL = new UUID(0L, 0L);
 
+  /** Los eventIds B y A de la última fila de @s19, fijos para que «menor» no dependa del azar. */
+  private static final UUID SMALLER = UUID.fromString("11111111-1111-4111-8111-111111111111");
+
+  private static final UUID GREATER = UUID.fromString("22222222-2222-4222-8222-222222222222");
+
   private static PostgresWebhookStore store() {
     return new PostgresWebhookStore(
         WebhookPersistenceTest.Database.JDBC, WebhookPersistenceTest.Database.TRANSACTIONS);
@@ -58,7 +63,18 @@ class WebhookOutboxPersistenceTest {
 
   private static UUID givenEvent(
       String owner, UUID projectId, String type, Instant occurredAt, String status, int version) {
-    var eventId = UUID.randomUUID();
+    return givenEventWithId(
+        owner, projectId, UUID.randomUUID(), type, occurredAt, status, version);
+  }
+
+  private static UUID givenEventWithId(
+      String owner,
+      UUID projectId,
+      UUID eventId,
+      String type,
+      Instant occurredAt,
+      String status,
+      int version) {
     var payload =
         "{\"eventId\":\""
             + eventId
@@ -187,6 +203,53 @@ class WebhookOutboxPersistenceTest {
         WebhookPersistenceTest.Database.JDBC.queryForMap(
             "SELECT status, attempts, published_at FROM outbox_events WHERE event_id=?", eventId);
     assertEquals(Map.of("status", "pending", "attempts", 0L), rowWithoutNulls(row));
+  }
+
+  /**
+   * @s19, última fila del Examples: «dos eventos con el mismo occurredAt y eventIds B y A → se
+   *     encola primero el de eventId menor A». Quien produce ese orden es el {@code ORDER BY
+   *     occurred_at, event_id} del adaptador, y la parte del desempate no tenía oráculo: la prueba
+   *     que cubría esa línea, {@code EnqueueWebhookDeliveriesTest}, corre contra un {@code
+   *     FakeOutbox} <b>que se ordena a sí mismo</b>, así que demuestra que el caso de uso respeta
+   *     el orden que le den, no que el adaptador lo produzca.
+   *     <p>Lo que está en juego no es la estética del orden: {@code enqueueFirstEligible} adelanta
+   *     el cursor al candidato que encola, y {@code WebhookCursor.precedes} excluye para siempre lo
+   *     que quede por detrás. Si el desempate se cae, el hermano de identificador menor se pierde
+   *     en silencio y de forma permanente. Por eso la segunda mitad de la prueba vuelve a pedir
+   *     candidatos con el cursor ya movido: el oráculo del orden y el de la no pérdida son cosas
+   *     distintas.
+   *     <p>El mayor se inserta primero a propósito: sin desempate, el orden que devuelve la tabla
+   *     es el de escritura, y entonces la primera aserción cae. Con dos identificadores fijos,
+   *     además, «menor» significa lo mismo en PostgreSQL y en Java.
+   */
+  @Test
+  void s19_ofTwoEventsOfTheSameInstantTheSmallerEventIdGoesFirstAndTheOtherIsNotLost() {
+    var owner = "tie-" + UUID.randomUUID();
+    var project = givenProject(owner);
+    var endpoint = given(owner, List.of("ProjectCreated.v1"));
+    var sameInstant = T.plusSeconds(1);
+    givenEventWithId(owner, project, GREATER, "ProjectCreated.v1", sameInstant, "pending", 1);
+    givenEventWithId(owner, project, SMALLER, "ProjectCreated.v1", sameInstant, "pending", 1);
+
+    var candidates = outbox().after(owner, new WebhookCursor(T, NIL), T.plusSeconds(60));
+
+    assertEquals(
+        List.of(SMALLER, GREATER),
+        candidates.stream().map(candidate -> candidate.eventId()).toList(),
+        "«se encola primero el de eventId menor A» (features/webhooks.feature:258)");
+
+    outbox().enqueue(endpoint.id(), candidates.getFirst(), UUID.randomUUID(), sameInstant);
+
+    assertEquals(
+        new WebhookCursor(sameInstant, SMALLER),
+        cursorOf(endpoint.id()),
+        "el cursor avanza hasta el que se encoló, no más allá");
+    assertEquals(
+        List.of(GREATER),
+        outbox().after(owner, cursorOf(endpoint.id()), T.plusSeconds(60)).stream()
+            .map(candidate -> candidate.eventId())
+            .toList(),
+        "el hermano queda por delante del cursor, no detrás: no se pierde");
   }
 
   @Test

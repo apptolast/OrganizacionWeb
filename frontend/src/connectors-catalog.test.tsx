@@ -385,7 +385,8 @@ it("@s7 falls back to a plain explanation when the failure carries no code", asy
 
 /** Salir del catálogo cancela de verdad su petición, no la deja en vuelo hasta que responda. */
 it("@s37 leaving the catalogue aborts the read it had in flight", async () => {
-  const fetcher = vi.fn(() => new Promise<Response>(() => {}));
+  const fetcher = vi.fn();
+  fetcher.mockReturnValue(new Promise<Response>(() => {}));
   vi.stubGlobal("fetch", fetcher);
 
   const view = render(<ConnectorsCatalog />);

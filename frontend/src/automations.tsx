@@ -17,6 +17,7 @@ import {
 } from "./automations-api";
 import type {
   Automation,
+  AutomationAction,
   AutomationDraft,
   AutomationMatch,
   AutomationRun,
@@ -121,6 +122,21 @@ function editingOf(rule: Automation): Editing {
   };
 }
 
+/** Este editor sólo compone acciones CREATE_TASK: la de cualquier otra regla vuelve intacta. */
+function actionOf(editing: Editing): AutomationAction {
+  if (editing.rule && editing.rule.action.type !== "CREATE_TASK")
+    return editing.rule.action;
+  return {
+    type: "CREATE_TASK",
+    projectId: editing.projectId,
+    titleTemplate: editing.titleTemplate,
+    criterionTemplate:
+      editing.criterionTemplate === "" ? null : editing.criterionTemplate,
+    estimatedMinutes:
+      editing.estimatedMinutes === "" ? null : Number(editing.estimatedMinutes),
+  };
+}
+
 function draftOf(editing: Editing): AutomationDraft {
   return {
     name: editing.name,
@@ -130,17 +146,7 @@ function draftOf(editing: Editing): AutomationDraft {
       editing.conditionProjectId === ""
         ? null
         : { projectId: editing.conditionProjectId },
-    action: {
-      type: "CREATE_TASK",
-      projectId: editing.projectId,
-      titleTemplate: editing.titleTemplate,
-      criterionTemplate:
-        editing.criterionTemplate === "" ? null : editing.criterionTemplate,
-      estimatedMinutes:
-        editing.estimatedMinutes === ""
-          ? null
-          : Number(editing.estimatedMinutes),
-    },
+    action: actionOf(editing),
   };
 }
 

@@ -2,7 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Automations } from "./automations";
-import type { Automation, AutomationRun } from "./automations-api";
+import type { Automation, AutomationRun, EventType } from "./automations-api";
 
 const RULE = "22222222-2222-4222-8222-222222222222";
 const OTHER_RULE = "66666666-6666-4666-8666-666666666666";
@@ -49,7 +49,13 @@ const projects = {
 
 type Route = { status: number; body?: unknown; delay?: Promise<void> };
 let routes: Map<string, Route[]>;
-let calls: { url: string; method: string; headers: Headers }[];
+let calls: {
+  url: string;
+  method: string;
+  headers: Headers;
+  body?: string;
+  signal?: AbortSignal | null;
+}[];
 
 function key(url: string, method: string) {
   return `${method} ${url.split("?")[0]}`;
@@ -73,7 +79,13 @@ beforeEach(() => {
   route("GET", "/api/v1/projects", 200, projects);
   vi.stubGlobal("fetch", async (url: string, options: RequestInit = {}) => {
     const method = options.method ?? "GET";
-    calls.push({ url, method, headers: new Headers(options.headers) });
+    calls.push({
+      url,
+      method,
+      headers: new Headers(options.headers),
+      body: typeof options.body === "string" ? options.body : undefined,
+      signal: options.signal,
+    });
     const list = routes.get(key(url, method));
     const next = list && list.length > 1 ? list.shift()! : list?.[0];
     if (!next) return new Response(null, { status: 404 });
@@ -91,6 +103,11 @@ afterEach(() => vi.unstubAllGlobals());
 
 const listed = (...items: Automation[]) =>
   route("GET", "/api/v1/me/automations", 200, { items });
+
+const sent = (method: string, url: string) =>
+  calls
+    .filter((call) => call.method === method && call.url === url)
+    .map((call) => JSON.parse(call.body ?? "null") as unknown);
 
 describe("automations page", () => {
   it("@s37 heads the page and announces the load before anything else", async () => {
@@ -133,6 +150,8 @@ describe("automations page", () => {
     expect(within(rows[0]).getByText("Activa")).toBeInTheDocument();
     expect(within(rows[1]).getByText("Proyecto creado")).toBeInTheDocument();
     expect(within(rows[1]).getByText("Inactiva")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("@s37 offers a retry and shows neither list nor empty state when the read fails", async () => {
@@ -436,7 +455,11 @@ describe("automations page", () => {
     expect(screen.getByText("Fallida")).toBeInTheDocument();
     expect(screen.getByText("PROJECT_COMPLETED")).toBeInTheDocument();
     const history = screen.getByRole("list", { name: "Ejecuciones" });
-    expect(within(history).getAllByRole("listitem")).toHaveLength(3);
+    const rows = within(history).getAllByRole("listitem");
+    expect(rows).toHaveLength(3);
+    // La fila sin código de error no pinta un hueco vacío por él.
+    expect(rows[0].querySelectorAll("span")).toHaveLength(2);
+    expect(rows[2].querySelectorAll("span")).toHaveLength(3);
     expect(within(history).getAllByRole("link")[0]).toHaveAttribute(
       "href",
       `/proyectos/${PROJECT}/tareas/${PROJECT}`,
@@ -525,6 +548,896 @@ describe("automations page", () => {
     expect(sessionStorage.length).toBe(0);
   });
 
+  const TRIGGERS: [EventType, string][] = [
+    ["ProjectCreated.v1", "Proyecto creado"],
+    ["ProjectUpdated.v1", "Proyecto editado"],
+    ["ProjectStatusChanged.v1", "Estado de proyecto cambiado"],
+    ["TaskCreated.v1", "Tarea creada"],
+    ["SubtaskCreated.v1", "Subtarea creada"],
+    ["TaskStatusChanged.v1", "Estado de tarea cambiado"],
+    ["BlockPlanned.v1", "Bloque planificado"],
+    ["BlockChanged.v1", "Bloque modificado"],
+    ["WorkSessionStarted.v1", "Sesión iniciada"],
+    ["WorkSessionStateChanged.v1", "Sesión pausada o reanudada"],
+    ["WorkSessionExtended.v1", "Sesión ampliada"],
+    ["WorkSessionClosed.v1", "Sesión cerrada"],
+  ];
+
+  it("@s37 writes each of the twelve published triggers in readable Spanish", async () => {
+    listed(
+      ...TRIGGERS.map(([eventType], index) => ({
+        ...rule,
+        id: `2222222${index.toString(16)}-2222-4222-8222-222222222222`,
+        name: `Regla ${index}`,
+        trigger: { eventType },
+      })),
+    );
+    render(<Automations owner="owner" />);
+    const rows = await screen.findAllByRole("listitem");
+    expect(rows).toHaveLength(TRIGGERS.length);
+    TRIGGERS.forEach(([, label], index) =>
+      expect(within(rows[index]).getByText(label), label).toBeInTheDocument(),
+    );
+  });
+
+  it("@s38 offers the twelve triggers in the editor, in the published order", async () => {
+    listed();
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    const trigger = screen.getByLabelText("Disparador");
+    expect(
+      within(trigger).getAllByRole("option").map((option) => option.textContent),
+    ).toEqual(TRIGGERS.map(([, label]) => label));
+    expect(trigger).toHaveValue("TaskCreated.v1");
+    const condition = screen.getByLabelText("Sólo en el proyecto");
+    expect(
+      within(condition)
+        .getAllByRole("option")
+        .map((option) => option.textContent),
+    ).toEqual(["Cualquiera", "Marketing"]);
+  });
+
+  const FAILURES: [string | null, string][] = [
+    ["PROJECT_COMPLETED", "proyecto completado"],
+    ["TITLE_TOO_LONG", "título demasiado largo"],
+    ["CRITERION_TOO_LONG", "criterio demasiado largo"],
+    ["ENDPOINT_NOT_FOUND", "endpoint no encontrado"],
+    ["TARGET_NOT_FOUND", "destino no encontrado"],
+    ["LO_QUE_SEA", "LO_QUE_SEA"],
+    [null, "no falla"],
+  ];
+
+  it("@s39 explains every failure the simulation can foresee and repeats the code it does not know", async () => {
+    listed();
+    route("POST", "/api/v1/me/automations/simulate", 200, {
+      evaluatedEvents: FAILURES.length,
+      matches: FAILURES.map(([code], index) => ({
+        eventId: `5555555${index.toString(16)}-5555-4555-8555-555555555555`,
+        eventType: "TaskCreated.v1",
+        occurredAt: "2026-09-08T10:15:30.123456Z",
+        preview: {
+          type: "CREATE_TASK",
+          projectId: PROJECT,
+          title: `Revisar ${index}`,
+          completionCriterion: "",
+          estimatedMinutes: null,
+          wouldFail: code,
+        },
+        loopGuarded: false,
+      })),
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    await screen.findByRole("status", { name: "Resultado de la simulación" });
+    for (const [code, text] of FAILURES)
+      if (code !== null)
+        expect(screen.getByText(`Fallaría: ${text}`), code).toBeInTheDocument();
+    // La última coincidencia no falla: no puede aparecer un aviso vacío por ella.
+    expect(screen.getAllByText(/^Fallaría/)).toHaveLength(FAILURES.length - 1);
+  });
+
+  it("@s38 replaces the four markers with their sample values and lists them verbatim", async () => {
+    listed();
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    const title = screen.getByLabelText(/título de la tarea/i);
+    await userEvent.clear(title);
+    await userEvent.click(title);
+    await userEvent.paste(
+      "{{event.type}} / {{task.title}} / {{project.name}} / {{occurredAt}} / {{otro}}",
+    );
+    expect(screen.getByTestId("automation-preview")).toHaveTextContent(
+      "TaskCreated.v1 / Redactar informe / Marketing / 2026-09-08T10:15:30.123456Z / {{otro}}",
+    );
+    expect(screen.getByTestId("automation-placeholders")).toHaveTextContent(
+      "Marcadores disponibles: {{event.type}}, {{task.title}}, {{project.name}}, {{occurredAt}}",
+    );
+  });
+
+  const FIELDS: [string, string][] = [
+    ["name", "automation-name"],
+    ["action.titleTemplate", "automation-title"],
+    ["action.criterionTemplate", "automation-criterion"],
+    ["trigger.eventType", "automation-trigger"],
+    ["condition.projectId", "automation-condition"],
+    ["accion.desconocida", "automation-name"],
+  ];
+
+  it("@s38 focuses the control that owns the field the server complained about", async () => {
+    for (const [field, control] of FIELDS) {
+      routes = new Map();
+      calls = [];
+      route("GET", "/api/v1/projects", 200, projects);
+      listed();
+      route("POST", "/api/v1/me/automations", 422, {
+        code: "VALIDATION_ERROR",
+        errors: [{ field, code: "REQUIRED", message: "x" }],
+      });
+      const view = render(<Automations owner="owner" />);
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Nueva regla" }),
+      );
+      await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+      await waitFor(() =>
+        expect(document.getElementById(control), field).toHaveFocus(),
+      );
+      view.unmount();
+    }
+  });
+
+  const CREATE = "/api/v1/me/automations";
+
+  it("@s40 sends a brand new rule exactly as the editor shows it", async () => {
+    listed();
+    route("POST", CREATE, 201, { ...rule, name: "Seguimiento" });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    expect(screen.getByLabelText("Nombre")).toHaveValue("");
+    expect(screen.getByLabelText("Disparador")).toHaveValue("TaskCreated.v1");
+    expect(screen.getByLabelText("Sólo en el proyecto")).toHaveValue("");
+    expect(screen.getByLabelText("Título de la tarea")).toHaveValue(
+      "Revisar {{task.title}}",
+    );
+    expect(screen.getByLabelText("Criterio de la tarea")).toHaveValue("");
+    await userEvent.type(screen.getByLabelText("Nombre"), "Seguimiento");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(sent("POST", CREATE)).toHaveLength(1));
+    expect(sent("POST", CREATE)[0]).toEqual({
+      name: "Seguimiento",
+      enabled: true,
+      trigger: { eventType: "TaskCreated.v1" },
+      condition: null,
+      action: {
+        type: "CREATE_TASK",
+        projectId: PROJECT,
+        titleTemplate: "Revisar {{task.title}}",
+        criterionTemplate: null,
+        estimatedMinutes: null,
+      },
+    });
+  });
+
+  it("@s40 sends the trigger, the condition and the criterion the owner picked", async () => {
+    listed();
+    route("POST", CREATE, 201, rule);
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.type(screen.getByLabelText("Nombre"), "Seguimiento");
+    await userEvent.selectOptions(
+      screen.getByLabelText("Disparador"),
+      "BlockPlanned.v1",
+    );
+    await userEvent.selectOptions(
+      screen.getByLabelText("Sólo en el proyecto"),
+      PROJECT,
+    );
+    await userEvent.type(
+      screen.getByLabelText("Criterio de la tarea"),
+      "Con el informe enviado",
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(sent("POST", CREATE)).toHaveLength(1));
+    expect(sent("POST", CREATE)[0]).toMatchObject({
+      trigger: { eventType: "BlockPlanned.v1" },
+      condition: { projectId: PROJECT },
+      action: { criterionTemplate: "Con el informe enviado" },
+    });
+  });
+
+  it("@s40 gives back untouched the parts of the rule the editor does not show", async () => {
+    listed({ ...rule, version: 2 }, disabled);
+    route("PUT", `${CREATE}/${RULE}`, 200, {
+      ...rule,
+      version: 3,
+      name: "Renombrada",
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Editar Seguimiento" }),
+    );
+    const name = screen.getByLabelText("Nombre");
+    await userEvent.clear(name);
+    await userEvent.type(name, "Renombrada");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(sent("PUT", `${CREATE}/${RULE}`)).toHaveLength(1));
+    expect(sent("PUT", `${CREATE}/${RULE}`)[0]).toEqual({
+      name: "Renombrada",
+      enabled: true,
+      trigger: { eventType: "TaskCreated.v1" },
+      condition: null,
+      action: {
+        type: "CREATE_TASK",
+        projectId: PROJECT,
+        titleTemplate: "Revisar {{task.title}}",
+        criterionTemplate: null,
+        estimatedMinutes: 30,
+      },
+    });
+    // La regla guardada sustituye a la de la lista, no se añade otra.
+    expect(await screen.findByText("Renombrada")).toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+    expect(screen.getByText("Pausada")).toBeInTheDocument();
+    expect(screen.queryByText("Seguimiento")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Nombre")).not.toBeInTheDocument();
+  });
+
+  it("@s40 carries the condition and the criterion of the rule it is editing", async () => {
+    listed({
+      ...rule,
+      enabled: false,
+      condition: { projectId: PROJECT },
+      action: {
+        type: "CREATE_TASK",
+        projectId: PROJECT,
+        titleTemplate: "Revisar {{task.title}}",
+        criterionTemplate: "Con el informe enviado",
+        estimatedMinutes: null,
+      },
+    });
+    route("PUT", `${CREATE}/${RULE}`, 200, rule);
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Editar Seguimiento" }),
+    );
+    expect(screen.getByLabelText("Sólo en el proyecto")).toHaveValue(PROJECT);
+    const criterion = screen.getByLabelText("Criterio de la tarea");
+    expect(criterion).toHaveValue("Con el informe enviado");
+    await userEvent.clear(criterion);
+    await userEvent.type(criterion, "Con el informe revisado");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(sent("PUT", `${CREATE}/${RULE}`)).toHaveLength(1));
+    expect(sent("PUT", `${CREATE}/${RULE}`)[0]).toMatchObject({
+      enabled: false,
+      condition: { projectId: PROJECT },
+      action: {
+        criterionTemplate: "Con el informe revisado",
+        estimatedMinutes: null,
+      },
+    });
+  });
+
+  it("@s37 adds the new rule to the list instead of replacing it", async () => {
+    listed(rule);
+    route("POST", CREATE, 201, { ...rule, id: OTHER_RULE, name: "Otra" });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.type(screen.getByLabelText("Nombre"), "Otra");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(screen.getAllByRole("listitem")).toHaveLength(2));
+    expect(screen.getByText("Seguimiento")).toBeInTheDocument();
+    expect(screen.getByText("Otra")).toBeInTheDocument();
+  });
+
+  it("@s37 still lets a rule be written when the projects could not be read", async () => {
+    for (const existing of [[], [rule]]) {
+      routes = new Map();
+      calls = [];
+      route("GET", "/api/v1/projects", 503, { code: "STORAGE_UNAVAILABLE" });
+      listed(...existing);
+      route("POST", CREATE, 201, { ...rule, id: OTHER_RULE, name: "Otra" });
+      const view = render(<Automations owner="owner" />);
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Nueva regla" }),
+      );
+      expect(
+        within(screen.getByLabelText("Sólo en el proyecto"))
+          .getAllByRole("option")
+          .map((option) => option.textContent),
+        `${existing.length} reglas`,
+      ).toEqual(["Cualquiera"]);
+      await userEvent.type(screen.getByLabelText("Nombre"), "Otra");
+      await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+      await waitFor(() => expect(sent("POST", CREATE)).toHaveLength(1));
+      expect(sent("POST", CREATE)[0], `${existing.length} reglas`).toMatchObject(
+        { action: { type: "CREATE_TASK", projectId: "" } },
+      );
+      view.unmount();
+    }
+  });
+
+  const held = () => {
+    let release = () => {};
+    const promise = new Promise<void>((resolve) => (release = resolve));
+    return { promise, release: () => release() };
+  };
+
+  it("@s40 says so when the rule could not be saved, and keeps the draft", async () => {
+    listed();
+    route("POST", CREATE, 503, { code: "STORAGE_UNAVAILABLE" });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.type(screen.getByLabelText("Nombre"), "Seguimiento");
+    expect(
+      screen.queryByText("Otra pestaña cambió esta regla"),
+    ).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "No se ha podido guardar. Inténtalo de nuevo.",
+    );
+    expect(
+      screen.queryByText("Otra pestaña cambió esta regla"),
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Nombre")).toHaveValue("Seguimiento");
+    expect(screen.getByRole("button", { name: "Guardar" })).toBeEnabled();
+  });
+
+  it("@s39 says so when the simulation could not be run", async () => {
+    listed();
+    route("POST", "/api/v1/me/automations/simulate", 503, {
+      code: "STORAGE_UNAVAILABLE",
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "No se ha podido simular. Inténtalo de nuevo.",
+    );
+    expect(
+      screen.queryByRole("status", { name: "Resultado de la simulación" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("@s39 pins a field error of the simulation to its control and focuses it", async () => {
+    listed();
+    route("POST", "/api/v1/me/automations/simulate", 400, {
+      code: "INVALID_TEMPLATE",
+      errors: [
+        { field: "action.titleTemplate", code: "UNCLOSED_PLACEHOLDER", m: "x" },
+      ],
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    const title = screen.getByLabelText("Título de la tarea");
+    await waitFor(() => expect(title).toHaveAttribute("aria-invalid", "true"));
+    expect(title).toHaveFocus();
+    expect(
+      document.getElementById(
+        title.getAttribute("aria-describedby")!.split(" ").at(-1)!,
+      ),
+    ).toHaveTextContent("Falta cerrar un marcador con dos llaves.");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("@s40 says so when the current version could not be loaded", async () => {
+    listed({ ...rule, version: 2 });
+    route("PUT", `${CREATE}/${RULE}`, 412, { code: "AUTOMATION_CONFLICT" });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Editar Seguimiento" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await screen.findByText("Otra pestaña cambió esta regla");
+    routes.delete("GET /api/v1/me/automations");
+    route("GET", "/api/v1/me/automations", 503, {
+      code: "STORAGE_UNAVAILABLE",
+    });
+    await userEvent.click(
+      screen.getByRole("button", { name: "Cargar versión actual" }),
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByText("No se ha podido cargar la versión actual."),
+      ).toBeInTheDocument(),
+    );
+    expect(screen.getByLabelText("Nombre")).toHaveValue("Seguimiento");
+  });
+
+  it("@s41 says so when the history could not be loaded", async () => {
+    listed(rule);
+    route("GET", `${CREATE}/${RULE}/runs`, 503, {
+      code: "STORAGE_UNAVAILABLE",
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Historial de Seguimiento" }),
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "No se ha podido cargar el historial.",
+    );
+  });
+
+  it("@s37 keeps offering the retry when the second read fails too", async () => {
+    const second = held();
+    route("GET", "/api/v1/me/automations", 503, { code: "X" });
+    route("GET", "/api/v1/me/automations", 503, { code: "X" }, second.promise);
+    listed(rule);
+    render(<Automations owner="owner" />);
+    await screen.findByRole("alert");
+    await userEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+    // Mientras se reintenta se anuncia la carga y el error desaparece.
+    expect(screen.getByRole("status")).toHaveTextContent(/cargando/i);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    second.release();
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Reintentar" }),
+      ).toBeInTheDocument(),
+    );
+    expect(
+      screen.getByText("No se han podido cargar tus automatizaciones."),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+    expect(await screen.findByText("Seguimiento")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/todavía no tienes ninguna regla/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("@s43 drops a save that another write superseded, without announcing anything", async () => {
+    listed();
+    const save = held();
+    route("POST", CREATE, 201, rule, save.promise);
+    route("POST", "/api/v1/me/automations/simulate", 200, {
+      evaluatedEvents: 3,
+      matches: [],
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.type(screen.getByLabelText("Nombre"), "Seguimiento");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(sent("POST", CREATE)).toHaveLength(1));
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    await screen.findByRole("status", { name: "Resultado de la simulación" });
+    save.release();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Nombre")).toHaveValue("Seguimiento");
+    expect(screen.queryByRole("list", { name: "Reglas" })).not.toBeInTheDocument();
+  });
+
+  it("@s43 drops a simulation that a save superseded, without announcing anything", async () => {
+    listed();
+    const simulation = held();
+    route(
+      "POST",
+      "/api/v1/me/automations/simulate",
+      200,
+      { evaluatedEvents: 3, matches: [] },
+      simulation.promise,
+    );
+    route("POST", CREATE, 201, rule);
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.type(screen.getByLabelText("Nombre"), "Seguimiento");
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    await waitFor(() =>
+      expect(sent("POST", "/api/v1/me/automations/simulate")).toHaveLength(1),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await screen.findByRole("list", { name: "Reglas" });
+    simulation.release();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("status", { name: "Resultado de la simulación" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("@s43 drops a switch answer that another write superseded, without announcing anything", async () => {
+    listed({ ...rule, version: 2 });
+    const flip = held();
+    route(
+      "PUT",
+      `${CREATE}/${RULE}`,
+      200,
+      { ...rule, version: 3, enabled: false },
+      flip.promise,
+    );
+    route("POST", "/api/v1/me/automations/simulate", 200, {
+      evaluatedEvents: 3,
+      matches: [],
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Editar Seguimiento" }),
+    );
+    await userEvent.click(screen.getByRole("switch", { name: /seguimiento/i }));
+    await waitFor(() => expect(sent("PUT", `${CREATE}/${RULE}`)).toHaveLength(1));
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    await screen.findByRole("status", { name: "Resultado de la simulación" });
+    flip.release();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByText("Activa")).toBeInTheDocument();
+  });
+
+  it("@s40 marks the state of each switch with a class besides the text", async () => {
+    listed(rule, disabled);
+    render(<Automations owner="owner" />);
+    const switches = await screen.findAllByRole("switch");
+    expect(switches[0]).toHaveClass("is-active");
+    expect(switches[1]).toHaveClass("is-inactive");
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Automatizaciones" }),
+    ).toHaveAttribute("tabindex", "-1");
+  });
+
+  it("@s40 blocks the second switch while the first one is still in the air", async () => {
+    listed({ ...rule, version: 2 }, disabled);
+    const flip = held();
+    route(
+      "PUT",
+      `${CREATE}/${RULE}`,
+      200,
+      { ...rule, version: 3, enabled: false },
+      flip.promise,
+    );
+    route("PUT", `${CREATE}/${OTHER_RULE}`, 200, { ...disabled, enabled: true });
+    render(<Automations owner="owner" />);
+    const first = await screen.findByRole("switch", { name: /seguimiento/i });
+    const second = screen.getByRole("switch", { name: /pausada/i });
+    await userEvent.click(first);
+    await waitFor(() => expect(first).toBeDisabled());
+    expect(second).toBeEnabled();
+    await userEvent.click(second);
+    expect(sent("PUT", `${CREATE}/${OTHER_RULE}`)).toHaveLength(0);
+    flip.release();
+    await waitFor(() => expect(first).toBeEnabled());
+    expect(screen.getAllByText("Inactiva")).toHaveLength(2);
+    expect(screen.queryByText("Activa")).not.toBeInTheDocument();
+    // La respuesta sólo sustituye a su regla: la otra sigue siendo la otra.
+    expect(screen.getByText("Pausada")).toBeInTheDocument();
+    expect(screen.getByText("Seguimiento")).toBeInTheDocument();
+  });
+
+  const signalOf = (url: string) =>
+    calls.find((call) => call.url.split("?")[0] === url)?.signal;
+
+  it("@s43 cancels the reads still in the air when the page is left", async () => {
+    const rules = held();
+    const projectList = held();
+    routes.delete("GET /api/v1/projects");
+    route("GET", "/api/v1/projects", 200, projects, projectList.promise);
+    route(
+      "GET",
+      "/api/v1/me/automations",
+      200,
+      { items: [] },
+      rules.promise,
+    );
+    const view = render(<Automations owner="owner" />);
+    await waitFor(() => expect(calls).toHaveLength(2));
+    expect(signalOf("/api/v1/me/automations")!.aborted).toBe(false);
+    expect(signalOf("/api/v1/projects")!.aborted).toBe(false);
+    view.unmount();
+    expect(signalOf("/api/v1/me/automations")!.aborted).toBe(true);
+    expect(signalOf("/api/v1/projects")!.aborted).toBe(true);
+    rules.release();
+    projectList.release();
+  });
+
+  it("@s43 cancels the write and the history still in the air when the page is left", async () => {
+    listed(rule);
+    const simulation = held();
+    const history = held();
+    route(
+      "POST",
+      "/api/v1/me/automations/simulate",
+      200,
+      { evaluatedEvents: 1, matches: [] },
+      simulation.promise,
+    );
+    route(
+      "GET",
+      `${CREATE}/${RULE}/runs`,
+      200,
+      { items: [], nextCursor: null },
+      history.promise,
+    );
+    const view = render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Editar Seguimiento" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Historial de Seguimiento" }),
+    );
+    await waitFor(() =>
+      expect(signalOf("/api/v1/me/automations/simulate")).toBeDefined(),
+    );
+    expect(signalOf("/api/v1/me/automations/simulate")!.aborted).toBe(false);
+    expect(signalOf(`${CREATE}/${RULE}/runs`)!.aborted).toBe(false);
+    view.unmount();
+    expect(signalOf("/api/v1/me/automations/simulate")!.aborted).toBe(true);
+    expect(signalOf(`${CREATE}/${RULE}/runs`)!.aborted).toBe(true);
+    simulation.release();
+    history.release();
+  });
+
+  it("@s38 clears the previous complaint each time the owner saves again", async () => {
+    listed();
+    const complaint = (field: string) => ({
+      code: "VALIDATION_ERROR",
+      errors: [{ field, code: "REQUIRED", message: "x" }],
+    });
+    route("POST", CREATE, 422, complaint("name"));
+    route("POST", CREATE, 503, { code: "STORAGE_UNAVAILABLE" });
+    route("POST", CREATE, 422, complaint("action.titleTemplate"));
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    const save = screen.getByRole("button", { name: "Guardar" });
+    const name = screen.getByLabelText("Nombre");
+    await userEvent.click(save);
+    await waitFor(() => expect(name).toHaveAttribute("aria-invalid", "true"));
+
+    // Un fallo sin campos no puede dejar en pie la queja del intento anterior.
+    await userEvent.click(save);
+    await screen.findByRole("alert");
+    expect(name).not.toHaveAttribute("aria-invalid");
+
+    // Y una queja nueva no puede dejar en pie el aviso anterior.
+    await userEvent.click(save);
+    const title = screen.getByLabelText("Título de la tarea");
+    await waitFor(() => expect(title).toHaveAttribute("aria-invalid", "true"));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(name).not.toHaveAttribute("aria-invalid");
+  });
+
+  it("@s39 clears the previous complaint each time the simulation is run again", async () => {
+    listed();
+    const simulate = "/api/v1/me/automations/simulate";
+    route("POST", simulate, 503, { code: "STORAGE_UNAVAILABLE" });
+    route("POST", simulate, 422, {
+      code: "VALIDATION_ERROR",
+      errors: [{ field: "name", code: "REQUIRED", message: "x" }],
+    });
+    route("POST", simulate, 200, { evaluatedEvents: 2, matches: [] });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    const button = screen.getByRole("button", { name: "Simular" });
+    await userEvent.click(button);
+    await screen.findByRole("alert");
+
+    await userEvent.click(button);
+    const name = screen.getByLabelText("Nombre");
+    await waitFor(() => expect(name).toHaveAttribute("aria-invalid", "true"));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    await userEvent.click(button);
+    await screen.findByRole("status", { name: "Resultado de la simulación" });
+    expect(name).not.toHaveAttribute("aria-invalid");
+  });
+
+  it("@s40 clears the previous complaint when the switch is flipped again", async () => {
+    listed({ ...rule, version: 2 });
+    route("GET", `${CREATE}/${RULE}/runs`, 503, { code: "X" });
+    route("PUT", `${CREATE}/${RULE}`, 200, {
+      ...rule,
+      version: 3,
+      enabled: false,
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Historial de Seguimiento" }),
+    );
+    await screen.findByRole("alert");
+    await userEvent.click(screen.getByRole("switch", { name: /seguimiento/i }));
+    await waitFor(() =>
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument(),
+    );
+    expect(screen.getByText("Inactiva")).toBeInTheDocument();
+  });
+
+  it("@s40 loads the current version of the very rule that clashed", async () => {
+    listed(disabled, { ...rule, version: 2 });
+    route("PUT", `${CREATE}/${RULE}`, 412, { code: "AUTOMATION_CONFLICT" });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Editar Seguimiento" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await screen.findByText("Otra pestaña cambió esta regla");
+    routes.delete("GET /api/v1/me/automations");
+    listed(disabled, { ...rule, version: 3, name: "Del servidor" });
+    await userEvent.click(
+      screen.getByRole("button", { name: "Cargar versión actual" }),
+    );
+    await waitFor(() =>
+      expect(screen.getByLabelText("Nombre")).toHaveValue("Del servidor"),
+    );
+    expect(
+      screen.queryByText("Otra pestaña cambió esta regla"),
+    ).not.toBeInTheDocument();
+    // La lista también queda al día, no sólo el borrador.
+    expect(
+      screen.getByRole("button", { name: "Editar Del servidor" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Pausada")).toBeInTheDocument();
+  });
+
+  it("@s41 empties the previous history before the new one arrives", async () => {
+    listed(rule, disabled);
+    const later = held();
+    route("GET", `${CREATE}/${RULE}/runs`, 200, {
+      items: [
+        {
+          id: "44444444-4444-4444-8444-444444444444",
+          eventId: "55555555-5555-4555-8555-555555555555",
+          eventType: "TaskCreated.v1",
+          occurredAt: "2026-09-08T10:15:30.123456Z",
+          attempt: 1,
+          status: "succeeded",
+          createdTaskId: null,
+          deliveryId: null,
+          errorCode: null,
+          executedAt: "2026-09-08T10:15:30.123456Z",
+        },
+      ],
+      nextCursor: null,
+    });
+    route(
+      "GET",
+      `${CREATE}/${OTHER_RULE}/runs`,
+      200,
+      { items: [], nextCursor: null },
+      later.promise,
+    );
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Historial de Seguimiento" }),
+    );
+    expect(await screen.findByText("Correcta")).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Historial de Pausada" }),
+    );
+    expect(screen.getByTestId("automation-history-title")).toHaveTextContent(
+      "Pausada",
+    );
+    expect(screen.queryByText("Correcta")).not.toBeInTheDocument();
+    expect(
+      within(screen.getByRole("list", { name: "Ejecuciones" })).queryAllByRole(
+        "listitem",
+      ),
+    ).toHaveLength(0);
+    later.release();
+  });
+
+  const ENDPOINT = "88888888-8888-4888-8888-888888888888";
+  const webhookRule: Automation = {
+    ...rule,
+    id: OTHER_RULE,
+    name: "Aviso",
+    version: 2,
+    action: { type: "NOTIFY_WEBHOOK", endpointId: ENDPOINT },
+  };
+
+  it("@s37 keeps the endpoint of a webhook rule when only its name changes", async () => {
+    listed(webhookRule);
+    route("PUT", `${CREATE}/${OTHER_RULE}`, 200, {
+      ...webhookRule,
+      version: 3,
+      name: "Aviso renombrado",
+    });
+    render(<Automations owner="owner" />);
+    const row = await screen.findByRole("listitem");
+    expect(within(row).getByText("Webhook")).toBeInTheDocument();
+    expect(within(row).queryByText("Marketing")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Editar Aviso" }));
+    const name = screen.getByLabelText("Nombre");
+    await userEvent.clear(name);
+    await userEvent.type(name, "Aviso renombrado");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() =>
+      expect(sent("PUT", `${CREATE}/${OTHER_RULE}`)).toHaveLength(1),
+    );
+    // Renombrar no puede convertir un aviso en una tarea ni perder el endpoint.
+    expect(sent("PUT", `${CREATE}/${OTHER_RULE}`)[0]).toEqual({
+      name: "Aviso renombrado",
+      enabled: true,
+      trigger: { eventType: "TaskCreated.v1" },
+      condition: null,
+      action: { type: "NOTIFY_WEBHOOK", endpointId: ENDPOINT },
+    });
+  });
+
+  it("@s40 keeps the endpoint of a webhook rule when the switch is flipped", async () => {
+    listed({ ...webhookRule, enabled: false });
+    route("PUT", `${CREATE}/${OTHER_RULE}`, 200, {
+      ...webhookRule,
+      version: 3,
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(await screen.findByRole("switch", { name: /aviso/i }));
+    await waitFor(() =>
+      expect(sent("PUT", `${CREATE}/${OTHER_RULE}`)).toHaveLength(1),
+    );
+    expect(sent("PUT", `${CREATE}/${OTHER_RULE}`)[0]).toEqual({
+      name: "Aviso",
+      enabled: true,
+      trigger: { eventType: "TaskCreated.v1" },
+      condition: null,
+      action: { type: "NOTIFY_WEBHOOK", endpointId: ENDPOINT },
+    });
+  });
+
+  it("@s39 previews a webhook notice instead of a resolved task title", async () => {
+    listed();
+    route("POST", "/api/v1/me/automations/simulate", 200, {
+      evaluatedEvents: 1,
+      matches: [
+        {
+          eventId: "55555555-5555-4555-8555-555555555555",
+          eventType: "TaskCreated.v1",
+          occurredAt: "2026-09-08T10:15:30.123456Z",
+          preview: {
+            type: "NOTIFY_WEBHOOK",
+            endpointId: ENDPOINT,
+            eventId: "55555555-5555-4555-8555-555555555555",
+          },
+          loopGuarded: false,
+        },
+      ],
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    const match = await screen.findByRole("listitem");
+    expect(within(match).getByText("Aviso al webhook")).toBeInTheDocument();
+    expect(within(match).queryByText(/Fallaría/)).not.toBeInTheDocument();
+  });
+
+  it("@s37 shows the identifier of a destination it cannot name", async () => {
+    listed({
+      ...rule,
+      action: { ...rule.action, projectId: OTHER_RULE } as Automation["action"],
+    });
+    render(<Automations owner="owner" />);
+    expect(await screen.findByText(OTHER_RULE)).toBeInTheDocument();
+  });
+
   it("@s43 drops the history of the rule the owner just left", async () => {
     listed(rule, disabled);
     let release = () => {};
@@ -548,6 +1461,12 @@ describe("automations page", () => {
     );
     release();
     await screen.findByRole("list", { name: "Ejecuciones" });
+    expect(screen.getByTestId("automation-history-title")).toHaveTextContent(
+      "Pausada",
+    );
+    // La respuesta tardía de la primera regla no anuncia nada ni recupera el sitio.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(screen.getByTestId("automation-history-title")).toHaveTextContent(
       "Pausada",
     );

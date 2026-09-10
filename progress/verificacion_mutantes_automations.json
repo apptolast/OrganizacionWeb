@@ -1,0 +1,101 @@
+[
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R8 178 limpieza de desmontaje -> {}",
+    "verdict": "MUERE",
+    "tests": [
+      "@s43 cancels the write and the history still in the air when the page is left"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R8 180 cuerpo de la limpieza -> {}",
+    "verdict": "MUERE",
+    "tests": [
+      "@s43 cancels the write and the history still in the air when the page is left"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R8 183 aborto del historial -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s43 cancels the write and the history still in the air when the page is left"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R8 184 aborto de la escritura -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s43 cancels the write and the history still in the air when the page is left"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R8 223 limpieza de la lectura inicial -> undefined",
+    "verdict": "SOBREVIVE",
+    "tests": []
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R8 233 limpieza de la lectura de proyectos -> undefined",
+    "verdict": "MUERE",
+    "tests": [
+      "@s43 cancels the reads still in the air when the page is left"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R8 207 setFailed(false) al reintentar -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 keeps offering the retry when the second read fails too"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R8 218 setFailed(false) tras la lectura inicial -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 shows name, readable trigger, destination and state as text",
+      "@s40 says so when the rule could not be saved, and keeps the draft",
+      "@s39 says so when the simulation could not be run",
+      "@s39 pins a field error of the simulation to its control and focuses it",
+      "@s41 says so when the history could not be loaded",
+      "@s43 drops a save that another write superseded, without announcing anything",
+      "@s43 drops a simulation that a save superseded, without announcing anything",
+      "@s43 drops a switch answer that another write superseded, without announcing anything",
+      "@s38 clears the previous complaint each time the owner saves again",
+      "@s39 clears the previous complaint each time the simulation is run again",
+      "@s40 clears the previous complaint when the switch is flipped again",
+      "@s43 drops the history of the rule the owner just left"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R8 197 setFailed(false) tras el reintento -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 keeps offering the retry when the second read fails too"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R8 281 finally de save -> {}",
+    "verdict": "MUERE",
+    "tests": [
+      "@s40 says so when the rule could not be saved, and keeps the draft",
+      "@s38 clears the previous complaint each time the owner saves again"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R8 283 setSaving(false) -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s40 says so when the rule could not be saved, and keeps the draft",
+      "@s38 clears the previous complaint each time the owner saves again"
+    ]
+  }
+]

@@ -55,16 +55,15 @@ expresamente fuera de alcance.
 Con el secreto `whsec_AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8`, este cuerpo
 de exactamente 209 bytes UTF-8:
 
-```json
-{
-  "eventId": "11111111-1111-4111-8111-111111111111",
-  "aggregateId": "22222222-2222-4222-8222-222222222222",
-  "ownerId": "owner-a",
-  "occurredAt": "2026-09-08T10:00:00.000000Z",
-  "schemaVersion": 1,
-  "type": "webhook.ping.v1"
-}
+<!-- prettier-ignore -->
 ```
+{"eventId":"11111111-1111-4111-8111-111111111111","aggregateId":"22222222-2222-4222-8222-222222222222","ownerId":"owner-a","occurredAt":"2026-09-08T10:00:00.000000Z","schemaVersion":1,"type":"webhook.ping.v1"}
+```
+
+**Cópialo tal cual, en una sola línea.** La firma es sobre **bytes**, no sobre el
+JSON como estructura: si lo reindentas, pasa de 209 bytes a 238 y las firmas de
+abajo dejan de cuadrar aunque el contenido sea el mismo. Es el mismo motivo por
+el que hay que firmar los bytes crudos de lo que recibes.
 
 y `t=1788861600`, la cabecera es exactamente:
 
@@ -92,7 +91,8 @@ firma. Deduplica por él.
 
 El cuerpo es el registro de la outbox **tal cual**, así que **los campos dependen
 del tipo**. Los seis comunes están siempre; algunos tipos añaden los suyos. Por
-ejemplo, `TaskCreated.v1` y `SubtaskCreated.v1` llevan **ocho**:
+ejemplo, `TaskCreated.v1` lleva **ocho** —los seis comunes más `taskId` y `title`—
+y `SubtaskCreated.v1` lleva **nueve**, porque añade además `parentTaskId`:
 
 ```json
 {

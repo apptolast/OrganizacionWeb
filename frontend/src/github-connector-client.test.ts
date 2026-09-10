@@ -1,7 +1,11 @@
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { setCsrfToken, observeAccess } from "./api-client";
 import {
+  CONNECTION_FIELDS,
   ConnectorError,
+  RECEIPT_FIELDS,
   connectGithub,
   disconnectGithub,
   readGithubConnection,
@@ -550,4 +554,66 @@ it("@s39 an unreadable problem body still yields the typed error", async () => {
   expect(error).toBeInstanceOf(ConnectorError);
   expect(error.code).toBe("CONNECTOR_ERROR");
   expect(error.retryAfterSeconds).toBeNull();
+});
+
+// ------------------------------------------------- el contrato, atado a los dos lados
+
+/**
+ * La guarda que faltaba. La regresión de `a347936` fue **este** fichero contra
+ * `GithubConnectorController`: el recibo compartido pasó de once claves con `repository` a doce
+ * con `source` y `projectPath`, el cliente siguió exigiendo las once y `exact()` —que compara
+ * cardinalidad— tumbó la sección entera. La prueba equivalente existía para GitLab, o sea que la
+ * lección se había aprendido en el conector que no se rompió.
+ *
+ * <p>Ata las dos orillas leyendo la fuente Java. Lo que puede y lo que no puede prometer:
+ * comprueba que el `record` tiene esos componentes, no que Jackson los serialice con esos nombres.
+ * Un `@JsonProperty("repo")` la dejaría verde y rompería el cliente. Hoy no hay anotaciones, así
+ * que el riesgo es teórico, pero es el techo de la técnica y conviene que esté escrito antes de
+ * que alguien la crea infalible.
+ *
+ * <p>El ayudante está duplicado a propósito con el de `gitlab-connector-client.test.ts`: cada
+ * prueba de contrato lee el fichero que vigila y no depende de ninguna otra. Extraerlo a un módulo
+ * compartido es una mejora razonable para quien tenga los dos ficheros a la vez.
+ */
+function componentsOf(record: string, source: string): string[] {
+  const body = new RegExp(`record ${record}\\(([^)]*)\\)`, "s").exec(source);
+  if (!body) throw new Error(`no se encontró el record ${record}`);
+  return body[1]
+    .split(",")
+    .map((each) => each.trim().split(/\s+/).at(-1) ?? "")
+    .filter(Boolean);
+}
+
+const CONTROLLER =
+  "backend/src/main/java/com/apptolast/organization/adapter/http/GithubConnectorController.java";
+
+/** Sube desde el directorio de trabajo hasta encontrar la raíz del repositorio. */
+function controller(): string {
+  for (let where = process.cwd(), step = 0; step < 6; step++) {
+    const candidate = resolve(where, CONTROLLER);
+    if (existsSync(candidate)) return readFileSync(candidate, "utf8");
+    where = dirname(where);
+  }
+  throw new Error(`no se encontró ${CONTROLLER} desde ${process.cwd()}`);
+}
+
+/**
+ * Conjuntos, no listas. El orden de los componentes de un `record` no es parte del contrato JSON:
+ * `exact()` compara cardinalidad y presencia, y un objeto JSON no tiene orden. Reordenarlos es un
+ * no-op en producción, y una guarda que se pone roja por un cambio cosmético acaba relajada.
+ */
+function sorted(fields: string[]): string[] {
+  return [...fields].sort();
+}
+
+it("@s16 decodes exactly the receipt the controller publishes", () => {
+  expect(sorted(componentsOf("ImportResponse", controller()))).toEqual(
+    sorted(RECEIPT_FIELDS.split(" ")),
+  );
+});
+
+it("@s5 decodes exactly the connection the controller publishes", () => {
+  expect(sorted(componentsOf("ConnectionResponse", controller()))).toEqual(
+    sorted(CONNECTION_FIELDS.split(" ")),
+  );
 });

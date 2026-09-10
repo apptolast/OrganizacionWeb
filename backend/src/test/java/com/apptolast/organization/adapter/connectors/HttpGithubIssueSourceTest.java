@@ -28,6 +28,13 @@ class HttpGithubIssueSourceTest {
   private static final Instant NOW = Instant.parse("2026-09-09T12:00:00Z");
   private static final String ISSUES_PATH = "/repos/octocat/Hello-World/issues";
 
+  /**
+   * El techo que fija el contrato de la feature 29 (@s25, fila «200 con cuerpo JSON de más de 5
+   * MiB»), que gobierna a los dos adaptadores. Se escribe aquí y no se importa de producción a
+   * propósito: si alguien sube la constante del adaptador, estas dos pruebas tienen que enterarse.
+   */
+  private static final int FIVE_MEBIBYTES = 5 * 1024 * 1024;
+
   private FakeIssueServer github;
   private HttpGithubIssueSource source;
 
@@ -333,6 +340,40 @@ class HttpGithubIssueSourceTest {
 
     assertEquals(Reason.UNAVAILABLE, error.reason());
     assertTrue(elapsed.compareTo(Duration.ofMillis(2900)) < 0, "tardó " + elapsed);
+  }
+
+  /**
+   * @s28 «respuestas inesperadas de GitHub son 503 GITHUB_UNAVAILABLE», con el techo que fija la
+   *     fila «200 con cuerpo JSON de más de 5 MiB» del {@code @s25} de la feature 29: el adaptador
+   *     es gemelo del de GitLab y el peligro es el mismo, porque {@code app.github.api-base}
+   *     también es configurable. El cuerpo es una issue válida: lo que se rechaza es el
+   *     <em>tamaño</em>.
+   */
+  @Test
+  void s28_abodyOverFiveMebibytesIsUnavailableInsteadOfEatingTheMemory() {
+    github.reply(ISSUES_PATH, FakeIssueServer.Reply.ok(issueArrayOfExactly(FIVE_MEBIBYTES + 1)));
+
+    assertEquals(Reason.UNAVAILABLE, listFailure().reason());
+  }
+
+  /** La otra mitad del techo: justo en el límite todavía se importa, o el corte sería otro. */
+  @Test
+  void s28_abodyOfExactlyFiveMebibytesStillImports() {
+    github.reply(ISSUES_PATH, FakeIssueServer.Reply.ok(issueArrayOfExactly(FIVE_MEBIBYTES)));
+
+    assertEquals(1, source.list(REPOSITORY, TOKEN, 1).issues().size());
+  }
+
+  /**
+   * Array JSON de una sola issue de GitHub válida cuyo tamaño en bytes es exactamente el pedido.
+   * Todo el relleno va en el cuerpo de la issue, y todo es ASCII: un carácter es un byte.
+   */
+  private static String issueArrayOfExactly(int bytes) {
+    var head =
+        "[{\"id\":9001,\"title\":\"Issue 9001\",\"html_url\":"
+            + "\"https://github.com/octocat/Hello-World/issues/9001\",\"body\":\"";
+    var tail = "\"}]";
+    return head + "x".repeat(bytes - head.length() - tail.length()) + tail;
   }
 
   @Test

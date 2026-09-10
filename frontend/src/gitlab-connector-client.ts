@@ -8,7 +8,7 @@ export const CONNECTION_KEYS =
   "status apiBase projectPath projectId tokenHint lastActivityAt lastError version";
 export const RECEIPT_KEYS =
   "id source projectId projectPath status created skipped failed truncated errorCode startedAt finishedAt";
-const ERROR_FIELDS = "code at";
+export const ERROR_FIELDS = "code at";
 const INCOMPATIBLE = "Confirmación incompatible";
 const SOURCE = "gitlab";
 

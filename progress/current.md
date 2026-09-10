@@ -134,6 +134,14 @@ se ha implementado; se ha devuelto a límite declarado y se ha corregido el
 javadoc, que afirmaba estar cerrado sin estarlo. El límite residual y su
 contención por política de egreso quedan escritos en `deploy/EGRESS.md`.
 
+> **Superado el 10 de septiembre de 2026.** Las dos decisiones de arriba eran
+> contrarias entre sí: la 28 ancló y la 25 revocó el anclaje, sin verse. El
+> propietario zanja a favor de anclar en las dos **y probar el TLS**, que era el
+> punto que nadie había medido. Hecho: el anclaje **no** rompe la verificación
+> del certificado si se conserva el nombre, y ahora hay oráculo de ello en las
+> dos features. `deploy/EGRESS.md` pasa a ser defensa en profundidad. Bitácora:
+> `progress/tdd_anclaje_dns.md`.
+
 ### Cuatro veces que un agente refutó lo que se le dijo
 
 Vale la pena registrarlo, porque es lo que separa este trabajo de un teatro:

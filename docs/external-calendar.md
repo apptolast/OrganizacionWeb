@@ -42,12 +42,26 @@ La dirección completa no aparece en ninguna respuesta, log ni error: solo `urlH
     vez, exige que **todas** las direcciones devueltas pasen la política y **conecta contra la
     dirección literal ya validada**, conservando el nombre original en la cabecera `Host` y en el
     `SNIHostName` de TLS. Como el cliente HTTP recibe una dirección y no un nombre, no hay segunda
-    resolución y por tanto no hay ventana entre la comprobación y el uso.
-  - Límite que sí queda escrito: si el nombre resuelve a varias direcciones se usa la primera y no
-    se reintenta con las demás. Todas estaban validadas, así que es pérdida de tolerancia a fallos,
-    no de seguridad. Y la parte de SNI/certificado no tiene prueba propia: el arnés de esta clase
-    habla HTTP en claro contra `127.0.0.1`, así que lo verificado es el anclaje de dirección y la
-    cabecera `Host`, no el apretón de manos TLS.
+    resolución y por tanto no hay ventana entre la comprobación y el uso. Las tres piezas del
+    anclaje viven en `adapter/net/AnchoredConnection`, compartidas con el emisor de webhooks de la
+    feature 25, que ancla igual: es una sola decisión y tiene un solo sitio.
+  - **El TLS del camino anclado está probado**, que es el punto que puede romper: anclar a una
+    dirección suele tirar abajo la verificación del certificado. `HttpCalendarFeedTest` lo mide en
+    los dos sentidos contra un `HttpsServer` con el fixture
+    `src/test/resources/tls/anchored-receiver.p12` —autofirmado, con `SAN` de tipo `dNSName` y
+    **ninguna** de tipo `iPAddress`, que es lo que lo convierte en oráculo—: un certificado válido
+    para el nombre se acepta aunque la conexión vaya a `127.0.0.1`, el **mismo** certificado se
+    rechaza si el nombre pedido es otro, y uno que nadie avala se sigue rechazando. Los tres dan
+    `FEED_UNREACHABLE` al fallar, porque el conjunto cerrado de códigos de la feature no tiene una
+    clase propia para TLS.
+  - Lo que el anclaje cuesta, escrito y no escondido: la aplicación necesita
+    `jdk.httpclient.allowRestrictedHeaders=host` (se activa sola, añadiéndose a lo que hubiera
+    declarado el despliegue); la descarga habla **HTTP/1.1**, porque sobre HTTP/2 la autoridad la
+    fija la URI y el proveedor no vería el nombre; y si el nombre resuelve a varias direcciones se
+    usa la primera y no se reintenta con las demás. Esto último es pérdida de tolerancia a fallos,
+    no de seguridad: todas estaban validadas.
+  - La política de egreso de `deploy/EGRESS.md` sigue siendo obligatoria, pero como **defensa en
+    profundidad**: la contención del reenlace es de la aplicación.
 - **Descarga.** Redirecciones deshabilitadas, `Accept: text/calendar`, sin cookie ni `Authorization`,
   **plazo total de 5 s para el intercambio completo** —conexión, cabeceras y lectura del cuerpo—,
   aborto al superar 1 MiB, y solo 200 con `Content-Type` `text/*`. El plazo del cuerpo no lo da

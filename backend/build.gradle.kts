@@ -29,6 +29,12 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     systemProperty("api.version", "1.44")
+    // El anclaje de la enmienda B3 envia la cabecera Host a mano, y el cliente del JDK solo la
+    // admite si se le autoriza ANTES de inicializar su clase de utilidades, cosa que ocurre en
+    // cuanto cualquier componente construye su primera peticion. Los bloques estaticos de los
+    // conectores no bastan: quien cargue primero decide. Declarada aqui, la decision es del JVM y
+    // no del orden de carga. En produccion lo hace OrganizationApplication.main como primera linea.
+    systemProperty("jdk.httpclient.allowRestrictedHeaders", "host")
     doFirst { systemProperty("outbox.test.classpath", sourceSets.test.get().runtimeClasspath.asPath) }
 }
 pitest {
@@ -698,7 +704,7 @@ pitest {
     if (authenticationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-authentication"))
     if (splitOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-split-task"))
     if (taskOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-create-task"))
-    jvmArgs.set(setOf("-Dapi.version=1.44"))
+    jvmArgs.set(setOf("-Dapi.version=1.44", "-Djdk.httpclient.allowRestrictedHeaders=host"))
     jvmArgs.add(providers.provider {
         "-Doutbox.test.classpath=${sourceSets.test.get().runtimeClasspath.asPath}"
     })

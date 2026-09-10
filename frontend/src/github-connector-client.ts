@@ -8,10 +8,11 @@ const IMPORTS_URL = `${CONNECTION_URL}/imports`;
 // nombra su origen (`source`) y la ruta del proyecto en él (`projectPath`), donde antes decía
 // `repository`. additional_connectors.feature:242 exige que los dos recibos tengan las mismas
 // claves; este cliente sólo habla con el extremo de GitHub, así que exige `source` "github".
-const RECEIPT_FIELDS =
+export const RECEIPT_FIELDS =
   "id source projectId projectPath status created skipped failed truncated errorCode startedAt finishedAt";
 const GITHUB = "github";
-const CONNECTION_FIELDS = "repository login status connectedAt lastImport";
+export const CONNECTION_FIELDS =
+  "repository login status connectedAt lastImport";
 const INCOMPATIBLE = "Confirmación incompatible";
 
 export type GithubImportReceipt = {

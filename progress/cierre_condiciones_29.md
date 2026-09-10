@@ -273,3 +273,146 @@ Producción restaurada y verde. Diez pruebas de la clase en verde.
 - `backend/src/test/java/com/apptolast/organization/adapter/ConnectorCatalogApiTest.java`
 
 Sin cambios de producción: los dos hallazgos eran de oráculo, no de conducta.
+
+---
+
+## C4 — la prueba de contrato, apuntada al conector correcto — **CERRADA**
+
+### F1 — la guarda que faltaba: GitHub
+
+`gitlab-connector-client.test.ts` ataba las dos orillas del conector de GitLab.
+La regresión de `a347936` fue `github-connector-client.ts` contra
+`GithubConnectorController`: **la lección se había aprendido en el carril
+equivocado**. Ahora existe la equivalente en
+`frontend/src/github-connector-client.test.ts`, sobre `ImportResponse` contra
+`RECEIPT_FIELDS` y `ConnectionResponse` contra `CONNECTION_FIELDS`.
+
+Para que la guarda sea real y no una copia, las dos constantes pasan a estar
+exportadas en `github-connector-client.ts` (y `ERROR_FIELDS` en el de GitLab):
+la prueba compara contra **la misma constante que `exact()` usa en producción**,
+no contra una lista escrita a mano en el test. Si comparase contra una copia, la
+guarda sería decorativa —la misma familia que H1—.
+
+**Rojo 1, reproduciendo la regresión real.** Devolví `RECEIPT_FIELDS` a las once
+claves con `repository` que tenía antes de `a347936`:
+
+```
+❯ src/github-connector-client.test.ts (48 tests | 8 failed)
+   × @s16 decodes exactly the receipt the controller publishes
+AssertionError: expected [...] to deeply equal [...]
++   "source"        (lo que publica el controlador)
+-   "repository"    (lo que decodificaba el cliente)
+```
+
+**Rojo 2, y éste es el decisivo.** El anterior tumbaba ocho pruebas porque el
+fixture del propio fichero también quedaba desfasado. La forma real de la
+regresión es la contraria: **se mueve el lado Java y el cliente no se entera**.
+Renombré `source` a `origin` en `GithubConnectorController.ImportResponse` y dejé
+el cliente intacto:
+
+```
+❯ src/github-connector-client.test.ts (48 tests | 1 failed)
+   × @s16 decodes exactly the receipt the controller publishes
++   "origin"
+-   "source"
+```
+
+**Una sola prueba roja de 48.** Las otras 47 —incluidas todas las de fixture— se
+quedan verdes, porque ninguna mira la fuente Java. Eso es exactamente lo que pasó
+la noche del 9: el cambio pasó los dos lados por separado y falló al juntarlos.
+Sin esta prueba no había nada que lo dijera.
+
+### F2 — el tercer `record`
+
+`GitlabConnectorController:298` publica `record ErrorResponse(String code,
+Instant at)` y el cliente lo valida contra `ERROR_FIELDS` (`:11`, usado en
+`decodeFailure`). Ese par no se comparaba. Añadido en la de GitLab.
+
+En GitHub **no aplica**: `GithubConnectorController` no tiene `ErrorResponse`, y
+su `ConnectionResponse.lastImport` es un `ImportResponse`, que ya está cubierto.
+Comprobado leyendo los dos controladores, no supuesto.
+
+**Rojo acreditado.** `ErrorResponse(String code, …)` → `ErrorResponse(String
+errorCode, …)`:
+
+```
+❯ src/gitlab-connector-client.test.ts (20 tests | 1 failed)
+   × @s2 decodes exactly the error the controller publishes
+AssertionError: expected [ 'at', 'errorCode' ] to deeply equal [ 'at', 'code' ]
+```
+
+Otra vez **una sola** roja de 20: las diecinueve restantes, incluidas las dos
+pruebas de contrato que ya existían, se quedan verdes. Es literalmente lo que
+denunciaba F2 —«pasa la prueba de contrato entera y rompe `decodeFailure` en
+ejecución»— y ahora ya no.
+
+### F3 — el orden, relajado
+
+Las tres comparaciones pasan de `toEqual` sobre listas a `toEqual` sobre listas
+**ordenadas alfabéticamente**, que es la comparación de conjuntos con un diff
+legible (un `Set` daría un mensaje peor y perdería la cardinalidad, que sí
+importa: `exact()` la compara).
+
+**El orden no es parte del contrato JSON**, y no encuentro argumento para
+conservarlo: `exact()` (`schedule-block-api.ts:341-350`) compara cardinalidad y
+presencia, y un objeto JSON no tiene orden. Reordenar componentes de un `record`
+es un no-op en producción.
+
+**Verde acreditado**, que aquí es la evidencia que toca: reordené
+`ErrorResponse(String code, Instant at)` a `ErrorResponse(Instant at, String
+code)` —un cambio puramente cosmético— y la suite se quedó en
+
+```
+Test Files  1 passed (1)      Tests  20 passed (20)
+```
+
+Con el `toEqual` sobre listas de antes eso habría sido una alarma falsa. La
+tercera vez que alguien ve una guarda roja por un reordenamiento, la relaja.
+
+### F4 y F5, que no condiciona el dictamen pero conviene que estén escritas
+
+- **F4, la regex `record NOMBRE\(([^)]*)\)`.** Sigue igual: se rompe con
+  cualquier componente cuyo tipo lleve un paréntesis o una coma
+  (`Map<String, Object>`, `@JsonFormat(...)`) y coge la **primera** aparición del
+  nombre. Falla ruidosamente, que es lo importante, pero con un mensaje que no
+  explica nada. Hoy ninguno de los cinco `record` tiene genéricos ni anotaciones.
+  No lo toco: la condición no lo pide y arreglarlo bien es un analizador, no un
+  parche a la regex.
+- **F5, el techo de la técnica.** Estas pruebas atan **nombres de componentes**,
+  no serialización. Un `@JsonProperty("repo")` las dejaría verdes y rompería el
+  cliente. Queda escrito en el javadoc de las dos, para que nadie las crea
+  infalibles.
+
+### El ayudante duplicado, a propósito
+
+`componentsOf` y `controller()` están ahora en los dos ficheros de prueba. Es
+deliberado: cada prueba de contrato lee el fichero que vigila y no depende de
+ninguna otra. Extraerlo a un módulo compartido exigiría crear un fichero fuera
+de mi ámbito de esta noche (`frontend/src/github-connector*` sólo está cedido
+para la prueba nueva). Queda como mejora razonable para quien tenga los dos.
+
+### Ficheros
+
+- `frontend/src/github-connector-client.test.ts` (66 líneas nuevas)
+- `frontend/src/github-connector-client.ts` (dos `const` pasan a `export const`)
+- `frontend/src/gitlab-connector-client.test.ts`
+- `frontend/src/gitlab-connector-client.ts` (un `const` pasa a `export const`)
+
+`frontend/src/github-connector*` está cedido en el encargo **sólo para la prueba
+de contrato nueva de C4**, y eso es lo único que se ha tocado: el cambio en el
+cliente son dos palabras `export`, necesarias para que la prueba compare contra
+la constante de producción y no contra una copia.
+
+Ninguna de las dos configuraciones de Stryker implicadas
+(`stryker.github-connector.config.json`, `stryker.additional-connectors.config.json`)
+usa rangos por línea —mutan ficheros enteros—, así que las líneas añadidas no
+desplazan nada. Comprobado, por el hallazgo de `progress/hallazgo_rangos_stryker.md`.
+
+### Verificación
+
+- `vitest run src/github-connector-client.test.ts src/gitlab-connector-client.test.ts
+  src/github-connector.test.tsx src/gitlab-connector.test.tsx` → **163 verdes**.
+- `tsc --noEmit`, `eslint` y `prettier --write` limpios sobre los cuatro ficheros.
+- `gradlew spotlessCheck compileTestJava` verde: los dos controladores quedaron
+  restaurados byte a byte tras las roturas (`git diff` de
+  `adapter/http/` vacío).

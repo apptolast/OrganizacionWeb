@@ -10,6 +10,7 @@ import {
   readGitlabImport,
   startGitlabImport,
   CONNECTION_KEYS,
+  ERROR_FIELDS,
   RECEIPT_KEYS,
 } from "./gitlab-connector-client";
 
@@ -292,14 +293,35 @@ function controller(): string {
   throw new Error(`no se encontró ${CONTROLLER} desde ${process.cwd()}`);
 }
 
-it("@s15 decodes exactly the receipt the controller publishes, in the same order", () => {
-  expect(componentsOf("ImportResponse", controller())).toEqual(
-    RECEIPT_KEYS.split(" "),
+/**
+ * Conjuntos, no listas. El orden de los componentes de un `record` no es parte del contrato JSON:
+ * `exact()` compara cardinalidad y presencia, y un objeto JSON no tiene orden. Reordenarlos es un
+ * no-op en producción, y una guarda que se pone roja por un cambio cosmético acaba relajada.
+ */
+function sorted(fields: string[]): string[] {
+  return [...fields].sort();
+}
+
+it("@s15 decodes exactly the receipt the controller publishes", () => {
+  expect(sorted(componentsOf("ImportResponse", controller()))).toEqual(
+    sorted(RECEIPT_KEYS.split(" ")),
   );
 });
 
-it("@s8 decodes exactly the connection the controller publishes, in the same order", () => {
-  expect(componentsOf("ConnectionResponse", controller())).toEqual(
-    CONNECTION_KEYS.split(" "),
+it("@s8 decodes exactly the connection the controller publishes", () => {
+  expect(sorted(componentsOf("ConnectionResponse", controller()))).toEqual(
+    sorted(CONNECTION_KEYS.split(" ")),
+  );
+});
+
+/**
+ * El tercer `record` que el cliente decodifica, y que la guarda se dejaba fuera. `decodeFailure`
+ * valida `lastError` contra `ERROR_FIELDS`; renombrar `code` por `errorCode` en el `ErrorResponse`
+ * del controlador pasaba la prueba de contrato entera y rompía la decodificación en ejecución.
+ * Es la misma clase de fallo que la regresión de `a347936`, un nivel más abajo.
+ */
+it("@s2 decodes exactly the error the controller publishes", () => {
+  expect(sorted(componentsOf("ErrorResponse", controller()))).toEqual(
+    sorted(ERROR_FIELDS.split(" ")),
   );
 });

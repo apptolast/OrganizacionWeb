@@ -100,3 +100,27 @@ Serios/menores confirmados que no bloquean pero deben quedar registrados: Connec
 **Por que bloquea:** La transacción de lectura hace varias consultas (find y events): sin REPEATABLE_READ pueden caer a ambos lados de un commit y devolver la lista parcial que features/external_calendar.feature:15 prohíbe ('nunca una lista parcial'). El veredicto §1 declaró el hallazgo 19 'sí en lo portante' apoyándose en un oráculo que la mutación demuestra ciego al nivel de aislamiento que el código fija a propósito.
 
 **Como se cierra:** Una prueba de lectura concurrente que abra la transacción de lectura, deje que un escritor haga commit entre sus dos consultas y afirme que la vista devuelta es coherente (o todo lo viejo o todo lo nuevo); debe caer al quitar setIsolationLevel de :264.
+
+---
+
+## Nota del orquestador: parte de esto ya caducó al escribirse
+
+El panel se lanzó a las 12:50 y sintetizó sobre lo que había en disco entonces.
+A las **13:17** terminó la primera campaña de Stryker de esta feature, así que:
+
+- **«La de frontend NO se ha ejecutado nunca»** ya no es cierto. Medida:
+  **91,32 %** (663 de 726 con veredicto), por encima del umbral. El acta, con la
+  lista nominal de los 65 sin matar, está en
+  `progress/mutacion_external_calendar_frontend_medida.md`.
+- **«La campaña PIT existe en disco pero ninguna bitácora la cita»** queda
+  cerrado por la misma acta, que cita las dos: backend **91,71 %** (531/579) y
+  frontend **91,32 %**.
+
+Lo que **sigue en pie** de ese bloqueante es la parte que no era de medir sino de
+escribir: `feature_list.json` y `progress/current.md` decían «pendiente». El
+parte ya está corregido; `feature_list.json` no se toca hasta que el juez
+apruebe, que es la regla.
+
+**Los otros nueve bloqueantes siguen enteros.** Y conviene leer también las cuatro
+cosas que el panel **descartó** al comprobarlas: son oráculos que otro juez había
+dado por rotos y no lo estaban. No los rehagas.

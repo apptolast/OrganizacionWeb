@@ -177,6 +177,12 @@ function AutomationsWorkspace() {
   const live = useRef<AbortController | null>(null);
   const runsRequest = useRef<AbortController | null>(null);
   const writeRequest = useRef<AbortController | null>(null);
+  // Quien encendio cada indicador de ocupado. writeRequest lo comparten save,
+  // simulate y toggle, asi que el perdedor de una carrera deja de ser el
+  // vigente; pero sigue siendo el dueno de su propio flag y tiene que
+  // apagarlo, o el control queda inerte para siempre.
+  const savingRequest = useRef<AbortController | null>(null);
+  const toggleRequest = useRef<AbortController | null>(null);
   const mounted = useRef(true);
   const heading = useRef<HTMLHeadingElement>(null);
   const invalid = useRef<string | null>(null);
@@ -254,6 +260,7 @@ function AutomationsWorkspace() {
     writeRequest.current?.abort();
     const controller = new AbortController();
     writeRequest.current = controller;
+    savingRequest.current = controller;
     setSaving(true);
     setFields({});
     setConflict(false);
@@ -285,7 +292,7 @@ function AutomationsWorkspace() {
       } else if (error instanceof AutomationConflict) setConflict(true);
       else setNotice("No se ha podido guardar. Inténtalo de nuevo.");
     } finally {
-      if (mounted.current && writeRequest.current === controller)
+      if (mounted.current && savingRequest.current === controller)
         setSaving(false);
     }
   }
@@ -318,6 +325,7 @@ function AutomationsWorkspace() {
     const controller = new AbortController();
     writeRequest.current?.abort();
     writeRequest.current = controller;
+    toggleRequest.current = controller;
     setBusyToggle(rule.id);
     setNotice(null);
     try {
@@ -335,7 +343,7 @@ function AutomationsWorkspace() {
       if (!mounted.current || writeRequest.current !== controller) return;
       setNotice("No se ha podido cambiar el estado de la regla.");
     } finally {
-      if (mounted.current && writeRequest.current === controller)
+      if (mounted.current && toggleRequest.current === controller)
         setBusyToggle(null);
     }
   }

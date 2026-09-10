@@ -1018,7 +1018,12 @@ describe("automations page", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("@s43 drops a save that another write superseded, without announcing anything", async () => {
+  // Tres pruebas de una situacion que NO esta en los Examples de @s43 («navega
+  // a /proyectos», «cierra sesion», «cambia a otra regla»): otra escritura
+  // supera a la primera. Lo que si fija el contrato de esa situacion es @s40
+  // fila 1, «el boton queda deshabilitado HASTA la respuesta»: hasta, no para
+  // siempre. Por eso viven aqui bajo @s40 y miran el control, no solo el aviso.
+  it("@s40 releases Guardar when another write supersedes the save, without announcing anything", async () => {
     listed();
     const save = held();
     route("POST", CREATE, 201, rule, save.promise);
@@ -1042,9 +1047,13 @@ describe("automations page", () => {
     expect(
       screen.queryByRole("list", { name: "Reglas" }),
     ).not.toBeInTheDocument();
+    // El borrador queda dentro del editor: Guardar tiene que poder sacarlo.
+    expect(screen.getByRole("button", { name: "Guardar" })).toBeEnabled();
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(sent("POST", CREATE)).toHaveLength(2));
   });
 
-  it("@s43 drops a simulation that a save superseded, without announcing anything", async () => {
+  it("@s40 drops a simulation that a save superseded, without announcing anything", async () => {
     listed();
     const simulation = held();
     route(
@@ -1074,7 +1083,7 @@ describe("automations page", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("@s43 drops a switch answer that another write superseded, without announcing anything", async () => {
+  it("@s40 releases the switch when another write supersedes it, without announcing anything", async () => {
     listed({ ...rule, version: 2 });
     const flip = held();
     route(
@@ -1102,6 +1111,13 @@ describe("automations page", () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(screen.getByText("Activa")).toBeInTheDocument();
+    // El interruptor vuelve a ser usable, y no bloquea a los demas.
+    const flipped = screen.getByRole("switch", { name: /seguimiento/i });
+    expect(flipped).toBeEnabled();
+    await userEvent.click(flipped);
+    await waitFor(() =>
+      expect(sent("PUT", `${CREATE}/${RULE}`)).toHaveLength(2),
+    );
   });
 
   it("@s40 marks the state of each switch with a class besides the text", async () => {

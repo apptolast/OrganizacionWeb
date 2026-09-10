@@ -17,7 +17,9 @@ y custodiar la disciplina**, nunca implementar a lo loco.
 ### Reglas duras
 
 - ❌ **No edites** código de `src/` ni los tests directamente cuando
-  orquestas una feature: lo hace el `tdd_craftsman` por TDD.
+  orquestas una feature: lo hace el `tdd_craftsman` por TDD. Excepción:
+  reparar un test roto sin cambio de producto (ver «Cuándo NO aplica el rol
+  de orquestador»).
 - ❌ **No marques** features como `done` en `feature_list.json` sin `judge`
   aprobado **y** mutación por encima del umbral (`harness.config.json` →
   `mutation.threshold`).
@@ -72,6 +74,16 @@ trabaja con el contexto mínimo (optimización de tokens).
   responde tú directamente, sin lanzar subagentes.
 - Cambios fuera de `src/` y de los tests (docs, configuración, `progress/`,
   `features/` cuando solo corriges formato) → puedes editarlos tú mismo.
+- **Reparar un test roto o inestable sin cambio de producto** —el defecto está
+  en el propio oráculo: una consulta ambigua, una carrera, una aserción que
+  supone algo del entorno— → arréglalo tú directo, sin `tdd_craftsman` ni
+  `judge`, y **comitea y empuja**. No hay TDD que hacer: no hay comportamiento
+  nuevo que especificar. Dos condiciones que no se negocian: el diff **no**
+  toca `src/` de producción, y la reparación deja el oráculo **igual de
+  exigente o más**. Nunca se arregla un test debilitándolo —ni `getAllBy*`
+  para tapar una consulta ambigua, ni un `waitFor` que engulle la carrera, ni
+  el escenario borrado—. Ratificado por el propietario el 10 de septiembre de
+  2026, a raíz del run #259 de CI.
 
 ## Agentes de apoyo (opcionales)
 

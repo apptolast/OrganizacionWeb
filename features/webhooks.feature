@@ -336,6 +336,18 @@ Feature: Entregar los eventos propios ya confirmados a URLs https elegidas con f
       | presenta un certificado no confiable                     | TLS             | null |
       | tiene un host que ya no resuelve                         | DNS             | null |
       | tiene un host que ahora resuelve a 10.0.0.7              | BLOCKED_ADDRESS | null |
+    # Enmienda del 10 de septiembre de 2026, ratificada por el propietario. El catalogo
+    # de error_class pasa de siete clases a OCHO: se anade SECRET_UNREADABLE, que no es
+    # un resultado de un envio -por eso no tiene fila en este Outline, donde se clasifica
+    # lo que devuelve el receptor- sino el desenlace de una entrega que NO se pudo
+    # enviar porque ninguna clave del llavero abre el secreto guardado, escenario que
+    # project-spec.md declara ESPERADO tras una rotacion.
+    #
+    # Sin esa clase, el arreglo del 10 de septiembre -sacar el descifrado del RowMapper
+    # para que una fila envenenada deje de detener la cola de TODOS los propietarios-
+    # habria cambiado el silencio de sitio en vez de quitarlo: la entrega quedaria sin
+    # explicacion. El propietario eligio ampliar el catalogo para que el operador vea
+    # POR QUE fallo. Ver progress/ratificaciones.md, entrada R6.
 
   @s26
   Scenario Outline: Cualquier 2xx dentro del plazo cierra la entrega como succeeded
@@ -399,7 +411,15 @@ Feature: Entregar los eventos propios ya confirmados a URLs https elegidas con f
   @s32
   Scenario Outline: El worker sólo existe con app.webhooks.enabled y acota cada ciclo
     Given <configuracion> y 25 entregas pendientes elegibles hacia un receptor que responde 200
-    When transcurren 1500 ms desde el arranque
+    When transcurren 2500 ms desde el arranque
+    # Enmienda del 10 de septiembre de 2026, ratificada por el propietario. Decia
+    # 1500 ms, y la fila 3 exige DOS ciclos del worker. Con
+    # @Scheduled(initialDelay=1000, fixedDelay=1000) a los 1500 ms solo ha corrido
+    # UNO: la clausula era imposible de cumplir, no dificil. 2500 ms si cubre dos
+    # tics. Se enmienda el plazo y no el cableado porque el cableado es correcto y
+    # el que estaba mal era el numero del contrato. WebhookScheduleTest sujeta
+    # initialDelay, fixedDelay y unidad por reflexion, asi que cualquier desvio
+    # futuro se pone rojo al instante. Ver progress/ratificaciones.md, entrada R5.
     Then <resultado>
     Examples:
       | configuracion                                 | resultado |

@@ -26,6 +26,7 @@ por ti. ¿Las ratificas?»
 > recursos.
 
 **Alcanza a:**
+
 - `features/additional_connectors.feature:388` — `@s31`, las dos filas de
   credencial Bearer pasan de 401 `UNAUTHENTICATED` a 403 `API_SCOPE_DENIED`.
   Es la condición **C7** de `progress/judge_additional_connectors.md`.
@@ -70,3 +71,33 @@ delante:
 Es el bloqueante **B7** de `progress/carriles/bloqueantes_25.md`, que decía —con
 razón en la forma— que la enmienda «no lleva contrafirma donde mira el siguiente
 revisor». Ahora la lleva, en el propio `.feature`.
+
+---
+
+## R5 — 10 de septiembre de 2026 — el plazo del `@s32` sube a 2500 ms
+
+**Pregunta:** «El escenario `@s32` dice "transcurren 1500 ms desde el arranque" y
+exige dos ciclos del worker, pero el planificador está en `initialDelay=1000` y
+`fixedDelay=1000`: a los 1500 ms sólo ha corrido uno. La cláusula es imposible.»
+
+**Opción elegida:** «Subir el plazo a 2500 ms», descrita así: _el `When` pasa a un
+plazo que sí cubre dos tics; la prueba de reflexión ya sujeta `initialDelay`,
+`fixedDelay` y unidad, así que cualquier desvío se pone rojo al instante._
+
+**Alcanza a:** `features/webhooks.feature:402`.
+
+---
+
+## R6 — 10 de septiembre de 2026 — el catálogo de `error_class` pasa a ocho
+
+**Pregunta:** «El arreglo de hoy escribe una octava clase de error,
+`SECRET_UNREADABLE`, cuando un secreto no se puede descifrar. El contrato cierra
+el catálogo en siete, y el frontend la rechaza: deja ciego el panel de entregas
+de ese endpoint. ¿Qué mando?»
+
+**Opción elegida:** «Ampliar el catálogo a ocho», descrita así: _contrafirmas la
+ampliación y el carril añade `SECRET_UNREADABLE` al decodificador del frontend;
+el propietario ve por qué falló esa entrega en vez de una pantalla ciega._
+
+**Alcanza a:** `features/webhooks.feature` (`@s25`), `project-spec.md:2038`, y
+`frontend/src/webhooks-client.ts` (que hoy la rechaza y deja el panel ciego).

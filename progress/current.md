@@ -22,7 +22,7 @@ borrarlos habría dejado esa feature sin cifrado.
 |                           | Mutación backend | Mutación frontend | `harness init`      | Juez        |
 | ------------------------- | ---------------- | ----------------- | ------------------- | ----------- |
 | **25** webhooks           | **92,81 %** ✅   | **94,57 %** ✅    | **verde entero** ✅ | re-juzgando |
-| **28** calendario externo | remidiéndose     | remidiéndose      | ✅                  | pendiente   |
+| **28** calendario externo | **95,29 %** ✅ | **92,54 %** ✅ | **verde entero** ✅ | confirmando |
 
 La 25 tiene **las tres puertas acreditadas** y ninguna condición pendiente de
 nadie. Sólo espera el visto bueno del juez sobre cuatro correcciones.

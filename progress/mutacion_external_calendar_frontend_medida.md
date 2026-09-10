@@ -1,3 +1,18 @@
+> # ⚠️ ACTA CADUCADA — no la uses
+>
+> Esta acta publica **91,32 %** y se midió con el **ámbito ancho**, el que
+> puntuaba 16 mutantes de otras diez features. La cifra vigente es
+> **92,54 % (620/670)** y vive en `progress/mutation_external_calendar_frontend.md`,
+> junto con la lista nominal de los 50 sin matar.
+>
+> Se conserva porque su lista de supervivientes sigue siendo útil como historia,
+> no como medida. Y porque el propio plan de cierre se puso la regla de «que no
+> queden dos verdades»: borrarla dejaría sin explicar de dónde salía el 91,32 %
+> que se publicó durante unas horas.
+>
+> Además citaba como base el commit `ec0a3b8`, **que no existe**
+> (`git cat-file -t` no lo resuelve). Ese dato era falso y por eso se tacha.
+
 # Mutación de frontend de la feature 28 — medida, 10 de septiembre de 2026
 
 **91,32 %**, por encima del umbral de 0,80 de `harness.config.json`.
@@ -10,7 +25,7 @@ publicó un 96,00 % que no estaba medido y el XML daba 95,72 %.
 
 Campaña: `frontend/stryker.external-calendar.config.json`, 26 min 35 s.
 Informe: `frontend/reports/mutation-external-calendar/mutation.json`.
-Sobre `main` en `ec0a3b8` (merge de los oráculos del carril, 83 -> 161 pruebas).
+~~Sobre `main` en `ec0a3b8`~~ (commit inexistente, ver aviso de arriba) (merge de los oráculos del carril, 83 -> 161 pruebas).
 
 | Fichero | Puntuación | Muertos | Plazo | Vivos | Sin cobertura |
 |---|---|---|---|---|---|

@@ -50,7 +50,17 @@ final class PublicAddressPolicy implements AddressPolicy {
     return blocked.stream().noneMatch(range -> range.contains(resolved));
   }
 
-  /** Solo la forma mapeada se normaliza; compatible, 6to4 y NAT64 se bloquean por rango entero. */
+  /**
+   * Duplicacion defensiva: el JDK ya devuelve {@link java.net.Inet4Address} para la forma mapeada,
+   * asi que este metodo no llega a normalizar nada en la practica. Medido el 10 de septiembre de
+   * 2026 con PIT: sus tres mutantes salen inalcanzables -uno SURVIVED y dos sin cobertura-
+   * precisamente por eso.
+   *
+   * <p>Se conserva a proposito, no por descuido: si una version futura del JDK dejara de
+   * normalizar, esto sigue tapando el agujero. Lo que se corrige es la frase, que decia "solo la
+   * forma mapeada se normaliza" en presente y describia algo que no ocurre. Compatible, 6to4 y
+   * NAT64 se bloquean por rango entero, eso si es cierto.
+   */
   private static InetAddress unmap(InetAddress address) {
     if (!(address instanceof Inet6Address)) return address;
     var bytes = address.getAddress();

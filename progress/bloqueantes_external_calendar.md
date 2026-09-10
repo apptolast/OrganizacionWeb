@@ -207,7 +207,7 @@ propiedad ahora = null
 ```
 
 Es decir: **ni fijarla ni borrarla en caliente cambia nada**. `backend/build.gradle.kts:37`
-(`systemProperty` en `test`) y `:764` (`jvmArgs` en `pitest`) la fijan en todos
+(`systemProperty` en `test`) y `:769` (`jvmArgs` en `pitest`) la fijan en todos
 los JVM de prueba, así que dentro de ellos la rama de `HttpCalendarFeed.java:148`
 es inalcanzable por construcción. Una prueba que la simulara con una costura
 inyectada mediría nuestra lógica de degradación, no el rechazo del JDK: eso es

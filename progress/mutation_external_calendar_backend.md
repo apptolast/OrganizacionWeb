@@ -57,3 +57,25 @@ informe porque su única clase salía con cero.
 | `PublicAddressPolicy$Cidr`   | `prefixLength`     | 67    | PrimitiveReturnsMutator      | NO_COVERAGE |
 | `PublicAddressPolicy$Cidr`   | `of`               | 70    | NullReturnValsMutator        | SURVIVED    |
 | `PublicAddressPolicy$Cidr`   | `contains`         | 78    | BooleanTrueReturnValsMutator | NO_COVERAGE |
+
+---
+
+## `DeleteExternalCalendar` sale con cero mutantes, y por qué no es un problema
+
+Se deja escrito porque si no, el próximo juez lo vuelve a abrir — y con razón,
+porque «una clase del ámbito con cero mutantes» es señal de alarma en este
+repositorio: así se descubrieron los cinco adaptadores de bitácora que estaban
+exentos sin que nadie lo supiera.
+
+**Aquí la causa es distinta y es benigna.** El cuerpo del caso de uso es una sola
+llamada **no-void cuyo valor se descarta**, y ningún mutador por defecto de PIT
+toca esa forma: no hay condicional que negar, ni frontera que mover, ni retorno
+que sustituir. No es que la clase esté exenta como pasaba con `org.slf4j`; es que
+no tiene superficie que mutar.
+
+**No viola la condición C3 del veredicto**, porque esa condición enumera las
+clases que *tienen* que recibir mutantes y ésta no está en la lista.
+
+La diferencia con el caso de los adaptadores de bitácora, que sí era un defecto:
+allí la clase **tenía** código mutable y una opción de configuración lo estaba
+suprimiendo. Aquí no hay nada que suprimir.

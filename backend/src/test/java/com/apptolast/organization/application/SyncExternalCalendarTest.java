@@ -286,8 +286,8 @@ class SyncExternalCalendarTest {
   /**
    * @s17, @s18, @s20 y @s21 hablan de «los contadores que publica la sincronización», y hasta aquí
    *     todos los oráculos fuera de {@code IcsFeedTest} los afirmaban en cero: los cuatro accesores
-   *     podían devolver 0 siempre y la suite seguía verde. Un feed con las tres omisiones a la vez y
-   *     los cuatro contadores en valores <b>distintos entre sí</b> y distintos de cero cierra el
+   *     podían devolver 0 siempre y la suite seguía verde. Un feed con las tres omisiones a la vez
+   *     y los cuatro contadores en valores <b>distintos entre sí</b> y distintos de cero cierra el
    *     tramo entero —parser, SyncSummary, fila y DTO— y además delata cualquier cruce entre ellos,
    *     que un valor repetido escondería.
    */

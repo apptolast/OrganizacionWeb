@@ -12,10 +12,10 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @s1 y @s33: leer la suscripción del propietario, y solo la suya.
- *     <p>Este caso de uso no tenía ninguna prueba propia: las dos que lo rozaban son {@code
- *     @WebMvcTest} con el caso de uso simulado, de modo que afirmaban sobre lo que el propio doble
- *     devolvía. El resultado medible era que el único mutante de la clase —hacer que la lectura
- *     conteste siempre «sin suscripción»— salía sin cobertura.
+ *     <p>Este caso de uso no tenía ninguna prueba propia: las dos que lo rozaban son
+ *     {@code @WebMvcTest} con el caso de uso simulado, de modo que afirmaban sobre lo que el propio
+ *     doble devolvía. El resultado medible era que el único mutante de la clase —hacer que la
+ *     lectura conteste siempre «sin suscripción»— salía sin cobertura.
  */
 class ReadExternalCalendarTest {
   static final String A = "persona-a";

@@ -10,6 +10,7 @@ import com.apptolast.organization.adapter.config.SecurityConfiguration;
 import com.apptolast.organization.adapter.http.ApiErrors;
 import com.apptolast.organization.adapter.http.GitlabConnectorController;
 import com.apptolast.organization.application.*;
+import com.apptolast.organization.application.GitlabIssueConnections;
 import com.apptolast.organization.domain.FieldError;
 import com.apptolast.organization.domain.IssueImportReceipt;
 import com.apptolast.organization.domain.ValidationException;
@@ -477,7 +478,7 @@ class GitlabConnectorApiTest {
   void s16_s17_s21_s26_everyCounterAndFlagOfTheReceiptTravelsWithItsValue(
       String status, int created, int skipped, int failed, boolean truncated, String errorCode)
       throws Exception {
-    when(readImport.execute("owner", IMPORT))
+    when(readImport.execute("owner", GitlabIssueConnections.SOURCE, IMPORT))
         .thenReturn(
             new IssueImportReceipt(
                 IMPORT,

@@ -666,8 +666,8 @@ class ExternalCalendarPersistenceTest {
    *     <p>Para medirlo hace falta que la transacción de lectura haga <b>dos</b> consultas, y hoy
    *     hace una sola por llamada; la segunda se cuela por la misma costura que usa {@code
    *     s25_aConcurrentReadNeverSeesAnEmptyOrMixedSnapshot}: subclasificar el {@link JdbcTemplate}
-   *     del adaptador. Como la conexión está ligada al hilo, esa segunda consulta corre dentro de la
-   *     misma transacción. Entre una y otra, un escritor confirma desde otro hilo.
+   *     del adaptador. Como la conexión está ligada al hilo, esa segunda consulta corre dentro de
+   *     la misma transacción. Entre una y otra, un escritor confirma desde otro hilo.
    */
   @Test
   @Timeout(120)

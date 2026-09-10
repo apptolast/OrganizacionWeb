@@ -430,7 +430,8 @@ class HttpCalendarFeedTest {
     assertEquals(FeedError.FEED_UNREACHABLE, codeOf(feed().fetch("https://")));
   }
 
-  // --- @s12: las cuatro degradaciones que ocurren ANTES de abrir el socket ------------------------
+  // --- @s12: las cuatro degradaciones que ocurren ANTES de abrir el socket
+  // ------------------------
   //
   // feature:14 cierra la lista de códigos de fallo, y feature:15 exige que un fallo deje la
   // instantánea anterior intacta: para eso, todo lo que pueda torcerse aquí tiene que salir como un
@@ -474,8 +475,8 @@ class HttpCalendarFeedTest {
 
   /**
    * El nombre no tiene ninguna dirección. Sin esta guarda, {@code getFirst()} sobre la lista vacía
-   * subiría una excepción en vez de un código, y con una lista nula ni siquiera se llegaría a
-   * mirar la política.
+   * subiría una excepción en vez de un código, y con una lista nula ni siquiera se llegaría a mirar
+   * la política.
    */
   @ParameterizedTest
   @CsvSource({"vacía", "nula"})

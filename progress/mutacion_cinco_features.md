@@ -39,10 +39,10 @@ hasta esta mañana porque no estaba en ningún ámbito.
 
 | Feature | Puntuación | Vivos | Sin cobertura | Estado |
 |---|---|---|---|---|
+| 30 automatizaciones (tras el carril) | **91,18 %** | 74 | 4 | ✅ |
 | 27 conector GitHub | **85,06 %** | 88 | **0** | ✅ |
 | 25 webhooks | 71,40 % | 151 | 22 | carril trabajando |
 | 29 conectores adicionales | 68,51 % | 216 | 17 | carril trabajando |
-| 30 automatizaciones | 52,74 % | 337 | 77 | carril trabajando |
 | 28 calendario externo | sin medir | | | carril trabajando desde la predicción |
 
 Desglose de la 29, porque el trabajo está muy concentrado: `gitlab-connector.tsx`
@@ -76,3 +76,23 @@ importaba**, y sin avisar.
 Queda `scratchpad/patrones-muertos.mjs`, que barre los dos árboles de fuentes y
 exige que todo patrón resuelva a una clase real: **441 patrones, cero muertos**.
 Va antes de cada campaña.
+
+### La feature 30, de 52,74 % a 91,18 %
+
+Es el salto mayor de la tanda y conviene desglosarlo, porque enseña donde estaba
+el problema:
+
+| Fichero | Antes | Después |
+|---|---|---|
+| `automations-api.ts` | 58,22 % | **99,73 %** |
+| `automations.tsx` | 47,36 % | **84,60 %** |
+| `App.tsx` | — | 100 % |
+| `workspace.tsx` | 100 % | 100 % |
+
+El carril cerró ocho racimos y acredito cada uno aplicando el mutante **al
+fichero de producción real**: 198 aplicados, **196 muertos**, y los dos restantes
+razonados como equivalentes. Las pruebas de esa pantalla pasaron de 33 a 84.
+
+De paso encontró el séptimo defecto de producto de la tanda: renombrar una regla
+de aviso al webhook la convertía en una regla de crear tarea y **perdía el
+`endpointId`**.

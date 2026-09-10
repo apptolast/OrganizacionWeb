@@ -250,9 +250,7 @@ it("@s36 rejects a type outside the catalogue when it is the only one", async ()
 
 it("@s36 rejects a single unknown type hidden after valid ones", async () => {
   stub({
-    items: [
-      endpoint({ eventTypes: ["TaskCreated.v1", "ProjectCreated.v2"] }),
-    ],
+    items: [endpoint({ eventTypes: ["TaskCreated.v1", "ProjectCreated.v2"] })],
   });
 
   await expect(listWebhooks(new AbortController().signal)).rejects.toThrow(
@@ -617,15 +615,15 @@ it.each([
   ["deleteWebhook", () => deleteWebhook("../otro", signalOf())],
   ["pingWebhook", () => pingWebhook("../otro", signalOf())],
   ["listWebhookDeliveries", () => listWebhookDeliveries("../otro", signalOf())],
-])("@s38 %s refuses an id that is not a uuid before touching the network", async (
-  _name,
-  call,
-) => {
-  const fetcher = stub({ items: [] });
+])(
+  "@s38 %s refuses an id that is not a uuid before touching the network",
+  async (_name, call) => {
+    const fetcher = stub({ items: [] });
 
-  await expect(call()).rejects.toThrow("Identidad incompatible");
-  expect(fetcher).not.toHaveBeenCalled();
-});
+    await expect(call()).rejects.toThrow("Identidad incompatible");
+    expect(fetcher).not.toHaveBeenCalled();
+  },
+);
 
 it("@s40 redeliver refuses a delivery id that is not a uuid before touching the network", async () => {
   const fetcher = stub({ items: [] });

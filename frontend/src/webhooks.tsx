@@ -190,12 +190,30 @@ function WebhookPanel() {
     setUncertain(true);
   }
 
-  async function act(run: (signal: AbortSignal) => Promise<void>) {
+  /**
+   * Las acciones de la lista no son la creación: interpretar aquí los códigos
+   * del POST de creación hacía que desactivar un webhook dijera «No se ha
+   * podido crear el webhook», o «Ya tienes cinco webhooks», o encendiera el
+   * error del campo URL del formulario. Cada acción dice lo que le pasó a ella.
+   */
+  async function reportAction(error: unknown, failure: string) {
+    const code = await problemCode(error);
+    setFormError(
+      code === "CONNECTORS_DISABLED"
+        ? "Falta configuración del servidor para conectores."
+        : failure,
+    );
+  }
+
+  async function act(
+    run: (signal: AbortSignal) => Promise<void>,
+    failure: string,
+  ) {
     const controller = track();
     try {
       await run(controller.signal);
     } catch (error) {
-      if (!controller.signal.aborted) await report(error);
+      if (!controller.signal.aborted) await reportAction(error, failure);
     }
   }
 
@@ -203,16 +221,21 @@ function WebhookPanel() {
     endpoint: WebhookEndpoint,
     status: "active" | "disabled",
   ) {
-    void act(async (signal) => {
-      const updated = await setWebhookStatus(endpoint.id, status, signal);
-      if (signal.aborted) return;
-      setItems((current) =>
-        current.map((item) => (item.id === updated.id ? updated : item)),
-      );
-      setAnnouncement(
-        status === "disabled" ? "Webhook desactivado." : "Webhook activado.",
-      );
-    });
+    void act(
+      async (signal) => {
+        const updated = await setWebhookStatus(endpoint.id, status, signal);
+        if (signal.aborted) return;
+        setItems((current) =>
+          current.map((item) => (item.id === updated.id ? updated : item)),
+        );
+        setAnnouncement(
+          status === "disabled" ? "Webhook desactivado." : "Webhook activado.",
+        );
+      },
+      status === "disabled"
+        ? "No se ha podido desactivar el webhook."
+        : "No se ha podido activar el webhook.",
+    );
   }
 
   function ping(endpoint: WebhookEndpoint) {
@@ -225,7 +248,7 @@ function WebhookPanel() {
         ...current.filter((d) => d.id !== sent.id),
       ]);
       setAnnouncement("Ping enviado. La entrega queda pendiente.");
-    });
+    }, "No se ha podido enviar el ping.");
   }
 
   function remove(endpoint: WebhookEndpoint) {
@@ -236,7 +259,7 @@ function WebhookPanel() {
       setConfirming(null);
       setAnnouncement("Webhook eliminado.");
       listHeading.current?.focus();
-    });
+    }, "No se ha podido eliminar el webhook.");
   }
 
   function openDeliveries(endpoint: WebhookEndpoint) {
@@ -244,7 +267,7 @@ function WebhookPanel() {
     void act(async (signal) => {
       const rows = await listWebhookDeliveries(endpoint.id, signal);
       if (!signal.aborted) setDeliveries(rows);
-    });
+    }, "No se han podido cargar las entregas.");
   }
 
   function redeliver(endpointId: string, row: WebhookDelivery) {
@@ -255,7 +278,7 @@ function WebhookPanel() {
         current.map((item) => (item.id === reopened.id ? reopened : item)),
       );
       setAnnouncement("Entrega reenviada. Vuelve a estar pendiente.");
-    });
+    }, "No se ha podido reenviar la entrega.");
   }
 
   function closeSecret() {

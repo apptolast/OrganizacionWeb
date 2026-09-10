@@ -350,3 +350,88 @@ ROJO 352 announcement inicial -> "Stryker"  · idem
 parejas ya matan.)
 
 **Previsión de muertes: 12.** Acumulado acreditado: 76.
+
+---
+
+## Racimo 8 — `report()` escrito para la creación y reutilizado por `act()` (defecto de producto)
+
+**Causa común.** `report()` interpreta los códigos de problema del **POST de
+creación** (@s41). `act()` —el envoltorio de las **cinco** acciones de la lista:
+ping, activar/desactivar, eliminar, ver entregas y reenviar— lo reutilizaba tal
+cual. Ninguna prueba hacía fallar ninguna de las cinco, así que el `catch` de
+`act()` y las dos últimas ramas de `report()` no se ejecutaban **nunca**.
+
+### Defecto de producto: al desactivar un webhook, el usuario leía «No se ha podido crear el webhook»
+
+No es un hueco de cobertura: es una falsedad en pantalla. Escritas las siete
+pruebas contra la producción de partida, salieron en rojo **las siete**, y esto
+es lo que decía cada una:
+
+| Acción que falla | Lo que el usuario leía |
+|---|---|
+| Desactivar, con cualquier problema | «No se ha podido crear el webhook.» |
+| Enviar ping / Ver entregas / Eliminar / Reenviar | lo mismo |
+| Cualquier acción, con `409 WEBHOOK_LIMIT` | «Ya tienes cinco webhooks. Elimina uno antes de crear otro.» |
+| Cualquier acción, con `400 WEBHOOK_URL_BLOCKED` | se encendía el error del **campo URL del formulario de creación**, con `aria-describedby` apuntando a un campo que no tiene nada que ver |
+
+**Arreglo.** Un reportero propio para las acciones, que no interpreta los códigos
+que sólo tienen sentido creando, y un mensaje por acción:
+
+```tsx
+async function reportAction(error: unknown, failure: string) {
+  const code = await problemCode(error);
+  setFormError(
+    code === "CONNECTORS_DISABLED"
+      ? "Falta configuración del servidor para conectores."
+      : failure,
+  );
+}
+```
+
+`CONNECTORS_DISABLED` se conserva porque es el único código que aplica a
+**todas** las operaciones de conectores y explica mejor que el genérico.
+`act(run, failure)` pasa el mensaje de cada acción. `report()` sigue siendo el
+reportero de la creación y no cambia: @s41 lo gobierna y sigue cumpliéndose.
+
+Rehecho el defecto a mano sobre la producción arreglada (volviendo a
+`await report(error)` dentro de `act`), caen **7 pruebas**.
+
+Además se cierran las dos ramas de `report()` que nadie ejercía: el
+`WEBHOOK_INVALID` y el cajón de sastre de `Response`, éste con dos casos —un
+código no listado y un cuerpo `502` que ni siquiera es json—, comprobando que el
+usuario lee «No se ha podido crear el webhook» y **no** el mensaje de resultado
+incierto, que sólo vale cuando no hubo respuesta ninguna.
+
+**Evidencia del rojo: 17 mutantes muertos.**
+
+```
+ROJO 445 code === "WEBHOOK_INVALID" -> false · a creation rejected as invalid asks to review the form
+ROJO 447 "WEBHOOK_INVALID" -> ""             · idem
+ROJO 448 rama WEBHOOK_INVALID -> {}          · idem
+ROJO 450 "Revisa los datos…" -> ""           · idem
+ROJO 452 error instanceof Response -> false  · a creation that fails with an unlisted problem code…
+ROJO 453 rama Response genérica -> {}        · idem
+ROJO 455 "No se ha podido crear…" -> ""      · idem
+ROJO 460 catch de act -> {}                  · a failed «Desactivar» says what failed… (7 rojas)
+ROJO 461 !aborted -> aborted (act)           · idem (7 rojas)
+ROJO 463 guarda de act -> false              · idem (7 rojas)
+ROJO mensaje de desactivar -> ""             · idem
+ROJO mensaje de activar -> ""                · a failed «Activar» says the activate failed…
+ROJO mensaje de ping -> ""                   · a failed «Enviar ping» says what failed…
+ROJO mensaje de eliminar -> ""               · a failed delete says the delete failed…
+ROJO mensaje de entregas -> ""               · a failed «Ver entregas» says what failed…
+ROJO mensaje de reenviar -> ""               · a failed redeliver says the redeliver failed
+ROJO DEFECTO act reusa el reportero de la creación · 7 rojas
+```
+
+Queda vivo el 462 (`if (!controller.signal.aborted)` → `true` en `act`): sólo se
+distingue si la acción falla **después** de abortar. Va con el racimo de guardas
+de aborto.
+
+**Previsión de muertes: 16 de los medidos + los 6 mensajes nuevos.** Acumulado
+acreditado: 92.
+
+Contrato: el `.feature` **no** cubre el fallo de las acciones de la lista —@s39
+y @s40 sólo describen el camino feliz, y @s41 habla sólo del POST de creación—,
+así que el arreglo llena un silencio del contrato, no lo contradice. Queda
+anotado para el juez por si quiere una fila explícita en @s39.

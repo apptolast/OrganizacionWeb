@@ -873,6 +873,208 @@ it("@s41 offers to refresh the list after a network failure of uncertain result"
   expect(other).toHaveBeenCalledTimes(1);
 });
 
+/** Responde al GET inicial con un webhook y hace fallar todo lo demás. */
+function stubFailingAction(response: () => Response) {
+  return stubApi([endpoint()], () => Promise.resolve(response()));
+}
+
+const boom = () => Response.json({ code: "BOOM" }, { status: 500 });
+
+// @s41 gobierna los errores del POST de creación. Las acciones de la lista no
+// tenían ninguna prueba de fallo, y reutilizaban el mismo reportero.
+it.each([
+  ["Desactivar", /no se ha podido desactivar/i],
+  ["Enviar ping", /no se ha podido enviar el ping/i],
+  ["Ver entregas", /no se han podido cargar las entregas/i],
+])(
+  "@s39 a failed «%s» says what failed, not that the creation failed",
+  async (button, message) => {
+    stubFailingAction(boom);
+    const user = userEvent.setup();
+
+    render(<Webhooks owner="Ana" />);
+    await shown();
+    await user.click(screen.getByRole("button", { name: button }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(message),
+    );
+    expect(screen.getByRole("alert")).not.toHaveTextContent(
+      /crear el webhook/i,
+    );
+  },
+);
+
+it("@s39 a failed «Activar» says the activate failed, not the deactivate", async () => {
+  stubApi(
+    [
+      endpoint({
+        status: "disabled",
+        disabledReason: "MANUAL",
+        disabledAt: "2026-09-08T11:00:00.000000Z",
+      }),
+    ],
+    () => Promise.resolve(boom()),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.click(screen.getByRole("button", { name: "Activar" }));
+
+  await waitFor(() =>
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      /no se ha podido activar el webhook/i,
+    ),
+  );
+  expect(screen.getByRole("alert")).not.toHaveTextContent(/desactivar/i);
+  expect(screen.getByText("Desactivado manualmente")).toBeVisible();
+});
+
+it("@s39 a failed delete says the delete failed and leaves the webhook on the list", async () => {
+  stubFailingAction(boom);
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.click(screen.getByRole("button", { name: "Eliminar" }));
+  await user.click(
+    screen.getByRole("button", { name: "Confirmar eliminación" }),
+  );
+
+  await waitFor(() =>
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      /no se ha podido eliminar/i,
+    ),
+  );
+  expect(screen.getByText("https://example.com/hooks")).toBeVisible();
+  expect(announcement()).toBe("");
+});
+
+it("@s40 a failed redeliver says the redeliver failed", async () => {
+  const { other } = stubApi([endpoint()], (url) =>
+    Promise.resolve(
+      String(url).endsWith("/redeliver")
+        ? boom()
+        : Response.json({ items: [delivery()] }),
+    ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.click(screen.getByRole("button", { name: "Ver entregas" }));
+  await waitFor(() => expect(screen.getByRole("table")).toBeVisible());
+
+  await user.click(screen.getByRole("button", { name: "Reenviar" }));
+
+  await waitFor(() =>
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      /no se ha podido reenviar/i,
+    ),
+  );
+  expect(other.mock.calls.length).toBeGreaterThan(0);
+});
+
+// Los dos códigos que sólo tienen sentido creando: al reutilizar el reportero
+// de la creación, desactivar un webhook podía decir «Ya tienes cinco webhooks»
+// y encender el error del campo URL del formulario de creación.
+it("@s39 an action that fails with WEBHOOK_LIMIT never claims you already have five", async () => {
+  stubFailingAction(() =>
+    Response.json({ code: "WEBHOOK_LIMIT" }, { status: 409 }),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.click(screen.getByRole("button", { name: "Desactivar" }));
+
+  await waitFor(() => expect(screen.getByRole("alert")).toBeVisible());
+  expect(screen.getByRole("alert")).not.toHaveTextContent(/cinco/i);
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    /no se ha podido desactivar/i,
+  );
+});
+
+it("@s39 an action that fails with WEBHOOK_URL_BLOCKED never lights the creation url field", async () => {
+  stubFailingAction(() =>
+    Response.json({ code: "WEBHOOK_URL_BLOCKED" }, { status: 400 }),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.click(screen.getByRole("button", { name: "Desactivar" }));
+
+  await waitFor(() => expect(screen.getByRole("alert")).toBeVisible());
+  expect(screen.getByRole("textbox", { name: "URL" })).not.toHaveAttribute(
+    "aria-describedby",
+  );
+  expect(
+    screen.queryByText(/la dirección de destino no está permitida/i),
+  ).not.toBeInTheDocument();
+});
+
+it("@s41 a creation rejected as invalid asks to review the form", async () => {
+  const { other } = stubApi([], () =>
+    Promise.resolve(
+      Response.json({ code: "WEBHOOK_INVALID" }, { status: 400 }),
+    ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
+  await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+
+  await waitFor(() =>
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      /revisa los datos del formulario/i,
+    ),
+  );
+  expect(other).toHaveBeenCalledTimes(1);
+});
+
+// @s41 no enumera todos los códigos posibles: hace falta un cajón de sastre que
+// diga la verdad —que hubo respuesta y falló— en vez del mensaje de resultado
+// incierto, que sólo vale cuando no hubo respuesta ninguna.
+it.each([
+  ["an unlisted problem code", () => boom()],
+  [
+    "a body that is not even json",
+    () => new Response("<html>502</html>", { status: 502 }),
+  ],
+])(
+  "@s41 a creation that fails with %s says the creation failed",
+  async (_case, response) => {
+    stubApi([], () => Promise.resolve(response()));
+    const user = userEvent.setup();
+
+    render(<Webhooks owner="Ana" />);
+    await shown();
+    await user.type(
+      screen.getByRole("textbox", { name: "URL" }),
+      "https://example.com/hooks",
+    );
+    await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
+    await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /no se ha podido crear el webhook/i,
+      ),
+    );
+    expect(screen.queryByText(/no sabemos/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "URL" })).toHaveValue(
+      "https://example.com/hooks",
+    );
+  },
+);
+
 it("@s42 cancelling the delete confirmation returns focus to the control that opened it", async () => {
   stubApi([endpoint()]);
   const user = userEvent.setup();

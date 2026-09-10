@@ -170,6 +170,70 @@ class AutomationWorkPersistenceTest {
     assertThat(rowOf(rule, event)).containsEntry("status", "failed");
   }
 
+  /**
+   * @s22, la pieza de la que sale el número de intento: el ejecutor decide si reintenta y con qué
+   *     attempt leyendo las ejecuciones previas de cada candidato, y eso lo hace la consulta de
+   *     {@code withTheirRuns} con su {@code event_id IN (ventana)} y su {@code owner_id = ?}.
+   *     Ninguna prueba de integración dejaba de forma determinista una fila en {@code
+   *     automation_runs} antes de que un ciclo la leyera; la idempotencia sólo se probaba con el
+   *     doble.
+   *     <p>Si la consulta devolviera vacío —columna mal escrita, IN mal armado, filtro de owner de
+   *     más— el intento se recalcularía siempre como 1, la escalera se colapsaría y el {@code ON
+   *     CONFLICT DO NOTHING} enmascararía el destrozo. Y si el filtro de propietario se cayera, un
+   *     candidato arrastraría ejecuciones de otra cuenta sobre su mismo evento. Aquí hay una de
+   *     cada: dos ejecuciones propias del mismo evento, una ajena sobre ese evento y un evento sin
+   *     ninguna.
+   */
+  @Test
+  void s22_eachCandidateCarriesItsOwnPreviousRunsAndNobodyElses() {
+    var owner = owner();
+    var stranger = owner();
+    var project = project(owner);
+    var first = outbox(owner, project, T0.plusSeconds(1), "pending");
+    var second = outbox(owner, project, T0.plusSeconds(2), "pending");
+    var task = UUID.randomUUID();
+    var retrying = rule(owner);
+    var settled = rule(owner);
+    var mine = given(retrying, owner, first, 2, "retry", "STORAGE_UNAVAILABLE", T0.plusSeconds(3));
+    var sibling = given(settled, owner, first, 1, "succeeded", null, T0.plusSeconds(4), task);
+    given(rule(stranger), stranger, first, 1, "succeeded", null, T0.plusSeconds(5));
+
+    var candidates = work.after(owner, start());
+
+    assertThat(idsOf(candidates)).containsExactly(first, second);
+    assertThat(candidates.getFirst().runs())
+        .as("las ejecuciones del evento, todas las suyas y sólo las suyas")
+        .containsExactlyInAnyOrder(
+            new AutomationRun(
+                mine,
+                retrying,
+                owner,
+                first,
+                TRIGGER,
+                T0.plusSeconds(1),
+                2,
+                "retry",
+                null,
+                null,
+                "STORAGE_UNAVAILABLE",
+                T0.plusSeconds(3)),
+            new AutomationRun(
+                sibling,
+                settled,
+                owner,
+                first,
+                TRIGGER,
+                T0.plusSeconds(1),
+                1,
+                "succeeded",
+                task,
+                null,
+                null,
+                T0.plusSeconds(4)));
+    assertThat(candidates.getLast().runs())
+        .as("un evento sin ejecuciones previas llega limpio: su primer intento será el 1")
+        .isEmpty();
+  }
 
   private static AutomationCursor start() {
     return new AutomationCursor(T0, AutomationCursor.START);

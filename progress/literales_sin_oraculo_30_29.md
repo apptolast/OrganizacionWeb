@@ -27,6 +27,8 @@ nueva**, con el mensaje anotado. Un oráculo que no puede fallar no vale.
 | 2 | idem | borrar la cláusula entera | `[una fila ya resuelta no la reescribe nadie] Expecting code to raise a throwable.` |
 | 3 | `"blocked".equals(row.getString("status"))` (`event()`) | `"held".equals(…)` | `[una fila blocked está retenida: se salta, no dispara nada] Expecting value to be true but was false` |
 | 3 | idem | `"pending".equals(…)` | `[una fila pending no está retenida y sus reglas deben dispararse] Expecting value to be false but was true` |
+| 4 | la consulta de `withTheirRuns(...)`: el `event_id IN (ventana)` | `window("event_id")` → `window("aggregate_id")` | `[las ejecuciones del evento, todas las suyas y sólo las suyas] Expecting actual: [] to contain exactly in any order: [AutomationRun[…attempt=2, status=retry…], AutomationRun[…attempt=1, status=succeeded…]]` |
+| 4 | idem: el `owner_id = ?` | `owner_id <> ?` | el mismo, pero con la ejecución **del otro propietario** sobre ese mismo evento dentro: `Expecting actual: [AutomationRun[…ownerId=work-cb29…]]` |
 
 ---
 
@@ -120,3 +122,34 @@ tramos, porque las dos mutaciones fallan por lados opuestos:
 
 Sin el tramo 3, borrar la cláusula sobrevive; sin los tramos 1 y 2, cambiarla
 de estado sobrevive. Hacen falta los dos lados.
+
+---
+
+## Hallazgo 4 — la consulta de `withTheirRuns(...)` (`PostgresAutomationWork.java:250-257`)
+
+**Qué decide.** Si el ejecutor ve las ejecuciones previas de cada evento. De
+ahí salen la idempotencia —una regla ya resuelta no se reintenta— y el número
+de intento (`attemptOf`, `ExecuteAutomations.java:143`).
+
+**Por qué no lo distinguía nadie.** Ningún test de integración dejaba de forma
+determinista una fila en `automation_runs` antes de que un ciclo la leyera: en
+@s25 la caída hace rollback y la fila no llega a existir, y en @s19/@s26 el
+ciclo es el primero. La propiedad «una fila resuelta no se reintenta» sólo se
+probaba con el doble (`ExecuteAutomationsTest.java:399`).
+
+**La consecuencia.** Si la consulta devolviera vacío siempre —columna mal
+escrita, `IN` mal armado, filtro de propietario de más—, `attemptOf()`
+construiría siempre attempt 1: la escalera se colapsa y las filas en `retry`
+quedan huérfanas, todo ello **enmascarado** por el `ON CONFLICT DO NOTHING`. Y
+si el filtro de propietario se cayera, un candidato arrastraría ejecuciones de
+otra cuenta sobre su mismo evento.
+
+**La prueba.** `s22_eachCandidateCarriesItsOwnPreviousRunsAndNobodyElses`. La
+siembra tiene una fila por cada cosa que la consulta tiene que hacer bien: dos
+ejecuciones propias del mismo evento —de dos reglas distintas, que es el caso
+real de dos reglas sobre el mismo trigger—, una ejecución **ajena** sobre ese
+mismo evento, y un segundo evento sin ninguna. Se afirma el `AutomationRun`
+entero, campo a campo, así que `RUN_COLUMNS` queda atado de paso.
+
+- Romper la columna de la ventana del `IN` deja la lista vacía → rojo.
+- Invertir el filtro de propietario mete la ejecución del extraño → rojo.

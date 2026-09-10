@@ -654,3 +654,116 @@ Tres oráculos que la primera versión **no** discriminaba, y por qué:
   en el segundo hay **una** alerta, no dos.
 
 **Previsión de muertes: 17.** Acumulado acreditado: **137**.
+
+---
+
+# Resumen
+
+## Racimos cerrados y previsión
+
+La previsión es **no medida**: es el recuento de mutantes que se han aplicado a
+mano al fichero de producción real y han puesto la suite en rojo, con la prueba
+concreta que cae anotada en cada racimo. Stryker puede diferir en los bordes.
+
+| # | Racimo | Fichero | Previsión |
+|---|---|---|---|
+| 1 | El catálogo de `eventTypes`: orden, repetidos, catálogo cerrado | cliente | 12 |
+| 2 | Las demás guardas de `decodeEndpoint` y la invariante de desactivado | cliente | 14 |
+| 3 | `decodeDelivery`, las cuatro cláusulas de `whole()`, la deduplicación | cliente | 13 |
+| 4 | Identidad, cabecera, señal y crosscheck del cambio de estado | cliente | 19 |
+| 5 | Las guardas de aborto de las siete puertas | cliente | 9 |
+| 6 | Las doce etiquetas de evento y su emparejamiento | vista | 6 |
+| 7 | Marcar y **desmarcar** tipos; estado inicial del formulario | vista | 12 |
+| 8 | `report()` reutilizado por `act()` | vista | 16 |
+| 9 | La fuga de entregas entre webhooks | vista | 7 |
+| 10 | Las ocho celdas de la tabla de entregas | vista | 12 |
+| 11 | Identidad por elemento, reinicio del formulario, atributos de @s42 | vista | 17 |
+| | **Total** | | **137** |
+
+Partida: 432 muertos de 605 (71,40 %). Hacían falta **52** para llegar a 80 %.
+Si la mitad de la previsión se confirmara, la puerta ya estaría pasada.
+
+Pruebas: **44 → 150** en los tres ficheros de `src/webhooks*`. Verde de punta a
+punta, más `connectors-catalog` (30) que también importa la vista.
+
+## Los cuatro defectos encontrados
+
+Tres de producto y uno de método. Los tres primeros se arreglaron **con el rojo
+demostrado primero**: escritas las pruebas contra la producción de partida,
+fallaron; hecho el arreglo, pasaron; rehecho el defecto a mano, volvieron a
+fallar.
+
+1. **Al fallar una acción, el usuario leía «No se ha podido crear el webhook».**
+   `report()` se escribió para la creación y `act()` lo reutilizaba para las
+   cinco acciones de la lista. Además, un `WEBHOOK_LIMIT` decía «Ya tienes cinco
+   webhooks» al desactivar, y un `WEBHOOK_URL_BLOCKED` encendía el error del
+   campo URL del formulario de creación con `aria-describedby` apuntando a un
+   campo ajeno. **7 pruebas en rojo** contra la producción de partida.
+   *Arreglado*: un reportero propio para las acciones y un mensaje por acción.
+
+2. **El panel de entregas de un webhook enseñando las de otro.** El panel se
+   abría antes de tener las filas y no vaciaba la tabla, así que entre el clic y
+   la respuesta —y **para siempre** si esa respuesta fallaba— se veían las
+   entregas del webhook anterior bajo el nombre del nuevo, y su botón «Reenviar»
+   hacía `POST /webhooks/B/deliveries/{entrega-de-A}/redeliver`. **3 pruebas en
+   rojo**. *Arreglado*: cambiar de webhook vacía la tabla; refrescar el mismo la
+   conserva.
+
+3. **Nada ataba `eventLabels` con `webhookEventTypes`.** Dos listas paralelas
+   emparejadas por índice, y sólo el índice 3 verificado. No había error hoy,
+   pero no había forma de enterarse mañana: insertar un tipo a mitad del
+   catálogo haría que quien marca «Crear subtarea» se suscriba a otra cosa con
+   la suite en verde. *Arreglado*: una tabla literal de las doce parejas, fuera
+   de las dos listas, que las fija a las dos. Simulado el desalineamiento, caen
+   **12 pruebas**; antes no caía ninguna.
+
+4. **Dos aserciones que no podían fallar.**
+   - `webhooks.test.tsx:314` afirmaba la ausencia del secreto con la respuesta
+     retenida para siempre: no había secreto que pudiera aparecer. Ahora la
+     respuesta llega —tarde, con su 201— y sólo entonces se afirma la ausencia.
+   - En vitest 4, `rejects.toThrow("…")` **se cumple también cuando lo lanzado
+     es `undefined`** en vez de un `Error`. Las ~25 aserciones de rechazo del
+     cliente no comprobaban el diagnóstico, sólo que algo fallaba. Cerrado con
+     un oráculo que fija el valor rechazado entero.
+
+## Lo que no se puede ganar, y por qué
+
+**Las ocho guardas de aborto de `webhooks.tsx` son equivalentes.** Medido, no
+razonado: escritas las cuatro pruebas de «resuelve después de abortar», los ocho
+mutantes siguen vivos. En esta vista abortar y desmontar son el mismo suceso
+—el único `abort()` está en la limpieza del `useEffect`— y React descarta por su
+cuenta los `setState` sobre un componente desmontado, así que ejecutar la rama
+de más no cambia ni un carácter del DOM. Distinguirlos exigiría exponer estado
+interno. Las guardas del **cliente**, que sí son observables, quedan las nueve
+acreditadas.
+
+Otros equivalentes descartados y no perseguidos: `indexOf` → `lastIndexOf` sobre
+un catálogo sin duplicados; `(value as string).length === 36` cuando la expresión
+regular de `uuid()` ya fija la longitud; `disabledReason !== null` → `true` y
+`disabledAt !== null` → `true`, porque `includes(null)` e `instant(null)`
+devuelven `false` sin lanzar.
+
+## Cómo se acreditó
+
+`node scripts/verificar-mutantes-webhooks.mjs [filtro]` aplica cada mutante al
+fichero de producción real, ejecuta la suite del fichero, anota si cae en rojo y
+**restaura**. No se ejecutó Stryker: lo mide el orquestador.
+
+## Ficheros compartidos
+
+Ninguno. Sólo `frontend/src/webhooks*`, `scripts/verificar-mutantes-webhooks.mjs`
+y esta bitácora.
+
+## Para el juez
+
+El arreglo del defecto 1 introduce mensajes de error por acción que el
+`.feature` **no** describe: @s39 y @s40 sólo cuentan el camino feliz y @s41 habla
+sólo del POST de creación. El arreglo llena un silencio del contrato, no lo
+contradice, pero si se quiere una fila explícita en @s39 para el fallo de las
+acciones, ahí está el sitio.
+
+Observación anotada y **no** arreglada por estar fuera del encargo: eliminar un
+webhook no cierra su panel de entregas, así que quedan en pantalla las filas de
+algo que ya no existe. El guarda `if (endpoint)` de «Actualizar» impide que eso
+reviente. Cerrarlo por mi cuenta convertiría ese guarda en código muerto, y es
+una decisión de contrato.

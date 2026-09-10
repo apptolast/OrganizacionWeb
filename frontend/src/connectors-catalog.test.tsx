@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import { ConnectorsCatalog, CONNECTOR_ROUTES } from "./connectors-catalog";
@@ -44,6 +46,16 @@ function stub(...responses: Response[]) {
 }
 
 const rows = () => screen.getAllByRole("listitem");
+
+/** Sube desde el directorio de trabajo hasta encontrar la raíz del repositorio. */
+function climb(relative: string): string {
+  for (let where = process.cwd(), step = 0; step < 6; step++) {
+    const candidate = resolve(where, relative);
+    if (existsSync(candidate)) return readFileSync(candidate, "utf8");
+    where = dirname(where);
+  }
+  throw new Error(`no se encontró ${relative} desde ${process.cwd()}`);
+}
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -173,6 +185,80 @@ it("@s33 shows the GitHub error as a translated code and its activity in the use
     timeStyle: "short",
   }).format(new Date(AT));
   expect(within(github).getByText(readable)).toBeTruthy();
+});
+
+/**
+ * Las nueve traducciones del contrato, una por código que las fuentes del catálogo saben emitir.
+ * Sólo CONNECTION_INVALID llegaba a pintarse en alguna prueba: las ocho restantes —los siete de
+ * {@code FeedError} y el de webhooks— nunca se habían visto renderizadas.
+ */
+const TRANSLATIONS: [string, string][] = [
+  ["CONNECTION_INVALID", "La conexión ya no es válida"],
+  ["DELIVERY_EXHAUSTED", "Se agotaron los reintentos de entrega"],
+  ["FEED_REJECTED", "La dirección del calendario ya no es válida"],
+  ["FEED_UNREACHABLE", "El calendario no responde"],
+  ["FEED_HTTP_ERROR", "El calendario respondió con un error"],
+  ["FEED_TOO_LARGE", "El calendario es demasiado grande"],
+  ["FEED_UNSUPPORTED_TYPE", "El calendario no es un archivo de texto"],
+  ["FEED_MALFORMED", "El calendario no se pudo interpretar"],
+  ["SECRET_UNREADABLE", "Hay que volver a introducir la dirección"],
+];
+
+it.each(TRANSLATIONS)(
+  "@s33 shows %s as words the owner can act on, never as the raw code",
+  async (code, text) => {
+    stub(
+      Response.json(
+        catalog({
+          github: { status: "error", lastError: { code, at: AT } },
+        }),
+      ),
+    );
+
+    render(<ConnectorsCatalog />);
+
+    await waitFor(() => expect(rows()).toHaveLength(6));
+    expect(within(rows()[3]).getByText(text)).toBeTruthy();
+    expect(within(rows()[3]).queryByText(code)).toBeNull();
+    expect(
+      within(rows()[3]).queryByText("Hay un problema con esta integración"),
+    ).toBeNull();
+  },
+);
+
+/**
+ * Una constante nueva en {@code FeedError} sin traducción no rompería nada: la fila caería en el
+ * texto genérico y el propietario de un calendario caído leería «Hay un problema con esta
+ * integración» en vez del motivo. La lista se deriva del enum, no se escribe a mano.
+ */
+it("@s33 translates every failure the external calendar can report", () => {
+  const enumeration = climb(
+    "backend/src/main/java/com/apptolast/organization/domain/FeedError.java",
+  );
+  const constants = [...enumeration.matchAll(/^ {2}([A-Z][A-Z_]+),?$/gm)].map(
+    (match) => match[1],
+  );
+  expect(constants.length).toBeGreaterThan(0);
+  const translated = TRANSLATIONS.map(([code]) => code);
+  expect(constants.filter((code) => !translated.includes(code))).toEqual([]);
+});
+
+it("@s33 falls back to a plain explanation when the code is one it does not know", async () => {
+  stub(
+    Response.json(
+      catalog({
+        github: { status: "error", lastError: { code: "CODIGO_NUEVO", at: AT } },
+      }),
+    ),
+  );
+
+  render(<ConnectorsCatalog />);
+
+  await waitFor(() => expect(rows()).toHaveLength(6));
+  expect(
+    within(rows()[3]).getByText("Hay un problema con esta integración"),
+  ).toBeTruthy();
+  expect(within(rows()[3]).queryByText("CODIGO_NUEVO")).toBeNull();
 });
 
 it("@s33 says nothing about activity when the row has none", async () => {

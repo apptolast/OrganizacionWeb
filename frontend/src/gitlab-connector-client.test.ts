@@ -29,6 +29,19 @@ const connected = {
   version: 1,
 };
 
+const AT = "2026-09-09T10:05:00.123456Z";
+
+/**
+ * Conectado pero roto. El servidor conserva los cinco campos de la conexión y añade el motivo:
+ * es la forma que devuelve GitlabConnectionView cuando el token dejó de valer, y la única que
+ * lleva `lastError` distinto de null. Ninguna prueba la decodificaba.
+ */
+const broken = {
+  ...connected,
+  status: "error",
+  lastError: { code: "CONNECTION_INVALID", at: AT },
+};
+
 const notConnected = {
   status: "not_connected",
   apiBase: null,
@@ -105,6 +118,58 @@ it("@s8 refuses a connection carrying a ninth field", async () => {
 
 it("@s8 refuses a connected row that forgot its project", async () => {
   stub(Response.json({ ...connected, projectPath: null }));
+
+  await expect(readGitlabConnection(signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s8 decodes a connection that is broken, keeping the code and the instant of the failure", async () => {
+  stub(Response.json(broken));
+
+  const view = await readGitlabConnection(signal());
+
+  expect(view).toEqual(broken);
+  expect(view.lastError).toEqual({ code: "CONNECTION_INVALID", at: AT });
+});
+
+/**
+ * La propiedad de @s5, probada en el lado que decodifica la respuesta donde el token podría
+ * colarse: un `lastError` con un tercer campo es exactamente el hueco por el que entraría el
+ * texto del proveedor («invalid_token: glpat-…»). El decodificador es la única guarda.
+ */
+it("@s5 refuses a lastError that smuggles the provider's words in a third field", async () => {
+  stub(
+    Response.json({
+      ...broken,
+      lastError: {
+        code: "CONNECTION_INVALID",
+        at: AT,
+        detail: "invalid_token: glpat-abcdef1234",
+      },
+    }),
+  );
+
+  await expect(readGitlabConnection(signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s8 refuses a lastError with no code, which would leave «Error» without a reason", async () => {
+  stub(Response.json({ ...broken, lastError: { code: "", at: AT } }));
+
+  await expect(readGitlabConnection(signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s8 refuses a lastError whose instant is not one", async () => {
+  stub(
+    Response.json({
+      ...broken,
+      lastError: { code: "CONNECTION_INVALID", at: "ayer" },
+    }),
+  );
 
   await expect(readGitlabConnection(signal())).rejects.toThrow(
     "Confirmación incompatible",
@@ -188,6 +253,26 @@ it("@s15 refuses a finished receipt with no ending", async () => {
   await expect(startGitlabImport(projectId, signal())).rejects.toThrow(
     "Confirmación incompatible",
   );
+});
+
+/**
+ * Un recibo en curso: el @s27 del contrato lo da por existente («un recibo de gitlab en status
+ * running») y el @s30 lo recupera por su id. Es el único que carece de final y de error, y
+ * ninguna prueba lo decodificaba: las dos fixtures eran `completed`.
+ */
+it("@s30 reads back an import still running, with no ending and no error", async () => {
+  const running = {
+    ...receipt,
+    status: "running",
+    created: 0,
+    skipped: 0,
+    failed: 0,
+    errorCode: null,
+    finishedAt: null,
+  };
+  stub(Response.json(running));
+
+  await expect(readGitlabImport(importId, signal())).resolves.toEqual(running);
 });
 
 it("@s30 reads a receipt back by its identifier", async () => {

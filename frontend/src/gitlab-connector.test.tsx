@@ -197,6 +197,31 @@ it("@s34 marks the field the server complained about", async () => {
   expect(tokenField().getAttribute("aria-invalid")).not.toBe("true");
 });
 
+/**
+ * La simétrica de la anterior, y el único camino por el que el campo del token llega a marcarse.
+ * Sin ella, un token rechazado por el servidor podría señalar el campo equivocado o ninguno.
+ */
+it("@s34 marks the token field when the server is the one complaining about the token", async () => {
+  const user = userEvent.setup();
+  stub(
+    Response.json(notConnected),
+    Response.json(projects),
+    problem(400, {
+      code: "VALIDATION_ERROR",
+      errors: [{ field: "token", code: "REQUIRED" }],
+    }),
+  );
+
+  render(<GitlabConnector owner="owner" />);
+  await screen.findByLabelText(/Token de acceso personal/);
+  await fillAndSubmit(user);
+
+  await waitFor(() =>
+    expect(tokenField().getAttribute("aria-invalid")).toBe("true"),
+  );
+  expect(pathField().getAttribute("aria-invalid")).not.toBe("true");
+});
+
 // ------------------------------------------------------------------------ @s32
 
 it("@s32 never leaves the token in localStorage, sessionStorage or cookies", async () => {
@@ -446,6 +471,29 @@ it("@s35 keeps the connection when the disconnection fails", async () => {
 
   await screen.findByRole("alert");
   expect(screen.getByText("••••WXYZ")).toBeTruthy();
+});
+
+/**
+ * El camino de vuelta de la confirmación, declarado por @s35 y que ninguna prueba recorría: el
+ * botón «Cancelar» no lo pulsaba nadie, así que su `onClick` podía no cerrar nada.
+ */
+it("@s35 cancelling the confirmation closes it and disconnects nothing", async () => {
+  const user = userEvent.setup();
+  const fetcher = openConnected();
+
+  await renderConnected();
+  await user.click(screen.getByRole("button", { name: "Desconectar" }));
+  await user.click(screen.getByRole("button", { name: "Cancelar" }));
+
+  expect(
+    screen.queryByRole("group", { name: "Confirmar desconexión" }),
+  ).toBeNull();
+  expect(screen.getByRole("button", { name: "Desconectar" })).toBeTruthy();
+  expect(screen.getByText("••••WXYZ")).toBeTruthy();
+  const methods = fetcher.mock.calls.map(
+    (call) => (call[1] as RequestInit | undefined)?.method,
+  );
+  expect(methods).not.toContain("DELETE");
 });
 
 it("@s35 opens the form with an empty token field when the token is replaced", async () => {

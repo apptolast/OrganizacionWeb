@@ -1,0 +1,138 @@
+# Feature 29 — puerta de mutación de frontend
+
+Carril `additional-connectors`, noche del 9 al 10 de septiembre de 2026.
+Rama `claude/additional-connectors`, sobre `origin/main` (`5b019343`).
+
+## El punto de partida
+
+Medición previa: **68,51 %** (216 supervivientes + 17 sin cobertura de 740), umbral 80 %.
+Faltan **85 muertes**.
+
+| Fichero | Puntuación | Vivos | Sin cobertura | Total |
+|---|---|---|---|---|
+| `src/gitlab-connector.tsx` | 64,6 % | 97 | 5 | 288 |
+| `src/gitlab-connector-client.ts` | 66,0 % | 88 | 11 | 291 |
+| `src/connectors-catalog.tsx` | 76,6 % | 17 | 1 | 77 |
+| `src/connectors-catalog-client.ts` | 83,3 % | 14 | 0 | 84 |
+
+Fuentes cruzadas: `progress/prediccion_huecos_frontend.md` (sección `29-conectores`, causas)
+y `frontend/reports/mutation-additional-connectors/mutation.json` (cuenta exacta, línea y
+reemplazo de cada superviviente).
+
+## Cómo se acredita cada racimo
+
+No se ejecuta Stryker (hay otra campaña corriendo). Cada mutante se aplica **al fichero de
+producción real** con `scripts/verificar-mutantes-additional-connectors.mjs <racimo>`, se
+ejecuta `pnpm --dir frontend exec vitest run src/gitlab-connector src/connectors-catalog` y se
+restaura el fichero. El veredicto queda en
+`progress/verificacion_mutantes_additional_connectors<racimo>.json`.
+
+Producción **no se toca** para matar mutantes. `git diff` sobre `frontend/src/*.tsx`,
+`frontend/src/*-client.ts` y `backend/` queda vacío al terminar.
+
+---
+
+## Racimo 1 — los 17 sin cobertura
+
+«Sin cobertura» = ninguna prueba ejecuta esa rama. Antes de escribir el oráculo se ha leído qué
+hace la rama; abajo, lo que se ha encontrado.
+
+### 1.1 `decodeFailure` del cliente de GitLab (9 mutantes, `gitlab-connector-client.ts:112-116`)
+
+Causa: **el estado «conectado pero roto» no se decodificaba nunca**. Las dos fixtures del
+cliente (`connected`, `notConnected`) llevaban `lastError: null`, así que `decodeFailure` salía
+siempre por el `return null` de la 110 y las líneas 111-117 no las ejecutaba nadie.
+
+Comprobado contra el backend antes de escribir la fixture: `GitlabConnectionView` conserva los
+cinco campos de la conexión cuando el estado es `error` y añade `lastError`
+(`ErrorResponse(code, at)`), así que la fixture `broken` es la forma que el servidor devuelve
+de verdad, no una inventada.
+
+Oráculos nuevos (`gitlab-connector-client.test.ts`):
+
+- `@s8 decodes a connection that is broken, keeping the code and the instant of the failure`
+- `@s5 refuses a lastError that smuggles the provider's words in a third field`
+- `@s8 refuses a lastError with no code, which would leave «Error» without a reason`
+- `@s8 refuses a lastError whose instant is not one`
+
+El de `@s5` es el que faltaba de verdad: la propiedad «`lastError` nunca lleva texto del
+proveedor» estaba probada en el cliente del catálogo pero **no** en el de GitLab, que es el que
+decodifica la respuesta por la que se colaría un `invalid_token: glpat-…`.
+
+### 1.2 El recibo en curso (2 mutantes, `gitlab-connector-client.ts:167`)
+
+Causa: las dos fixtures de recibo eran `completed`; un recibo `running` no lo decodificaba
+nadie, y el contrato lo da por existente (@s27: «un recibo de gitlab en status running»; @s28:
+un running abandonado pasa a `failed` con `errorCode INTERRUPTED`).
+
+Oráculo: `@s30 reads back an import still running, with no ending and no error`.
+
+### 1.3 «Cancelar» de la confirmación de desconexión (2 mutantes, `gitlab-connector.tsx:368`)
+
+Causa: **ninguna prueba pulsaba «Cancelar»**. Es un camino de producto declarado por @s35 y sin
+recorrer: su `onClick` podía no cerrar nada y la suite seguía verde.
+
+Oráculo: `@s35 cancelling the confirmation closes it and disconnects nothing`, que además
+afirma que no sale ningún `DELETE` — cancelar no puede desconectar.
+
+### 1.4 El campo del token marcado por el servidor (1 mutante, `gitlab-connector.tsx:409`)
+
+Causa: `aria-invalid` del campo `token` nunca llegaba a ser `true` en ninguna prueba; sólo se
+probaba que **no** lo fuera. @s34 promete señalar «el campo afectado», y sólo se verificaba
+para `projectPath`.
+
+Oráculo: `@s34 marks the token field when the server is the one complaining about the token`.
+
+### 1.5 El texto de reserva del catálogo (1 mutante, `connectors-catalog.tsx:67`)
+
+Causa: ninguna fila traía un código desconocido, así que el `??` no se ejercitaba. Y de las
+nueve traducciones sólo `CONNECTION_INVALID` llegaba a pintarse.
+
+Oráculos: una paramétrica de nueve filas (código → texto exacto, y el código crudo ausente),
+el caso del código desconocido, y **una prueba derivada del enum**: lee
+`backend/.../domain/FeedError.java` y exige que toda constante tenga traducción. Sin ella, una
+constante nueva caería en el texto genérico y el propietario de un calendario caído leería «Hay
+un problema con esta integración» en vez del motivo. Sigue la regla 2 del reparto: la lista no
+se escribe a mano, se deriva de lo que la hace caducar.
+
+### 1.6 Los tres `?? ""` — supervivientes equivalentes, declarados
+
+No se escriben oráculos para ellos porque **no hay ningún camino de ejecución que los
+distinga**, y una prueba que no puede fallar es peor que ninguna:
+
+| Mutante | Por qué es inalcanzable |
+|---|---|
+| `gitlab-connector.tsx:183` `tokenField.current?.value ?? ""` | `submitConnection` sólo se dispara desde el `onSubmit` del formulario que contiene el propio campo; la ref está siempre montada cuando corre. |
+| `gitlab-connector.tsx:294` `connection?.projectPath ?? ""` | `replaceToken` sólo es alcanzable desde el panel, que se pinta con `connection` no nulo y `status !== "not_connected"`; para esos dos estados el decodificador exige `nonEmpty(projectPath)`. |
+| `gitlab-connector.tsx:329` `connection.tokenHint ?? ""` | Mismo guardia: el panel sólo se pinta con `connected`/`error`, y el decodificador exige `nonEmpty(tokenHint)` en ambos. |
+
+Los tres son consecuencia de que el decodificador cierre el DTO: el `?? ""` es defensa muerta.
+
+### Acreditación del rojo (17 de 17 mueren)
+
+`node scripts/verificar-mutantes-additional-connectors.mjs 1` →
+`progress/verificacion_mutantes_additional_connectors1.json`.
+
+| Mutante aplicado a producción | Prueba que se pone roja |
+|---|---|
+| `112 !exact‖!nonEmpty‖!instant → true` | @s8 decodes a connection that is broken… |
+| `112 … → false` | @s5 refuses a lastError that smuggles… |
+| `112 (A‖B) && C` | @s5 refuses a lastError that smuggles… |
+| `112 (A‖B) → false` | @s5 refuses a lastError that smuggles… |
+| `112 A && B` | @s5 refuses a lastError that smuggles… |
+| `112 !exact → exact` | @s8 decodes a connection that is broken… |
+| `113 !nonEmpty → nonEmpty` | @s8 decodes a connection that is broken… |
+| `114 !instant → instant` | @s8 decodes a connection that is broken… |
+| `116 throw → ;` | @s5 refuses a lastError that smuggles… |
+| `167 errorCode !== null → true` | @s30 reads back an import still running… |
+| `167 errorCode === null` | @s30 reads back an import still running… |
+| `368 setConfirming(false) → true` | @s35 cancelling the confirmation… |
+| `368 onClick → () => undefined` | @s35 cancelling the confirmation… |
+| `409 aria-invalid token → false` | @s34 marks the token field… |
+| `67 texto de reserva → ""` | @s33 falls back to a plain explanation… |
+| `54 FEED_UNREACHABLE → ""` | @s33 shows FEED_UNREACHABLE as words… |
+| `FeedError + FEED_NUEVO` (rotura en el backend) | @s33 translates every failure the external calendar can report |
+
+**Previsión del racimo: 17 mutantes muertos** (14 sin cobertura + 3 que ya estaban vivos y
+caen de paso: los dos de «Cancelar» cuentan como sin cobertura, y `FEED_UNREACHABLE` estaba
+marcado `Timeout`). 3 declarados equivalentes.

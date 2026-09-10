@@ -1,0 +1,149 @@
+[
+  {
+    "racimo": 1,
+    "name": "client 112 CE decodeFailure -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 decodes a connection that is broken, keeping the code and the instant of the failure"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "client 112 CE decodeFailure -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s5 refuses a lastError that smuggles the provider's words in a third field",
+      "@s8 refuses a lastError with no code, which would leave «Error» without a reason",
+      "@s8 refuses a lastError whose instant is not one"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "client 112 LogicalOperator (A||B) && C",
+    "verdict": "MUERE",
+    "tests": [
+      "@s5 refuses a lastError that smuggles the provider's words in a third field",
+      "@s8 refuses a lastError with no code, which would leave «Error» without a reason",
+      "@s8 refuses a lastError whose instant is not one"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "client 112 CE (A||B) -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s5 refuses a lastError that smuggles the provider's words in a third field",
+      "@s8 refuses a lastError with no code, which would leave «Error» without a reason"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "client 112 LogicalOperator A && B",
+    "verdict": "MUERE",
+    "tests": [
+      "@s5 refuses a lastError that smuggles the provider's words in a third field",
+      "@s8 refuses a lastError with no code, which would leave «Error» without a reason"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "client 112 BooleanLiteral !exact -> exact",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 decodes a connection that is broken, keeping the code and the instant of the failure",
+      "@s5 refuses a lastError that smuggles the provider's words in a third field"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "client 113 BooleanLiteral !nonEmpty -> nonEmpty",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 decodes a connection that is broken, keeping the code and the instant of the failure",
+      "@s8 refuses a lastError with no code, which would leave «Error» without a reason"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "client 114 BooleanLiteral !instant -> instant",
+    "verdict": "MUERE",
+    "tests": [
+      "@s8 decodes a connection that is broken, keeping the code and the instant of the failure",
+      "@s8 refuses a lastError whose instant is not one"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "client 116 CallExpression throw -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s5 refuses a lastError that smuggles the provider's words in a third field",
+      "@s8 refuses a lastError with no code, which would leave «Error» without a reason",
+      "@s8 refuses a lastError whose instant is not one"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "client 167 CE errorCode !== null -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s30 reads back an import still running, with no ending and no error"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "client 167 EqualityOperator errorCode === null",
+    "verdict": "MUERE",
+    "tests": [
+      "@s30 reads back an import still running, with no ending and no error"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "screen 368 BooleanLiteral Cancelar -> setConfirming(true)",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 cancelling the confirmation closes it and disconnects nothing"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "screen 368 ArrowFunction Cancelar -> () => undefined",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 cancelling the confirmation closes it and disconnects nothing"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "screen 409 BooleanLiteral aria-invalid token -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 marks the token field when the server is the one complaining about the token"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "catalogo 67 StringLiteral texto de reserva -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s33 falls back to a plain explanation when the code is one it does not know"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "catalogo 54 StringLiteral FEED_UNREACHABLE -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s33 shows FEED_UNREACHABLE as words the owner can act on, never as the raw code"
+    ]
+  },
+  {
+    "racimo": 1,
+    "name": "FeedError: una constante nueva sin traduccion",
+    "verdict": "MUERE",
+    "tests": [
+      "@s33 translates every failure the external calendar can report"
+    ]
+  }
+]

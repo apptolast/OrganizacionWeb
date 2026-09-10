@@ -309,17 +309,6 @@
       ],
       "sdd": true,
       "status": "in_progress"
-    },
-    {
-      "id": 30,
-      "name": "automations",
-      "title": "Automatizaciones",
-      "description": "Reglas auditables con disparador por evento, acciones CREATE_TASK y NOTIFY_WEBHOOK, simulación sin efectos y auditoría idempotente; contrato de 43 escenarios en features/automations.feature aprobado por autorización global. Fase 2 (worker y NOTIFY_WEBHOOK) depende de 25.",
-      "acceptance": [
-        "Cumplir @s1–@s43 de features/automations.feature con revisión, pruebas y mutación antes del cierre."
-      ],
-      "sdd": true,
-      "status": "in_progress"
     }
   ]
 }

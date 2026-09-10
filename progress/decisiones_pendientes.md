@@ -6,102 +6,7 @@ disciplina del repo dice que los firmas tú.
 
 ---
 
-## 1. Feature 30 — `@s43` no describe la carrera entre escrituras
-
-
-**Qué pasa.** Los `Examples` de `@s43` son «navega a /proyectos», «cierra sesión»
-y «cambia a otra regla». El camino donde vivía un defecto **real** que se arregló
-hoy —«otra escritura la supera», que dejaba `Guardar` y el interruptor inertes
-para siempre con el borrador atrapado— **no está en ese Outline ni en ningún
-otro**; sólo lo roza `@s40` fila 1 por el lado del botón.
-
-El carril movió las tres pruebas a `@s40`, porque ahí es donde el contrato dice
-algo aplicable («deshabilitado **hasta** la respuesta»), y **no enmendó** nada.
-
-**Lo que hay que decidir:** ¿gana `@s43` una cuarta fila de `Examples` para la
-carrera entre escrituras, o basta con la lectura de `@s40` fila 1?
-
----
-
----
-
----
-
----
-
-## 2. Feature 30 — el enlace del historial cuando la regla ya no crea tareas
-
-
-**Qué pasa.** En `automations.tsx:577-585`, si la regla es `NOTIFY_WEBHOOK` el
-segmento de proyecto se resuelve a `""` y el `href` sale `/proyectos//tareas/<id>`.
-
-Hoy es inalcanzable por el camino normal —una regla de webhook no crea tareas—
-pero **sí** es alcanzable tras un PUT que cambie una regla `CREATE_TASK` a
-`NOTIFY_WEBHOOK`: sus ejecuciones antiguas conservan `createdTaskId` y pintarían
-un enlace roto. `@s41` dice «un enlace a la tarea creada» y no dice qué hacer
-aquí.
-
-**Lo que hay que decidir:** ¿ocultar el enlace, apuntar a la tarea sin proyecto, o
-algo más? El carril **no inventó comportamiento**, que es lo correcto.
-
----
-
----
-
----
-
----
-
-## 3. Feature 30 — `upsert` puede pisar una confirmación buena
-
-
-**Qué pasa.** `PostgresAutomationWork.upsert` (`:204-212`) hace
-`ON CONFLICT (rule_id, event_id) DO UPDATE` **sin guarda de estado**, a diferencia
-de `claim` (`:192`), que sí exige `AND status = 'retry'`.
-
-El camino es concreto: el worker A calcula su resultado; el worker B confirma
-`succeeded` sobre la misma `(regla, evento)`; la transacción de A revierte y A
-llama a `record()`, que **pisa el `succeeded` de B** con un `retry`/`failed`.
-
-El carril **no fijó ese defecto como esperado** en la prueba nueva, y eso está
-bien: congelarlo en un oráculo habría sido convertir un fallo en contrato.
-
-**Lo que hay que decidir:** ¿se le añade la guarda de estado a `upsert`, o se
-declara que el último que escribe manda? Es el punto H6 que el juez pidió
-«arreglar o justificar», y ninguna de las dos salidas la puede elegir un carril.
-
----
-
----
-
----
-
----
-
-## 4. Feature 30 — qué muestra el editor al abrir una regla de webhook
-
-
-**Qué pasa.** Ni `@s37`, ni `@s38`, ni `@s40` dicen nada sobre qué debe mostrar
-el editor al abrir una regla `NOTIFY_WEBHOOK`. Hay dos mutantes vivos ahí y el
-oráculo que los mataría está escrito y listo, pero afirmarlo sería **fijar como
-esperado un comportamiento que nadie ha aprobado**.
-
-**Texto propuesto** para los `Examples` de `@s37`, si te parece bien:
-
-> `| una regla NOTIFY_WEBHOOK | pulsa «Editar» | los campos de tarea del editor aparecen vacíos y el endpoint se conserva |`
-
-Con esa fila los dos mutantes caen en una sola prueba. **No bloquea**: el fichero
-mide 84,60 % y el ámbito 91,18 %.
----
-
----
-
----
-
----
-
-## 5. Feature 25 — el `@s9` promete modo degradado y el código muere al arrancar
-
+## 1. Feature 25 — el `@s9` promete modo degradado y el código muere al arrancar
 
 **Qué pasa.** `features/webhooks.feature:129-142` dice «Sin clave de cifrado
 válida la aplicación arranca degradada / Then la aplicación queda disponible» y
@@ -151,8 +56,9 @@ comparten?
 
 ---
 
-## 6. Feature 28 — el plazo de 5 s pasa a cubrir el intercambio completo
+---
 
+## 2. Feature 28 — el plazo de 5 s pasa a cubrir el intercambio completo
 
 **Qué cambió, sin contrafirma.** El commit `baf5ab1f` reescribió
 `features/external_calendar.feature:13-14`. Antes: «Descarga con redirecciones
@@ -178,8 +84,9 @@ ratificación; lo pregunto porque **no lo puedo afirmar yo**.
 
 ---
 
-## 7. Feature 28 — el certificado que no vale para su nombre
+---
 
+## 3. Feature 28 — el certificado que no vale para su nombre
 
 **Qué cambió, sin contrafirma.** El commit `78dca3a6` añadió esta fila al
 `@s12`:
@@ -197,8 +104,9 @@ anclaje no sirve de nada. Pero es una fila nueva del contrato y la firma es tuya
 
 ---
 
-## 8. Feature 28 — el sitio de «Calendario externo» en el menú
+---
 
+## 4. Feature 28 — el sitio de «Calendario externo» en el menú
 
 **Qué pasa.** La enmienda de navegación que ratificaste fija el orden de las
 entradas del menú, y «Calendario externo» aparece en `workspace.tsx` en una

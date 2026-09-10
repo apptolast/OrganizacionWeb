@@ -168,3 +168,32 @@ También se conserva la variable `APP_CONNECTOR_KEY` y su cableado, por lo mismo
 El nombre queda desafortunado sin conectores, y se deja escrito aquí en vez de
 renombrarlo: renombrar una variable de entorno es otra cirugía y toca el
 despliegue.
+
+---
+
+## R9 — 10 de septiembre de 2026 — la feature 30 también se retira
+
+**Instrucción del propietario, literal:** «ya no la quiero ni que se implemente ni
+que exista», sobre la entrada `30 automations` de `feature_list.json`, pegada
+entera en el mensaje.
+
+**Se le dijo antes de ejecutar** —y aun así la mantuvo— que **era la más cerca de
+terminada de las tres que quedaban**: sus dos campañas pasaban todos los umbrales
+(98,09 % de backend con `ExecuteAutomations` al 95,08 % contra el 0,90 exigido, y
+90,29 % de frontend), sus 22 motivos bloqueantes estaban cerrados y de las 8
+condiciones de su juez ya había 4 cerradas.
+
+**Alcance:** desaparecen las reglas de automatización, el ejecutor, la simulación,
+la auditoría y su pantalla. Es más autocontenida que los conectores: tiene su
+propia migración (`V28__automations.sql`) y **consume** de la feature 25
+(`WebhookEndpointLookup`, el outbox) pero **nadie consume de ella** salvo el
+cableado de `ApplicationConfiguration` y el mapeo de errores de `ApiErrors`.
+
+`feature_list.json` pasa a **27 features**. Quedan **dos** por cerrar: la **25**
+(webhooks) y la **28** (calendario externo).
+
+**Consecuencia que conviene tener escrita:** con la 30 fuera, la feature 25 pierde
+a su único consumidor interno. Los webhooks siguen sirviendo para lo que fueron
+diseñados —notificar a terceros los eventos del outbox— pero ya no hay ninguna
+regla dentro del producto que los dispare. No es un defecto; es un cambio en para
+qué sirve la feature, y quien la lea dentro de seis meses merece saberlo.

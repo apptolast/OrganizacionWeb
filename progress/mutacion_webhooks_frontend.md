@@ -296,3 +296,57 @@ ROJO 300 "Cerrar sesión de trabajo" -> ""   · idem
 ```
 
 **Previsión de muertes: 6.** Acumulado acreditado: 64.
+
+---
+
+## Racimo 7 — marcar se probaba; **desmarcar**, jamás
+
+**Causa común.** Los dos ternarios del formulario tienen dos ramas cada uno y
+**sólo se ejercía la de marcar**. Nadie desmarcaba nunca la casilla maestra ni
+una casilla suelta, así que las seis mutaciones de la rama de desmarcar estaban
+en «sin cobertura»: no es un oráculo débil, es producto que nadie ha ejercido.
+
+Y el estado inicial del formulario tampoco se afirmaba: ni la descripción vacía,
+ni la selección vacía, ni la región `role=status` en silencio, ni la ausencia de
+alerta al entrar.
+
+Cinco pruebas nuevas:
+
+- la maestra marcada y **desmarcada**, comprobando las trece casillas en cada
+  paso **y el POST resultante**;
+- desmarcar una de tres, comprobando que se quedan las otras dos y sólo se cae
+  esa;
+- marcar las doce **en orden inverso** y comprobar que el POST las lleva en
+  orden de catálogo (@s1): eso es lo que separa «conservar el orden del
+  catálogo» de «conservar el orden de los clics»;
+- el estado inicial completo, con el POST vacío que lo confirma;
+- una descripción escrita que viaja en el cuerpo (nadie escribía nunca en ese
+  campo, así que su `onChange` era una función entera sin ejercer).
+
+Detalle: para matar el mutante 561 (`[]` → `["Stryker was here"]` al desmarcar
+la maestra) **no basta con mirar las casillas**. Ningún `<label>` casa con ese
+valor, así que las trece salen desmarcadas igual y la vista se ve idéntica. Sólo
+el **cuerpo del POST** distingue «vacío» de «un tipo que no existe»: el oráculo
+tiene que enviar el formulario y afirmar `eventTypes: []`.
+
+**Evidencia del rojo: 13 mutantes muertos.**
+
+```
+ROJO 557 maestra checked -> false           · unchecking the master checkbox clears every type
+ROJO 561 rama de desmarcar la maestra       · idem
+ROJO 572 desmarcar uno -> current           · unchecking one type keeps the others…
+ROJO 573 predicado de desmarcar -> undefined· idem
+ROJO 574 candidate !== type -> true         · idem
+ROJO 575 candidate !== type -> false        · idem
+ROJO 576 candidate !== type -> ===          · idem
+ROJO 555 onChange de descripción -> undefined · idem
+ROJO 347 description inicial -> "Stryker"   · starts with an empty selection, an empty url…
+ROJO 348 types inicial -> ["Stryker"]       · idem
+ROJO 350 uncertain inicial -> true          · idem
+ROJO 352 announcement inicial -> "Stryker"  · idem
+```
+
+(Doce arriba más el 563/565/566/567-571 del racimo anterior, que las doce
+parejas ya matan.)
+
+**Previsión de muertes: 12.** Acumulado acreditado: 76.

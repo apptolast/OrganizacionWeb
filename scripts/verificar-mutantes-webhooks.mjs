@@ -503,6 +503,95 @@ const MUTANTS = [
   "Editar proyecto",`,
     "view",
   ],
+  // ── Racimo 7: marcar y DESMARCAR tipos de evento ───────────────────────
+  [
+    "557 ConditionalExpression maestra checked -> false",
+    VIEW,
+    `              checked={types.length === webhookEventTypes.length}`,
+    `              checked={false}`,
+    "view",
+  ],
+  [
+    "561 ArrayDeclaration rama de desmarcar la maestra -> ['Stryker']",
+    VIEW,
+    `                setTypes(event.target.checked ? [...webhookEventTypes] : [])`,
+    `                setTypes(
+                  event.target.checked
+                    ? [...webhookEventTypes]
+                    : ["Stryker was here"],
+                )`,
+    "view",
+  ],
+  [
+    "572 MethodExpression desmarcar uno -> current",
+    VIEW,
+    `                      : current.filter((candidate) => candidate !== type),`,
+    `                      : current,`,
+    "view",
+  ],
+  [
+    "573 ArrowFunction predicado de desmarcar -> undefined",
+    VIEW,
+    `                      : current.filter((candidate) => candidate !== type),`,
+    `                      : current.filter((() => undefined) as never),`,
+    "view",
+  ],
+  [
+    "574 ConditionalExpression candidate !== type -> true",
+    VIEW,
+    `                      : current.filter((candidate) => candidate !== type),`,
+    `                      : current.filter(() => true),`,
+    "view",
+  ],
+  [
+    "575 ConditionalExpression candidate !== type -> false",
+    VIEW,
+    `                      : current.filter((candidate) => candidate !== type),`,
+    `                      : current.filter(() => false),`,
+    "view",
+  ],
+  [
+    "576 EqualityOperator candidate !== type -> ===",
+    VIEW,
+    `                      : current.filter((candidate) => candidate !== type),`,
+    `                      : current.filter((candidate) => candidate === type),`,
+    "view",
+  ],
+  [
+    "347 StringLiteral description inicial -> 'Stryker'",
+    VIEW,
+    `  const [description, setDescription] = useState("");`,
+    `  const [description, setDescription] = useState("Stryker was here!");`,
+    "view",
+  ],
+  [
+    "348 ArrayDeclaration types inicial -> ['Stryker']",
+    VIEW,
+    `  const [types, setTypes] = useState<string[]>([]);`,
+    `  const [types, setTypes] = useState<string[]>(["Stryker was here"]);`,
+    "view",
+  ],
+  [
+    "350 BooleanLiteral uncertain inicial -> true",
+    VIEW,
+    `  const [uncertain, setUncertain] = useState(false);`,
+    `  const [uncertain, setUncertain] = useState(true);`,
+    "view",
+  ],
+  [
+    "352 StringLiteral announcement inicial -> 'Stryker'",
+    VIEW,
+    `  const [announcement, setAnnouncement] = useState("");`,
+    `  const [announcement, setAnnouncement] = useState("Stryker was here!");`,
+    "view",
+  ],
+  [
+    "555 ArrowFunction onChange de descripcion -> undefined",
+    VIEW,
+    `            onChange={(event) => setDescription(event.target.value)}`,
+    `            onChange={() => undefined}`,
+    "view",
+  ],
 ];
 
 const suites = {

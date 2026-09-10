@@ -257,6 +257,145 @@ it.each(catalogue)(
   },
 );
 
+/** Los nombres accesibles de las doce casillas de tipo, sin la maestra. */
+function checkedTypeLabels() {
+  return screen
+    .getAllByRole("checkbox")
+    .filter((box) => (box as HTMLInputElement).checked)
+    .map((box) => box.closest("label")!.textContent);
+}
+
+// Marcar se ejercía; desmarcar, jamás. Son ramas distintas del mismo ternario y
+// la de desmarcar es la que decide qué se queda.
+it("@s37 unchecking the master checkbox clears every type", async () => {
+  const { other } = stubApi([], () =>
+    Promise.resolve(
+      Response.json({ code: "WEBHOOK_INVALID" }, { status: 400 }),
+    ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
+  const master = screen.getByRole("checkbox", { name: "Seleccionar todos" });
+  expect(master).not.toBeChecked();
+
+  await user.click(master);
+
+  expect(master).toBeChecked();
+  expect(checkedTypeLabels()).toHaveLength(13);
+
+  await user.click(master);
+
+  expect(master).not.toBeChecked();
+  expect(checkedTypeLabels()).toEqual([]);
+  // Marcada y desmarcada la maestra, la selección queda vacía de verdad: lo
+  // que se ve en las casillas y lo que viaja en el POST son lo mismo.
+  await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+  await waitFor(() => expect(other).toHaveBeenCalledTimes(1));
+  expect(bodyOf(other).eventTypes).toEqual([]);
+});
+
+it("@s37 starts with an empty selection, an empty url and an empty description", async () => {
+  const { other } = stubApi([], () =>
+    Promise.resolve(
+      Response.json({ code: "WEBHOOK_INVALID" }, { status: 400 }),
+    ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+
+  expect(checkedTypeLabels()).toEqual([]);
+  expect(screen.getByRole("textbox", { name: "URL" })).toHaveValue("");
+  expect(screen.getByRole("textbox", { name: "Descripción" })).toHaveValue("");
+  expect(announcement()).toBe("");
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
+  await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+
+  await waitFor(() => expect(other).toHaveBeenCalledTimes(1));
+  expect(bodyOf(other)).toEqual({
+    url: "https://example.com/hooks",
+    description: "",
+    eventTypes: [],
+  });
+});
+
+it("@s37 unchecking one type keeps the others and drops only that one", async () => {
+  const { other } = stubApi([], () =>
+    Promise.resolve(
+      Response.json({ endpoint: endpoint(), secret }, { status: 201 }),
+    ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
+  await user.type(
+    screen.getByRole("textbox", { name: "Descripción" }),
+    "Hook de reserva",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
+  await user.click(screen.getByRole("checkbox", { name: "Planificar bloque" }));
+  await user.click(screen.getByRole("checkbox", { name: "Extender sesión" }));
+
+  await user.click(screen.getByRole("checkbox", { name: "Planificar bloque" }));
+
+  expect(checkedTypeLabels()).toEqual(["Crear tarea", "Extender sesión"]);
+  await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+  await waitFor(() => expect(other).toHaveBeenCalledTimes(1));
+  expect(bodyOf(other)).toEqual({
+    url: "https://example.com/hooks",
+    description: "Hook de reserva",
+    eventTypes: ["TaskCreated.v1", "WorkSessionExtended.v1"],
+  });
+});
+
+// @s1: los tipos viajan en orden de catálogo, se marquen en el orden que se
+// marquen. Marcarlos al revés es lo que separa «conservar el orden del
+// catálogo» de «conservar el orden de los clics».
+it("@s1 sends the types in catalogue order however they were ticked", async () => {
+  const { other } = stubApi([], () =>
+    Promise.resolve(
+      Response.json({ endpoint: endpoint(), secret }, { status: 201 }),
+    ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
+  for (const [label] of [...catalogue].reverse())
+    await user.click(screen.getByRole("checkbox", { name: label }));
+
+  // Marcar las doce a mano deja la maestra marcada, igual que marcarla a ella.
+  expect(
+    screen.getByRole("checkbox", { name: "Seleccionar todos" }),
+  ).toBeChecked();
+
+  await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+
+  await waitFor(() => expect(other).toHaveBeenCalledTimes(1));
+  expect(bodyOf(other).eventTypes).toEqual(catalogue.map(([, type]) => type));
+});
+
 it("@s37 sends one POST with the twelve types and shows the secret once", async () => {
   let reply!: (response: Response) => void;
   const { other } = stubApi(

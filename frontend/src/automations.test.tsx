@@ -54,6 +54,7 @@ let calls: {
   method: string;
   headers: Headers;
   body?: string;
+  signal?: AbortSignal | null;
 }[];
 
 function key(url: string, method: string) {
@@ -83,6 +84,7 @@ beforeEach(() => {
       method,
       headers: new Headers(options.headers),
       body: typeof options.body === "string" ? options.body : undefined,
+      signal: options.signal,
     });
     const list = routes.get(key(url, method));
     const next = list && list.length > 1 ? list.shift()! : list?.[0];
@@ -148,6 +150,8 @@ describe("automations page", () => {
     expect(within(rows[0]).getByText("Activa")).toBeInTheDocument();
     expect(within(rows[1]).getByText("Proyecto creado")).toBeInTheDocument();
     expect(within(rows[1]).getByText("Inactiva")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("@s37 offers a retry and shows neither list nor empty state when the read fails", async () => {
@@ -973,12 +977,17 @@ describe("automations page", () => {
   });
 
   it("@s37 keeps offering the retry when the second read fails too", async () => {
+    const second = held();
     route("GET", "/api/v1/me/automations", 503, { code: "X" });
-    route("GET", "/api/v1/me/automations", 503, { code: "X" });
+    route("GET", "/api/v1/me/automations", 503, { code: "X" }, second.promise);
     listed(rule);
     render(<Automations owner="owner" />);
     await screen.findByRole("alert");
     await userEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+    // Mientras se reintenta se anuncia la carga y el error desaparece.
+    expect(screen.getByRole("status")).toHaveTextContent(/cargando/i);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    second.release();
     await waitFor(() =>
       expect(
         screen.getByRole("button", { name: "Reintentar" }),
@@ -1116,6 +1125,70 @@ describe("automations page", () => {
     // La respuesta sólo sustituye a su regla: la otra sigue siendo la otra.
     expect(screen.getByText("Pausada")).toBeInTheDocument();
     expect(screen.getByText("Seguimiento")).toBeInTheDocument();
+  });
+
+  const signalOf = (url: string) =>
+    calls.find((call) => call.url.split("?")[0] === url)?.signal;
+
+  it("@s43 cancels the reads still in the air when the page is left", async () => {
+    const rules = held();
+    const projectList = held();
+    routes.delete("GET /api/v1/projects");
+    route("GET", "/api/v1/projects", 200, projects, projectList.promise);
+    route(
+      "GET",
+      "/api/v1/me/automations",
+      200,
+      { items: [] },
+      rules.promise,
+    );
+    const view = render(<Automations owner="owner" />);
+    await waitFor(() => expect(calls).toHaveLength(2));
+    expect(signalOf("/api/v1/me/automations")!.aborted).toBe(false);
+    expect(signalOf("/api/v1/projects")!.aborted).toBe(false);
+    view.unmount();
+    expect(signalOf("/api/v1/me/automations")!.aborted).toBe(true);
+    expect(signalOf("/api/v1/projects")!.aborted).toBe(true);
+    rules.release();
+    projectList.release();
+  });
+
+  it("@s43 cancels the write and the history still in the air when the page is left", async () => {
+    listed(rule);
+    const simulation = held();
+    const history = held();
+    route(
+      "POST",
+      "/api/v1/me/automations/simulate",
+      200,
+      { evaluatedEvents: 1, matches: [] },
+      simulation.promise,
+    );
+    route(
+      "GET",
+      `${CREATE}/${RULE}/runs`,
+      200,
+      { items: [], nextCursor: null },
+      history.promise,
+    );
+    const view = render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Editar Seguimiento" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Historial de Seguimiento" }),
+    );
+    await waitFor(() =>
+      expect(signalOf("/api/v1/me/automations/simulate")).toBeDefined(),
+    );
+    expect(signalOf("/api/v1/me/automations/simulate")!.aborted).toBe(false);
+    expect(signalOf(`${CREATE}/${RULE}/runs`)!.aborted).toBe(false);
+    view.unmount();
+    expect(signalOf("/api/v1/me/automations/simulate")!.aborted).toBe(true);
+    expect(signalOf(`${CREATE}/${RULE}/runs`)!.aborted).toBe(true);
+    simulation.release();
+    history.release();
   });
 
   it("@s38 clears the previous complaint each time the owner saves again", async () => {

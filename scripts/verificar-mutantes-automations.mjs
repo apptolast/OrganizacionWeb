@@ -1319,6 +1319,110 @@ export async function deleteAutomation(`,
   ],
   [
     VIEW,
+    "R8 178 limpieza de desmontaje -> {}",
+    `  useLayoutEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      live.current?.abort();
+      runsRequest.current?.abort();
+      writeRequest.current?.abort();
+    };
+  }, []);`,
+    `  useLayoutEffect(() => {
+  }, []);`,
+  ],
+  [
+    VIEW,
+    "R8 180 cuerpo de la limpieza -> {}",
+    `    return () => {
+      mounted.current = false;
+      live.current?.abort();
+      runsRequest.current?.abort();
+      writeRequest.current?.abort();
+    };`,
+    `    return () => {};`,
+  ],
+  [
+    VIEW,
+    "R8 183 aborto del historial -> ;",
+    `      runsRequest.current?.abort();
+      writeRequest.current?.abort();`,
+    `      writeRequest.current?.abort();`,
+  ],
+  [
+    VIEW,
+    "R8 184 aborto de la escritura -> ;",
+    `      runsRequest.current?.abort();
+      writeRequest.current?.abort();`,
+    `      runsRequest.current?.abort();`,
+  ],
+  [
+    VIEW,
+    "R8 223 limpieza de la lectura inicial -> undefined",
+    `      .catch(() => {
+        if (mounted.current && live.current === controller) setFailed(true);
+      });
+    return () => controller.abort();`,
+    `      .catch(() => {
+        if (mounted.current && live.current === controller) setFailed(true);
+      });
+    return () => undefined;`,
+  ],
+  [
+    VIEW,
+    "R8 233 limpieza de la lectura de proyectos -> undefined",
+    `      .catch(() => {});
+    return () => controller.abort();`,
+    `      .catch(() => {});
+    return () => undefined;`,
+  ],
+  [
+    VIEW,
+    "R8 207 setFailed(false) al reintentar -> true",
+    `    setRules(null);
+    setFailed(false);`,
+    `    setRules(null);
+    setFailed(true);`,
+  ],
+  [
+    VIEW,
+    "R8 218 setFailed(false) tras la lectura inicial -> true",
+    `        setRules(items);
+        setFailed(false);
+      })`,
+    `        setRules(items);
+        setFailed(true);
+      })`,
+  ],
+  [
+    VIEW,
+    "R8 197 setFailed(false) tras el reintento -> true",
+    `      setRules(items);
+      setFailed(false);
+    } catch {`,
+    `      setRules(items);
+      setFailed(true);
+    } catch {`,
+  ],
+  [
+    VIEW,
+    "R8 281 finally de save -> {}",
+    `    } finally {
+      if (mounted.current && writeRequest.current === controller)
+        setSaving(false);
+    }`,
+    `    } finally {
+    }`,
+  ],
+  [
+    VIEW,
+    "R8 283 setSaving(false) -> true",
+    `        setSaving(false);`,
+    `        setSaving(true);`,
+  ],
+  [
+    VIEW,
     "490 opciones de proyecto -> undefined",
     `            {projects.map((project) => (
               <option key={project.id} value={project.id}>

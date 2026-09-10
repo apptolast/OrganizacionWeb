@@ -347,3 +347,94 @@ nadie miraba si la queja del intento anterior seguía en pantalla.
 
 **Previsión (no medida): 17 mutantes verificados, los 17 MUEREN.** Previsión
 razonada del racimo: **20 a 25**.
+
+---
+
+## Racimo 8 — al salir de la página, lo que queda en el aire
+
+**Causa común.** @s43 dice que la respuesta tardía «no modifica la interfaz visible
+ni anuncia nada», y las pruebas lo comprobaban mirando la pantalla **después** de
+desmontar. Pero una pantalla desmontada no muestra nada pase lo que pase: el
+oráculo no podía fallar. Borrar los cuatro `abort()` de la limpieza de desmontaje no
+rompía ninguna prueba.
+
+**Oráculo que faltaba.** Mirar **la señal**, no la pantalla. El arnés ahora guarda
+el `AbortSignal` de cada petición y dos pruebas comprueban que al desmontar quedan
+las cuatro abortadas:
+
+- `@s43 cancels the reads still in the air when the page is left` — la lista y los
+  proyectos.
+- `@s43 cancels the write and the history still in the air when the page is left` —
+  la simulación y el historial, que sólo los cancela la limpieza del
+  `useLayoutEffect`.
+
+Y dos afirmaciones más sobre el estado de error: al reintentar se anuncia la carga
+y desaparece el error, y una lectura correcta no deja el error puesto.
+
+**Previsión (no medida): 11 mutantes verificados, 10 MUEREN.** El que sobrevive,
+`return () => controller.abort()` de la lectura inicial, es **redundante con el
+código, no con la prueba**: la limpieza del `useLayoutEffect` ya aborta ese mismo
+controlador (`live.current`), así que quitar uno de los dos no cambia nada
+observable. Es código duplicado, no un hueco de oráculo; lo dejo anotado.
+
+---
+
+## Resumen y previsión
+
+| Racimo | Verificados | Mueren |
+|---|---|---|
+| 1 — esquema del cliente | 40 | 40 |
+| 2 — conversación del cliente | 34 | 34 |
+| 3 — tablas de la vista | 23 | 23 |
+| 4 — el cuerpo que manda el editor | 37 | 36 |
+| 5 — reglas de webhook (**defecto arreglado**) | 10 | 10 |
+| 6 — avisos de error y guardas tardías | 26 | 26 |
+| 7 — lo que tiene que desaparecer | 17 | 17 |
+| 8 — abortos al salir | 11 | 10 |
+| **Total** | **198** | **196** |
+
+Los dos que no mueren son equivalentes y están razonados arriba.
+
+**Previsión de puntuación (no medida; la mide el orquestador).** El denominador es
+876 mutantes con 462 muertos de partida (52,74 %). De los 414 vivos:
+
+- `automations-api.ts` — los 155 caen todos en líneas atacadas por los racimos 1 y
+  2, y las familias son sistemáticas (una fila de tabla por conjunto). Previsión:
+  **140-150 muertos**, de 58,22 % a **~93-96 %**.
+- `automations.tsx` — de los 259, quedan sin atacar unos **41**, casi todos
+  equivalentes o inalcanzables: guardas del camino de éxito que sólo se alcanzan si
+  una petición se sustituye **sin** abortarla (nunca ocurre: las tres escrituras
+  abortan siempre a la anterior, y el cliente lanza en cuanto ve la señal cortada),
+  arrays de dependencias constantes, `?.` sobre referencias que nunca son nulas, y
+  el enlace a la tarea del historial de una regla de webhook, que sólo se pintaría
+  con una respuesta del servidor que se contradice a sí misma. Previsión:
+  **170-195 muertos**, de 47,36 % a **~82-88 %**.
+
+**Previsión global: entre 85 % y 91 %, con el centro en ~88 %.** Por encima del
+umbral de 80 con margen incluso en el escenario pesimista (84,7 %).
+
+## Defectos de producto
+
+1. **Arreglado.** Renombrar una regla de aviso al webhook la convertía en una regla
+   de crear tareas y perdía el `endpointId` (racimo 5). Rojo demostrado, arreglo en
+   `actionOf()`, `git diff` de producción limitado a ese cambio.
+2. **Anotado, no arreglado** (diseño, fuera de encargo). Las tres escrituras
+   comparten un `AbortController`: empezar una cancela la anterior en silencio y
+   deja su bandera de ocupado (`saving`, `busyToggle`) puesta para siempre, de modo
+   que «Guardar» o el interruptor quedan inutilizables hasta recargar.
+3. **Anotado, no arreglado** (interfaz). El editor sigue mostrando «Título de la
+   tarea» y «Criterio de la tarea» vacíos al abrir una regla de webhook; ahora los
+   ignora en vez de destruir la regla, pero lo correcto sería no ofrecerlos.
+4. **Anotado, fuera de ámbito.** `frontend/src/appearance.test.tsx` →
+   `@s24 follows a system color-scheme change without persisting another preference`
+   falló una vez en una tanda combinada y volvió a pasar tres veces seguidas
+   después. No la toco, pero conviene mirarla: huele a verde por suerte de carga.
+
+## Comprobaciones finales
+
+- `pnpm --dir frontend exec vitest run src/automations` → **84 pruebas verdes**
+  (26 del cliente, 51 de la vista, 7 de la ruta).
+- `vitest run src/automations src/workspace src/App` → 190 verdes, tres veces.
+- `tsc --noEmit` y `eslint` sobre los ficheros tocados, limpios.
+- `git diff` de producción contra `origin/main`: sólo `actionOf()` en
+  `automations.tsx` (+17 −11), que es el arreglo del defecto 1.

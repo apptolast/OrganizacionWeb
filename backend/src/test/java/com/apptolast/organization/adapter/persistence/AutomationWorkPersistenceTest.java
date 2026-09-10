@@ -95,6 +95,34 @@ class AutomationWorkPersistenceTest {
         .containsExactly(GREATER);
   }
 
+  /**
+   * @s17, la otra mitad: «E3 posterior en estado blocked ... no existe ejecución para E3»
+   *     (features/automations.feature:233 y 238). La bandera la produce {@code
+   *     "blocked".equals(row.getString("status"))} y ninguna prueba la hacía pasar por este
+   *     adaptador: se fabricaba a mano en el doble. Si el literal deja de coincidir, {@code
+   *     blocked()} es siempre false y las reglas se ejecutan sobre eventos que la outbox retuvo a
+   *     propósito: tareas y webhooks a partir de lo que el sistema decidió no publicar.
+   *     <p>Se afirman los dos lados —el pendiente false y el bloqueado true— porque un literal
+   *     invertido («pending» en lugar de «blocked») sólo se distingue mirando los dos.
+   */
+  @Test
+  void s17_theBlockedFlagOfEachOutboxRowReachesTheWorker() {
+    var owner = owner();
+    var project = project(owner);
+    var open = outbox(owner, project, T0.plusSeconds(1), "pending");
+    var held = outbox(owner, project, T0.plusSeconds(2), "blocked");
+
+    var candidates = work.after(owner, start());
+
+    assertThat(idsOf(candidates)).containsExactly(open, held);
+    assertThat(candidates.getFirst().blocked())
+        .as("una fila pending no está retenida y sus reglas deben dispararse")
+        .isFalse();
+    assertThat(candidates.getLast().blocked())
+        .as("una fila blocked está retenida: se salta, no dispara nada")
+        .isTrue();
+  }
+
 
   private static AutomationCursor start() {
     return new AutomationCursor(T0, AutomationCursor.START);

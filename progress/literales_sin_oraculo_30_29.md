@@ -23,6 +23,8 @@ nueva**, con el mensaje anotado. Un oráculo que no puede fallar no vale.
 | 1 | `ORDER BY occurred_at, event_id` (`window()`) | quitar `, event_id` | `[«E1 y E2 con el mismo occurred_at y event_id de E1 menor», y E1 va primero] Expecting actual: [2222…, 1111…] to contain exactly (and in same order): [1111…, 2222…]` |
 | 1 | idem | `ORDER BY occurred_at, event_id DESC` | el mismo |
 | 1 | idem (la **pérdida**, con las dos primeras aserciones relajadas a propósito) | `event_id DESC` | `[el hermano queda por delante del cursor, no detrás: no se pierde] Expecting actual: [] to contain exactly: [2222…]` |
+| 3 | `"blocked".equals(row.getString("status"))` (`event()`) | `"held".equals(…)` | `[una fila blocked está retenida: se salta, no dispara nada] Expecting value to be true but was false` |
+| 3 | idem | `"pending".equals(…)` | `[una fila pending no está retenida y sus reglas deben dispararse] Expecting value to be false but was true` |
 
 ---
 
@@ -58,3 +60,29 @@ salta al de identificador mayor y el hermano desaparece de todos los ciclos
 futuros. Acreditado relajando a propósito las dos aserciones previas: la
 tercera dio `Expecting actual: [] to contain exactly: [2222…]`. Producción y
 prueba restauradas después.
+
+---
+
+## Hallazgo 3 — `"blocked".equals(row.getString("status"))` (`PostgresAutomationWork.event()`, :299)
+
+**Qué decide.** Si una fila de la outbox marcada como bloqueada se salta
+—avanza el cursor sin producir nada— o dispara reglas. Es la otra mitad de
+@s17: «E3 posterior en estado blocked … no existe ejecución para E3»
+(`features/automations.feature:233` y `:238`).
+
+**Por qué no lo distinguía nadie.** La bandera se fabricaba a mano en el doble
+(`ExecuteAutomationsTest.java:532`, usada en `:164`). `AutomationPersistenceTest.java:315`
+sí inserta una fila `blocked`, pero prueba `PostgresAutomationEvents.recent()`
+y su `status <> blocked`, que es otra consulta distinta. Por este adaptador no
+pasaba ninguna.
+
+**La consecuencia.** Si el literal deja de coincidir, `candidate.blocked()` es
+siempre `false` y las reglas se ejecutan sobre eventos que la outbox retuvo a
+propósito: se crean tareas y se encolan webhooks a partir de eventos que el
+sistema decidió no publicar.
+
+**La prueba.** `s17_theBlockedFlagOfEachOutboxRowReachesTheWorker`. Afirma los
+**dos** lados —la fila `pending` con `blocked() == false` y la `blocked` con
+`true`— porque un literal invertido sólo se distingue mirando los dos, y así
+quedó acreditado: romperlo hacia un valor que no existe pone roja la segunda
+aserción, invertirlo a `"pending"` pone roja la primera.

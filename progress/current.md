@@ -67,6 +67,26 @@ corrido nunca) y **Stryker de la 28**, recién integrada con 83 → 161 pruebas 
 decía «no hay eventos», y una limpieza de efecto que abortaba el controlador
 equivocado y dejaba escrituras vivas al salir de la pantalla.
 
+### Puertas de mutación, medidas (13:25)
+
+| Feature | Backend | Frontend |
+|---|---|---|
+| 25 webhooks | 89,88 % ✅ | carril trabajando (iba por 71,40 %) |
+| 27 conector GitHub | **caducada** ⚠️ | **caducada** ⚠️ |
+| 28 calendario externo | **91,71 %** ✅ | **91,32 %** ✅ |
+| 29 conectores adicionales | midiéndose, primera vez | carril trabajando (iba por 68,51 %) |
+| 30 automatizaciones | 95,72 % ✅ (no 96,00) | 91,18 % ✅ |
+
+**La 28 tiene ya las dos puertas de mutación.** Su cifra de frontend está
+calculada del `mutation.json` (663 de 726), no copiada de un HTML, y va con la
+lista nominal de los 65 sin matar en
+`progress/mutacion_external_calendar_frontend_medida.md`.
+
+**Las dos de la 27 caducaron hoy, y es correcto que caduquen**: el 93,23 % de
+backend se midió con un ámbito que arrastraba 81 mutantes de la feature 29, y el
+de frontend se midió antes del arreglo del `@s41`, que cambia producción. Hay que
+volver a medirlas.
+
 ### Lo que ya se cerró hoy
 
 - Rescate y merge del trabajo que el reset borró (cuatro oráculos de

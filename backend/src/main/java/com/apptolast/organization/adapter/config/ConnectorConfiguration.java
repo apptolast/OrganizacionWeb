@@ -3,11 +3,8 @@ package com.apptolast.organization.adapter.config;
 import com.apptolast.organization.adapter.connectors.AesGcmSecretCipher;
 import com.apptolast.organization.adapter.connectors.ConnectorKeyRing;
 import com.apptolast.organization.adapter.connectors.GithubApiBase;
-import com.apptolast.organization.adapter.connectors.GitlabApiBase;
 import com.apptolast.organization.adapter.connectors.HttpGithubIssueSource;
-import com.apptolast.organization.adapter.connectors.HttpGitlabIssueSource;
 import com.apptolast.organization.adapter.http.GithubConnectorController;
-import com.apptolast.organization.adapter.http.GitlabConnectorController;
 import com.apptolast.organization.application.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.SecureRandom;
@@ -77,69 +74,6 @@ public class ConnectorConfiguration {
   DisconnectGithubUseCase disconnectGithub(
       ConnectorConnectionStore connections, SecretCipher cipher) {
     return new DisconnectGithub(connections, cipher);
-  }
-
-  // ------------------------------------------------------------------------------- GitLab
-
-  @Bean
-  public GitlabApiBase gitlabApiBase(
-      @Value("${app.gitlab.api-base:https://gitlab.com/api/v4}") String base) {
-    return GitlabApiBase.of(base);
-  }
-
-  @Bean
-  HttpGitlabIssueSource gitlabIssueSource(GitlabApiBase base, ObjectMapper json, Clock clock) {
-    return new HttpGitlabIssueSource(base, json, clock);
-  }
-
-  @Bean
-  public ReadGitlabConnectionUseCase readGitlabConnection(
-      GitlabConnectionStore connections,
-      IssueImportReceiptStore receipts,
-      GitlabApiBase base,
-      SecretCipher cipher) {
-    return new ReadGitlabConnection(connections, receipts, base.value(), cipher);
-  }
-
-  @Bean
-  public ConnectGitlabUseCase connectGitlab(
-      GitlabConnectionStore connections,
-      HttpGitlabIssueSource directory,
-      IssueImportReceiptStore receipts,
-      GitlabApiBase base,
-      SecretCipher cipher,
-      Clock clock) {
-    return new ConnectGitlab(connections, directory, receipts, base.value(), cipher, clock);
-  }
-
-  @Bean
-  public DisconnectGitlabUseCase disconnectGitlab(
-      GitlabConnectionStore connections,
-      IssueImportReceiptStore receipts,
-      SecretCipher cipher,
-      Clock clock) {
-    return new DisconnectGitlab(connections, receipts, cipher, clock);
-  }
-
-  @Bean(GitlabConnectorController.GITLAB_IMPORTS)
-  ImportIssuesUseCase gitlabImportIssues(
-      GitlabConnectionStore connections,
-      IssueImportReceiptStore receipts,
-      ProjectQueries projects,
-      HttpGitlabIssueSource source,
-      ImportedTaskCommit commit,
-      SecretCipher cipher,
-      ConnectorAudit audit,
-      Clock clock) {
-    return new ImportIssues(
-        new GitlabIssueConnections(connections),
-        receipts,
-        projects,
-        source,
-        commit,
-        cipher,
-        audit,
-        clock);
   }
 
   @Bean

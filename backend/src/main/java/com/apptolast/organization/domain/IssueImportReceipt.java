@@ -10,8 +10,8 @@ import java.util.UUID;
  * el GET del recibo vuelve a leer, también tras un reinicio.
  *
  * <p>{@code source} nombra al gestor del que salieron las issues y {@code projectPath} al proyecto
- * suyo del que se leyeron. Los dos gestores comparten forma de recibo, así que una importación de
- * GitHub y otra de GitLab sólo se distinguen por sus valores, nunca por sus claves.
+ * suyo del que se leyeron. La forma del recibo no depende del gestor: dos gestores distintos se
+ * distinguirían por los valores de esos dos campos, nunca por las claves del cuerpo.
  */
 public record IssueImportReceipt(
     UUID id,

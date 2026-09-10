@@ -15,9 +15,8 @@ import java.util.UUID;
  * Importar es bajo demanda y de un solo sentido: nada vuelve al gestor externo.
  *
  * <p>El caso de uso no sabe qué gestor hay al otro lado. Recibe una implementación de {@link
- * IssueConnections} y otra de {@link IssueSource} por gestor, así que GitHub y GitLab recorren
- * exactamente este código y producen recibos con las mismas claves. Un tercer gestor no añade
- * ninguna rama aquí.
+ * IssueConnections} y otra de {@link IssueSource} por gestor, así que hoy sirve a GitHub sin
+ * nombrarlo y otro gestor no añadiría ninguna rama aquí.
  *
  * <p>Las precondiciones se evalúan en un orden fijo —conexión, validez de la conexión, proyecto,
  * estado del proyecto y sólo entonces la exclusión mutua— para que la respuesta no dependa de en
@@ -137,7 +136,7 @@ public final class ImportIssues implements ImportIssuesUseCase {
       IssueConnection connection,
       IssueImportReceipt receipt,
       IssueSourceException error) {
-    var errorCode = ConnectorFailures.importErrorCode(connections.source(), error);
+    var errorCode = ConnectorFailures.importErrorCode(error);
     var at = now();
     if (error.reason() == IssueSourceException.Reason.TOKEN_REJECTED)
       connections.invalidate(ownerId, errorCode, at);
@@ -153,9 +152,8 @@ public final class ImportIssues implements ImportIssuesUseCase {
       IssueConnection connection,
       IssueImportReceipt receipt,
       Tally tally) {
-    // El puerto unificado obliga a decidir: la 27 conserva su comportamiento previo, así que un
-    // secreto ilegible sigue siendo SecretUndecipherableException. El adaptador HTTP la traduce a
-    // 503 CONNECTOR_KEY_MISMATCH, así que una clave rotada da un fallo honesto y no un 500.
+    // Un secreto ilegible es SecretUndecipherableException. El adaptador HTTP la traduce a 503
+    // CONNECTOR_KEY_MISMATCH, así que una clave rotada da un fallo honesto y no un 500.
     var token =
         cipher
             .decrypt(ownerId, connection.tokenCiphertext())

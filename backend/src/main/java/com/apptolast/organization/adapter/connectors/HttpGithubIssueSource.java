@@ -25,9 +25,9 @@ import java.util.List;
  * Los plazos son cortos y explícitos, porque importar es una operación interactiva y quien espera
  * es una persona delante de la pantalla.
  *
- * <p>El cuerpo se lee acotado, por {@link BoundedResponse}, igual que en el gemelo de GitLab: la
- * base de la API es configuración del servidor y admite instancias propias, así que el tamaño de la
- * respuesta lo decide alguien que no somos nosotros. El techo lo fija el {@code @s25} de {@code
+ * <p>El cuerpo se lee acotado, por {@link BoundedResponse}: la base de la API es configuración del
+ * servidor y admite instancias propias, así que el tamaño de la respuesta lo decide alguien que no
+ * somos nosotros. El techo lo fija el {@code @s25} de {@code
  * features/additional_connectors.feature}, que gobierna a los dos adaptadores.
  */
 public final class HttpGithubIssueSource implements IssueSource, GithubRepositoryDirectory {

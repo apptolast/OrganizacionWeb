@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 public final class GithubConnectorController {
-  /** Nombre del caso de uso de importación cableado para GitHub; GitLab tiene el suyo. */
+  /** Nombre del caso de uso de importación cableado para GitHub. */
   public static final String GITHUB_IMPORTS = "githubImportIssues";
 
   private static final String CONNECTION = "/api/v1/me/connectors/github";

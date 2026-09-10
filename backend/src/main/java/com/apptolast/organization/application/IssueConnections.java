@@ -9,7 +9,7 @@ import java.util.Optional;
  * escribir para que un tercer gestor entre por el mismo camino.
  */
 public interface IssueConnections {
-  /** Clave estable del gestor: {@code github}, {@code gitlab}. */
+  /** Clave estable del gestor: hoy sólo {@code github}. */
   String source();
 
   Optional<IssueConnection> find(String ownerId);

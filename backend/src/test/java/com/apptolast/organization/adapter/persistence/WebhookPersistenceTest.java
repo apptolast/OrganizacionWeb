@@ -258,6 +258,79 @@ class WebhookPersistenceTest {
     assertEquals("succeeded", store.find(owner, owning.id(), delivery.id()).orElseThrow().status());
   }
 
+  /**
+   * El almacén inserta la entrega tal cual se la den —{@code event_type} incluido—, así que ésta es
+   * la vía para dejar pendiente una entrega derivada de la outbox sin montar un proyecto y un
+   * evento: lo que se ejerce aquí es el predicado de la consulta, no el origen de la fila.
+   */
+  private static WebhookDelivery givenPending(
+      PostgresWebhookStore store, String owner, UUID endpointId, String eventType) {
+    var delivery =
+        new WebhookDelivery(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            eventType,
+            WebhookDelivery.PENDING,
+            0,
+            null,
+            null,
+            null,
+            NOW,
+            NOW,
+            NOW);
+    store.enqueuePing(owner, endpointId, delivery, "{}");
+    return delivery;
+  }
+
+  private static void markSucceeded(UUID deliveryId) {
+    Database.JDBC.update(
+        "UPDATE webhook_deliveries SET status='succeeded', attempt=1, http_status=200,"
+            + " latency_ms=12, next_attempt_at=NULL WHERE id=?",
+        deliveryId);
+  }
+
+  /**
+   * @s14, las tres primeras filas del Examples: «ninguna entrega pendiente» y «una entrega de
+   *     outbox pendiente» dan 202, y «un ping pendiente» da 409 WEBHOOK_DELIVERY_PENDING. La única
+   *     guarda de esa distinción es el {@code WHERE} de {@code hasPendingPing}, y hasta ahora su
+   *     SQL <b>no se ejecutaba en ninguna prueba</b>: sólo lo cubrían dos dobles
+   *     (`FakeWebhookDeliveries` y `ConnectorStatusSourcesTest`), que se portan bien por
+   *     construcción. Cambiar {@code 'pending'} por {@code 'succeeded'} invertía la guarda entera
+   *     —pings ilimitados mientras uno está en vuelo, y 409 en el primer ping tras uno entregado—
+   *     sin que la suite se moviera.
+   *     <p>Se afirma el predicado completo, término a término, porque cada uno decide una fila
+   *     distinta del contrato: el estado, el tipo de evento, el webhook y el propietario.
+   */
+  @Test
+  void s14_onlyItsOwnPendingPingBlocksTheNextPing() {
+    var owner = "ping-" + UUID.randomUUID();
+    var stranger = "other-" + UUID.randomUUID();
+    var store = store();
+    var asked = endpoint(NOW);
+    var sibling = endpoint(NOW);
+    store.insert(owner, asked, cipher("whsec_x"));
+    store.insert(owner, sibling, cipher("whsec_y"));
+    assertFalse(store.hasPendingPing(owner, asked.id()), "«ninguna entrega pendiente»: 202");
+
+    givenPending(store, owner, asked.id(), "TaskCreated.v1");
+    assertFalse(
+        store.hasPendingPing(owner, asked.id()), "«una entrega de outbox pendiente»: 202, no 409");
+
+    givenPending(store, owner, sibling.id(), WebhookDelivery.PING);
+    assertFalse(
+        store.hasPendingPing(owner, asked.id()), "el ping en vuelo de otro webhook no es el suyo");
+    assertTrue(
+        store.hasPendingPing(owner, sibling.id()), "y para el otro webhook sí está en vuelo");
+
+    var ping = givenPending(store, owner, asked.id(), WebhookDelivery.PING);
+    assertTrue(store.hasPendingPing(owner, asked.id()), "«un ping pendiente»: 409");
+    assertFalse(
+        store.hasPendingPing(stranger, asked.id()), "un webhook ajeno no existe para nadie más");
+
+    markSucceeded(ping.id());
+    assertFalse(store.hasPendingPing(owner, asked.id()), "un ping ya entregado no está en vuelo");
+  }
+
   private static int count(String owner) {
     return Database.JDBC.queryForObject(
         "SELECT count(*) FROM webhook_endpoints WHERE owner_id=?", Integer.class, owner);

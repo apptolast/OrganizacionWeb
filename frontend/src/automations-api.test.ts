@@ -459,10 +459,16 @@ describe("automations api", () => {
 
   it("@s39 accepts the coincidences the contract publishes", async () => {
     const valid: [string, unknown][] = [
-      ["tarea que fallaría", m({ ...validPreview, wouldFail: "TITLE_TOO_LONG" })],
+      [
+        "tarea que fallaría",
+        m({ ...validPreview, wouldFail: "TITLE_TOO_LONG" }),
+      ],
       ["tarea sin minutos", m({ ...validPreview, estimatedMinutes: null })],
       ["aviso al webhook", m(webhookPreview)],
-      ["evento frenado por el guardián de bucles", { ...validMatch, loopGuarded: true }],
+      [
+        "evento frenado por el guardián de bucles",
+        { ...validMatch, loopGuarded: true },
+      ],
     ];
     for (const [what, item] of valid)
       await expect(coincidence(item), what).resolves.toEqual({
@@ -524,10 +530,24 @@ describe("automations api", () => {
 
   it("@s41 accepts the three states and the nulls where they apply", async () => {
     const valid: [string, unknown][] = [
-      ["reintento con entrega y sin tarea",
-        { ...validRun, status: "retry", createdTaskId: null, deliveryId: ENDPOINT }],
-      ["fallo con código de error",
-        { ...validRun, status: "failed", createdTaskId: null, errorCode: "PROJECT_COMPLETED" }],
+      [
+        "reintento con entrega y sin tarea",
+        {
+          ...validRun,
+          status: "retry",
+          createdTaskId: null,
+          deliveryId: ENDPOINT,
+        },
+      ],
+      [
+        "fallo con código de error",
+        {
+          ...validRun,
+          status: "failed",
+          createdTaskId: null,
+          errorCode: "PROJECT_COMPLETED",
+        },
+      ],
     ];
     for (const [what, item] of valid)
       await expect(execution(item), what).resolves.toEqual({
@@ -594,7 +614,9 @@ describe("automations api", () => {
       ["cuerpo vacío", 400, undefined],
     ];
     for (const [what, status, body] of bodies)
-      await expect(refused(status, body), what).rejects.toBeInstanceOf(Response);
+      await expect(refused(status, body), what).rejects.toBeInstanceOf(
+        Response,
+      );
   });
 
   it("@s36 only reads field errors out of a 400 or a 422", async () => {

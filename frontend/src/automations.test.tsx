@@ -588,7 +588,9 @@ describe("automations page", () => {
     );
     const trigger = screen.getByLabelText("Disparador");
     expect(
-      within(trigger).getAllByRole("option").map((option) => option.textContent),
+      within(trigger)
+        .getAllByRole("option")
+        .map((option) => option.textContent),
     ).toEqual(TRIGGERS.map(([, label]) => label));
     expect(trigger).toHaveValue("TaskCreated.v1");
     const condition = screen.getByLabelText("Sólo en el proyecto");
@@ -770,7 +772,9 @@ describe("automations page", () => {
     await userEvent.clear(name);
     await userEvent.type(name, "Renombrada");
     await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
-    await waitFor(() => expect(sent("PUT", `${CREATE}/${RULE}`)).toHaveLength(1));
+    await waitFor(() =>
+      expect(sent("PUT", `${CREATE}/${RULE}`)).toHaveLength(1),
+    );
     expect(sent("PUT", `${CREATE}/${RULE}`)[0]).toEqual({
       name: "Renombrada",
       enabled: true,
@@ -816,7 +820,9 @@ describe("automations page", () => {
     await userEvent.clear(criterion);
     await userEvent.type(criterion, "Con el informe revisado");
     await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
-    await waitFor(() => expect(sent("PUT", `${CREATE}/${RULE}`)).toHaveLength(1));
+    await waitFor(() =>
+      expect(sent("PUT", `${CREATE}/${RULE}`)).toHaveLength(1),
+    );
     expect(sent("PUT", `${CREATE}/${RULE}`)[0]).toMatchObject({
       enabled: false,
       condition: { projectId: PROJECT },
@@ -836,7 +842,9 @@ describe("automations page", () => {
     );
     await userEvent.type(screen.getByLabelText("Nombre"), "Otra");
     await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
-    await waitFor(() => expect(screen.getAllByRole("listitem")).toHaveLength(2));
+    await waitFor(() =>
+      expect(screen.getAllByRole("listitem")).toHaveLength(2),
+    );
     expect(screen.getByText("Seguimiento")).toBeInTheDocument();
     expect(screen.getByText("Otra")).toBeInTheDocument();
   });
@@ -861,9 +869,10 @@ describe("automations page", () => {
       await userEvent.type(screen.getByLabelText("Nombre"), "Otra");
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
       await waitFor(() => expect(sent("POST", CREATE)).toHaveLength(1));
-      expect(sent("POST", CREATE)[0], `${existing.length} reglas`).toMatchObject(
-        { action: { type: "CREATE_TASK", projectId: "" } },
-      );
+      expect(
+        sent("POST", CREATE)[0],
+        `${existing.length} reglas`,
+      ).toMatchObject({ action: { type: "CREATE_TASK", projectId: "" } });
       view.unmount();
     }
   });
@@ -1027,7 +1036,9 @@ describe("automations page", () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Nombre")).toHaveValue("Seguimiento");
-    expect(screen.queryByRole("list", { name: "Reglas" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("list", { name: "Reglas" }),
+    ).not.toBeInTheDocument();
   });
 
   it("@s43 drops a simulation that a save superseded, without announcing anything", async () => {
@@ -1079,7 +1090,9 @@ describe("automations page", () => {
       await screen.findByRole("button", { name: "Editar Seguimiento" }),
     );
     await userEvent.click(screen.getByRole("switch", { name: /seguimiento/i }));
-    await waitFor(() => expect(sent("PUT", `${CREATE}/${RULE}`)).toHaveLength(1));
+    await waitFor(() =>
+      expect(sent("PUT", `${CREATE}/${RULE}`)).toHaveLength(1),
+    );
     await userEvent.click(screen.getByRole("button", { name: "Simular" }));
     await screen.findByRole("status", { name: "Resultado de la simulación" });
     flip.release();
@@ -1109,7 +1122,10 @@ describe("automations page", () => {
       { ...rule, version: 3, enabled: false },
       flip.promise,
     );
-    route("PUT", `${CREATE}/${OTHER_RULE}`, 200, { ...disabled, enabled: true });
+    route("PUT", `${CREATE}/${OTHER_RULE}`, 200, {
+      ...disabled,
+      enabled: true,
+    });
     render(<Automations owner="owner" />);
     const first = await screen.findByRole("switch", { name: /seguimiento/i });
     const second = screen.getByRole("switch", { name: /pausada/i });
@@ -1135,13 +1151,7 @@ describe("automations page", () => {
     const projectList = held();
     routes.delete("GET /api/v1/projects");
     route("GET", "/api/v1/projects", 200, projects, projectList.promise);
-    route(
-      "GET",
-      "/api/v1/me/automations",
-      200,
-      { items: [] },
-      rules.promise,
-    );
+    route("GET", "/api/v1/me/automations", 200, { items: [] }, rules.promise);
     const view = render(<Automations owner="owner" />);
     await waitFor(() => expect(calls).toHaveLength(2));
     expect(signalOf("/api/v1/me/automations")!.aborted).toBe(false);
@@ -1388,7 +1398,9 @@ describe("automations page", () => {
       version: 3,
     });
     render(<Automations owner="owner" />);
-    await userEvent.click(await screen.findByRole("switch", { name: /aviso/i }));
+    await userEvent.click(
+      await screen.findByRole("switch", { name: /aviso/i }),
+    );
     await waitFor(() =>
       expect(sent("PUT", `${CREATE}/${OTHER_RULE}`)).toHaveLength(1),
     );

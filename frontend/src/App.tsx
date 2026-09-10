@@ -17,7 +17,6 @@ import { ImportData } from "./import-data";
 import { Calendar } from "./calendar";
 import { IntegrationApi } from "./integration-api";
 import { Webhooks } from "./webhooks";
-import { GithubConnector } from "./github-connector";
 import { IntegrationsIndex } from "./integrations-index";
 import { ExternalCalendar } from "./external-calendar";
 import { Automations } from "./automations";
@@ -41,7 +40,6 @@ export function App({
   const importData = route === "/importacion";
   const integrationApi = route === "/integraciones/api";
   const webhooks = route === "/webhooks";
-  const githubConnector = route === "/integraciones/github";
   const integrationsIndex = route === "/integraciones";
   const externalCalendar = route === "/calendario-externo";
   const automations = route === "/automatizaciones";
@@ -85,8 +83,6 @@ export function App({
         <Automations owner={username} />
       ) : webhooks && username ? (
         <Webhooks owner={username} />
-      ) : githubConnector && username ? (
-        <GithubConnector owner={username} />
       ) : integrationsIndex && username ? (
         <IntegrationsIndex />
       ) : externalCalendar && username ? (

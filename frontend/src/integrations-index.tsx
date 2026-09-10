@@ -1,8 +1,8 @@
 import { RouteLink } from "./navigation";
 
 /**
- * Índice de integraciones. Existe para que cada conector tenga dónde vivir sin que el menú
- * principal crezca una entrada por cada uno.
+ * Índice de integraciones. Existe para que cada integración tenga dónde vivir sin que el menú
+ * principal crezca una entrada por cada una.
  */
 export function IntegrationsIndex() {
   return (
@@ -10,13 +10,6 @@ export function IntegrationsIndex() {
       <h1>Integraciones</h1>
       <p>Conecta OrganizaciónWeb con las herramientas que ya usas.</p>
       <ul>
-        <li>
-          <RouteLink href="/integraciones/github">Conector de GitHub</RouteLink>
-          <p>
-            Trae las issues abiertas de un repositorio como tareas de un
-            proyecto propio.
-          </p>
-        </li>
         <li>
           <RouteLink href="/integraciones/api">
             API para integraciones

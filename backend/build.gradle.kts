@@ -771,6 +771,21 @@ pitest {
     // PIT's default FRECORD also removes hand-written compact constructors.
     features.set(setOf("-FRECORD"))
     excludedMethods.set(setOf("equals", "hashCode", "toString"))
+    // El avoidCallsTo POR DEFECTO de PIT suprime las llamadas a org.slf4j, y los cinco
+    // adaptadores de adapter/logging son puro logging: se quedaban con CERO mutantes
+    // estando nombrados en su ambito. Eso era causal de rechazo por la misma condicion
+    // en cuatro features a la vez (Slf4jWebhookAudit en la 25, Slf4jConnectorAudit en la
+    // 27, Slf4jExternalCalendarAudit en la 28 y Slf4jAutomationAudit en la 30), y nadie
+    // sabia por que: se explicaba como "una propiedad de los mutadores".
+    //
+    // Se declara la lista explicita sin org.slf4j. El radio esta MEDIDO antes de tocarlo:
+    // catorce llamadas de bitacora en toda la produccion, doce dentro de los propios
+    // adaptadores y dos fuera (AutomationSchedule y WebhookSchedule, una cada uno). No
+    // inunda nada, y ya hay cuatro clases de prueba que afirman la bitacora. Solo puede
+    // ANADIR mutantes, o sea bajar puntuaciones, nunca subirlas: si algo empeora es
+    // porque habia un hueco que no se veia.
+    avoidCallsTo.set(
+        setOf("java.util.logging", "org.apache.log4j", "org.apache.commons.logging"))
     mutationThreshold.set(80)
     outputFormats.set(setOf("HTML", "XML"))
     timestampedReports.set(false)

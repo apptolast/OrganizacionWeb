@@ -4,6 +4,7 @@ import static java.time.temporal.ChronoUnit.MICROS;
 
 import com.apptolast.organization.domain.GithubRepository;
 import com.apptolast.organization.domain.PersonalAccessToken;
+import com.apptolast.organization.domain.ValidationException;
 import java.time.Clock;
 
 /**
@@ -40,10 +41,11 @@ public final class ConnectGithub implements ConnectGithubUseCase {
     var target = GithubRepository.parse(repository);
     var secret = new PersonalAccessToken(token);
     var identity = identify(ownerId, target, secret);
+    var confirmed = canonical(identity.fullName());
     var connectedAt = clock.instant().truncatedTo(MICROS);
     var row =
         new StoredConnection(
-            identity.fullName(),
+            confirmed.fullName(),
             identity.login(),
             StoredConnection.VALID,
             cipher.encrypt(ownerId, secret.value()),
@@ -52,6 +54,19 @@ public final class ConnectGithub implements ConnectGithubUseCase {
     audit.connected(GithubIssueConnections.SOURCE, ownerId, row.repository(), row.login());
     return ConnectionView.of(
         row, receipts.latest(ownerId, GithubIssueConnections.SOURCE).orElse(null));
+  }
+
+  /**
+   * GitHub contesta el nombre canónico del repositorio, y ese nombre se guarda en la fila y se
+   * concatena en cada URL saliente. Si lo que llega no es un repositorio, la respuesta no sirve: el
+   * mismo trato que el adaptador ya da a un full_name ausente o no textual.
+   */
+  private static GithubRepository canonical(String fullName) {
+    try {
+      return new GithubRepository(fullName);
+    } catch (ValidationException error) {
+      throw new GithubUnavailableException();
+    }
   }
 
   private RepositoryIdentity identify(

@@ -127,7 +127,7 @@ class GitlabConnectorWiringTest {
 
       @Override
       public Optional<com.apptolast.organization.domain.IssueImportReceipt> find(
-          String ownerId, java.util.UUID importId) {
+          String ownerId, String source, java.util.UUID importId) {
         return Optional.empty();
       }
 

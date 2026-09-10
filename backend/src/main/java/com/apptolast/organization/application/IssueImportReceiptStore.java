@@ -30,7 +30,11 @@ public interface IssueImportReceiptStore {
       boolean truncated,
       Instant finishedAt);
 
-  Optional<IssueImportReceipt> find(String ownerId, UUID importId);
+  /**
+   * El recibo del propietario para ese gestor. La ruta lleva el gestor en el camino, asi que un
+   * recibo de otro conector no es visible desde aqui, igual que no lo es el de otra persona.
+   */
+  Optional<IssueImportReceipt> find(String ownerId, String source, UUID importId);
 
   /** El recibo más reciente del propietario para ese gestor, que es su última actividad. */
   Optional<IssueImportReceipt> latest(String ownerId, String source);

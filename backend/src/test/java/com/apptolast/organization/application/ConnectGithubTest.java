@@ -229,6 +229,30 @@ class ConnectGithubTest {
     assertEquals(java.util.List.of(), fakes.audit.lines());
   }
 
+  // -------------------------------------------- M12 el nombre que devuelve GitHub también se
+  // valida
+
+  /**
+   * Lo que la persona escribe pasa por {@code GithubRepository}; lo que GitHub contesta en {@code
+   * full_name} se guardaba tal cual y viajaba sin revalidar hasta la columna y hasta la URL
+   * saliente, donde un espacio, un {@code ?} o un {@code #} revientan {@code URI.create} con una
+   * {@code IllegalArgumentException} que nadie captura. El adaptador ya trata un {@code full_name}
+   * ausente o no textual como respuesta inservible; uno que no es {@code propietario/nombre} lo es
+   * exactamente igual.
+   */
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"octocat/Hello World", "octocat/repo?x=1", "octocat/repo#frag", "octocat", ""})
+  void b_aFullNameThatIsNotACanonicalRepositoryIsAnUnusableAnswer(String fullName) {
+    fakes.source.identify(fullName, "octocat");
+
+    assertThrows(
+        GithubUnavailableException.class,
+        () -> connect.execute(OWNER, "octocat/Hello-World", TOKEN));
+
+    assertEquals(0, fakes.connections.size(), "no se guarda una fila con un repositorio inválido");
+  }
+
   private static int indexOfPlaintext(byte[] ciphertext) {
     var plain = TOKEN.getBytes(java.nio.charset.StandardCharsets.UTF_8);
     outer:

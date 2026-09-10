@@ -433,32 +433,96 @@ class ImportGithubIssuesTest {
   void s29_theConnectionIsCheckedBeforeTheProject() {
     fakes.connections.delete(OWNER);
     var foreign = fakes.projects.seed("owner-2", "idea");
+    var before = receiptsAndCalls();
 
     assertThrows(ConnectionNotFoundException.class, () -> importIssues.execute(OWNER, foreign));
+
+    assertNothingWasStartedOrAsked(before);
   }
 
   @Test
   void s29_theConnectionStatusIsCheckedBeforeTheProjectState() {
     connect("invalid");
     fakes.projects.status(projectId, "completed");
+    var before = receiptsAndCalls();
 
     assertThrows(ConnectionInvalidException.class, () -> importIssues.execute(OWNER, projectId));
+
+    assertNothingWasStartedOrAsked(before);
   }
 
   @Test
   void s29_theProjectIsCheckedBeforeTheRunningReceipt() {
     fakes.receipts.seedRunning(OWNER, NOW.minusSeconds(5));
     var foreign = fakes.projects.seed("owner-2", "idea");
+    var before = receiptsAndCalls();
 
     assertThrows(ResourceNotFoundException.class, () -> importIssues.execute(OWNER, foreign));
+
+    assertNothingWasStartedOrAsked(before);
   }
 
   @Test
   void s29_theProjectStateIsCheckedBeforeTheRunningReceipt() {
     fakes.receipts.seedRunning(OWNER, NOW.minusSeconds(5));
     fakes.projects.status(projectId, "completed");
+    var before = receiptsAndCalls();
 
     assertThrows(ProjectCompletedException.class, () -> importIssues.execute(OWNER, projectId));
+
+    assertNothingWasStartedOrAsked(before);
+  }
+
+  /**
+   * La segunda frase del Then de @s29: «no se crea ningún recibo nuevo en ninguna fila y el
+   * servidor falso recibe cero peticiones». Sin esto, las cuatro filas sólo afirmaban qué excepción
+   * sale, y un orden de precondiciones que empezara insertando el recibo pasaría igual.
+   */
+  private int[] receiptsAndCalls() {
+    return new int[] {fakes.receipts.size(), fakes.source.calls().size()};
+  }
+
+  private void assertNothingWasStartedOrAsked(int[] before) {
+    assertEquals(before[0], fakes.receipts.size(), "no se crea ningún recibo nuevo");
+    assertEquals(before[1], fakes.source.calls().size(), "no se contacta con el servidor falso");
+  }
+
+  // ------------------------------------------------- M7 la clave rotada no deja el recibo colgado
+
+  /**
+   * Rotar APP_CONNECTOR_KEY sin conservar la clave anterior deja el texto cifrado ilegible. El
+   * recibo ya está insertado como running cuando eso se descubre, así que si la excepción se escapa
+   * por encima queda un running que no corresponde a ninguna importación viva: el siguiente POST
+   * choca con el índice único parcial y responde 409 IMPORT_IN_PROGRESS, que es mentira, y la
+   * pantalla esconde el botón de importar sin decir por qué. El contrato deja el recibo failed con
+   * su errorCode en todos los fallos que nombra, y éste no puede ser la excepción.
+   */
+  @Test
+  void b_anUndecipherableTokenLeavesTheReceiptFailedAndNoImportInProgress() {
+    connectWithTokenSealedFor("otro-propietario");
+
+    assertThrows(SecretUndecipherableException.class, () -> importIssues.execute(OWNER, projectId));
+
+    var receipt = fakes.receipts.latest(OWNER, "github").orElseThrow();
+    assertEquals("failed", receipt.status(), "el recibo no puede quedarse en running");
+    assertEquals("CONNECTOR_KEY_MISMATCH", receipt.errorCode());
+    assertNotNull(receipt.finishedAt());
+    assertFalse(
+        fakes.receipts.importing(OWNER, NOW.minus(ImportIssues.ABANDONED_AFTER)),
+        "no hay ninguna importación viva, así que el propietario puede volver a intentarlo");
+    assertEquals(List.of(), fakes.source.calls(), "no se contacta con GitHub sin token legible");
+  }
+
+  /** El token se selló para otro propietario, así que el dato autenticado no cuadra y no abre. */
+  private void connectWithTokenSealedFor(String otherOwner) {
+    fakes.connections.save(
+        OWNER,
+        new StoredConnection(
+            REPOSITORY,
+            "octocat",
+            "valid",
+            fakes.cipher.encrypt(otherOwner, "ghp_secreto123"),
+            NOW.minusSeconds(60)));
   }
 
   @Test

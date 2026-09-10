@@ -146,8 +146,20 @@ public final class PostgresIssueImportReceiptStore implements IssueImportReceipt
   }
 
   @Override
-  public Optional<IssueImportReceipt> find(String ownerId, UUID importId) {
-    return guarded(() -> read(ownerId, importId));
+  public Optional<IssueImportReceipt> find(String ownerId, String source, UUID importId) {
+    return guarded(
+        () ->
+            jdbc
+                .query(
+                    "SELECT "
+                        + COLUMNS
+                        + " FROM issue_import_receipts WHERE id=? AND owner_id=? AND source=?",
+                    mapper(),
+                    importId,
+                    ownerId,
+                    source)
+                .stream()
+                .findFirst());
   }
 
   @Override

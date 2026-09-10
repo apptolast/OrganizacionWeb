@@ -281,6 +281,36 @@ class GithubConnectorApiTest {
     verifyNoInteractions(connect);
   }
 
+  /**
+   * El mismo rasero en los otros dos verbos que escriben. El controlador ya lo hacía —{@code
+   * rejectQuery} está en los tres métodos—, pero sólo el PUT tenía oráculo: los mutantes que
+   * borraban la llamada en DELETE y en POST sobrevivieron en la campaña de cierre.
+   */
+  @Test
+  void s6_aQueryStringOnDisconnectingIsRejectedWithoutNamingAField() throws Exception {
+    mvc.perform(delete(CONNECTION + "?repository=x").with(user("owner")).with(csrf().asHeader()))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+        .andExpect(jsonPath("$.errors", org.hamcrest.Matchers.hasSize(0)));
+
+    verifyNoInteractions(disconnect);
+  }
+
+  @Test
+  void s6_aQueryStringOnStartingAnImportIsRejectedWithoutNamingAField() throws Exception {
+    mvc.perform(
+            post(IMPORTS + "?projectId=x")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .contentType("application/json")
+                .content("{\"projectId\":\"" + PROJECT + "\"}"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+        .andExpect(jsonPath("$.errors", org.hamcrest.Matchers.hasSize(0)));
+
+    verifyNoInteractions(importIssues);
+  }
+
   @Test
   void s6_truncatedJsonIsMalformedAndAnotherMediaTypeIsUnsupported() throws Exception {
     mvc.perform(
@@ -552,9 +582,41 @@ class GithubConnectorApiTest {
 
   // ------------------------------------------------------------------------ @s30 recibos
 
+  /**
+   * Todos los recibos que se serializaban en las pruebas traían {@code failed} 0 y {@code
+   * truncated} false, así que los mutantes que devuelven justo ese valor en el DTO sobrevivían: la
+   * respuesta era idéntica con el contador y sin él. Un recibo con issues fallidas y truncado los
+   * distingue.
+   */
+  @Test
+  void s30_theReceiptSerialisesFailuresAndTruncationWithTheirRealValues() throws Exception {
+    when(readImport.execute("owner", "github", IMPORT))
+        .thenReturn(
+            new IssueImportReceipt(
+                IMPORT,
+                "github",
+                PROJECT,
+                "octocat/Hello-World",
+                "completed",
+                199,
+                7,
+                2,
+                true,
+                null,
+                STARTED,
+                STARTED.plusSeconds(9)));
+
+    mvc.perform(get(IMPORTS + "/" + IMPORT).with(user("owner")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.created").value(199))
+        .andExpect(jsonPath("$.skipped").value(7))
+        .andExpect(jsonPath("$.failed").value(2))
+        .andExpect(jsonPath("$.truncated").value(true));
+  }
+
   @Test
   void s30_theOwnReceiptComesBackWithItsTwelveFields() throws Exception {
-    when(readImport.execute("owner", IMPORT)).thenReturn(completed());
+    when(readImport.execute("owner", "github", IMPORT)).thenReturn(completed());
 
     mvc.perform(get(IMPORTS + "/" + IMPORT).with(user("owner")))
         .andExpect(status().isOk())
@@ -580,7 +642,7 @@ class GithubConnectorApiTest {
 
   @Test
   void s30_aForeignReceiptIsIndistinguishableFromAMissingOne() throws Exception {
-    when(readImport.execute(any(), any())).thenThrow(new IssueImportNotFoundException());
+    when(readImport.execute(any(), any(), any())).thenThrow(new IssueImportNotFoundException());
 
     mvc.perform(get(IMPORTS + "/" + IMPORT).with(user("owner")))
         .andExpect(status().isNotFound())
@@ -595,7 +657,7 @@ class GithubConnectorApiTest {
     when(connect.execute(any(), any(), any())).thenThrow(new ConnectorsDisabledException());
     doThrow(new ConnectorsDisabledException()).when(disconnect).execute(any());
     when(importIssues.execute(any(), any())).thenThrow(new ConnectorsDisabledException());
-    when(readImport.execute(any(), any())).thenThrow(new ConnectorsDisabledException());
+    when(readImport.execute(any(), any(), any())).thenThrow(new ConnectorsDisabledException());
 
     for (var request :
         List.of(

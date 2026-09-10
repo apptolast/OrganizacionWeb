@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 class GithubConnectorQueriesTest {
   private static final String OWNER = "owner-1";
   private static final String OTHER = "owner-2";
+  private static final String SOURCE = GithubIssueConnections.SOURCE;
 
   private ConnectorFakes fakes;
   private ReadGithubConnection read;
@@ -91,7 +92,7 @@ class GithubConnectorQueriesTest {
 
     assertEquals(0, fakes.connections.size());
     assertThrows(ConnectionNotFoundException.class, () -> read.execute(OWNER));
-    assertEquals(receipt, readReceipt.execute(OWNER, receipt.id()));
+    assertEquals(receipt, readReceipt.execute(OWNER, SOURCE, receipt.id()));
   }
 
   @Test
@@ -109,12 +110,30 @@ class GithubConnectorQueriesTest {
     var mine = fakes.receipts.seedCompleted(OWNER);
     var theirs = fakes.receipts.seedCompleted(OTHER);
 
-    IssueImportReceipt found = readReceipt.execute(OWNER, mine.id());
+    IssueImportReceipt found = readReceipt.execute(OWNER, SOURCE, mine.id());
 
     assertEquals(mine, found);
-    assertThrows(IssueImportNotFoundException.class, () -> readReceipt.execute(OWNER, theirs.id()));
     assertThrows(
-        IssueImportNotFoundException.class, () -> readReceipt.execute(OWNER, UUID.randomUUID()));
+        IssueImportNotFoundException.class, () -> readReceipt.execute(OWNER, SOURCE, theirs.id()));
+    assertThrows(
+        IssueImportNotFoundException.class,
+        () -> readReceipt.execute(OWNER, SOURCE, UUID.randomUUID()));
+  }
+
+  /**
+   * La ruta lleva el gestor en el camino, así que un recibo de GitLab no es «el recibo propio» de
+   * GET /connectors/github/imports/{id}: es un recibo que esa ruta no conoce. El almacén ya filtra
+   * por origen al buscar el más reciente; leer uno suelto no puede hacerlo de otra manera.
+   */
+  @Test
+  void b_aReceiptOfAnotherConnectorIsNotVisibleThroughTheGithubRoute() {
+    var mine = fakes.receipts.seedCompleted(OWNER, SOURCE);
+    var elsewhere = fakes.receipts.seedCompleted(OWNER, "gitlab");
+
+    assertEquals(mine, readReceipt.execute(OWNER, SOURCE, mine.id()));
+    assertThrows(
+        IssueImportNotFoundException.class,
+        () -> readReceipt.execute(OWNER, SOURCE, elsewhere.id()));
   }
 
   @Test
@@ -125,7 +144,8 @@ class GithubConnectorQueriesTest {
 
     assertThrows(ConnectorsDisabledException.class, () -> read.execute(OWNER));
     assertThrows(ConnectorsDisabledException.class, () -> disconnect.execute(OWNER));
-    assertThrows(ConnectorsDisabledException.class, () -> readReceipt.execute(OWNER, receipt.id()));
+    assertThrows(
+        ConnectorsDisabledException.class, () -> readReceipt.execute(OWNER, SOURCE, receipt.id()));
     assertEquals(1, fakes.connections.size());
   }
 }

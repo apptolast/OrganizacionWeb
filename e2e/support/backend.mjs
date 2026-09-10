@@ -2,6 +2,9 @@ import { expect } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { loginSession } from "../../scripts/session-client.mjs";
 
+/** Lo que este andamiaje se concede para que la API vuelva a contestar tras el reinicio. */
+export const RESTART_READY_TIMEOUT_MS = 45_000;
+
 export async function restartBackend(request) {
   const fixture = process.env.E2E_COMPOSE_PROJECT;
   if (
@@ -20,6 +23,10 @@ export async function restartBackend(request) {
         fixture,
         "-f",
         "docker-compose.yml",
+        // El perfil e2e hace direccionable al servicio falso de GitHub, que comparte el espacio de
+        // red del backend y por tanto no sobrevive por su cuenta a un reinicio de éste.
+        "--profile",
+        "e2e",
         ...args,
       ],
       { encoding: "utf8", timeout: 30_000 },
@@ -36,6 +43,14 @@ export async function restartBackend(request) {
   const beforeBackend = inspect(backendId);
   const beforeDatabase = inspect(databaseId);
   compose("restart", "backend");
+  // El servicio falso de GitHub vive **dentro** del espacio de red del backend
+  // (`network_mode: service:backend`). Al reiniciarse el backend, Docker le crea un espacio de red
+  // nuevo y el falso se queda hablando con el viejo: desde entonces el backend no lo alcanza en
+  // 127.0.0.1:9000 y el conector responde 503. Se reinicia con él, igual que `withConnectorDisabled`
+  // los recrea en los dos sentidos. Si la pila se levantó sin el perfil e2e, no hay nada que
+  // reiniciar y el reinicio del backend basta.
+  const fakeId = compose("ps", "-q", "github-fake");
+  if (fakeId) compose("restart", "github-fake");
   await expect
     .poll(
       async () => {
@@ -47,7 +62,7 @@ export async function restartBackend(request) {
           return 0;
         }
       },
-      { timeout: 45_000, intervals: [500, 1000] },
+      { timeout: RESTART_READY_TIMEOUT_MS, intervals: [500, 1000] },
     )
     .toBe(200);
   const afterBackend = inspect(backendId);

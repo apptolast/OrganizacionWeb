@@ -877,3 +877,81 @@ cliente, así que no las sumo dos veces).
 
 **Total de pruebas: 44 → 176** en `src/webhooks*`. 195 en verde contando
 `connectors-catalog`.
+
+---
+
+# Cierre del carril
+
+Paro aquí por cambio de prioridad del coordinador: la máquina hace falta libre
+para la campaña de medición. El árbol queda **limpio y en verde**, sin nada a
+medias.
+
+## Estado
+
+- **195 pruebas en verde** (`src/webhooks*` más `src/connectors-catalog`, que
+  también importa la vista). De **44 a 176** en los tres ficheros de webhooks.
+- **Producción idéntica** al último estado bueno: `git diff` vacío,
+  `git status` vacío, cero residuos de mutante.
+- Sin pila de E2E levantada y sin contenedores míos vivos: este carril no ha
+  necesitado ni backend ni E2E, sólo vitest.
+- Ningún fichero compartido tocado.
+
+## Muertes acreditadas: 145
+
+Cada una aplicada al fichero de producción real, con la suite en rojo y la
+prueba que cae anotada. Reverificadas al final en lotes, **0 supervivientes** en
+los cuatro lotes que dio tiempo a repasar (23 + 32 + 9 + 18 = 82 mutantes, todos
+siguen muriendo).
+
+## Previsión de puntuación
+
+Partida medida: **432/605 = 71,40 %**. Umbral **80 %** ⇒ hacen falta **484**, es
+decir **52 muertes**.
+
+Con 145 acreditadas la aritmética directa daría 577/605 = 95 %, pero **no es la
+cifra que espero**, y prefiero decirlo antes de que se mida:
+
+- de las 145, unas **10** son mutantes que yo mismo añadí a mano para acreditar
+  defectos o mensajes nuevos y que **no existen** en el informe de partida (los
+  `DEFECTO …`, los `MECANISMO …`, los mensajes por acción);
+- otras **4** son guardas del cliente medidas dos veces, una desde cada suite.
+
+Descontando ambas cosas quedan **~131 muertes** sobre mutantes del informe.
+
+**Previsión: entre 88 % y 93 %**, y con holgura cómoda sobre el 80. La banda es
+ancha a propósito: Stryker puede matar de rebote mutantes que yo no perseguí
+(las suites nuevas ejercitan mucho más código), y en sentido contrario las **8
+guardas de aborto de la vista** seguirán vivas porque son equivalentes.
+
+Si hubiera que apostar a un número: **~90 %**.
+
+## Lo que queda abierto
+
+1. **Las ocho guardas `if (!aborted)` de `webhooks.tsx`** (`:119, :122, :125,
+   :151, :158, :161, :208, :221, :234, :246, :253`). **Abierto y, a mi juicio,
+   no ganable sin tocar producción.** Medido **dos veces**, la segunda con la
+   prueba que el propio panel prescribe (201 y 401 tras cambiar de identidad):
+   **0 muertos de 8**. Abortar y desmontar son el mismo suceso en esta vista, y
+   React descarta los `setState` sobre un componente desmontado. El **mecanismo**
+   de @s38 sí queda cubierto: borrarlo de las cuatro formas posibles pone 3
+   pruebas en rojo cada vez. Lo que no se puede matar son esos ocho mutantes.
+   Decisión pendiente del juez: aceptarlos como equivalentes, o autorizar un
+   cambio de producción que haga el aborto observable sin desmontar.
+2. **Repaso final de los lotes 5 a 8** de la reverificación (racimos 8 a 13).
+   Se quedó a medias al liberar la máquina. **Riesgo bajo**: cada racimo se
+   verificó entero cuando se escribió, y los cuatro lotes repasados salieron
+   sin supervivientes.
+3. **Mutantes que no perseguí**, por poco valor o por equivalencia razonada:
+   las `ArrayDeclaration` de las listas de dependencias de `useEffect`/
+   `useCallback` (`:105, :111, :127, :130`), el encadenamiento opcional de
+   `?.focus()` y de `navigator.clipboard?.` (`:238, :263, :268, :318`), y el
+   literal de espacio `{" "}` de `:398`. Son entre 8 y 10 mutantes; ninguno es
+   una cláusula del contrato.
+
+## Para quien mida
+
+No hace falta nada especial: `pnpm --dir frontend exec vitest run src/webhooks`
+queda en verde sobre `HEAD` de `claude/webhooks`. El verificador manual es
+`node scripts/verificar-mutantes-webhooks.mjs [filtro]` y **no debe lanzarse en
+segundo plano ni bajo `timeout`** (ver el incidente de más arriba); avisa solo
+si deja producción sucia.

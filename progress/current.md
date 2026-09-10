@@ -1,4 +1,27 @@
-# Estado actual — 9 de septiembre de 2026, sesión de tarde con plazo duro
+# Estado actual — noche del 9 al 10 de septiembre de 2026
+
+**Lo primero, para leer recién levantado.** Las cinco features que faltaban
+—25 webhooks, 27 conector GitHub, 28 calendario externo, 29 conectores
+adicionales y 30 automatizaciones— están **implementadas e integradas en
+`main`**. Lo que decide si pasan a `done` no es la implementación sino sus dos
+puertas: juez aprobado y mutación por encima del 80 %. El detalle de cuáles han
+pasado está más abajo, en «Cierre de la noche», con cifras medidas.
+
+Lo más importante que se resolvió, porque llevaba días escondido: **el ejecutor
+de reglas de automatizaciones no existía**. La feature 30 se había integrado
+como «fase 1» —reglas, plantillas, simulación, auditoría y pantalla— sin el
+motor que dispara las reglas ante eventos reales, así que nueve escenarios del
+contrato aprobado no tenían nada que probar. Ya está escrito, con sus nueve
+escenarios y tres más que el propio ejecutor destapó.
+
+**Dos decisiones tuyas quedaron aplicadas**: la enmienda de navegación (ahora
+catorce entradas, con «Conectores» tras «Importación» porque lo fija @s33) y la
+contradicción 50/52 de webhooks (se persisten 52, se sirven 50). Y una tercera,
+el anclaje del reenlace DNS en las dos features con su prueba de TLS.
+
+---
+
+## La sesión de tarde del 9 de septiembre (antecedente)
 
 El estado anterior, con toda la historia del 8 y del 9 por la mañana, está
 archivado en `progress/sesion_2026-09-08_09.md`. Este documento lo sustituye.

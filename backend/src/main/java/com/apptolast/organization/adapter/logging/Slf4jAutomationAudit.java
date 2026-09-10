@@ -11,8 +11,7 @@ import org.slf4j.LoggerFactory;
  * no los admite.
  *
  * <p>El {@code Logger} vive en el adaptador y no en el caso de uso para que la capa de aplicación
- * no dependa de {@code org.slf4j}, que es lo que exige la guarda hexagonal. Mismo reparto que
- * {@link Slf4jConnectorAudit}.
+ * no dependa de {@code org.slf4j}, que es lo que exige la guarda hexagonal.
  */
 public final class Slf4jAutomationAudit implements AutomationAudit {
   private static final Logger LOG = LoggerFactory.getLogger("organization.automations");

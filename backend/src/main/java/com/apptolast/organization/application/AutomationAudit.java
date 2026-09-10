@@ -7,8 +7,7 @@ import java.util.UUID;
  *
  * <p>Existe como puerto y no como un {@code Logger} dentro del caso de uso porque la capa de
  * aplicación sólo puede depender de {@code java..}, {@code ..domain..} y {@code ..application..}, y
- * {@code ArchitectureTest.hexagonalBoundariesAndInputPort()} lo comprueba. Es el mismo patrón que
- * {@link ConnectorAudit}.
+ * {@code ArchitectureTest.hexagonalBoundariesAndInputPort()} lo comprueba.
  *
  * <p>La firma admite <b>sólo identificadores</b>. El título renderizado de una tarea y el nombre de
  * un proyecto son contenido del propietario, y la bitácora de un trabajador de fondo no es el sitio

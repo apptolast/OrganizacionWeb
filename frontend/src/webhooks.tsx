@@ -213,7 +213,7 @@ function WebhookPanel() {
     try {
       await run(controller.signal);
     } catch (error) {
-      if (controller.signal.aborted) await reportAction(error, failure);
+      if (!controller.signal.aborted) await reportAction(error, failure);
     }
   }
 

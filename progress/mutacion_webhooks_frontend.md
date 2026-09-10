@@ -767,3 +767,33 @@ webhook no cierra su panel de entregas, así que quedan en pantalla las filas de
 algo que ya no existe. El guarda `if (endpoint)` de «Actualizar» impide que eso
 reviente. Cerrarlo por mi cuenta convertiría ese guarda en código muerto, y es
 una decisión de contrato.
+
+---
+
+## Incidente: un mutante llegó a un commit, y cómo se evita
+
+Al lanzar la batería completa **en segundo plano**, la tarea agotó su tiempo y
+el proceso murió sin ejecutar el `finally` que restaura. El mutante 461
+(`if (!controller.signal.aborted)` → `if (controller.signal.aborted)` en `act`)
+se quedó escrito en `webhooks.tsx`, y el siguiente `git add -A` lo commiteó en
+`9246699c`. Dos agravantes de Windows:
+
+- matar el envoltorio de msys **no** alcanza al `node.exe` real, así que el
+  proceso siguió mutando el fichero mientras yo intentaba arreglarlo;
+- `timeout` y las tareas en segundo plano matan con SIGKILL, que **ningún**
+  manejador puede interceptar.
+
+**Arreglado**: mutante revertido, producción idéntica a `5bd6c1e5`, 150 pruebas
+en verde. Y tres defensas en el script:
+
+1. manejadores de `exit`, `SIGINT`, `SIGTERM`, `SIGHUP` y `SIGBREAK` que
+   restauran los dos ficheros;
+2. una comprobación final que le pregunta **a git** si producción quedó limpia y
+   sale con código distinto de cero si no, en vez de fiarse del `finally`;
+3. un aviso en la cabecera: **no ejecutar en segundo plano ni bajo `timeout`**.
+
+La segunda es la que vale: la única garantía frente a un SIGKILL no es un
+manejador, es comprobar el resultado contra git antes de commitear nada.
+
+Comprobado que la defensa muerde: matando una pasada a mitad, el script avisa
+`PRODUCCIÓN SUCIA` y nombra el fichero.

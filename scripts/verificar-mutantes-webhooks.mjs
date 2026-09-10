@@ -1134,6 +1134,36 @@ const suites = {
   both: "src/webhooks",
 };
 
+/**
+ * NO EJECUTES ESTE SCRIPT EN SEGUNDO PLANO.
+ *
+ * El `finally` de cada pasada sólo restaura si el proceso sigue vivo. Si se
+ * mata a mitad —y en Windows una tarea en segundo plano que agota su tiempo se
+ * mata sin avisar, además de que matar el envoltorio de msys **no** alcanza al
+ * proceso real— el mutante se queda escrito en producción y el siguiente
+ * `git add -A` lo commitea. Pasó: el mutante 461 llegó a un commit.
+ *
+ * Estos manejadores cubren la salida ordenada, pero **no** un SIGKILL. La única
+ * garantía es la de abajo: al terminar, el script compara con `git` y avisa.
+ */
+const intactos = new Map(
+  [CLIENT, VIEW].map((fichero) => [fichero, readFileSync(fichero, "utf8")]),
+);
+function restaurarTodo() {
+  for (const [fichero, texto] of intactos)
+    if (readFileSync(fichero, "utf8") !== texto) writeFileSync(fichero, texto);
+}
+process.on("exit", restaurarTodo);
+for (const senal of ["SIGINT", "SIGTERM", "SIGHUP", "SIGBREAK"])
+  process.on(senal, () => {
+    restaurarTodo();
+    process.exit(130);
+  });
+process.on("uncaughtException", (error) => {
+  restaurarTodo();
+  throw error;
+});
+
 const filtro = process.argv[2] ?? "";
 let rojos = 0;
 let verdes = 0;
@@ -1173,3 +1203,19 @@ for (const [nombre, fichero, buscar, reemplazo, suite] of MUTANTS) {
 }
 
 console.log(`\nMuertos: ${rojos} · Vivos: ${verdes}`);
+
+// La comprobación que de verdad protege: no basta con creerse el `finally`, hay
+// que preguntarle a git si producción quedó como estaba. Si no, salida distinta
+// de cero para que nadie commitee un mutante sin enterarse.
+const sucio = execFileSync("git", ["diff", "--name-only", "--", CLIENT, VIEW], {
+  encoding: "utf8",
+}).trim();
+if (sucio) {
+  console.error(
+    `\nPRODUCCIÓN SUCIA, un mutante se ha quedado escrito:\n${sucio}`,
+  );
+  console.error("Restáuralo antes de commitear nada.");
+  process.exitCode = 1;
+} else {
+  console.log("Producción intacta: git diff vacío.");
+}

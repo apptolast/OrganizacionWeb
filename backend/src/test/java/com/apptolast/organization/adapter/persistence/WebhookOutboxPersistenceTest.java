@@ -63,8 +63,7 @@ class WebhookOutboxPersistenceTest {
 
   private static UUID givenEvent(
       String owner, UUID projectId, String type, Instant occurredAt, String status, int version) {
-    return givenEventWithId(
-        owner, projectId, UUID.randomUUID(), type, occurredAt, status, version);
+    return givenEventWithId(owner, projectId, UUID.randomUUID(), type, occurredAt, status, version);
   }
 
   private static UUID givenEventWithId(

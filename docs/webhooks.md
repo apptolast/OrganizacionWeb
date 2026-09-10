@@ -195,14 +195,19 @@ Los cuatro pasos del principio de esta página cierran ese agujero.
 
 ---
 
-## Hueco conocido, dicho aquí para que no se descubra tarde
+## De dónde se llega a esta página
 
-`project-spec.md:2044` dice que la ayuda del formulario de creación **enlaza a
-este documento**. Hoy no lo hace: `frontend/src/webhooks.tsx` no contiene ningún
-enlace. Comprobado con `grep`.
+El formulario de creación de `/webhooks` **enlaza aquí**, con el rótulo «Cómo
+verificar la firma». Ese enlace no es decorativo: lo pide el `@s43` de
+`features/webhooks.feature`, y una prueba comprueba que existe dentro del
+formulario, que se alcanza con Tab y que su nombre dice de qué es.
 
-No se ha añadido el enlace al escribir esta página, y el motivo es deliberado: el
-contrato ejecutable (`features/webhooks.feature`) **no** pide ese enlace en
-ningún escenario, así que añadirlo sería producción nueva sin ninguna prueba que
-la exija — exactamente lo que la disciplina de este repositorio prohíbe. Cerrarlo
-bien pide una fila de contrato y su oráculo, no un `<a>` colado.
+Lo que esa prueba **no** fija es la ruta. Si esta guía se publica algún día en
+otra dirección, basta cambiar el destino del enlace: el contrato seguirá
+cumpliéndose, porque lo que promete es que desde el formulario se llegue a la
+guía de verificación de firma, no que la guía viva en este fichero.
+
+Aquí hubo, hasta el 10 de septiembre de 2026, un aviso de hueco conocido: el
+producto no enlazaba y `project-spec.md:2044` decía que sí. Se cerró añadiendo el
+enlace con su fila de contrato y su oráculo. El `@s43` queda pendiente de la
+contrafirma del propietario; ver `progress/enlace_docs_webhooks.md`.

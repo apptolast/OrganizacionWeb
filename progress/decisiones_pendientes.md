@@ -45,18 +45,30 @@ por ratificado sin cita.
 
 ---
 
-## 1. Feature 25 — una línea del spec que era falsa, ya corregida
+## 1. Feature 25 — el enlace del formulario a la guía de firma, ya implementado
 
 **Qué pasaba.** `project-spec.md:2044` decía que la ayuda del formulario de
-webhooks **enlaza** a `docs/webhooks.md`. **No lo enlaza**: no hay ningún
+webhooks **enlaza** a `docs/webhooks.md`. **No lo enlazaba**: no había ningún
 enlace en `frontend/src/webhooks.tsx`, comprobado con `grep`.
 
-**Lo que he hecho, y por qué.** He corregido **el documento**, no el producto. El
-juez de cierre lo ratificó expresamente con este razonamiento: ningún `@s` del
-contrato pide ese enlace, y fijarlo con un oráculo sería clavar una ruta de
-documentación en la interfaz — frágil, y no mata ningún mutante. La otra salida
-—añadir fila de contrato— la descartó él mismo.
+**Cómo estaba esta mañana.** Se corrigió **el documento**, no el producto,
+razonando —con el juez de cierre— que ningún `@s` pedía el enlace y que clavar
+la ruta con un oráculo sería frágil.
 
-**Lo que falta:** tu contrafirma, porque he tocado un documento normativo. Es una
-línea. Si prefieres que el formulario enlace de verdad, dilo y se hace con su
-fila de contrato y su prueba.
+**Lo que has mandado hacer, y está hecho.** Cerrarlo por el otro lado: el
+formulario **enlaza de verdad**. Lleva su fila de contrato, el `@s43` de
+`features/webhooks.feature`, y su prueba
+(`frontend/src/webhooks.test.tsx`, rojo acreditado antes del enlace). La
+objeción del juez se respeta: el oráculo afirma que hay **un enlace a la guía de
+firma dentro del formulario, alcanzable con Tab y con nombre accesible que dice
+de qué es**, y **no** que el `href` sea `docs/webhooks.md`. Si la guía se muda,
+la prueba sigue verde; si el enlace desaparece, cae.
+
+**Lo que falta:** tu contrafirma del `@s43`, porque es una ampliación del
+contrato, y de la nueva redacción de `project-spec.md:2044`. El escenario está
+marcado en el `.feature` como pendiente de contrafirma. Detalle en
+`progress/enlace_docs_webhooks.md`.
+
+**Consecuencia de gestión:** `frontend/src/webhooks.tsx` se ha tocado, así que la
+cifra de mutación del frontend de la feature 25 (94,57 %) queda **pendiente de
+remedir**.

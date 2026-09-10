@@ -134,6 +134,51 @@ it("@s36 explains what a webhook is when the list is empty and keeps the form vi
   expect(screen.getByRole("textbox", { name: "URL" })).toBeVisible();
 });
 
+/**
+ * Camina el orden de tabulación de la vista y responde si el elemento llega a
+ * tomar el foco. Un enlace con tabindex="-1", oculto o sacado del documento no
+ * lo toma, que es exactamente lo que «alcanzable con Tab» significa para quien
+ * no usa ratón.
+ */
+async function tabReaches(
+  user: ReturnType<typeof userEvent.setup>,
+  target: HTMLElement,
+) {
+  const stops = document.querySelectorAll(
+    "a[href], button, input, select, textarea, [tabindex]",
+  ).length;
+  for (let step = 0; step < stops; step += 1) {
+    await user.tab();
+    if (document.activeElement === target) return true;
+  }
+  return false;
+}
+
+/**
+ * @s43. El contrato pide un enlace a la guía pública de verificación de firma
+ * dentro de la ayuda del formulario, con nombre accesible que diga de qué es y
+ * alcanzable con Tab. NO pide una ruta concreta: si mañana la guía se publica
+ * en otro sitio, el enlace sigue cumpliendo; si desaparece o deja de decir de
+ * qué es, esta prueba cae.
+ */
+it("@s43 the creation form links the public guide on verifying the signature", async () => {
+  stubApi([]);
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+
+  const form = screen
+    .getByRole("button", { name: "Crear webhook" })
+    .closest("form") as HTMLFormElement;
+  const guide = within(form).getByRole("link", { name: /firma/i });
+
+  expect(await tabReaches(user, guide)).toBe(true);
+  const destination = guide.getAttribute("href")?.trim();
+  expect(destination).toMatch(/^\S+$/);
+  expect(destination).not.toBe("#");
+});
+
 it("@s36 reports a failed load with an alert and retries only the GET", async () => {
   const fetcher = vi
     .fn()

@@ -186,6 +186,11 @@ class AutomationsApiTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.condition.length()").value(1))
         .andExpect(jsonPath("$.condition.projectId").value(PROJECT.toString()));
+    // Sin esto la prueba sólo comprobaba el eco de su propio stub: el cuerpo de la respuesta
+    // se construye a partir de `conditioned`, no de lo que el parser produjo. La condición es
+    // una cláusula de alcance (@s3): si se pierde por el camino, una regla acotada a un
+    // proyecto se guarda como global y se dispara en todos los del propietario.
+    verify(create).create(eq("owner"), eq(conditioned));
   }
 
   @ParameterizedTest
@@ -368,7 +373,11 @@ class AutomationsApiTest {
         "{\"name\":\"R\",\"enabled\":true,\"ownerId\":\"x\",\"trigger\":{\"eventType\":\"TaskCreated.v1\"},\"condition\":null,\"action\":ACTION}|body",
         "{\"name\":\"R\",\"name\":\"S\",\"enabled\":true,\"trigger\":{\"eventType\":\"TaskCreated.v1\"},\"condition\":null,\"action\":ACTION}|body",
         "{\"name\":\"R\",\"enabled\":true,\"trigger\":{\"eventType\":\"TaskCreated.v1\"},\"condition\":null,\"action\":{\"type\":\"CREATE_TASK\"}}|action",
-        "{\"name\":\"R\",\"enabled\":true,\"trigger\":{\"eventType\":\"TaskCreated.v1\"},\"condition\":null,\"action\":{\"type\":\"DELETE_TASK\"}}|action.type"
+        "{\"name\":\"R\",\"enabled\":true,\"trigger\":{\"eventType\":\"TaskCreated.v1\"},\"condition\":null,\"action\":{\"type\":\"DELETE_TASK\"}}|action.type",
+        // Cuenta de claves correcta y un nombre cambiado: la única fila que separa `exactly` de
+        // su cuenta de tamaño. Sin ella sobrevivía «removed call to onlyKnown» y una acción con
+        // una clave desconocida en lugar de la esperada pasaba la validación.
+        "{\"name\":\"R\",\"enabled\":true,\"trigger\":{\"eventType\":\"TaskCreated.v1\"},\"condition\":null,\"action\":{\"type\":\"CREATE_TASK\",\"projectId\":\"11111111-1111-4111-8111-111111111111\",\"titleTemplate\":\"Revisar\",\"completionCriterion\":null,\"estimatedMinutes\":30}}|action"
       })
   void s8_rejectsAMalformedBodyNamingTheField(String raw, String field) throws Exception {
     var content = raw.replace("ACTION", createTask("\"Revisar\"", "null", "30"));
@@ -445,6 +454,30 @@ class AutomationsApiTest {
         .andExpect(status().isOk())
         .andExpect(header().string("ETag", "\"3\""))
         .andExpect(jsonPath("$.version").value(3));
+  }
+
+  /**
+   * @s12 fila 1 —«enabled false → la lectura devuelve enabled false»
+   *     (features/automations.feature:178)— en la capa que pinta el interruptor. Toda la clase
+   *     montaba reglas con enabled true, así que {@code AutomationView$Rule::enabled -> true}
+   *     sobrevivía: una regla pausada se serializaba como activa y nadie se enteraba. El único
+   *     oráculo de la fila vivía sobre el draft (AutomationWiringTest), no sobre el JSON.
+   */
+  @Test
+  void s12_aPausedRuleIsReadAsPaused() throws Exception {
+    when(read.get("owner", RULE)).thenReturn(rule(3, paused()));
+    mvc.perform(get("/api/v1/me/automations/" + RULE).with(user("owner")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.enabled").value(false));
+  }
+
+  private static AutomationDraft paused() {
+    return new AutomationDraft(
+        "Seguimiento",
+        false,
+        "TaskCreated.v1",
+        null,
+        new CreateTaskAction(PROJECT, "Revisar {{task.title}}", null, 30));
   }
 
   @Test
@@ -645,6 +678,40 @@ class AutomationsApiTest {
                     true));
   }
 
+  /**
+   * @s34 —«cada item contiene exactamente id, eventId, ..., deliveryId, ... con null donde no
+   *     aplica» (features/automations.feature:454)— para la mitad que sí aplica. El fixture de
+   *     {@link #s34_pagesTheHistoryWithItemsAndNextCursor()} lleva {@code deliveryId} null y afirma
+   *     null, así que ni {@code AutomationView$Run::deliveryId} ni {@code
+   *     AutomationRun::deliveryId} podían caer: devolver null era exactamente lo esperado. Una
+   *     ejecución de webhook sin su entrega deja al propietario sin el rastro que enlaza la regla
+   *     con lo que se envió (@s26, :341).
+   */
+  @Test
+  void s34_aWebhookRunNamesTheDeliveryItProduced() throws Exception {
+    var delivery = UUID.fromString("66666666-6666-4666-8666-666666666666");
+    var run =
+        new AutomationRun(
+            UUID.fromString("44444444-4444-4444-8444-444444444444"),
+            RULE,
+            "owner",
+            UUID.fromString("55555555-5555-4555-8555-555555555555"),
+            "ProjectStatusChanged.v1",
+            NOW,
+            1,
+            "succeeded",
+            null,
+            delivery,
+            null,
+            NOW);
+    when(runs.read(eq("owner"), eq(RULE), isNull()))
+        .thenReturn(new AutomationRunPage(List.of(run), null));
+    mvc.perform(get("/api/v1/me/automations/" + RULE + "/runs").with(user("owner")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.items[0].deliveryId").value(delivery.toString()))
+        .andExpect(jsonPath("$.items[0].createdTaskId").value(org.hamcrest.Matchers.nullValue()));
+  }
+
   @Test
   void s35_aMalformedCursorIsAValidationError() throws Exception {
     mvc.perform(
@@ -664,7 +731,15 @@ class AutomationsApiTest {
             UUID.fromString("55555555-5555-4555-8555-555555555555"),
             "TaskCreated.v1",
             NOW,
-            new ActionPreview.Task(PROJECT, "Revisar Redactar informe", "", 30, null),
+            // El criterio va con el valor que pide el contrato (:399), no vacío: con "" el
+            // fixture coincidía con el mutante EmptyObjectReturnVals de
+            // AutomationView$TaskPreview::completionCriterion y lo hacía indetectable.
+            new ActionPreview.Task(
+                PROJECT,
+                "Revisar Redactar informe",
+                "TaskCreated.v1 a las 2026-09-08T10:15:30.123456Z",
+                30,
+                null),
             false);
     when(simulate.simulate(eq("owner"), any()))
         .thenReturn(new AutomationSimulation(5, List.of(match)));
@@ -685,7 +760,8 @@ class AutomationsApiTest {
                      "matches":[{"eventId":"55555555-5555-4555-8555-555555555555",
                        "eventType":"TaskCreated.v1","occurredAt":"2026-09-08T10:15:30.123456Z",
                        "preview":{"type":"CREATE_TASK","projectId":"%s",
-                         "title":"Revisar Redactar informe","completionCriterion":"",
+                         "title":"Revisar Redactar informe",
+                         "completionCriterion":"TaskCreated.v1 a las 2026-09-08T10:15:30.123456Z",
                          "estimatedMinutes":30,"wouldFail":null},
                        "loopGuarded":false}]}"""
                         .formatted(PROJECT),
@@ -733,7 +809,40 @@ class AutomationsApiTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.matches[0].preview.length()").value(3))
         .andExpect(jsonPath("$.matches[0].preview.type").value("NOTIFY_WEBHOOK"))
-        .andExpect(jsonPath("$.matches[0].preview.endpointId").value(ENDPOINT.toString()));
+        .andExpect(jsonPath("$.matches[0].preview.endpointId").value(ENDPOINT.toString()))
+        // La tercera clave de la fila 4 de @s32 (:428). Sin ella, `length()==3` seguía valiendo
+        // con el eventId a null y AutomationView$WebhookPreview::eventId -> null sobrevivía:
+        // la vista previa dejaría de decir sobre QUÉ evento se dispararía el envío.
+        .andExpect(
+            jsonPath("$.matches[0].preview.eventId").value("55555555-5555-4555-8555-555555555555"));
+  }
+
+  /**
+   * @s32 fila 3 —«TaskCreated.v1 de una tarea creada por automatización → loopGuarded true y
+   *     preview resuelta» (features/automations.feature:427)—. Ningún fixture de la clase traía una
+   *     coincidencia guardada, así que {@code AutomationView$Match::loopGuarded -> false}
+   *     sobrevivía y la pantalla mostraría como disparable lo que la guarda va a saltarse.
+   */
+  @Test
+  void s32_aGuardedMatchSaysSoAndStillResolvesItsPreview() throws Exception {
+    var match =
+        new AutomationMatch(
+            UUID.fromString("55555555-5555-4555-8555-555555555555"),
+            "TaskCreated.v1",
+            NOW,
+            new ActionPreview.Task(PROJECT, "Revisar Redactar informe", null, 30, null),
+            true);
+    when(simulate.simulate(eq("owner"), any()))
+        .thenReturn(new AutomationSimulation(1, List.of(match)));
+    mvc.perform(
+            post("/api/v1/me/automations/simulate")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .contentType("application/json")
+                .content(valid()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.matches[0].loopGuarded").value(true))
+        .andExpect(jsonPath("$.matches[0].preview.title").value("Revisar Redactar informe"));
   }
 
   @Test

@@ -28,6 +28,7 @@ class ExecuteAutomationsTest {
   private static final UUID COMPLETED = UUID.fromString("33333333-3333-4333-8333-333333333333");
   private static final UUID ENDPOINT = UUID.fromString("44444444-4444-4444-8444-444444444444");
   private static final UUID RUN = UUID.fromString("55555555-5555-4555-8555-555555555555");
+  private static final UUID SIBLING_RUN = UUID.fromString("77777777-7777-4777-8777-777777777777");
   private static final UUID AUTOMATED = UUID.fromString("66666666-6666-4666-8666-666666666666");
 
   private String projectName = "Marketing";
@@ -331,6 +332,7 @@ class ExecuteAutomationsTest {
   @Test
   void s20_aFailedConfirmationLeavesNothingBehindAndStrandsTheWalkOnTheEvent() {
     givenARuleThatCreatesTasks();
+    var rule = rules.list(OWNER).getFirst();
     work.cursors.put(OWNER, new AutomationCursor(T0, E0));
     work.outbox.add(taskCreated(E1, T0.plusSeconds(1)));
     work.outbox.add(taskCreated(E2, T0.plusSeconds(2)));
@@ -351,6 +353,15 @@ class ExecuteAutomationsTest {
     assertThat(work.cursors.get(OWNER))
         .as("the cursor never jumps over the event that did not confirm")
         .isEqualTo(new AutomationCursor(T0, E0));
+    // La bitácora del camino de fallo es la ÚNICA huella que sobrevive a la transacción
+    // revertida junto con la fila `record`: sin ella, un almacenamiento caído deja al
+    // propietario clavado en un evento sin una sola línea que diga cuál ni por qué. Sin esta
+    // aserción, la línea 97 entera —el forEach y la llamada a log de dentro— se podía borrar
+    // sin que cayera ninguna prueba.
+    assertThat(logged())
+        .as("the rolled back attempt is audited by identifiers, like the good one")
+        .contains(rule.id().toString(), E1.toString(), "retry", "attempt=1")
+        .contains("code=STORAGE_UNAVAILABLE");
   }
 
   @Test
@@ -400,6 +411,67 @@ class ExecuteAutomationsTest {
     assertThat(work.recorded).isEmpty();
     assertThat(work.createdTasks()).isEmpty();
     assertThat(work.cursors.get(OWNER)).isEqualTo(new AutomationCursor(T0.plusSeconds(1), E1));
+  }
+
+  /**
+   * El cruce de @s21 («sin detener las demás reglas») con @s22 (el reintento): un mismo evento con
+   * ejecuciones previas de DOS reglas. Ninguna prueba del árbol le daba a un evento más de una
+   * ejecución previa, así que el filtro que escoge la ejecución de ESTA regla —{@code run ->
+   * rule.id().equals(run.ruleId())}, ExecuteAutomations:143— podía devolver siempre true y toda la
+   * suite seguía verde.
+   *
+   * <p>Lo que ese mutante deja pasar: R1 quedó {@code failed} sobre E1 y R2 sigue en {@code retry}.
+   * Sin el filtro, R2 hereda la ejecución de R1, la ve resuelta y se salta para siempre. Pérdida
+   * permanente y silenciosa de una automatización del propietario, sin fila ni error.
+   *
+   * <p>La ejecución de R1 va primera en la lista a propósito: es la que {@code findFirst()}
+   * devolvería si el filtro dejara de discriminar.
+   */
+  @Test
+  void s22_eachRuleRetriesOnItsOwnPreviousRunAndNeverOnItsSiblings() {
+    work.owners.add(OWNER);
+    var settled = ruleWith(true, "Fijo de R1");
+    var retrying = ruleWith(true, "Fijo de R2");
+    rules.create(OWNER, settled);
+    rules.create(OWNER, retrying);
+    work.cursors.put(OWNER, new AutomationCursor(T0, E0));
+    work.outbox.add(
+        withRuns(
+            E1,
+            T0.plusSeconds(1),
+            List.of(runOn(settled, RUN, 3, "failed"), runOn(retrying, SIBLING_RUN, 1, "retry"))));
+
+    execute.runCycle();
+
+    assertThat(runOf(retrying))
+        .as("R2 reintenta sobre SU fila: misma identidad, un intento más")
+        .extracting(AutomationRun::id, AutomationRun::attempt, AutomationRun::status)
+        .containsExactly(SIBLING_RUN, 2, "succeeded");
+    assertThat(work.commits.stream().flatMap(commit -> commit.outcomes().stream()))
+        .as("y R1, ya resuelta, no se vuelve a intentar")
+        .extracting(outcome -> outcome.run().ruleId())
+        .containsExactly(retrying.id());
+  }
+
+  private static AutomationRun runOn(AutomationRule rule, UUID runId, int attempt, String status) {
+    return new AutomationRun(
+        runId,
+        rule.id(),
+        OWNER,
+        E1,
+        "TaskCreated.v1",
+        T0.plusSeconds(1),
+        attempt,
+        status,
+        null,
+        null,
+        "STORAGE_UNAVAILABLE",
+        T0.plusSeconds(1));
+  }
+
+  private static AutomationCandidate withRuns(
+      UUID eventId, Instant occurredAt, List<AutomationRun> runs) {
+    return new AutomationCandidate(taskCreated(eventId, occurredAt).event(), false, runs);
   }
 
   private static UUID event(AutomationOutcome outcome) {

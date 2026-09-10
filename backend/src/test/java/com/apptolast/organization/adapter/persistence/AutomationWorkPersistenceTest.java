@@ -235,6 +235,77 @@ class AutomationWorkPersistenceTest {
         .isEmpty();
   }
 
+  /**
+   * @s16 —«el primer cursor de un propietario nace en el instante de su regla más antigua, no al
+   *     principio del outbox»— contra la tabla real. {@code startCursor} y el {@code write} que lo
+   *     envuelve no los ejecutaba NINGUNA prueba, ni unitaria ni con contenedor: los dos mutantes
+   *     de PIT sobre esas líneas salieron NO_COVERAGE, y borrar la escritura entera dejaba la suite
+   *     verde. Sin la fila, cada ciclo recalcula el arranque y el propietario nunca deja de empezar
+   *     de cero.
+   *     <p>La segunda mitad es la otra cara del {@code ON CONFLICT (owner_id) DO NOTHING}: dos
+   *     workers pueden arrancar al mismo propietario a la vez, y el segundo no puede tirar del
+   *     cursor hacia atrás sobre el recorrido que el primero ya avanzó.
+   */
+  @Test
+  void s16_theFirstCursorIsWrittenOnceAndALaterStartNeverDragsItBack() {
+    var owner = owner();
+    var first = new AutomationCursor(T0.plusSeconds(10), SMALLER);
+
+    work.startCursor(owner, first);
+
+    assertThat(work.cursor(owner)).as("el cursor inicial queda escrito").contains(first);
+
+    work.startCursor(owner, new AutomationCursor(T0, GREATER));
+
+    assertThat(work.cursor(owner))
+        .as("quien llega segundo no mueve el cursor que ya existe")
+        .contains(first);
+  }
+
+  /**
+   * @s20 —«la única fila que sobrevive a una confirmación revertida, escrita fuera de ella»
+   *     (features/automations.feature:282 y el invariante de :263)—. {@code record} es la mitad de
+   *     recuperación del adaptador y no la tocaba ninguna prueba: sus dos mutantes NO_COVERAGE
+   *     —quitar el {@code executeWithoutResult} y quitar el {@code upsert} de dentro— borran la
+   *     escritura entera. Si esa fila no se escribe, el intento fallido no existe para nadie: el
+   *     siguiente ciclo lo recalcula como attempt 1 y la escalera de reintentos de @s22 no llega
+   *     nunca a agotarse.
+   *     <p>El segundo {@code record} es el {@code ON CONFLICT (rule_id, event_id) DO UPDATE}: el
+   *     reintento renueva su propia fila en lugar de duplicarla.
+   */
+  @Test
+  void s20_theRunOfARolledBackConfirmationIsWrittenApartAndTheRetryRenewsIt() {
+    var owner = owner();
+    var project = project(owner);
+    var event = outbox(owner, project, T0.plusSeconds(1), "pending");
+    var rule = rule(owner);
+
+    work.record(run(rule, owner, event, 1, "retry", "STORAGE_UNAVAILABLE", T0.plusSeconds(2)));
+
+    assertThat(rowOf(rule, event))
+        .as("la fila del intento fallido existe fuera de la transacción revertida")
+        .containsEntry("attempt", 1)
+        .containsEntry("status", "retry")
+        .containsEntry("error_code", "STORAGE_UNAVAILABLE");
+
+    work.record(run(rule, owner, event, 2, "failed", "STORAGE_UNAVAILABLE", T0.plusSeconds(3)));
+
+    assertThat(runsOf(rule, event)).as("una fila por (regla, evento), nunca dos").isEqualTo(1);
+    assertThat(rowOf(rule, event))
+        .as("el intento siguiente renueva la fila que ya había")
+        .containsEntry("attempt", 2)
+        .containsEntry("status", "failed")
+        .containsEntry("executed_at", Timestamp.from(T0.plusSeconds(3)));
+  }
+
+  private static int runsOf(UUID rule, UUID event) {
+    return AutomationPersistenceTest.Database.JDBC.queryForObject(
+        "SELECT count(*) FROM automation_runs WHERE rule_id = ? AND event_id = ?",
+        Integer.class,
+        rule,
+        event);
+  }
+
   private static AutomationCursor start() {
     return new AutomationCursor(T0, AutomationCursor.START);
   }

@@ -4,7 +4,7 @@
 //
 // Uso: node scripts/verificar-mutantes-automations.mjs [filtro]
 import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 
 const VIEW = "frontend/src/automations.tsx";
 const CLIENT = "frontend/src/automations-api.ts";
@@ -12,6 +12,20 @@ const originals = {
   [VIEW]: readFileSync(VIEW, "utf8"),
   [CLIENT]: readFileSync(CLIENT, "utf8"),
 };
+
+// El script escribe sobre los fuentes de verdad. Si la pasada se corta —Ctrl-C, un fallo
+// del proceso, la maquina— los deja mutados y el arbol miente. Restaurarlos al salir, pase
+// lo que pase, es lo unico que hace segura la tecnica.
+const restoreEverything = () => {
+  for (const [file, original] of Object.entries(originals))
+    if (readFileSync(file, "utf8") !== original) writeFileSync(file, original);
+};
+process.on("exit", restoreEverything);
+for (const signal of ["SIGINT", "SIGTERM"])
+  process.on(signal, () => {
+    restoreEverything();
+    process.exit(130);
+  });
 
 /** [fichero, nombre, texto exacto a buscar, texto de reemplazo] */
 const MUTANTS = [
@@ -1469,22 +1483,42 @@ for (const [file, name, search, replacement] of MUTANTS) {
   writeFileSync(file, original);
   const tests = failedTests(output);
   const compiles = !/Error: Failed to (parse|load)/.test(output);
-  results.push({
-    file,
-    name,
-    verdict: tests.length > 0 ? "MUERE" : compiles ? "SOBREVIVE" : "NO COMPILA",
-    tests,
-  });
+  // «Nadie falla» y «nadie llego a correr» se veian igual desde aqui: si vitest no arranca
+  // —sin node_modules en este arbol, un PATH distinto, un pnpm que no resuelve— la salida no
+  // trae ninguna linea de fallo y el mutante se anotaba SOBREVIVE sin que se hubiera
+  // ejecutado una sola prueba. Un veredicto fantasma en el libro es peor que un hueco.
+  const ran = /Test Files\s+\d+|Tests\s+\d+/.test(output);
+  const verdict = !ran
+    ? "NO EJECUTADO"
+    : tests.length > 0
+      ? "MUERE"
+      : compiles
+        ? "SOBREVIVE"
+        : "NO COMPILA";
+  results.push({ file, name, verdict, tests });
   console.log(
-    `${tests.length > 0 ? "MUERE   " : "SOBREVIVE"}  ${name}  ->  ${tests.join(" | ") || "(nadie falla)"}`,
+    `${verdict.padEnd(12)} ${name}  ->  ${tests.join(" | ") || (ran ? "(nadie falla)" : "(vitest no llego a correr)")}`,
   );
 }
 
-for (const [file, original] of Object.entries(originals))
-  writeFileSync(file, original);
+restoreEverything();
 const dead = results.filter((result) => result.verdict === "MUERE").length;
-console.log(`\nTOTAL: ${dead} mueren de ${results.length}`);
-writeFileSync(
-  "progress/verificacion_mutantes_automations.json",
-  `${JSON.stringify(results, null, 2)}\n`,
+console.log(`\nESTA PASADA: ${dead} mueren de ${results.length}`);
+
+// El libro se ACUMULA. Antes se sobrescribia entero en cada pasada, asi que una pasada con
+// filtro dejaba commiteados los veredictos de ese filtro y borraba todos los demas: el
+// fichero declaraba ser «el veredicto de cada uno» y contenia once de ciento noventa y ocho,
+// y el resto solo sobrevivia en el historial de git. Una pasada nueva de un mutante ya
+// juzgado reemplaza su entrada; nunca borra las ajenas.
+const LEDGER = "progress/verificacion_mutantes_automations.json";
+const previous = existsSync(LEDGER) ? JSON.parse(readFileSync(LEDGER, "utf8")) : [];
+const ledger = new Map(previous.map((entry) => [`${entry.file} ${entry.name}`, entry]));
+for (const result of results) ledger.set(`${result.file} ${result.name}`, result);
+const accumulated = [...ledger.values()];
+const pending = MUTANTS.filter(
+  ([file, name]) => !ledger.has(`${file} ${name}`),
+).length;
+console.log(
+  `LIBRO: ${accumulated.length} mutantes con veredicto, ${pending} anclas del script todavia sin juzgar`,
 );
+writeFileSync(LEDGER, `${JSON.stringify(accumulated, null, 2)}\n`);

@@ -49,3 +49,24 @@ Ratificada y escrita en `features/github_connector.feature:55`.
 
 Vive en `progress/decisiones_pendientes.md`. Nada de allí puede darse por bueno,
 por razonable que parezca la enmienda.
+
+---
+
+## R4 — 10 de septiembre de 2026 — `latencyMs` se mide con cronómetro monótono
+
+**Pregunta:** «El contrato de webhooks dice que `latencyMs` se mide "con el reloj
+inyectado". Implementé un cronómetro **monótono** inyectado en vez del reloj de
+pared, porque medir tiempo transcurrido con un reloj de pared da latencias
+negativas si el sistema ajusta la hora. ¿Cómo lo cierro?»
+
+**Opción elegida:** «Enmendar la línea al cronómetro», con esta vista previa
+delante:
+
+> ANTES: «latencyMs es un entero no negativo medido con el reloj inyectado»
+> DESPUÉS: «latencyMs es un entero no negativo medido con el cronómetro monótono
+> inyectado»
+
+**Alcanza a:** `features/webhooks.feature:233` y `:320`, y `project-spec.md:2038`.
+Es el bloqueante **B7** de `progress/carriles/bloqueantes_25.md`, que decía —con
+razón en la forma— que la enmienda «no lleva contrafirma donde mira el siguiente
+revisor». Ahora la lleva, en el propio `.feature`.

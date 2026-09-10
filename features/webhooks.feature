@@ -318,6 +318,13 @@ Feature: Entregar los eventos propios ya confirmados a URLs https elegidas con f
     When el worker ejecuta el intento
     Then la entrega queda pending con attempt 1, errorClass <clase> y httpStatus <http>
     And latencyMs es un entero no negativo medido con el cronómetro monótono inyectado
+    # Enmienda del 10 de septiembre de 2026, ratificada por el propietario. Las dos
+    # líneas de latencyMs -ésta y la del @s17- decían «medido con el reloj inyectado».
+    # Medir tiempo transcurrido con un reloj de pared es un defecto conocido: un ajuste
+    # de hora da latencias negativas. El código usa un cronómetro monótono inyectado, y
+    # el contrato pasa a decir lo que el código hace y lo que la ingeniería pide. La
+    # cláusula sigue siendo comprobable y su rojo está acreditado. Ver
+    # progress/ratificaciones.md, entrada R4.
     And el receptor de la redirección, si existe, no recibe ninguna petición
     Examples:
       | comportamiento                                           | clase           | http |

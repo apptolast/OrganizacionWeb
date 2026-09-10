@@ -65,24 +65,7 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
                   .prepare(
                       owner,
                       timestamp.get(),
-                      (collection, json) ->
-                          switch (collection) {
-                            case "projects" -> projects(owner, json);
-                            case "tasks" -> tasks(owner, json);
-                            case "plannedBlocks" -> blocks(owner, json);
-                            case "blockProjections" -> projections(owner, json);
-                            case "blockChanges" -> blockChanges(owner, json);
-                            case "workSessions" -> sessions(owner, json);
-                            case "workSessionIntervals" -> intervals(owner, json);
-                            case "workSessionChanges" -> sessionChanges(owner, json);
-                            case "taskStatusHistory" -> taskHistory(owner, json);
-                            case "availability" -> availability(owner, json);
-                            case "appearance" -> appearance(owner, json);
-                            case "customization" -> customization(owner, json);
-                            case "projectCustomFieldValues" -> projectValues(owner, json);
-                            case "taskCustomFieldValues" -> taskValues(owner, json);
-                            default -> 0;
-                          });
+                      (collection, json) -> writeCollection(owner, collection, json));
             } catch (IOException error) {
               throw new StorageUnavailableException(error);
             }
@@ -93,6 +76,28 @@ public final class PostgresExportDataQueries implements ExportDataQueries {
     } catch (RuntimeException error) {
       throw new StorageUnavailableException(error);
     }
+  }
+
+  long writeCollection(
+      String owner, String collection, com.fasterxml.jackson.core.JsonGenerator json)
+      throws IOException {
+    return switch (collection) {
+      case "projects" -> projects(owner, json);
+      case "tasks" -> tasks(owner, json);
+      case "plannedBlocks" -> blocks(owner, json);
+      case "blockProjections" -> projections(owner, json);
+      case "blockChanges" -> blockChanges(owner, json);
+      case "workSessions" -> sessions(owner, json);
+      case "workSessionIntervals" -> intervals(owner, json);
+      case "workSessionChanges" -> sessionChanges(owner, json);
+      case "taskStatusHistory" -> taskHistory(owner, json);
+      case "availability" -> availability(owner, json);
+      case "appearance" -> appearance(owner, json);
+      case "customization" -> customization(owner, json);
+      case "projectCustomFieldValues" -> projectValues(owner, json);
+      case "taskCustomFieldValues" -> taskValues(owner, json);
+      default -> throw new IllegalStateException("Unknown export collection: " + collection);
+    };
   }
 
   private int scalarBatch(String owner, String sizeQuery) {

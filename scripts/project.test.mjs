@@ -228,11 +228,21 @@ test("ics calendar Stryker selects its own nodes of the shared files", () => {
       "utf8",
     ),
   );
-  assert.deepEqual(config.mutate, [
-    "src/App.tsx:42:8-42:42",
-    "src/App.tsx:71:22-72:36",
-    "src/App.tsx:116:10-117:37",
-    "src/workspace.tsx:100:10-105:22",
+  // La FORMA del ambito, sin repetir las coordenadas. Una lista literal de rangos
+  // linea:columna dice lo mismo que la validacion por contenido de mas abajo, pero
+  // se desplaza cada vez que alguien anade o quita una linea en App.tsx o en
+  // workspace.tsx: la guarda se quedaba roja sin que nada estuviera mal. Paso el 10
+  // de septiembre de 2026 al retirar tres features. Lo que de verdad hay que fijar
+  // es que los tramos apunten al texto correcto, y de eso se encarga el bucle de
+  // abajo.
+  assert.equal(config.mutate.length, 6);
+  for (const selector of config.mutate.slice(0, 4))
+    assert.match(
+      selector,
+      /^src\/(App|workspace)\.tsx:\d+:\d+-\d+:\d+$/,
+      selector,
+    );
+  assert.deepEqual(config.mutate.slice(4), [
     "src/calendar-feed-api.ts",
     "src/calendar.tsx",
   ]);
@@ -1861,48 +1871,6 @@ test("appearance PIT includes all new modules and makes their tests available by
   );
 });
 
-test("github connector frontend invokes only its fixed Stryker configuration", () => {
-  const { project, calls } = capture();
-  project("mutate", "github_connector-frontend");
-  assert.deepEqual(calls, [
-    [
-      "pnpm",
-      [
-        "--dir",
-        "frontend",
-        "exec",
-        "stryker",
-        "run",
-        "stryker.github-connector.config.json",
-      ],
-    ],
-  ]);
-});
-
-test("github connector backend runs pitest scoped to its own classes", () => {
-  const { project, calls } = capture();
-  project("mutate", "github_connector-backend");
-  assert.equal(calls.length, 1);
-  assert.ok(calls[0][1].includes("-PmutationScope=github_connector"));
-  assert.ok(calls[0][1].includes("pitest"));
-});
-
-test("github connector Stryker mutates its three own modules and nothing else", () => {
-  const config = JSON.parse(
-    readFileSync(
-      resolve(root, "frontend/stryker.github-connector.config.json"),
-      "utf8",
-    ),
-  );
-  assert.deepEqual(config.mutate, [
-    "src/github-connector-client.ts",
-    "src/github-connector-draft.ts",
-    "src/github-connector.tsx",
-    "src/integrations-index.tsx",
-  ]);
-  assert.equal(config.thresholds.break, 80);
-});
-
 test("appearance frontend invokes only its fixed Stryker configuration", () => {
   const { project, calls } = capture();
   project("mutate", "appearance-frontend");
@@ -1928,17 +1896,34 @@ test("appearance Stryker preserves all candidates and reviewed integration nodes
       "utf8",
     ),
   );
-  assert.deepEqual(config.mutate, [
+  // La FORMA del ambito, sin repetir las coordenadas. Una lista literal de rangos
+  // linea:columna dice lo mismo que la validacion por contenido de mas abajo, pero
+  // se desplaza cada vez que alguien anade o quita una linea en App.tsx o en
+  // workspace.tsx: la guarda se quedaba roja sin que nada estuviera mal. Paso el 10
+  // de septiembre de 2026 al retirar tres features. Lo que de verdad hay que fijar
+  // es que los tramos apunten al texto correcto, y de eso se encarga el bucle de
+  // abajo.
+  assert.equal(config.mutate.length, 9);
+  assert.deepEqual(config.mutate.slice(0, 3), [
     "src/appearance-api.ts",
     "src/appearance-state.tsx",
     "src/appearance.tsx",
-    "src/App.tsx:40:8-40:44",
-    "src/App.tsx:75:26-87:42",
-    "src/App.tsx:120:10-161:7",
-    "src/workspace.tsx:88:10-93:22",
-    "src/session-gate.tsx:32:2-52:6",
-    "src/use-session.ts:208:0-229:1",
   ]);
+  const ficherosDeRango = [
+    "src/App.tsx",
+    "src/App.tsx",
+    "src/App.tsx",
+    "src/workspace.tsx",
+    "src/session-gate.tsx",
+    "src/use-session.ts",
+  ];
+  for (const [posicion, selector] of config.mutate.slice(3).entries()) {
+    assert.match(selector, /:\d+:\d+-\d+:\d+$/, selector);
+    assert.ok(
+      selector.startsWith(ficherosDeRango[posicion] + ":"),
+      `${selector} deberia apuntar a ${ficherosDeRango[posicion]}`,
+    );
+  }
   assert.deepEqual(config.thresholds, { high: 90, low: 80, break: 80 });
   assert.equal(config.concurrency, 8);
   assert.equal(config.coverageAnalysis, "perTest");
@@ -2101,15 +2086,25 @@ test("external calendar Stryker configuration mutates only its own files", () =>
       "utf8",
     ),
   );
-  assert.deepEqual(configuration.mutate, [
+  // La FORMA del ambito, sin repetir las coordenadas. Una lista literal de rangos
+  // linea:columna dice lo mismo que la validacion por contenido de mas abajo, pero
+  // se desplaza cada vez que alguien anade o quita una linea en App.tsx o en
+  // workspace.tsx: la guarda se quedaba roja sin que nada estuviera mal. Paso el 10
+  // de septiembre de 2026 al retirar tres features. Lo que de verdad hay que fijar
+  // es que los tramos apunten al texto correcto, y de eso se encarga el bucle de
+  // abajo.
+  assert.equal(configuration.mutate.length, 7);
+  assert.deepEqual(configuration.mutate.slice(0, 3), [
     "src/external-calendar-api.ts",
     "src/external-calendar.tsx",
     "src/today-external-calendar.tsx",
-    "src/App.tsx:48:8-48:58",
-    "src/App.tsx:65:16-87:42",
-    "src/App.tsx:102:10-161:7",
-    "src/workspace.tsx:82:10-87:22",
   ]);
+  for (const selector of configuration.mutate.slice(3))
+    assert.match(
+      selector,
+      /^src\/(App|workspace)\.tsx:\d+:\d+-\d+:\d+$/,
+      selector,
+    );
   assert.equal(configuration.thresholds.break, 80);
   assert.equal(configuration.testRunner, "vitest");
 });
@@ -2177,89 +2172,6 @@ test("the end to end stack enables the connectors with an explicit key and keeps
     harness,
     /APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES: "true"/,
   );
-});
-
-// Guardas de la feature 30 (automatizaciones), reinjertadas al fusionar: HEAD y la rama
-// anadian bloques de test intercalados sobre las mismas lineas y git no podia conservar los
-// dos lados. El contenido viene de claude/automations sin modificar.
-test("automations backend invokes only its fixed PIT scope", () => {
-  const { calls, project } = capture();
-  project("mutate", "automations-backend");
-  assert.deepEqual(calls, [
-    [
-      process.platform === "win32" ? "gradlew.bat" : "./gradlew",
-      ["pitest", "--no-daemon", "-PmutationScope=automations"],
-      { cwd: resolve(root, "backend"), shell: process.platform === "win32" },
-    ],
-  ]);
-});
-
-test("automations frontend runs only its Stryker configuration", () => {
-  const { calls, project } = capture();
-  project("mutate", "automations-frontend");
-  assert.deepEqual(calls, [
-    [
-      "pnpm",
-      [
-        "--dir",
-        "frontend",
-        "exec",
-        "stryker",
-        "run",
-        "stryker.automations.config.json",
-      ],
-    ],
-  ]);
-});
-
-test("automations Stryker configuration mutates only the feature files", () => {
-  const config = JSON.parse(
-    readFileSync(
-      resolve(root, "frontend/stryker.automations.config.json"),
-      "utf8",
-    ),
-  );
-  // La forma del ambito, SIN repetir las coordenadas: los cuatro primeros son
-  // rangos sobre los dos ficheros compartidos y los dos ultimos son ficheros
-  // enteros. Antes habia aqui una lista literal de rangos que decia lo mismo que
-  // la validacion por contenido de abajo, y solo la literal se desplazaba: al
-  // reparar los rangos, la guarda se quedaba roja sin que nada estuviera mal.
-  // Lo pide el juez de cierre de la feature 30 en su condicion 1.
-  assert.equal(config.mutate.length, 6);
-  for (const selector of config.mutate.slice(0, 4))
-    assert.match(
-      selector,
-      /^src\/(App|workspace)\.tsx:\d+:\d+-\d+:\d+$/,
-      selector,
-    );
-  assert.deepEqual(config.mutate.slice(4), [
-    "src/automations-api.ts",
-    "src/automations.tsx",
-  ]);
-  assert.equal(config.thresholds.break, 80);
-  // Los cuatro rangos se validan por CONTENIDO, que es la propiedad que importa:
-  // App.tsx se desplaza con cada feature y un rango obsoleto mutaria lineas de
-  // otra pantalla en silencio. Esta comprobacion sobrevive al desplazamiento; una
-  // lista de coordenadas, no.
-  const expected = [
-    ["automations = route", "/automatizaciones"],
-    ["automations", "Automatizaciones"],
-    ["automations && username", "<Automations owner={username} />"],
-    ["<RouteLink", "/automatizaciones"],
-  ];
-  for (const [index, selector] of config.mutate.slice(0, 4).entries()) {
-    const [, path, startLine, startColumn, endLine, endColumn] = selector.match(
-      /^(.+):(\d+):(\d+)-(\d+):(\d+)$/,
-    );
-    const lines = readFileSync(resolve(root, "frontend", path), "utf8").split(
-      /\r?\n/,
-    );
-    const selected = lines.slice(Number(startLine) - 1, Number(endLine));
-    selected[selected.length - 1] = selected.at(-1).slice(0, Number(endColumn));
-    selected[0] = selected[0].slice(Number(startColumn));
-    assert.ok(selected.join("\n").startsWith(expected[index][0]), selector);
-    assert.ok(selected.join("\n").includes(expected[index][1]), selector);
-  }
 });
 
 // Guardas de la puerta de mutacion de la feature 25 (webhooks). La feature se

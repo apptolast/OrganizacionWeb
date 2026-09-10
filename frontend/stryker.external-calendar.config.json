@@ -7,10 +7,10 @@
     "src/external-calendar-api.ts",
     "src/external-calendar.tsx",
     "src/today-external-calendar.tsx",
-    "src/App.tsx:48:8-48:58",
-    "src/App.tsx:65:16-87:42",
-    "src/App.tsx:102:10-161:7",
-    "src/workspace.tsx:82:10-87:22"
+    "src/App.tsx:43:8-43:58",
+    "src/App.tsx:53:12-75:38",
+    "src/App.tsx:82:10-83:28",
+    "src/workspace.tsx:80:10-85:22"
   ],
   "reporters": ["clear-text", "json", "html", "progress-append-only"],
   "thresholds": {

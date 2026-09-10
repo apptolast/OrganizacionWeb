@@ -4,10 +4,10 @@
   "plugins": ["@stryker-mutator/vitest-runner"],
   "ignorePatterns": [".stryker-tmp-*"],
   "mutate": [
-    "src/App.tsx:42:8-42:42",
-    "src/App.tsx:71:22-72:36",
-    "src/App.tsx:116:10-117:37",
-    "src/workspace.tsx:100:10-105:22",
+    "src/App.tsx:38:8-38:42",
+    "src/App.tsx:59:18-60:32",
+    "src/App.tsx:96:10-97:37",
+    "src/workspace.tsx:98:10-103:22",
     "src/calendar-feed-api.ts",
     "src/calendar.tsx"
   ],

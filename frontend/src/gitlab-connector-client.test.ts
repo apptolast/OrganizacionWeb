@@ -352,6 +352,107 @@ it("@s15 refuses a receipt whose source is not gitlab", async () => {
   );
 });
 
+const running = {
+  ...receipt,
+  status: "running",
+  created: 0,
+  skipped: 0,
+  failed: 0,
+  errorCode: null,
+  finishedAt: null,
+};
+
+it("@s27 refuses a running receipt that already carries an error", async () => {
+  stub(
+    Response.json({ ...running, errorCode: "CONNECTION_INVALID" }, {
+      status: 201,
+    }),
+  );
+
+  await expect(startGitlabImport(projectId, signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s27 refuses a running receipt that already has an ending", async () => {
+  stub(
+    Response.json(
+      { ...running, finishedAt: "2026-09-09T12:00:04.123456Z" },
+      { status: 201 },
+    ),
+  );
+
+  await expect(startGitlabImport(projectId, signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+/** @s21: un token rechazado durante la importación deja recibo failed con errorCode y final. */
+it("@s21 accepts a failed receipt with the code that explains it", async () => {
+  const stopped = {
+    ...receipt,
+    status: "failed",
+    created: 0,
+    skipped: 0,
+    failed: 0,
+    errorCode: "CONNECTION_INVALID",
+  };
+  stub(Response.json(stopped, { status: 201 }));
+
+  await expect(startGitlabImport(projectId, signal())).resolves.toEqual(
+    stopped,
+  );
+});
+
+it("@s15 refuses a receipt whose errorCode is an empty string", async () => {
+  stub(Response.json({ ...receipt, errorCode: "" }, { status: 201 }));
+
+  await expect(startGitlabImport(projectId, signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s16 refuses a receipt whose truncated is not a yes or a no", async () => {
+  stub(Response.json({ ...receipt, truncated: "sí" }, { status: 201 }));
+
+  await expect(startGitlabImport(projectId, signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s15 refuses a receipt that ends before it starts", async () => {
+  stub(
+    Response.json(
+      { ...receipt, finishedAt: "2026-09-09T11:59:59.123456Z" },
+      { status: 201 },
+    ),
+  );
+
+  await expect(startGitlabImport(projectId, signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+/** La frontera: empezar y terminar en el mismo microsegundo es una importación instantánea. */
+it("@s15 accepts a receipt that ends in the very microsecond it started", async () => {
+  const instantaneous = { ...receipt, finishedAt: receipt.startedAt };
+  stub(Response.json(instantaneous, { status: 201 }));
+
+  await expect(startGitlabImport(projectId, signal())).resolves.toEqual(
+    instantaneous,
+  );
+});
+
+it("@s15 refuses a receipt carrying a thirteenth field", async () => {
+  stub(
+    Response.json({ ...receipt, tokenHint: "WXYZ" }, { status: 201 }),
+  );
+
+  await expect(startGitlabImport(projectId, signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
 it("@s15 refuses a finished receipt with no ending", async () => {
   stub(Response.json({ ...receipt, finishedAt: null }, { status: 201 }));
 
@@ -366,18 +467,21 @@ it("@s15 refuses a finished receipt with no ending", async () => {
  * ninguna prueba lo decodificaba: las dos fixtures eran `completed`.
  */
 it("@s30 reads back an import still running, with no ending and no error", async () => {
-  const running = {
-    ...receipt,
-    status: "running",
-    created: 0,
-    skipped: 0,
-    failed: 0,
-    errorCode: null,
-    finishedAt: null,
-  };
   stub(Response.json(running));
 
   await expect(readGitlabImport(importId, signal())).resolves.toEqual(running);
+});
+
+/** @s30: el recibo ajeno y el inexistente dan el mismo 404, y la pantalla necesita el código. */
+it("@s30 turns a receipt that is not there into the typed error, not into an incompatible body", async () => {
+  stub(problem(404, { code: "IMPORT_NOT_FOUND" }));
+
+  const error = (await readGitlabImport(importId, signal()).catch(
+    (caught: unknown) => caught,
+  )) as GitlabConnectorError;
+
+  expect(error).toBeInstanceOf(GitlabConnectorError);
+  expect(error.code).toBe("IMPORT_NOT_FOUND");
 });
 
 it("@s30 reads a receipt back by its identifier", async () => {

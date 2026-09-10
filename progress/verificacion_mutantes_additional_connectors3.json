@@ -1,0 +1,169 @@
+[
+  {
+    "racimo": 3,
+    "name": "client 153 LogicalOperator !exact && !identifier",
+    "verdict": "MUERE",
+    "tests": [
+      "@s15 refuses a receipt whose identifier comes in upper case",
+      "@s15 refuses an identifier with the shape of a uuid that is not one",
+      "@s15 refuses a receipt carrying a thirteenth field"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 153 CE !exact -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s15 refuses a receipt carrying a thirteenth field"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 158 StringLiteral 'running' -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s30 reads back an import still running, with no ending and no error"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 158 StringLiteral 'failed' -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s21 accepts a failed receipt with the code that explains it"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 162 CE truncated no booleano -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s16 refuses a receipt whose truncated is not a yes or a no"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 164 CE (errorCode null || nonEmpty) -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s15 refuses a receipt whose errorCode is an empty string"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 166 CE status === 'running' -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s27 refuses a running receipt that already has an ending",
+      "@s30 reads back an import still running, with no ending and no error"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 166 StringLiteral 'running' -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s27 refuses a running receipt that already has an ending",
+      "@s30 reads back an import still running, with no ending and no error"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 167 CE clausula running+errorCode -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s27 refuses a running receipt that already carries an error"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 167 CE status === 'running' -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s21 accepts a failed receipt with the code that explains it"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 167 LogicalOperator running || errorCode",
+    "verdict": "MUERE",
+    "tests": [
+      "@s21 accepts a failed receipt with the code that explains it",
+      "@s30 reads back an import still running, with no ending and no error"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 167 EqualityOperator status !== 'running'",
+    "verdict": "MUERE",
+    "tests": [
+      "@s27 refuses a running receipt that already carries an error",
+      "@s21 accepts a failed receipt with the code that explains it"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 167 StringLiteral 'running' -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s27 refuses a running receipt that already carries an error"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 168 CE finishedAt !== null -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s30 reads back an import still running, with no ending and no error"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 168 CE finishedAt !== null -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s15 refuses a receipt that ends before it starts"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 168 EqualityOperator finishedAt === null",
+    "verdict": "MUERE",
+    "tests": [
+      "@s15 refuses a receipt that ends before it starts",
+      "@s30 reads back an import still running, with no ending and no error"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 169 LogicalOperator !instant && orden",
+    "verdict": "MUERE",
+    "tests": [
+      "@s15 refuses a receipt that ends before it starts"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 170 CE orden -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s15 refuses a receipt that ends before it starts"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 170 EqualityOperator < -> <=",
+    "verdict": "MUERE",
+    "tests": [
+      "@s15 accepts a receipt that ends in the very microsecond it started"
+    ]
+  },
+  {
+    "racimo": 3,
+    "name": "client 252 CE status !== 200 -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s30 turns a receipt that is not there into the typed error, not into an incompatible body"
+    ]
+  }
+]

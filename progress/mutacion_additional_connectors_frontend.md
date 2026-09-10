@@ -189,3 +189,34 @@ no distingue ninguna cuenta de ninguna otra.
 mutante aplicado a `frontend/src/gitlab-connector-client.ts`.
 
 **Previsión acumulada: 46 mutantes muertos** (15 del racimo 1 + 2 de propina + 29 nuevos).
+
+---
+
+## Racimo 3 — la tabla de rechazo del recibo (20 mutantes)
+
+Causa común: **las dos fixtures de recibo eran `completed` y válidas**. Los tres estados que el
+contrato admite no se recorrían, y ninguna prueba cruzaba las fronteras de `finishedAt`.
+
+| Oráculo nuevo | Qué fija del contrato | Mata |
+|---|---|---|
+| `@s27 refuses a running receipt that already carries an error` | sólo un recibo en curso carece de error | 3 |
+| `@s27 refuses a running receipt that already has an ending` | sólo un recibo en curso carece de final | 2 |
+| `@s21 accepts a failed receipt with the code that explains it` | @s21: `failed` + `errorCode` + `finishedAt` no nulo | 4 |
+| `@s15 refuses a receipt whose errorCode is an empty string` | un código vacío no explica nada | 1 |
+| `@s16 refuses a receipt whose truncated is not a yes or a no` | `truncated` es booleano, no «sí» | 1 |
+| `@s15 refuses a receipt that ends before it starts` | el orden de los dos instantes | 4 |
+| `@s15 accepts a receipt that ends in the very microsecond it started` | la frontera: `<`, no `<=` | 1 |
+| `@s15 refuses a receipt carrying a thirteenth field` | los doce campos exactos de @s15 | 2 |
+| `@s30 turns a receipt that is not there into the typed error…` | @s30: el 404 `IMPORT_NOT_FOUND` | 1 |
+| (del racimo 1) `@s30 reads back an import still running…` | recibo en curso | +1 |
+
+El último merece nota: `readGitlabImport` sólo se probaba con un 200. Con la guarda de estado
+relajada, un 404 dejaba de convertirse en `GitlabConnectorError` y salía como «Confirmación
+incompatible» — la pantalla perdería el código con el que decide qué ofrecerle al propietario.
+
+### Acreditación del rojo (20 de 20 mueren)
+
+`node scripts/verificar-mutantes-additional-connectors.mjs 3` →
+`progress/verificacion_mutantes_additional_connectors3.json`.
+
+**Previsión acumulada: 66 mutantes muertos.**

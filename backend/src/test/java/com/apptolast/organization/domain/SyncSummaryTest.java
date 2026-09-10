@@ -25,12 +25,7 @@ class SyncSummaryTest {
   }
 
   @ParameterizedTest
-  @CsvSource({
-    "-1, 0, 0, 0",
-    "0, -1, 0, 0",
-    "0, 0, -1, 0",
-    "0, 0, 0, -1"
-  })
+  @CsvSource({"-1, 0, 0, 0", "0, -1, 0, 0", "0, 0, -1, 0", "0, 0, 0, -1"})
   void anyNegativeCounterIsRejected(
       int imported, int skippedRecurring, int skippedCancelled, int skippedInvalid) {
     var error =

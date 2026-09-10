@@ -61,9 +61,9 @@ class SyncExternalCalendarTest {
 
   /**
    * Una sincronización de este test no toca la red y termina en milisegundos, así que cualquier
-   * duración por encima de un minuto delata que la resta del cronómetro no es una resta. El
-   * oráculo anterior sólo pedía {@code millis >= 0}, y por eso sobrevivía el mutante que cambia
-   * {@code nanoTime() - started} por una suma ({@code SyncExternalCalendar:64}).
+   * duración por encima de un minuto delata que la resta del cronómetro no es una resta. El oráculo
+   * anterior sólo pedía {@code millis >= 0}, y por eso sobrevivía el mutante que cambia {@code
+   * nanoTime() - started} por una suma ({@code SyncExternalCalendar:64}).
    */
   static final long PLAUSIBLE_MILLIS = 60_000;
 

@@ -109,6 +109,17 @@ it("@s37 muestra el formulario de alta cuando no hay suscripción", async () => 
   expect(
     screen.queryByRole("button", { name: "Sincronizar ahora" }),
   ).not.toBeInTheDocument();
+  // El primer render no lo fijaba nadie, y ahí viven cuatro supervivientes: la
+  // nota de «todavía no tienes» sólo aparece con loaded (:148), la etiqueta
+  // arranca vacía (:93), la región de estado arranca callada (:96) y una carga
+  // que va bien no deja ningún aviso de error (:149, que con `true` intenta leer
+  // la etiqueta de una suscripción nula y acaba en el catch).
+  expect(
+    screen.getByText("Todavía no tienes ningún calendario externo."),
+  ).toBeInTheDocument();
+  expect(screen.getByLabelText("Etiqueta")).toHaveValue("");
+  expect(screen.getByRole("status")).toHaveTextContent("");
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });
 
 // El andamiaje de la pantalla —la promesa de solo lectura, los nombres accesibles
@@ -178,6 +189,9 @@ it("@s37 muestra host y cola pero nunca la dirección completa", async () => {
   expect(
     screen.getByRole("button", { name: "Sincronizar ahora" }),
   ).toBeInTheDocument();
+  // La confirmación de borrado arranca cerrada: nadie lo afirmaba, así que el
+  // estado inicial podía ser `true` y el diálogo salir solo (superviviente :102).
+  expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
 });
 
 it("@s37 deja sin fecha la última sincronización correcta cuando nunca hubo", async () => {
@@ -353,6 +367,16 @@ it("@s38 anuncia Guardando, envía una sola petición y bloquea los controles", 
   expect(await screen.findByText("Guardando…")).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Guardar" })).toBeDisabled();
   expect(calls.filter((call) => call.method === "PUT")).toHaveLength(1);
+  // Lo que el usuario teclea tiene que LLEGAR a la petición, los dos campos. Sólo
+  // se afirmaba de la dirección, así que el onChange de Etiqueta podía no hacer
+  // nada y la suscripción se guardaba con la etiqueta vacía sin que cayera una
+  // prueba (superviviente medido external-calendar.tsx:291, ArrowFunction).
+  expect(
+    JSON.parse(calls.find((call) => call.method === "PUT")!.body!),
+  ).toEqual({
+    label: "Trabajo",
+    url: "https://calendar.google.com/a.ics",
+  });
   // @s40: aria-busy es la única señal programática de que el formulario está
   // ocupado, y hasta ahora solo se comprobaba la región role="status".
   const form = screen.getByLabelText("Etiqueta").closest("form")!;
@@ -749,6 +773,24 @@ it("@s38 vuelve al formulario vacío cuando la suscripción ya no existe", async
   );
   expect(screen.getByLabelText("Etiqueta")).toHaveValue("");
   expect(calls.filter((call) => call.method === "POST")).toHaveLength(1);
+});
+
+// El catch de synchronise() tiene dos ramas y ninguna prueba pasaba por la
+// segunda: el 404 de EXTERNAL_CALENDAR_NOT_CONFIGURED sí, pero ningún otro
+// error. Por eso external-calendar.tsx:236 sobrevivía con `true` (cualquier
+// fallo retiraba la suscripción de la pantalla) y :237 salía sin cobertura
+// (`else failed(error)` no se ejecutaba nunca). Un 500 distingue las dos.
+it("@s38 un 500 al sincronizar deja el estado incierto sin retirar la suscripción", async () => {
+  withSubscription(synced, [meeting]);
+  answer(`${ROUTE}/sync`, "POST", {}, 500);
+  const user = userEvent.setup();
+  render(<ExternalCalendar />);
+  await screen.findByText("Reunión");
+  await user.click(screen.getByRole("button", { name: "Sincronizar ahora" }));
+  expect(await screen.findByText(UNCERTAIN)).toBeInTheDocument();
+  expect(screen.getByText("calendar.google.com")).toBeInTheDocument();
+  expect(screen.getByLabelText("Etiqueta")).toHaveValue("Trabajo");
+  expect(screen.getByText("Reunión")).toBeInTheDocument();
 });
 
 it("@s39 no envía DELETE si se cancela la confirmación", async () => {

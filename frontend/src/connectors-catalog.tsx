@@ -47,9 +47,19 @@ const STATUS_MARKER: Record<ConnectorStatus, string> = {
   error: "▲",
 };
 
+/**
+ * Un texto por cada código que un {@code ConnectorStatusSource} puede publicar en
+ * {@code lastError.code}: los siete del calendario externo (FeedError), el de una conexión
+ * inservible, el de las entregas agotadas y los dos que deja una importación de GitLab rota. Las
+ * dos listas viven separadas y nada las ata, así que la de aquí se comprueba entera, código por
+ * código, en connectors-catalog.test.tsx; el respaldo de abajo es para el servidor que sepa más
+ * que esta versión, no para tapar un olvido.
+ */
 const ERROR_TEXT: Record<string, string> = {
   CONNECTION_INVALID: "La conexión ya no es válida",
   DELIVERY_EXHAUSTED: "Se agotaron los reintentos de entrega",
+  RATE_LIMITED: "El proveedor limitó las peticiones",
+  GITLAB_UNAVAILABLE: "GitLab no responde",
   FEED_REJECTED: "La dirección del calendario ya no es válida",
   FEED_UNREACHABLE: "El calendario no responde",
   FEED_HTTP_ERROR: "El calendario respondió con un error",

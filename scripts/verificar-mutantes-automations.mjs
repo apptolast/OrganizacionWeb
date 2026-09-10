@@ -1196,6 +1196,129 @@ export async function deleteAutomation(`,
   ],
   [
     VIEW,
+    "R7 158 conflicto inicial -> true",
+    `  const [conflict, setConflict] = useState(false);`,
+    `  const [conflict, setConflict] = useState(true);`,
+  ],
+  [
+    VIEW,
+    "R7 252 setFields({}) en save -> ;",
+    `    setFields({});
+    setConflict(false);`,
+    `    setConflict(false);`,
+  ],
+  [
+    VIEW,
+    "R7 253 setConflict(false) en save -> true",
+    `    setConflict(false);
+    setNotice(null);`,
+    `    setConflict(true);
+    setNotice(null);`,
+  ],
+  [
+    VIEW,
+    "R7 254 setNotice(null) en save -> ;",
+    `    setConflict(false);
+    setNotice(null);
+    try {`,
+    `    setConflict(false);
+    try {`,
+  ],
+  [
+    VIEW,
+    "R7 266 setEditing(null) tras guardar -> ;",
+    `      setEditing(null);
+      setRules((current) =>`,
+    `      setRules((current) =>`,
+  ],
+  [
+    VIEW,
+    "R7 292 setFields({}) en simulate -> ;",
+    `    setFields({});
+    setNotice(null);
+    try {
+      const result = await simulateAutomation(`,
+    `    setNotice(null);
+    try {
+      const result = await simulateAutomation(`,
+  ],
+  [
+    VIEW,
+    "R7 293 setNotice(null) en simulate -> ;",
+    `    setNotice(null);
+    try {
+      const result = await simulateAutomation(`,
+    `    try {
+      const result = await simulateAutomation(`,
+  ],
+  [
+    VIEW,
+    "R7 315 setBusyToggle -> ;",
+    `    setBusyToggle(rule.id);
+    setNotice(null);`,
+    `    setNotice(null);`,
+  ],
+  [
+    VIEW,
+    "R7 316 setNotice(null) en toggle -> ;",
+    `    setBusyToggle(rule.id);
+    setNotice(null);`,
+    `    setBusyToggle(rule.id);`,
+  ],
+  [
+    VIEW,
+    "R7 326 sustitución en el interruptor -> true",
+    `        (current ?? []).map((item) => (item.id === saved.id ? saved : item)),`,
+    `        (current ?? []).map((item) => (true ? saved : item)),`,
+  ],
+  [
+    VIEW,
+    "R7 340 setConflict(false) en reload -> true",
+    `    const id = editing?.rule?.id;
+    setConflict(false);`,
+    `    const id = editing?.rule?.id;
+    setConflict(true);`,
+  ],
+  [
+    VIEW,
+    "R7 347 setRules en reload -> ;",
+    `      setRules(items);
+      const fresh = items.find((rule) => rule.id === id);`,
+    `      const fresh = items.find((rule) => rule.id === id);`,
+  ],
+  [
+    VIEW,
+    "R7 348 búsqueda de la regla fresca -> true",
+    `      const fresh = items.find((rule) => rule.id === id);`,
+    `      const fresh = items.find(() => true);`,
+  ],
+  [
+    VIEW,
+    "R7 360 vaciado del historial -> false",
+    `    if (cursor === null) setHistory({ rule, items: [], nextCursor: null });`,
+    `    if (false) setHistory({ rule, items: [], nextCursor: null });`,
+  ],
+  [
+    VIEW,
+    "R7 360 lista vacía -> Stryker",
+    `    if (cursor === null) setHistory({ rule, items: [], nextCursor: null });`,
+    `    if (cursor === null)
+      setHistory({ rule, items: ["Stryker was here"] as never, nextCursor: null });`,
+  ],
+  [
+    VIEW,
+    "R7 570 hueco del código de error",
+    `                {run.errorCode && <span>{run.errorCode}</span>}`,
+    `                {run.errorCode || <span>{run.errorCode}</span>}`,
+  ],
+  [
+    VIEW,
+    "R7 500 error del título -> ''",
+    `            error={fields["action.titleTemplate"]}`,
+    `            error={fields[""]}`,
+  ],
+  [
+    VIEW,
     "490 opciones de proyecto -> undefined",
     `            {projects.map((project) => (
               <option key={project.id} value={project.id}>

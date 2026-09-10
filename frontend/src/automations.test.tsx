@@ -451,7 +451,11 @@ describe("automations page", () => {
     expect(screen.getByText("Fallida")).toBeInTheDocument();
     expect(screen.getByText("PROJECT_COMPLETED")).toBeInTheDocument();
     const history = screen.getByRole("list", { name: "Ejecuciones" });
-    expect(within(history).getAllByRole("listitem")).toHaveLength(3);
+    const rows = within(history).getAllByRole("listitem");
+    expect(rows).toHaveLength(3);
+    // La fila sin código de error no pinta un hueco vacío por él.
+    expect(rows[0].querySelectorAll("span")).toHaveLength(2);
+    expect(rows[2].querySelectorAll("span")).toHaveLength(3);
     expect(within(history).getAllByRole("link")[0]).toHaveAttribute(
       "href",
       `/proyectos/${PROJECT}/tareas/${PROJECT}`,
@@ -1109,6 +1113,161 @@ describe("automations page", () => {
     await waitFor(() => expect(first).toBeEnabled());
     expect(screen.getAllByText("Inactiva")).toHaveLength(2);
     expect(screen.queryByText("Activa")).not.toBeInTheDocument();
+    // La respuesta sólo sustituye a su regla: la otra sigue siendo la otra.
+    expect(screen.getByText("Pausada")).toBeInTheDocument();
+    expect(screen.getByText("Seguimiento")).toBeInTheDocument();
+  });
+
+  it("@s38 clears the previous complaint each time the owner saves again", async () => {
+    listed();
+    const complaint = (field: string) => ({
+      code: "VALIDATION_ERROR",
+      errors: [{ field, code: "REQUIRED", message: "x" }],
+    });
+    route("POST", CREATE, 422, complaint("name"));
+    route("POST", CREATE, 503, { code: "STORAGE_UNAVAILABLE" });
+    route("POST", CREATE, 422, complaint("action.titleTemplate"));
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    const save = screen.getByRole("button", { name: "Guardar" });
+    const name = screen.getByLabelText("Nombre");
+    await userEvent.click(save);
+    await waitFor(() => expect(name).toHaveAttribute("aria-invalid", "true"));
+
+    // Un fallo sin campos no puede dejar en pie la queja del intento anterior.
+    await userEvent.click(save);
+    await screen.findByRole("alert");
+    expect(name).not.toHaveAttribute("aria-invalid");
+
+    // Y una queja nueva no puede dejar en pie el aviso anterior.
+    await userEvent.click(save);
+    const title = screen.getByLabelText("Título de la tarea");
+    await waitFor(() => expect(title).toHaveAttribute("aria-invalid", "true"));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(name).not.toHaveAttribute("aria-invalid");
+  });
+
+  it("@s39 clears the previous complaint each time the simulation is run again", async () => {
+    listed();
+    const simulate = "/api/v1/me/automations/simulate";
+    route("POST", simulate, 503, { code: "STORAGE_UNAVAILABLE" });
+    route("POST", simulate, 422, {
+      code: "VALIDATION_ERROR",
+      errors: [{ field: "name", code: "REQUIRED", message: "x" }],
+    });
+    route("POST", simulate, 200, { evaluatedEvents: 2, matches: [] });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    const button = screen.getByRole("button", { name: "Simular" });
+    await userEvent.click(button);
+    await screen.findByRole("alert");
+
+    await userEvent.click(button);
+    const name = screen.getByLabelText("Nombre");
+    await waitFor(() => expect(name).toHaveAttribute("aria-invalid", "true"));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    await userEvent.click(button);
+    await screen.findByRole("status", { name: "Resultado de la simulación" });
+    expect(name).not.toHaveAttribute("aria-invalid");
+  });
+
+  it("@s40 clears the previous complaint when the switch is flipped again", async () => {
+    listed({ ...rule, version: 2 });
+    route("GET", `${CREATE}/${RULE}/runs`, 503, { code: "X" });
+    route("PUT", `${CREATE}/${RULE}`, 200, {
+      ...rule,
+      version: 3,
+      enabled: false,
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Historial de Seguimiento" }),
+    );
+    await screen.findByRole("alert");
+    await userEvent.click(screen.getByRole("switch", { name: /seguimiento/i }));
+    await waitFor(() =>
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument(),
+    );
+    expect(screen.getByText("Inactiva")).toBeInTheDocument();
+  });
+
+  it("@s40 loads the current version of the very rule that clashed", async () => {
+    listed(disabled, { ...rule, version: 2 });
+    route("PUT", `${CREATE}/${RULE}`, 412, { code: "AUTOMATION_CONFLICT" });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Editar Seguimiento" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await screen.findByText("Otra pestaña cambió esta regla");
+    routes.delete("GET /api/v1/me/automations");
+    listed(disabled, { ...rule, version: 3, name: "Del servidor" });
+    await userEvent.click(
+      screen.getByRole("button", { name: "Cargar versión actual" }),
+    );
+    await waitFor(() =>
+      expect(screen.getByLabelText("Nombre")).toHaveValue("Del servidor"),
+    );
+    expect(
+      screen.queryByText("Otra pestaña cambió esta regla"),
+    ).not.toBeInTheDocument();
+    // La lista también queda al día, no sólo el borrador.
+    expect(
+      screen.getByRole("button", { name: "Editar Del servidor" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Pausada")).toBeInTheDocument();
+  });
+
+  it("@s41 empties the previous history before the new one arrives", async () => {
+    listed(rule, disabled);
+    const later = held();
+    route("GET", `${CREATE}/${RULE}/runs`, 200, {
+      items: [
+        {
+          id: "44444444-4444-4444-8444-444444444444",
+          eventId: "55555555-5555-4555-8555-555555555555",
+          eventType: "TaskCreated.v1",
+          occurredAt: "2026-09-08T10:15:30.123456Z",
+          attempt: 1,
+          status: "succeeded",
+          createdTaskId: null,
+          deliveryId: null,
+          errorCode: null,
+          executedAt: "2026-09-08T10:15:30.123456Z",
+        },
+      ],
+      nextCursor: null,
+    });
+    route(
+      "GET",
+      `${CREATE}/${OTHER_RULE}/runs`,
+      200,
+      { items: [], nextCursor: null },
+      later.promise,
+    );
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Historial de Seguimiento" }),
+    );
+    expect(await screen.findByText("Correcta")).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Historial de Pausada" }),
+    );
+    expect(screen.getByTestId("automation-history-title")).toHaveTextContent(
+      "Pausada",
+    );
+    expect(screen.queryByText("Correcta")).not.toBeInTheDocument();
+    expect(
+      within(screen.getByRole("list", { name: "Ejecuciones" })).queryAllByRole(
+        "listitem",
+      ),
+    ).toHaveLength(0);
+    later.release();
   });
 
   const ENDPOINT = "88888888-8888-4888-8888-888888888888";

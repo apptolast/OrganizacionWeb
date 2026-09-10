@@ -316,3 +316,34 @@ aborta, y como el `finally` está guardado por `writeRequest.current === control
 con `busyToggle` y el interruptor. No es un hueco de oráculo sino un diseño a
 revisar (un `AbortController` por operación), y cambiarlo aquí sería refactorizar
 de paso.
+
+---
+
+## Racimo 7 — lo que la pantalla tiene que **dejar de** mostrar
+
+**Causa común.** Todas las pruebas comprobaban lo que aparece; ninguna, lo que
+tiene que **desaparecer**. Por eso vivían los `setFields({})`, `setNotice(null)`,
+`setConflict(false)` y el vaciado del historial: borrarlos no rompía nada porque
+nadie miraba si la queja del intento anterior seguía en pantalla.
+
+**Oráculos que faltaban.** Cinco pruebas nuevas y dos reforzadas:
+
+- `@s38 clears the previous complaint each time the owner saves again` — tres
+  intentos encadenados: una queja por campo, un fallo sin campos (que debe **quitar**
+  el `aria-invalid` anterior) y otra queja por campo (que debe **quitar** el aviso).
+- `@s39 clears the previous complaint each time the simulation is run again`.
+- `@s40 clears the previous complaint when the switch is flipped again` — el aviso
+  de un historial que falló no puede sobrevivir al siguiente cambio de interruptor.
+- `@s40 loads the current version of the very rule that clashed` — con dos reglas,
+  para que buscar la que chocó se distinga de coger la primera; y además el aviso de
+  conflicto se cierra y la lista queda al día, no sólo el borrador.
+- `@s41 empties the previous history before the new one arrives` — al abrir el
+  historial de otra regla, las filas de la anterior desaparecen **antes** de que
+  llegue la respuesta, no después.
+- Reforzada `@s41 loads the history in pages…`: una fila sin código de error no
+  pinta un hueco vacío por él.
+- Reforzada `@s40 blocks the second switch…`: la respuesta sustituye **sólo** a su
+  regla; la otra sigue siendo la otra.
+
+**Previsión (no medida): 17 mutantes verificados, los 17 MUEREN.** Previsión
+razonada del racimo: **20 a 25**.

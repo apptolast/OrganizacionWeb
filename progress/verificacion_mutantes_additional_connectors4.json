@@ -1,0 +1,259 @@
+[
+  {
+    "racimo": 4,
+    "name": "client readGitlabConnection throwIfAborted parada 1 de 3 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 readGitlabConnection asks the server for nothing when the caller already aborted"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client readGitlabConnection throwIfAborted parada 2 de 3 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 readGitlabConnection does not read the body of a response that landed after the abort"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client readGitlabConnection throwIfAborted parada 3 de 3 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 readGitlabConnection decodes nothing when the abort lands while the body is being read"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client connectGitlab throwIfAborted parada 1 de 3 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 connectGitlab asks the server for nothing when the caller already aborted"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client connectGitlab throwIfAborted parada 2 de 3 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 connectGitlab does not read the body of a response that landed after the abort"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client connectGitlab throwIfAborted parada 3 de 3 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 connectGitlab decodes nothing when the abort lands while the body is being read"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client disconnectGitlab throwIfAborted parada 1 de 2 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 disconnectGitlab asks the server for nothing when the caller already aborted"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client disconnectGitlab throwIfAborted parada 2 de 2 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 disconnectGitlab does not read the body of a response that landed after the abort"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client startGitlabImport throwIfAborted parada 1 de 3 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 startGitlabImport asks the server for nothing when the caller already aborted"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client startGitlabImport throwIfAborted parada 2 de 3 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 startGitlabImport does not read the body of a response that landed after the abort"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client startGitlabImport throwIfAborted parada 3 de 3 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 startGitlabImport decodes nothing when the abort lands while the body is being read"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client readGitlabImport throwIfAborted parada 1 de 3 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 readGitlabImport asks the server for nothing when the caller already aborted"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client readGitlabImport throwIfAborted parada 2 de 3 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 readGitlabImport does not read the body of a response that landed after the abort"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client readGitlabImport throwIfAborted parada 3 de 3 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 readGitlabImport decodes nothing when the abort lands while the body is being read"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 188 ObjectLiteral { signal } -> {} (leer conexion)",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 sends the caller's own signal with the read of the connection"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 250 ObjectLiteral { signal } -> {} (leer recibo)",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 sends the caller's own signal with the read of a receipt"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 204 ObjectLiteral headers -> {} (conectar)",
+    "verdict": "MUERE",
+    "tests": [
+      "@s9 sends exactly the token and the project path, and nothing else"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 204 StringLiteral Content-Type -> '' (conectar)",
+    "verdict": "MUERE",
+    "tests": [
+      "@s9 sends exactly the token and the project path, and nothing else"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 235 ObjectLiteral headers -> {} (importar)",
+    "verdict": "MUERE",
+    "tests": [
+      "@s15 starts an import with exactly the destination project"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 235 StringLiteral Content-Type -> '' (importar)",
+    "verdict": "MUERE",
+    "tests": [
+      "@s15 starts an import with exactly the destination project"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 58 CE super(code) -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 turns an unreadable problem body into a code the screen can still act on"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 58 CE super(code) -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 keeps the seconds of a rate limit so the screen can name them"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 58 EqualityOperator typeof !== string",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 keeps the seconds of a rate limit so the screen can name them",
+      "@s36 turns an unreadable problem body into a code the screen can still act on"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 58 StringLiteral 'string' -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 keeps the seconds of a rate limit so the screen can name them"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 58 StringLiteral CONNECTOR_ERROR -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 turns an unreadable problem body into a code the screen can still act on"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 59 StringLiteral this.name -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 keeps the seconds of a rate limit so the screen can name them"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 75 CE filtro entero -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 keeps out of the map the entries that are not a field and a code"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 75 LogicalOperator ultimo && -> ||",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 keeps out of the map the entries that are not a field and a code"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 75 CE (entry && typeof && field) -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 keeps out of the map the entries that are not a field and a code"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 75 CE (entry && typeof) -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 keeps out of the map the entries that are not a field and a code"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 75 LogicalOperator segundo && -> ||",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 keeps out of the map the entries that are not a field and a code"
+    ]
+  },
+  {
+    "racimo": 4,
+    "name": "client 75 LogicalOperator primer && -> ||",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 keeps out of the map the entries that are not a field and a code"
+    ]
+  }
+]

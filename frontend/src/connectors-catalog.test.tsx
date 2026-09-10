@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import { ConnectorsCatalog, CONNECTOR_ROUTES } from "./connectors-catalog";
@@ -44,6 +46,16 @@ function stub(...responses: Response[]) {
 }
 
 const rows = () => screen.getAllByRole("listitem");
+
+/** Sube desde el directorio de trabajo hasta encontrar la raíz del repositorio. */
+function climb(relative: string): string {
+  for (let where = process.cwd(), step = 0; step < 6; step++) {
+    const candidate = resolve(where, relative);
+    if (existsSync(candidate)) return readFileSync(candidate, "utf8");
+    where = dirname(where);
+  }
+  throw new Error(`no se encontró ${relative} desde ${process.cwd()}`);
+}
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -147,6 +159,33 @@ it("@s33 gives each state a marker of its own, so colour is never the only cue",
   expect(markers.every((glyph) => Boolean(glyph && glyph.trim()))).toBe(true);
 });
 
+/** El glifo y el estado son dos palabras separadas: sin el espacio se leería «●Conectado». */
+it("@s33 separates the marker from the words of the state", async () => {
+  stub(Response.json(catalog({ api_credentials: { status: "connected" } })));
+
+  render(<ConnectorsCatalog />);
+
+  await waitFor(() => expect(rows()).toHaveLength(6));
+  const marker = within(rows()[0]).getByRole("img");
+  expect(marker.parentElement?.textContent).toBe("● Conectado");
+});
+
+/** Un `tabIndex` positivo mete al contenedor delante de todo lo demás y rompe el orden lógico. */
+it("@s38 keeps its own containers out of the tab order instead of in front of it", async () => {
+  stub(Response.json(catalog()));
+
+  render(<ConnectorsCatalog />);
+
+  await waitFor(() => expect(rows()).toHaveLength(6));
+  const declared = [...document.querySelectorAll("[tabindex]")];
+  expect(declared.length).toBeGreaterThanOrEqual(2);
+  expect(
+    declared
+      .filter((node) => Number(node.getAttribute("tabindex")) > 0)
+      .map((node) => node.tagName),
+  ).toEqual([]);
+});
+
 // ------------------------------------------------------------- @s33 el error y la actividad
 
 it("@s33 shows the GitHub error as a translated code and its activity in the user's zone", async () => {
@@ -237,7 +276,48 @@ it("@s7 a catalogue the client cannot read is not painted either", async () => {
   expect(screen.queryAllByRole("listitem")).toHaveLength(0);
 });
 
+/**
+ * Los dos avisos sólo se buscaban por su rol: un `<p role="alert">` vacío satisfacía las dos
+ * pruebas. Un rol de alerta sin texto no anuncia nada, y quien use un lector se queda sin saber
+ * qué ha pasado delante de un párrafo en blanco.
+ */
+it("@s7 says in words that the state could not be consulted", async () => {
+  stub(problem(503, { code: "STORAGE_UNAVAILABLE" }));
+
+  render(<ConnectorsCatalog />);
+
+  const alert = await screen.findByRole("alert");
+  expect(alert.textContent).toBe(
+    "No se pudo consultar el estado. Inténtalo más tarde",
+  );
+  expect(alert.textContent).not.toContain("STORAGE_UNAVAILABLE");
+});
+
+it("@s7 falls back to a plain explanation when the failure carries no code", async () => {
+  stub(Response.json({ connectors: [] }));
+
+  render(<ConnectorsCatalog />);
+
+  const alert = await screen.findByRole("alert");
+  expect(alert.textContent).toBe(
+    "No se pudo consultar el estado de las integraciones",
+  );
+});
+
 // ------------------------------------------------------------------------------ @s37
+
+/** Salir del catálogo cancela de verdad su petición, no la deja en vuelo hasta que responda. */
+it("@s37 leaving the catalogue aborts the read it had in flight", async () => {
+  const fetcher = vi.fn();
+  fetcher.mockReturnValue(new Promise<Response>(() => {}));
+  vi.stubGlobal("fetch", fetcher);
+
+  const view = render(<ConnectorsCatalog />);
+  const inFlight = (fetcher.mock.calls[0][1] as RequestInit).signal!;
+  view.unmount();
+
+  expect(inFlight.aborted).toBe(true);
+});
 
 it("@s37 a response that lands after the screen is gone changes nothing", async () => {
   let settle: (value: Response) => void = () => {};
@@ -323,6 +403,24 @@ it.each(TRANSLATED)(
     expect(within(item).queryByText(GENERIC)).toBeNull();
   },
 );
+
+/**
+ * `Record<FeedError, string>` obliga a que estén los siete del **tipo de TypeScript**, pero nada
+ * ata ese tipo al enum de Java: una constante nueva en {@code FeedError.java} entraría sin que el
+ * compilador dijera nada y el propietario de un calendario caído leería el texto genérico. Ésta
+ * es la única prueba del árbol que lee la fuente Java, así que la lista no se escribe a mano.
+ */
+it("@s33 translates every failure the external calendar can report", () => {
+  const enumeration = climb(
+    "backend/src/main/java/com/apptolast/organization/domain/FeedError.java",
+  );
+  const constants = [...enumeration.matchAll(/^ {2}([A-Z][A-Z_]+),?$/gm)].map(
+    (match) => match[1],
+  );
+
+  expect(constants.length).toBeGreaterThan(0);
+  expect(constants.filter((code) => !(code in FEED_TEXT))).toEqual([]);
+});
 
 it("@s33 a code this version does not know still says something honest", async () => {
   stub(Response.json(withError("gitlab", "UNKNOWN_TO_THIS_VERSION")));

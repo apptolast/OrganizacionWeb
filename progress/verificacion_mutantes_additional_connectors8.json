@@ -1,0 +1,83 @@
+[
+  {
+    "racimo": 8,
+    "name": "screen 94 el foco de apertura no se mueve al h1",
+    "verdict": "MUERE",
+    "tests": [
+      "@s38 opens with the focus on the heading, not on one of the actions"
+    ]
+  },
+  {
+    "racimo": 8,
+    "name": "screen 320 aria-label de la seccion del panel -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 shows the hint, the path and the identifier next to the three buttons"
+    ]
+  },
+  {
+    "racimo": 8,
+    "name": "catalogo 93 el foco de apertura del catalogo",
+    "verdict": "MUERE",
+    "tests": [
+      "@s33 moves the focus to the heading when the screen opens"
+    ]
+  },
+  {
+    "racimo": 8,
+    "name": "screen 55 StringLiteral texto de reserva -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 after a network failure offers «Actualizar estado» and retries nothing on its own"
+    ]
+  },
+  {
+    "racimo": 8,
+    "name": "screen 36 StringLiteral STORAGE_UNAVAILABLE -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 keeps the connection when the disconnection fails"
+    ]
+  },
+  {
+    "racimo": 8,
+    "name": "screen 37 StringLiteral VALIDATION_ERROR -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 marks the field the server complained about"
+    ]
+  },
+  {
+    "racimo": 8,
+    "name": "screen 65 BooleanLiteral disabled inicial -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 shows neither the form nor the panel until the connection is known",
+      "@s36 a passing read failure does not accuse the server of missing configuration"
+    ]
+  },
+  {
+    "racimo": 8,
+    "name": "screen 120 CallExpression setConnection(null) del catch -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 a reread that fails stops showing the connection it can no longer confirm"
+    ]
+  },
+  {
+    "racimo": 8,
+    "name": "screen 251 CallExpression setActionError(null) al desconectar -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 the disconnection clears the notice left by a failed import"
+    ]
+  },
+  {
+    "racimo": 8,
+    "name": "screen 282 CallExpression setActionError(null) al releer -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 «Actualizar estado» clears the notice of what failed before"
+    ]
+  }
+]

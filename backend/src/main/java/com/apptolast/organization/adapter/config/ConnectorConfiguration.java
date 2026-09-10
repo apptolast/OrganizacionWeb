@@ -168,37 +168,6 @@ public class ConnectorConfiguration {
         clock);
   }
 
-  // ------------------------------------------------------------------------------ catálogo
-
-  /**
-   * El orden de las seis filas del catálogo se escribe aquí, entero y a la vista, porque es el
-   * orden que fija el contrato y la pantalla depende de que no baile. Dejárselo al contenedor —al
-   * inyectar {@code List<ConnectorStatusSource>}— lo haría depender del orden de declaración de los
-   * beans, que nadie lee al añadir uno.
-   */
-  @Bean
-  public ReadConnectorCatalogUseCase readConnectorCatalog(
-      ApiCredentialQueries credentials,
-      WebhookEndpoints webhookEndpoints,
-      WebhookDeliveries webhookDeliveries,
-      CalendarFeedTokens feedTokens,
-      ConnectorConnectionStore githubConnections,
-      ExternalCalendarStatusSource externalCalendarStatus,
-      ReadGitlabConnectionUseCase gitlabConnection,
-      IssueImportReceiptStore receipts,
-      SecretCipher cipher,
-      Clock clock) {
-    return new ReadConnectorCatalog(
-        java.util.List.of(
-            new ApiCredentialStatusSource(credentials, clock),
-            new WebhookStatusSource(webhookEndpoints, webhookDeliveries),
-            new IcsCalendarStatusSource(feedTokens),
-            new GithubStatusSource(githubConnections, receipts),
-            externalCalendarStatus,
-            new GitlabStatusSource(gitlabConnection)),
-        cipher);
-  }
-
   /** Una variable de entorno sin definir llega como cadena vacía: eso es ausencia, no error. */
   private static String configured(String value) {
     return value == null || value.isBlank() ? null : value;

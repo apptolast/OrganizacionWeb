@@ -251,6 +251,20 @@ function AutomationsWorkspace() {
     invalid.current = null;
   }, [fields]);
 
+  /**
+   * Cada error del servidor a SU campo. El de un campo que el editor no muestra va a la página, con
+   * su nombre delante: colgarlo del primer control de la lista movería el foco a un campo que el
+   * servidor no nombró, y el mensaje se perdería, porque no hay control que lea esa clave.
+   */
+  function pinToTheirFields(errors: Record<string, string>) {
+    const named = Object.keys(errors);
+    const shown = named.filter((field) => controlIdOf(field));
+    const unshown = named.filter((field) => !controlIdOf(field));
+    invalid.current = shown.length > 0 ? controlIdOf(shown[0])! : null;
+    setFields(errors);
+    if (unshown.length > 0) setNotice(unshownNotice(unshown, errors));
+  }
+
   function nameOfProject(id: string) {
     return projects.find((project) => project.id === id)?.name ?? id;
   }
@@ -286,10 +300,9 @@ function AutomationsWorkspace() {
       );
     } catch (error) {
       if (!mounted.current || writeRequest.current !== controller) return;
-      if (error instanceof AutomationFieldErrors) {
-        invalid.current = controlIdOf(Object.keys(error.fields)[0]);
-        setFields(error.fields);
-      } else if (error instanceof AutomationConflict) setConflict(true);
+      if (error instanceof AutomationFieldErrors)
+        pinToTheirFields(error.fields);
+      else if (error instanceof AutomationConflict) setConflict(true);
       else setNotice("No se ha podido guardar. Inténtalo de nuevo.");
     } finally {
       if (mounted.current && savingRequest.current === controller)
@@ -313,10 +326,9 @@ function AutomationsWorkspace() {
       setSimulation(result);
     } catch (error) {
       if (!mounted.current || writeRequest.current !== controller) return;
-      if (error instanceof AutomationFieldErrors) {
-        invalid.current = controlIdOf(Object.keys(error.fields)[0]);
-        setFields(error.fields);
-      } else setNotice("No se ha podido simular. Inténtalo de nuevo.");
+      if (error instanceof AutomationFieldErrors)
+        pinToTheirFields(error.fields);
+      else setNotice("No se ha podido simular. Inténtalo de nuevo.");
     }
   }
 
@@ -620,16 +632,32 @@ function toDraft(rule: Automation): AutomationDraft {
   };
 }
 
+/** El control del campo, o nada si el editor no muestra ese campo. */
 function controlIdOf(field: string) {
-  return (
-    {
-      name: "automation-name",
-      "action.titleTemplate": "automation-title",
-      "action.criterionTemplate": "automation-criterion",
-      "trigger.eventType": "automation-trigger",
-      "condition.projectId": "automation-condition",
-    }[field] ?? "automation-name"
-  );
+  return {
+    name: "automation-name",
+    "action.titleTemplate": "automation-title",
+    "action.criterionTemplate": "automation-criterion",
+    "trigger.eventType": "automation-trigger",
+    "condition.projectId": "automation-condition",
+  }[field];
+}
+
+/**
+ * Los campos que el editor envía pero no muestra: hoy los compone él solo, así que su error no
+ * puede colgar de ningún control. Nombrarlos es lo mínimo para que el propietario sepa qué pasó.
+ */
+const UNSHOWN_LABELS: Record<string, string> = {
+  "action.type": "el tipo de acción",
+  "action.projectId": "el proyecto de destino",
+  "action.estimatedMinutes": "la duración estimada",
+  "action.endpointId": "el endpoint del aviso",
+};
+
+function unshownNotice(fields: string[], messages: Record<string, string>) {
+  return fields
+    .map((field) => `${UNSHOWN_LABELS[field] ?? field}: ${messages[field]}`)
+    .join(" ");
 }
 
 function Field({

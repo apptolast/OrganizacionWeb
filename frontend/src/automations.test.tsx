@@ -241,6 +241,41 @@ describe("automations page", () => {
     expect(sessionStorage.length).toBe(0);
   });
 
+  /**
+   * @s38, «asocia cada error del servidor a SU campo». El editor no expone control para
+   * action.projectId ni para action.estimatedMinutes: una regla nueva apunta siempre a
+   * projects[0]?.id ?? "". Si la lista de proyectos todavía no ha llegado o está vacía, Guardar
+   * envía projectId "" y el servidor contesta 400 sobre action.projectId.
+   *
+   * <p>Hoy controlIdOf no tiene entrada para ese campo y cae en su ?? "automation-name": el foco
+   * salta a Nombre —un campo que el servidor no nombró y que no tiene ningún error— y el mensaje
+   * del servidor no lo pinta nadie, porque ningún control lee esa clave. El propietario ve un
+   * Guardar que no hace nada y un foco que le señala el campo equivocado. La prueba que cubre @s38
+   * sólo ejercita action.criterionTemplate, que sí está en el mapa, así que la rama por defecto no
+   * tenía oráculo.
+   */
+  it("@s38 never pins a server error to a field the server did not name", async () => {
+    routes.set("GET /api/v1/projects", [
+      { status: 200, body: { items: [], nextCursor: null } },
+    ]);
+    listed();
+    route("POST", "/api/v1/me/automations", 400, {
+      code: "VALIDATION_ERROR",
+      errors: [{ field: "action.projectId", code: "REQUIRED", message: "x" }],
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.type(screen.getByLabelText(/nombre/i), "Seguimiento");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(/proyecto/i);
+    const name = screen.getByLabelText(/nombre/i);
+    expect(name).not.toHaveFocus();
+    expect(name).not.toHaveAttribute("aria-invalid", "true");
+  });
+
   it("@s39 simulates in place, announces the count and never saves", async () => {
     listed();
     route("POST", "/api/v1/me/automations/simulate", 200, {
@@ -666,13 +701,19 @@ describe("automations page", () => {
     );
   });
 
+  /**
+   * Los cinco campos que el editor muestra. Aquí había una sexta fila —["accion.desconocida",
+   * "automation-name"]— que daba por buena la rama por defecto de controlIdOf: sancionaba como
+   * esperado que el error de un campo cualquiera aterrizara en Nombre. @s38 pide lo contrario, «a
+   * SU campo», y de un campo que el editor no muestra Nombre no es el suyo. Lo que hace el editor
+   * con esos campos lo mide ahora la prueba de arriba, que sí puede fallar por ello.
+   */
   const FIELDS: [string, string][] = [
     ["name", "automation-name"],
     ["action.titleTemplate", "automation-title"],
     ["action.criterionTemplate", "automation-criterion"],
     ["trigger.eventType", "automation-trigger"],
     ["condition.projectId", "automation-condition"],
-    ["accion.desconocida", "automation-name"],
   ];
 
   it("@s38 focuses the control that owns the field the server complained about", async () => {

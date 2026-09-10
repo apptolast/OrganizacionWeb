@@ -27,4 +27,13 @@ public final class Slf4jAutomationAudit implements AutomationAudit {
         attempt,
         errorCode);
   }
+
+  @Override
+  public void cycleFailed(String ownerId, UUID eventId, String category) {
+    LOG.warn(
+        "Automation cycle stopped for one owner; ownerId={} eventId={} category={}",
+        ownerId,
+        eventId,
+        category);
+  }
 }

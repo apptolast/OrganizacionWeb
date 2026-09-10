@@ -19,6 +19,47 @@ catorce entradas, con «Conectores» tras «Importación» porque lo fija @s33) 
 contradicción 50/52 de webhooks (se persisten 52, se sirven 50). Y una tercera,
 el anclaje del reenlace DNS en las dos features con su prueba de TLS.
 
+## 10 de septiembre, 14:25 — todos los carriles aterrizados, midiendo
+
+**Los nueve carriles han cerrado.** Ninguno quedó parado ni en error. La máquina
+está drenada por primera vez en el día y **la pasada combinada de PIT está
+corriendo**: mide las cinco features de una vez, sobre árbol limpio y con el SHA
+anotado, que son las tres condiciones que yo mismo me impuse después de que se
+cayeran tres campañas.
+
+### Lo que trajeron los carriles, en defectos reales de producto
+
+No huecos de prueba: cosas que le pasaban al usuario.
+
+| Feature | Defecto |
+|---|---|
+| 25 | Un secreto ilegible **paraba la cola de entregas de todos los propietarios**, en silencio y para siempre. Ninguna prueba lo tocaba. |
+| 25 | El panel de entregas de un webhook **enseñaba las de otro**, con su «Reenviar» apuntando a la entrega ajena. |
+| 25 | Cualquier fallo decía «No se ha podido crear el webhook», y el error se encendía en un campo que no era. |
+| 27 | `hint()` devolvía el **token entero** si medía cuatro caracteres o menos. |
+| 27 | El recibo de importación se buscaba sin filtrar por origen: uno de GitHub salía por la ruta de GitLab. |
+| 29 | Las dos pantallas **no tenían bloque de estilos**: enlaces a 21 px y desbordamiento con el texto al 200 %. |
+| 29 | Una importación lenta **repintaba su recibo sobre una pantalla ya desconectada**. |
+| 30 | `queue()` **descartaba el evento entero en silencio** cuando el endpoint dejaba de estar activo. |
+| 30 | `Guardar` y el interruptor quedaban **inertes para siempre** si una escritura adelantaba a otra. |
+
+### Dos cifras remedidas, y las dos bajan
+
+- Feature 30, frontend: **90,29 %** (era 91,18). Baja porque los arreglos
+  añadieron producción: se matan doce mutantes más, pero hay 22 nuevos. Una
+  cifra que subiera después de arreglar defectos sería la sospechosa.
+- Feature 28, backend: va a bajar del 91,71 % en cuanto se mida, porque salió
+  del ámbito una clase que aportaba **113 de 579 mutantes con 112 muertos por
+  pruebas de otras features**. Era nota prestada.
+
+### Lo que falta
+
+1. La pasada de PIT (corriendo) y tres campañas de Stryker.
+2. Los jueces de las cuatro features que no lo tienen.
+3. **Nueve decisiones tuyas**, en `progress/decisiones_pendientes.md`.
+
+---
+
 ## Cuánto falta de verdad — 10 de septiembre, 14:20
 
 Llevas diez días y pediste el 100 %. Ésta es la cuenta sin adornos.

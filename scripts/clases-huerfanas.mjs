@@ -26,19 +26,28 @@ const walk = (dir, out = []) => {
 };
 
 const clases = walk(ROOT).map((f) =>
-  f.slice(ROOT.length + 1, -".java".length).split("/").join("."),
+  f
+    .slice(ROOT.length + 1, -".java".length)
+    .split("/")
+    .join("."),
 );
 
 // Los conjuntos nombrados, uno por feature. Se excluye el comodin del ambito por
 // defecto, que taparia justo lo que se busca.
-const conjuntos = [...build.matchAll(/val (\w+Classes) = setOf\(([\s\S]*?)\n    \)/g)];
+const conjuntos = [
+  ...build.matchAll(/val (\w+Classes) = setOf\(([\s\S]*?)\n    \)/g),
+];
 const patrones = [];
 for (const [, nombre, cuerpo] of conjuntos)
-  for (const [, p] of cuerpo.matchAll(/"(com\.apptolast\.organization\.[^"]+)"/g))
+  for (const [, p] of cuerpo.matchAll(
+    /"(com\.apptolast\.organization\.[^"]+)"/g,
+  ))
     if (p !== "com.apptolast.organization.*") patrones.push({ nombre, p });
 
 const casa = (p, fqn) =>
-  new RegExp("^" + p.replace(/[.]/g, "\.").replace(/\*/g, ".*") + "$").test(fqn);
+  new RegExp("^" + p.replace(/[.]/g, "\.").replace(/\*/g, ".*") + "$").test(
+    fqn,
+  );
 
 const huerfanas = clases.filter((c) => !patrones.some(({ p }) => casa(p, c)));
 

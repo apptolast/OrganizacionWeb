@@ -35,6 +35,23 @@ class WebhookWorkPersistenceTest {
             new String(ciphertext, StandardCharsets.UTF_8).replace("cipher:", ""));
   }
 
+  /**
+   * Un abridor de secretos que se niega con UN endpoint concreto, como hace {@code
+   * AesGcmWebhookSecrets.decrypt} con una fila sellada por una clave ya rotada (project-spec.md,
+   * «Rotación de APP_CONNECTOR_KEY invalida los secretos guardados»). El mensaje es el mismo de
+   * producción: no dice nada del material de la clave ni del secreto.
+   */
+  private static PostgresWebhookWork workRefusing(UUID unreadable) {
+    return new PostgresWebhookWork(
+        WebhookPersistenceTest.Database.JDBC,
+        WebhookPersistenceTest.Database.TRANSACTIONS,
+        (owner, endpointId, ciphertext) -> {
+          if (unreadable.equals(endpointId))
+            throw new IllegalStateException("Webhook secret cannot be opened");
+          return new String(ciphertext, StandardCharsets.UTF_8).replace("cipher:", "");
+        });
+  }
+
   private static WebhookEndpoint endpointOf(String status) {
     return new WebhookEndpoint(
         UUID.randomUUID(),
@@ -419,5 +436,311 @@ class WebhookWorkPersistenceTest {
         persisted.subList(0, 50),
         served.stream().map(WebhookDelivery::id).toList(),
         "the first fifty of updatedAt DESC then id DESC, and no others");
+  }
+
+  /**
+   * B10 del panel de precierre. Un secreto que no se puede abrir detenía la cola de <b>todos</b>
+   * los propietarios, en silencio y para siempre.
+   *
+   * <p>El descifrado vivía dentro del {@code RowMapper} de {@code claimNext}, es decir <b>antes</b>
+   * del {@code UPDATE ... SET leased_until}. Cuando la fila estaba sellada con una clave ya rotada
+   * —escenario que el propio project-spec declara esperado— el {@code RowMapper} lanzaba, la
+   * transacción entera se deshacía y la fila quedaba <b>sin arrendar</b>. Como el orden de
+   * reclamación es {@code next_attempt_at, d.id}, esa misma fila volvía a ser la primera en el tic
+   * siguiente, un segundo después, para siempre. {@code WebhookSchedule.guarded} se tragaba la
+   * excepción y sólo registraba el nombre de la clase en su propio logger, sin pasar por {@code
+   * WebhookAudit}: ninguna entrega volvía a salir, ninguna quedaba marcada como fallida y {@code
+   * GET /deliveries} no mostraba nada anómalo.
+   *
+   * <p>Dos oráculos, y los dos son necesarios: que la entrega del vecino <b>salga</b> (la cola no
+   * se detiene) y que la fila ilegible <b>quede arrendada</b> (no vuelve a encabezar cada tic). Con
+   * cualquiera de los dos por separado el defecto se colaba.
+   */
+  @Test
+  void b10_anUnreadableSecretNeitherStopsTheQueueNorKeepsItsTurnForever() {
+    var stuck = "stuck-" + UUID.randomUUID();
+    var neighbour = "neighbour-" + UUID.randomUUID();
+    var poisoned = given(stuck, "active");
+    var sound = given(neighbour, "active");
+    var first = enqueue(stuck, poisoned.id(), "{}");
+    var second = enqueue(neighbour, sound.id(), "{}");
+    // La fila envenenada encabeza el orden de reclamación, que es donde hace daño.
+    WebhookPersistenceTest.Database.JDBC.update(
+        "UPDATE webhook_deliveries SET next_attempt_at=? WHERE id=?",
+        java.sql.Timestamp.from(T.minus(Duration.ofSeconds(10))),
+        first.id());
+    var work = workRefusing(poisoned.id());
+    var mine = List.of(stuck, neighbour);
+
+    var claimed = claimedForAny(work, mine, T);
+
+    assertEquals(
+        List.of(first.id(), second.id()),
+        claimed.stream().map(each -> each.delivery().id()).toList(),
+        "la entrega del vecino sale detrás de la ilegible: la cola no se detiene");
+    assertNull(
+        claimed.getFirst().secret(),
+        "un secreto que no se puede abrir llega como ausente, no como una excepción");
+    assertEquals(SECRET, claimed.get(1).secret(), "el secreto legible del vecino sigue abriéndose");
+    assertTrue(
+        claimedForAny(work, mine, T).isEmpty(),
+        "la fila ilegible queda arrendada: no vuelve a ser la primera en el tic siguiente");
+  }
+
+  /** Reclama hasta agotar la cola y devuelve, en orden, lo que salió de los propietarios dados. */
+  private static List<com.apptolast.organization.application.ClaimedDelivery> claimedForAny(
+      PostgresWebhookWork work, List<String> owners, Instant now) {
+    var claimed = new ArrayList<com.apptolast.organization.application.ClaimedDelivery>();
+    for (var attempt = 0; attempt < 200; attempt++) {
+      var next = work.claimNext(now);
+      if (next.isEmpty()) break;
+      if (owners.contains(next.get().ownerId())) claimed.add(next.get());
+    }
+    return claimed;
+  }
+
+  /**
+   * B10, tercera pieza y la que casi se me escapa. Que la aplicación decida marcar la entrega como
+   * fallida no sirve de nada si la fila <b>no se puede escribir</b>: {@code webhook_deliveries}
+   * tiene un CHECK que enumera las clases de error permitidas, y una clase nueva rebota contra él.
+   * Sin esta prueba el arreglo de la cola se habría cambiado por una excepción en {@code record},
+   * es decir por el mismo silencio en otro sitio.
+   */
+  @Test
+  void b10_aDeliveryFailedForAnUnreadableSecretCanActuallyBeWritten() {
+    var owner = "unreadable-" + UUID.randomUUID();
+    var endpoint = given(owner, "active");
+    enqueue(owner, endpoint.id(), "{}");
+    var work = work();
+    var claimed = claimOwn(work, owner, T);
+
+    work.record(claimed, claimed.delivery().recorded(WebhookAttempt.unreadableSecret(), T), null);
+
+    var stored = store().list(owner, endpoint.id()).getFirst();
+    assertEquals("pending", stored.status(), "es un intento fallido más, con su reintento");
+    assertEquals(1, stored.attempt());
+    assertEquals(WebhookAttempt.SECRET_UNREADABLE, stored.errorClass());
+    assertNull(stored.httpStatus(), "no hubo respuesta porque no hubo petición");
+    assertEquals(0, stored.latencyMs(), "ni tiempo de intercambio que medir");
+    assertEquals(T.plus(Duration.ofMinutes(1)), stored.nextAttemptAt());
+  }
+
+  /**
+   * @s27 «si la transacción de desactivación falla, D1 no queda exhausted ni el webhook disabled».
+   *     El único test del escenario era el camino feliz y no había ninguno que provocara el fallo
+   *     de escritura (B8.a del panel): la atomicidad estaba declarada en un javadoc y en ningún
+   *     oráculo.
+   *     <p>El fallo se provoca con una razón de desactivación fuera del catálogo del esquema, que
+   *     es un fallo real de la base y no un doble: lo rechaza el mismo CHECK que protegería la
+   *     columna en producción. Lo que se mide es que la primera escritura de la transacción —la de
+   *     la entrega— se deshace con la segunda.
+   */
+  @Test
+  void s27_whenTheDisablingWriteFailsNeitherTheDeliveryNorTheEndpointChanges() {
+    var owner = "atomic-" + UUID.randomUUID();
+    var endpoint = given(owner, "active");
+    enqueue(owner, endpoint.id(), "{}");
+    var work = work();
+    var claimed = claimOwn(work, owner, T);
+    var exhausted =
+        new WebhookDelivery(
+            claimed.delivery().id(),
+            claimed.delivery().eventId(),
+            claimed.delivery().eventType(),
+            "exhausted",
+            6,
+            500,
+            3,
+            "HTTP_ERROR",
+            null,
+            claimed.delivery().createdAt(),
+            T);
+    var rejected =
+        new WebhookEndpoint(
+            endpoint.id(),
+            endpoint.url(),
+            endpoint.description(),
+            endpoint.eventTypes(),
+            "disabled",
+            "RAZON_FUERA_DEL_CATALOGO",
+            T,
+            endpoint.createdAt(),
+            T);
+
+    assertThrows(
+        org.springframework.dao.DataAccessException.class,
+        () -> work.record(claimed, exhausted, rejected));
+
+    var stored = store().find(owner, endpoint.id()).orElseThrow();
+    assertEquals("active", stored.status(), "el webhook no queda disabled");
+    assertNull(stored.disabledReason());
+    assertNull(stored.disabledAt());
+    var log = store().list(owner, endpoint.id());
+    assertEquals(1, log.size());
+    assertEquals("pending", log.getFirst().status(), "D1 no queda exhausted");
+    assertEquals(0, log.getFirst().attempt(), "ni con el intento contado");
+    assertNull(log.getFirst().errorClass());
+  }
+
+  /**
+   * @s20 «el receptor recibe exactamente tres POST con X-OrganizationWeb-Event-Id E1, E2 y E3 en
+   *     ese orden» y «un ping encolado entre E1 y E2 se entrega sin alterar el orden relativo».
+   *     <p>El orden real se medía con un {@code FakeSender}, dos entregas <b>ya reclamadas</b> y un
+   *     solo ciclo, y el ping intercalado no se encolaba en ninguna parte (B8.b del panel). Eso
+   *     mide que el caso de uso envía en el orden en que le den las entregas, no que la cadena
+   *     entera —caminar la outbox, encolar de una en una, reclamar por {@code next_attempt_at, id}—
+   *     conserve el orden de la outbox. Aquí corren los adaptadores reales contra la base, ciclo a
+   *     ciclo.
+   *     <p>El ping se encola después de que E1 haya salido. No se afirma en qué posición absoluta
+   *     llega —comparte instante de vencimiento con E2 y el desempate es por identificador, que es
+   *     aleatorio—, sino lo que dice el contrato: que llega, y que E1, E2 y E3 conservan su orden
+   *     relativo entre ellos.
+   */
+  @Test
+  void s20_theThreeEventsReachTheReceiverInOrderAndAnInterleavedPingDoesNotDisturbThem() {
+    var owner = "order-" + UUID.randomUUID();
+    var project = givenProject(owner);
+    var endpoint = givenSubscribedToProjects(owner);
+    var first = givenEvent(owner, project, T.plusSeconds(1));
+    var second = givenEvent(owner, project, T.plusSeconds(2));
+    var third = givenEvent(owner, project, T.plusSeconds(3));
+    var received = new ArrayList<UUID>();
+    var worker = worker(received);
+
+    worker.run();
+    var ping = WebhookDelivery.ping(UUID.randomUUID(), T);
+    store().enqueuePing(owner, endpoint.id(), ping, "{}");
+    worker.run();
+    worker.run();
+    worker.run();
+
+    var events = List.of(first, second, third);
+    assertEquals(
+        events,
+        received.stream().filter(events::contains).toList(),
+        "«tres POST con X-OrganizationWeb-Event-Id E1, E2 y E3 en ese orden»");
+    assertTrue(received.contains(ping.id()), "«un ping encolado entre E1 y E2 se entrega»");
+  }
+
+  /** Un ciclo completo del worker con los adaptadores reales: encolar y después entregar. */
+  private static Runnable worker(List<UUID> received) {
+    var clock = java.time.Clock.fixed(T.plus(Duration.ofMinutes(1)), java.time.ZoneOffset.UTC);
+    var audit = noAudit();
+    var outbox =
+        new PostgresWebhookOutbox(
+            WebhookPersistenceTest.Database.JDBC,
+            WebhookPersistenceTest.Database.TRANSACTIONS,
+            new com.fasterxml.jackson.databind.ObjectMapper());
+    var enqueue =
+        new com.apptolast.organization.application.EnqueueWebhookDeliveries(outbox, audit, clock);
+    com.apptolast.organization.application.WebhookSender sender =
+        (url, secret, eventId, body) -> {
+          received.add(UUID.fromString(eventId));
+          return WebhookAttempt.http(200, 1);
+        };
+    var dispatch =
+        new com.apptolast.organization.application.DispatchWebhooks(
+            work(), sender, audit, alwaysKeyed(), clock);
+    return () -> {
+      enqueue.runCycle();
+      dispatch.runCycle();
+    };
+  }
+
+  private static com.apptolast.organization.application.WebhookAudit noAudit() {
+    return new com.apptolast.organization.application.WebhookAudit() {
+      @Override
+      public void attempt(UUID endpointId, UUID eventId, String status, String errorClass) {}
+
+      @Override
+      public void discarded(UUID endpointId, UUID eventId, String code) {}
+
+      @Override
+      public void workerError(String code) {}
+    };
+  }
+
+  private static com.apptolast.organization.application.WebhookSecrets alwaysKeyed() {
+    return new com.apptolast.organization.application.WebhookSecrets() {
+      @Override
+      public boolean available() {
+        return true;
+      }
+
+      @Override
+      public byte[] encrypt(String ownerId, UUID endpointId, String secret) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public String decrypt(String ownerId, UUID endpointId, byte[] ciphertext) {
+        throw new UnsupportedOperationException();
+      }
+    };
+  }
+
+  private static WebhookEndpoint givenSubscribedToProjects(String owner) {
+    var endpoint =
+        new WebhookEndpoint(
+            UUID.randomUUID(),
+            "https://example.com/h",
+            "",
+            List.of("ProjectCreated.v1"),
+            "active",
+            null,
+            null,
+            T,
+            T);
+    store().insert(owner, endpoint, ("cipher:" + SECRET).getBytes(StandardCharsets.UTF_8));
+    return endpoint;
+  }
+
+  /** outbox_events.aggregate_id apunta a projects(id), así que hace falta un proyecto real. */
+  private static UUID givenProject(String owner) {
+    var id = UUID.randomUUID();
+    WebhookPersistenceTest.Database.JDBC.update(
+        """
+        INSERT INTO projects (id, owner_id, name, description, status, version, created_at,
+          updated_at)
+        VALUES (?,?,?,?,?,?,?,?)
+        """,
+        id,
+        owner,
+        "Proyecto",
+        "",
+        "active",
+        1L,
+        java.sql.Timestamp.from(T),
+        java.sql.Timestamp.from(T));
+    return id;
+  }
+
+  private static UUID givenEvent(String owner, UUID project, Instant occurredAt) {
+    var eventId = UUID.randomUUID();
+    var payload =
+        "{\"eventId\":\""
+            + eventId
+            + "\",\"aggregateId\":\""
+            + project
+            + "\",\"ownerId\":\""
+            + owner
+            + "\",\"occurredAt\":\""
+            + occurredAt
+            + "\",\"schemaVersion\":1,\"type\":\"ProjectCreated.v1\",\"name\":\"Proyecto\"}";
+    WebhookPersistenceTest.Database.JDBC.update(
+        """
+        INSERT INTO outbox_events (
+          event_id, aggregate_id, owner_id, event_type, schema_version, occurred_at, payload, status)
+        VALUES (?,?,?,?,?,?,?::jsonb,?)
+        """,
+        eventId,
+        project,
+        owner,
+        "ProjectCreated.v1",
+        1,
+        java.sql.Timestamp.from(occurredAt),
+        payload,
+        "pending");
+    return eventId;
   }
 }

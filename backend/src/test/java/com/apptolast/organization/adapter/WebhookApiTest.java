@@ -190,29 +190,100 @@ class WebhookApiTest {
         .andExpect(jsonPath("$.delivery.errorClass").value(org.hamcrest.Matchers.nullValue()));
   }
 
+  /**
+   * @s35 «los problem+json contienen código y mensaje en español sin URL, secreto, trazas ni datos
+   *     de otra cuenta». Esta prueba afirmaba sólo el {@code $.code}: el mensaje visible para la
+   *     persona no lo miraba nadie (B5 del panel).
+   *     <p>El campo del mensaje se llama {@code title}: es el nombre que le da RFC 7807, que es el
+   *     formato que el contrato nombra por su tipo de contenido. No hay enmienda que hacer, sólo
+   *     que la cláusula se comprueba sobre {@code title}.
+   *     <p>El oráculo es la <b>igualdad exacta</b> del texto, no su mera existencia: mata al
+   *     mutante que B5 describe —devolver el detalle de la excepción, con la URL del endpoint
+   *     dentro— y también a la traducción al inglés de una cláusula que exige español. Y el
+   *     recuento de claves cierra la puerta a colar un campo nuevo con lo que sea.
+   */
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.CsvSource({
-    "NOT_FOUND,404,WEBHOOK_NOT_FOUND",
-    "DISABLED,409,WEBHOOK_DISABLED",
-    "DELIVERY_PENDING,409,WEBHOOK_DELIVERY_PENDING",
-    "CONNECTORS_DISABLED,503,CONNECTORS_DISABLED",
-    "LIMIT,409,WEBHOOK_LIMIT",
-    "URL_BLOCKED,400,WEBHOOK_URL_BLOCKED",
-    "URL_UNRESOLVABLE,400,WEBHOOK_URL_UNRESOLVABLE"
+    "NOT_FOUND,404,WEBHOOK_NOT_FOUND,No se encuentra el webhook.",
+    "DISABLED,409,WEBHOOK_DISABLED,Activa el webhook antes de esta operación.",
+    "DELIVERY_PENDING,409,WEBHOOK_DELIVERY_PENDING,Ya hay una entrega pendiente para este webhook.",
+    "CONNECTORS_DISABLED,503,CONNECTORS_DISABLED,Falta configuración del servidor para conectores.",
+    "LIMIT,409,WEBHOOK_LIMIT,Has alcanzado el límite de cinco webhooks.",
+    "URL_BLOCKED,400,WEBHOOK_URL_BLOCKED,La dirección de destino no está permitida.",
+    "URL_UNRESOLVABLE,400,WEBHOOK_URL_UNRESOLVABLE,No se resuelve el host de destino."
   })
-  void s11_s34_everyOperationCodeMapsToItsStableStatusAndProblemBody(
-      String code, int status, String expected) throws Exception {
+  void s11_s34_s35_everyOperationCodeMapsToItsStatusCodeAndSpanishMessage(
+      String code, int status, String expected, String message) throws Exception {
     when(manage.ping("owner", W))
         .thenThrow(
             new com.apptolast.organization.application.WebhookOperationException(
                 com.apptolast.organization.application.WebhookOperationException.Code.valueOf(
                     code)));
-    mvc.perform(
-            post("/api/v1/me/webhooks/" + W + "/ping").with(user("owner")).with(csrf().asHeader()))
-        .andExpect(status().is(status))
-        .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
-        .andExpect(header().string("Cache-Control", "no-store"))
-        .andExpect(jsonPath("$.code").value(expected));
+    var body =
+        mvc.perform(
+                post("/api/v1/me/webhooks/" + W + "/ping")
+                    .with(user("owner"))
+                    .with(csrf().asHeader()))
+            .andExpect(status().is(status))
+            .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+            .andExpect(header().string("Cache-Control", "no-store"))
+            .andExpect(jsonPath("$.code").value(expected))
+            .andExpect(jsonPath("$.title").value(message))
+            .andExpect(jsonPath("$.status").value(status))
+            .andExpect(
+                jsonPath("$.type")
+                    .value(
+                        "urn:organization:problem:" + expected.toLowerCase(java.util.Locale.ROOT)))
+            .andExpect(jsonPath("$.*", hasSize(4)))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    assertNoLeak(body);
+  }
+
+  /** Lo que @s35 prohíbe en un cuerpo de error, buscado sobre el texto completo de la respuesta. */
+  private static void assertNoLeak(String body) {
+    for (var forbidden :
+        List.of(
+            "https://", "whsec_", "?token=", "v1=", "example.com", "com.apptolast", "Exception"))
+      org.junit.jupiter.api.Assertions.assertFalse(
+          body.contains(forbidden),
+          "el cuerpo de error no debe contener «" + forbidden + "»: " + body);
+  }
+
+  /**
+   * @s35, la mitad que no se podía comprobar afirmando textos constantes: <b>que el detalle de un
+   *     fallo inesperado no salga por la respuesta</b>.
+   *     <p>Aquí el caso de uso revienta con un mensaje envenenado a propósito, con la URL completa
+   *     del endpoint, su cadena de consulta y algo con forma de secreto. Si algún día el manejador
+   *     genérico decide «ayudar» poniendo {@code error.getMessage()} o la traza en el cuerpo, esta
+   *     prueba se pone roja. La referencia de correlación sí viaja: es un UUID nuevo que no
+   *     identifica nada del propietario y es lo que permite cruzar la respuesta con el registro.
+   */
+  @Test
+  void s35_anUnexpectedFailureAnswersWithoutTheUrlTheSecretOrAnyTrace() throws Exception {
+    when(manage.deliveries("owner", W))
+        .thenThrow(
+            new IllegalStateException(
+                "POST https://example.com/hooks?token=abc falló firmando con"
+                    + " whsec_ESTO-NO-ES-UN-SECRETO-REAL"));
+
+    var body =
+        mvc.perform(get("/api/v1/me/webhooks/" + W + "/deliveries").with(user("owner")))
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+            .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
+            .andExpect(
+                jsonPath("$.title")
+                    .value(
+                        "No se ha podido completar la operación. Usa la referencia al solicitar"
+                            + " ayuda."))
+            .andExpect(jsonPath("$.correlationId").isString())
+            .andExpect(jsonPath("$.*", hasSize(5)))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    assertNoLeak(body);
   }
 
   @Test
@@ -223,17 +294,68 @@ class WebhookApiTest {
     verifyNoInteractions(manage);
   }
 
+  /**
+   * @s29 «cada elemento tiene exactamente id, eventId, eventType, status, attempt, httpStatus,
+   *     latencyMs, errorClass, nextAttemptAt, createdAt y updatedAt».
+   *     <p>La versión anterior contaba once campos y sólo nombraba dos (B8.g del panel). Contar no
+   *     es nombrar: los cuatro accesores de {@code WebhookDeliveryView} sobrevivían a la mutación y
+   *     la única aserción de {@code attempt} en la frontera era {@code .value(0)}, justo contra el
+   *     mutante «replaced int return with 0». Aquí cada uno de los once campos se afirma <b>por su
+   *     nombre</b> y con un valor distinto de los demás y distinto de cero.
+   */
   @Test
-  void s29_deliveriesAreListedWithTheirClosedDtoAndNoBody() throws Exception {
+  void s29_everyOneOfTheElevenDeliveryFieldsIsServedByNameWithItsOwnValue() throws Exception {
+    var deliveryId = UUID.fromString("33333333-3333-4333-8333-333333333333");
+    var eventId = UUID.fromString("11111111-1111-4111-8111-111111111111");
     var delivery =
         new com.apptolast.organization.domain.WebhookDelivery(
-            UUID.fromString("33333333-3333-4333-8333-333333333333"),
-            UUID.fromString("11111111-1111-4111-8111-111111111111"),
+            deliveryId,
+            eventId,
             "TaskCreated.v1",
-            "succeeded",
-            1,
-            200,
-            12,
+            "pending",
+            4,
+            503,
+            1234,
+            "HTTP_ERROR",
+            Instant.parse("2026-09-08T14:30:00.000000Z"),
+            Instant.parse("2026-09-08T10:00:00.000000Z"),
+            Instant.parse("2026-09-08T12:15:30.000000Z"));
+    when(manage.deliveries("owner", W)).thenReturn(List.of(delivery));
+    mvc.perform(get("/api/v1/me/webhooks/" + W + "/deliveries").with(user("owner")))
+        .andExpect(status().isOk())
+        .andExpect(header().string("Cache-Control", "no-store"))
+        .andExpect(jsonPath("$.*", hasSize(1)))
+        .andExpect(jsonPath("$.items[0].*", hasSize(11)))
+        .andExpect(jsonPath("$.items[0].id").value(deliveryId.toString()))
+        .andExpect(jsonPath("$.items[0].eventId").value(eventId.toString()))
+        .andExpect(jsonPath("$.items[0].eventType").value("TaskCreated.v1"))
+        .andExpect(jsonPath("$.items[0].status").value("pending"))
+        .andExpect(jsonPath("$.items[0].attempt").value(4))
+        .andExpect(jsonPath("$.items[0].httpStatus").value(503))
+        .andExpect(jsonPath("$.items[0].latencyMs").value(1234))
+        .andExpect(jsonPath("$.items[0].errorClass").value("HTTP_ERROR"))
+        .andExpect(jsonPath("$.items[0].nextAttemptAt").value("2026-09-08T14:30:00.000000Z"))
+        .andExpect(jsonPath("$.items[0].createdAt").value("2026-09-08T10:00:00.000000Z"))
+        .andExpect(jsonPath("$.items[0].updatedAt").value("2026-09-08T12:15:30.000000Z"))
+        .andExpect(jsonPath("$.items[0].body").doesNotExist())
+        .andExpect(jsonPath("$.items[0].url").doesNotExist());
+  }
+
+  /**
+   * @s29 los cuatro campos sin desenlace viajan como null y no desaparecen del DTO.
+   */
+  @Test
+  void s29_aDeliveryWithoutOutcomeYetKeepsItsFourNullFields() throws Exception {
+    var deliveryId = UUID.fromString("44444444-4444-4444-8444-444444444444");
+    var delivery =
+        new com.apptolast.organization.domain.WebhookDelivery(
+            deliveryId,
+            deliveryId,
+            "webhook.ping.v1",
+            "pending",
+            0,
+            null,
+            null,
             null,
             null,
             NOW,
@@ -241,13 +363,63 @@ class WebhookApiTest {
     when(manage.deliveries("owner", W)).thenReturn(List.of(delivery));
     mvc.perform(get("/api/v1/me/webhooks/" + W + "/deliveries").with(user("owner")))
         .andExpect(status().isOk())
-        .andExpect(header().string("Cache-Control", "no-store"))
-        .andExpect(jsonPath("$.*", hasSize(1)))
         .andExpect(jsonPath("$.items[0].*", hasSize(11)))
-        .andExpect(jsonPath("$.items[0].httpStatus").value(200))
-        .andExpect(jsonPath("$.items[0].latencyMs").value(12))
-        .andExpect(jsonPath("$.items[0].body").doesNotExist())
-        .andExpect(jsonPath("$.items[0].url").doesNotExist());
+        .andExpect(jsonPath("$.items[0].httpStatus").value(org.hamcrest.Matchers.nullValue()))
+        .andExpect(jsonPath("$.items[0].latencyMs").value(org.hamcrest.Matchers.nullValue()))
+        .andExpect(jsonPath("$.items[0].errorClass").value(org.hamcrest.Matchers.nullValue()))
+        .andExpect(jsonPath("$.items[0].nextAttemptAt").value(org.hamcrest.Matchers.nullValue()));
+  }
+
+  /**
+   * @s11 fila 1 y @s8:122. La lectura de un webhook por su identificador no se ejercía
+   *     <b>nunca</b>: {@code WebhookController.find} salía NO_COVERAGE en la campaña y los únicos
+   *     GET de esa ruta en esta clase eran con un identificador que no es UUID y con el sufijo
+   *     {@code /deliveries} (B8.d del panel).
+   */
+  @Test
+  void s8_s11_readingOnesOwnWebhookServesTheNineFieldEndpointWithoutTheSecret() throws Exception {
+    when(manage.find("owner", W)).thenReturn(endpoint());
+
+    mvc.perform(get("/api/v1/me/webhooks/" + W).with(user("owner")))
+        .andExpect(status().isOk())
+        .andExpect(header().string("Cache-Control", "no-store"))
+        .andExpect(content().contentTypeCompatibleWith("application/json"))
+        .andExpect(jsonPath("$.*", hasSize(9)))
+        .andExpect(jsonPath("$.id").value(W.toString()))
+        .andExpect(jsonPath("$.url").value("https://example.com/hooks"))
+        .andExpect(jsonPath("$.description").value("Mi hook"))
+        .andExpect(
+            jsonPath(
+                "$.eventTypes",
+                org.hamcrest.Matchers.contains("TaskCreated.v1", "TaskStatusChanged.v1")))
+        .andExpect(jsonPath("$.status").value("active"))
+        .andExpect(jsonPath("$.disabledReason").value(org.hamcrest.Matchers.nullValue()))
+        .andExpect(jsonPath("$.disabledAt").value(org.hamcrest.Matchers.nullValue()))
+        .andExpect(jsonPath("$.createdAt").value("2026-09-08T10:00:00.000000Z"))
+        .andExpect(jsonPath("$.updatedAt").value("2026-09-08T10:00:00.000000Z"))
+        .andExpect(jsonPath("$.secret").doesNotExist());
+  }
+
+  /**
+   * El ajeno y el inexistente responden lo mismo, por diseño: distinguirlos revelaría que el
+   * recurso existe en otra cuenta.
+   */
+  @Test
+  void s11_readingAWebhookOfAnotherAccountOrOfNoAccountIsTheSameNotFound() throws Exception {
+    var foreign = UUID.fromString("55555555-5555-4555-8555-555555555555");
+    var absent = UUID.fromString("66666666-6666-4666-8666-666666666666");
+    for (var missing : List.of(foreign, absent)) {
+      when(manage.find("owner", missing))
+          .thenThrow(
+              new com.apptolast.organization.application.WebhookOperationException(
+                  com.apptolast.organization.application.WebhookOperationException.Code.NOT_FOUND));
+      mvc.perform(get("/api/v1/me/webhooks/" + missing).with(user("owner")))
+          .andExpect(status().isNotFound())
+          .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+          .andExpect(header().string("Cache-Control", "no-store"))
+          .andExpect(jsonPath("$.code").value("WEBHOOK_NOT_FOUND"))
+          .andExpect(jsonPath("$.title").value("No se encuentra el webhook."));
+    }
   }
 
   @Test

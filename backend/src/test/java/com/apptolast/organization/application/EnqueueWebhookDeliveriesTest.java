@@ -48,12 +48,20 @@ class EnqueueWebhookDeliveriesTest {
               candidate ->
                   candidate.occurredAt().isBefore(horizon)
                       || candidate.occurredAt().equals(horizon))
-          .filter(candidate -> cursor.precedes(candidate.occurredAt(), candidate.eventId()))
+          .filter(candidate -> beyond(cursor, candidate))
           // Mirrors PostgreSQL: instants first, then uuid as unsigned bytes.
           .sorted(
               java.util.Comparator.comparing(OutboxCandidate::occurredAt)
                   .thenComparing(OutboxCandidate::eventId, WebhookCursor::compareUnsigned))
           .toList();
+    }
+
+    /** Lo mismo que el {@code (occurred_at, event_id) > (?, ?)} del adaptador, aquí y sólo aquí. */
+    private static boolean beyond(WebhookCursor cursor, OutboxCandidate candidate) {
+      var byInstant = candidate.occurredAt().compareTo(cursor.occurredAt());
+      return byInstant != 0
+          ? byInstant > 0
+          : WebhookCursor.compareUnsigned(candidate.eventId(), cursor.eventId()) > 0;
     }
 
     @Override

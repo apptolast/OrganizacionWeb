@@ -72,13 +72,35 @@ public final class PostgresWebhookWork implements WebhookWork {
                       stamp(now),
                       stamp(now));
               if (claimed.isEmpty()) return null;
-              var delivery = claimed.getFirst();
+              var row = claimed.getFirst();
               jdbc.update(
                   "UPDATE webhook_deliveries SET leased_until=? WHERE id=?",
                   stamp(now.plus(LEASE)),
-                  delivery.delivery().id());
-              return delivery;
+                  row.delivery().id());
+              return handOver(row);
             }));
+  }
+
+  /**
+   * Opens the stored secret <b>after</b> the lease, never inside the {@code RowMapper}.
+   *
+   * <p>A row sealed with an already rotated key cannot be opened, and project-spec declares that
+   * case expected. Opening it while mapping meant the whole claim was rolled back before the lease
+   * was written, so the same row headed the {@code next_attempt_at, d.id} order again on the next
+   * tick and no delivery of any owner ever left again. Now the row is already leased and its secret
+   * arrives as absent, which the worker settles as one failed attempt with an audited code.
+   *
+   * <p>The failure itself is deliberately dropped: it carries a message about key material and this
+   * class must never let it reach a log.
+   */
+  private ClaimedDelivery handOver(LeasedRow row) {
+    String secret;
+    try {
+      secret = secrets.open(row.owner(), row.endpoint().id(), row.sealedSecret());
+    } catch (RuntimeException unreadable) {
+      secret = null;
+    }
+    return new ClaimedDelivery(row.endpoint(), row.owner(), row.delivery(), row.body(), secret);
   }
 
   @Override
@@ -135,7 +157,15 @@ public final class PostgresWebhookWork implements WebhookWork {
         KEPT_TERMINAL_DELIVERIES);
   }
 
-  private ClaimedDelivery claim(ResultSet rs, int index) throws SQLException {
+  /** One claimed row with its secret still sealed: nothing here can fail on bad key material. */
+  private record LeasedRow(
+      WebhookEndpoint endpoint,
+      String owner,
+      WebhookDelivery delivery,
+      String body,
+      byte[] sealedSecret) {}
+
+  private LeasedRow claim(ResultSet rs, int index) throws SQLException {
     var endpoint =
         new WebhookEndpoint(
             rs.getObject("endpoint_id", UUID.class),
@@ -160,13 +190,12 @@ public final class PostgresWebhookWork implements WebhookWork {
             instant(rs, "next_attempt_at"),
             instant(rs, "created_at"),
             instant(rs, "updated_at"));
-    var owner = rs.getString("endpoint_owner");
-    return new ClaimedDelivery(
+    return new LeasedRow(
         endpoint,
-        owner,
+        rs.getString("endpoint_owner"),
         delivery,
         rs.getString("body"),
-        secrets.open(owner, endpoint.id(), rs.getBytes("secret_ciphertext")));
+        rs.getBytes("secret_ciphertext"));
   }
 
   private static Timestamp stamp(Instant instant) {

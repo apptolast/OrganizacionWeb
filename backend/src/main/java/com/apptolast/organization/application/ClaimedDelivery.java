@@ -7,7 +7,9 @@ import com.apptolast.organization.domain.WebhookEndpoint;
  * A delivery leased for one attempt, with everything the send needs. Amendment B1: the lease lets
  * the HTTP exchange happen outside any transaction.
  *
- * <p>The secret is in the clear here and must never be logged: {@link #toString()} redacts it.
+ * <p>The secret is in the clear here and must never be logged: {@link #toString()} redacts it. It
+ * is null when the stored secret could not be opened -a row sealed with a key that no longer
+ * reads-; the worker settles such a delivery as a failed attempt instead of sending it.
  */
 public record ClaimedDelivery(
     WebhookEndpoint endpoint,

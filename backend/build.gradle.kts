@@ -490,8 +490,13 @@ pitest {
         "com.apptolast.organization.adapter.http.ExternalCalendarController*",
         "com.apptolast.organization.adapter.http.ConnectorsGate*",
         "com.apptolast.organization.adapter.persistence.PostgresExternalCalendarStore*",
-        "com.apptolast.organization.adapter.logging.Slf4jExternalCalendarAudit*",
-        "com.apptolast.organization.adapter.config.ApplicationConfiguration*"
+        "com.apptolast.organization.adapter.logging.Slf4jExternalCalendarAudit*"
+        // ApplicationConfiguration SALE de este ambito. Aportaba 113 de los 579
+        // mutantes -el 19,5 por ciento- con 112 muertos casi todos por
+        // AutomationWiringTest y ApplicationWiringTest: eran pruebas de OTRAS
+        // features sosteniendo la nota de esta, y tapaban que adapter.feed va al
+        // 70,2 por ciento, diez puntos bajo el liston por capa del veredicto. La
+        // puntuacion global baja al quitarlo, y baja porque era prestada.
     )
     val exportHttpClasses = setOf(
         "com.apptolast.organization.adapter.http.ExportDataController*",

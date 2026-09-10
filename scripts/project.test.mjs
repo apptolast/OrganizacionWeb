@@ -2080,7 +2080,6 @@ test("external calendar PIT scope covers the whole slice and extends the default
       "adapter.http.ConnectorsGate*",
       "adapter.persistence.PostgresExternalCalendarStore*",
       "adapter.logging.Slf4jExternalCalendarAudit*",
-      "adapter.config.ApplicationConfiguration*",
     ].map((name) => `com.apptolast.organization.${name}`),
   );
   assert.match(

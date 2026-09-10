@@ -137,3 +137,49 @@ Dos equivalentes descartados y no perseguidos:
 - `value.disabledReason !== null` → `true` y `value.disabledAt !== null` → `true`.
   `includes(null)` e `instant(null)` devuelven `false` sin lanzar, así que el
   resultado de la conjunción no cambia nunca.
+
+---
+
+## Racimo 3 — `decodeDelivery`, las cuatro cláusulas de `whole()` y la deduplicación
+
+**Causa común.** `whole(value, max)` codifica **cuatro** reglas en una línea
+—que sea número, que sea entero, que no sea negativo y que no pase del máximo—
+y las tres pruebas de entregas sólo pasaban por enteros válidos. Un predicado de
+cuatro cláusulas necesita **cuatro contraejemplos**, uno por cláusula, o las
+conjunciones son indistinguibles de las disyunciones.
+
+Lo mismo, campo por campo, con los seis `null || …` de `decodeDelivery`: cuando
+la única entrega de prueba trae siempre valores válidos, cambiar la guarda entera
+por `true` no rompe nada.
+
+Y la invariante de @s40 —«sólo una entrega pendiente está programada para otro
+intento»— se rompe por **los dos lados**: una terminal con `nextAttemptAt`, y una
+pendiente sin él. Hay que probar los dos.
+
+Quince pruebas nuevas, incluida la frontera que sí acepta (`attempt: 6`).
+
+**Evidencia del rojo: 13 mutantes muertos.**
+
+```
+ROJO 9   whole() entero -> true                · rejects an attempt that is not a number
+ROJO 11  whole() … && <= max -> ||             · idem
+ROJO 13  whole() … && >= 0 -> ||               · idem
+ROJO 15  whole() typeof && isInteger -> ||     · rejects an attempt that is fractional
+ROJO 19  whole() value >= 0 -> true            · rejects an attempt that is negative
+ROJO 22  whole() value <= max -> true          · rejects an attempt beyond the six the contract allows
+ROJO 143 typeof eventType !== string -> false  · rejects an eventType that is not a string
+ROJO 150 httpStatus null|whole -> true         · rejects an httpStatus outside the range of a status code
+ROJO 156 latencyMs null|whole -> true          · rejects a negative latency
+ROJO 162 errorClass null|catálogo -> true      · rejects an error class outside the seven the contract defines
+ROJO 168 nextAttemptAt null|instant -> true    · rejects a nextAttemptAt that is not an instant
+ROJO 176 invariante de pendiente -> false      · rejects a terminal delivery still scheduled for another attempt
+ROJO 193 deduplicación -> false                · rejects a list that repeats the same delivery id
+```
+
+Detalle del 168: no basta con un `nextAttemptAt` inválido en una entrega
+terminal, porque entonces **rechaza igualmente por la invariante de pendiente**
+y el mutante sobrevive. El contraejemplo tiene que ser una entrega **pendiente**
+con un `nextAttemptAt` que no es un instante: así la invariante se cumple y la
+única defensa que queda es la guarda mutada.
+
+**Previsión de muertes del racimo 3: 13.** Acumulado acreditado: 39.

@@ -216,6 +216,116 @@ const MUTANTS = [
     `const incompatible = (): Error => undefined as unknown as Error;`,
     "client",
   ],
+  // ── Racimo 3: decodeDelivery, whole() y la deduplicación ───────────────
+  [
+    "9 ConditionalExpression whole() entero -> true",
+    CLIENT,
+    `    typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= 0 &&
+    value <= max`,
+    `    true`,
+    "client",
+  ],
+  [
+    "11 LogicalOperator whole() ... && <= max -> ||",
+    CLIENT,
+    `    value >= 0 &&
+    value <= max`,
+    `    value >= 0 ||
+    value <= max`,
+    "client",
+  ],
+  [
+    "13 LogicalOperator whole() ... && >= 0 -> ||",
+    CLIENT,
+    `    Number.isInteger(value) &&
+    value >= 0 &&`,
+    `    Number.isInteger(value) ||
+    value >= 0 &&`,
+    "client",
+  ],
+  [
+    "15 LogicalOperator whole() typeof && isInteger -> ||",
+    CLIENT,
+    `    typeof value === "number" &&
+    Number.isInteger(value) &&`,
+    `    (typeof value === "number" ||
+    Number.isInteger(value)) &&`,
+    "client",
+  ],
+  [
+    "19 ConditionalExpression whole() value >= 0 -> true",
+    CLIENT,
+    `    value >= 0 &&
+    value <= max`,
+    `    true &&
+    value <= max`,
+    "client",
+  ],
+  [
+    "22 ConditionalExpression whole() value <= max -> true",
+    CLIENT,
+    `    value >= 0 &&
+    value <= max`,
+    `    value >= 0 &&
+    true`,
+    "client",
+  ],
+  [
+    "143 ConditionalExpression typeof eventType !== string -> false",
+    CLIENT,
+    `    typeof value.eventType !== "string" ||`,
+    `    false ||`,
+    "client",
+  ],
+  [
+    "150 ConditionalExpression httpStatus null|whole -> true",
+    CLIENT,
+    `    !(value.httpStatus === null || whole(value.httpStatus, 599)) ||`,
+    `    !true ||`,
+    "client",
+  ],
+  [
+    "156 ConditionalExpression latencyMs null|whole -> true",
+    CLIENT,
+    `      value.latencyMs === null ||
+      whole(value.latencyMs, Number.MAX_SAFE_INTEGER)`,
+    `      true`,
+    "client",
+  ],
+  [
+    "162 ConditionalExpression errorClass null|catalogo -> true",
+    CLIENT,
+    `      value.errorClass === null ||
+      (errorClasses as readonly string[]).includes(value.errorClass as string)`,
+    `      true`,
+    "client",
+  ],
+  [
+    "168 ConditionalExpression nextAttemptAt null|instant -> true",
+    CLIENT,
+    `    !(value.nextAttemptAt === null || instant(value.nextAttemptAt)) ||`,
+    `    !true ||`,
+    "client",
+  ],
+  [
+    "176 ConditionalExpression invariante de pendiente -> false",
+    CLIENT,
+    `  if ((value.status === "pending") !== (value.nextAttemptAt !== null))`,
+    `  if (false)`,
+    "client",
+  ],
+  [
+    "193 ConditionalExpression deduplicacion -> false",
+    CLIENT,
+    `    new Set(items.map((item) => (item as { id: string }).id)).size !==
+    items.length
+  )`,
+    `    false
+  )`,
+    "client",
+  ],
 ];
 
 const suites = {

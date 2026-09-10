@@ -458,6 +458,122 @@ it("@s40 lists deliveries over the closed delivery DTO", async () => {
   expect(fetcher.mock.calls[0][0]).toBe(`/api/v1/me/webhooks/${id}/deliveries`);
 });
 
+// `whole(value, max)` tiene cuatro cláusulas —número, entero, no negativo y
+// dentro del máximo— y las pruebas sólo pasaban por enteros válidos. Cada
+// cláusula necesita su propio contraejemplo.
+it.each([
+  ["not a number", "3"],
+  ["fractional", 1.5],
+  ["negative", -1],
+  ["beyond the six attempts the contract allows", 7],
+])("@s40 rejects an attempt that is %s", async (_case, attempt) => {
+  stub({ items: [delivery({ attempt })] });
+
+  await expect(
+    listWebhookDeliveries(id, new AbortController().signal),
+  ).rejects.toThrow("Confirmación incompatible");
+});
+
+it("@s40 accepts the sixth and last attempt", async () => {
+  stub({ items: [delivery({ attempt: 6 })] });
+
+  const items = await listWebhookDeliveries(id, new AbortController().signal);
+
+  expect(items[0].attempt).toBe(6);
+});
+
+it("@s40 rejects an httpStatus outside the range of a status code", async () => {
+  stub({ items: [delivery({ httpStatus: 600 })] });
+
+  await expect(
+    listWebhookDeliveries(id, new AbortController().signal),
+  ).rejects.toThrow("Confirmación incompatible");
+});
+
+it("@s40 rejects a negative latency", async () => {
+  stub({ items: [delivery({ latencyMs: -1 })] });
+
+  await expect(
+    listWebhookDeliveries(id, new AbortController().signal),
+  ).rejects.toThrow("Confirmación incompatible");
+});
+
+it("@s40 rejects an error class outside the seven the contract defines", async () => {
+  stub({ items: [delivery({ status: "exhausted", errorClass: "BOOM" })] });
+
+  await expect(
+    listWebhookDeliveries(id, new AbortController().signal),
+  ).rejects.toThrow("Confirmación incompatible");
+});
+
+it("@s40 rejects an eventType that is not a string", async () => {
+  stub({ items: [delivery({ eventType: 42 })] });
+
+  await expect(
+    listWebhookDeliveries(id, new AbortController().signal),
+  ).rejects.toThrow("Confirmación incompatible");
+});
+
+it("@s40 rejects a nextAttemptAt that is not an instant", async () => {
+  stub({
+    items: [
+      delivery({
+        status: "pending",
+        httpStatus: null,
+        latencyMs: null,
+        nextAttemptAt: "2026-09-08",
+      }),
+    ],
+  });
+
+  await expect(
+    listWebhookDeliveries(id, new AbortController().signal),
+  ).rejects.toThrow("Confirmación incompatible");
+});
+
+// Sólo una entrega pendiente está programada para otro intento: la invariante
+// se rompe por los dos lados y hay que probar los dos.
+it("@s40 rejects a terminal delivery still scheduled for another attempt", async () => {
+  stub({ items: [delivery({ nextAttemptAt: "2026-09-08T13:00:00.000000Z" })] });
+
+  await expect(
+    listWebhookDeliveries(id, new AbortController().signal),
+  ).rejects.toThrow("Confirmación incompatible");
+});
+
+it("@s40 rejects a pending delivery with no next attempt scheduled", async () => {
+  stub({
+    items: [
+      delivery({
+        status: "pending",
+        httpStatus: null,
+        latencyMs: null,
+        nextAttemptAt: null,
+      }),
+    ],
+  });
+
+  await expect(
+    listWebhookDeliveries(id, new AbortController().signal),
+  ).rejects.toThrow("Confirmación incompatible");
+});
+
+it("@s40 rejects a list that repeats the same delivery id", async () => {
+  stub({ items: [delivery(), delivery({ eventType: "BlockPlanned.v1" })] });
+
+  await expect(
+    listWebhookDeliveries(id, new AbortController().signal),
+  ).rejects.toThrow("Confirmación incompatible");
+});
+
+it("@s36 rejects a list that repeats the same endpoint id", async () => {
+  stub({ items: [endpoint(), endpoint({ description: "Otro" })] });
+
+  await expect(listWebhooks(new AbortController().signal)).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
 it("@s40 rejects a delivery that leaks a body or a url", async () => {
   stub({ items: [{ ...delivery(), body: "{}" }] });
   await expect(

@@ -106,7 +106,8 @@ pitest {
         "com.apptolast.organization.adapter.connectors.GitlabApiBase*",
         "com.apptolast.organization.adapter.connectors.HttpGitlabIssueSource*",
         "com.apptolast.organization.adapter.http.GitlabConnectorController*",
-        "com.apptolast.organization.adapter.persistence.PostgresGitlabConnectionStore*")
+        "com.apptolast.organization.adapter.persistence.PostgresGitlabConnectionStore*"
+    )
     val githubConnectorClasses = setOf(
         "com.apptolast.organization.domain.GithubRepository*",
         "com.apptolast.organization.domain.PersonalAccessToken*",
@@ -727,11 +728,13 @@ pitest {
     mutationThreshold.set(80)
     outputFormats.set(setOf("HTML", "XML"))
     timestampedReports.set(false)
-    // El ambito conjunto de las cinco features es mucho mas grande que uno solo y con
-    // cuatro hilos el sistema se quedo sin memoria y mato la campana. Dos hilos tardan
-    // mas pero terminan, que es lo unico que cuenta a estas horas.
-    threads.set(
-        if (integrationApiOnly || integrationApiHttpOnly) 8 else if (nightFiveOnly) 2 else 4)
+    // El ambito conjunto `noche_cinco` existe pero NO cabe en esta maquina: probado con
+    // cuatro hilos y con dos, y el sistema lo mato por memoria las dos veces. La fase de
+    // cobertura levanta la suite entera y ademas retiene los mutantes de las cinco
+    // features a la vez. Se conserva declarado por si alguna vez hay maquina, pero las
+    // campanas van por feature. Esta linea la fijan nueve guardas del arnes: no cambiarla
+    // sin actualizarlas.
+    threads.set(if (integrationApiOnly || integrationApiHttpOnly) 8 else 4)
 }
 
 spotless { java { googleJavaFormat("1.31.0") } }

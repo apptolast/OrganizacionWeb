@@ -1,0 +1,32 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "ignorePatterns": [".stryker-tmp-*"],
+  "mutate": [
+    "src/App.tsx:42:8-42:42",
+    "src/App.tsx:71:22-72:36",
+    "src/App.tsx:116:10-117:37",
+    "src/workspace.tsx:100:10-105:22",
+    "src/calendar-feed-api.ts",
+    "src/calendar.tsx"
+  ],
+  "reporters": ["clear-text", "json", "html", "progress-append-only"],
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 80
+  },
+  "concurrency": 8,
+  "coverageAnalysis": "perTest",
+  "vitest": {
+    "configFile": "vite.config.ts"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation-ics-calendar/mutation.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation-ics-calendar/mutation.html"
+  },
+  "tempDirName": ".stryker-tmp-ics-calendar"
+}

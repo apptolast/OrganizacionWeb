@@ -602,3 +602,55 @@ ROJO DEFECTO data-label de Latencia desalineado
 ```
 
 **Previsión de muertes: 12.** Acumulado acreditado: 120.
+
+---
+
+## Racimo 12 — identidad por elemento, reinicio del formulario y los atributos de @s42
+
+**Causa común, la misma de siempre en tres sitios distintos.** Con **un solo**
+elemento en la lista, «cambiar el que toca» y «cambiarlos todos» son
+indistinguibles: `map((item) => item.id === updated.id ? updated : item)` da lo
+mismo que `map(() => updated)`. Igual al eliminar y al reenviar. Hacen falta dos
+elementos y mirar **el otro**, el que no se tocó.
+
+Y tres cosas que ninguna prueba miraba nunca: que la creación con éxito vacía el
+formulario que acaba de enviar, que un intento nuevo borra lo que dejó el
+anterior, y los atributos de los que depende @s42 (`tabIndex={-1}` del `main` y
+del encabezado, `onFocus` que selecciona el secreto entero).
+
+Ocho pruebas nuevas. **17 mutantes muertos.**
+
+```
+ROJO 471 item.id === updated.id -> true   · disabling one webhook of two leaves the other exactly as it was
+ROJO 503 filtro de eliminar -> undefined  · deleting one webhook of two removes only that one…
+ROJO 505 item.id !== endpoint.id -> false · idem
+ROJO 507 setConfirming(null) -> ;         · idem
+ROJO 525 item.id === reopened.id -> true  · redelivering one row of two leaves the other exactly as it was
+ROJO 408 setUrl("") -> "Stryker"          · a successful creation empties the form it just sent
+ROJO 410 setDescription("") -> "Stryker"  · idem
+ROJO 412 setTypes([]) -> ["Stryker"]      · idem
+ROJO 395 setFormError(null) -> ;          · each attempt clears what the previous one left on screen
+ROJO 396 setUrlError(null) -> ;           · idem
+ROJO 390 preventDefault() -> ;            · submitting the form never navigates away from the view
+ROJO 385 setLoading(true) -> false        · Reintentar shows the loading state again…
+ROJO 387 setLoadFailed(false) -> true     · idem
+ROJO 543 alerta de carga fallida -> ""    · idem
+ROJO 536 tabIndex del main -> +1          · the main landmark and the list heading take focus…
+ROJO 584 tabIndex del h2 -> +1            · idem
+ROJO 547 onFocus del secreto -> undefined · focusing the secret selects it whole…
+```
+
+Tres oráculos que la primera versión **no** discriminaba, y por qué:
+
+- **La fila que no se toca.** Guardaba la referencia al `<tr>` *antes* de
+  reenviar. Si React sustituye la fila, el oráculo lee un nodo desprendido y no
+  se entera de nada. Hay que **volver a consultarla** después de la acción.
+- **`setTypes([])` tras crear.** Otra vez lo del racimo 7: ninguna etiqueta casa
+  con un tipo inventado, así que las casillas se ven igual. Sólo un **segundo
+  envío** distingue «vacío» de «un tipo que nadie reconoce».
+- **`setFormError(null)`.** El primer intento tiene que dejar un mensaje
+  **general**; si falla por el campo URL, lo que se limpia es el otro estado. La
+  prueba encadena tres intentos —límite, URL bloqueada, éxito— y comprueba que
+  en el segundo hay **una** alerta, no dos.
+
+**Previsión de muertes: 17.** Acumulado acreditado: **137**.

@@ -1472,6 +1472,321 @@ it.each([
   },
 );
 
+// Con un solo webhook en la lista, «cambiar el que toca» y «cambiarlos todos»
+// son indistinguibles. Lo mismo al eliminar. Hacen falta dos y mirar el otro.
+it("@s39 disabling one webhook of two leaves the other exactly as it was", async () => {
+  const { other } = stubApi(
+    [
+      endpoint(),
+      endpoint({
+        id: second,
+        url: "https://otro.example/h",
+        description: "Otro",
+      }),
+    ],
+    () =>
+      Promise.resolve(
+        Response.json(
+          endpoint({
+            status: "disabled",
+            disabledReason: "MANUAL",
+            disabledAt: "2026-09-08T11:00:00.000000Z",
+          }),
+        ),
+      ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.click(screen.getAllByRole("button", { name: "Desactivar" })[0]);
+
+  await waitFor(() =>
+    expect(screen.getByText("Desactivado manualmente")).toBeVisible(),
+  );
+  expect(urlOf(other)).toBe(`/api/v1/me/webhooks/${id}/status`);
+  expect(screen.getAllByText("Activo")).toHaveLength(1);
+  expect(screen.getByText("https://otro.example/h")).toBeVisible();
+  expect(screen.getByText("Otro")).toBeVisible();
+});
+
+it("@s39 deleting one webhook of two removes only that one and closes the dialog", async () => {
+  stubApi(
+    [
+      endpoint(),
+      endpoint({
+        id: second,
+        url: "https://otro.example/h",
+        description: "Otro",
+      }),
+    ],
+    () => Promise.resolve(new Response(null, { status: 204 })),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.click(screen.getAllByRole("button", { name: "Eliminar" })[0]);
+  await user.click(
+    screen.getByRole("button", { name: "Confirmar eliminación" }),
+  );
+
+  await waitFor(() =>
+    expect(
+      screen.queryByText("https://example.com/hooks"),
+    ).not.toBeInTheDocument(),
+  );
+  expect(screen.getByText("https://otro.example/h")).toBeVisible();
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});
+
+it("@s40 redelivering one row of two leaves the other exactly as it was", async () => {
+  stubApi([endpoint()], (url) =>
+    Promise.resolve(
+      String(url).endsWith("/redeliver")
+        ? Response.json(
+            {
+              delivery: delivery({
+                status: "pending",
+                attempt: 0,
+                httpStatus: null,
+                latencyMs: null,
+                nextAttemptAt: "2026-09-08T13:00:00.000000Z",
+              }),
+            },
+            { status: 202 },
+          )
+        : Response.json({
+            items: [
+              delivery(),
+              delivery({
+                id: otherDeliveryId,
+                eventId: otherDeliveryId,
+                eventType: "BlockPlanned.v1",
+                status: "exhausted",
+                attempt: 6,
+                errorClass: "HTTP_ERROR",
+                httpStatus: 500,
+              }),
+            ],
+          }),
+    ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.click(screen.getByRole("button", { name: "Ver entregas" }));
+  await waitFor(() => expect(screen.getByRole("table")).toBeVisible());
+  const [, first] = screen.getAllByRole("row");
+
+  await user.click(within(first).getByRole("button", { name: "Reenviar" }));
+
+  await waitFor(() =>
+    expect(within(first).getByText("Pendiente")).toBeVisible(),
+  );
+  // Se vuelve a consultar la fila: quedarse con la referencia de antes leería un
+  // nodo que React pudo haber sustituido, y el oráculo no se enteraría.
+  const untouched = screen.getAllByRole("row")[2];
+  expect(cellsOf(untouched)).toEqual([
+    ["Tipo", "BlockPlanned.v1"],
+    ["Intento", "6"],
+    ["Código HTTP", "500"],
+    ["Latencia", "12 ms"],
+    ["Clase de error", "HTTP_ERROR"],
+    ["Estado", "Agotada"],
+    ["Fecha", "2026-09-08"],
+    ["Acciones", "Reenviar"],
+  ]);
+});
+
+it("@s37 a successful creation empties the form it just sent", async () => {
+  const { other } = stubApi([], () =>
+    Promise.resolve(
+      Response.json({ endpoint: endpoint(), secret }, { status: 201 }),
+    ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
+  await user.type(
+    screen.getByRole("textbox", { name: "Descripción" }),
+    "Mi hook",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
+  await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+
+  await waitFor(() => expect(screen.getByDisplayValue(secret)).toBeVisible());
+  expect(screen.getByRole("textbox", { name: "URL" })).toHaveValue("");
+  expect(screen.getByRole("textbox", { name: "Descripción" })).toHaveValue("");
+  expect(checkedTypeLabels()).toEqual([]);
+  expect(screen.getByRole("button", { name: "Crear webhook" })).toBeEnabled();
+  expect(other).toHaveBeenCalledTimes(1);
+
+  // La selección queda vacía **de verdad**, no sólo sin casillas marcadas: un
+  // segundo envío lo enseña, porque el cuerpo es lo único que distingue «vacío»
+  // de «un tipo que ninguna etiqueta reconoce».
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://otro.example/h",
+  );
+  await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+
+  await waitFor(() => expect(other).toHaveBeenCalledTimes(2));
+  expect(bodyOf(other, 1)).toEqual({
+    url: "https://otro.example/h",
+    description: "",
+    eventTypes: [],
+  });
+});
+
+// @s41 dice «no se envía otro POST automáticamente», no «el mensaje se queda
+// para siempre»: reintentar a mano tiene que borrar lo que dijo el intento
+// anterior, o el usuario lee un error que ya no existe.
+it("@s41 each attempt clears what the previous one left on screen", async () => {
+  const answers = [
+    () => Response.json({ code: "WEBHOOK_LIMIT" }, { status: 409 }),
+    () => Response.json({ code: "WEBHOOK_URL_BLOCKED" }, { status: 400 }),
+    () => Response.json({ endpoint: endpoint(), secret }, { status: 201 }),
+  ];
+  let attempt = 0;
+  const { other } = stubApi([], () => Promise.resolve(answers[attempt++]()));
+  const user = userEvent.setup();
+  const submit = async (typed: string) => {
+    await user.type(screen.getByRole("textbox", { name: "URL" }), typed);
+    await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
+    await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+  };
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+
+  await submit("https://example.com/hooks");
+  await waitFor(() =>
+    expect(screen.getByRole("alert")).toHaveTextContent(/cinco/i),
+  );
+
+  // El segundo intento falla por el campo URL: el mensaje general del primero
+  // no puede quedarse debajo, o el usuario lee dos errores y sólo uno es suyo.
+  await user.clear(screen.getByRole("textbox", { name: "URL" }));
+  await submit("https://10.0.0.1/h");
+  await waitFor(() =>
+    expect(screen.getByRole("textbox", { name: "URL" })).toHaveAttribute(
+      "aria-describedby",
+    ),
+  );
+  expect(screen.getAllByRole("alert")).toHaveLength(1);
+  expect(screen.getByRole("alert")).toHaveTextContent(/no está permitida/i);
+
+  await user.clear(screen.getByRole("textbox", { name: "URL" }));
+  await submit("https://example.com/hooks");
+
+  await waitFor(() => expect(screen.getByDisplayValue(secret)).toBeVisible());
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(screen.getByRole("textbox", { name: "URL" })).not.toHaveAttribute(
+    "aria-describedby",
+  );
+  expect(other).toHaveBeenCalledTimes(3);
+});
+
+it("@s37 submitting the form never navigates away from the view", async () => {
+  stubApi([], () => new Promise<Response>(() => {}));
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  // React delega en el contenedor, así que un oyente en el documento se entera
+  // después de que el manejador de la vista haya corrido.
+  let prevented: boolean | null = null;
+  const watch = (event: Event) => (prevented = event.defaultPrevented);
+  document.addEventListener("submit", watch);
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
+
+  await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+  document.removeEventListener("submit", watch);
+
+  expect(prevented).toBe(true);
+});
+
+it("@s36 Reintentar shows the loading state again and clears the previous alert", async () => {
+  let reply!: (response: Response) => void;
+  let call = 0;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() => {
+      call += 1;
+      return call === 1
+        ? Promise.resolve(
+            Response.json({ code: "STORAGE_UNAVAILABLE" }, { status: 503 }),
+          )
+        : new Promise<Response>((resolve) => (reply = resolve));
+    }),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await waitFor(() =>
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "No se ha podido cargar la lista de webhooks.",
+    ),
+  );
+
+  await user.click(screen.getByRole("button", { name: "Reintentar" }));
+
+  expect(screen.getByText("Cargando webhooks…")).toBeVisible();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  reply(Response.json({ items: [] }));
+  await shown();
+});
+
+// @s42: el enlace de salto lleva al main y el foco vuelve al encabezado tras
+// eliminar. Los dos dependen de un tabIndex negativo, que hace el elemento
+// enfocable por programa sin meterlo en el recorrido del tabulador.
+it("@s42 the main landmark and the list heading take focus without entering the tab order", async () => {
+  stubApi([]);
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+
+  expect(screen.getByRole("main")).toHaveAttribute("tabindex", "-1");
+  expect(
+    screen.getByRole("heading", { level: 2, name: "Tus webhooks" }),
+  ).toHaveAttribute("tabindex", "-1");
+});
+
+it("@s42 focusing the secret selects it whole, so one gesture copies it", async () => {
+  stubApi([], () =>
+    Promise.resolve(
+      Response.json({ endpoint: endpoint(), secret }, { status: 201 }),
+    ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
+  await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+  await waitFor(() => expect(screen.getByDisplayValue(secret)).toBeVisible());
+
+  const field = screen.getByDisplayValue(secret) as HTMLTextAreaElement;
+  field.focus();
+
+  expect(field.selectionStart).toBe(0);
+  expect(field.selectionEnd).toBe(secret.length);
+});
+
 it("@s42 cancelling the delete confirmation returns focus to the control that opened it", async () => {
   stubApi([endpoint()]);
   const user = userEvent.setup();

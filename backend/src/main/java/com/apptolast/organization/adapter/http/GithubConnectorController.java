@@ -111,7 +111,10 @@ public final class GithubConnectorController {
   public ResponseEntity<ImportResponse> getImport(Principal principal, @PathVariable String id) {
     if (!CANONICAL_UUID.matcher(id).matches()) throw new IssueImportNotFoundException();
     return noStore()
-        .body(ImportResponse.of(readImport.execute(principal.getName(), UUID.fromString(id))));
+        .body(
+            ImportResponse.of(
+                readImport.execute(
+                    principal.getName(), GithubIssueConnections.SOURCE, UUID.fromString(id))));
   }
 
   // --------------------------------------------------------------------------- lectura JSON

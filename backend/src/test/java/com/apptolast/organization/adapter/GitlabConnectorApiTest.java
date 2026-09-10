@@ -420,7 +420,7 @@ class GitlabConnectorApiTest {
   })
   void s30_amalformedOrUnknownReceiptIdentifierNeverLeaksWhatExists(
       String id, int status, String code) throws Exception {
-    when(readImport.execute(any(), any())).thenThrow(new IssueImportNotFoundException());
+    when(readImport.execute(any(), any(), any())).thenThrow(new IssueImportNotFoundException());
 
     mvc.perform(get(IMPORTS + "/" + id).with(user("owner")))
         .andExpect(status().is(status))
@@ -429,7 +429,7 @@ class GitlabConnectorApiTest {
 
   @Test
   void s30_areceiptOfTheOwnerComesBackWholeThroughItsIdentifier() throws Exception {
-    when(readImport.execute("owner", IMPORT)).thenReturn(completed());
+    when(readImport.execute("owner", "gitlab", IMPORT)).thenReturn(completed());
 
     var body =
         mvc.perform(get(IMPORTS + "/" + IMPORT).with(user("owner")))

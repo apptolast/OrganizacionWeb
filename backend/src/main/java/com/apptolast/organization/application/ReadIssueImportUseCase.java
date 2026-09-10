@@ -4,5 +4,5 @@ import com.apptolast.organization.domain.IssueImportReceipt;
 import java.util.UUID;
 
 public interface ReadIssueImportUseCase {
-  IssueImportReceipt execute(String ownerId, UUID importId);
+  IssueImportReceipt execute(String ownerId, String source, UUID importId);
 }

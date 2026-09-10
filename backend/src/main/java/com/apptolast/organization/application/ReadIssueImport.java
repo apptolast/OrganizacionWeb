@@ -17,8 +17,8 @@ public final class ReadIssueImport implements ReadIssueImportUseCase {
   }
 
   @Override
-  public IssueImportReceipt execute(String ownerId, UUID importId) {
+  public IssueImportReceipt execute(String ownerId, String source, UUID importId) {
     if (!cipher.enabled()) throw new ConnectorsDisabledException();
-    return receipts.find(ownerId, importId).orElseThrow(IssueImportNotFoundException::new);
+    return receipts.find(ownerId, source, importId).orElseThrow(IssueImportNotFoundException::new);
   }
 }

@@ -40,11 +40,17 @@ class GithubConnectorPersistenceTest {
   private static final String OWNER = "owner-a";
   private static final String OTHER = "owner-b";
   private static final String REPOSITORY = "octocat/Hello-World";
+  private static final String GITHUB = "github";
   private static final Instant NOW = Instant.parse("2026-09-09T12:00:00Z");
   // El formato en reposo de AesGcmSecretCipher: nonce delante, etiqueta GCM detrás, sin byte de
   // versión desde que se unificó el cifrador entre las features 27 y 28.
   private static final int NONCE_BYTES = 12;
   private static final int TAG_BYTES = 16;
+  // El rango que fija el CHECK de la V30 sobre connector_connections.token_ciphertext.
+  private static final int V30_MIN_OCTETS = 29;
+  private static final int V30_MAX_OCTETS = 283;
+  private static final String SHORTEST_TOKEN = "xxxxx";
+  private static final int LONGEST_TOKEN_LENGTH = 255;
 
   static JdbcTemplate jdbc;
   static DataSourceTransactionManager manager;
@@ -164,47 +170,60 @@ class GithubConnectorPersistenceTest {
   }
 
   /**
-   * @s1 el formato en reposo es 12 de nonce + texto + 16 de etiqueta, sin byte de versión. Un token
-   *     de un solo carácter —que el dominio admite, porque {@code PersonalAccessToken} sólo acota
-   *     el máximo— produce 29 octetos, y la fila tiene que entrar. Quien decide si un token de un
-   *     carácter vale es el dominio, con su mensaje; no la base de datos con una violación de
+   * @s1 el formato en reposo es 12 de nonce + texto + 16 de etiqueta, sin byte de versión. El token
+   *     más corto que el dominio admite son cinco caracteres —uno más de los que enseña la pista,
+   *     para que la pista no sea el token entero—, y la fila tiene que entrar. Quien decide si un
+   *     token vale es el dominio, con su mensaje; no la base de datos con una violación de
    *     restricción, que además saldría como 500 en vez de como el error del contrato.
+   *     <p>El texto cifrado lo produce el cifrador de verdad, no un array del tamaño que la prueba
+   *     supone: si el formato en reposo cambia, esta prueba tiene que enterarse.
    */
   @Test
   void s1_theShortestTokenTheDomainAcceptsAlsoFitsInTheColumn() {
-    var shortest = new PersonalAccessToken("x");
-    var sealed = new byte[NONCE_BYTES + shortest.value().length() + TAG_BYTES];
+    var shortest = new PersonalAccessToken(SHORTEST_TOKEN);
+    var sealed = realCipher().encrypt(OWNER, shortest.value());
 
     connections.save(OWNER, connection(REPOSITORY, "valid", sealed));
 
-    assertThat(sealed).hasSize(29);
-    assertThat(
-            jdbc.queryForObject(
-                "SELECT octet_length(token_ciphertext) FROM connector_connections WHERE owner_id=?",
-                Integer.class,
-                OWNER))
-        .isEqualTo(29);
+    assertThat(sealed).hasSize(NONCE_BYTES + SHORTEST_TOKEN.length() + TAG_BYTES);
+    assertThat(storedCiphertextLength()).isEqualTo(sealed.length);
+    assertThat(storedCiphertextLength()).isGreaterThanOrEqualTo(V30_MIN_OCTETS);
   }
 
   /**
    * La cota alta, por el otro extremo: el token más largo que el dominio admite son 255 caracteres,
-   * que cifrados son 283 octetos. Las dos pruebas juntas fijan el rango entero, de modo que una
-   * cota calculada para otro formato no puede volver a pasar inadvertida.
+   * que cifrados por el cifrador real son 283 octetos, justo el techo de la V30. Las dos pruebas
+   * juntas atan el rango del CHECK al formato que produce {@code AesGcmSecretCipher}, de modo que
+   * una cota calculada para otro formato no puede volver a pasar inadvertida: si el formato crece
+   * un solo octeto, la fila deja de entrar y esta prueba lo dice.
    */
   @Test
   void s1_theLongestTokenTheDomainAcceptsAlsoFitsInTheColumn() {
-    var longest = new PersonalAccessToken("t".repeat(255));
-    var sealed = new byte[NONCE_BYTES + longest.value().length() + TAG_BYTES];
+    var longest = new PersonalAccessToken("t".repeat(LONGEST_TOKEN_LENGTH));
+    var sealed = realCipher().encrypt(OWNER, longest.value());
 
     connections.save(OWNER, connection(REPOSITORY, "valid", sealed));
 
-    assertThat(sealed).hasSize(283);
-    assertThat(
-            jdbc.queryForObject(
-                "SELECT octet_length(token_ciphertext) FROM connector_connections WHERE owner_id=?",
-                Integer.class,
-                OWNER))
-        .isEqualTo(283);
+    assertThat(sealed).hasSize(NONCE_BYTES + LONGEST_TOKEN_LENGTH + TAG_BYTES);
+    assertThat(storedCiphertextLength()).isEqualTo(sealed.length);
+    assertThat(storedCiphertextLength()).isLessThanOrEqualTo(V30_MAX_OCTETS);
+  }
+
+  /** El cifrador de producción con una clave de pruebas: el formato en reposo es el suyo. */
+  private static SecretCipher realCipher() {
+    var material = new byte[32];
+    java.util.Arrays.fill(material, (byte) 7);
+    return new com.apptolast.organization.adapter.connectors.AesGcmSecretCipher(
+        com.apptolast.organization.adapter.connectors.ConnectorKeyRing.of(
+            java.util.Base64.getEncoder().encodeToString(material), null),
+        new java.security.SecureRandom());
+  }
+
+  private int storedCiphertextLength() {
+    return jdbc.queryForObject(
+        "SELECT octet_length(token_ciphertext) FROM connector_connections WHERE owner_id=?",
+        Integer.class,
+        OWNER);
   }
 
   @Test
@@ -383,7 +402,7 @@ class GithubConnectorPersistenceTest {
     assertThat(receipt.source()).isEqualTo("github");
     assertThat(receipt.startedAt()).isEqualTo(NOW);
     assertThat(receipt.finishedAt()).isNull();
-    assertThat(receipts.find(OWNER, receipt.id())).contains(receipt);
+    assertThat(receipts.find(OWNER, GITHUB, receipt.id())).contains(receipt);
   }
 
   @Test
@@ -473,7 +492,7 @@ class GithubConnectorPersistenceTest {
             OWNER, projectId, "github", REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
 
     assertThat(fresh.status()).isEqualTo("running");
-    var interrupted = receipts.find(OWNER, stale.id()).orElseThrow();
+    var interrupted = receipts.find(OWNER, GITHUB, stale.id()).orElseThrow();
     assertThat(interrupted.status()).isEqualTo("failed");
     assertThat(interrupted.errorCode()).isEqualTo("INTERRUPTED");
     assertThat(interrupted.finishedAt()).isNotNull();
@@ -489,11 +508,31 @@ class GithubConnectorPersistenceTest {
 
     receipts.progress(OWNER, receipt.id(), 2, 0, 0);
 
-    var reread = receipts.find(OWNER, receipt.id()).orElseThrow();
+    var reread = receipts.find(OWNER, GITHUB, receipt.id()).orElseThrow();
     assertThat(reread.status()).isEqualTo("running");
     assertThat(reread.created()).isEqualTo(2);
     assertThat(reread.errorCode()).isNull();
     assertThat(reread.finishedAt()).isNull();
+  }
+
+  /**
+   * @s12 «finishedAt no anterior a startedAt». Si el reloj se atrasa entre el begin y el finish —un
+   *     ajuste de NTP, o dos instancias con relojes distintos— el cierre llegaría con un instante
+   *     anterior al comienzo, y la V25 tiene esperando al otro lado un CHECK que convertiría eso en
+   *     un 500. El GREATEST del UPDATE es lo único que lo impide, y hasta ahora ninguna prueba
+   *     distinguía tenerlo de no tenerlo.
+   */
+  @Test
+  void s12_aClockThatWentBackwardsNeverClosesAReceiptBeforeItStarted() {
+    var receipt =
+        receipts.begin(
+            OWNER, projectId, GITHUB, REPOSITORY, NOW, NOW.minus(Duration.ofMinutes(15)));
+
+    var closed =
+        receipts.finish(OWNER, receipt.id(), "completed", null, false, NOW.minusSeconds(3));
+
+    assertThat(closed.finishedAt()).isEqualTo(NOW);
+    assertThat(closed.finishedAt()).isAfterOrEqualTo(closed.startedAt());
   }
 
   @Test
@@ -512,7 +551,7 @@ class GithubConnectorPersistenceTest {
     assertThat(closed.truncated()).isTrue();
     assertThat(closed.errorCode()).isNull();
     assertThat(closed.finishedAt()).isEqualTo(NOW.plusSeconds(4));
-    assertThat(receipts.find(OWNER, receipt.id())).contains(closed);
+    assertThat(receipts.find(OWNER, GITHUB, receipt.id())).contains(closed);
   }
 
   @Test
@@ -548,7 +587,7 @@ class GithubConnectorPersistenceTest {
         receipts.begin(
             OTHER, otherProject, "github", "otra/Cosa", NOW, NOW.minus(Duration.ofMinutes(15)));
 
-    assertThat(receipts.find(OWNER, theirs.id())).isEmpty();
+    assertThat(receipts.find(OWNER, GITHUB, theirs.id())).isEmpty();
     assertThat(receipts.latest(OWNER, "github")).isEmpty();
   }
 
@@ -565,7 +604,7 @@ class GithubConnectorPersistenceTest {
 
     assertThat(count("task_external_links")).isEqualTo(1);
     assertThat(count("tasks")).isEqualTo(1);
-    assertThat(receipts.find(OWNER, receipt.id())).isPresent();
+    assertThat(receipts.find(OWNER, GITHUB, receipt.id())).isPresent();
   }
 
   @Test
@@ -612,7 +651,7 @@ class GithubConnectorPersistenceTest {
     receipts.finish(
         OWNER, receipt.id(), "failed", "STORAGE_UNAVAILABLE", false, NOW.plusSeconds(2));
 
-    var closed = receipts.find(OWNER, receipt.id()).orElseThrow();
+    var closed = receipts.find(OWNER, GITHUB, receipt.id()).orElseThrow();
     assertThat(closed.created()).isEqualTo(2);
     assertThat(closed.errorCode()).isEqualTo("STORAGE_UNAVAILABLE");
     assertThat(count("tasks")).isEqualTo(2);

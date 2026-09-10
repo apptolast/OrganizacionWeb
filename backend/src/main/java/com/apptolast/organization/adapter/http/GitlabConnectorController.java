@@ -114,7 +114,10 @@ public final class GitlabConnectorController {
   public ResponseEntity<ImportResponse> getImport(Principal principal, @PathVariable String id) {
     if (!CANONICAL_UUID.matcher(id).matches()) throw invalid("importId", "INVALID_FORMAT");
     return noStore()
-        .body(ImportResponse.of(readImport.execute(principal.getName(), UUID.fromString(id))));
+        .body(
+            ImportResponse.of(
+                readImport.execute(
+                    principal.getName(), GitlabIssueConnections.SOURCE, UUID.fromString(id))));
   }
 
   // --------------------------------------------------------------------------- lectura JSON

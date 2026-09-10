@@ -229,9 +229,9 @@ final class ConnectorFakes {
     }
 
     @Override
-    public Optional<IssueImportReceipt> find(String ownerId, UUID importId) {
+    public Optional<IssueImportReceipt> find(String ownerId, String source, UUID importId) {
       return Optional.ofNullable(rows.get(importId))
-          .filter(row -> ownerId.equals(owners.get(row.id())));
+          .filter(row -> ownerId.equals(owners.get(row.id())) && source.equals(row.source()));
     }
 
     @Override

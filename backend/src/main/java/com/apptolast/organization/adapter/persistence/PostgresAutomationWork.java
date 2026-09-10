@@ -4,6 +4,7 @@ import com.apptolast.organization.application.AutomationCandidate;
 import com.apptolast.organization.application.AutomationClaimedException;
 import com.apptolast.organization.application.AutomationCommit;
 import com.apptolast.organization.application.AutomationEffect;
+import com.apptolast.organization.application.AutomationEndpointGoneException;
 import com.apptolast.organization.application.AutomationOutcome;
 import com.apptolast.organization.application.AutomationWork;
 import com.apptolast.organization.application.CreateTaskUseCase;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,6 +46,7 @@ public final class PostgresAutomationWork implements AutomationWork {
   private final JdbcTemplate jdbc;
   private final ObjectMapper json;
   private final CreateTaskUseCase createTask;
+  private final Clock clock;
   private final TransactionTemplate confirming;
   private final TransactionTemplate apart;
 
@@ -51,10 +54,12 @@ public final class PostgresAutomationWork implements AutomationWork {
       JdbcTemplate jdbc,
       PlatformTransactionManager transactions,
       ObjectMapper json,
-      CreateTaskUseCase createTask) {
+      CreateTaskUseCase createTask,
+      Clock clock) {
     this.jdbc = jdbc;
     this.json = json;
     this.createTask = createTask;
+    this.clock = clock;
     this.confirming = new TransactionTemplate(transactions);
     this.apart = new TransactionTemplate(transactions);
     this.apart.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -152,11 +157,16 @@ public final class PostgresAutomationWork implements AutomationWork {
   /**
    * One pending delivery of feature 25 carrying the outbox row untransformed. The body is copied
    * from the outbox by the database itself, so no re-serialisation can alter a single byte, and the
-   * subscription of the endpoint is deliberately not consulted: the rule is the subscription.
+   * subscription of the endpoint is deliberately not consulted: the rule is the subscription. Same
+   * stamping as {@code PostgresWebhookOutbox.enqueue}, which is the other door into this table.
    */
   private UUID queue(String owner, AutomationEffect.Notify notify) {
     var deliveryId = UUID.randomUUID();
-    var now = Timestamp.from(notify.event().occurredAt());
+    // The instant of the queueing, never the instant of the event. A worker that wakes up to a
+    // backlog would otherwise stamp every delivery in the past: the created_at the owner reads in
+    // the delivery log would stop meaning when it was created, and the due index
+    // (next_attempt_at, id) WHERE status = 'pending' would put them ahead of every legitimate one.
+    var now = Timestamp.from(clock.instant());
     var affected =
         jdbc.update(
             "INSERT INTO webhook_deliveries(id, endpoint_id, owner_id, event_id, event_type, body,"
@@ -172,7 +182,11 @@ public final class PostgresAutomationWork implements AutomationWork {
             notify.endpointId(),
             owner,
             notify.event().eventId());
-    if (affected == 0) throw new AutomationClaimedException();
+    // Affecting no row cannot mean a lost claim: this INSERT carries no ON CONFLICT and the id of
+    // the delivery was drawn a line above, so nobody could have taken it. It only means the SELECT
+    // did not match, that is, that the endpoint is no longer an active endpoint of this owner.
+    // Telling the two apart is what keeps the rule from vanishing behind the cursor without a run.
+    if (affected == 0) throw new AutomationEndpointGoneException(notify.endpointId());
     return deliveryId;
   }
 

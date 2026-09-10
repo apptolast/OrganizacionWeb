@@ -294,6 +294,137 @@ class ExecuteAutomationsTest {
     assertThat(work.runs()).as("a deterministic failure is never retried").hasSize(2);
   }
 
+  /**
+   * @s21 en su ámbito mayor: «sin detener las demás reglas» se afirmaba sólo dentro de un evento de
+   *     un propietario, y el ciclo no tiene ninguna frontera por propietario. {@code runCycle()}
+   *     recorre {@code ownersWithRules()} sin envolver nada, y {@code process()} calcula los
+   *     resultados —con {@code matcher.loopGuarded}, que pide {@code uuid("taskId")}— FUERA del
+   *     try. Una fila de outbox TaskCreated.v1 sin taskId en el payload revienta con {@link
+   *     IllegalArgumentException} y hoy aborta el ciclo entero: todos los propietarios que el
+   *     {@code SELECT DISTINCT owner_id} devuelva después de él se quedan sin automatizaciones,
+   *     indefinidamente y sin diagnóstico, porque {@code AutomationSchedule.tick} sólo apunta el
+   *     nombre de la clase.
+   *     <p>Por eso hay dos aserciones y no una: que el siguiente propietario ejecute lo suyo, y que
+   *     el fallo quede nombrado por propietario, evento y causa. Un aislamiento mudo cambia una
+   *     avería general por una avería invisible.
+   */
+  @Test
+  void s21_aPoisonedEventOfOneOwnerNeverLeavesTheOtherAccountsWithoutAutomations() {
+    var poisoned = "b";
+    work.owners.add(poisoned);
+    rules.create(poisoned, ruleWith(true, "Revisar de nuevo"));
+    givenARuleThatCreatesTasks();
+    work.cursors.put(poisoned, new AutomationCursor(T0, E0));
+    work.cursors.put(OWNER, new AutomationCursor(T0, E0));
+    work.outbox.add(taskCreatedWithoutTaskId(poisoned, E1, T0.plusSeconds(1)));
+    work.outbox.add(taskCreated(E2, T0.plusSeconds(2)));
+
+    execute.runCycle();
+
+    assertThat(work.runs())
+        .extracting(AutomationRun::eventId, AutomationRun::status)
+        .as("el dato envenenado de un propietario no deja sin automatizaciones a los demás")
+        .containsExactly(tuple(E2, "succeeded"));
+    assertThat(work.cursors.get(poisoned))
+        .as("y su propio recorrido se queda donde estaba: nada se salta en silencio")
+        .isEqualTo(new AutomationCursor(T0, E0));
+    assertThat(logged())
+        .as("propietario, evento y causa, que es lo que falta para diagnosticarlo")
+        .contains(poisoned, E1.toString(), "IllegalArgumentException");
+  }
+
+  /** Una fila de outbox cuyo payload no trae el taskId que su propio tipo de evento promete. */
+  private static AutomationCandidate taskCreatedWithoutTaskId(
+      String owner, UUID eventId, Instant occurredAt) {
+    return new AutomationCandidate(
+        new AutomationEvent(
+            eventId, owner, "TaskCreated.v1", P, occurredAt, Map.of("title", "Redactar informe")),
+        false,
+        List.of());
+  }
+
+  /**
+   * La otra mitad de la frontera: lo que revienta antes de que haya un evento en la mano. {@code
+   * walk()} deja escapar lo que lancen {@code work.cursor}, {@code startCursor} y {@code
+   * work.after}, y ninguno de los tres está dentro del try por candidato. Basta con que la lectura
+   * del cursor de un propietario falle —una fila corrupta, un fallo de almacenamiento— para que el
+   * ciclo entero se caiga y los propietarios siguientes se queden sin ejecutar.
+   *
+   * <p>Aquí no hay evento que nombrar, y por eso el oráculo exige que la bitácora lo diga con
+   * eventId nulo en lugar de callarse: el propietario y la causa siguen siendo obligatorios.
+   */
+  @Test
+  void s21_anOwnerWhoseCursorCannotBeReadDoesNotTakeTheOtherAccountsDownWithHim() {
+    var unreadable = "b";
+    work.owners.add(unreadable);
+    work.unreadable.add(unreadable);
+    rules.create(unreadable, ruleWith(true, "Revisar de nuevo"));
+    givenARuleThatCreatesTasks();
+    work.cursors.put(OWNER, new AutomationCursor(T0, E0));
+    work.outbox.add(taskCreated(E2, T0.plusSeconds(2)));
+
+    execute.runCycle();
+
+    assertThat(work.runs())
+        .extracting(AutomationRun::eventId, AutomationRun::status)
+        .as("un propietario ilegible no cancela el ciclo de los que van detrás")
+        .containsExactly(tuple(E2, "succeeded"));
+    assertThat(logged())
+        .as("propietario y causa; el evento no existe todavía y se dice que no existe")
+        .contains(unreadable, "eventId=null", "StorageUnavailableException");
+  }
+
+  /**
+   * @s21, filas 4 y 5, en la ventana que el ejecutor no cubría: entre {@code
+   *     endpoints.isActiveEndpointOf} —que se consulta FUERA de la transacción— y el INSERT de la
+   *     entrega, el endpoint puede dejar de ser un endpoint activo de este propietario. No hace
+   *     falta un atacante: el worker de la feature 25 desactiva endpoints solo, en el mismo
+   *     proceso.
+   *     <p>Hoy el adaptador contesta a eso con {@link AutomationClaimedException} y el ejecutor la
+   *     lee como «otro worker se me adelantó»: devuelve true sin llamar a {@code record()}, con la
+   *     transacción ya revertida. Se pierden la ejecución de la regla de webhook, la de CUALQUIER
+   *     otra regla que casara el mismo evento —aquí, la tarea de R2— y hasta la línea de bitácora;
+   *     y como el cursor del evento siguiente se escribe por posición absoluta, el evento saltado
+   *     no se vuelve a leer jamás. Pérdida permanente y en silencio.
+   *     <p>El contrato pide para esa regla exactamente lo mismo que para un endpoint borrado antes
+   *     del ciclo: attempt 1, status failed, errorCode ENDPOINT_NOT_FOUND. Por eso el oráculo mira
+   *     las dos reglas, el cursor y la bitácora: lo que se perdía no era sólo la fila del webhook.
+   */
+  @Test
+  void s21_anEndpointGoneBetweenTheCheckAndTheWriteSettlesItsRuleAndSavesTheRest() {
+    var notify = ruleFor(new NotifyWebhookAction(ENDPOINT));
+    var sound = ruleWith(true, "Fijo de R2");
+    work.owners.add(OWNER);
+    rules.create(OWNER, notify);
+    rules.create(OWNER, sound);
+    work.cursors.put(OWNER, new AutomationCursor(T0, E0));
+    work.outbox.add(taskCreated(E1, T0.plusSeconds(1)));
+    work.gone.add(ENDPOINT);
+    var whileTheEndpointStillLooksActive =
+        new ExecuteAutomations(
+            work, rules, matcher, facts, (owner, endpoint) -> true, audit, clock);
+
+    whileTheEndpointStillLooksActive.runCycle();
+
+    assertThat(runOf(notify))
+        .extracting(
+            AutomationRun::attempt,
+            AutomationRun::status,
+            AutomationRun::errorCode,
+            AutomationRun::createdTaskId,
+            AutomationRun::deliveryId)
+        .as("la regla que no llegó a su endpoint queda resuelta, no desaparecida")
+        .containsExactly(1, "failed", "ENDPOINT_NOT_FOUND", null, null);
+    assertThat(runOf(sound).status())
+        .as("y la otra regla del mismo evento conserva su ejecución y su tarea")
+        .isEqualTo("succeeded");
+    assertThat(effectOf(sound)).isInstanceOf(AutomationEffect.CreateTask.class);
+    assertThat(work.cursors.get(OWNER)).isEqualTo(new AutomationCursor(T0.plusSeconds(1), E1));
+    assertThat(logged())
+        .as("y queda línea de bitácora, que era lo primero que se perdía")
+        .contains("ENDPOINT_NOT_FOUND");
+  }
+
   private AutomationRule brokenRule(String situation) {
     return switch (situation) {
       case "completed project" ->
@@ -598,7 +729,9 @@ class ExecuteAutomationsTest {
     final List<AutomationRun> recorded = new ArrayList<>();
     final List<AutomationCursor> started = new ArrayList<>();
     final List<UUID> attempted = new ArrayList<>();
+    final Set<String> unreadable = new HashSet<>();
     java.util.function.Predicate<AutomationCommit> failing = commit -> false;
+    final Set<UUID> gone = new HashSet<>();
 
     @Override
     public List<String> ownersWithRules() {
@@ -607,6 +740,8 @@ class ExecuteAutomationsTest {
 
     @Override
     public Optional<AutomationCursor> cursor(String owner) {
+      if (unreadable.contains(owner))
+        throw new StorageUnavailableException(new IllegalStateException("induced"));
       return Optional.ofNullable(cursors.get(owner));
     }
 
@@ -634,6 +769,12 @@ class ExecuteAutomationsTest {
       attempted.add(commit.reached().eventId());
       if (failing.test(commit))
         throw new StorageUnavailableException(new IllegalStateException("induced"));
+      // Como el adaptador: el INSERT ... SELECT de la entrega no casa ninguna fila porque el
+      // endpoint ya no es un endpoint activo de este propietario. Nada de la confirmación queda.
+      for (var outcome : commit.outcomes())
+        if (outcome.effect() instanceof AutomationEffect.Notify notify
+            && gone.contains(notify.endpointId()))
+          throw new AutomationEndpointGoneException(notify.endpointId());
       commits.add(commit);
       if (commit.reached() != null) cursors.put(commit.owner(), commit.reached());
     }

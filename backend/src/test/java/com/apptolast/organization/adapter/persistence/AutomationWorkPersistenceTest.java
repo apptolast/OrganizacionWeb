@@ -6,13 +6,17 @@ import com.apptolast.organization.application.AutomationCandidate;
 import com.apptolast.organization.application.AutomationClaimedException;
 import com.apptolast.organization.application.AutomationCommit;
 import com.apptolast.organization.application.AutomationEffect;
+import com.apptolast.organization.application.AutomationEndpointGoneException;
 import com.apptolast.organization.application.AutomationOutcome;
 import com.apptolast.organization.domain.AutomationCursor;
+import com.apptolast.organization.domain.AutomationEvent;
 import com.apptolast.organization.domain.AutomationRun;
 import com.apptolast.organization.domain.Task;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -41,12 +45,16 @@ class AutomationWorkPersistenceTest {
 
   private static final UUID GREATER = UUID.fromString("22222222-2222-4222-8222-222222222222");
 
+  /** El instante del encolado, siempre posterior al de los eventos de esta clase. */
+  private static final Instant NOW = Instant.parse("2026-09-09T08:30:00Z");
+
   private final PostgresAutomationWork work =
       new PostgresAutomationWork(
           AutomationPersistenceTest.Database.JDBC,
           AutomationPersistenceTest.Database.TRANSACTIONS,
           new ObjectMapper(),
-          AutomationWorkPersistenceTest::noTaskHere);
+          AutomationWorkPersistenceTest::noTaskHere,
+          Clock.fixed(NOW, ZoneOffset.UTC));
 
   private static Task noTaskHere(
       String owner, UUID project, String title, String criterion, Integer minutes) {
@@ -233,6 +241,172 @@ class AutomationWorkPersistenceTest {
     assertThat(candidates.getLast().runs())
         .as("un evento sin ejecuciones previas llega limpio: su primer intento será el 1")
         .isEmpty();
+  }
+
+  /**
+   * @s21, filas 4 y 5 del Outline, y el invariante «existe exactamente una ejecución» de @s19: el
+   *     ejecutor comprueba que el endpoint está activo FUERA de la transacción, y entre esa
+   *     comprobación y el INSERT de la entrega el endpoint puede dejar de serlo —el worker de la
+   *     feature 25 desactiva endpoints solo, en el mismo proceso—. Aquí eso se reproduce sin
+   *     carrera ninguna: se confirma una Notify hacia un endpoint que ya no está activo.
+   *     <p>El INSERT no lleva ON CONFLICT y el id de la entrega es un UUID recién sorteado, así que
+   *     {@code affected == 0} NO puede significar nunca que otro worker se adelantara: sólo puede
+   *     significar que el SELECT no casó. Confundir las dos cosas es lo que hace que el ejecutor
+   *     conteste «ya lo hizo otro», siga el paseo, y el evento entero —con las reglas que también
+   *     lo casaban— se pierda para siempre detrás del cursor, sin fila de ejecución y sin bitácora.
+   *     <p>Las dos últimas aserciones son las que dan sentido a la primera: si algo hubiera quedado
+   *     escrito, la distinción sería otro problema.
+   */
+  @Test
+  void s21_anEndpointNoLongerActiveIsNotAClaimAnotherWorkerWon() {
+    var owner = owner();
+    var project = project(owner);
+    var event = outbox(owner, project, T0.plusSeconds(1), "pending");
+    var endpoint = endpoint(owner, "disabled");
+    var rule = rule(owner);
+
+    assertThatThrownBy(() -> work.commit(notifying(owner, rule, endpoint, event)))
+        .as("«el endpoint ya no está activo» y «otro worker se me adelantó» no son la misma cosa")
+        .isInstanceOf(AutomationEndpointGoneException.class);
+
+    assertThat(deliveriesOf(owner)).as("y no se encoló ninguna entrega").isZero();
+    assertThat(runsOf(owner)).as("ni quedó fila de ejecución: la transacción revirtió").isZero();
+  }
+
+  /**
+   * M9: el aislamiento por propietario de {@code queue()} vive en dos literales de SQL —{@code
+   * e.owner_id = ?} y {@code e.status = 'active'}— que ninguna prueba distinguía, porque el único
+   * test que llegaba a este INSERT usaba un endpoint activo del propio propietario y PIT no muta
+   * cadenas. Borrar {@code AND e.owner_id = ?} dejaba la suite verde y entregaba el payload de A a
+   * la cola de B: el {@code INSERT ... SELECT} toma {@code e.owner_id} y la URL del endpoint, y
+   * {@code o.payload} del evento de A.
+   *
+   * <p>Por eso el segundo propietario tiene su endpoint ACTIVO: con uno inactivo el predicado de
+   * estado tapa al de propietario y la prueba volvería a no discriminar.
+   */
+  @Test
+  void queueNeverHandsTheEventOfOneOwnerToTheEndpointOfAnother() {
+    var mine = owner();
+    var stranger = owner();
+    var project = project(mine);
+    var event = outbox(mine, project, T0.plusSeconds(1), "pending");
+    var theirs = endpoint(stranger, "active");
+    var rule = rule(mine);
+
+    assertThatThrownBy(() -> work.commit(notifying(mine, rule, theirs, event)))
+        .as("un endpoint ajeno no es alcanzable ni siquiera nombrándolo por su id")
+        .isInstanceOf(AutomationEndpointGoneException.class);
+
+    assertThat(deliveriesOf(stranger))
+        .as("nada del propietario A llega a la cola de entregas de B")
+        .isZero();
+    assertThat(deliveriesOf(mine)).isZero();
+  }
+
+  /**
+   * M11: {@code queue()} sella {@code next_attempt_at}, {@code created_at} y {@code updated_at} de
+   * la entrega con {@code notify.event().occurredAt()}, el instante del EVENTO. En el propio @s15
+   * —el worker apagado que se enciende y camina el atraso— toda entrega de automatización nace con
+   * las tres marcas en el pasado: el {@code createdAt} que el propietario ve en el registro de la
+   * feature 25 (@s29) deja de ser cuando se creó la entrega, y el índice {@code
+   * webhook_deliveries_due (next_attempt_at, id) WHERE status='pending'} las coloca por delante de
+   * todas las entregas legítimas. El {@code enqueue} de la propia feature 25 sella con {@code now}:
+   * este adaptador era el único que no.
+   *
+   * <p>El oráculo de @s26 afirma endpoint_id, event_id, event_type, status y body y ninguna de las
+   * tres marcas, así que hasta aquí nada podía notarlo, ni en un sentido ni en el otro.
+   */
+  @Test
+  void s26_aQueuedDeliveryIsStampedWhenItIsQueuedAndNotWhenTheEventHappened() {
+    var owner = owner();
+    var project = project(owner);
+    var event = outbox(owner, project, T0.plusSeconds(1), "pending");
+    var endpoint = endpoint(owner, "active");
+
+    work.commit(notifying(owner, rule(owner), endpoint, event));
+
+    assertThat(deliveryOf(owner))
+        .as("las tres marcas son las del encolado, no las del evento que lo provocó")
+        .containsEntry("created_at", Timestamp.from(NOW))
+        .containsEntry("updated_at", Timestamp.from(NOW))
+        .containsEntry("next_attempt_at", Timestamp.from(NOW));
+  }
+
+  private static Map<String, Object> deliveryOf(String owner) {
+    return AutomationPersistenceTest.Database.JDBC.queryForMap(
+        "SELECT * FROM webhook_deliveries WHERE owner_id = ?", owner);
+  }
+
+  private AutomationCommit notifying(String owner, UUID rule, UUID endpoint, UUID event) {
+    var effect =
+        new AutomationEffect.Notify(
+            endpoint,
+            new AutomationEvent(
+                event, owner, TRIGGER, UUID.randomUUID(), T0.plusSeconds(1), Map.of()));
+    return new AutomationCommit(
+        owner,
+        null,
+        List.of(
+            new AutomationOutcome(
+                run(rule, owner, event, 1, "succeeded", null, T0.plusSeconds(2)), effect)));
+  }
+
+  /**
+   * Un endpoint del propietario en el estado que pida la prueba. El secreto es un byte de relleno,
+   * y la razón y el instante de desactivación van juntos porque el CHECK de la tabla los exige.
+   */
+  private static UUID endpoint(String owner, String status) {
+    var disabled = "disabled".equals(status);
+    var id = UUID.randomUUID();
+    AutomationPersistenceTest.Database.JDBC.update(
+        "INSERT INTO webhook_endpoints(id,owner_id,url,description,event_types,status,"
+            + "disabled_reason,disabled_at,"
+            + "secret_ciphertext,cursor_occurred_at,cursor_event_id,created_at,updated_at)"
+            + " VALUES (?,?,'https://example.com/h','',ARRAY['TaskCreated.v1']::text[],?,?,?,"
+            + "'\\x01'::bytea,?,?,?,?)",
+        id,
+        owner,
+        status,
+        disabled ? "MANUAL" : null,
+        disabled ? Timestamp.from(T0) : null,
+        Timestamp.from(T0),
+        new UUID(0L, 0L),
+        Timestamp.from(T0),
+        Timestamp.from(T0));
+    return id;
+  }
+
+  private static long deliveriesOf(String owner) {
+    return AutomationPersistenceTest.Database.JDBC.queryForObject(
+        "SELECT count(*) FROM webhook_deliveries WHERE owner_id = ?", Long.class, owner);
+  }
+
+  private static long runsOf(String owner) {
+    return AutomationPersistenceTest.Database.JDBC.queryForObject(
+        "SELECT count(*) FROM automation_runs WHERE owner_id = ?", Long.class, owner);
+  }
+
+  /**
+   * M9: el aislamiento del recorrido. La ventana de candidatos es {@code WHERE owner_id = ? AND
+   * (occurred_at, event_id) > (?, ?)}, y hasta aquí ninguna prueba ponía dos propietarios con
+   * eventos en la misma base: cada test se inventaba un propietario único, así que el predicado de
+   * propietario no tenía nada contra lo que discriminar y PIT no muta cadenas.
+   *
+   * <p>Sin él, el ciclo de A leería los eventos de B, sus reglas se dispararían sobre ellos y le
+   * crearía tareas —o le encolaría entregas— a partir de datos de otra cuenta. El evento del
+   * extraño ocurre ANTES que el propio a propósito: sin el predicado sería el primero de la lista,
+   * y el ciclo de A lo procesaría antes que nada suyo.
+   */
+  @Test
+  void theWalkOfOneOwnerNeverReadsTheOutboxOfAnother() {
+    var mine = owner();
+    var stranger = owner();
+    outbox(stranger, project(stranger), T0.plusSeconds(1), "pending");
+    var own = outbox(mine, project(mine), T0.plusSeconds(2), "pending");
+
+    assertThat(idsOf(work.after(mine, start())))
+        .as("la ventana de candidatos es la de un propietario, no la de la instalación")
+        .containsExactly(own);
   }
 
   private static AutomationCursor start() {

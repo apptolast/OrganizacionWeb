@@ -17,4 +17,12 @@ import java.util.UUID;
  */
 public interface AutomationAudit {
   void runFinished(UUID ruleId, UUID eventId, String status, int attempt, String errorCode);
+
+  /**
+   * Un fallo atribuible a un propietario, que detiene su recorrido y el de nadie más. {@code
+   * eventId} nombra la fila de outbox en la que se quedó, o es null cuando el fallo no es de un
+   * evento concreto. {@code category} es el nombre de la clase del fallo: ni el mensaje ni el
+   * payload, que son contenido del propietario.
+   */
+  void cycleFailed(String ownerId, UUID eventId, String category);
 }

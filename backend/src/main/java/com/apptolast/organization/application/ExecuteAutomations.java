@@ -50,13 +50,42 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
 
   @Override
   public void runCycle() {
-    for (var owner : work.ownersWithRules()) walk(owner);
+    for (var owner : work.ownersWithRules()) walkGuarded(owner);
+  }
+
+  /**
+   * The outer half of the same frontier, for what breaks before there is an event in hand: reading
+   * the cursor, starting it, reading the window. There is no event to name, and the line says so
+   * rather than saying nothing.
+   */
+  private void walkGuarded(String owner) {
+    try {
+      walk(owner);
+    } catch (RuntimeException failure) {
+      audit.cycleFailed(owner, null, failure.getClass().getSimpleName());
+    }
   }
 
   private void walk(String owner) {
     var cursor = work.cursor(owner).or(() -> startCursorOf(owner));
     if (cursor.isEmpty()) return;
-    for (var candidate : work.after(owner, cursor.get())) if (!process(owner, candidate)) return;
+    for (var candidate : work.after(owner, cursor.get())) if (!attempt(owner, candidate)) return;
+  }
+
+  /**
+   * The blast radius of one poisoned row is one owner. Whatever the row breaks —a payload that does
+   * not carry the identifier its own event type promises is the cheap way in— the walk of this
+   * owner stops on it and the cycle carries on with the next account. It stops instead of skipping
+   * on purpose: the cursor stays put, so nothing is passed over in silence, and the line names the
+   * owner, the event and the class of the failure, which is what a skip would never leave behind.
+   */
+  private boolean attempt(String owner, AutomationCandidate candidate) {
+    try {
+      return process(owner, candidate);
+    } catch (RuntimeException failure) {
+      audit.cycleFailed(owner, candidate.event().eventId(), failure.getClass().getSimpleName());
+      return false;
+    }
   }
 
   /**
@@ -82,10 +111,20 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
         candidate.blocked() || matcher.loopGuarded(owner, event)
             ? List.<AutomationOutcome>of()
             : firedBy(owner, candidate);
+    return confirm(owner, event, outcomes);
+  }
+
+  private boolean confirm(String owner, AutomationEvent event, List<AutomationOutcome> outcomes) {
     try {
       work.commit(new AutomationCommit(owner, reachedBy(event), outcomes));
       outcomes.forEach(this::log);
       return true;
+    } catch (AutomationEndpointGoneException gone) {
+      // The endpoint stopped being an active endpoint of this owner between the check and the
+      // write. Nothing of the confirmation landed, so the same event is confirmed again with that
+      // rule settled as the contract asks; every other rule of the event keeps its effect. Each
+      // pass settles at least one endpoint, so the walk cannot spin here.
+      return confirm(owner, event, settledFor(outcomes, gone.endpointId()));
     } catch (AutomationClaimedException claimed) {
       // Another worker got there first: its run is the one that counts and the walk carries on.
       return true;
@@ -99,6 +138,36 @@ public final class ExecuteAutomations implements ExecuteAutomationsUseCase {
       // the next cycle fixes that when it reads the event again and finds every rule settled.
       return !rows.isEmpty() && rows.stream().noneMatch(row -> RETRY.equals(row.status()));
     }
+  }
+
+  /** The rules aimed at an endpoint that is no longer there, settled where they stand. */
+  private static List<AutomationOutcome> settledFor(
+      List<AutomationOutcome> outcomes, UUID endpointId) {
+    return outcomes.stream()
+        .map(
+            outcome ->
+                outcome.effect() instanceof AutomationEffect.Notify notify
+                        && notify.endpointId().equals(endpointId)
+                    ? new AutomationOutcome(
+                        withoutReaching(outcome.run()), new AutomationEffect.None())
+                    : outcome)
+        .toList();
+  }
+
+  private static AutomationRun withoutReaching(AutomationRun run) {
+    return new AutomationRun(
+        run.id(),
+        run.ruleId(),
+        run.ownerId(),
+        run.eventId(),
+        run.eventType(),
+        run.occurredAt(),
+        run.attempt(),
+        FAILED,
+        null,
+        null,
+        ENDPOINT_NOT_FOUND,
+        run.executedAt());
   }
 
   /**

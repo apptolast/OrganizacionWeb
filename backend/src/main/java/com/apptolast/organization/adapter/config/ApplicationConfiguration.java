@@ -749,9 +749,10 @@ public class ApplicationConfiguration {
       org.springframework.jdbc.core.JdbcTemplate jdbc,
       org.springframework.transaction.PlatformTransactionManager transactions,
       com.fasterxml.jackson.databind.ObjectMapper json,
-      com.apptolast.organization.application.CreateTaskUseCase createTask) {
+      com.apptolast.organization.application.CreateTaskUseCase createTask,
+      Clock clock) {
     return new com.apptolast.organization.adapter.persistence.PostgresAutomationWork(
-        jdbc, transactions, json, createTask);
+        jdbc, transactions, json, createTask, clock);
   }
 
   @Bean

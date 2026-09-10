@@ -390,3 +390,92 @@ entera de fallo. Fijar coordenadas linea:columna sobre ficheros compartidos que
 crecen es frágil por construcción, y ninguna disciplina lo arregla. **No lo
 condiciono a esta feature** —es deuda del proyecto, no de la 29— pero debería ser
 la siguiente tarea de arnés.
+
+---
+
+## 7. Mutación: qué exijo (la campaña la corre el orquestador)
+
+Umbral del proyecto: `harness.config.json:22`, **0.8**. No lo bajo.
+
+### Umbrales por capa
+
+| Capa | Umbral | Motivo |
+|---|---|---|
+| Dominio y aplicación: `GitlabProjectPath`, las seis `*StatusSource`, `ReadConnectorCatalog`, `ConnectGitlab`, `DisconnectGitlab`, `ReadGitlabConnection`, `ImportGuard` | **>= 0.90** | Es donde vive la decisión. Hay 34 casos de prueba sobre las seis derivaciones de estado; si eso no llega a 90 es que las pruebas describen en vez de discriminar. |
+| Adaptadores: `HttpGitlabIssueSource`, `GitlabApiBase`, `GitlabConnectorController`, `ConnectorCatalogController`, `PostgresGitlabConnectionStore` | **>= 0.80** | Umbral del proyecto. Aquí hay traducción y plomería; sobreviven mutantes de mensajes y de cabeceras. |
+| Frontend: los cuatro ficheros de `stryker.additional-connectors.config.json` | **>= 0.80**, que es el `break` ya declarado | 77 pruebas sobre cuatro ficheros. Con esa densidad, menos de 80 sería alarmante. |
+
+### Clases que **tienen que recibir mutantes sí o sí**
+
+El artesano cazó que `ConnectorStatusSource*` sólo resolvía a la interfaz y añadió
+las seis implementaciones (`build.gradle.kts:92-100`, con el comentario que lo
+explica). Bien visto. Pero he vuelto a pasar el mismo cedazo sobre el ámbito
+entero y **quedan tres patrones muertos o ausentes**:
+
+1. **`com.apptolast.organization.domain.GitlabProjectPath*` — AUSENTE.** No
+   aparece ni una vez en `backend/build.gradle.kts`. Es el validador de recorrido
+   de rutas: `@s10` le cuelga cinco filas y la superficie SSRF depende de él.
+   `additionalConnectorsClasses` no incluye **ninguna** clase de `domain`. Añadir.
+   **Innegociable.**
+
+2. **`com.apptolast.organization.application.ImportIssues*` — SIN ÁMBITO NINGUNO.**
+   El comentario de `build.gradle.kts:81-83` dice que las clases compartidas
+   («ImportIssues, IssueImportReceipt») las muta el ámbito `github_connector` para
+   no contar un mutante dos veces. El razonamiento es correcto; **el hecho no lo
+   es**. `githubConnectorClasses:115` declara `application.ImportGithubIssues*`, y
+   esa clase **ya no existe**: no hay ningún fichero `ImportGithubIssues*` bajo
+   `backend/src/main`. La renombró esta misma feature (decisión 1 de la bitácora).
+   El patrón está muerto y `ImportIssues` —el caso de uso único que sirve a los dos
+   gestores, el corazón de `@s15` a `@s28` y el origen literal de la regresión de
+   `a347936`— **no recibe un solo mutante en ninguna campaña del repositorio**.
+
+   Es la misma familia que el `ConnectorStatusSource*` que él cazó, que el patrón
+   PIT muerto que dejó `AesGcmSecretCipher` sin mutantes y que los rangos
+   desplazados del hallazgo. Tercera aparición en una noche: un patrón que no
+   resuelve **no falla, puntúa**. Corregir `:115` a `ImportIssues*`, o declararlo
+   en el ámbito de la 29 y asumir el doble conteo, que es el mal menor.
+
+3. **`com.apptolast.organization.application.ImportGuard*` — AUSENTE.** Tampoco
+   aparece en `build.gradle.kts`. Es la guarda de `IMPORT_IN_PROGRESS` por
+   propietario y el vencimiento a los 15 minutos: `@s27` (cinco filas) y `@s28`
+   (dos filas, una de ellas la frontera 14/16 minutos) descansan enteros ahí.
+   Añadir.
+
+Además de los diez que el artesano pidió y que ya están puestos
+(`build.gradle.kts:94-108`), exijo que reciban mutantes:
+
+```
+domain.GitlabProjectPath*                     <- hoy fuera (S2)
+application.ImportIssues*                     <- hoy fuera de TODA campaña
+application.ImportGuard*                      <- hoy fuera
+application.ApiCredentialStatusSource*        ya
+application.WebhookStatusSource*              ya
+application.IcsCalendarStatusSource*          ya
+application.GithubStatusSource*               ya
+application.ExternalCalendarStatusSource*     ya
+application.GitlabStatusSource*               ya
+application.ReadConnectorCatalog*             ya
+adapter.connectors.HttpGitlabIssueSource*     ya
+adapter.http.ConnectorCatalogController*      ya
+```
+
+Y en frontend, los cuatro declarados. **No** exijo rangos sobre `App.tsx` ni
+`workspace.tsx` para esta feature: con C1 resuelto habrá una prueba de ruta que
+los mate, y meter rangos nuevos sería añadir leña al problema del hallazgo.
+
+### Supervivientes que acepto de antemano
+
+El artesano los previó (bitácora, «Qué mutantes espero que sobrevivan») y le doy
+la razón en los cuatro: los nulos de `ConnectorRow.disabled` y `notConnected`, la
+guarda `IllegalArgumentException` de `ConnectorCatalog.row`, la frontera
+`isBefore` frente a `!isAfter` de `ApiCredentialStatusSource`, y el recorte de
+espacios de `@s21` guardado dos veces (`ExternalIssue` y `Task.create`).
+Predecirlos por escrito **antes** de la campaña es la forma correcta de hacer
+esto: si aparecen, son conocidos; si aparecen otros, hay que explicarlos.
+
+### Lo que exijo del informe
+
+Que se contraste con esa previsión y que **cualquier superviviente no previsto en
+`GitlabProjectPath`, `ImportIssues`, `ImportGuard` o las seis `*StatusSource` se
+explique una a una**. Un porcentaje agregado no vale como evidencia en las clases
+donde vive la seguridad.

@@ -18,7 +18,6 @@ export function Workspace({
     | "Calendario"
     | "Calendario externo"
     | "Importación"
-    | "Conectores"
     | "API para integraciones"
     | "Webhooks"
     | "Automatizaciones"
@@ -109,15 +108,6 @@ export function Workspace({
           >
             <span aria-hidden="true">↑</span> Importación
             {section === "Importación" && (
-              <span className="nav-dot" aria-hidden="true" />
-            )}
-          </RouteLink>
-          <RouteLink
-            href="/conectores"
-            aria-current={section === "Conectores" ? "page" : undefined}
-          >
-            Conectores
-            {section === "Conectores" && (
               <span className="nav-dot" aria-hidden="true" />
             )}
           </RouteLink>

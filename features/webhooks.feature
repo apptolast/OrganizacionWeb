@@ -584,8 +584,10 @@ Feature: Entregar los eventos propios ya confirmados a URLs https elegidas con f
     And ese enlace se alcanza con Tab y cumple el foco visible y los 44 px que el @s42 exige a todo control
     And su nombre accesible dice que explica cómo verificar la firma, no «aquí» ni «más información»
     And el enlace apunta a un destino no vacío; el contrato no fija cuál
-    # Ampliación del 10 de septiembre de 2026. PENDIENTE DE CONTRAFIRMA del
-    # propietario: hasta que la haya, este escenario no acredita cierre.
+    # Ampliación del 10 de septiembre de 2026, CONTRAFIRMADA por el propietario
+    # el 11 de septiembre de 2026. Queda como R14 en progress/ratificaciones.md,
+    # con la pregunta y la respuesta literales: fue una ratificación delegada
+    # («lo que tú me recomiendes»), y allí se dice así y no de otro modo.
     #
     # project-spec.md:2044 promete desde el principio que la ayuda del formulario
     # ENLAZA docs/webhooks.md, y el producto no enlazaba. Hoy se corrigió el
@@ -602,4 +604,5 @@ Feature: Entregar los eventos propios ya confirmados a URLs https elegidas con f
     # sabiendo a qué llega, a la guía de verificación de firma. Un enlace ausente,
     # mudo, sin destino o fuera del orden de tabulación incumple; mudar la guía de
     # sitio, no.
-    # Ver progress/enlace_docs_webhooks.md y progress/decisiones_pendientes.md.
+    # Ver progress/ratificaciones.md (R14), progress/enlace_docs_webhooks.md y
+    # progress/decisiones_pendientes.md.

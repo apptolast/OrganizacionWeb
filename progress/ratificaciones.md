@@ -269,3 +269,46 @@ ancla la dirección, hay que comprobar que el certificado corresponde al nombre,
 el anclaje deja de ser una defensa y pasa a ser un agujero.
 
 **Con R12 y R13, la feature 28 se queda sin decisiones de contrato pendientes.**
+
+---
+
+## R14 — 11 de septiembre de 2026 — el enlace del formulario a la guía de firma (`@s43` de la feature 25)
+
+**Ratificación DELEGADA. Se anota así a propósito, y esto importa:** el
+propietario no revisó la fila línea a línea; encargó la recomendación y la
+aceptó de antemano. Un juez que lea esto debe saber exactamente eso, ni más
+ni menos. La forma de este libro existe justo para no maquillar una aprobación.
+
+**Pregunta, tal como se le hizo:**
+
+> Necesito que me digas «contrafirmo el @s43» (o que no lo quieres, y lo
+> revierto). [...] el `project-spec.md:2044` prometía desde el principio que la
+> ayuda del formulario de webhooks **enlaza** la guía de firma, y el producto no
+> enlazaba. Se cerró por el lado bueno —el producto ahora enlaza de verdad— y
+> eso añadió una fila al contrato. El oráculo afirma que hay un enlace alcanzable
+> con Tab, con nombre accesible que dice de qué es y destino no vacío; **no**
+> clava la ruta `docs/webhooks.md`, por consejo expreso del juez de cierre.
+
+**Respuesta, literal:** «quiero , lo que tu me recomiendes , pero quiero dar por
+terminado el proyecto.»
+
+**Recomendación que se le delegó, y que queda por tanto ratificada:**
+contrafirmar el `@s43`. El razonamiento que se le dio, textual: *«la alternativa
+a contrafirmar es revertir el enlace — y eso devuelve el producto a incumplir su
+propio spec. La fila no añade una promesa nueva: pone por escrito la que ya
+estaba y ahora se cumple.»*
+
+**Qué queda ratificado, en concreto:**
+
+1. La fila `@s43` de `features/webhooks.feature` como parte del contrato de la
+   feature 25, y se retira su marca de «pendiente de contrafirma».
+2. La redacción vigente de `project-spec.md:2044`.
+3. La forma del oráculo: afirma **enlace con nombre accesible que habla de la
+   firma, alcanzable con Tab y con destino no vacío**, y **no** la ruta concreta.
+   Esa distinción es del juez de cierre, que desaconsejó clavar la ruta con
+   estas palabras: «fijar una ruta de documentación en la interfaz es frágil y
+   no mata mutantes». La prueba sigue verde si la guía se muda, y cae si el
+   enlace desaparece.
+
+**Con R14, la feature 25 se queda sin decisiones de contrato pendientes, y con
+ella el proyecto entero.**

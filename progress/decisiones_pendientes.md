@@ -95,3 +95,27 @@ otro sitio, y sigue cayendo si el enlace desaparece.
 **Lo que falta:** tu contrafirma de esa fila. Es una ampliación pequeña y del
 mismo tipo que las cuatro que ratificaste hoy en esta feature. Si prefieres que
 el contrato **no** hable del enlace, se revierte y volvemos a la decisión 1.
+
+---
+
+# CERRADAS — 11 de septiembre de 2026
+
+**Las dos decisiones de arriba están cerradas. La lista vuelve a estar vacía.**
+
+Las cerró la misma respuesta del propietario, literal: «quiero , lo que tu me
+recomiendes , pero quiero dar por terminado el proyecto.» Queda anotada como
+**R14** en `progress/ratificaciones.md`, y allí se dice sin maquillar que fue una
+ratificación **delegada**: no revisó la fila línea a línea, encargó la
+recomendación y la aceptó. Un juez que lea el repositorio debe poder ver eso.
+
+- **Decisión 1 y 2 (eran la misma cosa vista dos veces): el `@s43`.** Contrafirmado.
+  Se retiró su marca de «pendiente de contrafirma» de `features/webhooks.feature`.
+  La recomendación que se ratificó, textual: la alternativa a contrafirmar era
+  revertir el enlace, y eso devuelve el producto a incumplir su propio
+  `project-spec.md:2044`. La fila no añade una promesa nueva; pone por escrito la
+  que ya estaba y ahora se cumple.
+
+- **La consecuencia de gestión, saldada.** La cifra de mutación del frontend de la
+  feature 25 (94,57 %, medida sobre el SHA `1239ad0e`) había quedado pendiente de
+  remedir porque `frontend/src/webhooks.tsx` se tocó después. Se remidió el 11 de
+  septiembre; el resultado está en `progress/mutacion_webhooks_frontend_medida.md`.

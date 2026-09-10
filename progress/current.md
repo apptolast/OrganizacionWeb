@@ -869,3 +869,46 @@ limpio: lint verde y los 2.961 otra vez.
 
 Aviso de lectura: la cabecera de este documento («quedan dos features») es del
 19:30 y ha quedado atrás.
+
+---
+
+## 11 de septiembre de 2026 — CIERRE DEL PROYECTO
+
+**27 de 27 features en `done`, sin decisiones pendientes y sin cifras caducadas.**
+
+Lo que faltaba esta noche y ya está saldado:
+
+1. **La contrafirma del `@s43`.** Dada por el propietario y anotada como **R14**
+   en `progress/ratificaciones.md`, donde se dice sin maquillar que fue una
+   ratificación **delegada** («lo que tú me recomiendes»): no revisó la fila
+   línea a línea, encargó la recomendación y la aceptó. La marca de «pendiente
+   de contrafirma» se retiró de `features/webhooks.feature`.
+2. **La mutación de frontend de la feature 25, remedida.** **94,43 %** (593/628)
+   sobre el SHA `2c0f34fd`, calculada del `mutation.json`. Acta en
+   `progress/mutacion_webhooks_frontend_medida.md`, con los 35 supervivientes
+   nominales que exige C7. La cifra vieja (94,57 % sobre `1239ad0e`) ya no
+   describía el árbol porque `webhooks.tsx` se tocó después.
+3. **Los cuatro workflows**, ninguno parado ni fallando. Detalle y evidencia en
+   `progress/auditoria_workflows.md`.
+
+## Lo que se cierra SABIENDO, que no es lo mismo que ocultarlo
+
+Dos cosas quedan nombradas, no escondidas. Ninguna bloquea el cierre; las dos
+merecen un párrafo para que nadie las descubra dentro de seis meses creyendo que
+se le ocultaron:
+
+- **La red de seguridad de mutación de todo el repositorio no existe hoy.** No es
+  que se haya relajado: nunca llegó a funcionar. Pedía 11-17 h en un job con
+  techo de 6. Queda a petición, con la medición escrita dentro del propio YAML y
+  con la condición para devolverle el cron. La puerta que cierra features —la
+  mutación por feature de C7— sí se cumplió, feature a feature, con su acta.
+- **Hay un punto ciego de medición, medido.** El objetivo vacío muta 456 clases
+  de backend; la unión de los ámbitos con nombre alcanzables, 308. Las 148 de
+  diferencia —`Project`, `Task`, `CreateTaskUseCase`, `ValidationException`
+  entre ellas— no las cubre hoy ningún ámbito con nombre, porque el comodín
+  `core` sólo vive en la rama `else`. Y `noche_cinco`, que se creía un atajo
+  combinado, no existe como ámbito: cae al `else`, o sea al backend entero.
+  Números y método reproducible en `progress/medicion_ambito_mutacion.md`.
+
+**Aviso de lectura:** la cabecera de este documento («quedan dos features») es
+del 10 de septiembre a las 19:30 y quedó atrás hace mucho. Este bloque manda.

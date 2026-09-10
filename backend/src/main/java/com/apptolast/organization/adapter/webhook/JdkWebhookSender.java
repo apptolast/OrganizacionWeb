@@ -59,6 +59,17 @@ public final class JdkWebhookSender implements WebhookSender {
   }
 
   private final Clock clock;
+
+  /**
+   * El cronómetro del intento. Es un {@link java.util.function.LongSupplier} de nanos y no el
+   * {@link Clock} inyectado a propósito: medir tiempo transcurrido con un reloj de pared es un
+   * defecto conocido —un ajuste de NTP a mitad de intento da latencias negativas o absurdas—.
+   * Inyectarlo satisface la cláusula del contrato («medido con el reloj inyectado»: nada ambiente,
+   * todo controlable por la prueba) sin renunciar a la monotonía, que es lo que una latencia
+   * necesita.
+   */
+  private final java.util.function.LongSupplier ticker;
+
   private final AddressPolicy policy;
   private final com.apptolast.organization.application.WebhookDestinationGuard.HostResolver
       resolver;
@@ -99,7 +110,25 @@ public final class JdkWebhookSender implements WebhookSender {
       Duration connectDeadline,
       Duration exchangeDeadline,
       SSLContext tls) {
+    this(clock, policy, resolver, connectDeadline, exchangeDeadline, tls, System::nanoTime);
+  }
+
+  /**
+   * El cronómetro es inyectable porque el contrato lo exige —«latencyMs es un entero no negativo
+   * medido con el reloj inyectado», features/webhooks.feature:320— y porque sin inyectarlo la
+   * cláusula no se puede probar: una latencia real no es reproducible. Producción usa {@code
+   * System::nanoTime} a través del constructor de arriba.
+   */
+  JdkWebhookSender(
+      Clock clock,
+      AddressPolicy policy,
+      com.apptolast.organization.application.WebhookDestinationGuard.HostResolver resolver,
+      Duration connectDeadline,
+      Duration exchangeDeadline,
+      SSLContext tls,
+      java.util.function.LongSupplier ticker) {
     this.clock = clock;
+    this.ticker = ticker;
     this.policy = policy;
     this.resolver = resolver;
     this.connectDeadline = connectDeadline;
@@ -120,7 +149,7 @@ public final class JdkWebhookSender implements WebhookSender {
 
   @Override
   public WebhookAttempt send(String url, String secret, String eventId, String body) {
-    var started = System.nanoTime();
+    var started = ticker.getAsLong();
     var payload = body.getBytes(StandardCharsets.UTF_8);
     var target = URI.create(url);
     var host = target.getHost();
@@ -206,8 +235,8 @@ public final class JdkWebhookSender implements WebhookSender {
     return HttpResponse.BodyHandlers.discarding();
   }
 
-  private static int elapsedMillis(long startedNanos) {
-    return (int) Math.max(0, (System.nanoTime() - startedNanos) / MILLIS_PER_NANO);
+  private int elapsedMillis(long startedNanos) {
+    return (int) Math.max(0, (ticker.getAsLong() - startedNanos) / MILLIS_PER_NANO);
   }
 
   private static final class BlockedDestination extends RuntimeException {}

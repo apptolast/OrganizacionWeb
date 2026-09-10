@@ -90,6 +90,24 @@ class JdkWebhookSenderTest {
   }
 
   /** The same sender with the two deadlines shortened, so the timeout row is affordable. */
+  /**
+   * El mismo emisor, con el cronómetro bajo control de la prueba. Sin esto, la cláusula «latencyMs
+   * medido con el reloj inyectado» de features/webhooks.feature:320 no se puede comprobar: una
+   * latencia real no es reproducible, así que el oráculo tendría que conformarse con «es un entero
+   * no negativo», que lo cumple cualquier cosa, incluido un cero constante.
+   */
+  private static JdkWebhookSender senderTicking(long... nanos) {
+    var pasos = new java.util.concurrent.atomic.AtomicInteger();
+    return new JdkWebhookSender(
+        CLOCK,
+        EVERY_ADDRESS_ALLOWED,
+        InetAddress::getAllByName,
+        TEST_CONNECT_DEADLINE,
+        TEST_EXCHANGE_DEADLINE,
+        null,
+        () -> nanos[Math.min(pasos.getAndIncrement(), nanos.length - 1)]);
+  }
+
   private static JdkWebhookSender senderWithShortDeadlines() {
     return new JdkWebhookSender(
         CLOCK,
@@ -500,6 +518,19 @@ class JdkWebhookSenderTest {
       assertEquals("BLOCKED_ADDRESS", outcome.errorClass());
       assertNull(outcome.httpStatus());
       assertTrue(receiver.received().isEmpty());
+    }
+  }
+
+  @Test
+  void s25_latencyMsComesFromTheInjectedTickerAndNotFromTheAmbientClock() throws Exception {
+    // 1 ms de arranque y 1,25 s al terminar: 1250 ms exactos, imposibles de obtener por
+    // casualidad contra un receptor local que responde en microsegundos.
+    try (var receiver = start(exchange -> respond(exchange, 200, new byte[0]))) {
+      var outcome =
+          senderTicking(1_000_000L, 1_251_000_000L).send(receiver.url(), SECRET, EVENT, BODY);
+
+      assertEquals(200, outcome.httpStatus());
+      assertEquals(1250, outcome.latencyMs(), "la latencia no sale del cronómetro inyectado");
     }
   }
 }

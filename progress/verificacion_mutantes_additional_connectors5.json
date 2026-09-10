@@ -1,0 +1,164 @@
+[
+  {
+    "racimo": 5,
+    "name": "screen 116 LogicalOperator instanceof || code",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 a passing read failure does not accuse the server of missing configuration"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 117 CE code === CONNECTORS_DISABLED -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s36 a passing read failure does not accuse the server of missing configuration"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 319 StringLiteral not_connected -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 a connection that does not exist yet paints no panel to act on"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 319 CE status !== not_connected -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s34 a connection that does not exist yet paints no panel to act on"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 319 LogicalOperator showPanel || connection",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 while the token is being replaced the old panel offers nothing"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 299 CE showPanel -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 while the token is being replaced the old panel offers nothing"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 299 LogicalOperator ultimo && -> ||",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 while the token is being replaced the old panel offers nothing"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 443 StringLiteral region viva vacia",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 the live region says nothing while nothing is travelling"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 303 UnaryOperator tabIndex main -> +1",
+    "verdict": "MUERE",
+    "tests": [
+      "@s38 keeps its own containers out of the tab order instead of in front of it"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 304 UnaryOperator tabIndex h1 -> +1",
+    "verdict": "MUERE",
+    "tests": [
+      "@s38 keeps its own containers out of the tab order instead of in front of it"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 461 UnaryOperator tabIndex recibo -> +1",
+    "verdict": "MUERE",
+    "tests": [
+      "@s38 keeps its own containers out of the tab order instead of in front of it"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 338 ArrowFunction onChange del selector",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 imports into the project chosen in the selector"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 74 StringLiteral selected inicial",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 imports into the first open project when the owner chooses none",
+      "@s35 with no project to import into, the button sends nothing"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 166 CE current -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 imports into the first open project when the owner chooses none",
+      "@s35 with no project to import into, the button sends nothing"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 166 StringLiteral sin proyectos",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 with no project to import into, the button sends nothing"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 207 CE guarda de importacion -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 with no project to import into, the button sends nothing"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 207 LogicalOperator importing && !selected",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 with no project to import into, the button sends nothing"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 141 BooleanLiteral focusReplace no se apaga",
+    "verdict": "MUERE",
+    "tests": [
+      "@s38 does not steal the focus back to «Actualizar token» on every later render"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 146 BooleanLiteral focusReceipt no se apaga",
+    "verdict": "MUERE",
+    "tests": [
+      "@s38 does not steal the focus back to the receipt on every later render"
+    ]
+  },
+  {
+    "racimo": 5,
+    "name": "screen 151 BooleanLiteral focusHeading no se apaga",
+    "verdict": "MUERE",
+    "tests": [
+      "@s38 does not steal the focus back to the heading on every later render"
+    ]
+  }
+]

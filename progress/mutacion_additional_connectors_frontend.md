@@ -277,3 +277,90 @@ generan del propio código fuente (`abortMutants()`), no se escriben a mano.
 
 **Previsión acumulada: 98 mutantes muertos** — por encima de las 85 que pide el umbral.
 Los racimos siguientes son margen, y van al fichero donde la predicción marcaba defecto.
+
+---
+
+## Racimo 5 — la pantalla de GitLab (20 mutantes)
+
+Aquí es donde la predicción marcaba defecto, y donde lo había. Cinco hallazgos de producto que
+la suite no podía delatar:
+
+### 5.1 Cualquier fallo de lectura acusaba a la instalación (2 mutantes, líneas 116-117)
+
+Sólo @s29 hacía fallar el GET de la conexión, y con `CONNECTORS_DISABLED`. Con la guarda
+relajada, **cualquier** lectura fallida —un 503 pasajero, un cuerpo ilegible— pintaba «Falta
+configuración del servidor para usar los conectores» y escondía el formulario: el propietario
+sale a molestar a quien administra la instalación por algo que se arregla reintentando.
+
+Oráculo: `@s36 a passing read failure does not accuse the server of missing configuration`.
+
+### 5.2 El panel se pintaba sin conexión (2 mutantes, línea 319)
+
+Con `not_connected` el objeto **no** es nulo, así que `showPanel` ya vale `true` y lo único que
+impide pintar el panel es el `!==`. La única aserción que podría pillarlo,
+`queryByText("Conectado")`, compara texto exacto y «No conectado» no es «Conectado». Con el
+mutante, un propietario sin conexión recibía el panel entero: «No conectado», proyecto vacío,
+«••••» e identificador vacío, junto al formulario.
+
+Oráculo: `@s34 a connection that does not exist yet paints no panel to act on`.
+
+### 5.3 El panel viejo sobrevivía al reemplazo del token (3 mutantes, líneas 299 y 319)
+
+Nadie afirmaba la exclusión mutua en esa dirección: mientras se reemplaza el token, el panel
+seguía ofreciendo «Importar issues» y «Desconectar» sobre una conexión que está a punto de
+cambiar.
+
+Oráculo: `@s35 while the token is being replaced the old panel offers nothing`.
+
+### 5.4 La región viva no callaba (1 mutante, línea 443)
+
+Se afirmaba que contiene «Guardando…» y «Importando», nunca que esté **vacía** cuando no hay
+nada en vuelo. Una pantalla que anuncia «Importando issues…» de forma permanente pasaba la
+suite entera. Es la misma familia del defecto de la región `aria-live` de esta noche, mirado por
+el otro lado.
+
+Oráculo: `@s35 the live region says nothing while nothing is travelling`.
+
+### 5.5 Lo elegido y lo enviado no estaban atados (5 mutantes, líneas 74, 166, 207, 338)
+
+`user.selectOptions` no aparecía en todo el fichero y no había un solo `JSON.parse` del cuerpo
+del POST: el servidor doble respondía el recibo se mandara lo que se mandara. La pantalla podía
+importar siempre al primer proyecto, o mandar un identificador basura, sin que nada fallara.
+Y con la lista de proyectos vacía, el botón «Importar issues» sigue habilitado: sólo la guarda
+`!selected` impide un POST con destino vacío, y nadie la ejercía.
+
+Oráculos: `@s35 imports into the project chosen in the selector`, `@s35 imports into the first
+open project when the owner chooses none` y `@s35 with no project to import into, the button
+sends nothing`. El primero, de paso, es el único que consulta el selector por su etiqueta
+(`getByLabelText("Proyecto de destino")`), que ata el `id`/`htmlFor` del control.
+
+### 5.6 El foco robado en cada repintado (3 mutantes, líneas 141, 146, 151)
+
+Las tres banderas se apagan justo antes de mover el foco. Dejarlas encendidas devuelve el foco
+al mismo sitio en **cada** render: quien navegue con teclado no podría ni recorrer el selector
+de proyectos. Las tres pruebas @s38 que había miran dónde está el foco justo después del cambio
+de estado, y ahí las dos versiones coinciden.
+
+Oráculos: tres pruebas que, tras el cambio de estado que mueve el foco, provocan **otro** render
+que no debe moverlo y afirman que el foco sigue donde el usuario lo dejó.
+
+### 5.7 El orden de tabulación (3 mutantes, líneas 303, 304, 461)
+
+`tabIndex={-1}` → `+1` mete el `<main>`, el `<h1>` y el recibo delante de todo lo demás. La
+prueba no enumera los tres elementos: recoge todo lo que declara `tabindex` y exige que ninguno
+sea positivo, así que un contenedor nuevo queda cubierto sin tocarla.
+
+### Equivalentes declarados en este racimo
+
+| Mutante | Por qué no puede matarse |
+|---|---|
+| `116:9 error instanceof GitlabConnectorError → true` | Para distinguirlo haría falta un error que no sea `GitlabConnectorError` y que además lleve `code === "CONNECTORS_DISABLED"`. Lo que `readGitlabConnection` puede lanzar es el error tipado, `Error("Confirmación incompatible")` o un `TypeError`/`AbortError` de red: ninguno lleva ese `code`. |
+| `299` los cuatro mutantes de `!disabled` y `!loading` | `disabled` sólo se enciende en el mismo `catch` que hace `setConnection(null)`, y `loading` sólo es cierto antes de la primera lectura, cuando `connection` todavía es `null`. En los dos casos `Boolean(connection)` ya vale `false`, así que las dos cláusulas son redundantes para `showPanel`. |
+| `94, 142, 147, 152` los cuatro `?.focus()` | Las cuatro referencias están montadas cuando su efecto corre: `heading` siempre; `replaceButton` porque `focusReplace` sólo se enciende desde `startImport`, alcanzable únicamente desde el panel; `receiptBox` porque `focusReceipt` se enciende con el recibo, que se pinta en el mismo render. |
+
+### Acreditación del rojo (20 de 20 mueren)
+
+`node scripts/verificar-mutantes-additional-connectors.mjs 5` →
+`progress/verificacion_mutantes_additional_connectors5.json`.
+
+**Previsión acumulada: 118 mutantes muertos.**

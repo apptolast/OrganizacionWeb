@@ -275,6 +275,32 @@ it("@s32 does not paint the token even while the request is still travelling", a
   await waitFor(() => expect(screen.getByText("Conectado")).toBeTruthy());
 });
 
+/**
+ * Un fallo pasajero de lectura no es una instalación mal configurada. Con la guarda relajada,
+ * cualquier 503 pintaba «Falta configuración del servidor» y escondía el formulario, mandando al
+ * propietario a molestar a quien administra la instalación por algo que se arregla reintentando.
+ */
+it("@s36 a passing read failure does not accuse the server of missing configuration", async () => {
+  stub(problem(503, { code: "STORAGE_UNAVAILABLE" }), Response.json(projects));
+
+  render(<GitlabConnector owner="owner" />);
+
+  await screen.findByLabelText(/Token de acceso personal/);
+  expect(screen.queryByText(/configuración del servidor/)).toBeNull();
+});
+
+/** Sin conexión no hay nada sobre lo que actuar: el panel entero sobra. */
+it("@s34 a connection that does not exist yet paints no panel to act on", async () => {
+  stub(Response.json(notConnected), Response.json(projects));
+
+  render(<GitlabConnector owner="owner" />);
+
+  await screen.findByLabelText(/Token de acceso personal/);
+  expect(screen.queryByRole("region", { name: "Conexión" })).toBeNull();
+  expect(screen.queryByText(/••••/)).toBeNull();
+  expect(screen.queryByRole("button", { name: "Importar issues" })).toBeNull();
+});
+
 // ------------------------------------------------------------------------ @s29
 
 it("@s29 without the server key it explains the missing configuration and offers no form", async () => {
@@ -430,6 +456,58 @@ it("@s35 warns visibly when the import came back truncated", async () => {
   expect(screen.getByText(/quedaron issues sin traer/i)).toBeTruthy();
 });
 
+const destination = () => screen.getByLabelText("Proyecto de destino");
+
+const bodyOf = (fetcher: ReturnType<typeof stub>) =>
+  JSON.parse(
+    String((fetcher.mock.calls.at(-1)?.[1] as RequestInit | undefined)?.body),
+  ) as Record<string, unknown>;
+
+/**
+ * Atar lo elegido con lo enviado. Ninguna prueba del componente leía el cuerpo del POST, y el
+ * selector no lo cambiaba nadie: el servidor doble respondía el recibo se mandara lo que se
+ * mandara, así que la pantalla podía importar siempre al primer proyecto sin que nada fallara.
+ */
+it("@s35 imports into the project chosen in the selector", async () => {
+  const user = userEvent.setup();
+  const fetcher = openConnected(Response.json(receipt(), { status: 201 }));
+
+  await renderConnected();
+  await user.selectOptions(destination(), otherProjectId);
+  await user.click(screen.getByRole("button", { name: "Importar issues" }));
+
+  await screen.findByRole("region", { name: "Resultado de la importación" });
+  expect(bodyOf(fetcher)).toEqual({ projectId: otherProjectId });
+});
+
+it("@s35 imports into the first open project when the owner chooses none", async () => {
+  const user = userEvent.setup();
+  const fetcher = openConnected(Response.json(receipt(), { status: 201 }));
+
+  await renderConnected();
+  await user.click(screen.getByRole("button", { name: "Importar issues" }));
+
+  await screen.findByRole("region", { name: "Resultado de la importación" });
+  expect(bodyOf(fetcher)).toEqual({ projectId });
+});
+
+/** Sin ningún proyecto abierto no hay dónde importar: el botón no puede mandar un destino vacío. */
+it("@s35 with no project to import into, the button sends nothing", async () => {
+  const user = userEvent.setup();
+  const fetcher = stub(
+    Response.json(connected),
+    Response.json({ items: [], nextCursor: null }),
+  );
+
+  await renderConnected();
+  expect(screen.queryAllByRole("option")).toHaveLength(0);
+  const asked = fetcher.mock.calls.length;
+  await user.click(screen.getByRole("button", { name: "Importar issues" }));
+  await new Promise((resolve) => setTimeout(resolve, 30));
+
+  expect(fetcher.mock.calls.length).toBe(asked);
+});
+
 it("@s35 asks for an explicit confirmation that promises the imported tasks survive", async () => {
   const user = userEvent.setup();
   openConnected();
@@ -505,6 +583,33 @@ it("@s35 opens the form with an empty token field when the token is replaced", a
 
   expect((tokenField() as HTMLInputElement).value).toBe("");
   expect((pathField() as HTMLInputElement).value).toBe("grupo/proyecto");
+});
+
+/**
+ * Mientras se reemplaza el token, la conexión está a punto de cambiar: el panel viejo no puede
+ * seguir ofreciendo «Importar issues» ni «Desconectar» sobre ella. Nadie afirmaba la exclusión
+ * mutua en esta dirección.
+ */
+it("@s35 while the token is being replaced the old panel offers nothing", async () => {
+  const user = userEvent.setup();
+  openConnected();
+
+  await renderConnected();
+  await user.click(screen.getByRole("button", { name: "Actualizar token" }));
+
+  expect(screen.queryByRole("region", { name: "Conexión" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Importar issues" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Desconectar" })).toBeNull();
+  expect(screen.queryByText("••••WXYZ")).toBeNull();
+});
+
+/** La región viva calla cuando no pasa nada: anunciar en vacío es ruido para un lector. */
+it("@s35 the live region says nothing while nothing is travelling", async () => {
+  openConnected();
+
+  await renderConnected();
+
+  expect(screen.getByRole("status").textContent).toBe("");
 });
 
 it("@s35 leaves no trace of a previous token in the form it reopens", async () => {
@@ -786,6 +891,72 @@ it("@s38 keeps the focus on the result notice when the receipt arrives", async (
 
   await screen.findByRole("region", { name: "Resultado de la importación" });
   expect(focusLanded()).toBe(true);
+});
+
+/**
+ * Las tres banderas de foco se apagan justo antes de mover el foco. Si una se quedara encendida
+ * el foco volvería al mismo sitio en CADA repintado, y quien navegue con teclado no podría ni
+ * recorrer el selector: cada render lo devolvería al encabezado. Ninguna prueba lo miraba,
+ * porque todas comprueban dónde está el foco justo después del cambio de estado y ahí las dos
+ * versiones coinciden. Estas tres provocan OTRO render que no debe mover nada.
+ */
+it("@s38 does not steal the focus back to the heading on every later render", async () => {
+  const user = userEvent.setup();
+  stub(
+    Response.json(notConnected),
+    Response.json(projects),
+    Response.json(connected),
+  );
+
+  render(<GitlabConnector owner="owner" />);
+  await screen.findByLabelText(/Token de acceso personal/);
+  await fillAndSubmit(user);
+  await waitFor(() => expect(screen.getByText("Conectado")).toBeTruthy());
+  await user.selectOptions(destination(), otherProjectId);
+
+  expect(document.activeElement).toBe(destination());
+});
+
+it("@s38 does not steal the focus back to the receipt on every later render", async () => {
+  const user = userEvent.setup();
+  openConnected(Response.json(receipt(), { status: 201 }));
+
+  await renderConnected();
+  await user.click(importButton());
+  await screen.findByRole("region", { name: "Resultado de la importación" });
+  await user.selectOptions(destination(), otherProjectId);
+
+  expect(document.activeElement).toBe(destination());
+});
+
+it("@s38 does not steal the focus back to «Actualizar token» on every later render", async () => {
+  const user = userEvent.setup();
+  openConnected(problem(409, { code: "CONNECTION_INVALID" }));
+
+  await renderConnected();
+  await user.click(importButton());
+  await waitFor(() => expect(screen.getByText("Error")).toBeTruthy());
+  await user.selectOptions(destination(), otherProjectId);
+
+  expect(document.activeElement).toBe(destination());
+});
+
+/** Un `tabIndex` positivo mete al contenedor delante de todo lo demás y rompe el orden lógico. */
+it("@s38 keeps its own containers out of the tab order instead of in front of it", async () => {
+  const user = userEvent.setup();
+  openConnected(Response.json(receipt(), { status: 201 }));
+
+  await renderConnected();
+  await user.click(importButton());
+  await screen.findByRole("region", { name: "Resultado de la importación" });
+
+  const declared = [...document.querySelectorAll("[tabindex]")];
+  expect(declared.length).toBeGreaterThanOrEqual(3);
+  expect(
+    declared
+      .filter((node) => Number(node.getAttribute("tabindex")) > 0)
+      .map((node) => node.tagName),
+  ).toEqual([]);
 });
 
 it("@s38 keeps the focus on the heading when the connection is dropped", async () => {

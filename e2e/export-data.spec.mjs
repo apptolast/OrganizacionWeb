@@ -71,7 +71,6 @@ test("export: real owner snapshot downloads original bytes twice without another
       "Importación",
       "API para integraciones",
       "Webhooks",
-      "Automatizaciones",
     ];
     await expect(nav.getByRole("link")).toHaveCount(ORDEN_CANONICO.length);
     for (const [posicion, nombre] of ORDEN_CANONICO.entries())

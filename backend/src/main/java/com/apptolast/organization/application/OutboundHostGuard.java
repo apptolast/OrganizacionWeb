@@ -7,8 +7,9 @@ package com.apptolast.organization.application;
  *
  * <p>Esta guardia decide si una suscripción puede guardarse o sincronizarse; <b>no</b> es la que
  * abre la conexión. La segunda mitad de la enmienda B3 —conectar contra la dirección literal ya
- * validada, conservando el nombre en Host y en SNI— vive en {@code adapter.feed.HttpCalendarFeed},
- * que resuelve una vez y conecta él mismo. Por eso ya no queda aquí ningún «riesgo residual de
+ * validada, conservando el nombre en Host y en SNI— vive en {@code adapter.net.AnchoredConnection},
+ * que usan por igual el calendario externo y el emisor de webhooks: cada uno resuelve una vez y
+ * conecta él mismo contra lo que validó. Por eso ya no queda aquí ningún «riesgo residual de
  * rebinding aceptado»: no hay ventana entre la resolución y la conexión, porque quien conecta es
  * quien resolvió.
  */

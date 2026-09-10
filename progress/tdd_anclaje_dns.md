@@ -269,3 +269,79 @@ de ese mismo outline (`s12_anAbsentContentTypeIsUnsupported`,
 **Verde de las tres clases tocadas:** `HttpCalendarFeedTest` 37/37,
 `AnchoredConnectionTest` 9/9, `JdkWebhookSenderTest` 19/19, y
 `ExternalCalendarWiringTest` sigue verde con el constructor público intacto.
+
+### Ciclo 4 — la documentación, que decía lo contrario en tres sitios
+
+Sin código: alinear el texto con la decisión. Cuatro ficheros de prosa y un
+javadoc.
+
+**`project-spec.md:2492` (fichero compartido, asignado por el propietario para
+esto; REGLAS §6 y REPARTO §3).** Cambio mínimo: se sustituye **sólo** el párrafo
+de la «Corrección del 9 de septiembre» que revocaba el anclaje. Lo demás de B2 y
+B3 —los rangos CIDR, la clase única de política, la resolución única— no se toca.
+El texto nuevo dice que se conecta contra la dirección literal conservando `Host`
+y SNI, que el reenlace queda **cerrado** y no aceptado, y deja constancia de que
+esto zanja una contradicción entre carriles y de cuál era el temor y por qué está
+descartado con medición. También escribe el precio: la propiedad
+`allowRestrictedHeaders`, el HTTP/1.1 y la primera dirección de varias.
+
+**`deploy/EGRESS.md`.** Reescrito. Antes decía «el cierre efectivo es de
+infraestructura, no de aplicación»; ahora dice que la aplicación cierra la
+ventana y que el egreso es **defensa en profundidad**, con un aviso explícito de
+que el documento cambió de posición para que nadie lo lea a medias. La sección
+«Qué debe aportar el despliegue» se mantiene entera e igual de obligatoria: lo
+que cambia es qué sujeta el problema, no lo que hay que configurar. La sección
+«Si no se cumple» pasa de «deja de haber segunda barrera» a «se pierde la segunda
+barrera, no la primera», y enumera lo que sí queda sin acotar. Añadida la lista
+de lo que el anclaje **cuesta**, porque quien despliegue tiene que saber que la
+aplicación necesita `jdk.httpclient.allowRestrictedHeaders=host`.
+
+**`docs/external-calendar.md:40-45`.** El párrafo que decía «la parte de
+SNI/certificado no tiene prueba propia» ya no es cierto: se sustituye por la
+descripción del oráculo, con el nombre del fixture y por qué la ausencia de `SAN`
+de tipo `iPAddress` es lo que lo convierte en oráculo. Se añade el coste del
+anclaje y que el egreso es defensa en profundidad.
+
+**`progress/current.md`.** Tenía un párrafo —«en webhooks el reenlace DNS no se
+ha implementado»— que ahora es falso. No se reescribe la historia: se añade una
+nota fechada que lo declara superado y apunta a esta bitácora. Dejar la
+afirmación vieja en pie sería exactamente la enfermedad que este encargo cura.
+
+**`OutboundHostGuard` (javadoc).** Decía que la segunda mitad de B3 «vive en
+`adapter.feed.HttpCalendarFeed`». Ya no: vive en `adapter.net.AnchoredConnection`
+y la usan los dos. Una línea.
+
+## Resumen
+
+**El anclaje no rompe el TLS.** Era la única razón por la que se había revocado,
+y era una suposición. Medido: un certificado válido para el nombre se acepta
+conectando por dirección, siempre que el nombre viaje en el SNI y se verifique
+contra él. Lo que sí rompe el TLS es anclar **mal** —sin conservar el nombre—, y
+eso también está medido: es el mutante A, y las pruebas lo cazan en las dos
+features.
+
+| Cuestión | Webhooks (25) | Calendario (28) |
+|---|---|---|
+| Ancla a la dirección validada | **sí** (antes no) | sí |
+| Conserva `Host` y SNI | **sí** | sí |
+| Certificado válido para el nombre, aceptado por IP | **probado** | **probado** |
+| Mismo certificado con otro nombre, rechazado | **probado** | **probado** |
+| Certificado no confiable, rechazado | probado, ahora también por el camino anclado | **probado** |
+| Copias de la decisión en el código | **una**, `AnchoredConnection` | **una**, la misma |
+
+**No ejecutado, por REPARTO §4:** Stryker y PIT. La previsión de mutantes está en
+el ciclo 2.
+
+**Ficheros tocados.**
+
+- `backend/src/main/java/com/apptolast/organization/adapter/net/AnchoredConnection.java` (nuevo)
+- `backend/src/test/java/com/apptolast/organization/adapter/net/AnchoredConnectionTest.java` (nuevo)
+- `backend/src/test/resources/tls/anchored-receiver.p12` (nuevo)
+- `backend/src/main/java/com/apptolast/organization/adapter/webhook/JdkWebhookSender.java`
+- `backend/src/test/java/com/apptolast/organization/adapter/webhook/JdkWebhookSenderTest.java`
+- `backend/src/main/java/com/apptolast/organization/adapter/feed/HttpCalendarFeed.java`
+- `backend/src/test/java/com/apptolast/organization/adapter/feed/HttpCalendarFeedTest.java`
+- `backend/src/main/java/com/apptolast/organization/application/OutboundHostGuard.java` (javadoc)
+- `features/external_calendar.feature` (una fila)
+- `project-spec.md` (compartido, un párrafo), `deploy/EGRESS.md`,
+  `docs/external-calendar.md`, `progress/current.md` (una nota)

@@ -1,46 +1,66 @@
 # Política de egreso — requisito de despliegue
 
-Origen: hallazgo **B3** de `progress/security_review_connectors.md:40`, que ya
-preveía esta salida: «Si se mantiene el límite, declarar la política de egreso
-como requisito de despliegue en `deploy/`». El hallazgo 5 del dictamen de la
-feature 25 la exige ejecutada. Este fichero es esa declaración.
+Origen: hallazgo **B3** de `progress/security_review_connectors.md:40`. Este
+fichero es la declaración de lo que el despliegue debe aportar.
 
-## Qué queda abierto en la aplicación
+**Cambio del 10 de septiembre de 2026.** Este documento decía antes que la
+aplicación **no** cerraba la ventana de reenlace de nombres y que el cierre
+efectivo era de infraestructura. Ya no es así: la aplicación la cierra. Lo que
+sigue aquí abajo pasa de ser **la** contención a ser **defensa en profundidad**,
+que es distinto y sigue siendo obligatorio.
 
-Los conectores salientes (webhooks de la feature 25, calendario externo de la 28
-y el conector de GitHub de la 26) resuelven el nombre del destino una vez,
+## Qué cierra la aplicación
+
+Los conectores salientes —webhooks de la feature 25, calendario externo de la 28
+y conector de GitHub de la 26— resuelven el nombre del destino **una vez**,
 validan **todas** las direcciones devueltas contra `AddressPolicy` y abandonan la
 petición antes de abrir la conexión si una sola está bloqueada.
 
-La petición viaja después **por nombre**, no por la dirección literal ya
-validada. El cliente HTTP del JDK resuelve otra vez por su cuenta, de modo que la
-ventana entre la comprobación y el uso (*DNS rebinding*) **no la cierra la
-aplicación**. Se decidió no anclar la conexión a la dirección literal porque
-hacerlo en este cliente obliga a `jdk.httpclient.allowRestrictedHeaders=host` y
-rompe la verificación del nombre del certificado: cerraría una ventana estrecha
-abriendo una peor.
+Y la petición viaja después **contra esa misma dirección ya validada**, no contra
+el nombre. El cliente HTTP no vuelve a preguntar al DNS, de modo que la ventana
+entre la comprobación y el uso (*DNS rebinding*) **no existe**: no hay una segunda
+resolución que pueda contestar otra cosa.
 
-Lo que acota el residuo dentro de la aplicación:
+Anclar a una dirección suele romper la verificación del certificado. Aquí no,
+porque el nombre viaja con la petición: en la cabecera `Host` y en la indicación
+de servidor de TLS, contra la que se verifica el certificado. Las tres piezas
+viven juntas en `adapter/net/AnchoredConnection`, compartidas por los conectores,
+y están probadas en los dos sentidos:
 
-- **https obligatorio** en los destinos y `Redirect.NEVER`. Un servicio interno
-  al que apuntase un nombre reenlazado tendría que presentar un certificado
-  válido para el nombre del atacante. Que un certificado no confiable se rechaza
-  está probado en `JdkWebhookSenderTest.s25_aReceiverWithAnUntrustedCertificateIsATlsFailure`.
-- La **caché DNS de la JVM**, que hace que las dos resoluciones coincidan en la
-  práctica dentro de su ventana. Es una mitigación real pero incidental: no se
-  configura y no se debe contar con ella.
+- Un certificado **válido para el nombre** se acepta aunque la conexión vaya a la
+  dirección:
+  `JdkWebhookSenderTest.s25_b3_aCertificateValidForTheNameIsAcceptedAlthoughTheConnectionGoesToTheAddress`
+  y `HttpCalendarFeedTest.s12_b3_unCertificadoValidoParaElNombreSeAceptaAunqueSeConecteALaDireccion`.
+- El **mismo** certificado se rechaza si el nombre pedido es otro, y un
+  certificado que nadie avala se sigue rechazando:
+  `…theSameCertificateIsRejectedWhenTheNameAskedForIsAnother`,
+  `…anUntrustedCertificateIsStillRejectedOnTheAnchoredPath`,
+  `s12_b3_elMismoCertificadoSeRechazaSiElNombrePedidoEsOtro` y
+  `s12_b3_unCertificadoQueNadieAvalaSeRechaza`.
+
+Lo acompañan **https obligatorio** en los destinos y `Redirect.NEVER`.
+
+**Lo que el anclaje cuesta**, para que quien despliegue lo sepa:
+
+1. La aplicación necesita `jdk.httpclient.allowRestrictedHeaders=host`. Se activa
+   sola al cargar los conectores, **añadiéndose** a lo que ya hubiera declarado el
+   despliegue, no sustituyéndolo. Si el despliegue pasa la propiedad por su
+   cuenta, que incluya `host`.
+2. Las salidas hablan **HTTP/1.1**. Sobre HTTP/2 la autoridad la fija la URI —la
+   dirección literal— y el receptor no vería el nombre.
+3. Si un nombre resuelve a **varias** direcciones se usa la primera y no se
+   reintenta con las demás. Todas estaban validadas, así que no es un agujero de
+   seguridad: es menos tolerancia a fallos que la del cliente por defecto.
 
 ## Qué debe aportar el despliegue
 
-El cierre efectivo es de infraestructura, no de aplicación. Quien despliegue
-esta aplicación **debe** restringir el egreso del contenedor de la API a lo
-estrictamente necesario:
+La segunda barrera. Quien despliegue esta aplicación **debe** restringir el
+egreso del contenedor de la API a lo estrictamente necesario:
 
 1. **Denegar por defecto** todo el tráfico saliente del contenedor de la API y
    permitir sólo 443/tcp hacia internet.
 2. **Bloquear en la red** los destinos que la política de la aplicación ya
-   rechaza, para que un reenlace posterior a la comprobación tampoco tenga
-   salida: `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `127.0.0.0/8`,
+   rechaza: `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `127.0.0.0/8`,
    `169.254.0.0/16` (incluido el 169.254.169.254 de metadatos), `100.64.0.0/10`,
    `0.0.0.0/8`, `192.0.0.0/24`, `192.88.99.0/24`, `198.18.0.0/15`,
    `240.0.0.0/4`, y sus equivalentes IPv6 `::1/128`, `fc00::/7`, `fe80::/10`,
@@ -54,7 +74,8 @@ declara el requisito, porque este repositorio no despliega.
 
 ## Si no se cumple
 
-El límite pasa de «aceptado y acotado» a «aceptado y sin acotar». No es una
-vulnerabilidad explotable por sí sola —hace falta además un servicio interno que
-presente un certificado válido para el nombre del atacante—, pero deja de haber
-segunda barrera.
+Se pierde la segunda barrera, no la primera. El reenlace de nombres sigue cerrado
+en la aplicación. Lo que queda sin acotar es todo lo demás: un fallo en la
+política de direcciones, un destino público que resuelva a algo que no debería, o
+cualquier salida futura que no pase por estos conectores. Por eso el requisito
+sigue siendo obligatorio aunque ya no sea lo único que sujeta el problema.

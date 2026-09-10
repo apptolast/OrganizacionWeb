@@ -19,6 +19,42 @@ catorce entradas, con «Conectores» tras «Importación» porque lo fija @s33) 
 contradicción 50/52 de webhooks (se persisten 52, se sirven 50). Y una tercera,
 el anclaje del reenlace DNS en las dos features con su prueba de TLS.
 
+## Cuánto falta de verdad — 10 de septiembre, 14:20
+
+Llevas diez días y pediste el 100 %. Ésta es la cuenta sin adornos.
+
+**25 de 30 están `done`.** Las cinco que faltan tienen **73 motivos bloqueantes**
+encontrados hoy por dos paneles de jueces independientes, sobre features que ya
+tenían las tres puertas en verde y por encima del umbral. Ése es el hecho
+central del día: **los números salían y el trabajo no estaba**.
+
+De esos 73, a las 14:20 hay **29 cerrados y verificados** (los 22 de la feature
+30 y siete más), y los otros 44 están **todos asignados** a nueve carriles que
+trabajan ahora mismo, cada uno en su propio worktree.
+
+**Lo que queda después de los carriles, en orden:**
+
+1. **Las campañas de mutación.** Todas las cifras vigentes están caducadas o son
+   irreproducibles, y hay que rehacerlas con la máquina drenada. Con el ámbito
+   combinado son ~40 min de PIT más cuatro o cinco de Stryker: **entre dos y tres
+   horas**, y no se pueden solapar con los carriles porque hoy se han caído tres
+   por eso.
+2. **Los jueces.** Uno por feature, en paralelo, ~30 min.
+3. **Lo que los jueces encuentren.** Aquí no puedo prometer nada: el panel de hoy
+   encontró 20 motivos en una feature que tres puertas verdes daban por lista. Si
+   los jueces devuelven condiciones nuevas, hay otra vuelta.
+
+**Y siete decisiones que sólo puedes tomar tú**, en
+`progress/decisiones_pendientes.md`. Ninguna bloquea el trabajo de hoy, pero
+**cada una bloquea el cierre de su feature**. Dos son cambios de contrato ya
+hechos sin contrafirma, dos son huecos que el contrato no describe, y una —la
+guarda de estado de `upsert`— es elegir entre arreglar una condición de carrera
+o declarar que el último que escribe manda.
+
+**Lo que no voy a hacer:** marcar `done` nada que no haya pasado juez y mutación
+de verdad. Es lo que ha pasado esta semana y es por lo que hoy hay 73 motivos en
+vez de cero.
+
 ## Lo que hay que saber hoy, 10 de septiembre al mediodía
 
 **Ninguna de las cinco está `done`, y el motivo cambió esta mañana.** Hasta hoy

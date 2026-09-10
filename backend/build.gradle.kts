@@ -88,6 +88,7 @@ pitest {
         "com.apptolast.organization.application.GitlabConnection*",
         "com.apptolast.organization.application.GitlabIssueConnections*",
         "com.apptolast.organization.application.GitlabProject*",
+        "com.apptolast.organization.domain.GitlabProjectPath*",
         "com.apptolast.organization.application.GitlabUnavailableException*",
         // ConnectorStatusSource* solo resuelve a la INTERFAZ, que no tiene mutantes:
         // las seis implementaciones no empiezan por ese prefijo y quedaban fuera.
@@ -112,7 +113,11 @@ pitest {
         "com.apptolast.organization.domain.ExternalIssue*",
         "com.apptolast.organization.domain.IssueImportReceipt*",
         "com.apptolast.organization.application.ConnectGithub*",
-        "com.apptolast.organization.application.ImportGithubIssues*",
+        // ImportGithubIssues lo BORRO la feature 29 al unificar el caso de uso: el patron
+        // quedo muerto y con el ImportIssues no recibia mutantes en NINGUNA campana del
+        // repositorio. Tercer patron muerto de la noche; lo caza el juez de cierre de la 29.
+        "com.apptolast.organization.application.ImportIssues*",
+        "com.apptolast.organization.application.ImportGuard*",
         "com.apptolast.organization.application.ReadGithubConnection*",
         "com.apptolast.organization.application.DisconnectGithub*",
         "com.apptolast.organization.application.ReadIssueImport*",

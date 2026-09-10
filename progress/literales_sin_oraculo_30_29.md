@@ -23,6 +23,8 @@ nueva**, con el mensaje anotado. Un oráculo que no puede fallar no vale.
 | 1 | `ORDER BY occurred_at, event_id` (`window()`) | quitar `, event_id` | `[«E1 y E2 con el mismo occurred_at y event_id de E1 menor», y E1 va primero] Expecting actual: [2222…, 1111…] to contain exactly (and in same order): [1111…, 2222…]` |
 | 1 | idem | `ORDER BY occurred_at, event_id DESC` | el mismo |
 | 1 | idem (la **pérdida**, con las dos primeras aserciones relajadas a propósito) | `event_id DESC` | `[el hermano queda por delante del cursor, no detrás: no se pierde] Expecting actual: [] to contain exactly: [2222…]` |
+| 2 | `AND status = 'retry'` (`claim()`) | `AND status = 'failed'` | `AutomationClaimedException: Otro worker ya registró esta ejecución.` |
+| 2 | idem | borrar la cláusula entera | `[una fila ya resuelta no la reescribe nadie] Expecting code to raise a throwable.` |
 | 3 | `"blocked".equals(row.getString("status"))` (`event()`) | `"held".equals(…)` | `[una fila blocked está retenida: se salta, no dispara nada] Expecting value to be true but was false` |
 | 3 | idem | `"pending".equals(…)` | `[una fila pending no está retenida y sus reglas deben dispararse] Expecting value to be false but was true` |
 
@@ -86,3 +88,35 @@ sistema decidió no publicar.
 `true`— porque un literal invertido sólo se distingue mirando los dos, y así
 quedó acreditado: romperlo hacia un valor que no existe pone roja la segunda
 aserción, invertirlo a `"pending"` pone roja la primera.
+
+---
+
+## Hallazgo 2 — `AND status = 'retry'` en el UPDATE de reintento (`PostgresAutomationWork.claim()`, :192)
+
+**Qué decide.** Si un segundo o tercer intento puede reclamar la fila abierta.
+Es la escalera de reintentos completa (attempt 1 → 2 → 3 → failed) que exige
+@s22 (`features/automations.feature:290-294`).
+
+**Por qué no lo distinguía nadie.** Ningún test de integración dejaba nunca una
+fila en `retry` antes de un ciclo: `AutomationExecutionTest` sólo crea filas de
+primer intento, y el primer intento va por la otra rama de `claim()`, la del
+`INSERT … ON CONFLICT DO NOTHING`. La escalera sólo se probaba con el doble en
+memoria (`ExecuteAutomationsTest.java:350` y `:377`), que no ejecuta ese UPDATE.
+
+**La consecuencia.** Cambiado a `'failed'` o borrado, el UPDATE afecta a 0
+filas, `claim()` lanza `AutomationClaimedException`, `ExecuteAutomations` lo
+interpreta como «otro worker ganó» (`ExecuteAutomations.java:89`) y el paseo
+continúa: el reintento nunca aterriza y la ejecución se queda clavada en su
+intento para siempre, sin error visible.
+
+**La prueba.** `s22_onlyARowStillInRetryCanBeRenewedByALaterAttempt`, en tres
+tramos, porque las dos mutaciones fallan por lados opuestos:
+
+1. una fila en `retry` attempt 1 se renueva a attempt 2 `retry` con su nuevo
+   `executed_at`;
+2. y de ahí a attempt 3 `failed`, que es la escalera del contrato;
+3. y esa fila ya resuelta **no** la renueva un cuarto intento: se rechaza con
+   `AutomationClaimedException` y la fila no cambia.
+
+Sin el tramo 3, borrar la cláusula sobrevive; sin los tramos 1 y 2, cambiarla
+de estado sobrevive. Hacen falta los dos lados.

@@ -123,6 +123,53 @@ class AutomationWorkPersistenceTest {
         .isTrue();
   }
 
+  /**
+   * @s22: «una ejecución retry attempt 2 para el evento E1 ... la ejecución de E1 tiene attempt 3,
+   *     status failed» (features/automations.feature:290-294). La escalera entera la sostiene el
+   *     {@code AND status = 'retry'} del UPDATE, y sólo se probaba con el doble en memoria, que no
+   *     ejecuta ese UPDATE: ninguna prueba de integración dejaba una fila en {@code retry} antes de
+   *     un ciclo.
+   *     <p>Si el literal cambia, el UPDATE no afecta a ninguna fila, {@code claim} lanza {@link
+   *     AutomationClaimedException}, el caso de uso lo lee como «otro worker ganó» y la ejecución
+   *     se queda clavada en su intento para siempre, sin error visible. Si el literal desaparece,
+   *     pasa lo contrario y una fila ya resuelta se puede reescribir: por eso la tercera parte pide
+   *     renovar una {@code failed} y exige que se rechace.
+   */
+  @Test
+  void s22_onlyARowStillInRetryCanBeRenewedByALaterAttempt() {
+    var owner = owner();
+    var project = project(owner);
+    var event = outbox(owner, project, T0.plusSeconds(1), "pending");
+    var rule = rule(owner);
+    given(rule, owner, event, 1, "retry", "STORAGE_UNAVAILABLE", T0.plusSeconds(2));
+
+    work.commit(commitOf(owner, run(rule, owner, event, 2, "retry", "STORAGE_UNAVAILABLE", T0)));
+
+    assertThat(rowOf(rule, event))
+        .as("el segundo intento renueva su propia fila")
+        .containsEntry("attempt", 2)
+        .containsEntry("status", "retry")
+        .containsEntry("executed_at", Timestamp.from(T0));
+
+    work.commit(
+        commitOf(
+            owner, run(rule, owner, event, 3, "failed", "STORAGE_UNAVAILABLE", T0.plusSeconds(9))));
+
+    assertThat(rowOf(rule, event))
+        .as("y el tercero la cierra")
+        .containsEntry("attempt", 3)
+        .containsEntry("status", "failed");
+
+    assertThatThrownBy(
+            () ->
+                work.commit(
+                    commitOf(
+                        owner, run(rule, owner, event, 3, "succeeded", null, T0.plusSeconds(10)))))
+        .as("una fila ya resuelta no la reescribe nadie")
+        .isInstanceOf(AutomationClaimedException.class);
+    assertThat(rowOf(rule, event)).containsEntry("status", "failed");
+  }
+
 
   private static AutomationCursor start() {
     return new AutomationCursor(T0, AutomationCursor.START);

@@ -14,8 +14,11 @@ import org.slf4j.LoggerFactory;
 /**
  * El adaptador de bitácora, medido directamente y no a través del caso de uso.
  *
- * <p>Existe porque PIT no puede vigilarlo: su interceptor {@code FLOGCALL}, activo por defecto,
- * descarta las mutaciones que caen dentro de una llamada a un framework de logging. El único
+ * <p>Existe porque PIT no vigilaba esta clase: su {@code avoidCallsTo} POR DEFECTO suprime las
+ * llamadas a {@code org.slf4j}, y este adaptador es puro logging, así que salía con cero mutantes.
+ * Corregido el 10 de septiembre en {@code backend/build.gradle.kts}, que declara la lista explícita
+ * sin {@code org.slf4j}; antes se atribuyó por error al interceptor {@code FLOGCALL}. La prueba se
+ * queda igualmente: mide el adaptador directamente y no a través del caso de uso. El único
  * enunciado de {@code runFinished} es {@code LOG.info(...)} y sus cinco argumentos son parámetros
  * pasados tal cual, sin ninguna expresión que calcular, así que después del filtro no queda nada
  * que mutar y la clase no aparece ni una vez en {@code mutations.xml}. El contraste que lo prueba

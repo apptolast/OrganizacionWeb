@@ -297,9 +297,18 @@ Se descartan las dos sospechas del encargo, con evidencia:
 - **El nombre es exacto.** La clase existe en
   `backend/src/main/java/com/apptolast/organization/adapter/logging/Slf4jAutomationAudit.java`.
 
-**La causa es el interceptor `FLOGCALL` de PIT**, activo por defecto y no desactivado
-en `build.gradle.kts` (allí sólo se apaga `FRECORD`). Descarta las mutaciones que caen
-**dentro de una llamada a un framework de logging**. `runFinished` tiene un único
+**Corregido el 10 de septiembre, 15:10.** Este párrafo decía que la causa era el
+interceptor `FLOGCALL` de PIT. **Era falso**, y es el mismo error que M19 le reprocha
+a la explicación anterior: acertar el efecto y equivocar la causa. La causa real es el
+**`avoidCallsTo` por defecto de PIT**, que suprime las llamadas a `org.slf4j`. Está
+arreglado desde `4212e1ef` (`backend/build.gradle.kts:774-788`), que declara la lista
+explícita sin `org.slf4j` — siete minutos después de que este carril mergeara. Queda
+pendiente **confirmar en la campaña que la clase ya recibe mutantes**; si sigue a cero,
+hay que decirlo en vez de dar la condición por cerrada.
+
+Lo que sigue es el razonamiento original, conservado porque su descripción del efecto
+sí es correcta: las mutaciones que caen **dentro de una llamada a un framework de
+logging** se descartan. `runFinished` tiene un único
 enunciado, `LOG.info(...)`, y sus cinco argumentos son parámetros pasados tal cual, sin
 ninguna expresión que calcular: después del filtro no queda **nada** que mutar, y la
 clase no aparece ni una vez en el XML.

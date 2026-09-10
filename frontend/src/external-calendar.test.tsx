@@ -443,6 +443,147 @@ it("@s39 cancela la petición en curso al desmontar la vista", async () => {
   expect(document.body.textContent).toBe("");
 });
 
+// @s39 fila 3: «navego a /hoy con una petición en curso -> la petición se cancela
+// y su respuesta tardía no modifica la vista destino». Hasta ahora solo estaba
+// probado para el GET de montaje; ninguna prueba abortaba una escritura.
+const held = () => {
+  let release: (() => void) | undefined;
+  const promise = new Promise<void>((resolve) => (release = resolve));
+  return { promise, release: () => release?.() };
+};
+
+it.each([
+  [
+    "un guardado",
+    "PUT",
+    { configured: true, subscription: synced },
+    async (user: ReturnType<typeof userEvent.setup>) => {
+      await user.type(
+        screen.getByLabelText("Dirección secreta iCal"),
+        "https://calendar.google.com/a.ics",
+      );
+      await user.click(screen.getByRole("button", { name: "Guardar" }));
+    },
+  ],
+  [
+    "una sincronización",
+    "POST",
+    { performed: true, subscription: synced },
+    async (user: ReturnType<typeof userEvent.setup>) => {
+      await user.click(
+        screen.getByRole("button", { name: "Sincronizar ahora" }),
+      );
+    },
+  ],
+  [
+    "un borrado",
+    "DELETE",
+    null,
+    async (user: ReturnType<typeof userEvent.setup>) => {
+      await user.click(
+        screen.getByRole("button", { name: "Eliminar suscripción" }),
+      );
+      await user.click(screen.getByRole("button", { name: "Sí, eliminar" }));
+    },
+  ],
+])(
+  "@s39 salir de la vista con %s en curso cancela la petición y su respuesta tardía no repinta",
+  async (_name, method, reply, launch) => {
+    const gate = held();
+    const signals: AbortSignal[] = [];
+    const original = globalThis.fetch as unknown as typeof fetch;
+    withSubscription(synced, [meeting]);
+    vi.stubGlobal("fetch", async (url: string, options: RequestInit = {}) => {
+      if ((options.method ?? "GET") !== method)
+        return original(url as never, options);
+      calls.push({ url, method });
+      if (options.signal) signals.push(options.signal);
+      await gate.promise;
+      return reply === null
+        ? new Response(null, { status: 204 })
+        : Response.json(reply);
+    });
+    const user = userEvent.setup();
+    const view = render(<ExternalCalendar />);
+    await screen.findByText("calendar.google.com");
+    await launch(user);
+    await waitFor(() => expect(signals).toHaveLength(1));
+    expect(signals[0].aborted).toBe(false);
+    view.unmount();
+    expect(signals[0].aborted).toBe(true);
+    gate.release();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(document.body.textContent).toBe("");
+  },
+);
+
+// Guardar está habilitado mientras la carga inicial sigue en vuelo, así que el
+// único solapamiento real de la pantalla es este: el GET de montaje contra un PUT.
+// start() aborta el anterior; sin ese aborto, la lectura tardía pisaría lo guardado.
+it("@s38 guardar mientras la carga inicial sigue en vuelo la cancela y su respuesta tardía no pisa lo guardado", async () => {
+  const gate = held();
+  const signals: AbortSignal[] = [];
+  vi.stubGlobal("fetch", async (url: string, options: RequestInit = {}) => {
+    const method = options.method ?? "GET";
+    calls.push({ url, method });
+    if (options.signal) signals.push(options.signal);
+    if (method === "GET" && !url.includes("/events")) {
+      await gate.promise;
+      return Response.json({ configured: false, subscription: null });
+    }
+    if (method === "PUT")
+      return Response.json({ configured: true, subscription: synced });
+    return Response.json(emptyEvents);
+  });
+  const user = userEvent.setup();
+  render(<ExternalCalendar />);
+  await user.type(await screen.findByLabelText("Etiqueta"), "Trabajo");
+  await user.type(
+    screen.getByLabelText("Dirección secreta iCal"),
+    "https://calendar.google.com/a.ics",
+  );
+  await user.click(screen.getByRole("button", { name: "Guardar" }));
+  expect(await screen.findByText("Guardado.")).toBeInTheDocument();
+  expect(signals[0].aborted).toBe(true);
+  gate.release();
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  expect(screen.getByText("calendar.google.com")).toBeInTheDocument();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("Todavía no tienes ningún calendario externo."),
+  ).not.toBeInTheDocument();
+});
+
+// El botón «Sí, eliminar» del diálogo NO lleva disabled={locked}: se puede pulsar
+// otra vez con el DELETE en vuelo. Lo único que impide el segundo borrado es el
+// guardián `if (busy) return` de confirmRemoval, que hasta ahora no tenía oráculo.
+it("@s39 un segundo Sí, eliminar con el borrado en vuelo no envía otro DELETE", async () => {
+  const gate = held();
+  const original = globalThis.fetch as unknown as typeof fetch;
+  withSubscription(synced, [meeting]);
+  vi.stubGlobal("fetch", async (url: string, options: RequestInit = {}) => {
+    if ((options.method ?? "GET") !== "DELETE")
+      return original(url as never, options);
+    calls.push({ url, method: "DELETE" });
+    await gate.promise;
+    return new Response(null, { status: 204 });
+  });
+  const user = userEvent.setup();
+  render(<ExternalCalendar />);
+  await screen.findByText("calendar.google.com");
+  await user.click(
+    screen.getByRole("button", { name: "Eliminar suscripción" }),
+  );
+  const confirm = screen.getByRole("button", { name: "Sí, eliminar" });
+  await user.click(confirm);
+  expect(await screen.findByText("Eliminando…")).toBeInTheDocument();
+  expect(confirm).toBeEnabled();
+  await user.click(confirm);
+  expect(calls.filter((call) => call.method === "DELETE")).toHaveLength(1);
+  gate.release();
+  expect(await screen.findByText("Suscripción eliminada.")).toBeInTheDocument();
+});
+
 it("@s36 avisa de lectura inválida sin perder el resto de la pantalla", async () => {
   answer(ROUTE, "GET", { configured: true, subscription: synced });
   answer(`${ROUTE}/events`, "GET", {

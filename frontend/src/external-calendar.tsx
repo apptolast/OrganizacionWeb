@@ -160,7 +160,11 @@ export function ExternalCalendar() {
         );
       }
     })();
-    return () => controller.abort();
+    // Al salir hay que cancelar la peticion viva, que no siempre es la del montaje:
+    // save/synchronise/confirmRemoval crean la suya con start() y la dejan en
+    // inFlight. Abortar solo `controller` dejaba corriendo cualquier escritura en
+    // vuelo, contra lo que pide @s39 fila 3.
+    return () => inFlight.current?.abort();
   }, [loadEvents]);
 
   useEffect(() => {

@@ -122,3 +122,87 @@ Pruebas nuevas:
 | literal «Todavía no tienes ningún calendario externo.» → `""` | MUERE | `@s37 una carga que falla…` |
 
 Estado tras el racimo: **90 pruebas verdes**.
+
+---
+
+## Racimo C — reentrada y aborto de las tres escrituras (predicción: racimo 2, `sin_cobertura`, 16 mutantes)
+
+`external-calendar.tsx:109-114, 160, 190, 203, 207, 212, 227, 232, 237, 246, 250`.
+
+### DEFECTO DE PRODUCTO 2 — salir de la pantalla no cancelaba ninguna escritura
+
+@s39 fila 3 dice: «navego a /hoy con una petición en curso → **la petición se
+cancela** y su respuesta tardía no modifica la vista destino». Solo estaba probado
+para el `GET` de montaje.
+
+La limpieza del efecto era `return () => controller.abort()`, y `controller` es el
+del **montaje**, capturado en el closure. `save`, `synchronise` y `confirmRemoval`
+crean el suyo con `start()` y lo dejan en `inFlight.current`. Al desmontar se
+abortaba un controlador ya resuelto y **la escritura en vuelo seguía viva**.
+
+Rojo acreditado, `it.each` de tres filas
+(`@s39 salir de la vista con un guardado / una sincronización / un borrado en curso…`):
+
+```
+AssertionError: expected false to be true // Object.is equality
+   -> expect(signals[0].aborted).toBe(true)  tras view.unmount()
+```
+
+Las tres filas rojas, con el `PUT`, el `POST /sync` y el `DELETE` retenidos.
+
+**Arreglo** (`external-calendar.tsx:160`): `return () => inFlight.current?.abort();`.
+Es correcto y suficiente porque `start()` ya aborta la anterior antes de crear la
+nueva, así que `inFlight.current` es siempre la única que puede seguir viva.
+
+### El único solapamiento real de la pantalla, sin probar
+
+Guardar está **habilitado** mientras la carga inicial sigue en vuelo. Prueba nueva
+`@s38 guardar mientras la carga inicial sigue en vuelo la cancela y su respuesta
+tardía no pisa lo guardado`: el `GET` de montaje retenido devuelve
+`configured:false`, y si `start()` no lo abortara, esa lectura tardía borraría de
+pantalla la suscripción recién guardada.
+
+### Reentrada: el guardián que sí es alcanzable, y los dos que no
+
+El botón «Sí, eliminar» del diálogo **no** lleva `disabled={locked}`, así que se
+puede pulsar otra vez con el `DELETE` en vuelo: lo único que impide el segundo
+borrado es `if (busy) return`. Prueba nueva
+`@s39 un segundo Sí, eliminar con el borrado en vuelo no envía otro DELETE`.
+
+Los de `save` y `synchronise` **no son alcanzables** desde la interfaz, y lo
+comprobé ejecutando en vez de razonar: escribí una prueba sonda que, con el `PUT`
+retenido, enfoca «Etiqueta» y pulsa Enter. Pasó **igual con el guardián puesto que
+con `if (false) return`**: la submisión implícita no ocurre porque el botón de
+envío está deshabilitado. Era una aserción que no puede fallar, así que **borré la
+sonda** en lugar de dejarla (categoría 2 del encargo). Quedan declarados como
+supervivientes equivalentes.
+
+### Acreditación por mutante (racimo C)
+
+| Mutante | Veredicto | Quién lo mata |
+|---|---|---|
+| limpieza del efecto → no aborta nada | MUERE | las cuatro pruebas de desmontaje |
+| limpieza del efecto → aborta solo el controlador del montaje (**el código anterior**) | MUERE | las tres filas de escritura |
+| `start()`: `inFlight.current?.abort()` → sin abortar | MUERE | `@s38 guardar mientras la carga inicial…` |
+| montaje: `if (controller.signal.aborted) return` → `false` | MUERE | `@s38 guardar mientras la carga inicial…` |
+| `confirmRemoval`: `if (busy) return` → `false` | MUERE | `@s39 un segundo Sí, eliminar…` |
+| `confirmRemoval`: `setBusy("deleting")` → `""` | MUERE | idem |
+| `confirmRemoval`: literal «Eliminando…» → `""` | MUERE | idem |
+| `confirmRemoval`: literal «Suscripción eliminada.» → `""` | MUERE | idem |
+| `save`: `if (signal.aborted) return` del catch → `false` | **SOBREVIVE** | equivalente: ver abajo |
+| `save`: `if (!signal.aborted) setBusy("")` del finally → `true` | **SOBREVIVE** | equivalente |
+| `synchronise`: `if (signal.aborted) return` del catch → `false` | **SOBREVIVE** | equivalente |
+| `confirmRemoval`: `if (signal.aborted) return` del catch → `false` | **SOBREVIVE** | equivalente |
+| `confirmRemoval`: `if (!signal.aborted) setBusy("")` del finally → `true` | **SOBREVIVE** | equivalente |
+
+**Por qué esos cinco son equivalentes, declarado antes de la campaña.** Una
+escritura solo puede abortarse en dos momentos: al desmontar, o porque `start()`
+la cancele. Lo segundo exige empezar otra operación, y `if (busy) return` lo
+impide. Queda solo el desmontaje, y ahí React 19 hace de cualquier `setState`
+sobre un árbol desmontado un no-op silencioso: **no hay nada observable** en el
+DOM, ni aviso en consola. Escribir un oráculo para ellos exigiría cambiar la
+producción para permitir dos escrituras solapadas, que es justo lo contrario de lo
+que pide @s38 («se envía exactamente una petición»). Son 5 de los ~16 previstos
+para este racimo; los otros 8 mueren.
+
+Estado tras el racimo: **95 pruebas verdes**.

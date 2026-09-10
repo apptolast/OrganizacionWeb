@@ -93,7 +93,19 @@ it("@s35 muestra el evento en hora local y la marca de la última sincronizació
   expect(
     within(section).getByText(/Según sincronización de 12:00/),
   ).toBeInTheDocument();
-  expect(within(section).queryAllByRole("button")).toHaveLength(0);
+  // «Sin botones de edición» (@s35): la sección no renderiza ningún botón en
+  // ninguna de sus ramas, así que contarlos era una aserción que no puede fallar.
+  // Lo que sí distingue este estado del de fallo es que no hay enlace de rescate,
+  // y lo que distingue el camino feliz es que no se anuncia sincronización
+  // pendiente: las dos sí caen si la producción se rompe.
+  expect(section).toHaveAttribute("aria-live", "polite");
+  expect(
+    within(section).getByRole("heading", { name: "Calendario externo" }),
+  ).toBeInTheDocument();
+  expect(within(section).queryByRole("link")).not.toBeInTheDocument();
+  expect(
+    within(section).queryByText("Sincronización pendiente."),
+  ).not.toBeInTheDocument();
 });
 
 it("@s35 un evento de todo el día se muestra sin horas", async () => {
@@ -191,6 +203,70 @@ it("@s36 un fallo de red al leer eventos avisa con enlace y sin error global", a
   expect(screen.queryByText("Reunión")).not.toBeInTheDocument();
 });
 
+// El fallo de red y la lectura inválida comparten el enlace, así que afirmar solo
+// el enlace no distingue los dos mensajes: el literal de «no se ha podido
+// consultar» no lo fijaba ninguna prueba.
+it("@s36 un fallo de red dice que no se ha podido consultar, no que no se ha podido leer", async () => {
+  eventsAnswer = async () => {
+    throw new TypeError("Failed to fetch");
+  };
+  paint();
+  expect(
+    await screen.findByText(/no se ha podido consultar el calendario externo/i),
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByText(/no se ha podido leer el calendario externo/i),
+  ).not.toBeInTheDocument();
+});
+
+it("@s35 con la zona de la instantánea sin resolver se muestra el instante crudo", async () => {
+  eventsAnswer = async () =>
+    Response.json({
+      configured: true,
+      lastSyncAt: "2030-01-07T11:00:00Z",
+      lastStatus: "OK",
+      items: [],
+    });
+  render(
+    <TodayExternalCalendar
+      zoneId="Marte/Base"
+      dayStartAt={DAY_START}
+      dayEndAt={DAY_END}
+      revision="r1"
+    />,
+  );
+  expect(
+    await screen.findByText("Según sincronización de 2030-01-07T11:00:00Z"),
+  ).toBeInTheDocument();
+});
+
+it("@s35 sin última sincronización la marca queda sin hora", async () => {
+  eventsAnswer = async () =>
+    Response.json({
+      configured: true,
+      lastSyncAt: null,
+      lastStatus: "OK",
+      items: [],
+    });
+  paint();
+  expect(
+    await screen.findByText("Según sincronización de"),
+  ).toBeInTheDocument();
+});
+
+it("@s19 un evento sin resumen se muestra como Sin título", async () => {
+  eventsAnswer = async () =>
+    Response.json({
+      configured: true,
+      lastSyncAt: "2030-01-07T11:00:00Z",
+      lastStatus: "OK",
+      items: [{ ...meeting, summary: "" }],
+    });
+  paint();
+  const item = await screen.findByRole("listitem");
+  expect(item.textContent).toBe("Sin título 09:00–10:00");
+});
+
 it("@s36 una lectura inválida avisa y no pinta ningún evento", async () => {
   eventsAnswer = async () =>
     Response.json({
@@ -240,6 +316,53 @@ it("@s36 una actualización nueva cancela la anterior y su respuesta tardía no 
   );
   expect(await screen.findByText("Nueva")).toBeInTheDocument();
   release?.();
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  expect(screen.queryByText("Vieja")).not.toBeInTheDocument();
+  expect(screen.getByText("Nueva")).toBeInTheDocument();
+});
+
+// La cancelación puede llegar mientras se está leyendo el cuerpo, no solo mientras
+// se espera la respuesta: entonces json() ya ha pasado su throwIfAborted y el flujo
+// vuelve por el camino feliz. Lo único que impide repintar es la guarda posterior.
+it("@s36 una cancelación mientras se lee el cuerpo tampoco repinta la sección", async () => {
+  let release: ((body: unknown) => void) | undefined;
+  const body = new Promise<unknown>((resolve) => (release = resolve));
+  let firstEvents = true;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string, options: RequestInit = {}) => {
+      calls.push(`${options.method ?? "GET"} ${url}`);
+      if (String(url).includes("/sync"))
+        return Response.json({ performed: true, subscription });
+      if (firstEvents) {
+        firstEvents = false;
+        return { status: 200, json: () => body } as unknown as Response;
+      }
+      return Response.json({
+        configured: true,
+        lastSyncAt: "2030-01-07T11:00:00Z",
+        lastStatus: "OK",
+        items: [{ ...meeting, summary: "Nueva" }],
+      });
+    }),
+  );
+  const view = paint("r1");
+  await waitFor(() => expect(calls.length).toBeGreaterThanOrEqual(2));
+  view.rerender(
+    <TodayExternalCalendar
+      zoneId={ZONE}
+      dayStartAt={DAY_START}
+      dayEndAt={DAY_END}
+      revision="r2"
+    />,
+  );
+  expect(await screen.findByText("Nueva")).toBeInTheDocument();
+  release?.({
+    configured: true,
+    lastSyncAt: "2030-01-07T11:00:00Z",
+    lastStatus: "OK",
+    items: [{ ...meeting, summary: "Vieja" }],
+  });
   await new Promise((resolve) => setTimeout(resolve, 10));
   expect(screen.queryByText("Vieja")).not.toBeInTheDocument();
   expect(screen.getByText("Nueva")).toBeInTheDocument();

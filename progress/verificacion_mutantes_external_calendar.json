@@ -1,0 +1,122 @@
+[
+  {
+    "cluster": "I",
+    "name": "vista: aria-labelledby del formulario -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 el formulario se anuncia por su título y promete que solo se lee"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: aria-labelledby de la ficha -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 la ficha y su diálogo se nombran solos"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: parrafo de solo lectura -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 el formulario se anuncia por su título y promete que solo se lee"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: autoComplete de la etiqueta -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 el formulario se anuncia por su título y promete que solo se lee"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: type de la etiqueta -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 el formulario se anuncia por su título y promete que solo se lee"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: spellCheck del campo de direccion -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 el formulario se anuncia por su título y promete que solo se lee"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: aria-describedby del campo de direccion pierde la ayuda",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 el formulario se anuncia por su título y promete que solo se lee"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: aria-atomic de la region viva -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 el formulario se anuncia por su título y promete que solo se lee"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: h3 'Eventos' -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 la ficha y su diálogo se nombran solos"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: aria-label del dialogo -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 la ficha y su diálogo se nombran solos"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: texto del dialogo -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 la ficha y su diálogo se nombran solos"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: role='note' del aviso de truncado -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 avisa cuando la instantánea quedó truncada, y solo entonces"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "vista: texto del aviso de truncado -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 avisa cuando la instantánea quedó truncada, y solo entonces"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "hoy: aria-live de la seccion -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 muestra el evento en hora local y la marca de la última sincronización"
+    ]
+  },
+  {
+    "cluster": "I",
+    "name": "hoy: h2 'Calendario externo' -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s35 muestra el evento en hora local y la marca de la última sincronización"
+    ]
+  }
+]

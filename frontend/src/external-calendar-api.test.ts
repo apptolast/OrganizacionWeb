@@ -95,6 +95,30 @@ describe("@s37 lectura de la suscripción", () => {
     ],
     ["instante inválido", { ...subscription, lastSyncAt: "ayer" }],
     ["identificador que no es uuid", { ...subscription, id: "1" }],
+    // Una fila por guarda de subscriptionOf que hasta ahora se evaluaba siempre
+    // en falso: sin fixture roto, el mutante que apaga la guarda sobrevive.
+    ["etiqueta vacía", { ...subscription, label: "" }],
+    ["etiqueta que no es texto", { ...subscription, label: 7 }],
+    ["host que no es texto", { ...subscription, urlHost: 7 }],
+    ["cola que no es texto", { ...subscription, urlTail: 7 }],
+    ["identificador que no es texto", { ...subscription, id: 7 }],
+    // Los dos anclajes del regex de uuid: sin estas dos filas sobreviven
+    // exactamente los mutantes que quitan ^ y $, como pasó en automatizaciones.
+    [
+      "identificador con prefijo",
+      { ...subscription, id: `x${subscription.id}` },
+    ],
+    [
+      "identificador con sufijo",
+      { ...subscription, id: `${subscription.id}x` },
+    ],
+    ["último intento inválido", { ...subscription, lastAttemptAt: "ayer" }],
+    ["zona que no es texto ni nula", { ...subscription, snapshotZoneId: 7 }],
+    ["truncado que no es booleano", { ...subscription, truncated: "sí" }],
+    ["fecha de actualización inválida", { ...subscription, updatedAt: "ayer" }],
+    ["recurrentes negativos", { ...subscription, skippedRecurring: -1 }],
+    ["cancelados fraccionarios", { ...subscription, skippedCancelled: 1.5 }],
+    ["inválidos negativos", { ...subscription, skippedInvalid: -1 }],
   ])("rechaza una suscripción con %s", async (_name, broken) => {
     stub({ configured: true, subscription: broken });
     await expect(readExternalCalendar()).rejects.toThrow(
@@ -113,6 +137,37 @@ describe("@s37 lectura de la suscripción", () => {
     stub({ configured: false, subscription });
     await expect(readExternalCalendar()).rejects.toThrow(
       "Respuesta de calendario externo inválida",
+    );
+  });
+
+  it.each([
+    [
+      "un campo de más en la instantánea",
+      { configured: false, subscription: null, extra: 1 },
+    ],
+    ["configured que no es booleano", { configured: "sí", subscription: null }],
+  ])("rechaza %s", async (_name, body) => {
+    stub(body);
+    await expect(readExternalCalendar()).rejects.toThrow(
+      "Respuesta de calendario externo inválida",
+    );
+  });
+
+  it("rechaza un cuerpo que ni siquiera es JSON", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("no soy json", { status: 200 })),
+    );
+    await expect(readExternalCalendar()).rejects.toThrow(
+      "Respuesta de calendario externo inválida",
+    );
+  });
+
+  it("pide JSON en la cabecera Accept", async () => {
+    const fetcher = stub({ configured: false, subscription: null });
+    await readExternalCalendar();
+    expect(new Headers(fetcher.mock.calls[0][1].headers).get("Accept")).toBe(
+      "application/json",
     );
   });
 
@@ -186,6 +241,26 @@ describe("@s38 guardado", () => {
     ).rejects.toBe(response);
   });
 
+  // Única protección contra que saveExternalCalendar devuelva null y la vista haga
+  // setSubscription(null) tras un guardado con éxito, dejando al propietario en el
+  // formulario de alta como si no se hubiera guardado nada.
+  it("rechaza un guardado que responde que no hay nada configurado", async () => {
+    stub({ configured: false, subscription: null });
+    await expect(
+      saveExternalCalendar("Trabajo", "https://x.test/a.ics"),
+    ).rejects.toThrow("Respuesta de calendario externo inválida");
+  });
+
+  it("viaja como JSON, pide JSON y conserva el token CSRF", async () => {
+    const fetcher = stub({ configured: true, subscription });
+    setCsrfToken("token");
+    await saveExternalCalendar("Trabajo", "https://x.test/a.ics");
+    const headers = new Headers(fetcher.mock.calls[0][1].headers);
+    expect(headers.get("Content-Type")).toBe("application/json");
+    expect(headers.get("Accept")).toBe("application/json");
+    expect(headers.get("X-CSRF-TOKEN")).toBe("token");
+  });
+
   it("@s38 traduce el 503 de conectores para conservar el borrador", async () => {
     stub(disabled, { status: 503 });
     await expect(
@@ -208,6 +283,34 @@ describe("@s39 borrado", () => {
     const response = new Response(null, { status: 200 });
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
     await expect(deleteExternalCalendar()).rejects.toBe(response);
+  });
+
+  it("@s39 no borra nada si la señal ya venía abortada", async () => {
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+    const controller = new AbortController();
+    controller.abort();
+    await expect(
+      deleteExternalCalendar(controller.signal),
+    ).rejects.toMatchObject({ name: "AbortError" });
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("@s39 un borrado cancelado en vuelo no se da por hecho", async () => {
+    const controller = new AbortController();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async () => {
+        controller.abort();
+        return new Response(null, { status: 204 });
+      }),
+    );
+    const rejection = await deleteExternalCalendar(controller.signal).then(
+      () => null,
+      (error: unknown) => error,
+    );
+    expect(rejection).toBe(controller.signal.reason);
+    expect(rejection).toMatchObject({ name: "AbortError" });
   });
 });
 
@@ -234,11 +337,23 @@ describe("@s38 sincronización", () => {
     );
   });
 
-  it("rechaza un performed que no es booleano", async () => {
-    stub({ performed: "sí", subscription });
+  it.each([
+    ["un performed que no es booleano", { performed: "sí", subscription }],
+    ["un campo de más", { performed: true, subscription, extra: 1 }],
+    ["la suscripción ausente", { performed: true }],
+  ])("rechaza %s", async (_name, body) => {
+    stub(body);
     await expect(syncExternalCalendar(false)).rejects.toThrow(
       "Respuesta de calendario externo inválida",
     );
+  });
+
+  it("declara el cuerpo como JSON", async () => {
+    const fetcher = stub({ performed: true, subscription });
+    await syncExternalCalendar(false);
+    expect(
+      new Headers(fetcher.mock.calls[0][1].headers).get("Content-Type"),
+    ).toBe("application/json");
   });
 });
 
@@ -278,6 +393,9 @@ describe("@s35 lectura de eventos", () => {
     ["con uid vacío", { ...item, uid: "" }],
     ["con summary que no es texto", { ...item, summary: 3 }],
     ["con instante inválido", { ...item, startAt: "2030-01-07" }],
+    ["con fin malformado", { ...item, endAt: "ayer" }],
+    ["con uid que no es texto", { ...item, uid: 7 }],
+    ["con allDay que no es booleano", { ...item, allDay: "sí" }],
   ])("@s36 rechaza una lista con un item %s", async (_name, broken) => {
     stub({
       configured: true,
@@ -303,6 +421,32 @@ describe("@s35 lectura de eventos", () => {
     ).rejects.toThrow("Respuesta de calendario externo inválida");
   });
 
+  // El sobre de readExternalEvents tenía cuatro guardas mudas: las pruebas rompían
+  // los items, pero nadie rompía el resto de la respuesta.
+  it.each([
+    [
+      "configured que no es booleano",
+      { configured: "sí", lastSyncAt: null, lastStatus: "OK", items: [] },
+    ],
+    [
+      "instante de última sincronización inválido",
+      { configured: true, lastSyncAt: "ayer", lastStatus: "OK", items: [] },
+    ],
+    [
+      "estado desconocido",
+      { configured: true, lastSyncAt: null, lastStatus: "RARO", items: [] },
+    ],
+    [
+      "items que no son una lista",
+      { configured: true, lastSyncAt: null, lastStatus: "OK", items: {} },
+    ],
+  ])("@s36 rechaza una respuesta con %s", async (_name, body) => {
+    stub(body);
+    await expect(
+      readExternalEvents("2030-01-06T23:00:00Z", "2030-01-07T23:00:00Z"),
+    ).rejects.toThrow("Respuesta de calendario externo inválida");
+  });
+
   it("@s36 el summary vacío es válido", async () => {
     stub({
       configured: true,
@@ -313,6 +457,44 @@ describe("@s35 lectura de eventos", () => {
     await expect(
       readExternalEvents("2030-01-06T23:00:00Z", "2030-01-07T23:00:00Z"),
     ).resolves.toMatchObject({ items: [{ ...item, summary: "" }] });
+  });
+});
+
+// Las tres guardas de refuse() son conjunciones estado+código y nunca se probaban
+// con una sola mitad cierta, así que el mutante && -> || sobrevivía en las tres.
+// @s10 fija 400 MALFORMED_JSON y 415 como respuestas posibles de la misma ruta.
+describe("@s10 traducir un problema exige que coincidan estado y código", () => {
+  it.each([
+    ["503 con otro código", 503, { code: "OTRA_COSA" }],
+    ["404 con otro código", 404, { code: "OTRA_COSA" }],
+    ["400 con otro código", 400, { code: "MALFORMED_JSON" }],
+    ["500 con el código de conectores", 500, { code: "CONNECTORS_DISABLED" }],
+    [
+      "400 con el código de suscripción ausente",
+      400,
+      { code: "EXTERNAL_CALENDAR_NOT_CONFIGURED" },
+    ],
+    [
+      "404 con el código de validación",
+      404,
+      {
+        code: "VALIDATION_ERROR",
+        errors: [{ field: "url", code: "INVALID_VALUE", message: "m" }],
+      },
+    ],
+  ])("relanza la respuesta tal cual con %s", async (_name, status, body) => {
+    const response = Response.json({ status, ...body }, { status });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
+    await expect(readExternalCalendar()).rejects.toBe(response);
+  });
+
+  it("no se queda sin cuerpo al relanzar: puede leerse una vez más", async () => {
+    const response = Response.json({ status: 500, code: "X" }, { status: 500 });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
+    const rejection = (await readExternalCalendar().catch(
+      (error: unknown) => error,
+    )) as Response;
+    await expect(rejection.json()).resolves.toMatchObject({ code: "X" });
   });
 });
 

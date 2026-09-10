@@ -49,6 +49,21 @@ it("@s37 una URL directa autenticada abre la misma vista y marca la navegación"
   expect(screen.getByRole("navigation", { name: "Principal" })).toBeVisible();
 });
 
+// @s40 pide la pantalla operable con teclado. El «Saltar al contenido» del espacio
+// de trabajo apunta a #proyectos: si el <main> de esta vista perdiera ese id, el
+// salto dejaría de llevar a ninguna parte y ninguna prueba se enteraba.
+it("@s40 el salto al contenido aterriza en el main de la vista", async () => {
+  window.history.replaceState(null, "", "/calendario-externo");
+  render(<App username="Ana" />);
+  await screen.findByRole("heading", { level: 1, name: "Calendario externo" });
+  const skip = screen.getByRole("link", { name: "Saltar al contenido" });
+  const target = document.querySelector(
+    skip.getAttribute("href") ?? "#ninguno",
+  );
+  expect(target).toBe(screen.getByRole("main"));
+  expect(target).toHaveAttribute("tabindex", "-1");
+});
+
 it("@s37 la miga de pan del encabezado nombra la sección", async () => {
   window.history.replaceState(null, "", "/calendario-externo");
   render(<App username="Ana" />);

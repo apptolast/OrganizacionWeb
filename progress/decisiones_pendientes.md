@@ -46,3 +46,29 @@ rompería el `@s20` de la 29).
 Los carriles están destapando cosas. Cuando alguno encuentre otro cambio de
 contrato, se apunta aquí y se pregunta todo junto, para no interrumpirte por
 goteo.
+
+---
+
+## 2. Feature 29 — el `@s9` nombra una columna que no existe
+
+**Qué pasa.** `@s9` de `features/additional_connectors.feature` dice «token_nonce
+de 12 bytes». Esa columna **no existe**:
+`V29__additional_connectors.sql:37` declara sólo `token_ciphertext`, con el nonce
+embebido dentro del criptograma. Lo caza el panel de precierre de la 29.
+
+**Mi lectura.** El nonce embebido es el diseño correcto y el que usa el resto del
+repositorio; lo que caducó es la línea del contrato, que describe una forma de
+guardar que nunca se implementó. No es un agujero de seguridad: el nonce está,
+sólo que dentro del mismo campo.
+
+**Lo que hay que decidir:** enmendar la línea del `.feature` para que describa el
+nonce embebido (y contrafirmarla), o añadir la columna `token_nonce` separada y
+migrar, que es trabajo real y sin ganancia de seguridad que yo vea.
+
+---
+
+## 3. Feature 27 y 29 — dónde vive la ratificación
+
+Ya no hace falta preguntarte por esto: las ratificaciones que sí diste están
+ahora escritas con su cita exacta en `progress/ratificaciones.md`, para que un
+juez que sólo lee el repositorio pueda comprobarlas sin la conversación.

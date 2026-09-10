@@ -58,55 +58,9 @@ comparten?
 
 ---
 
-## 2. Feature 28 — el plazo de 5 s pasa a cubrir el intercambio completo
-
-**Qué cambió, sin contrafirma.** El commit `baf5ab1f` reescribió
-`features/external_calendar.feature:13-14`. Antes: «Descarga con redirecciones
-deshabilitadas, **timeout de 5 s**, Accept text/calendar…». Después, el plazo pasa
-a ser del **intercambio completo** —conexión, cabeceras y lectura del cuerpo— y se
-añade esta fila al `@s12`:
-
-> `| 200 text/calendar que envía las cabeceras y luego gotea el cuerpo sin cerrar | FEED_UNREACHABLE |`
-
-**Por qué se hizo.** Sin ese plazo total, un proveedor que manda las cabeceras y
-luego gotea el cuerpo sin cerrarlo **retiene un hilo indefinidamente**. Es un
-agujero de recursos real, y el propio texto lo dice: «ninguna descarga puede
-retener un hilo más de 5 s».
-
-**Nota:** esto puede ser lo que ya ratificaste como «la de la 28 amplía su
-contrato con el plazo de lectura del cuerpo del feed» en la entrada R1 de
-`progress/ratificaciones.md`. Si es así, dilo y lo doy por cerrado citando esa
-ratificación; lo pregunto porque **no lo puedo afirmar yo**.
-
 ---
 
----
-
----
-
----
-
-## 3. Feature 28 — el certificado que no vale para su nombre
-
-**Qué cambió, sin contrafirma.** El commit `78dca3a6` añadió esta fila al
-`@s12`:
-
-> `| presenta un certificado que no es válido para su nombre | FEED_UNREACHABLE |`
-
-**Mi lectura.** Es la consecuencia directa de la decisión que **sí** tomaste
-—«Anclar, y probar el TLS»— aplicada al calendario externo: si se ancla la
-dirección, hay que comprobar que el certificado corresponde al nombre, o el
-anclaje no sirve de nada. Pero es una fila nueva del contrato y la firma es tuya.
-
----
-
----
-
----
-
----
-
-## 4. Feature 28 — el sitio de «Calendario externo» en el menú
+## 2. Feature 28 — el sitio de «Calendario externo» en el menú
 
 **Qué pasa.** La enmienda de navegación que ratificaste fija el orden de las
 entradas del menú, y «Calendario externo» aparece en `workspace.tsx` en una

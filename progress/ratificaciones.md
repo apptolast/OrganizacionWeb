@@ -230,3 +230,42 @@ que es un error del operador y debe verse al instante. El modo degradado se
 reserva para la clave **ausente**, que ya está descrito y ratificado._
 
 **Alcanza a:** las dos filas del `Examples` del `@s9`, que pasan a `ausente`.
+
+---
+
+## R12 — 9 de septiembre de 2026 — el plazo de 5 s cubre el intercambio completo (feature 28)
+
+**No hizo falta preguntar de nuevo: ya estaba ratificada.** Se cerró por cita el
+10 de septiembre, al comprobar que la respuesta «Ratifico las dos» alcanzaba
+también a ésta.
+
+La opción que el propietario eligió describía esta enmienda con estas palabras:
+
+> La de la 28 amplía su contrato con el plazo de lectura del cuerpo del feed, que
+> cierra un agujero de recursos.
+
+**Alcanza a:** `features/external_calendar.feature:13-14` y la fila del `@s12` del
+proveedor que gotea el cuerpo. Introducida por el commit `baf5ab1f`.
+
+---
+
+## R13 — 9 de septiembre de 2026 — el certificado que no vale para su nombre (feature 28)
+
+**Tampoco hizo falta preguntar: es la prueba de TLS que el propietario pidió.**
+
+**Pregunta original:** «Dos carriles decidieron lo contrario sobre el reenlace
+DNS: webhooks revocó el anclaje a la dirección validada (viaja por nombre) y el
+calendario externo lo implementó. ¿Cuál manda?»
+
+**Opción elegida:** «Anclar, y probar el TLS», descrita así:
+
+> Se conecta a la dirección ya validada en **las dos features**, que es lo que
+> pedía la enmienda B3 original, y **se escribe la prueba de TLS/SNI que hoy no
+> existe**.
+
+La fila que el commit `78dca3a6` añadió al `@s12` —un certificado que no es válido
+para su nombre da `FEED_UNREACHABLE`— **es** esa prueba. Y es indispensable: si se
+ancla la dirección, hay que comprobar que el certificado corresponde al nombre, o
+el anclaje deja de ser una defensa y pasa a ser un agujero.
+
+**Con R12 y R13, la feature 28 se queda sin decisiones de contrato pendientes.**

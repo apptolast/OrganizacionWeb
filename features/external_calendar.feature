@@ -12,6 +12,13 @@ Feature: Suscribirse en solo lectura a un calendario iCalendar externo y verlo e
   Descarga con redirecciones deshabilitadas, Accept text/calendar, aborto al superar 1 MiB; solo HTTP 200 con Content-Type text/*.
   El plazo de 5 s es del intercambio completo: conexión, cabeceras y lectura del cuerpo. Un proveedor que envía las cabeceras y luego
   gotea el cuerpo sin cerrarlo se corta al vencer ese plazo con FEED_UNREACHABLE; ninguna descarga puede retener un hilo más de 5 s.
+  # Enmienda del 9 de septiembre de 2026, ratificada por el propietario. El plazo de 5 s
+  # era solo del timeout de conexion; pasa a cubrir el INTERCAMBIO COMPLETO. Sin eso, un
+  # proveedor que manda las cabeceras y luego gotea el cuerpo sin cerrarlo retiene un hilo
+  # indefinidamente: es un agujero de recursos, no una lentitud. La ratificacion es la
+  # respuesta "Ratifico las dos", cuya opcion describia esta enmienda como "la de la 28
+  # amplia su contrato con el plazo de lectura del cuerpo del feed, que cierra un agujero
+  # de recursos". Ver progress/ratificaciones.md, entrada R12.
   Códigos cerrados de fallo: FEED_REJECTED, FEED_UNREACHABLE, FEED_HTTP_ERROR, FEED_TOO_LARGE, FEED_UNSUPPORTED_TYPE, FEED_MALFORMED, SECRET_UNREADABLE.
   Un fallo de sincronización es 200 con lastStatus FAILED y la instantánea anterior intacta; nunca una lista parcial.
   Parser propio: solo VEVENT; UID y DTSTART obligatorios; Z es UTC; TZID debe pertenecer al catálogo de zonas; flotantes y VALUE=DATE se
@@ -196,6 +203,13 @@ Feature: Suscribirse en solo lectura a un calendario iCalendar externo y verlo e
       | 500                                                                        | FEED_HTTP_ERROR       |
       | conexión rechazada                                                         | FEED_UNREACHABLE      |
       | presenta un certificado que no es válido para su nombre                    | FEED_UNREACHABLE      |
+      # Fila del 9 de septiembre de 2026, ratificada por el propietario. Es literalmente
+      # la prueba de TLS que pidio al resolver la contradiccion del reenlace DNS entre dos
+      # carriles: eligio "Anclar, y probar el TLS", opcion descrita como "se conecta a la
+      # direccion ya validada en las DOS features y se escribe la prueba de TLS/SNI que hoy
+      # no existe". Si se ancla la direccion hay que comprobar que el certificado
+      # corresponde al NOMBRE, o el anclaje no sirve de nada: sin esta fila, anclar
+      # convertiria una defensa en un agujero. Ver progress/ratificaciones.md, entrada R13.
       | 200 tras 6 s sin enviar cabeceras                                          | FEED_UNREACHABLE      |
       | 200 text/calendar que envía las cabeceras y luego gotea el cuerpo sin cerrar | FEED_UNREACHABLE      |
       | 200 text/calendar con cuerpo de 1 MiB más 1 byte                           | FEED_TOO_LARGE        |

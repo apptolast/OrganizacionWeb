@@ -456,6 +456,35 @@ it("@s36 avisa de lectura inválida sin perder el resto de la pantalla", async (
   expect(screen.getByText("calendar.google.com")).toBeInTheDocument();
 });
 
+it("@s37 dice que la ventana está vacía solo cuando la lectura sí ha llegado", async () => {
+  withSubscription(synced);
+  render(<ExternalCalendar />);
+  expect(
+    await screen.findByText("No hay eventos en la ventana guardada."),
+  ).toBeInTheDocument();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+});
+
+it.each([
+  ["500 sin cuerpo reconocible", {}, 500],
+  ["503 de conectores", { status: 503, code: "CONNECTORS_DISABLED" }, 503],
+  ["fallo de red", "network", 200],
+])(
+  "@s36 no afirma que la ventana esté vacía cuando la lista falla con %s",
+  async (_name, body, status) => {
+    answer(ROUTE, "GET", { configured: true, subscription: synced });
+    answer(`${ROUTE}/events`, "GET", body, status);
+    render(<ExternalCalendar />);
+    expect(
+      await screen.findByText("No se ha podido leer la lista de eventos."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("No hay eventos en la ventana guardada."),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("calendar.google.com")).toBeInTheDocument();
+  },
+);
+
 it("@s40 recorre con el teclado Etiqueta, Dirección, Guardar, Sincronizar y Eliminar", async () => {
   withSubscription(synced);
   const user = userEvent.setup();

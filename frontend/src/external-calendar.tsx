@@ -129,8 +129,11 @@ export function ExternalCalendar() {
       setInvalidList(false);
     } catch (error) {
       if (signal.aborted) throw error;
-      if (error instanceof Error && !(error instanceof ConnectorsDisabledError))
-        setInvalidList(true);
+      // Cualquier lectura que no llega deja la lista en desconocido: decir «no hay
+      // eventos» seria afirmar un hecho que la pantalla no conoce. Antes solo se
+      // marcaba para los rechazos que eran Error, asi que un 500 —que refuse()
+      // relanza como Response— pintaba la ventana como vacia.
+      setInvalidList(true);
       setEvents([]);
     }
   }, []);

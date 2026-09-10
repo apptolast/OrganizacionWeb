@@ -31,6 +31,11 @@ condiciones de arranque y acta.
   la comprobación que habría cazado el informe de la 25 el día que se escribió.
 - **Comprobar que los tests que se escribieron para matar aparecen como
   `killingTest`.** Si un test existe y no aparece, la campaña es de otro árbol.
+- **Comprobar que los cinco adaptadores de bitácora ya reciben mutantes.** Hoy
+  se quitó `org.slf4j` del `avoidCallsTo`, que era la causa de que
+  `Slf4jWebhookAudit`, `Slf4jConnectorAudit`, `Slf4jExternalCalendarAudit` y
+  `Slf4jAutomationAudit` salieran con cero. **Si siguen a cero, el arreglo no
+  funcionó** y hay que decirlo en vez de dar la condición por cerrada.
 - **Barrer patrones muertos**: ninguna clase del ámbito puede salir con cero
   mutantes sin explicación. Hoy han aparecido seis ámbitos mal apuntados.
 

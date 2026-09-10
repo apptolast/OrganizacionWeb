@@ -34,6 +34,39 @@ condiciones de arranque y acta.
 - **Barrer patrones muertos**: ninguna clase del ámbito puede salir con cero
   mutantes sin explicación. Hoy han aparecido seis ámbitos mal apuntados.
 
+## Un atajo legítimo para las cinco de PIT
+
+PIT gasta **~17 minutos calculando cobertura** sea cual sea el ámbito, porque
+`targetTests` es la suite entera. Ese coste es el mismo para una feature que para
+cinco. Ya existe el ámbito **`noche_cinco`** (`backend/build.gradle.kts:54`) que
+une los cinco conjuntos **por referencia**, así que hereda automáticamente las
+correcciones de ámbito de hoy.
+
+La puntuación **por feature** sale después, del XML, que trae el resultado clase
+a clase: son los mismos mutantes y las mismas pruebas que en las campañas
+separadas, no una medida distinta. Eso convierte **cinco campañas de PIT en
+una**.
+
+Ya murió dos veces por memoria, pero las dos con carriles trabajando encima. Se
+intenta primero combinada y, si vuelve a caer, se baja a una por feature. La
+diferencia son unas tres horas.
+
+## Lo que NO se va a hacer, y por qué
+
+**No se van a excluir pruebas del cálculo de cobertura.** La tentación es
+concreta: `ImportSocketTest` tardó **68,2 s** y es la que tumbó la campaña de la
+29 al no pasar sin mutación; excluirla sería más rápido y más robusto, y además
+sería *conservador* —quitar una prueba sólo puede bajar la puntuación, nunca
+subirla—, porque una prueba de límites de nginx no puede matar un mutante de
+webhooks.
+
+Aun así no se hace. Falló **por carga**, con nueve carriles encima, y en máquina
+drenada pasa. Excluirla trataría el síntoma y, sobre todo, cambiaría el
+instrumento a mitad de la medición, que es exactamente la clase de decisión que
+ha producido hoy seis ámbitos mal apuntados y una cifra irreproducible. Si vuelve
+a caer **con la máquina drenada**, entonces sí hay un problema de estabilidad de
+esa prueba, y se arregla en la prueba, no en el ámbito.
+
 ## La cola, por orden
 
 Diez campañas. A ~30 min cada una son unas **cinco horas** de máquina drenada, y

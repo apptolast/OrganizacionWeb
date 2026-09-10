@@ -18,10 +18,8 @@ export function Workspace({
     | "Calendario"
     | "Calendario externo"
     | "Importación"
-    | "Conectores"
     | "API para integraciones"
     | "Webhooks"
-    | "Automatizaciones"
     | null;
 }) {
   return (
@@ -113,15 +111,6 @@ export function Workspace({
             )}
           </RouteLink>
           <RouteLink
-            href="/conectores"
-            aria-current={section === "Conectores" ? "page" : undefined}
-          >
-            Conectores
-            {section === "Conectores" && (
-              <span className="nav-dot" aria-hidden="true" />
-            )}
-          </RouteLink>
-          <RouteLink
             href="/integraciones/api"
             aria-current={
               section === "API para integraciones" ? "page" : undefined
@@ -134,12 +123,6 @@ export function Workspace({
             aria-current={section === "Webhooks" ? "page" : undefined}
           >
             Webhooks
-          </RouteLink>
-          <RouteLink
-            href="/automatizaciones"
-            aria-current={section === "Automatizaciones" ? "page" : undefined}
-          >
-            Automatizaciones
           </RouteLink>
         </nav>
         <div className="sidebar-note">

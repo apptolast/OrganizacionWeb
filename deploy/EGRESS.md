@@ -21,13 +21,6 @@ el nombre. El cliente HTTP no vuelve a preguntar al DNS, de modo que la ventana
 entre la comprobación y el uso (*DNS rebinding*) **no existe**: no hay una segunda
 resolución que pueda contestar otra cosa.
 
-El conector de GitHub **no** ancla, y no le hace falta por el mismo motivo por el
-que no valida direcciones: su base no la elige el usuario, es configuración del
-servidor validada al arrancar contra una lista fija (enmienda B11). Lo que el
-usuario aporta es el nombre del repositorio, no el destino. Si algún día la base
-pasara a ser dato de petición, este párrafo deja de valer y habría que anclarlo
-igual.
-
 Anclar a una dirección suele romper la verificación del certificado. Aquí no,
 porque el nombre viaja con la petición: en la cabecera `Host` y en la indicación
 de servidor de TLS, contra la que se verifica el certificado. Las tres piezas

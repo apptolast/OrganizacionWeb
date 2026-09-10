@@ -17,12 +17,8 @@ import { ImportData } from "./import-data";
 import { Calendar } from "./calendar";
 import { IntegrationApi } from "./integration-api";
 import { Webhooks } from "./webhooks";
-import { GithubConnector } from "./github-connector";
 import { IntegrationsIndex } from "./integrations-index";
 import { ExternalCalendar } from "./external-calendar";
-import { Automations } from "./automations";
-import { ConnectorsCatalog } from "./connectors-catalog";
-import { GitlabConnector } from "./gitlab-connector";
 import { useAppearance } from "./appearance-state";
 export function App({
   sessionControls,
@@ -43,12 +39,8 @@ export function App({
   const importData = route === "/importacion";
   const integrationApi = route === "/integraciones/api";
   const webhooks = route === "/webhooks";
-  const githubConnector = route === "/integraciones/github";
   const integrationsIndex = route === "/integraciones";
   const externalCalendar = route === "/calendario-externo";
-  const automations = route === "/automatizaciones";
-  const connectorsCatalog = route === "/conectores";
-  const gitlabConnector = route === "/conectores/gitlab";
   const taskRoute = /^\/proyectos\/([^/]+)\/tareas\/([^/?]+)$/.exec(route);
   const sessionRoute =
     /^\/proyectos\/([^/]+)\/tareas\/([^/]+)\/sesiones\/([^/?]+)$/.exec(route);
@@ -56,47 +48,35 @@ export function App({
     <Workspace
       sessionControls={sessionControls}
       section={
-        connectorsCatalog || gitlabConnector
-          ? "Conectores"
-          : automations
-            ? "Automatizaciones"
-            : webhooks
-              ? "Webhooks"
-              : externalCalendar
-                ? "Calendario externo"
-                : integrationApi
-                  ? "API para integraciones"
-                  : importData
-                    ? "Importación"
-                    : calendar
-                      ? "Calendario"
-                      : exportData
-                        ? "Exportación"
-                        : appearance
-                          ? "Apariencia"
-                          : route === "/"
-                            ? "Hoy"
-                            : weeklyReview
-                              ? "Revisión semanal"
-                              : history
-                                ? "Historial"
-                                : availability
-                                  ? "Disponibilidad"
-                                  : route.startsWith("/proyectos")
-                                    ? "Proyectos"
-                                    : null
+        webhooks
+          ? "Webhooks"
+          : externalCalendar
+            ? "Calendario externo"
+            : integrationApi
+              ? "API para integraciones"
+              : importData
+                ? "Importación"
+                : calendar
+                  ? "Calendario"
+                  : exportData
+                    ? "Exportación"
+                    : appearance
+                      ? "Apariencia"
+                      : route === "/"
+                        ? "Hoy"
+                        : weeklyReview
+                          ? "Revisión semanal"
+                          : history
+                            ? "Historial"
+                            : availability
+                              ? "Disponibilidad"
+                              : route.startsWith("/proyectos")
+                                ? "Proyectos"
+                                : null
       }
     >
-      {connectorsCatalog && username ? (
-        <ConnectorsCatalog />
-      ) : gitlabConnector && username ? (
-        <GitlabConnector owner={username} />
-      ) : automations && username ? (
-        <Automations owner={username} />
-      ) : webhooks && username ? (
+      {webhooks && username ? (
         <Webhooks owner={username} />
-      ) : githubConnector && username ? (
-        <GithubConnector owner={username} />
       ) : integrationsIndex && username ? (
         <IntegrationsIndex />
       ) : externalCalendar && username ? (

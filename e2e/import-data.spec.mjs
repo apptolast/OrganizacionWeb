@@ -73,10 +73,8 @@ test("import: own durable project preview and deliberate atomic addition with no
       "Exportación",
       "Calendario",
       "Importación",
-      "Conectores",
       "API para integraciones",
       "Webhooks",
-      "Automatizaciones",
     ];
     await expect(nav.getByRole("link")).toHaveCount(ORDEN_CANONICO.length);
     for (const [posicion, nombre] of ORDEN_CANONICO.entries())

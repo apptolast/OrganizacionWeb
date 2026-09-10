@@ -16,7 +16,7 @@ import { join, resolve } from "node:path";
  * con `font-size`, pero **el zoom nativo que el contrato nombra no se ejecutaba en ninguna parte**:
  * `setViewportSize` cambia el tamaño de la ventana, no el zoom. La única forma de ampliar de verdad
  * es `chrome.tabs.setZoom` desde una extensión efímera. Mismo mecanismo que
- * `e2e/github-connector-native-zoom.spec.mjs`.
+ * `e2e/reschedule-native-zoom.spec.mjs`.
  *
  * Precio declarado: `headless: false` y `channel: "chromium"` hacen la prueba dependiente de un
  * entorno gráfico. A cambio, si el zoom no se aplica **falla**, no se salta.

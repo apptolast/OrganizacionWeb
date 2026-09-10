@@ -358,6 +358,73 @@ class AutomationsApiTest {
             jsonPath("$.action.criterionTemplate").value("Llave simple { y cierre } sin marcador"));
   }
 
+  /** Exactly {@code count} code points, half of them outside the BMP, so «byte a byte» bites. */
+  private static String codePoints(int count) {
+    return "á".repeat(count / 2) + "😀".repeat(count - count / 2);
+  }
+
+  private static String quoted(String raw) {
+    return "\"" + raw + "\"";
+  }
+
+  /**
+   * @s6 rows 4 and 5. Neither the criterion at its exact limit of 2000 code points nor the empty
+   *     criterion had ever travelled through the API: AutomationDraftTest only builds the 2000 one
+   *     in the constructor, and the empty one was nowhere. The oracle is the draft handed to the
+   *     use case, not the echo of the stub: a parser that trimmed, truncated, counted chars instead
+   *     of code points or turned "" into null would be caught here.
+   */
+  @Test
+  void s6_carriesTheCriterionAtItsLimitAndTheEmptyOneUntouchedToTheUseCase() throws Exception {
+    var criterion = codePoints(CreateTaskAction.CRITERION_LIMIT);
+    var atTheLimit =
+        new AutomationDraft(
+            "Regla",
+            true,
+            "BlockPlanned.v1",
+            null,
+            new CreateTaskAction(PROJECT, "Preparar {{task.title}}", criterion, 30));
+    when(create.create(eq("owner"), any())).thenReturn(rule(1, atTheLimit));
+
+    mvc.perform(
+            post("/api/v1/me/automations")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .contentType("application/json")
+                .content(
+                    body(
+                        "\"Regla\"",
+                        "\"BlockPlanned.v1\"",
+                        "null",
+                        createTask("\"Preparar {{task.title}}\"", quoted(criterion), "30"))))
+        .andExpect(status().isCreated());
+    verify(create).create("owner", atTheLimit);
+
+    var title = codePoints(CreateTaskAction.TITLE_LIMIT);
+    var emptyCriterion =
+        new AutomationDraft(
+            "Regla",
+            true,
+            "WorkSessionClosed.v1",
+            null,
+            new CreateTaskAction(PROJECT, title, "", 30));
+    when(create.create(eq("owner"), any())).thenReturn(rule(1, emptyCriterion));
+
+    mvc.perform(
+            post("/api/v1/me/automations")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .contentType("application/json")
+                .content(
+                    body(
+                        "\"Regla\"",
+                        "\"WorkSessionClosed.v1\"",
+                        "null",
+                        createTask(quoted(title), "\"\"", "30"))))
+        .andExpect(status().isCreated());
+    verify(create).create("owner", emptyCriterion);
+  }
+
   @ParameterizedTest
   @CsvSource(
       delimiter = '|',
@@ -567,6 +634,31 @@ class AutomationsApiTest {
                 .content(valid()))
         .andExpect(status().isForbidden());
     verifyNoInteractions(replace);
+  }
+
+  /**
+   * @s36 row 5. /simulate is the only POST of the contract that writes nothing, and therefore the
+   *     natural candidate for somebody to except from the guards «because it is read-only». The row
+   *     exists to forbid exactly that, so it needs its own oracle: today the only foreign-Origin
+   *     test uses PUT and the only CSRF-less one uses POST /automations.
+   */
+  @Test
+  void s36_simulateIsNotExceptedFromTheOriginGuardNorFromCsrf() throws Exception {
+    mvc.perform(
+            post("/api/v1/me/automations/simulate")
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .header("Origin", "https://evil.example")
+                .contentType("application/json")
+                .content(valid()))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            post("/api/v1/me/automations/simulate")
+                .with(user("owner"))
+                .contentType("application/json")
+                .content(valid()))
+        .andExpect(status().isForbidden());
+    verifyNoInteractions(simulate);
   }
 
   @Test

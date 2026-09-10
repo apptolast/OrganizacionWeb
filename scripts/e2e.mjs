@@ -11,16 +11,13 @@ const environmentFile = join(scratch, "test.env");
 const webPort = process.env.E2E_WEB_PORT ?? "18080";
 if (!/^\d{2,5}$/.test(webPort)) throw new Error("Invalid E2E_WEB_PORT");
 const baseUrl = `http://127.0.0.1:${webPort}`;
-// Clave de conectores sólo para pruebas: 32 bytes en base64. Habilita las rutas del conector para
-// que su E2E recorra los estados reales en lugar del 503 de "sin configurar".
+// Clave de cifrado sólo para pruebas: 32 bytes en base64. Habilita las rutas que cifran secretos
+// —hoy el calendario externo— para que su E2E recorra los estados reales en lugar del 503 de
+// "sin configurar".
 const connectorKey = "ZTJlLW9ubHktY29ubmVjdG9yLWtleS0zMi1ieXRlcyE=";
-// El servicio falso de GitHub comparte el espacio de red del backend, así que éste lo alcanza por
-// loopback y la lista blanca de GithubApiBase no se relaja. Ninguna petición sale hacia
-// api.github.com: el nombre oficial no aparece en la configuración de la pila.
-const githubApiBase = "http://127.0.0.1:9000";
 writeFileSync(
   environmentFile,
-  `DB_USERNAME=e2e_user\nDB_PASSWORD=e2e-only-database\nAPP_AUTH_USERNAME=e2e-user\nAPP_AUTH_PASSWORD=e2e-only-password\nWEB_PORT=${webPort}\nAPP_CONNECTOR_KEY=${connectorKey}\nAPP_GITHUB_API_BASE=${githubApiBase}\n`,
+  `DB_USERNAME=e2e_user\nDB_PASSWORD=e2e-only-database\nAPP_AUTH_USERNAME=e2e-user\nAPP_AUTH_PASSWORD=e2e-only-password\nWEB_PORT=${webPort}\nAPP_CONNECTOR_KEY=${connectorKey}\n`,
 );
 const project = `organizationweb-e2e-${process.pid}`;
 const composeArgs = [
@@ -31,9 +28,6 @@ const composeArgs = [
   project,
   "-f",
   resolve(root, "docker-compose.yml"),
-  // El perfil e2e añade el servicio falso de GitHub, que un despliegue normal no levanta.
-  "--profile",
-  "e2e",
 ];
 const env = {
   ...process.env,
@@ -46,7 +40,6 @@ const env = {
   E2E_BASE_URL: process.env.E2E_BASE_URL ?? baseUrl,
   APP_MAX_ACTIVE_PROJECTS: "3",
   APP_CONNECTOR_KEY: connectorKey,
-  APP_GITHUB_API_BASE: githubApiBase,
   // La guardia SSRF se deja activada: ninguna prueba puede alcanzar una red privada.
   APP_CONNECTORS_ALLOW_PRIVATE_ADDRESSES: "false",
   E2E_COMPOSE_PROJECT: project,

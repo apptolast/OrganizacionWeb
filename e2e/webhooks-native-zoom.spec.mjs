@@ -13,7 +13,7 @@ import { join, resolve } from "node:path";
  * `deviceScaleFactor` cambia la densidad de píxeles. Ninguno de los dos reproduce el reflujo que
  * este escenario nombra. La única forma de ampliar de verdad es `chrome.tabs.setZoom` desde una
  * extensión efímera, que es lo que hace esta spec. Mismo mecanismo que
- * `e2e/github-connector-native-zoom.spec.mjs` y `e2e/reschedule-native-zoom.spec.mjs`.
+ * `e2e/reschedule-native-zoom.spec.mjs`.
  *
  * Precio declarado, igual que en las otras dos: `headless: false` y `channel: "chromium"` hacen la
  * prueba dependiente de un entorno gráfico. Es el coste de medir el zoom de verdad; a cambio, si el

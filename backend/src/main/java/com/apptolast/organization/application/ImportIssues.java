@@ -35,6 +35,9 @@ public final class ImportIssues implements ImportIssuesUseCase {
   /** El fallo no vino del gestor externo, así que no hay código HTTP suyo que anotar. */
   private static final int NOT_THE_PROVIDER = 0;
 
+  /** Ninguna clave del llavero abre el texto cifrado guardado: la del servidor cambió. */
+  private static final String KEY_MISMATCH = "CONNECTOR_KEY_MISMATCH";
+
   private final IssueConnections connections;
   private final IssueImportReceiptStore receipts;
   private final ProjectQueries projects;
@@ -111,6 +114,13 @@ public final class ImportIssues implements ImportIssuesUseCase {
       throw failed(ownerId, connection, receipt, "PROJECT_COMPLETED", 0, NOT_THE_PROVIDER);
     } catch (StorageUnavailableException error) {
       throw failed(ownerId, connection, receipt, "STORAGE_UNAVAILABLE", 0, NOT_THE_PROVIDER);
+    } catch (SecretUndecipherableException error) {
+      // El recibo ya está insertado como en curso, así que hay que cerrarlo antes de propagar: un
+      // fallo de la clave del servidor no puede dejar al propietario bloqueado quince minutos con
+      // un IMPORT_IN_PROGRESS que no corresponde a ninguna importación viva. La excepción sigue
+      // subiendo tal cual para que el adaptador la traduzca a 503 CONNECTOR_KEY_MISMATCH.
+      failed(ownerId, connection, receipt, KEY_MISMATCH, 0, NOT_THE_PROVIDER);
+      throw error;
     }
   }
 

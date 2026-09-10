@@ -188,19 +188,51 @@ class GitlabConnectorPersistenceTest {
     assertThat(count("task_external_links")).isEqualTo(1);
   }
 
+  /**
+   * @s14 dice «no existe fila de conexión GitLab <em>del propietario</em>», y esa mitad sólo se
+   *     mide con una segunda fila delante: con una sola en la tabla, borrar sin {@code WHERE
+   *     owner_id} da exactamente el mismo resultado. El literal SQL queda fuera del alcance de la
+   *     mutación —PIT no muta cadenas— así que este es el único oráculo posible, y lo que está en
+   *     juego es el texto cifrado de todos los demás inquilinos.
+   */
   @Test
   void s14_deletingIsIdempotentAndLeavesTasksLinksAndReceiptsUntouched() {
     connections.save(OWNER, connection(GitlabConnection.CONNECTED, ciphertext("A"), 1L));
+    connections.save(OTHER, connection(GitlabConnection.CONNECTED, ciphertext("B"), 7L));
     link(OWNER, "gitlab", "gitlab.example.com:9001");
     receipts.begin(OWNER, projectId, "gitlab", PROJECT_PATH, NOW, NOW.minus(FIFTEEN_MINUTES));
 
     assertThat(connections.delete(OWNER)).isTrue();
     assertThat(connections.delete(OWNER)).isFalse();
 
-    assertThat(count("gitlab_connections")).isZero();
+    assertThat(connections.find(OWNER)).isEmpty();
+    var untouched = connections.find(OTHER).orElseThrow();
+    assertThat(untouched.tokenCiphertext()).isEqualTo(ciphertext("B"));
+    assertThat(untouched.version()).isEqualTo(7L);
+    assertThat(count("gitlab_connections")).isEqualTo(1);
     assertThat(count("tasks")).isEqualTo(1);
     assertThat(count("task_external_links")).isEqualTo(1);
     assertThat(count("issue_import_receipts")).isEqualTo(1);
+  }
+
+  /**
+   * El caso simétrico del upsert: el {@code ON CONFLICT (owner_id)} tiene que resolverse contra la
+   * fila de quien guarda y no contra la única que hubiera en la tabla. Sin segundo propietario, un
+   * upsert que ignorase el propietario también dejaría estas cuentas cuadradas.
+   */
+  @Test
+  void s13_savingAgainReplacesOnlyTheRowOfItsOwnerAndNotTheOneNextToIt() {
+    connections.save(OWNER, connection(GitlabConnection.CONNECTED, ciphertext("A"), 1L));
+    connections.save(OTHER, connection(GitlabConnection.CONNECTED, ciphertext("B"), 7L));
+
+    connections.save(OWNER, connection(GitlabConnection.CONNECTED, ciphertext("C"), 2L));
+
+    assertThat(connections.find(OWNER).orElseThrow().tokenCiphertext()).isEqualTo(ciphertext("C"));
+    assertThat(connections.find(OWNER).orElseThrow().version()).isEqualTo(2L);
+    var untouched = connections.find(OTHER).orElseThrow();
+    assertThat(untouched.tokenCiphertext()).isEqualTo(ciphertext("B"));
+    assertThat(untouched.version()).isEqualTo(7L);
+    assertThat(count("gitlab_connections")).isEqualTo(2);
   }
 
   @Test

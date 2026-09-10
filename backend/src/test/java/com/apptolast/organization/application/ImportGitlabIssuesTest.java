@@ -87,6 +87,10 @@ class ImportGitlabIssuesTest {
     assertEquals(NOW, receipt.finishedAt());
     assertEquals(2, fakes.tasks.tasks());
     assertEquals(2, fakes.tasks.events());
+    // El nombre del evento es un contrato entre features: las automatizaciones de la 30 se
+    // suscriben a este literal exacto, y cambiarlo dejaría de dispararlas en silencio.
+    assertEquals("TaskCreated.v1", fakes.tasks.lastEvent().type());
+    assertEquals(1, fakes.tasks.lastEvent().schemaVersion());
     assertEquals(
         List.of("gitlab|gitlab.example.com:9001", "gitlab|gitlab.example.com:9002"),
         fakes.tasks.linkKeys());
@@ -251,6 +255,44 @@ class ImportGitlabIssuesTest {
     assertEquals(30, error.retryAfterSeconds());
     assertEquals("connected", gitlab.connections.find(OWNER).orElseThrow().status());
     assertEquals(0, fakes.tasks.tasks());
+  }
+
+  // ------------------ @s27 la clave rotada cierra el recibo en vez de dejarlo colgado
+
+  /**
+   * @s27: rotar APP_CONNECTOR_KEY sin conservar la anterior deja un texto cifrado que ninguna clave
+   *     abre. El recibo ya está insertado como {@code running} cuando eso se descubre, y si la
+   *     excepción escapa sin cerrarlo el guardián responde IMPORT_IN_PROGRESS a toda escritura del
+   *     propietario durante quince minutos por un fallo de configuración del servidor.
+   */
+  @Test
+  void s27_atokenNoKeyCanOpenClosesTheReceiptInsteadOfLeavingItRunning() {
+    gitlab.connections.put(OWNER, connectedWithForeignCiphertext());
+    fakes.source.page(1, new IssuePage(List.of(issue(9001)), 1, false));
+
+    assertThrows(
+        SecretUndecipherableException.class, () -> importIssues().execute(OWNER, projectId));
+
+    var receipt = fakes.receipts.latest(OWNER, "gitlab").orElseThrow();
+    assertEquals("failed", receipt.status());
+    assertEquals("CONNECTOR_KEY_MISMATCH", receipt.errorCode());
+    assertEquals(NOW, receipt.finishedAt());
+    assertFalse(fakes.receipts.importing(OWNER, NOW.minusSeconds(15 * 60)));
+    assertEquals(List.of(), fakes.source.calls());
+  }
+
+  /** El mismo cifrado, sellado para otro propietario: descifrarlo con OWNER no devuelve nada. */
+  private GitlabConnection connectedWithForeignCiphertext() {
+    return new GitlabConnection(
+        PROJECT_PATH,
+        Long.parseLong(REFERENCE),
+        "WXYZ",
+        GitlabConnection.CONNECTED,
+        gitlab.cipher.encrypt("owner-ajeno", TOKEN),
+        Instant.parse("2026-09-09T10:00:00Z"),
+        null,
+        null,
+        1L);
   }
 
   // ------------------------------------------- @s26 un fallo en la página 2 no borra la página 1

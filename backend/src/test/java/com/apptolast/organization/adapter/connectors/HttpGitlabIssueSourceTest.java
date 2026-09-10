@@ -34,6 +34,9 @@ class HttpGitlabIssueSourceTest {
    */
   private static final int FIVE_MEBIBYTES = 5 * 1024 * 1024;
 
+  /** Lo que tarda el proveedor mudo en decidirse: más que el plazo de lectura del adaptador. */
+  private static final java.time.Duration PROVIDER_DELAY = java.time.Duration.ofSeconds(6);
+
   private FakeIssueServer gitlab;
   private HttpGitlabIssueSource source;
 
@@ -167,6 +170,33 @@ class HttpGitlabIssueSourceTest {
     assertThat(issue.url()).isEqualTo("https://gitlab.example.com/grupo/proyecto/-/issues/9001");
   }
 
+  /**
+   * @s21 y @s15: el cuerpo de la issue es lo que alimenta el completionCriterion de la tarea, y
+   *     GitLab lo entrega de tres formas —con texto, como null explícito y sin el campo—. Sin
+   *     afirmar las tres, invertir cualquiera de las dos mitades de la guarda del adaptador pasa
+   *     inadvertido: las issues de las demás pruebas traen todas {@code "description":null}.
+   */
+  @Test
+  void s21_thedescriptionOfTheIssueArrivesAsTheBodyOfTheExternalIssue() {
+    issuesReply(FakeIssueServer.Reply.ok("[" + gitlabIssueDescribed(9001, "\"una\\ndos\"") + "]"));
+
+    assertThat(source.list(REFERENCE, TOKEN, 1).issues().getFirst().body()).isEqualTo("una\ndos");
+  }
+
+  @Test
+  void s21_anExplicitNullDescriptionIsNoBodyAtAllAndNotTheWordNull() {
+    issuesReply(FakeIssueServer.Reply.ok("[" + gitlabIssueDescribed(9001, "null") + "]"));
+
+    assertThat(source.list(REFERENCE, TOKEN, 1).issues().getFirst().body()).isNull();
+  }
+
+  @Test
+  void s21_anAbsentDescriptionFieldIsNoBodyEither() {
+    issuesReply(FakeIssueServer.Reply.ok("[" + gitlabIssueWithoutDescription(9001) + "]"));
+
+    assertThat(source.list(REFERENCE, TOKEN, 1).issues().getFirst().body()).isNull();
+  }
+
   @ParameterizedTest
   @CsvSource({
     "'\"issue_type\":\"incident\"'",
@@ -228,13 +258,24 @@ class HttpGitlabIssueSourceTest {
     assertThat(gitlab.received()).hasSize(1);
   }
 
+  /**
+   * @s25, fila «sin respuesta dentro del tiempo de lectura». El veredicto UNAVAILABLE por sí solo
+   *     no discriminaba nada: un proveedor que tarda seis segundos y luego manda un cuerpo vacío da
+   *     UNAVAILABLE igual sin plazo ninguno, porque el cuerpo vacío tampoco es un array. Lo que hay
+   *     que medir es que se rinde <em>antes</em> de que el proveedor termine, y eso es el reloj.
+   */
   @Test
-  void s25_aprovidearThatNeverFinishesAnsweringIsUnavailable() {
-    issuesReply(FakeIssueServer.Reply.ok("[]"));
-    gitlab.delayBody(6000);
+  @Timeout(value = 20, unit = TimeUnit.SECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+  void s25_aproviderThatNeverFinishesAnsweringIsCutBeforeItDecidesToAnswer() {
+    issuesReply(FakeIssueServer.Reply.ok("[" + gitlabIssue(9001) + "]"));
+    gitlab.delayBody(PROVIDER_DELAY.toMillis());
 
-    assertThat(reasonOf(() -> source.list(REFERENCE, TOKEN, 1)))
-        .isEqualTo(IssueSourceException.Reason.UNAVAILABLE);
+    var started = System.nanoTime();
+    var reason = reasonOf(() -> source.list(REFERENCE, TOKEN, 1));
+    var elapsed = java.time.Duration.ofNanos(System.nanoTime() - started);
+
+    assertThat(reason).isEqualTo(IssueSourceException.Reason.UNAVAILABLE);
+    assertThat(elapsed).as("tardó %s", elapsed).isLessThan(PROVIDER_DELAY.minusMillis(500));
   }
 
   @Test
@@ -305,6 +346,23 @@ class HttpGitlabIssueSourceTest {
 
   private static String gitlabIssue(int id) {
     return gitlabIssueWith(id, "\"issue_type\":\"issue\"");
+  }
+
+  /** La misma issue con la descripción que se le indique, ya escrita como JSON. */
+  private static String gitlabIssueDescribed(int id, String descriptionJson) {
+    return gitlabIssueWithoutDescription(id)
+        .replace("\"issue_type\"", "\"description\":" + descriptionJson + ",\"issue_type\"");
+  }
+
+  private static String gitlabIssueWithoutDescription(int id) {
+    return "{\"id\":"
+        + id
+        + ",\"title\":\"Issue "
+        + id
+        + "\",\"web_url\":"
+        + "\"https://gitlab.example.com/grupo/proyecto/-/issues/"
+        + id
+        + "\",\"issue_type\":\"issue\"}";
   }
 
   private static String gitlabIssueWith(int id, String marker) {

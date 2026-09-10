@@ -119,6 +119,67 @@ it("@s8 refuses a status outside the three agreed ones", async () => {
   );
 });
 
+/*
+ * @s5 @s8 @s23 el decodificador de lastError. Todos los fixtures del carril traían lastError null,
+ * así que la guarda entera de decodeFailure —campos exactos, code no vacío, at instante— nunca se
+ * ejecutaba: el contrato del tercer record se comprobaba leyendo el fuente Java, no ejercitándolo.
+ */
+
+const errored = {
+  ...connected,
+  status: "error",
+  lastError: { code: "CONNECTION_INVALID", at: "2026-09-09T10:00:00.123456Z" },
+};
+
+it("@s5 decodes a lastError with exactly a code and an instant", async () => {
+  stub(Response.json(errored));
+
+  const view = await readGitlabConnection(signal());
+
+  expect(view.status).toBe("error");
+  expect(view.lastError).toEqual({
+    code: "CONNECTION_INVALID",
+    at: "2026-09-09T10:00:00.123456Z",
+  });
+});
+
+it.each([
+  [
+    "un campo de más, que es por donde se cuela el mensaje del proveedor",
+    {
+      code: "CONNECTION_INVALID",
+      at: "2026-09-09T10:00:00.123456Z",
+      detail: "invalid_token",
+    },
+  ],
+  ["un campo de menos", { code: "CONNECTION_INVALID" }],
+  [
+    "el campo renombrado",
+    { errorCode: "CONNECTION_INVALID", at: "2026-09-09T10:00:00.123456Z" },
+  ],
+  ["un code vacío", { code: "", at: "2026-09-09T10:00:00.123456Z" }],
+  ["un at que no es instante", { code: "CONNECTION_INVALID", at: "ayer" }],
+  [
+    "un at con desplazamiento en vez de Z",
+    { code: "CONNECTION_INVALID", at: "2026-09-09T12:00:00+02:00" },
+  ],
+  ["algo que ni siquiera es un objeto", "CONNECTION_INVALID"],
+])("@s5 refuses a lastError with %s", async (_what, lastError) => {
+  stub(Response.json({ ...errored, lastError }));
+
+  await expect(readGitlabConnection(signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s23 the lastError of a reconnection answer goes through the same guard", async () => {
+  stub(Response.json({ ...errored, lastError: { code: "  ", at: "no" } }));
+
+  await expect(
+    connectGitlab({ token: TOKEN, projectPath: "grupo/proyecto" }, signal()),
+  ).rejects.toThrow("Confirmación incompatible");
+});
+
 // ------------------------------------------------------------------------ @s9 conectar
 
 it("@s9 sends exactly the token and the project path, and nothing else", async () => {

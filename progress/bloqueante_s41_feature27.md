@@ -161,3 +161,77 @@ carril (REPARTO_NOCHE, regla 3). **`App.tsx` no se ha tocado.**
 `e2e/github-connector.spec.mjs` no se ha corrido: levantar la pila no entraba en
 el encargo y las otras tres filas de `@s41` viven ahí. Merece una pasada del
 orquestador antes de cerrar.
+
+---
+
+## 3. Los espacios Unicode de `@s14` y `@s15` — el encargo partía de un hecho falso
+
+El encargo decía: «tres filas del contrato nombran `U+00A0` y **ninguna prueba
+mete jamás un espacio duro**». **Es falso, y lo dice la ejecución** (REPARTO_NOCHE,
+regla 5: si la ejecución contradice el brief, gana la ejecución).
+
+Comprobado byte a byte sobre `origin/main` antes de escribir nada:
+
+```
+$ grep -nP "[^\x00-\x7F]" ExternalIssueTest.java | cat -A
+20:        Arguments.of(" M-bM-^@M-^CArreglar loginM-BM- ", "Arreglar login"),$
+21:        Arguments.of(" M-BM-  ", ""),$
+```
+
+`M-BM- ` es `C2 A0` = **U+00A0**; `M-bM-^@M-^C` es `E2 80 83` = **U+2003**. Lo
+mismo en `ExternalIssueCriterionTest.java:23`. Los oráculos existían. El propio
+`progress/panel_precierre_27_30.md` ya lo había desmentido en su síntesis
+(«El hallazgo del U+00A0 en `ExternalIssue` es FALSO»); el encargo recogió el
+motivo de un juez, no la síntesis.
+
+### ROJO — acreditado igualmente, que es lo que decide
+
+Sustituido `ExternalIssue.java:29` por `String.strip()`. Mueren **exactamente las
+tres filas del contrato**, ni una más:
+
+```
+16 tests completed, 3 failed
+ExternalIssueTest > [5] raw=  Arreglar login , expected=Arreglar login FAILED
+    expected: <Arreglar login> but was: <Arreglar loginM-BM- >
+ExternalIssueTest > [6] raw=   , expected= FAILED
+    expected: <> but was: <M-BM- >
+ExternalIssueCriterionTest.java:25 FAILED
+    expected: <https://github.com/octocat/Hello-World/issues/7>
+    but  was: <https://github.com/octocat/Hello-World/issues/7&#10;&#10;M-BM- >
+```
+
+El sobrante es siempre `C2 A0`: `Character.isWhitespace('\u00a0')` es `false`, así
+que `strip()` no lo quita y `(?U)\s` sí. **El oráculo discrimina.** Producción
+restaurada; `git diff backend/src/main/` vacío.
+
+### Lo que sí faltaba: que se vieran
+
+Los caracteres iban como **bytes literales invisibles**. Ése es justo el motivo de
+que dos jueces independientes leyeran los ficheros y concluyeran que la cobertura
+no existía, y de que este encargo llegara con la premisa equivocada. Un byte
+invisible también es lo primero que un formateador o un editor normaliza sin que
+nadie lo note.
+
+Aplicado lo que el encargo pedía —**copiar el patrón del gemelo**—, que es
+exactamente lo que hace `GithubRepositoryTest.java:12-13`: escapes `\uXXXX`
+explícitos en vez de bytes crudos.
+
+```
+ExternalIssueTest.java:23   Arguments.of(" \u2003Arreglar login\u00a0", "Arreglar login"),
+ExternalIssueTest.java:24   Arguments.of(" \u00a0 ", ""),
+ExternalIssueCriterionTest.java:27  @ValueSource(strings = {"", "   ", "\u00a0\u2003\n\r\n\t"})
+```
+
+Mismo valor para el compilador, cero cambio de comportamiento, y ahora la fila se
+lee. Con un comentario en cada sitio que nombra `@s14` / `@s15` y el porqué.
+
+**Rojo re-acreditado tras la reescritura** (para que no quedara duda de que los
+escapes siguen discriminando): otra vez `String.strip()`, otra vez
+`16 tests completed, 3 failed`, mismas tres filas, ahora en
+`ExternalIssueTest.java:34` y `ExternalIssueCriterionTest.java:27`. Restaurado.
+
+Verde final: `BUILD SUCCESSFUL`, y `spotlessCheck` conforme.
+
+**Nota sobre mutación**: PIT no muta literales de cadena, así que este regex nunca
+va a tener un mutante que lo delate. Estas tres filas son el único guardián que
+tiene. Merece la pena que no vuelvan a ser invisibles.

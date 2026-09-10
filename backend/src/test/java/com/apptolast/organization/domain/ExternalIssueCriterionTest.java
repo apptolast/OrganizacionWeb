@@ -19,8 +19,10 @@ class ExternalIssueCriterionTest {
     assertEquals(URL, criterionOf(null));
   }
 
+  // "Blanco" es "solo Unicode White_Space", que incluye el espacio duro U+00A0 y el em U+2003.
+  // Como escapes y no como bytes literales, para que la fila se vea al leer el fichero.
   @ParameterizedTest
-  @ValueSource(strings = {"", "   ", "  \n\r\n\t"})
+  @ValueSource(strings = {"", "   ", "\u00a0\u2003\n\r\n\t"})
   void s15_blankBodyIsIndistinguishableFromAbsentBody(String blank) {
     assertEquals(URL, criterionOf(blank));
   }

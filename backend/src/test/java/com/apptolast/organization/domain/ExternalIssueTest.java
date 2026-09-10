@@ -17,8 +17,11 @@ class ExternalIssueTest {
         Arguments.of("a".repeat(160), "a".repeat(160)),
         Arguments.of("a".repeat(161), "a".repeat(159) + "…"),
         Arguments.of(rocket.repeat(161), rocket.repeat(159) + "…"),
-        Arguments.of("  Arreglar login ", "Arreglar login"),
-        Arguments.of("   ", ""),
+        // @s14 recorta "sólo Unicode White_Space": el espacio duro U+00A0 y el em U+2003 cuentan.
+        // Van escritos como escapes, igual que en GithubRepositoryTest, para que se vean: cuando
+        // iban como bytes literales dos jueces leyeron el fichero y dieron la fila por descubierta.
+        Arguments.of(" \u2003Arreglar login\u00a0", "Arreglar login"),
+        Arguments.of(" \u00a0 ", ""),
         Arguments.of(null, ""),
         Arguments.of("b".repeat(155) + "      ", "b".repeat(155)));
   }

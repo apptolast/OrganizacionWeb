@@ -41,9 +41,14 @@ hasta esta mañana porque no estaba en ningún ámbito.
 |---|---|---|---|---|
 | 27 conector GitHub | **85,06 %** | 88 | **0** | ✅ |
 | 25 webhooks | 71,40 % | 151 | 22 | carril trabajando |
+| 29 conectores adicionales | 68,51 % | 216 | 17 | carril trabajando |
 | 30 automatizaciones | 52,74 % | 337 | 77 | carril trabajando |
-| 28 calendario externo | pendiente | | | |
-| 29 conectores adicionales | midiéndose | | | |
+| 28 calendario externo | sin medir | | | carril trabajando desde la predicción |
+
+Desglose de la 29, porque el trabajo está muy concentrado: `gitlab-connector.tsx`
+64,6 % y `gitlab-connector-client.ts` 66,0 % se llevan 185 de los 216
+supervivientes; el catálogo va en 76,6 % y 83,3 %. Faltan **85 muertes** para el
+umbral y casi todas están en los dos ficheros de GitLab.
 
 **Feature 27, las tres condiciones del juez, no sólo el porcentaje**: 589
 mutantes generados, ningún módulo a cero, y los 13 mutantes del escuchador de

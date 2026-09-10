@@ -46,6 +46,10 @@ const deliveryStatusLabels: Record<string, string> = {
   exhausted: "Agotada",
 };
 
+/** Dónde se publica la guía pública de verificación de firma. Sólo el destino
+ * vive aquí: el contrato (@s43) pide el enlace, no esta ruta. */
+const signatureGuide = "/docs/webhooks.md";
+
 /** A remount per identity guarantees no state of one owner survives into another. */
 export function Webhooks({ owner }: { owner: string }) {
   return <WebhookPanel key={owner} />;
@@ -365,7 +369,10 @@ function WebhookPanel() {
         <p>
           Un webhook envía tus hechos de trabajo ya confirmados a una URL https
           que elijas, firmados con la cabecera X-OrganizationWeb-Signature para
-          que puedas verificarlos. Puedes tener hasta cinco.
+          que puedas verificarlos. Puedes tener hasta cinco.{" "}
+          <a className="webhook-guide" href={signatureGuide}>
+            Cómo verificar la firma
+          </a>
         </p>
         <label>
           URL

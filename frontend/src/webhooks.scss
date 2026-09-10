@@ -98,6 +98,17 @@
     box-sizing: border-box;
   }
 
+  // El enlace a la guía pública es un objetivo interactivo como los demás, y @s42
+  // pide 44 px en TODOS. Como texto corrido medía 21 px de alto —rojo acreditado
+  // del E2E de geometría—, así que se le da caja propia con altura cómoda. Sin
+  // colores aquí: hereda el acento del tema, cuyo oráculo es el paso de axe.
+  .webhook-guide {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
   // A bare checkbox is far smaller than 44 px, so the LABEL is the real target:
   // it wraps the box, is clickable, and carries the comfortable hit area itself.
   label:has(input[type="checkbox"]) {

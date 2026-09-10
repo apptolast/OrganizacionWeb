@@ -575,3 +575,31 @@ Feature: Entregar los eventos propios ya confirmados a URLs https elegidas con f
     And ningún ancho presenta scroll horizontal ni recorte de la URL, del secreto ni de la tabla de entregas
     And tras cerrar el panel del secreto o la confirmación de eliminación el foco vuelve al control que los abrió
     And axe no informa violaciones en ninguno de los estados y los cambios de estado se anuncian por aria-live
+
+  @s43
+  Scenario: La ayuda del formulario ofrece la guía pública de verificación de firma
+    Given la vista de Webhooks con el formulario de creación visible
+    When recorre el formulario con el teclado
+    Then la ayuda del formulario contiene un enlace a la guía pública de verificación de firma
+    And ese enlace se alcanza con Tab y cumple el foco visible y los 44 px que el @s42 exige a todo control
+    And su nombre accesible dice que explica cómo verificar la firma, no «aquí» ni «más información»
+    And el enlace apunta a un destino no vacío; el contrato no fija cuál
+    # Ampliación del 10 de septiembre de 2026. PENDIENTE DE CONTRAFIRMA del
+    # propietario: hasta que la haya, este escenario no acredita cierre.
+    #
+    # project-spec.md:2044 promete desde el principio que la ayuda del formulario
+    # ENLAZA docs/webhooks.md, y el producto no enlazaba. Hoy se corrigió el
+    # documento -declarando falsa esa línea- porque ningún @s pedía el enlace. El
+    # propietario pide cerrarlo por el otro lado: que el formulario enlace de
+    # verdad, y que sea el contrato quien lo pida.
+    #
+    # La cláusula dice ENLACE, no RUTA, y es deliberado. El juez de cierre
+    # desaconsejó «fijar una ruta de documentación en la interfaz: frágil, y no
+    # mata mutantes», y en eso tenía razón: un oráculo que clave la cadena
+    # docs/webhooks.md caería el día que la guía se publique en otro sitio, sin
+    # que ningún usuario hubiera perdido nada. Lo que el usuario necesita -y lo
+    # único que aquí se promete- es llegar desde el formulario, con el teclado y
+    # sabiendo a qué llega, a la guía de verificación de firma. Un enlace ausente,
+    # mudo, sin destino o fuera del orden de tabulación incumple; mudar la guía de
+    # sitio, no.
+    # Ver progress/enlace_docs_webhooks.md y progress/decisiones_pendientes.md.

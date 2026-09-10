@@ -1126,6 +1126,64 @@ const MUTANTS = [
     "            onFocus={() => undefined}",
     "view",
   ],
+  // -- B1: la vista rechaza lo que el servidor devuelve mal
+  [
+    "VISTA 57 https:// -> '' (suite de la vista)",
+    CLIENT,
+    '    !value.url.startsWith("https://") ||',
+    '    !value.url.startsWith("") ||',
+    "view",
+  ],
+  [
+    "VISTA 233 ancla del secreto (suite de la vista)",
+    CLIENT,
+    "    !/^whsec_[A-Za-z0-9_-]{43}$/.test(body.secret)",
+    "    !/whsec_[A-Za-z0-9_-]{43}$/.test(body.secret)",
+    "view",
+  ],
+  [
+    "VISTA 229 typeof secret !== string (suite de la vista)",
+    CLIENT,
+    '    typeof body.secret !== "string" ||',
+    "    false ||",
+    "view",
+  ],
+  [
+    "VISTA 3 uuid(value) -> true (suite de la vista)",
+    CLIENT,
+    "  return uuid(value) && (value as string).length === 36;",
+    "  return true && (value as string).length === 36;",
+    "view",
+  ],
+  // -- B1: el mecanismo de aborto de @s38, no sus guardas
+  [
+    "MECANISMO borrar el abort de la limpieza",
+    VIEW,
+    "      for (const controller of requests.current) controller.abort();",
+    "      /* sin abortar */",
+    "view",
+  ],
+  [
+    "MECANISMO limpieza -> () => undefined",
+    VIEW,
+    "    () => () => {\n      for (const controller of requests.current) controller.abort();\n    },",
+    "    () => () => undefined,",
+    "view",
+  ],
+  [
+    "MECANISMO no registrar los controladores",
+    VIEW,
+    "    requests.current.push(controller);",
+    "    /* sin registrar */",
+    "view",
+  ],
+  [
+    "MECANISMO track() no crea controlador propio",
+    VIEW,
+    "    const controller = new AbortController();\n    requests.current.push(controller);\n    return controller;",
+    "    const controller = new AbortController();\n    return controller;",
+    "view",
+  ],
 ];
 
 const suites = {

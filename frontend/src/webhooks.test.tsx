@@ -1,6 +1,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
+import { observeAccess } from "./api-client";
 import { Webhooks } from "./webhooks";
 
 const id = "12345678-1234-4234-8234-123456789abc";
@@ -193,6 +194,105 @@ it("@s39 shows an exhausted webhook with its date and the same value in ARIA", a
   const label = "Desactivado por entregas agotadas el 2026-09-08";
   expect(screen.getByText(label)).toBeVisible();
   expect(screen.getByLabelText(label)).toBeInTheDocument();
+});
+
+// El cliente rechaza lo que no cumple el DTO cerrado, pero eso no dice qué hace
+// **la vista** con ese rechazo. Sin este oráculo, la vista podría pintar tan
+// tranquila una URL http:// que el servidor devolviera. Un caso por guarda.
+it.each([
+  ["a url that is not https", { url: "http://example.com/hooks" }],
+  // Treinta y seis caracteres con la forma de un uuid pero sin serlo: un id más
+  // corto lo rechazaría también una comprobación de longitud a secas.
+  [
+    "an id of the right length that is not a uuid",
+    {
+      id: "zzzzzzzz-zzzz-4zzz-8zzz-zzzzzzzzzzzz",
+    },
+  ],
+  ["a type outside the catalogue", { eventTypes: ["ProjectCreated.v2"] }],
+  [
+    "types out of catalogue order",
+    {
+      eventTypes: ["SubtaskCreated.v1", "TaskCreated.v1"],
+    },
+  ],
+  ["a null createdAt", { createdAt: null }],
+  ["a null updatedAt", { updatedAt: null }],
+  ["a status the contract does not define", { status: "paused" }],
+])("@s36 refuses to paint a listed webhook with %s", async (_case, broken) => {
+  stubApi([endpoint(broken)]);
+
+  render(<Webhooks owner="Ana" />);
+
+  await waitFor(() =>
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "No se ha podido cargar la lista de webhooks.",
+    ),
+  );
+  expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
+  expect(document.body.textContent).not.toContain("http://example.com/hooks");
+  expect(document.body.textContent).not.toContain("zzzzzzzz-zzzz");
+});
+
+it.each([
+  [
+    "one that does not match whsec_ plus 43 base64url characters",
+    "whsec_corto",
+  ],
+  ["one with the wrong prefix", `owp_${"A".repeat(43)}`],
+  ["one that is 44 characters long", `whsec_${"A".repeat(44)}`],
+  // Con basura DELANTE: es lo único que separa el ancla `^` de su ausencia.
+  ["one with anything in front of the prefix", `xx${secret}`],
+  // Y uno que no es cadena pero se LEE como el secreto bueno: sin la
+  // comprobación de tipo, la expresión regular lo coacciona y lo acepta.
+  ["one that is not a string at all", [secret] as unknown as string],
+])("@s37 never shows a created secret when it is %s", async (_case, bad) => {
+  const { other } = stubApi([], () =>
+    Promise.resolve(
+      Response.json({ endpoint: endpoint(), secret: bad }, { status: 201 }),
+    ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
+  await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+
+  // Sin respuesta reconocible el resultado es incierto: ni se enseña un secreto
+  // que no cumple el contrato, ni se mete el webhook en la lista.
+  await waitFor(() =>
+    expect(screen.getByRole("alert")).toHaveTextContent(/no sabemos/i),
+  );
+  expect(screen.queryByDisplayValue(bad)).not.toBeInTheDocument();
+  expect(document.body.textContent).not.toContain(bad);
+  expect(screen.queryByText(/guarda el secreto/i)).not.toBeInTheDocument();
+  expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
+  expect(other).toHaveBeenCalledTimes(1);
+});
+
+it("@s40 refuses to paint a delivery row the contract does not allow", async () => {
+  stubApi([endpoint()], () =>
+    Promise.resolve(
+      Response.json({ items: [delivery({ attempt: 7, eventType: "" })] }),
+    ),
+  );
+  const user = userEvent.setup();
+
+  render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.click(screen.getByRole("button", { name: "Ver entregas" }));
+
+  await waitFor(() =>
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      /no se han podido cargar las entregas/i,
+    ),
+  );
+  expect(screen.queryAllByRole("row")).toHaveLength(1);
 });
 
 /**
@@ -590,6 +690,95 @@ it("@s38 a late failure of an action after leaving the view raises no alert", as
   await Promise.resolve();
 
   expect(document.body.textContent).toBe("");
+});
+
+// @s38:474 al pie de la letra: «la respuesta tardía no muestra su secreto **ni
+// actualiza la lista de otra identidad**». Desmontar y cambiar de identidad no
+// son lo mismo: al cambiar de identidad hay una vista nueva **en pantalla** que
+// podría recibir lo que llega tarde de la anterior.
+it("@s38 a 201 that lands after switching identity leaks nothing into the new one", async () => {
+  let reply!: (response: Response) => void;
+  const bea = endpoint({
+    id: second,
+    url: "https://bea.example/h",
+    description: "Hook de Bea",
+  });
+  const lists = [[], [bea]];
+  let listed = 0;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((url: RequestInfo | URL, options?: RequestInit) =>
+      url === "/api/v1/me/webhooks" &&
+      (!options?.method || options.method === "GET")
+        ? Promise.resolve(Response.json({ items: lists[listed++] ?? [] }))
+        : new Promise<Response>((resolve) => (reply = resolve)),
+    ),
+  );
+  const user = userEvent.setup();
+
+  const view = render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
+  await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+
+  view.rerender(<Webhooks owner="Bea" />);
+  await shown();
+  expect(screen.getByText("Hook de Bea")).toBeVisible();
+
+  // El 201 de Ana llega cuando Bea ya está en pantalla.
+  reply(Response.json({ endpoint: endpoint(), secret }, { status: 201 }));
+  await Promise.resolve();
+  await Promise.resolve();
+
+  expect(screen.queryByDisplayValue(secret)).not.toBeInTheDocument();
+  expect(document.body.textContent).not.toContain(secret);
+  expect(document.body.textContent).not.toContain("whsec_");
+  // La lista de Bea sigue siendo la de Bea: el webhook de Ana no se cuela.
+  expect(screen.queryByText("Mi hook")).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("https://example.com/hooks"),
+  ).not.toBeInTheDocument();
+  expect(screen.getByText("Hook de Bea")).toBeVisible();
+});
+
+// @s38:475: «un 401 tardío de esa petición no retira una sesión posterior».
+it("@s38 a 401 that lands after switching identity does not tear down the new session", async () => {
+  let reply!: (response: Response) => void;
+  const seen: number[] = [];
+  observeAccess((status) => seen.push(status));
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((url: RequestInfo | URL, options?: RequestInit) =>
+      url === "/api/v1/me/webhooks" &&
+      (!options?.method || options.method === "GET")
+        ? Promise.resolve(Response.json({ items: [] }))
+        : new Promise<Response>((resolve) => (reply = resolve)),
+    ),
+  );
+  const user = userEvent.setup();
+
+  const view = render(<Webhooks owner="Ana" />);
+  await shown();
+  await user.type(
+    screen.getByRole("textbox", { name: "URL" }),
+    "https://example.com/hooks",
+  );
+  await user.click(screen.getByRole("checkbox", { name: "Crear tarea" }));
+  await user.click(screen.getByRole("button", { name: "Crear webhook" }));
+
+  view.rerender(<Webhooks owner="Bea" />);
+  await shown();
+
+  reply(Response.json({ code: "UNAUTHENTICATED" }, { status: 401 }));
+  await Promise.resolve();
+  await Promise.resolve();
+
+  expect(seen).toEqual([]);
+  observeAccess(undefined);
 });
 
 it("@s38 shows the secret for one identity and starts clean for another", async () => {

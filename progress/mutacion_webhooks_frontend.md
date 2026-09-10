@@ -797,3 +797,83 @@ manejador, es comprobar el resultado contra git antes de commitear nada.
 
 Comprobado que la defensa muerde: matando una pasada a mitad, el script avisa
 `PRODUCCIÓN SUCIA` y nombra el fichero.
+
+---
+
+## Racimo 13 — respuesta al bloqueante B1 del panel
+
+`progress/carriles/bloqueantes_25.md` §B1 enumera los supervivientes por línea.
+Contrastada su lista con lo hecho, quedaban **dos** puntos suyos abiertos, y los
+dos eran cláusulas del contrato, no código accesorio.
+
+### 1. @s38:474-475, con **cambio de identidad**, no con desmontaje
+
+Yo había escrito la respuesta tardía **desmontando** la vista. No es lo mismo:
+al cambiar de identidad hay **una vista nueva en pantalla** que podría recibir lo
+que llega tarde de la anterior. Dos pruebas más, exactamente las que pide el
+panel:
+
+- una **201** de Ana que resuelve cuando Bea ya está en pantalla: no aparece el
+  `whsec_` por ninguna parte del `body`, y la lista de Bea sigue siendo la de
+  Bea (el webhook de Ana no se cuela en ella);
+- una **401** tardía de esa misma petición que **no** llega al observador de
+  acceso (`observeAccess`), es decir que no retira la sesión posterior.
+
+### 2. «La vista aceptaría y pintaría una URL `http://` o un secreto arbitrario»
+
+Cierto y no cubierto: yo había puesto el oráculo en el **cliente**, que rechaza,
+pero nada decía qué hace **la vista** con ese rechazo. Trece casos nuevos de
+extremo a extremo: siete de listado (url no https, id con forma de uuid pero que
+no lo es, tipo fuera de catálogo, tipos desordenados, `createdAt` y `updatedAt`
+nulos, estado no definido), cinco de secreto y uno de entrega.
+
+Acreditado corriendo mutantes **del cliente** contra la **suite de la vista**:
+
+```
+ROJO 57  "https://" -> ""            · refuses to paint a listed webhook with a url that is not https
+ROJO 3   uuid(value) -> true         · …with an id of the right length that is not a uuid
+ROJO 233 ancla ^ del secreto         · never shows a created secret when it is one with anything in front of the prefix
+ROJO 229 typeof secret !== string    · …when it is one that is not a string at all
+```
+
+Los tres últimos **sobrevivían** a la primera versión de estas pruebas: hubo que
+volver a afinar los contraejemplos igual que en los racimos 2 y 4 —un id de
+**36** caracteres, un secreto válido con basura **delante**, y un secreto que no
+es cadena pero se **lee** como el bueno—. Un contraejemplo que falla por el
+motivo equivocado no acredita nada.
+
+### Sobre «el mecanismo entero de @s38 se puede borrar sin que nada se ponga rojo»
+
+Era verdad, y ya no lo es. Hay que separar dos cosas que B1 junta:
+
+- **El mecanismo** —registrar cada controlador y abortarlos todos al salir— **sí
+  está cubierto ahora**. Medido borrándolo de las cuatro formas posibles:
+
+```
+ROJO MECANISMO borrar el abort de la limpieza      · 3 rojas
+ROJO MECANISMO limpieza -> () => undefined         · 3 rojas
+ROJO MECANISMO no registrar los controladores      · 3 rojas
+ROJO MECANISMO track() no crea controlador propio  · 3 rojas
+```
+
+- **Las ocho guardas `if (!aborted)`** de la vista siguen siendo
+  **equivalentes**, y lo he vuelto a medir **con la prueba que el propio panel
+  prescribe** (201 y 401 tras cambiar de identidad): los ocho siguen vivos, 0
+  muertos. No es un oráculo que falte. En esta vista abortar y desmontar son el
+  mismo suceso, y React descarta por su cuenta los `setState` sobre un
+  componente desmontado: ejecutar la rama de más no cambia ni un carácter del
+  DOM. Distinguirlos exigiría exponer estado interno de la vista.
+
+Es decir: la cláusula de @s38 **sí** queda sujeta por un oráculo que puede
+fallar; lo que no se puede ganar son ocho mutantes concretos. Lo dejo medido y
+por escrito para que la campaña no los persiga y para que el juez decida con el
+dato, no con la suposición. Si aun así se exige matarlos, la única vía honesta
+es cambiar producción para que abortar sea observable sin desmontar, y eso no lo
+hago por mi cuenta.
+
+**Muertes acreditadas en este racimo: 8** (4 del mecanismo, 4 de las guardas de
+decodificación vistas desde la vista; estas últimas ya contaban desde el
+cliente, así que no las sumo dos veces).
+
+**Total de pruebas: 44 → 176** en `src/webhooks*`. 195 en verde contando
+`connectors-catalog`.

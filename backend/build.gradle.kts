@@ -724,6 +724,11 @@ pitest {
     if (importPersistenceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-import-data-persistence"))
     if (exportPersistenceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-export-data-persistence"))
     if (externalCalendarOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-external-calendar"))
+    // Era el UNICO ambito sin directorio propio, asi que caia en el generico
+    // reports/pitest, donde lo habria pisado cualquier campana futura sin dejar
+    // rastro. La primera campana de esta feature, la del 10 de septiembre, todavia
+    // escribio ahi porque Gradle ya habia leido este fichero cuando se arreglo.
+    if (additionalConnectorsOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-additional-connectors"))
     if (customizationOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-custom-views-fields"))
     if (appearanceOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-appearance"))
     if (weeklyReviewOnly) reportDir.set(layout.buildDirectory.dir("reports/pitest-weekly-review"))

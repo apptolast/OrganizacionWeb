@@ -578,6 +578,62 @@ export async function deleteAutomation(`,
       headers: { Accept: "" },
     }),`,
   ],
+  ...[
+    ["30", `  "ProjectUpdated.v1": "Proyecto editado",`],
+    ["31", `  "ProjectStatusChanged.v1": "Estado de proyecto cambiado",`],
+    ["33", `  "SubtaskCreated.v1": "Subtarea creada",`],
+    ["34", `  "TaskStatusChanged.v1": "Estado de tarea cambiado",`],
+    ["35", `  "BlockPlanned.v1": "Bloque planificado",`],
+    ["36", `  "BlockChanged.v1": "Bloque modificado",`],
+    ["37", `  "WorkSessionStarted.v1": "Sesión iniciada",`],
+    ["38", `  "WorkSessionStateChanged.v1": "Sesión pausada o reanudada",`],
+    ["39", `  "WorkSessionExtended.v1": "Sesión ampliada",`],
+    ["51", `  TITLE_TOO_LONG: "título demasiado largo",`],
+    ["52", `  CRITERION_TOO_LONG: "criterio demasiado largo",`],
+    ["53", `  ENDPOINT_NOT_FOUND: "endpoint no encontrado",`],
+    ["54", `  TARGET_NOT_FOUND: "destino no encontrado",`],
+    ["65", `  "{{event.type}}": "TaskCreated.v1",`],
+    ["67", `  "{{project.name}}": "Marketing",`],
+    ["68", `  "{{occurredAt}}": "2026-09-08T10:15:30.123456Z",`],
+    ["94", `    eventType: "TaskCreated.v1",`],
+    ["612", `      name: "automation-name",`],
+    ["613", `      "action.titleTemplate": "automation-title",`],
+    ["614", `      "action.criterionTemplate": "automation-criterion",`],
+    ["615", `      "trigger.eventType": "automation-trigger",`],
+    ["616", `      "condition.projectId": "automation-condition",`],
+    ["617", `    }[field] ?? "automation-name"`],
+  ].map(([line, text]) => [
+    VIEW,
+    `${line} StringLiteral -> ''`,
+    text,
+    text.replace(/"[^"]*",?$/, (tail) => (tail.endsWith(",") ? `"",` : `""`)),
+  ]),
+  [
+    VIEW,
+    "515 separador de marcadores -> ''",
+    `Marcadores disponibles: {PLACEHOLDERS.join(", ")}`,
+    `Marcadores disponibles: {PLACEHOLDERS.join("")}`,
+  ],
+  [
+    VIEW,
+    "475 opciones del disparador -> undefined",
+    `            {EVENT_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {TRIGGER_LABELS[type]}
+              </option>
+            ))}`,
+    `            {EVENT_TYPES.map(() => undefined)}`,
+  ],
+  [
+    VIEW,
+    "490 opciones de proyecto -> undefined",
+    `            {projects.map((project) => (
+              <option key={project.id} value={project.id}>
+                {project.name}
+              </option>
+            ))}`,
+    `            {projects.map(() => undefined)}`,
+  ],
 ];
 
 function failedTests(output) {

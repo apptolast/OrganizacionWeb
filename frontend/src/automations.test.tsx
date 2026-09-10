@@ -2,7 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Automations } from "./automations";
-import type { Automation, AutomationRun } from "./automations-api";
+import type { Automation, AutomationRun, EventType } from "./automations-api";
 
 const RULE = "22222222-2222-4222-8222-222222222222";
 const OTHER_RULE = "66666666-6666-4666-8666-666666666666";
@@ -523,6 +523,146 @@ describe("automations page", () => {
     ).toHaveLength(2);
     expect(localStorage.length).toBe(0);
     expect(sessionStorage.length).toBe(0);
+  });
+
+  const TRIGGERS: [EventType, string][] = [
+    ["ProjectCreated.v1", "Proyecto creado"],
+    ["ProjectUpdated.v1", "Proyecto editado"],
+    ["ProjectStatusChanged.v1", "Estado de proyecto cambiado"],
+    ["TaskCreated.v1", "Tarea creada"],
+    ["SubtaskCreated.v1", "Subtarea creada"],
+    ["TaskStatusChanged.v1", "Estado de tarea cambiado"],
+    ["BlockPlanned.v1", "Bloque planificado"],
+    ["BlockChanged.v1", "Bloque modificado"],
+    ["WorkSessionStarted.v1", "Sesión iniciada"],
+    ["WorkSessionStateChanged.v1", "Sesión pausada o reanudada"],
+    ["WorkSessionExtended.v1", "Sesión ampliada"],
+    ["WorkSessionClosed.v1", "Sesión cerrada"],
+  ];
+
+  it("@s37 writes each of the twelve published triggers in readable Spanish", async () => {
+    listed(
+      ...TRIGGERS.map(([eventType], index) => ({
+        ...rule,
+        id: `2222222${index.toString(16)}-2222-4222-8222-222222222222`,
+        name: `Regla ${index}`,
+        trigger: { eventType },
+      })),
+    );
+    render(<Automations owner="owner" />);
+    const rows = await screen.findAllByRole("listitem");
+    expect(rows).toHaveLength(TRIGGERS.length);
+    TRIGGERS.forEach(([, label], index) =>
+      expect(within(rows[index]).getByText(label), label).toBeInTheDocument(),
+    );
+  });
+
+  it("@s38 offers the twelve triggers in the editor, in the published order", async () => {
+    listed();
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    const trigger = screen.getByLabelText("Disparador");
+    expect(
+      within(trigger).getAllByRole("option").map((option) => option.textContent),
+    ).toEqual(TRIGGERS.map(([, label]) => label));
+    expect(trigger).toHaveValue("TaskCreated.v1");
+    const condition = screen.getByLabelText("Sólo en el proyecto");
+    expect(
+      within(condition)
+        .getAllByRole("option")
+        .map((option) => option.textContent),
+    ).toEqual(["Cualquiera", "Marketing"]);
+  });
+
+  const FAILURES: [string, string][] = [
+    ["PROJECT_COMPLETED", "proyecto completado"],
+    ["TITLE_TOO_LONG", "título demasiado largo"],
+    ["CRITERION_TOO_LONG", "criterio demasiado largo"],
+    ["ENDPOINT_NOT_FOUND", "endpoint no encontrado"],
+    ["TARGET_NOT_FOUND", "destino no encontrado"],
+    ["LO_QUE_SEA", "LO_QUE_SEA"],
+  ];
+
+  it("@s39 explains every failure the simulation can foresee and repeats the code it does not know", async () => {
+    listed();
+    route("POST", "/api/v1/me/automations/simulate", 200, {
+      evaluatedEvents: FAILURES.length,
+      matches: FAILURES.map(([code], index) => ({
+        eventId: `5555555${index.toString(16)}-5555-4555-8555-555555555555`,
+        eventType: "TaskCreated.v1",
+        occurredAt: "2026-09-08T10:15:30.123456Z",
+        preview: {
+          type: "CREATE_TASK",
+          projectId: PROJECT,
+          title: `Revisar ${index}`,
+          completionCriterion: "",
+          estimatedMinutes: null,
+          wouldFail: code,
+        },
+        loopGuarded: false,
+      })),
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    await screen.findByRole("status", { name: "Resultado de la simulación" });
+    for (const [code, text] of FAILURES)
+      expect(screen.getByText(`Fallaría: ${text}`), code).toBeInTheDocument();
+  });
+
+  it("@s38 replaces the four markers with their sample values and lists them verbatim", async () => {
+    listed();
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    const title = screen.getByLabelText(/título de la tarea/i);
+    await userEvent.clear(title);
+    await userEvent.click(title);
+    await userEvent.paste(
+      "{{event.type}} / {{task.title}} / {{project.name}} / {{occurredAt}} / {{otro}}",
+    );
+    expect(screen.getByTestId("automation-preview")).toHaveTextContent(
+      "TaskCreated.v1 / Redactar informe / Marketing / 2026-09-08T10:15:30.123456Z / {{otro}}",
+    );
+    expect(screen.getByTestId("automation-placeholders")).toHaveTextContent(
+      "Marcadores disponibles: {{event.type}}, {{task.title}}, {{project.name}}, {{occurredAt}}",
+    );
+  });
+
+  const FIELDS: [string, string][] = [
+    ["name", "automation-name"],
+    ["action.titleTemplate", "automation-title"],
+    ["action.criterionTemplate", "automation-criterion"],
+    ["trigger.eventType", "automation-trigger"],
+    ["condition.projectId", "automation-condition"],
+    ["accion.desconocida", "automation-name"],
+  ];
+
+  it("@s38 focuses the control that owns the field the server complained about", async () => {
+    for (const [field, control] of FIELDS) {
+      routes = new Map();
+      calls = [];
+      route("GET", "/api/v1/projects", 200, projects);
+      listed();
+      route("POST", "/api/v1/me/automations", 422, {
+        code: "VALIDATION_ERROR",
+        errors: [{ field, code: "REQUIRED", message: "x" }],
+      });
+      const view = render(<Automations owner="owner" />);
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Nueva regla" }),
+      );
+      await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+      await waitFor(() =>
+        expect(document.getElementById(control), field).toHaveFocus(),
+      );
+      view.unmount();
+    }
   });
 
   it("@s43 drops the history of the rule the owner just left", async () => {

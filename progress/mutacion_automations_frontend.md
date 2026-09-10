@@ -126,3 +126,37 @@ cuenta por separado en las mismas cadenas, la previsión razonada para
 58,22 % a ~95 %.
 
 `git diff` sobre producción: vacío.
+
+---
+
+## Racimo 3 — las tablas de la vista se comprobaban por muestreo (`automations.tsx`)
+
+**Causa común.** Cuatro tablas de traducción (los doce disparadores, los cinco
+motivos de fallo, los cuatro marcadores de ejemplo y los cinco controles de
+`controlIdOf`) se afirmaban con **una o dos filas** cada una. Vaciar cualquiera de
+las demás no rompía nada: son 22 mutantes de cadena que sólo hacen falta cuando
+alguien mira la fila concreta.
+
+**Oráculos que faltaban.** Cinco pruebas nuevas, todas dirigidas por tabla:
+
+- `@s37 writes each of the twelve published triggers in readable Spanish` — doce
+  reglas, una por tipo de evento, cada fila con su etiqueta.
+- `@s38 offers the twelve triggers in the editor, in the published order` — la
+  lista completa de opciones del `select`, en orden, más el valor por omisión y la
+  lista de proyectos con «Cualquiera» delante. La afirmación es sobre **la lista
+  entera**, no sobre posiciones: no caduca cuando se añada un evento nuevo, falla.
+- `@s39 explains every failure the simulation can foresee and repeats the code it
+  does not know` — los cinco motivos publicados y uno inventado, que debe salir
+  con su código tal cual.
+- `@s38 replaces the four markers with their sample values and lists them verbatim`
+  — los cuatro marcadores a la vez, más uno inventado que ha de quedar literal, y
+  el texto exacto de la ayuda con sus comas.
+- `@s38 focuses the control that owns the field the server complained about` —
+  los cinco campos que el contrato nombra y uno desconocido, que cae al control
+  del nombre.
+
+**Previsión (no medida): 23 mutantes verificados, todos MUEREN**
+(`TOTAL: 97 mueren de 97` acumulado con los racimos 1 y 2). Previsión razonada del
+racimo, contando hermanos: **25 a 30**.
+
+`git diff` sobre producción: vacío.

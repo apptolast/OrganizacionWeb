@@ -109,6 +109,113 @@ const MUTANTS = [
     `    false ||`,
     "client",
   ],
+  // ── Racimo 2: el resto de guardas de decodeEndpoint ────────────────────
+  [
+    "3 ConditionalExpression uuid(value) -> true",
+    CLIENT,
+    `  return uuid(value) && (value as string).length === 36;`,
+    `  return true && (value as string).length === 36;`,
+    "client",
+  ],
+  [
+    "5 LogicalOperator identifier && -> ||",
+    CLIENT,
+    `  return uuid(value) && (value as string).length === 36;`,
+    `  return uuid(value) || (value as string).length === 36;`,
+    "client",
+  ],
+  [
+    "52 ConditionalExpression typeof url !== string -> false",
+    CLIENT,
+    `    typeof value.url !== "string" ||`,
+    `    false ||`,
+    "client",
+  ],
+  [
+    "57 StringLiteral https:// -> ''",
+    CLIENT,
+    `    !value.url.startsWith("https://") ||`,
+    `    !value.url.startsWith("") ||`,
+    "client",
+  ],
+  [
+    "58 ConditionalExpression typeof description !== string -> false",
+    CLIENT,
+    `    typeof value.description !== "string" ||`,
+    `    false ||`,
+    "client",
+  ],
+  [
+    "61 ConditionalExpression description > 80 -> false",
+    CLIENT,
+    `    [...value.description].length > 80 ||`,
+    `    false ||`,
+    "client",
+  ],
+  [
+    "62 EqualityOperator > 80 -> >= 80",
+    CLIENT,
+    `    [...value.description].length > 80 ||`,
+    `    [...value.description].length >= 80 ||`,
+    "client",
+  ],
+  [
+    "64 ArrayDeclaration [...description] -> []",
+    CLIENT,
+    `    [...value.description].length > 80 ||`,
+    `    [].length > 80 ||`,
+    "client",
+  ],
+  [
+    "98 LogicalOperator invariante disabled || -> &&",
+    CLIENT,
+    `        )) ||
+    disabled !== (value.disabledAt !== null && instant(value.disabledAt))`,
+    `        )) &&
+    disabled !== (value.disabledAt !== null && instant(value.disabledAt))`,
+    "client",
+  ],
+  [
+    "99 ConditionalExpression mitad de la razon -> false",
+    CLIENT,
+    `    disabled !==
+      (value.disabledReason !== null &&
+        (disabledReasons as readonly string[]).includes(
+          value.disabledReason as string,
+        )) ||`,
+    `    false ||`,
+    "client",
+  ],
+  [
+    "103 LogicalOperator razon && -> ||",
+    CLIENT,
+    `      (value.disabledReason !== null &&
+        (disabledReasons as readonly string[]).includes(`,
+    `      (value.disabledReason !== null ||
+        (disabledReasons as readonly string[]).includes(`,
+    "client",
+  ],
+  [
+    "106 ConditionalExpression mitad del instante -> false",
+    CLIENT,
+    `    disabled !== (value.disabledAt !== null && instant(value.disabledAt))`,
+    `    false`,
+    "client",
+  ],
+  [
+    "110 LogicalOperator instante && -> ||",
+    CLIENT,
+    `    disabled !== (value.disabledAt !== null && instant(value.disabledAt))`,
+    `    disabled !== (value.disabledAt !== null || instant(value.disabledAt))`,
+    "client",
+  ],
+  [
+    "0 ArrowFunction incompatible -> undefined",
+    CLIENT,
+    `const incompatible = () => new Error("Confirmación incompatible");`,
+    `const incompatible = (): Error => undefined as unknown as Error;`,
+    "client",
+  ],
 ];
 
 const suites = {

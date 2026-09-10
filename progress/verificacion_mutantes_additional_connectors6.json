@@ -1,0 +1,156 @@
+[
+  {
+    "racimo": 6,
+    "name": "catalogClient 48 CE super(code) -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s7 keeps a code even when the problem body is unreadable"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogClient 48 CE super(code) -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s7 turns a storage failure into a typed error and never an empty catalogue"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogClient 48 EqualityOperator typeof !== string",
+    "verdict": "MUERE",
+    "tests": [
+      "@s7 turns a storage failure into a typed error and never an empty catalogue",
+      "@s7 keeps a code even when the problem body is unreadable"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogClient 48 StringLiteral 'string' -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s7 turns a storage failure into a typed error and never an empty catalogue"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogClient 48 StringLiteral CATALOG_ERROR -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s7 keeps a code even when the problem body is unreadable"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogClient 58 CE typeof code !== string -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s33 refuses a lastError whose code is not even a string"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogClient 71 CE (null || instant) -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s33 refuses a last activity that is not an instant"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogClient 84 CE longitud del catalogo -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s33 refuses a catalogue with a seventh connector"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogClient 103 ObjectLiteral { signal } -> {}",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 sends the caller's own signal, so leaving the screen cancels the read",
+      "@s37 leaving the catalogue aborts the read it had in flight"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogClient 102 throwIfAborted parada 1 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 asks the server for nothing when the caller already aborted"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogClient 104 throwIfAborted parada 2 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 does not read the body of a catalogue that landed after the abort"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogClient 107 throwIfAborted parada 3 -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 decodes nothing when the abort lands while the body is being read"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogo 106 CE instanceof Error -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s7 says in words that the state could not be consulted"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogo 106 StringLiteral 'code' -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s7 says in words that the state could not be consulted"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogo 117 CallExpression controller.abort() -> ;",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 leaving the catalogue aborts the read it had in flight"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogo 115 BlockStatement limpieza -> {}",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 leaving the catalogue aborts the read it had in flight"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogo 122 UnaryOperator tabIndex main -> +1",
+    "verdict": "MUERE",
+    "tests": [
+      "@s38 keeps its own containers out of the tab order instead of in front of it"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogo 123 UnaryOperator tabIndex h1 -> +1",
+    "verdict": "MUERE",
+    "tests": [
+      "@s38 keeps its own containers out of the tab order instead of in front of it"
+    ]
+  },
+  {
+    "racimo": 6,
+    "name": "catalogo 146 StringLiteral separador -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s33 separates the marker from the words of the state"
+    ]
+  }
+]

@@ -364,3 +364,51 @@ sea positivo, así que un contenedor nuevo queda cubierto sin tocarla.
 `progress/verificacion_mutantes_additional_connectors5.json`.
 
 **Previsión acumulada: 118 mutantes muertos.**
+
+---
+
+## Racimo 6 — el catálogo y su cliente (19 mutantes)
+
+### 6.1 El aviso vacío (2 mutantes, `connectors-catalog.tsx:106`)
+
+Los dos oráculos @s7 hacían `await screen.findByRole("alert")` y nada más: un
+`<p role="alert"></p>` vacío los satisfacía. Es la familia exacta del defecto de la región
+`aria-live` de esta noche: un rol de alerta sin texto no anuncia nada, y quien use un lector se
+queda delante de un párrafo en blanco sin saber qué ha pasado.
+
+Oráculos: el texto exacto con `STORAGE_UNAVAILABLE` y el genérico cuando el fallo no trae
+código.
+
+### 6.2 La limpieza del efecto (2 mutantes, líneas 115-117)
+
+Nadie afirmaba que salir del catálogo abortara su petición: la prueba @s37 desmonta y comprueba
+que no hay filas ni ruido, y las dos cosas se cumplen igual con la limpieza vacía. Con ella
+vacía, la petición se queda en vuelo hasta que responda.
+
+Oráculo: `@s37 leaving the catalogue aborts the read it had in flight`.
+
+### 6.3 El separador del marcador (1 mutante, línea 146)
+
+`{" "}` vaciado pega el glifo al estado: «●Conectado». Se afirma el texto del párrafo entero.
+
+### 6.4 El orden de tabulación del catálogo (2 mutantes, líneas 122-123)
+
+La misma prueba derivada que en la pantalla de GitLab.
+
+### 6.5 El cliente del catálogo (12 mutantes)
+
+| Oráculo nuevo | Mata |
+|---|---|
+| el mensaje de `CatalogError` en sus dos ramas | 5 |
+| un `lastError` cuyo `code` no es una cadena | 1 |
+| una actividad que no es un instante | 1 |
+| un catálogo con un séptimo conector | 1 |
+| las tres paradas de aborto de la lectura, cada una con lo que promete que no pasará | 3 |
+| la señal viaja en la petición | 1 |
+
+### Acreditación del rojo (19 de 19 mueren)
+
+`node scripts/verificar-mutantes-additional-connectors.mjs 6` →
+`progress/verificacion_mutantes_additional_connectors6.json`.
+
+**Previsión acumulada: 137 mutantes muertos.**

@@ -164,6 +164,39 @@ it("@s5 refuses a lastError that carries the provider text", async () => {
   );
 });
 
+it("@s33 refuses a lastError whose code is not even a string", async () => {
+  stub(
+    Response.json(
+      catalog({
+        gitlab: { status: "error", lastError: { code: 42, at: AT } },
+      }),
+    ),
+  );
+
+  await expect(readConnectorCatalog(signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+it("@s33 refuses a last activity that is not an instant", async () => {
+  stub(Response.json(catalog({ webhooks: { lastActivityAt: "ayer" } })));
+
+  await expect(readConnectorCatalog(signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
+/** Una séptima fila significa un servidor que esta versión no sabe leer, no una fila de más. */
+it("@s33 refuses a catalogue with a seventh connector", async () => {
+  const body = catalog();
+  body.connectors.push(row("gitlab") as never);
+  stub(Response.json(body));
+
+  await expect(readConnectorCatalog(signal())).rejects.toThrow(
+    "Confirmación incompatible",
+  );
+});
+
 // ------------------------------------------------------------------------------------- @s7
 
 it("@s7 turns a storage failure into a typed error and never an empty catalogue", async () => {
@@ -172,6 +205,8 @@ it("@s7 turns a storage failure into a typed error and never an empty catalogue"
   await expect(readConnectorCatalog(signal())).rejects.toMatchObject({
     name: "CatalogError",
     code: "STORAGE_UNAVAILABLE",
+    // Lo unico que se lee en un volcado del navegador cuando el error escapa.
+    message: "STORAGE_UNAVAILABLE",
   });
 });
 
@@ -184,6 +219,7 @@ it("@s7 keeps a code even when the problem body is unreadable", async () => {
 
   expect(error).toBeInstanceOf(CatalogError);
   expect((error as CatalogError).code).toBe("CATALOG_ERROR");
+  expect((error as CatalogError).message).toBe("CATALOG_ERROR");
 });
 
 // ------------------------------------------------------------------------------------ @s37
@@ -194,4 +230,58 @@ it("@s37 does not decode anything once the caller aborted", async () => {
   controller.abort();
 
   await expect(readConnectorCatalog(controller.signal)).rejects.toThrow();
+});
+
+/** Las tres paradas de aborto de la lectura, cada una con lo que promete que NO pasará. */
+it("@s37 asks the server for nothing when the caller already aborted", async () => {
+  const controller = new AbortController();
+  const fetcher = stub();
+  controller.abort();
+
+  await expect(readConnectorCatalog(controller.signal)).rejects.toThrow();
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it("@s37 does not read the body of a catalogue that landed after the abort", async () => {
+  const controller = new AbortController();
+  const json = vi.fn(() => Promise.resolve(catalog()));
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() => {
+      controller.abort();
+      return Promise.resolve({ status: 200, json });
+    }),
+  );
+
+  await expect(readConnectorCatalog(controller.signal)).rejects.toThrow();
+  expect(json).not.toHaveBeenCalled();
+});
+
+it("@s37 decodes nothing when the abort lands while the body is being read", async () => {
+  const controller = new AbortController();
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() =>
+      Promise.resolve({
+        status: 200,
+        json: () => {
+          controller.abort();
+          return Promise.resolve(catalog());
+        },
+      }),
+    ),
+  );
+
+  await expect(readConnectorCatalog(controller.signal)).rejects.toThrow();
+});
+
+it("@s37 sends the caller's own signal, so leaving the screen cancels the read", async () => {
+  const controller = new AbortController();
+  const fetcher = stub(Response.json(catalog()));
+
+  await readConnectorCatalog(controller.signal);
+
+  expect((fetcher.mock.calls[0][1] as RequestInit).signal).toBe(
+    controller.signal,
+  );
 });

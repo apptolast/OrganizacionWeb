@@ -72,3 +72,26 @@ marcado en el `.feature` como pendiente de contrafirma. Detalle en
 **Consecuencia de gestión:** `frontend/src/webhooks.tsx` se ha tocado, así que la
 cifra de mutación del frontend de la feature 25 (94,57 %) queda **pendiente de
 remedir**.
+
+---
+
+## 2. Feature 25 — fila de contrato nueva: el enlace a la guía de firma
+
+**Qué se ha hecho.** El formulario de creación de webhooks **ya enlaza** la guía
+pública, y la fila `@s43` de `features/webhooks.feature` lo fija con su nota
+fechada. Eso cierra por el lado correcto el hueco de la decisión 1: en vez de
+corregir el documento hacia abajo, el producto hace lo que el spec prometía.
+
+**Cómo está escrita, que es lo que importa.** La prueba afirma que dentro del
+formulario hay un enlace **con nombre accesible que habla de la firma**,
+alcanzable recorriendo con Tab y con destino no vacío. **No** afirma que el
+`href` sea `docs/webhooks.md`.
+
+Esa distinción es del juez de cierre, que desaconsejó expresamente clavar la
+ruta: _«fijar una ruta de documentación en la interfaz es frágil y no mata
+mutantes»_. La aserción elegida sigue siendo cierta si el documento se publica en
+otro sitio, y sigue cayendo si el enlace desaparece.
+
+**Lo que falta:** tu contrafirma de esa fila. Es una ampliación pequeña y del
+mismo tipo que las cuatro que ratificaste hoy en esta feature. Si prefieres que
+el contrato **no** hable del enlace, se revierte y volvemos a la decisión 1.

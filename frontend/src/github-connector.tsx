@@ -6,6 +6,10 @@ import {
   useState,
 } from "react";
 import { RouteLink } from "./navigation";
+import {
+  readRepositoryDraft,
+  saveRepositoryDraft,
+} from "./github-connector-draft";
 import { readProjects, type ProjectSummary } from "./read-projects-api";
 import {
   ConnectorError,
@@ -22,7 +26,7 @@ import {
  * entera, de modo que ni el repositorio escrito ni el resumen de una importación ajena sobreviven.
  */
 export function GithubConnector({ owner }: { owner: string }) {
-  return <GithubConnectorScreen key={owner} />;
+  return <GithubConnectorScreen key={owner} owner={owner} />;
 }
 
 /** Lo que el resumen necesita saber, venga de un recibo completo o de un error con contadores. */
@@ -54,11 +58,13 @@ function importMessage(error: ConnectorError): string {
   return MESSAGES[error.code] ?? "No se pudo importar. Inténtalo más tarde";
 }
 
-function GithubConnectorScreen() {
+function GithubConnectorScreen({ owner }: { owner: string }) {
   const [connection, setConnection] = useState<GithubConnection | null>(null);
   const [disabled, setDisabled] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [repository, setRepository] = useState("");
+  const [repository, setRepository] = useState(() =>
+    readRepositoryDraft(owner),
+  );
   const [token, setToken] = useState("");
   const [reconnecting, setReconnecting] = useState(false);
   const [connectError, setConnectError] = useState<ConnectorError | null>(null);
@@ -88,6 +94,12 @@ function GithubConnectorScreen() {
       pending.current = null;
     };
   }, []);
+
+  /** Único camino para tocar el repositorio: lo que se ve y lo que sobrevive nunca divergen. */
+  const editRepository = (value: string) => {
+    setRepository(value);
+    saveRepositoryDraft(owner, value);
+  };
 
   const live = (controller: AbortController) =>
     mounted.current &&
@@ -191,7 +203,7 @@ function GithubConnectorScreen() {
       if (!live(controller)) return;
       setConnection(saved);
       setReconnecting(false);
-      setRepository("");
+      editRepository("");
       setSummary(null);
       setImportError(null);
     } catch (error) {
@@ -259,7 +271,7 @@ function GithubConnectorScreen() {
       setConnection(null);
       setSummary(null);
       setImportError(null);
-      setRepository("");
+      editRepository("");
       setToken("");
       focusHeading.current = true;
     } catch (error) {
@@ -379,7 +391,7 @@ function GithubConnectorScreen() {
               autoComplete="off"
               value={repository}
               readOnly={connecting}
-              onChange={(event) => setRepository(event.target.value)}
+              onChange={(event) => editRepository(event.target.value)}
               placeholder="propietario/nombre"
             />
           </div>

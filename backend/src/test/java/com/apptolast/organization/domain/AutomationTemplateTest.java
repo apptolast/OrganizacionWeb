@@ -46,5 +46,12 @@ class AutomationTemplateTest {
         .isEqualTo("Llave { y } <b>Redactar informe</b>");
     assertThat(AutomationTemplate.render("Kickoff de {{project.name}}", values.withoutTask()))
         .isEqualTo("Kickoff de Marketing");
+    // Dos marcadores pegados, sin nada entre el cierre de uno y la apertura del siguiente. Es una
+    // plantilla legal —@s6 las guarda byte a byte y ningún defecto de @s7 la rechaza— y es la
+    // única forma del texto que separa «busca el cierre DESPUÉS de la apertura» de «búscalo
+    // antes»: en todas las demás plantillas del árbol sobra hueco y las dos búsquedas coinciden.
+    // Con la resta, el cierre que encuentra es el del marcador anterior y el render revienta.
+    assertThat(AutomationTemplate.render("{{task.title}}{{project.name}}", values))
+        .isEqualTo("Redactar informeMarketing");
   }
 }

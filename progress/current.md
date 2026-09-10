@@ -625,3 +625,29 @@ que volver a buscarlo. Ordenado por relación entre valor y coste:
 - **Repartir los números de migración por adelantado.** Dos carriles crearon
   `V29` a la vez y `git` no lo vio, porque son ficheros con nombres distintos: la
   colisión vive en el espacio de nombres de Flyway. Costó 965 fallos en cascada.
+
+## Carril auto-mutantes — motivos M13 a M22 de la feature 30
+
+Bitácora completa en `progress/mutation_automations.md` (es el fichero que la
+condición 2 del juez exige y que no existía). Resumen:
+
+- **Cerrados:** M13, M14, M15, M16, M17, M18, M19, M20, M21, M22.
+- **Supervivientes matados: 17**, cada uno con el mutante aplicado a mano al
+  fuente y la clase de test corrida por su nombre. Un decimoctavo ya estaba
+  muerto desde `5309e409`.
+- **La cifra real, medida sobre `mutations.xml`: 95,72 %** (581/607). El
+  «96,00 %» publicado era el entero redondeado del `index.html`. Tras este
+  carril la proyección aritmética es 98,68 % (599/607), **declarada como
+  proyección**: nadie ha vuelto a lanzar PIT.
+- **Frontend, medido sobre `mutation.json`: 91,18 %** (806/884).
+- **M19 tiene causa nombrada:** el interceptor `FLOGCALL` de PIT, no un patrón
+  muerto (barrido: 442 patrones, 0 muertos). Cero
+  `removed call to org/slf4j/Logger::*` en 3.819 mutantes de seis campañas.
+- **Abiertos, con destinatario:** H6 (`upsert` sin guarda de estado, pide
+  decisión de contrato), los 2 mutantes matables de `editingOf` (piden fila de
+  contrato en @s37), los 7 inobservables (dependen de M12),
+  `EventTask$OfWorkSession::sessionId`, las 57 anclas del script de frontend sin
+  juzgar y `ApplicationConfiguration:22` (es de `integration_api`).
+
+Nada de producción se tocó: `git status` sobre `backend/src/main` y
+`frontend/src` quedó vacío al cerrar.

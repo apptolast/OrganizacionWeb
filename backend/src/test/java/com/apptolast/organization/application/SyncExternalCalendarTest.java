@@ -59,12 +59,21 @@ class SyncExternalCalendarTest {
     }
   }
 
+  /**
+   * Una sincronización de este test no toca la red y termina en milisegundos, así que cualquier
+   * duración por encima de un minuto delata que la resta del cronómetro no es una resta. El oráculo
+   * anterior sólo pedía {@code millis >= 0}, y por eso sobrevivía el mutante que cambia {@code
+   * nanoTime() - started} por una suma ({@code SyncExternalCalendar:64}).
+   */
+  static final long PLAUSIBLE_MILLIS = 60_000;
+
   static final class RecordingAudit implements ExternalCalendarAudit {
     final List<String> lines = new ArrayList<>();
 
     @Override
     public void syncFinished(String host, SyncStatus status, FeedError error, long millis) {
-      lines.add(host + " " + status + " " + error + " " + (millis >= 0));
+      var plausible = millis >= 0 && millis < PLAUSIBLE_MILLIS;
+      lines.add(host + " " + status + " " + error + " " + plausible);
     }
   }
 

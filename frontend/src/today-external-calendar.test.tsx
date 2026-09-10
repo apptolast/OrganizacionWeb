@@ -38,11 +38,13 @@ const subscription = {
 };
 
 let calls: string[];
+let sent: unknown[];
 let syncAnswer: () => Promise<Response>;
 let eventsAnswer: () => Promise<Response>;
 
 beforeEach(() => {
   calls = [];
+  sent = [];
   syncAnswer = async () => Response.json({ performed: true, subscription });
   eventsAnswer = async () =>
     Response.json({
@@ -55,6 +57,9 @@ beforeEach(() => {
     "fetch",
     vi.fn(async (url: string, options: RequestInit = {}) => {
       calls.push(`${options.method ?? "GET"} ${url}`);
+      sent.push(
+        typeof options.body === "string" ? JSON.parse(options.body) : null,
+      );
       return String(url).includes("/sync")
         ? await syncAnswer()
         : await eventsAnswer();
@@ -81,6 +86,12 @@ it("@s35 sincroniza con onlyIfStale y luego pide el día completo, en ese orden"
     "POST /api/v1/me/external-calendar/sync",
     `GET /api/v1/me/external-calendar/events?from=${encodeURIComponent(DAY_START)}&to=${encodeURIComponent(DAY_END)}`,
   ]);
+  // La regla de frescura de @s35 vive en el CUERPO del POST, no en su método ni
+  // en su URL: pedir la sincronización «sólo si está rancia» es lo que impide
+  // que cada carga de Hoy dispare una descarga del feed ajeno. Sin esta línea,
+  // cambiar el true por false dejaba la suite verde (superviviente medido
+  // today-external-calendar.tsx:59, BooleanLiteral -> false).
+  expect(sent[0]).toEqual({ onlyIfStale: true });
 });
 
 it("@s35 muestra el evento en hora local y la marca de la última sincronización", async () => {
@@ -90,8 +101,11 @@ it("@s35 muestra el evento en hora local y la marca de la última sincronizació
   });
   expect(within(section).getByText("Reunión")).toBeInTheDocument();
   expect(within(section).getByText("09:00–10:00")).toBeInTheDocument();
+  // Exacto, no /12:00/: con hour12 puesto a true la marca dice «12:00 p. m.» y
+  // una expresión regular de subcadena seguía casando, así que el formato de 24
+  // horas no lo fijaba nadie (superviviente today-external-calendar.tsx:27).
   expect(
-    within(section).getByText(/Según sincronización de 12:00/),
+    within(section).getByText("Según sincronización de 12:00"),
   ).toBeInTheDocument();
   // «Sin botones de edición» (@s35): la sección no renderiza ningún botón en
   // ninguna de sus ramas, así que contarlos era una aserción que no puede fallar.
@@ -211,12 +225,17 @@ it("@s36 un fallo de red dice que no se ha podido consultar, no que no se ha pod
     throw new TypeError("Failed to fetch");
   };
   paint();
-  expect(
-    await screen.findByText(/no se ha podido consultar el calendario externo/i),
-  ).toBeInTheDocument();
+  const notice = await screen.findByText(
+    /no se ha podido consultar el calendario externo/i,
+  );
   expect(
     screen.queryByText(/no se ha podido leer el calendario externo/i),
   ).not.toBeInTheDocument();
+  // El separador entre el aviso y el enlace es producción, no adorno: sin él el
+  // párrafo se lee «…calendario externo.Revisar el calendario externo».
+  expect(notice.textContent).toBe(
+    "No se ha podido consultar el calendario externo. Revisar el calendario externo",
+  );
 });
 
 it("@s35 con la zona de la instantánea sin resolver se muestra el instante crudo", async () => {

@@ -101,6 +101,13 @@ describe("@s37 lectura de la suscripción", () => {
     ["etiqueta que no es texto", { ...subscription, label: 7 }],
     ["host que no es texto", { ...subscription, urlHost: 7 }],
     ["cola que no es texto", { ...subscription, urlTail: 7 }],
+    // `urlTail: 7` no basta: la guarda de tipo puede apagarse y la longitud
+    // sigue rechazándolo, porque (7).length no es 4. Hace falta algo que NO sea
+    // texto y mida exactamente cuatro (superviviente external-calendar-api.ts:102).
+    [
+      "cola que no es texto pero mide cuatro",
+      { ...subscription, urlTail: [".", "i", "c", "s"] },
+    ],
     ["identificador que no es texto", { ...subscription, id: 7 }],
     // Los dos anclajes del regex de uuid: sin estas dos filas sobreviven
     // exactamente los mutantes que quitan ^ y $, como pasó en automatizaciones.
@@ -146,6 +153,14 @@ describe("@s37 lectura de la suscripción", () => {
       { configured: false, subscription: null, extra: 1 },
     ],
     ["configured que no es booleano", { configured: "sí", subscription: null }],
+    // `"sí"` con suscripción nula tampoco basta: es un valor VERDADERO, así que
+    // apagar la guarda de tipo lleva igualmente a subscriptionOf(null), que
+    // rechaza. Un valor FALSO que no sea booleano se colaría entero
+    // (superviviente external-calendar-api.ts:140).
+    [
+      "configured que es cero en vez de false",
+      { configured: 0, subscription: null },
+    ],
   ])("rechaza %s", async (_name, body) => {
     stub(body);
     await expect(readExternalCalendar()).rejects.toThrow(

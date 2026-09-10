@@ -1,560 +1,236 @@
-# Cierre de la puerta de mutación de frontend — feature 28, calendario externo
+# C5 (frontend) — veredicto de los 65 supervivientes de la feature 28
 
-Carril `claude/external-calendar`, worktree `C:/Users/vhurt/ow-worktrees/external-calendar`,
-partiendo de `origin/main` en `5b019343`. Puerto E2E asignado: 18092 (no usado: todo
-el trabajo es de unitarias).
+Cierra la **condición 8** de `progress/cierre_28.md`: «falta el veredicto escrito de
+cada superviviente, y el acta lo confiesa». La confesión está en
+`progress/mutacion_external_calendar_frontend_medida.md:27-29` («lo que falta —y es el
+trabajo siguiente— es el veredicto escrito de cada uno»). Aquí está, uno a uno.
 
-Ámbito de mutación (`frontend/stryker.external-calendar.config.json`):
-`src/external-calendar-api.ts`, `src/external-calendar.tsx`,
-`src/today-external-calendar.tsx` (más cuatro rangos de `App.tsx`/`workspace.tsx`
-que no son míos).
+Carril `cal-bloqueantes`, 10 de septiembre de 2026.
 
-Mapa de partida: `progress/prediccion_huecos_frontend.md`, sección
-`28-calendario-externo`. Orden de ataque el del encargo: primero `sin_cobertura`
-con posible defecto, luego `asercion_que_no_puede_fallar`, luego `oraculo_debil`.
+> **Este fichero sustituye a su versión anterior.** Lo que había era la *previsión*
+> pre-campaña («111 de 119 mueren») que el panel declaró irreproducible: el único
+> artefacto máquina tenía 15 entradas y ninguna era un superviviente, o sea que el
+> 87 % de lo publicado no se podía recomputar (`bloqueantes_28.md`, B3). Se reemplaza
+> por el veredicto sobre la lista **medida**. La versión anterior sigue en el
+> historial de git, que es donde le corresponde estar.
 
-Línea base antes de tocar nada: **83 pruebas verdes** en los cuatro ficheros del
-ámbito (`external-calendar.test.tsx`, `external-calendar-api.test.ts`,
-`external-calendar-route.test.tsx`, `today-external-calendar.test.tsx`).
+## Sobre qué lista se razona, y por qué vale aunque el ámbito esté por corregir
 
----
+La medida es la del acta: **91,32 %**, 663 resueltos sobre 726 con veredicto,
+`frontend/reports/mutation-external-calendar/mutation.json`. Las condiciones 4, 5 y 6
+del veredicto mandan estrechar los dos rangos de `App.tsx` y **remedir**, y son de
+otros (orquestador y campaña). Eso **no invalida este trabajo**, y la razón es
+aritmética:
 
-## Racimo A — el catch de `loadEvents` (predicción: racimo 3, `sin_cobertura`, 9 mutantes)
+`src/App.tsx` puntúa **100,00 %** (55 muertos + 9 por plazo, **0 vivos, 0 sin
+cobertura**). Estrechar su rango sólo puede quitar mutantes **muertos**: la lista de
+supervivientes es exactamente la misma antes y después del arreglo de ámbito. Baja el
+porcentaje publicado —de 91,32 % a 90,48 % (599/662)—, no el trabajo pendiente.
 
-`external-calendar.tsx:124-137`. La predicción decía que con un 500 o un 503 en
-`GET /events` la vista cae al `else` de `:390` y afirma «No hay eventos en la
-ventana guardada»: le dice al propietario que su calendario está vacío cuando en
-realidad no ha podido leerlo.
+## Resumen del veredicto
 
-### DEFECTO DE PRODUCTO 1 — la ventana vacía que nadie había leído
-
-Confirmado ejecutando, no razonando. Prueba nueva
-«@s36 no afirma que la ventana esté vacía cuando la lista falla con 500 sin cuerpo
-reconocible»: el volcado del DOM del fallo contiene, literalmente,
-
-```
-No hay eventos en la ventana guardada.
-```
-
-con el `GET /events` respondiendo **500**. La causa: `refuse()`
-(`external-calendar-api.ts:188`) relanza la **propia `Response`**, que no es
-`instanceof Error`, así que la guarda
-
-```ts
-if (error instanceof Error && !(error instanceof ConnectorsDisabledError))
-  setInvalidList(true);
-```
-
-no se cumplía nunca para un error de servidor. Igual con el 503
-`CONNECTORS_DISABLED`, que sí es `Error` pero estaba excluido a propósito: también
-acababa pintando la ventana como vacía.
-
-**Arreglo** (`external-calendar.tsx:130-137`): toda lectura que no llega deja la
-lista en «no se ha podido leer». La condición desaparece; queda solo el
-cortocircuito de aborto, que sí tiene motivo (una lectura cancelada no es una
-lectura fallida).
-
-Es el mismo patrón que los cinco defectos de esta noche: **la interfaz afirma un
-hecho que no conoce**.
-
-### Rojo acreditado
-
-Tres filas nuevas (`it.each`), una por forma de fallo, más una prueba positiva:
-
-| Prueba | Antes del arreglo | Después |
-|---|---|---|
-| `@s36 … falla con 500 sin cuerpo reconocible` | ROJO: `Unable to find an element with the text: No se ha podido leer la lista de eventos.` y el DOM mostraba «No hay eventos en la ventana guardada.» | verde |
-| `@s36 … falla con 503 de conectores` | ROJO, mismo mensaje | verde |
-| `@s36 … falla con fallo de red` | ya pasaba (un `TypeError` sí es `Error`); queda como red de seguridad de la rama que antes funcionaba | verde |
-| `@s37 dice que la ventana está vacía solo cuando la lectura sí ha llegado` | verde desde el principio; existe porque el literal «No hay eventos en la ventana guardada.» **no lo afirmaba ninguna prueba** (hueco «omitido» de la predicción) y sin él la aserción negativa de las tres filas anteriores no valdría nada | verde |
-
-Mutantes que pasan a estar cubiertos: el literal de `:390`, el ternario
-`events.length === 0`, y —por la vía del arreglo— desaparecen del denominador los
-mutantes de la conjunción que se ha eliminado.
-
-Estado tras el racimo: **87 pruebas verdes** en los cuatro ficheros.
-
-### Acreditación por mutante (racimo A)
-
-`node scripts/verificar-mutantes-external-calendar.mjs A` — cada mutante se aplica
-al fichero de producción real, se ejecuta `src/external-calendar.test.tsx`, se anota
-el rojo y se restaura.
-
-| Mutante | Veredicto | Quién lo mata |
-|---|---|---|
-| `setInvalidList(true)` → `false` (catch) | MUERE | las tres filas de `@s36 no afirma que la ventana esté vacía…` y `@s36 avisa de lectura inválida…` |
-| `setEvents([])` → lista no vacía (catch) | **SOBREVIVE** | nadie: con `invalidList` en `true` la lista no se pinta, así que el estado de eventos es invisible por ese camino. Superviviente **equivalente**, declarado aquí antes de la campaña |
-| `setInvalidList(false)` del camino feliz → `true` | MUERE | cinco pruebas |
-| literal «No hay eventos en la ventana guardada.» → `""` | MUERE | `@s37 dice que la ventana está vacía solo cuando la lectura sí ha llegado` |
-| `events.length === 0` → `!==` | MUERE | cinco pruebas |
-
----
-
-## Racimo B — el catch del efecto de montaje (predicción: racimo 4, `sin_cobertura`, 8 mutantes)
-
-`external-calendar.tsx:147-158`. Ninguna prueba hacía fallar el `GET` de montaje,
-así que el catch entero —incluido el mensaje de conectores deshabilitados y el
-`setLoaded(true)`— no se ejecutaba nunca.
-
-**No hay defecto aquí**: las tres pruebas nuevas pasaron a la primera. Por eso, y
-porque una prueba que pasa a la primera no demuestra nada, se acredita mutante a
-mutante contra la producción real (regla 5 del reparto: ejecutar, no razonar).
-
-Pruebas nuevas:
-
-- `@s8 la carga con conectores deshabilitados lo dice, sin el mensaje genérico`
-  (503 `CONNECTORS_DISABLED` en el `GET`) — afirma el texto propio **y la ausencia
-  del genérico**, que es lo que distingue las dos ramas del ternario.
-- `@s37 una carga que falla deja la pantalla usable, no un vacío permanente`
-  (500) — genérico presente, el de conectores ausente, «Todavía no tienes ningún
-  calendario externo.» visible y Guardar habilitado: eso fija `setLoaded(true)`.
-- `@s37 mientras la carga no ha respondido no promete que no haya suscripción`
-  (fetch que no resuelve) — fija la rama falsa del ternario `loaded ? … : null`,
-  que nadie afirmaba: sin ella, mutarlo a `true` sobrevive.
-
-| Mutante | Veredicto | Quién lo mata |
-|---|---|---|
-| ternario de conectores → siempre el genérico | MUERE | `@s8 la carga con conectores deshabilitados…` |
-| ternario de conectores → siempre el de conectores | MUERE | `@s37 una carga que falla…` |
-| literal genérico → `""` | MUERE | `@s37 una carga que falla…` |
-| `setLoaded(true)` del catch → `false` | MUERE | `@s37 una carga que falla…` |
-| `loaded ? … : null` → `true` | MUERE | `@s37 mientras la carga no ha respondido…` |
-| literal «Todavía no tienes ningún calendario externo.» → `""` | MUERE | `@s37 una carga que falla…` |
-
-Estado tras el racimo: **90 pruebas verdes**.
-
----
-
-## Racimo C — reentrada y aborto de las tres escrituras (predicción: racimo 2, `sin_cobertura`, 16 mutantes)
-
-`external-calendar.tsx:109-114, 160, 190, 203, 207, 212, 227, 232, 237, 246, 250`.
-
-### DEFECTO DE PRODUCTO 2 — salir de la pantalla no cancelaba ninguna escritura
-
-@s39 fila 3 dice: «navego a /hoy con una petición en curso → **la petición se
-cancela** y su respuesta tardía no modifica la vista destino». Solo estaba probado
-para el `GET` de montaje.
-
-La limpieza del efecto era `return () => controller.abort()`, y `controller` es el
-del **montaje**, capturado en el closure. `save`, `synchronise` y `confirmRemoval`
-crean el suyo con `start()` y lo dejan en `inFlight.current`. Al desmontar se
-abortaba un controlador ya resuelto y **la escritura en vuelo seguía viva**.
-
-Rojo acreditado, `it.each` de tres filas
-(`@s39 salir de la vista con un guardado / una sincronización / un borrado en curso…`):
-
-```
-AssertionError: expected false to be true // Object.is equality
-   -> expect(signals[0].aborted).toBe(true)  tras view.unmount()
-```
-
-Las tres filas rojas, con el `PUT`, el `POST /sync` y el `DELETE` retenidos.
-
-**Arreglo** (`external-calendar.tsx:160`): `return () => inFlight.current?.abort();`.
-Es correcto y suficiente porque `start()` ya aborta la anterior antes de crear la
-nueva, así que `inFlight.current` es siempre la única que puede seguir viva.
-
-### El único solapamiento real de la pantalla, sin probar
-
-Guardar está **habilitado** mientras la carga inicial sigue en vuelo. Prueba nueva
-`@s38 guardar mientras la carga inicial sigue en vuelo la cancela y su respuesta
-tardía no pisa lo guardado`: el `GET` de montaje retenido devuelve
-`configured:false`, y si `start()` no lo abortara, esa lectura tardía borraría de
-pantalla la suscripción recién guardada.
-
-### Reentrada: el guardián que sí es alcanzable, y los dos que no
-
-El botón «Sí, eliminar» del diálogo **no** lleva `disabled={locked}`, así que se
-puede pulsar otra vez con el `DELETE` en vuelo: lo único que impide el segundo
-borrado es `if (busy) return`. Prueba nueva
-`@s39 un segundo Sí, eliminar con el borrado en vuelo no envía otro DELETE`.
-
-Los de `save` y `synchronise` **no son alcanzables** desde la interfaz, y lo
-comprobé ejecutando en vez de razonar: escribí una prueba sonda que, con el `PUT`
-retenido, enfoca «Etiqueta» y pulsa Enter. Pasó **igual con el guardián puesto que
-con `if (false) return`**: la submisión implícita no ocurre porque el botón de
-envío está deshabilitado. Era una aserción que no puede fallar, así que **borré la
-sonda** en lugar de dejarla (categoría 2 del encargo). Quedan declarados como
-supervivientes equivalentes.
-
-### Acreditación por mutante (racimo C)
-
-| Mutante | Veredicto | Quién lo mata |
-|---|---|---|
-| limpieza del efecto → no aborta nada | MUERE | las cuatro pruebas de desmontaje |
-| limpieza del efecto → aborta solo el controlador del montaje (**el código anterior**) | MUERE | las tres filas de escritura |
-| `start()`: `inFlight.current?.abort()` → sin abortar | MUERE | `@s38 guardar mientras la carga inicial…` |
-| montaje: `if (controller.signal.aborted) return` → `false` | MUERE | `@s38 guardar mientras la carga inicial…` |
-| `confirmRemoval`: `if (busy) return` → `false` | MUERE | `@s39 un segundo Sí, eliminar…` |
-| `confirmRemoval`: `setBusy("deleting")` → `""` | MUERE | idem |
-| `confirmRemoval`: literal «Eliminando…» → `""` | MUERE | idem |
-| `confirmRemoval`: literal «Suscripción eliminada.» → `""` | MUERE | idem |
-| `save`: `if (signal.aborted) return` del catch → `false` | **SOBREVIVE** | equivalente: ver abajo |
-| `save`: `if (!signal.aborted) setBusy("")` del finally → `true` | **SOBREVIVE** | equivalente |
-| `synchronise`: `if (signal.aborted) return` del catch → `false` | **SOBREVIVE** | equivalente |
-| `confirmRemoval`: `if (signal.aborted) return` del catch → `false` | **SOBREVIVE** | equivalente |
-| `confirmRemoval`: `if (!signal.aborted) setBusy("")` del finally → `true` | **SOBREVIVE** | equivalente |
-
-**Por qué esos cinco son equivalentes, declarado antes de la campaña.** Una
-escritura solo puede abortarse en dos momentos: al desmontar, o porque `start()`
-la cancele. Lo segundo exige empezar otra operación, y `if (busy) return` lo
-impide. Queda solo el desmontaje, y ahí React 19 hace de cualquier `setState`
-sobre un árbol desmontado un no-op silencioso: **no hay nada observable** en el
-DOM, ni aviso en consola. Escribir un oráculo para ellos exigiría cambiar la
-producción para permitir dos escrituras solapadas, que es justo lo contrario de lo
-que pide @s38 («se envía exactamente una petición»). Son 5 de los ~16 previstos
-para este racimo; los otros 8 mueren.
-
-Estado tras el racimo: **95 pruebas verdes**.
-
----
-
-## Racimo D — las aserciones que no pueden fallar (categoría 2 del encargo)
-
-Cuatro sitios, todos denunciados por la predicción o por sus refutaciones.
-
-### D.1 · Los dos mensajes de fallo de guardado eran indistinguibles
-
-`external-calendar.test.tsx`, el `it.each` de dos filas (503 `CONNECTORS_DISABLED`
-y fallo de red) usaba **la misma** aserción `/no sabemos si se guardó/i` para las
-dos. Borrando entero el bloque de `ConnectorsDisabledError` de `failed()`
-(`external-calendar.tsx:177-180`) las dos filas seguían verdes, porque el 503 cae
-en el `setFailure(UNCERTAIN)` genérico y produce un texto que también contiene esa
-frase. @s38 fila 3 pide un mensaje distinto del genérico.
-
-Ahora cada fila lleva su **texto completo** y se afirma el `textContent` exacto del
-`role="alert"`, así que cada una niega implícitamente el de la otra. Y de paso se
-afirma que el `role="status"` queda vacío: si `setAnnouncement("")` del catch se
-perdiera, la región viva seguiría diciendo «Guardando…» mientras la alerta dice que
-falló.
-
-### D.2 · El recuento de botones de la sección de Hoy
-
-`today-external-calendar.test.tsx:96`,
-`expect(within(section).queryAllByRole("button")).toHaveLength(0)`: la sección no
-renderiza **ningún** botón en ninguna de sus ramas, así que la cuenta es cero por
-construcción y ningún mutante puede tumbarla. Sustituida por dos aserciones que sí
-caen: no hay enlace de rescate (lo que distingue el camino feliz del de fallo) y no
-se anuncia «Sincronización pendiente.» (la rama falsa que nadie fijaba).
-
-### D.3 · «ningún nodo del DOM contiene la URL completa»
-
-`external-calendar.test.tsx:119`, `not.toContain("https://")`: estructuralmente
-infalible, porque el DTO solo transporta `urlHost` y `urlTail` y la URL completa no
-existe en el fixture. Se conserva como documentación del And de @s37, pero el test
-ahora fija además la forma exacta del recorte
-(`"calendar.google.com … .ics"`), que el separador esté fuera del árbol de
-accesibilidad (`aria-hidden="true"`) y que la etiqueta llegue al campo.
-
-### D.4 · La sincronización fallida que «conserva la lista» por casualidad
-
-La prueba de @s38 fila 7 afirmaba que «Reunión» sigue en pantalla, pero el doble de
-`fetch` reutiliza la última respuesta encolada: si el mutante quitara la guarda
-`if (outcome.subscription.lastStatus === "OK") await loadEvents(signal)`, la
-recarga devolvería lo mismo y la prueba pasaría igual. Ahora se **cuenta** la
-petición: una sola lectura de `/events` tras una sincronización fallida, dos tras
-una correcta. Y se afirma el anuncio «Sincronización fallida.», que no aparecía en
-ninguna prueba del repositorio.
-
-También se corrigió el comentario engañoso de la prueba del doble clic de
-Sincronizar: quien impide el segundo POST es el atributo `disabled`, no el
-guardián de reentrada.
-
-### Acreditación por mutante (racimo D) — 12 de 12 mueren
-
-| Mutante | Quién lo mata |
+| Veredicto | Mutantes |
 |---|---|
-| `failed()`: se borra el bloque de `ConnectorsDisabledError` | `@s38 … con 503` |
-| `failed()`: el prefijo de conectores se pierde al componer | `@s38 … con 503` |
-| `save`: `setAnnouncement("")` del catch → se borra | las dos filas de `@s38 … estado incierto` |
-| separador `" … "` → `""` | `@s37 muestra host y cola…` |
-| `aria-hidden="true"` → `""` | `@s37 muestra host y cola…` |
-| `setLabel(subscription.label)` → `""` | `@s37 muestra host y cola…` |
-| literal «Sincronización fallida.» → `""` | `@s38 muestra el mensaje del código…` |
-| ternario del anuncio → siempre «Sincronizado.» | `@s38 muestra el mensaje del código…` |
-| guarda de recarga → recarga siempre | `@s38 muestra el mensaje del código…` |
-| guarda de recarga → no recarga nunca | `@s38 sincroniza…` y `@s38 una sincronización correcta sí vuelve a pedir…` |
-| Hoy: `pendingSync ? … : null` → `true` | `@s35 muestra el evento en hora local…` |
-| Hoy: el ternario de fallo → `true` | siete pruebas |
+| **Muertos** por oráculo nuevo de este carril | **13** |
+| **Equivalentes o inalcanzables**, con la razón escrita | 21 |
+| **Abiertos**, con el trabajo concreto | 29 |
+| **Errores de ejecución**, fuera del denominador de Stryker | 2 |
 
-Estado tras el racimo: **96 pruebas verdes**.
+Suman 65. Como en backend, ninguno de los 13 se declara de memoria: por cada uno
+**apliqué el mutante al fuente de producción, vi el rojo y lo pegué**, y restauré.
 
----
+## Los 13 que se matan
 
-## Racimo E — los validadores de la capa API (predicción: racimo 1 `oraculo_debil` 24 mutantes, racimo 5 `oraculo_debil` 8, racimo 12 `sin_cobertura` 7, racimo 9 `oraculo_debil` 5, más cuatro huecos «omitidos»)
+| Fichero | Línea | Mutador | Prueba que lo mata |
+|---|---|---|---|
+| `today-external-calendar.tsx` | 59 | BooleanLiteral → `false` | `@s35 sincroniza con onlyIfStale y luego pide el día completo, en ese orden` |
+| `today-external-calendar.tsx` | 27 | BooleanLiteral `hour12` → `true` | `@s35 muestra el evento en hora local y la marca de la última sincronización` |
+| `today-external-calendar.tsx` | 105 | StringLiteral → `""` | `@s36 un fallo de red dice que no se ha podido consultar, no que no se ha podido leer` |
+| `external-calendar.tsx` | 291 | ArrowFunction → `() => undefined` | `@s38 anuncia Guardando, envía una sola petición y bloquea los controles` |
+| `external-calendar.tsx` | 236 | ConditionalExpression → `true` | `@s38 un 500 al sincronizar deja el estado incierto sin retirar la suscripción` |
+| `external-calendar.tsx` | 237 | CallExpression → `;` (`NoCoverage`) | la misma |
+| `external-calendar.tsx` | 148 | BooleanLiteral → `false` | `@s37 muestra el formulario de alta cuando no hay suscripción` |
+| `external-calendar.tsx` | 149 | ConditionalExpression → `true` | la misma |
+| `external-calendar.tsx` | 93 | StringLiteral → `"Stryker was here!"` | la misma (y una segunda) |
+| `external-calendar.tsx` | 96 | StringLiteral → `"Stryker was here!"` | la misma |
+| `external-calendar.tsx` | 102 | BooleanLiteral → `true` | `@s37 muestra host y cola pero nunca la dirección completa` |
+| `external-calendar-api.ts` | 102 | ConditionalExpression → `false` | `rechaza una suscripción con cola que no es texto pero mide cuatro` |
+| `external-calendar-api.ts` | 140 | ConditionalExpression → `false` | `rechaza configured que es cero en vez de false` |
 
-`external-calendar-api.ts`. La enfermedad es una sola y está en los **cuatro**
-validadores del fichero, no solo en `subscriptionOf`: una cadena de guardas de la
-que solo unas pocas tienen fixture roto; las demás se evalúan **siempre en falso**,
-así que el mutante que las apaga sobrevive sin que nada se ponga rojo.
+Lo que cada uno protegía, que es lo que importa:
 
-De `external-calendar-api.test.ts` se pasa de 40 a **81 pruebas**. Lo añadido:
+- **`today:59`** es la **condición 3** del veredicto, la del `@s35`. El doble de
+  `fetch` apilaba método y URL pero nunca el cuerpo, así que cambiar
+  `syncExternalCalendar(true)` por `false` dejaba la suite verde y convertía cada
+  carga de Hoy en una descarga forzada del feed ajeno. Rojo acreditado:
+  `expected { onlyIfStale: false } to deeply equal { onlyIfStale: true }`.
+- **`today:27`**: la marca se afirmaba con `/Según sincronización de 12:00/`, y con
+  `hour12: true` el texto es «12:00 p. m.», que **contiene** esa subcadena. Es la
+  misma trampa que la de `APP_CONNECTOR_KEY` en backend: una aserción de subcadena
+  que casa con las dos ramas. Ahora es igualdad.
+- **`today:105`** no era el mensaje, como decía el veredicto, sino el **separador**
+  `{" "}` entre el aviso y el enlace. Sin él el párrafo se lee «…calendario
+  externo.Revisar el calendario externo». Se fija el `textContent` entero.
+- **`external-calendar.tsx:291`**: sólo se afirmaba que la **dirección** tecleada
+  llegaba a la petición, no la **etiqueta**. El `onChange` de Etiqueta podía no hacer
+  nada y la suscripción se guardaba con etiqueta vacía. Rojo:
+  `expected { label: '', …(1) } to deeply equal { label: 'Trabajo', …(1) }`.
+- **`:236` y `:237`**: el `catch` de `synchronise()` tiene dos ramas y ninguna prueba
+  pasaba por la segunda. Con `:236` a `true`, **cualquier** fallo de sincronización
+  retiraba la suscripción de la pantalla; `:237` (`else failed(error)`) no se
+  ejecutaba jamás. Un 500 distingue las dos y las mata a la vez.
+- **`:148` y `:149`**: el **primer render** no lo fijaba nadie. Con `:149` a `true`
+  una carga sin suscripción intenta leer `snapshot.subscription.label`, revienta,
+  cae en el `catch` y pinta un aviso de error —y el formulario **seguía saliendo**,
+  así que la prueba pasaba igual. Con `:148` a `false` la nota «Todavía no tienes
+  ningún calendario externo» no aparece nunca y tampoco lo notaba nadie.
+- **`api:102` y `api:140`** son el caso fino: **ya había filas adversariales** y aun
+  así sobrevivían. `urlTail: 7` no basta, porque apagar la guarda de tipo deja actuar
+  a la de longitud (`(7).length` no es 4); hace falta algo que no sea texto y **mida
+  cuatro**. Y `configured: "sí"` tampoco, porque es un valor **verdadero** y acaba en
+  `subscriptionOf(null)`, que rechaza igual; hace falta un valor **falso** que no sea
+  booleano, como `0`. Dos filas, dos mutantes.
 
-- **`subscriptionOf`**: 15 filas nuevas en el `it.each`, una por guarda muda
-  (etiqueta vacía y no-texto, host y cola no-texto, id no-texto, último intento
-  inválido, zona no-texto, truncado no-booleano, `updatedAt` inválido y los tres
-  contadores que solo tenían fixture en `imported`). Y las **dos filas de anclaje
-  del regex de uuid** —`x1111…` y `…5555x`—, que son las que en la campaña de
-  automatizaciones sobrevivieron cuando todo lo demás murió.
-- **`eventOf`**: `endAt` malformado, `uid` no-texto y `allDay` no-booleano. Ojo con
-  el último: el fixture `{...item, allDay: undefined}` que ya existía **pierde la
-  clave** al serializarse con `Response.json`, así que cae en `exact()` y no llega
-  nunca al `typeof`. Confirmado por el refutador y por la ejecución.
-- **El sobre de `readExternalEvents`**: `configured` no-booleano, `lastSyncAt`
-  inválido, `lastStatus` desconocido e `items` que no es lista.
-- **`snapshotOf`**: campo de más en la instantánea (el que ya había rompía el
-  **subobjeto**, no el sobre) y `configured` no-booleano.
-- **`syncExternalCalendar`**: campo de más y `subscription` ausente, para el
-  `exact(body, "performed subscription")`.
-- **`refuse()`**: seis casos que separan las dos mitades de cada conjunción
-  estado+código (503/404/400 con otro código, y 500/400/404 con el código ajeno),
-  más uno que vuelve a leer el cuerpo de la respuesta relanzada, que es lo único
-  que fija el `.clone()` de `problem()`.
-- **Cabeceras**: `Accept` en el GET, `Accept` + `Content-Type` + `X-CSRF-TOKEN` en
-  el PUT, `Content-Type` en el POST `/sync`. **Corrijo aquí a la predicción**: su
-  `posibleDefecto` («si el spread de `options.headers` se perdiera, el PUT viajaría
-  sin `X-CSRF-TOKEN`») es falso, y las dos refutaciones tenían razón:
-  `api-client.ts:22-27` construye `new Headers(options.headers)` y hace
-  `headers.set("X-CSRF-TOKEN", …)` **después** de la mezcla, así que el token se
-  añade pase lo que pase. El oráculo escrito sobre esa premisa habría dado verde
-  con la producción rota. Lo que sí se pierde con ese mutante es el
-  `Content-Type` —y eso es lo que afirman las pruebas nuevas—.
-- **Cuerpo 200 que no es JSON**, **PUT que responde `configured:false`** (la única
-  protección contra que `saveExternalCalendar` devuelva `null` y la vista deje al
-  propietario en el formulario de alta tras un guardado con éxito) y las **dos
-  señales abortadas del DELETE**, antes y durante.
+## Los 21 equivalentes o inalcanzables, con su razón
 
-### Acreditación por mutante (racimo E) — 40 de 41 mueren
+### `external-calendar-api.ts` (7)
 
-Todos los de `subscriptionOf`, `eventOf`, el sobre de `readExternalEvents`,
-`snapshotOf`, `exact` de sync, las tres conjunciones de `refuse`, el `.clone()` de
-`problem`, las tres cabeceras, el `if (!snapshot.configured) invalid()` y los dos
-`throwIfAborted` del DELETE: **mueren**, con la prueba concreta que los mata
-anotada en `progress/verificacion_mutantes_external_calendar.json`.
+| Línea | Mutador | Razón |
+|---|---|---|
+| 66 | StringLiteral | El `message` de `ExternalCalendarValidationError` **no se pinta nunca**: la pantalla usa `error.fields`, no `error.message`. |
+| 67 | StringLiteral | `this.name`. El despacho es por `instanceof`, no por nombre. |
+| 73 | StringLiteral | `this.name` de `ConnectorsDisabledError`. Su `message` (`:72`) sí muere, porque ése sí se pinta: la asimetría confirma el criterio. |
+| 78 | StringLiteral | El `message` de `ExternalCalendarNotConfiguredError` no llega a la pantalla: ese error se traduce en `forget()`. |
+| 79 | StringLiteral | `this.name`. |
+| 94 | ConditionalExpression | `typeof value.id !== "string"` es **redundante con la cláusula siguiente**: el regex de UUID rechaza igual cualquier cosa que no sea un UUID, sea del tipo que sea. |
+| 167 | ConditionalExpression | Con `true`, toda respuesta de error entra en la rama de `VALIDATION_ERROR`; si no reúne campos reconocibles cae en el mismo `throw response` de `:188`. Sólo se distinguiría con un cuerpo que el backend no produce (un 500 que traiga `errors` bien formados). |
 
-Tres apuntes de método:
+### `external-calendar.tsx` (10)
 
-1. Los anclajes `^` y `$` del regex mueren **solo** por las dos filas de prefijo y
-   sufijo. Sin ellas, las otras quince no los tocan. La predicción acertó de lleno.
-2. Cuatro «supervivientes» de mi primera pasada eran artefacto **del mutante que
-   escribí yo**, no de Stryker: apagar una guarda entera no es un operador que
-   Stryker genere. Repetidos con los operadores reales
-   (`!==` → `===` y `"string"` → `""`) los cuatro **mueren**, casi siempre por el
-   camino feliz. Queda anotado para que la campaña no se lea mal.
-3. **Superviviente equivalente declarado**: `response.json().catch(() => invalid())`
-   mutado a `catch(() => undefined)`. Todos los llamadores revalidan el cuerpo
-   (`snapshotOf`, `exact`, el sobre de eventos), así que `undefined` acaba lanzando
-   exactamente el mismo «Respuesta de calendario externo inválida». No hay oráculo
-   posible sin cambiar la producción.
+| Línea | Mutador | Razón |
+|---|---|---|
+| 43 | Regex `/\.\d+Z$/` → sin ancla | El valor viene de `toISOString()`, donde los milisegundos sólo pueden estar al final. El ancla no tiene nada más que anclar. |
+| 92 | ArrayDeclaration | El estado inicial de la lista se sobrescribe antes de que la lista llegue a pintarse: la ficha sólo existe con suscripción, y para entonces `loadEvents` ya escribió. |
+| 110 | OptionalChaining | `inFlight.current` se fija en el montaje (`:143`), así que nunca es nulo cuando corre `start()`. |
+| 114 | ArrayDeclaration | Array de **dependencias** de `useCallback`, no de datos: cambia la identidad del callback, no el comportamiento. |
+| 122 | ArrayDeclaration | Ídem, las de `forget`. |
+| 137 | ArrayDeclaration | `setEvents([])` en el `catch` de `loadEvents`: da igual lo que se ponga, porque `setInvalidList(true)` gana al render (`:393` pinta el aviso en vez de la lista). |
+| 139 | ArrayDeclaration | Dependencias de `loadEvents`. |
+| 167 | OptionalChaining | Mismo motivo que `:110`. |
+| 168 | ArrayDeclaration | Dependencias del efecto de montaje. `loadEvents` es estable (`useCallback` con `[]`), así que el efecto no se reejecuta ni con la lista ni sin ella. |
+| 175 | OptionalChaining | `field?.focus`. `focusOn` sólo se arma en `failed()` para errores de validación, y en ese estado los dos campos están montados: la referencia nunca es nula ahí. |
 
-Estado tras el racimo: **135 pruebas verdes** (83 de partida → 135).
+**Corrección al veredicto:** decía «`:114`/`:118`/`:122` (`forget()` puede dejar de
+vaciar la lista, `feature:542`)». Sólo **`:118`** es `setEvents([])`; `:114` y `:122`
+son los arrays de dependencias de dos `useCallback`. Y `:118` tampoco es tan directo
+como parece: ver «abiertos».
 
----
+### `today-external-calendar.tsx` (4)
 
-## Racimo F — la presentacion de /calendario-externo (predicción: racimos 7, 8, 10, 11 y 13, más cinco huecos «omitidos»)
+| Línea | Mutador | Razón |
+|---|---|---|
+| 51 | BooleanLiteral | `useState(false)` de `pendingSync`. Mientras `reading.kind === "hidden"` la sección devuelve `null`, y `setPendingSync(pending)` corre en el mismo paso que `setReading`: el valor inicial **nunca llega a pintarse**. |
+| 61 | ConditionalExpression | `if (signal.aborted) return` en el `catch` de la sincronización. Es una guarda redundante: si no corta aquí, la lectura siguiente lanza sobre la señal abortada y vuelve a cortar en `:66`/`:79`. |
+| 71 | StringLiteral | `kind: "events"` → `""`. El render sólo distingue `hidden` y el par `unreadable`/`unreachable`; cualquier otro valor pinta la rama de eventos exactamente igual. Es una diferencia de tipos, no de comportamiento. |
+| 80 | CallExpression | `setPendingSync(pending)` en la rama de **error**. El aviso de pendiente sólo se pinta en la rama de eventos (`:117`), así que ese estado no llega nunca a la pantalla. |
 
-- **`formatMoment` y `formatClock`** (racimo 7 + el gemelo que añadió el refutador):
-  ninguna prueba fijaba una fecha formateada. Ahora hay dos: con
-  `snapshotZoneId: "Asia/Tokyo"` las dos fechas de la ficha valen exactamente
-  «7 ene 2030, 20:00» y «7 ene 2030, 21:00» y el evento sale «17:00–18:00»; y con
-  `snapshotZoneId: null` las horas coinciden con las del navegador, derivadas con
-  `new Date(...).getHours()` en vez de con literales.
-  **Se eligió Asia/Tokyo a propósito**: la máquina que ejecuta la suite está en
-  `Europe/Madrid`, así que un fixture en Madrid habría hecho indistinguible «zona de
-  la instantánea» de «zona del navegador» aquí y distinguible en otra máquina. Es
-  justo la clase de constante caduca que prohíbe la regla 2 del reparto.
-- **Los siete mensajes de `FEED_MESSAGES`** (racimo 8): `it.each` de siete filas,
-  cuatro de las cuales no se renderizaban en ninguna prueba, afirmando un fragmento
-  distintivo **y** que el texto no se agota en él (un `role="alert"` vacío es peor
-  que no mostrarlo, @s12). Más dos filas negativas —`OK` con código, `FAILED` sin
-  código— que fijan la conjunción de `:352`.
-- **`failed()`** (racimo 10): un 400 `VALIDATION_ERROR` en `label` que afirma la
-  asociación, el `aria-invalid` de los **dos** campos y el foco en Etiqueta; y un
-  PUT 500 que afirma que la suscripción **no** se retira, que es lo que cae si el
-  `&& error.status === 401` se relaja.
-- **Resumen vacío** (racimo 11): un evento con `summary: ""` en las dos vistas,
-  afirmando el `<li>` completo («Sin título 09:00–10:00»), que además fija que la
-  fila no queda sin nombre accesible. @s19.
-- **`truncated` en falso**, **Cancelar cierra el diálogo**, **`aria-busy` del
-  formulario** en los dos sentidos y **el `<h2>` que cambia con la suscripción**
-  (racimo 13 y tres «omitidos»).
-- **Los reinicios de estado**: dos pruebas de error-y-reintento, una para
-  `setFieldErrors({})` y otra para `setFailure("")`, que no existían.
-- **`forget()` cierra el diálogo**: el `setConfirming(false)` sobrevivía porque al
-  borrar desaparece la sección entera. La prueba que lo mata recorre el camino
-  completo —eliminar, confirmar, volver a suscribirse— y afirma que el diálogo de
-  eliminación **no reaparece solo**. Sin ese `setConfirming(false)` el propietario
-  se encontraría, tras dar de alta un calendario nuevo, con el diálogo de borrado
-  abierto sin haberlo pedido.
+## Los 2 con error de ejecución: qué les pasa
 
-Acreditación: **24 de 24 mutantes mueren** (dos exigieron una prueba más, escrita
-después de ver el superviviente; un tercero tenía el ancla ambigua porque el
-ternario de zona aparece dos veces, y se desambiguó).
+`today-external-calendar.tsx:76` (`ObjectLiteral → {}` y `StringLiteral → ""`) es
+`: { kind: "hidden" }`. Con cualquiera de los dos mutantes el objeto deja de tener la
+forma que el render espera, se cae por la rama de eventos y explota al leer
+`reading.items.length`. Stryker lo etiqueta `RuntimeError` —y lo **saca del
+denominador**— porque el mutante revienta el ejecutor en vez de hacer fallar una
+aserción.
 
-## Racimo G — la sección de Hoy (predicción: racimo 6, ya refutado dos veces)
+No es un hueco de oráculo: `@s36 sin suscripción la sección no se muestra ni avisa de
+nada` sí detecta el cambio (afirma `container.textContent === ""`, y con el mutante
+el render lanza). Lo dejo escrito para que el próximo juez no lo cuente como deuda:
+**la producción está cubierta; lo que falta es que la herramienta sepa clasificarlo.**
 
-Las dos refutaciones tenían razón: el racimo valía 2-3 mutantes, no 8, porque
-`today-external-calendar.test.tsx:194-210` ya mataba el mutante que apaga el
-`startsWith`. Lo que de verdad no tenía oráculo, y ahora sí:
+## Los 29 abiertos, agrupados por hueco real
 
-- El literal «No se ha podido consultar el calendario externo.»: la prueba de fallo
-  de red solo miraba el `href` del enlace, que los **dos** mensajes comparten. Ahora
-  afirma su texto y niega el del otro.
-- El `catch` de `clock()`: una zona no resoluble (`Marte/Base`) devuelve el instante
-  crudo. Nunca se ejecutaba.
-- La rama de `lastSyncAt` nulo: el único fixture con `lastSyncAt: null` pertenecía a
-  la prueba de desmontaje, que nunca llega a pintar.
-- `summary: ""` en Hoy.
-- **La guarda de aborto de después de leer el cuerpo** (`today:66`). El refutador la
-  daba por código muerto; **no lo es**, y lo demuestro ejecutando: `json()` hace su
-  `throwIfAborted` y **luego** espera a `response.json()`, así que una cancelación
-  que llega durante la lectura del cuerpo vuelve por el camino feliz. La prueba
-  nueva retiene el `json()` (no el `fetch`), rerenderiza con otra revisión —lo que
-  aborta la anterior con la sección **viva**, así que sí es observable— y afirma que
-  la respuesta tardía no repinta «Vieja».
+No son veintinueve problemas: son **cuatro racimos** y cuatro sueltos. Escribirlos así es lo
+único que hace el trabajo presupuestable.
 
-**Superviviente equivalente declarado**: la guarda de aborto del `catch` de la
-sincronización (`today:61`). Quitándola, el flujo sigue a `readExternalEvents`, que
-lanza en su primer `throwIfAborted` **antes de pedir nada**, y el `catch` siguiente
-vuelve a cortar por `signal.aborted`. No hay diferencia observable: ni pintado, ni
-petición de más.
+### Racimo 1 — el validador de `problem+json` no se ejerce deforme (9 mutantes)
 
-Acreditación: **6 de 7 mutantes mueren**.
+`external-calendar-api.ts` `:160`, `:164`, `:167` (encadenamiento opcional), `:170`,
+`:172` ×2, `:173`, `:177`, `:178`.
 
----
+`refuse()` desarma el cuerpo de error del servidor, y **ninguna prueba le manda un
+cuerpo deforme**. Los tres `body?.code` sobreviven porque no hay ningún 503, 404 ni
+400 cuyo cuerpo no sea JSON (con el mutante, `body.code` sobre `null` lanza
+`TypeError` en vez de caer al `throw response`). Los siete restantes son el bucle de
+`errors`: falta un `errors` que no sea lista, una entrada nula, una que no sea objeto,
+una con `message` no textual y una con `code` no textual.
 
-## Racimo H — el foco, la asociación del error y el salto al contenido
+**Cómo se cierra:** una tabla `it.each` en `external-calendar-api.test.ts`, del mismo
+estilo que las dos que ya existen, con esos cinco cuerpos más tres respuestas de
+cuerpo no-JSON. Es **una sola prueba parametrizada** y mata los nueve.
 
-Cinco mutantes que ninguna prueba distinguía y que son contrato de @s38 y @s40:
+### Racimo 2 — el `catch` de `confirmRemoval()` no se ejerce (6 mutantes)
 
-- `focusOn.current = null` en el efecto de foco. Sin él, cada cambio de
-  `fieldErrors` vuelve a mover el foco: al reintentar con éxito, el foco saltaría
-  del botón que el propietario acaba de pulsar al campo de dirección. @s40 pide
-  que los estados se anuncien **sin mover el foco**.
-- El `aria-describedby` del campo y el `id` del párrafo de error. «El error se
-  asocia al campo» (@s38 fila 2) es una asociación programática, no una proximidad
-  visual: la prueba comprueba que el mensaje está entre los elementos que describen
-  al campo.
-- El `id="proyectos"` y el `tabIndex={-1}` del `<main>`. El «Saltar al contenido»
-  del espacio de trabajo apunta a `#proyectos`; si esta vista perdiera el id, el
-  salto no llevaría a ninguna parte. La prueba vive en
-  `external-calendar-route.test.tsx`, que es donde existe el enlace, y **deriva** el
-  destino del `href` en vez de escribirlo a mano (regla 2 del reparto).
+`external-calendar.tsx` `:252`, `:253` ×2, `:254`, `:255`, `:257`.
 
-**5 de 5 mueren.**
+Ninguna prueba hace fallar el `DELETE`. Los dos `NoCoverage` (`:254` y `:255`) lo
+dicen literalmente: `setAnnouncement("")` y `failed(error)` no se ejecutan jamás.
 
-## Racimo I — el andamiaje de la pantalla
+**Cómo se cierra:** una prueba calcada de la de `@s38 un 500 al sincronizar…`, con
+`answer(ROUTE, "DELETE", {}, 500)`, afirmando que sale el aviso de estado incierto,
+que la suscripción **sigue** en pantalla y que los controles se desbloquean.
 
-Textos y cableado de accesibilidad que no afirmaba nadie: la promesa «solo se lee:
-esta aplicación nunca escribe en tu proveedor», los nombres accesibles de las dos
-secciones (`aria-labelledby` más los `id` de sus encabezados), el `type`,
-`autoComplete` y `spellCheck` de los campos, el `aria-atomic` de la región viva, la
-ayuda de Google Calendar como descripción del campo de dirección, el
-`<h3>Eventos</h3>`, el `role="note"` y el texto del aviso de truncado, el nombre y
-el texto del diálogo de confirmación, y en Hoy el `aria-live` de la sección y su
-`<h2>`.
+### Racimo 3 — reentrada y aborto de las tres escrituras (8 mutantes)
 
-**15 de 15 mueren.**
+`external-calendar.tsx` `:197`, `:210`, `:214` (guardar), `:219`, `:234`, `:235`,
+`:239` (sincronizar), `:131` (lectura de eventos).
 
----
+Las guardas `if (busy) return` y `if (signal.aborted) …` no las mide nadie porque los
+botones se deshabilitan y las pruebas nunca fuerzan la segunda entrada ni el aborto a
+mitad. Es la familia que ya mordió en `@s39` fila 3.
 
-## Previsión de puntuación — es una PREVISIÓN, no una medida
+**Cómo se cierra:** dos pruebas con la respuesta retenida (la técnica de la promesa
+`pending` que ya se usa en `@s38 anuncia Guardando…`): una que envíe el formulario dos
+veces y afirme una sola petición, y otra que desmonte a mitad y afirme que no se toca
+el estado después.
 
-**No he ejecutado Stryker**: había dos campañas corriendo y la mide el orquestador.
+### Racimo 4 — los dos párrafos de error de campo vacíos (2 mutantes)
 
-Lo que sí está medido: **119 mutantes aplicados a mano al fichero de producción
-real, ejecutados contra las pruebas y restaurados**, con el detalle en
-`progress/verificacion_mutantes_external_calendar.json`. De ellos **111 mueren** y
-**8 sobreviven**, y los ocho están declarados abajo con su razón.
+`external-calendar.tsx` `:294` y `:319`: `{fieldErrors.label ?? ""}` y su gemelo.
+Nadie afirma que estén **vacíos** cuando no hay error, así que pueden decir cualquier
+cosa mientras el formulario está limpio.
 
-**Previsión: 88-94 %**, con lo que quede vivo concentrado en dos sitios conocidos.
+**Cómo se cierra:** dos aserciones en la prueba del formulario de alta.
 
-### Los ocho supervivientes que conozco, y por qué son equivalentes
+### Sueltos (4 mutantes)
 
-| Mutante | Razón |
-|---|---|
-| `setEvents([])` del catch de `loadEvents` | con `invalidList` en `true` la lista no se pinta: el estado es invisible por ese camino |
-| `save`: `if (signal.aborted) return` del catch | una escritura solo se aborta al desmontar —el guardián de reentrada impide la otra vía— y en React 19 un `setState` sobre un árbol desmontado es un no-op silencioso |
-| `save`: `if (!signal.aborted) setBusy("")` del finally | ídem |
-| `synchronise`: `if (signal.aborted) return` del catch | ídem |
-| `confirmRemoval`: `if (signal.aborted) return` del catch | ídem |
-| `confirmRemoval`: `if (!signal.aborted) setBusy("")` del finally | ídem |
-| `json()`: el `catch` que llama a `invalid()` | todos los llamadores revalidan el cuerpo, así que `undefined` acaba lanzando el mismo error |
-| Hoy: `if (signal.aborted) return` del catch de la sincronización | quitándolo, `readExternalEvents` lanza en su primer `throwIfAborted` antes de pedir nada y el catch siguiente vuelve a cortar |
+| Fichero | Línea | Qué falta |
+|---|---|---|
+| `external-calendar.tsx` | 118 | `setEvents([])` dentro de `forget()`. **Sólo es observable en el instante entre `setSubscription(saved)` y la resolución de `loadEvents`**, porque todo camino que vuelve a pintar la ficha recarga la lista. Se cierra reteniendo la respuesta de eventos tras un alta y afirmando que la lista está vacía en ese render intermedio. Es la prueba más cara de la lista y la dejo escrita, no hecha. |
+| `external-calendar.tsx` | 103 | `useState(true)` de `invalidList` pinta «No se ha podido leer la lista de eventos» en el render intermedio de una carga que va bien. Mismo tipo de prueba que la anterior. |
+| `external-calendar.tsx` | 196 | `event.preventDefault()`. En jsdom no hay navegación que impedir, así que nadie lo nota. Se cierra con un `submit` sintético afirmando `defaultPrevented`. |
+| `external-calendar.tsx` | 223 | `setFailure("")` al empezar a sincronizar: falta encadenar una sincronización fallida y otra correcta y afirmar que el aviso anterior desaparece. Existe ese encadenamiento para **guardar** (`@s38 un reintento con éxito retira el aviso`), no para sincronizar. |
 
-A ellos hay que sumar los dos guardianes de reentrada de `save` y `synchronise`
-(`if (busy) return`), no alcanzables desde la interfaz porque sus botones llevan
-`disabled={locked}`. Lo comprobé con una sonda que **borré** por ser una aserción
-que no puede fallar.
+## Efecto esperado en la próxima campaña
 
-### El suelo que no he intentado tocar, y por qué
+13 mutantes pasan de vivos a muertos sobre los mismos 726 con veredicto:
+**676/726 = 93,11 %**, desde 91,32 %. Con el ámbito ya estrechado (condición 4), que
+quita 64 mutantes de `App.tsx` todos resueltos: **612/662 = 92,45 %**, en vez del
+90,48 % que habría dado el estrechamiento por sí solo.
 
-**~26 mutantes de `className`.** Stryker muta cada literal de `className` a cadena
-vacía. La única forma de matarlos en vitest es afirmar el nombre de la clase de
-vuelta, y **ninguna prueba de este repositorio lo hace**: `grep toHaveClass` en
-`frontend/src` da cero ficheros. Fijar la lista de clases de un subárbol es además
-la clase de constante caduca que prohíbe la regla 2 del reparto: caduca en cuanto
-alguien añade un elemento. Lo dejo declarado en vez de subir la puntuación con
-aserciones que solo se repiten a sí mismas. Si se prefiere lo contrario, son 26
-líneas y media hora.
+Por fichero, el que estaba flojo deja de estarlo: `external-calendar.tsx` sube de
+**84,80 %** (212/250) a **88,00 %** (220/250) y `today-external-calendar.tsx` de
+**91,36 %** a **95,06 %**. Es previsión aritmética, no medida: **la medida la da la
+campaña**.
 
-Intenté un oráculo mejor —«toda clase que se pinta tiene regla en la hoja de
-estilos», derivado del `.scss` y por tanto no caduco— y **no se puede escribir hoy,
-porque fallaría contra la producción actual**: ver el hallazgo siguiente.
+## Qué cambió en el árbol
 
-### Hallazgo fuera de mi ámbito (regla 9: lo anoto y sigo)
+Sólo pruebas, ni una línea de producción:
 
-Cuatro clases que la vista pinta **no tienen ninguna regla** en `styles.scss` ni en
-`today.scss`:
-
-- `danger`, en el botón «Eliminar suscripción»: la acción destructiva se ve
-  exactamente igual que las demás. Es el único de los cuatro con consecuencia de
-  producto.
-- `external-calendar-counters`, `external-calendar-when` y
-  `today-external-calendar-stamp`: ganchos muertos, inofensivos.
-
-No los toco: la hoja de estilos no es de mi carril y el brief pide no refactorizar
-de paso.
-
----
-
-## Resumen
-
-| | |
-|---|---|
-| Racimos atacados | 9 (A-I), que cubren los 13 racimos de la predicción y sus 20 «omitidos» |
-| Defectos de producto encontrados y arreglados | **2** |
-| Pruebas | 83 → **161** |
-| Mutantes acreditados a mano | 119 aplicados: **111 mueren**, 8 equivalentes declarados |
-| Producción tocada | solo por los dos defectos, ambos en `external-calendar.tsx`. `git diff` de producción **vacío** al terminar |
-| Puertas | `vitest` 161 verdes · `tsc --noEmit` limpio · `eslint src` limpio · `prettier --check` limpio |
-
-### Los dos defectos, en una línea cada uno
-
-1. **La ventana vacía que nadie había leído**: con un 500 o un 503 en `GET /events`
-   la pantalla decía «No hay eventos en la ventana guardada», porque `refuse()`
-   relanza una `Response` y la guarda exigía un `Error`. Le decía al propietario que
-   su calendario estaba vacío cuando no lo había podido leer.
-2. **Salir de la pantalla no cancelaba ninguna escritura**: la limpieza del efecto
-   abortaba el controlador del montaje, capturado en el closure, y no el de
-   `inFlight`. Un `PUT`, un `POST /sync` o un `DELETE` en vuelo seguían vivos al
-   navegar a otra ruta, contra @s39 fila 3.
-
-### Correcciones a la predicción, todas comprobadas ejecutando
-
-- **Racimo 9 (cabeceras), `posibleDefecto` falso**, como decían sus dos
-  refutaciones: perder el spread de `options.headers` no puede quitar el
-  `X-CSRF-TOKEN`; quita el `Content-Type`. El oráculo que la predicción proponía
-  habría dado verde con la producción rota.
-- **Racimo 2, «el doble clic de synchronise ya tiene oráculo»: falso.** Lo garantiza
-  el atributo `disabled`, no el guardián. El guardián alcanzable de verdad es el de
-  `confirmRemoval`, cuyo botón **no** está deshabilitado.
-- **La guarda de aborto de `today:66` no es código muerto**, contra lo que sostenía
-  el refutador: se alcanza cuando la cancelación llega mientras se lee el cuerpo,
-  porque `json()` ya pasó su `throwIfAborted`. Tiene prueba, y observable, con
-  rerender en vez de desmontaje.
-- **Racimo 3, oráculo (a): el refutador tenía razón** —con un 500 no aparece ningún
-  aviso—, solo que eso no era una corrección al oráculo: era el defecto.
-
-Estado final: **161 pruebas verdes** en los cuatro ficheros del ámbito (83 de
-partida). `tsc --noEmit`, `eslint src` y `prettier --check` limpios.
+- `frontend/src/today-external-calendar.test.tsx` — el doble de `fetch` guarda también
+  el cuerpo; `@s35` afirma `{ onlyIfStale: true }`; la marca horaria pasa a igualdad;
+  el aviso de red afirma su `textContent` entero.
+- `frontend/src/external-calendar.test.tsx` — el cuerpo del `PUT` se afirma entero;
+  prueba nueva del 500 al sincronizar; el primer render queda fijado (nota, etiqueta
+  vacía, región de estado callada, sin aviso de error, sin diálogo abierto).
+- `frontend/src/external-calendar-api.test.ts` — dos filas adversariales nuevas.

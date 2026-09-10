@@ -40,7 +40,29 @@ class ExternalCalendarWiringTest {
         assertThrows(
             IllegalArgumentException.class,
             () -> CONNECTORS.secretCipher("no-es-base64-de-32-bytes", ""));
-    assertTrue(thrown.getMessage().contains("APP_CONNECTOR_KEY"), thrown.getMessage());
+    assertTrue(thrown.getMessage().contains("(APP_CONNECTOR_KEY)"), thrown.getMessage());
+    assertTrue(thrown.getMessage().contains("app.connectors.key "), thrown.getMessage());
+    // La otra variable NO puede aparecer. Sin esta línea bastaba con que el
+    // mensaje dijese APP_CONNECTOR_KEY_PREVIOUS, porque contiene la subcadena.
+    assertFalse(thrown.getMessage().contains("APP_CONNECTOR_KEY_PREVIOUS"), thrown.getMessage());
+    assertFalse(thrown.getMessage().contains("no-es-base64-de-32-bytes"));
+  }
+
+  /**
+   * La caída de arranque nombra la variable de entorno de la clave que está mal, no la otra. El
+   * oráculo anterior usaba {@code contains("APP_CONNECTOR_KEY")}, que es subcadena de {@code
+   * APP_CONNECTOR_KEY_PREVIOUS}: el mensaje podía señalar la variable equivocada y quien arrancase
+   * el servicio iría a corregir la clave sana (superviviente {@code ConnectorKeyRing:55}).
+   */
+  @Test
+  void s9_aMalformedPreviousKeyNamesThePreviousVariableAndNotTheCurrentOne() {
+    var thrown =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> CONNECTORS.secretCipher(KEY, "no-es-base64-de-32-bytes"));
+    assertTrue(thrown.getMessage().contains("(APP_CONNECTOR_KEY_PREVIOUS)"), thrown.getMessage());
+    assertTrue(thrown.getMessage().contains("app.connectors.key-previous "), thrown.getMessage());
+    assertFalse(thrown.getMessage().contains("(APP_CONNECTOR_KEY)"), thrown.getMessage());
     assertFalse(thrown.getMessage().contains("no-es-base64-de-32-bytes"));
   }
 

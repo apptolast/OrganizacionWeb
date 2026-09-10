@@ -1,70 +1,44 @@
-# Decisiones que esperan al propietario — 10 de septiembre de 2026
+# Decisiones que esperan al propietario
 
-Nada de esto bloquea el trabajo: los carriles siguen. Bloquea el **cierre** de la
-feature que se nombra en cada punto, porque son cambios de contrato y la
-disciplina del repo dice que los firmas tú.
+**Ninguna. La lista está vacía desde el 10 de septiembre de 2026, 19:15.**
 
----
+Llegó a tener **quince**. Se cerraron así:
 
-## 1. Feature 25 — el `@s9` promete modo degradado y el código muere al arrancar
+| Cómo se cerró | Cuántas |
+|---|---|
+| Respondidas por el propietario hoy | 6 |
+| Ya estaban ratificadas y se cerraron **por cita**, sin volver a preguntar | 4 |
+| Desaparecieron con las features retiradas (27, 29 y 30) | 4 |
+| Resuelta por la propia cirugía de retirada | 1 |
 
-**Qué pasa.** `features/webhooks.feature:129-142` dice «Sin clave de cifrado
-válida la aplicación arranca degradada / Then la aplicación queda disponible» y
-lista tres filas de `<clave>`: `ausente`, `base64 de 31 bytes` y `texto no
-base64`, las tres con resultado `503 CONNECTORS_DISABLED`.
+Todas las respuestas y las citas están en `progress/ratificaciones.md`, entradas
+R1 a R13, cada una con la pregunta tal como se hizo y la opción tal como se
+eligió. Ése es el artefacto que un juez puede comprobar sin la conversación, y
+existe porque un panel objetó —con razón— que una contrafirma escrita por el
+mismo carril que hizo la enmienda no vale como aprobación humana.
 
-La producción hace otra cosa en dos de las tres:
-`AesGcmWebhookSecrets.from` (`backend/src/main/java/.../adapter/webhook/AesGcmWebhookSecrets.java:54-59`)
-devuelve `null` **sólo** si la clave está ausente y **lanza**
-`IllegalStateException` en los dos casos malformados; `ApplicationConfiguration:451`
-construye el bean con ella, así que el contexto no refresca y **la aplicación no
-arranca**. `AesGcmWebhookSecretsTest.s9_b5_aMalformedCurrentKeyFailsFastInsteadOfDegrading`
-afirma exactamente lo contrario del contrato.
+## Las cuatro que se cerraron por cita, porque conviene saber cuáles fueron
 
-Y no es un despiste: es la política que **ya ratificaste** en la enmienda B5/B6
-de seguridad, escrita en `project-spec.md:2496`: «fallo rápido al arrancar si la
-clave está mal formada, modo degradado con `CONNECTORS_DISABLED` solo si está
-ausente». El código obedece esa política; el `.feature` nunca se tocó.
+No se volvió a molestar al propietario con ellas: se comprobó contra el
+transcript que su decisión **ya las alcanzaba**.
 
-Lo mismo, menor, en `@s8:125-126`: el contrato dice que el dato adicional
-autenticado es «el id del endpoint» y la producción usa `ownerId + "|" +
-endpointId`, que es la enmienda **B6** del mismo `project-spec.md:2496`.
+- **R4** — `latencyMs` medido con cronómetro monótono (feature 25).
+- **R10** — el dato adicional autenticado ata propietario y endpoint (feature 25).
+- **R12** — el plazo de 5 s cubre el intercambio completo (feature 28). Lo cubría
+  su «Ratifico las dos», cuya opción nombraba esta enmienda literalmente.
+- **R13** — el certificado que no vale para su nombre (feature 28). **Es** la
+  prueba de TLS que pidió al elegir «Anclar, y probar el TLS», opción que decía
+  «se escribe la prueba de TLS/SNI que hoy no existe» para las dos features.
 
-**Mi lectura.** Lo que caducó es el `.feature`, no el código. Pero el efecto
-visible para un operador no es cosmético: quien se equivoque copiando
-`APP_CONNECTOR_KEY` recibe una aplicación muerta, no el modo degradado que el
-contrato describe. Merece que lo decidas mirándolo, no que lo alinee un carril.
+## La que resolvió la cirugía
 
-**La pregunta, exacta:** ¿enmiendo el `.feature` para que diga lo que fija la
-política ya ratificada —las dos filas malformadas de `@s9` pasan a «la aplicación
-no arranca y registra `CONFIGURATION_ERROR`», y la línea `@s8:125-126` pasa a
-«el propietario y el id del endpoint como dato adicional autenticado»—, con su
-nota de enmienda fechada dentro del fichero al modo de la de `@s33`? ¿O prefieres
-lo contrario, que la producción degrade también con clave malformada, lo que
-revocaría la enmienda B5 de la revisión de seguridad en las tres features que la
-comparten?
+El sitio de «Calendario externo» en el menú dependía de un orden que incluía
+«Conectores» y «Automatizaciones». Las tres features que los ponían ahí se
+retiraron, así que la pregunta dejó de existir: el orden lo fija ahora lo que
+queda.
 
-**No lo he tocado.** Es el bloqueante **B6** de
-`progress/carriles/bloqueantes_25.md` y queda declarado abierto en
-`progress/mutation_webhooks.md`.
+## Si vuelve a aparecer alguna
 
----
-
----
-
----
-
----
-
----
-
----
-
-## 2. Feature 28 — el sitio de «Calendario externo» en el menú
-
-**Qué pasa.** La enmienda de navegación que ratificaste fija el orden de las
-entradas del menú, y «Calendario externo» aparece en `workspace.tsx` en una
-posición que esa enmienda no nombra explícitamente.
-
-**Lo que hay que decidir:** confirmar la posición actual, o decir cuál es la
-correcta. Es de dos minutos y cierra la última puerta humana de esta feature.
+Se anota aquí con la misma forma que tenían las quince: **qué pasa**, **por qué se
+hizo**, y **qué hay que decidir**, con recomendación cuando la haya. Nada se da
+por ratificado sin cita.

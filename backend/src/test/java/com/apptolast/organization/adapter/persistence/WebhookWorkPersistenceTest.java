@@ -119,6 +119,46 @@ class WebhookWorkPersistenceTest {
     throw new AssertionError("no delivery of " + owner + " was claimable");
   }
 
+  /**
+   * @s24 «status pending y nextAttemptAt T + 1 min». El dominio calcula ese instante ({@link
+   *     com.apptolast.organization.domain.RetrySchedule}) pero quien lo hace cumplir es una sola
+   *     línea de SQL: la cláusula {@code AND d.next_attempt_at <= ?} de {@code claimNext}. Sin
+   *     ella, la entrega recién fallada vuelve a ser reclamable en la misma pasada, y como {@code
+   *     DispatchWebhooks.runCycle} reclama hasta veinte veces por ciclo, los seis intentos se
+   *     queman de golpe contra el receptor caído: el webhook acaba {@code disabled} con {@code
+   *     DELIVERY_EXHAUSTED} en un solo tick en lugar de a lo largo del backoff.
+   *     <p>Ninguna prueba creaba jamás una entrega con vencimiento futuro —todas nacen con {@code
+   *     nextAttemptAt = T}—, así que la cláusula se podía borrar entera y la suite seguía verde.
+   *     PIT tampoco la ve: no muta literales de cadena y el SQL es uno.
+   *     <p>El instante de vencimiento no se escribe a mano, se toma del resultado que devuelve el
+   *     dominio: si algún día cambia la tabla de reintentos, esta prueba no caduca.
+   */
+  @Test
+  void s24_aFailedDeliveryIsNotClaimableUntilTheClockReachesItsNextAttempt() {
+    var owner = "backoff-" + UUID.randomUUID();
+    var endpoint = given(owner, "active");
+    enqueue(owner, endpoint.id(), "{}");
+    var work = work();
+    var claimed = claimOwn(work, owner, T);
+
+    var failed = claimed.delivery().recorded(WebhookAttempt.http(500, 1), T);
+    work.record(claimed, failed, null);
+    var due = failed.nextAttemptAt();
+
+    assertEquals(T.plus(Duration.ofMinutes(1)), due, "@s24: tras el primer fallo, T + 1 min");
+    assertTrue(
+        claimedFor(work, owner, T).isEmpty(),
+        "la entrega recién fallada no se vuelve a reclamar en la misma pasada");
+    assertTrue(
+        claimedFor(work, owner, due.minusMillis(1)).isEmpty(),
+        "un instante antes del vencimiento sigue sin ser reclamable");
+
+    var reclaimed = claimedFor(work, owner, due);
+    assertEquals(1, reclaimed.size(), "cuando el reloj alcanza el vencimiento vuelve al ciclo");
+    assertEquals(failed.id(), reclaimed.getFirst().delivery().id());
+    assertEquals(1, reclaimed.getFirst().delivery().attempt(), "el intento fallido está contado");
+  }
+
   @Test
   void s22_aDisabledEndpointNeverYieldsItsPendingDeliveries() {
     var owner = "off-" + UUID.randomUUID();

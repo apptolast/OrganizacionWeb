@@ -33,6 +33,9 @@ class ExecuteAutomationsTest {
   private String projectName = "Marketing";
   private String taskTitle = "Redactar informe";
 
+  /** A title per task, so several events of one walk stop being indistinguishable. */
+  private final Map<UUID, String> titleOfTask = new HashMap<>();
+
   private final FakeWork work = new FakeWork();
   private final InMemoryAutomations rules = new InMemoryAutomations();
   private final AutomationEventProjects projects =
@@ -56,7 +59,7 @@ class ExecuteAutomationsTest {
 
         @Override
         public Optional<String> taskTitle(String owner, UUID taskId) {
-          return Optional.of(taskTitle);
+          return Optional.of(titleOfTask.getOrDefault(taskId, taskTitle));
         }
 
         @Override
@@ -159,10 +162,18 @@ class ExecuteAutomationsTest {
     var blocked = numbered(3);
     var e4 = numbered(4);
     var late = numbered(9);
-    work.outbox.add(taskCreated(e2, T0.plusSeconds(1)));
-    work.outbox.add(taskCreated(e1, T0.plusSeconds(1)));
+    // Una tarea distinta por evento: con las tres tareas creadas byte a byte
+    // iguales, cualquier permutacion -o repetir tres veces la misma- pasaba.
+    var first = numbered(101);
+    var second = numbered(102);
+    var fourth = numbered(104);
+    titleOfTask.put(first, "Primera");
+    titleOfTask.put(second, "Segunda");
+    titleOfTask.put(fourth, "Cuarta");
+    work.outbox.add(taskCreatedOf(e2, T0.plusSeconds(1), second));
+    work.outbox.add(taskCreatedOf(e1, T0.plusSeconds(1), first));
     work.outbox.add(blockedTaskCreated(blocked, T0.plusSeconds(2)));
-    work.outbox.add(taskCreated(e4, T0.plusSeconds(3)));
+    work.outbox.add(taskCreatedOf(e4, T0.plusSeconds(3), fourth));
     work.outbox.add(taskCreated(late, T0.minusSeconds(1)));
 
     execute.runCycle();
@@ -173,6 +184,18 @@ class ExecuteAutomationsTest {
         .as("executedAt never goes backwards along the walk")
         .isSorted();
     assertThat(work.createdTasks()).hasSize(3);
+    // «Y las 3 tareas creadas tienen createdAt en ese mismo orden». El puerto no
+    // lleva instante -AutomationEffect.CreateTask no tiene reloj-, asi que lo que
+    // se afirma aqui es la condicion que lo produce: cada tarea es la de SU
+    // evento y llegan en el orden del paseo, que es el orden en que el adaptador
+    // las sella. El instante real sigue sin oraculo (H3 del juez).
+    assertThat(work.createdTasks())
+        .extracting(AutomationEffect.CreateTask::title)
+        .as("las 3 tareas se crean en el orden E1, E2, E4, cada una con su evento")
+        .containsExactly(
+            "Revisar Primera en Marketing",
+            "Revisar Segunda en Marketing",
+            "Revisar Cuarta en Marketing");
     assertThat(work.commits)
         .extracting(commit -> commit.reached().eventId(), commit -> commit.outcomes().size())
         .as("the blocked row moves the cursor without producing anything")

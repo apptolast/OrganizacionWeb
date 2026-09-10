@@ -83,9 +83,11 @@ function GitlabConnectorScreen() {
   const tokenField = useRef<HTMLInputElement>(null);
   const replaceButton = useRef<HTMLButtonElement>(null);
   const receiptBox = useRef<HTMLElement>(null);
+  const statusBox = useRef<HTMLParagraphElement>(null);
   const focusReplace = useRef(false);
   const focusHeading = useRef(false);
   const focusReceipt = useRef(false);
+  const focusStatus = useRef(false);
   const pending = useRef<AbortController | null>(null);
   const mounted = useRef(true);
 
@@ -150,6 +152,11 @@ function GitlabConnectorScreen() {
     if (focusHeading.current) {
       focusHeading.current = false;
       heading.current?.focus();
+      return;
+    }
+    if (focusStatus.current) {
+      focusStatus.current = false;
+      statusBox.current?.focus();
     }
   });
 
@@ -176,6 +183,9 @@ function GitlabConnectorScreen() {
     if (connecting) return;
     setConnecting(true);
     setConnectError(null);
+    // Mismo motivo que en startImport: el boton de enviar queda `disabled` y sin esto el
+    // foco se cae al body mientras se guarda.
+    focusStatus.current = true;
     const controller = new AbortController();
     pending.current = controller;
     try {
@@ -208,6 +218,11 @@ function GitlabConnectorScreen() {
     setImporting(true);
     setActionError(null);
     setReceipt(null);
+    // El boton que se acaba de pulsar queda `disabled`, y un elemento deshabilitado pierde el
+    // foco al body: quien navega con teclado o lector se queda sin saber que ha pasado. El foco
+    // pasa al aviso, que es donde se cuenta. Lo lee dos veces —por region viva y por foco—, que
+    // es mucho menos malo que no leer nada.
+    focusStatus.current = true;
     const controller = new AbortController();
     pending.current = controller;
     try {
@@ -435,7 +450,13 @@ function GitlabConnectorScreen() {
 
       {receipt ? <Receipt receipt={receipt} boxRef={receiptBox} /> : null}
 
-      <p role="status" aria-live="polite" aria-atomic="true">
+      <p
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        ref={statusBox}
+        tabIndex={-1}
+      >
         {connecting
           ? "Guardando…"
           : importing

@@ -2335,6 +2335,123 @@ button {
   }
 }
 
+// Catalogo de conectores y conector de GitLab (feature 29). Ninguna de las dos pantallas
+// tenia bloque propio, asi que no les alcanzaba ninguna regla de control: los enlaces del
+// catalogo median 21 px de alto y a 320 px con el texto al 200 % la pagina desbordaba en
+// horizontal porque ni siquiera el h1 podia partirse. @s38 exige las dos cosas, y la
+// revision con Playwright las mide (e2e/additional-connectors-ux.spec.mjs).
+.connectors-catalog {
+  min-width: 0;
+  max-width: 880px;
+  overflow-wrap: anywhere;
+  h1 {
+    margin-bottom: 16px;
+  }
+  p {
+    line-height: 1.6;
+    max-width: 68ch;
+    margin: 4px 0;
+    min-width: 0;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 16px;
+  }
+  li {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+    padding: 16px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  h2 {
+    margin: 0;
+    min-width: 0;
+  }
+  // El enlace es el unico contenido de su bloque, asi que no cae bajo la excepcion
+  // "Inline" de WCAG 2.2 2.5.8: es un destino de puntero de pleno derecho.
+  a {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-width: 44px;
+    min-height: 44px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
+// Hermano del bloque .github-connector, y por el mismo motivo: los controles viven fuera de
+// un formulario y no les alcanzan las reglas de campo del area de trabajo.
+.gitlab-connector {
+  min-width: 0;
+  max-width: 880px;
+  overflow-wrap: anywhere;
+  p {
+    line-height: 1.6;
+    max-width: 68ch;
+    min-width: 0;
+  }
+  // `fit-content(40%)` y no `auto`: con `auto` la primera columna se lleva todo su
+  // max-content antes de que el `1fr` reparta, la segunda se queda en 0 px y el valor
+  // desborda. Pasa a 320 px con el texto al 200 %, donde "Identificador del proyecto"
+  // pide 274 px de los 290 disponibles. Aqui la etiqueta no puede pasar del 40 %.
+  dl {
+    display: grid;
+    grid-template-columns: fit-content(40%) minmax(0, 1fr);
+    gap: 8px 16px;
+    align-items: baseline;
+  }
+  dt {
+    color: var(--muted);
+    min-width: 0;
+  }
+  dd {
+    margin: 0;
+    min-width: 0;
+  }
+  button,
+  select,
+  input {
+    box-sizing: border-box;
+    min-width: 44px;
+    min-height: 44px;
+    max-width: 100%;
+  }
+  select,
+  input {
+    color: var(--ink);
+    background: var(--editable);
+    border: 1px solid var(--control-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font: inherit;
+  }
+  a {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-width: 44px;
+    min-height: 44px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  label {
+    display: block;
+    margin-block-end: 8px;
+  }
+}
+@media (max-width: 600px) {
+  .gitlab-connector button,
+  .gitlab-connector select {
+    width: 100%;
+  }
+}
+
 .external-calendar {
   min-width: 0;
   max-width: 880px;

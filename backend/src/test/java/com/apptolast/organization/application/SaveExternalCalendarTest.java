@@ -201,15 +201,19 @@ class SaveExternalCalendarTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"UNRESOLVABLE, UNRESOLVABLE_HOST", "BLOCKED, BLOCKED_ADDRESS"})
+  @CsvSource({
+    "UNRESOLVABLE, UNRESOLVABLE_HOST, No se ha podido resolver el nombre de esa dirección.",
+    "BLOCKED, BLOCKED_ADDRESS, Esa dirección apunta a una red interna y no se puede usar."
+  })
   void s4_aHostThatDoesNotPassTheGuardIsRejectedOnTheUrlFieldWithoutWriting(
-      OutboundGuard.Verdict rejected, String code) {
+      OutboundGuard.Verdict rejected, String code, String message) {
     verdict = rejected;
     var error =
         assertThrows(ValidationException.class, () -> save().execute(OWNER, "Trabajo", URL));
     assertEquals(1, error.errors().size());
     assertEquals("url", error.errors().getFirst().field());
     assertEquals(code, error.errors().getFirst().code());
+    assertEquals(message, error.errors().getFirst().message());
     assertTrue(store.find(OWNER).isEmpty());
   }
 

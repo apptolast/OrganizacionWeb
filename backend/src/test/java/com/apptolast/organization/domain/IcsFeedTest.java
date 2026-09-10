@@ -275,4 +275,59 @@ class IcsFeedTest {
         List.of("utc-ok@outlook.com"), parsed.events().stream().map(ExternalEvent::uid).toList());
     assertEquals(1, parsed.skippedInvalid());
   }
+
+  /**
+   * Cierra el superviviente {@code IcsFeed:121} (MathMutator sobre {@code i + 1}): un SUMMARY que
+   * termina en barra invertida no tiene carácter siguiente que escapar, y sin esa guarda el parser
+   * lee más allá del final y revienta con StringIndexOutOfBounds.
+   */
+  @Test
+  void summaryEndingInBackslashKeepsTheBackslashInsteadOfReadingPastTheEnd() {
+    var parsed =
+        IcsFeed.parse(
+            calendar(
+                event(
+                    "UID:u1@example",
+                    "DTSTART:20300108T090000Z",
+                    "DTEND:20300108T100000Z",
+                    "SUMMARY:Copia de seguridad C:\\")),
+            MADRID,
+            ZONES);
+    assertEquals("Copia de seguridad C:\\", parsed.events().getFirst().summary());
+  }
+
+  /**
+   * Cierra el superviviente {@code IcsFeed$Property:148} (frontera de {@code i < line.length()}):
+   * una línea sin dos puntos es un feed mal formado, no un desbordamiento de índice.
+   */
+  @Test
+  void aPropertyLineWithoutAColonIsMalformedAndNotAnIndexOverflow() {
+    var text =
+        calendar(
+            event(
+                "UID:u1@example",
+                "DTSTART:20300108T090000Z",
+                "DTEND:20300108T100000Z",
+                "LINEASINDOSPUNTOS"));
+    assertThrows(IcsFeedMalformedException.class, () -> IcsFeed.parse(text, MADRID, ZONES));
+  }
+
+  /**
+   * Cierra el superviviente {@code IcsFeed$Property:150} (NO_COVERAGE: ninguna prueba traía
+   * comillas): los dos puntos dentro de un parámetro entrecomillado no separan nombre de valor.
+   */
+  @Test
+  void aColonInsideAQuotedParameterDoesNotSeparateNameFromValue() {
+    var parsed =
+        IcsFeed.parse(
+            calendar(
+                event(
+                    "UID:u1@example",
+                    "DTSTART:20300108T090000Z",
+                    "DTEND:20300108T100000Z",
+                    "SUMMARY;X-ALT-DESC=\"a:b\":Reunión")),
+            MADRID,
+            ZONES);
+    assertEquals("Reunión", parsed.events().getFirst().summary());
+  }
 }

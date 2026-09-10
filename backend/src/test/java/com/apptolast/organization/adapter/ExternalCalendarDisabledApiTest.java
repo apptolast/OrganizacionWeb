@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -57,7 +58,10 @@ class ExternalCalendarDisabledApiTest {
         .andExpect(status().isServiceUnavailable())
         .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
         .andExpect(jsonPath("$.code").value("CONNECTORS_DISABLED"))
-        .andExpect(jsonPath("$.status").value(503));
+        .andExpect(jsonPath("$.status").value(503))
+        // La respuesta de conectores apagados no se puede cachear: el día que se
+        // configure la clave, un 503 guardado seguiría apagando el producto.
+        .andExpect(header().string("Cache-Control", "no-store"));
   }
 
   @Test

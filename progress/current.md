@@ -1,23 +1,67 @@
-# Estado actual — noche del 9 al 10 de septiembre de 2026
+# Estado actual — 10 de septiembre de 2026, 19:30
 
-**Lo primero, para leer recién levantado.** Las cinco features que faltaban
-—25 webhooks, 27 conector GitHub, 28 calendario externo, 29 conectores
-adicionales y 30 automatizaciones— están **implementadas e integradas en
-`main`**. Lo que decide si pasan a `done` no es la implementación sino sus dos
-puertas: juez aprobado y mutación por encima del 80 %. El detalle de cuáles han
-pasado está más abajo, en «Cierre de la noche», con cifras medidas.
+## Lo primero: quedan **dos** features, no cinco
 
-Lo más importante que se resolvió, porque llevaba días escondido: **el ejecutor
-de reglas de automatizaciones no existía**. La feature 30 se había integrado
-como «fase 1» —reglas, plantillas, simulación, auditoría y pantalla— sin el
-motor que dispara las reglas ante eventos reales, así que nueve escenarios del
-contrato aprobado no tenían nada que probar. Ya está escrito, con sus nueve
-escenarios y tres más que el propio ejecutor destapó.
+`feature_list.json` tiene **27 features**, 25 en `done`. Faltan la **25**
+(webhooks) y la **28** (calendario externo).
 
-**Dos decisiones tuyas quedaron aplicadas**: la enmienda de navegación (ahora
-catorce entradas, con «Conectores» tras «Importación» porque lo fija @s33) y la
-contradicción 50/52 de webhooks (se persisten 52, se sirven 50). Y una tercera,
-el anclaje del reenlace DNS en las dos features con su prueba de TLS.
+Las features **27** (conector de GitHub), **29** (conectores adicionales) y **30**
+(automatizaciones) **se retiraron del producto** por decisión del propietario,
+tomada hoy con los costes delante. Están ratificadas como R7, R8 y R9 en
+`progress/ratificaciones.md`, cada una con la instrucción literal. La cirugía
+fueron 13 commits y **−40.658 líneas**, más una sola migración que retira siete
+tablas comprobadas una a una.
+
+Lo delicado de esa cirugía salió bien: **las dos features que quedan no
+sufrieron**. Se conservaron a propósito el cifrador, el llavero y la puerta de
+conectores, porque cifran en reposo la URL del feed del calendario externo;
+borrarlos habría dejado esa feature sin cifrado.
+
+## Las puertas de las dos que quedan
+
+|                           | Mutación backend | Mutación frontend | `harness init`      | Juez        |
+| ------------------------- | ---------------- | ----------------- | ------------------- | ----------- |
+| **25** webhooks           | **92,81 %** ✅   | **94,57 %** ✅    | **verde entero** ✅ | re-juzgando |
+| **28** calendario externo | remidiéndose     | remidiéndose      | ✅                  | pendiente   |
+
+La 25 tiene **las tres puertas acreditadas** y ninguna condición pendiente de
+nadie. Sólo espera el visto bueno del juez sobre cuatro correcciones.
+
+Las dos cifras de la 28 se están rehaciendo porque su ámbito cambió: se le quitó
+una clase que aportaba **113 de 579 mutantes con 112 muertos por pruebas de otras
+features**, y los rangos de frontend se recalcularon tras la cirugía.
+
+## Ninguna decisión pendiente del propietario
+
+La lista llegó a tener **quince** y está vacía. Seis las respondió, **cuatro se
+cerraron por cita** —se comprobó contra el transcript que sus decisiones
+anteriores ya las alcanzaban, sin volver a molestarle—, cuatro se fueron con las
+features retiradas y una la resolvió la propia cirugía. Todas con su cita literal
+en `progress/ratificaciones.md`, R1 a R13.
+
+## Lo que este día ha dejado, más allá de las features
+
+Cinco defectos de medición que hacían que las puertas mintieran, y que están
+arreglados y con guarda:
+
+1. **Siete ámbitos de mutación mal apuntados.** Uno medía 81 mutantes de otra
+   feature; otro no tenía dónde escribir su informe; otro sostenía la nota con
+   pruebas ajenas. Hay dos barridos en `scripts/` que los cazan:
+   `patrones-muertos.mjs` y `clases-huerfanas.mjs`.
+2. **Un informe que describía un árbol inexistente.** Situaba una línea en la 237
+   y no está en la 237 en ningún commit.
+3. **Los cinco adaptadores de bitácora salían con cero mutantes** por el
+   `avoidCallsTo` por defecto de PIT. Se explicaba como «una propiedad de los
+   mutadores»; era una opción. Confirmado arreglado en cuatro features.
+4. **Cifras leídas de un HTML redondeado** en vez de calculadas del XML.
+5. **Coordenadas escritas a mano** —rangos de Stryker, listas de líneas— que se
+   rompen cada vez que el fichero se mueve. Ahora se derivan del texto, con
+   `scripts/reapuntar-rangos-stryker.mjs`.
+
+Todas son la misma falta: **una puerta que mide algo que se parece a lo que
+quería medir**.
+
+---
 
 ## Cuadro de puertas — 10 de septiembre, 16:30
 

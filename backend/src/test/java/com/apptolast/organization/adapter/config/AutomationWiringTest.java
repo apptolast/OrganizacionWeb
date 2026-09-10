@@ -119,6 +119,30 @@ class AutomationWiringTest {
         .containsExactlyInAnyOrderElementsOf(before);
   }
 
+  /**
+   * @s4 row 2: a completed project of the owner is a valid target at save time. The contract draws
+   *     the line here between «save-time error» and «deterministic run failure»: the rule is stored
+   *     and the run later fails with PROJECT_COMPLETED (@s21), so refusing it at 201 would move the
+   *     failure to the wrong side. The only production that decides this row is the literal SQL of
+   *     the automationTargets bean, which PIT does not mutate; the helper of this very class
+   *     accepted a status and had never been given anything but "active".
+   */
+  @Test
+  void s4_aCompletedProjectOfTheOwnerIsStillAValidTargetAtSaveTime() {
+    var owner = "wiring-automations-" + UUID.randomUUID();
+    var completed = project(owner, "completed");
+
+    var created = create.create(owner, draft(completed));
+
+    assertThat(created.version()).isEqualTo(1);
+    var stored = read.get(owner, created.id());
+    assertThat(stored).isEqualTo(created);
+    assertThat(stored.draft().action())
+        .isInstanceOf(CreateTaskAction.class)
+        .extracting(action -> ((CreateTaskAction) action).projectId())
+        .isEqualTo(completed);
+  }
+
   @Test
   void s4_s33_theRealBeansRefuseAForeignProjectAndSimulateWithoutWriting() {
     var owner = "wiring-automations-" + UUID.randomUUID();

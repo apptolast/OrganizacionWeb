@@ -591,13 +591,14 @@ describe("automations page", () => {
     ).toEqual(["Cualquiera", "Marketing"]);
   });
 
-  const FAILURES: [string, string][] = [
+  const FAILURES: [string | null, string][] = [
     ["PROJECT_COMPLETED", "proyecto completado"],
     ["TITLE_TOO_LONG", "título demasiado largo"],
     ["CRITERION_TOO_LONG", "criterio demasiado largo"],
     ["ENDPOINT_NOT_FOUND", "endpoint no encontrado"],
     ["TARGET_NOT_FOUND", "destino no encontrado"],
     ["LO_QUE_SEA", "LO_QUE_SEA"],
+    [null, "no falla"],
   ];
 
   it("@s39 explains every failure the simulation can foresee and repeats the code it does not know", async () => {
@@ -626,7 +627,10 @@ describe("automations page", () => {
     await userEvent.click(screen.getByRole("button", { name: "Simular" }));
     await screen.findByRole("status", { name: "Resultado de la simulación" });
     for (const [code, text] of FAILURES)
-      expect(screen.getByText(`Fallaría: ${text}`), code).toBeInTheDocument();
+      if (code !== null)
+        expect(screen.getByText(`Fallaría: ${text}`), code).toBeInTheDocument();
+    // La última coincidencia no falla: no puede aparecer un aviso vacío por ella.
+    expect(screen.getAllByText(/^Fallaría/)).toHaveLength(FAILURES.length - 1);
   });
 
   it("@s38 replaces the four markers with their sample values and lists them verbatim", async () => {
@@ -856,6 +860,257 @@ describe("automations page", () => {
     }
   });
 
+  const held = () => {
+    let release = () => {};
+    const promise = new Promise<void>((resolve) => (release = resolve));
+    return { promise, release: () => release() };
+  };
+
+  it("@s40 says so when the rule could not be saved, and keeps the draft", async () => {
+    listed();
+    route("POST", CREATE, 503, { code: "STORAGE_UNAVAILABLE" });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.type(screen.getByLabelText("Nombre"), "Seguimiento");
+    expect(
+      screen.queryByText("Otra pestaña cambió esta regla"),
+    ).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "No se ha podido guardar. Inténtalo de nuevo.",
+    );
+    expect(
+      screen.queryByText("Otra pestaña cambió esta regla"),
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Nombre")).toHaveValue("Seguimiento");
+    expect(screen.getByRole("button", { name: "Guardar" })).toBeEnabled();
+  });
+
+  it("@s39 says so when the simulation could not be run", async () => {
+    listed();
+    route("POST", "/api/v1/me/automations/simulate", 503, {
+      code: "STORAGE_UNAVAILABLE",
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "No se ha podido simular. Inténtalo de nuevo.",
+    );
+    expect(
+      screen.queryByRole("status", { name: "Resultado de la simulación" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("@s39 pins a field error of the simulation to its control and focuses it", async () => {
+    listed();
+    route("POST", "/api/v1/me/automations/simulate", 400, {
+      code: "INVALID_TEMPLATE",
+      errors: [
+        { field: "action.titleTemplate", code: "UNCLOSED_PLACEHOLDER", m: "x" },
+      ],
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    const title = screen.getByLabelText("Título de la tarea");
+    await waitFor(() => expect(title).toHaveAttribute("aria-invalid", "true"));
+    expect(title).toHaveFocus();
+    expect(
+      document.getElementById(
+        title.getAttribute("aria-describedby")!.split(" ").at(-1)!,
+      ),
+    ).toHaveTextContent("Falta cerrar un marcador con dos llaves.");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("@s40 says so when the current version could not be loaded", async () => {
+    listed({ ...rule, version: 2 });
+    route("PUT", `${CREATE}/${RULE}`, 412, { code: "AUTOMATION_CONFLICT" });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Editar Seguimiento" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await screen.findByText("Otra pestaña cambió esta regla");
+    routes.delete("GET /api/v1/me/automations");
+    route("GET", "/api/v1/me/automations", 503, {
+      code: "STORAGE_UNAVAILABLE",
+    });
+    await userEvent.click(
+      screen.getByRole("button", { name: "Cargar versión actual" }),
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByText("No se ha podido cargar la versión actual."),
+      ).toBeInTheDocument(),
+    );
+    expect(screen.getByLabelText("Nombre")).toHaveValue("Seguimiento");
+  });
+
+  it("@s41 says so when the history could not be loaded", async () => {
+    listed(rule);
+    route("GET", `${CREATE}/${RULE}/runs`, 503, {
+      code: "STORAGE_UNAVAILABLE",
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Historial de Seguimiento" }),
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "No se ha podido cargar el historial.",
+    );
+  });
+
+  it("@s37 keeps offering the retry when the second read fails too", async () => {
+    route("GET", "/api/v1/me/automations", 503, { code: "X" });
+    route("GET", "/api/v1/me/automations", 503, { code: "X" });
+    listed(rule);
+    render(<Automations owner="owner" />);
+    await screen.findByRole("alert");
+    await userEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Reintentar" }),
+      ).toBeInTheDocument(),
+    );
+    expect(
+      screen.getByText("No se han podido cargar tus automatizaciones."),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+    expect(await screen.findByText("Seguimiento")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/todavía no tienes ninguna regla/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("@s43 drops a save that another write superseded, without announcing anything", async () => {
+    listed();
+    const save = held();
+    route("POST", CREATE, 201, rule, save.promise);
+    route("POST", "/api/v1/me/automations/simulate", 200, {
+      evaluatedEvents: 3,
+      matches: [],
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.type(screen.getByLabelText("Nombre"), "Seguimiento");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(sent("POST", CREATE)).toHaveLength(1));
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    await screen.findByRole("status", { name: "Resultado de la simulación" });
+    save.release();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Nombre")).toHaveValue("Seguimiento");
+    expect(screen.queryByRole("list", { name: "Reglas" })).not.toBeInTheDocument();
+  });
+
+  it("@s43 drops a simulation that a save superseded, without announcing anything", async () => {
+    listed();
+    const simulation = held();
+    route(
+      "POST",
+      "/api/v1/me/automations/simulate",
+      200,
+      { evaluatedEvents: 3, matches: [] },
+      simulation.promise,
+    );
+    route("POST", CREATE, 201, rule);
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.type(screen.getByLabelText("Nombre"), "Seguimiento");
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    await waitFor(() =>
+      expect(sent("POST", "/api/v1/me/automations/simulate")).toHaveLength(1),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await screen.findByRole("list", { name: "Reglas" });
+    simulation.release();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("status", { name: "Resultado de la simulación" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("@s43 drops a switch answer that another write superseded, without announcing anything", async () => {
+    listed({ ...rule, version: 2 });
+    const flip = held();
+    route(
+      "PUT",
+      `${CREATE}/${RULE}`,
+      200,
+      { ...rule, version: 3, enabled: false },
+      flip.promise,
+    );
+    route("POST", "/api/v1/me/automations/simulate", 200, {
+      evaluatedEvents: 3,
+      matches: [],
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Editar Seguimiento" }),
+    );
+    await userEvent.click(screen.getByRole("switch", { name: /seguimiento/i }));
+    await waitFor(() => expect(sent("PUT", `${CREATE}/${RULE}`)).toHaveLength(1));
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    await screen.findByRole("status", { name: "Resultado de la simulación" });
+    flip.release();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByText("Activa")).toBeInTheDocument();
+  });
+
+  it("@s40 marks the state of each switch with a class besides the text", async () => {
+    listed(rule, disabled);
+    render(<Automations owner="owner" />);
+    const switches = await screen.findAllByRole("switch");
+    expect(switches[0]).toHaveClass("is-active");
+    expect(switches[1]).toHaveClass("is-inactive");
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Automatizaciones" }),
+    ).toHaveAttribute("tabindex", "-1");
+  });
+
+  it("@s40 blocks the second switch while the first one is still in the air", async () => {
+    listed({ ...rule, version: 2 }, disabled);
+    const flip = held();
+    route(
+      "PUT",
+      `${CREATE}/${RULE}`,
+      200,
+      { ...rule, version: 3, enabled: false },
+      flip.promise,
+    );
+    route("PUT", `${CREATE}/${OTHER_RULE}`, 200, { ...disabled, enabled: true });
+    render(<Automations owner="owner" />);
+    const first = await screen.findByRole("switch", { name: /seguimiento/i });
+    const second = screen.getByRole("switch", { name: /pausada/i });
+    await userEvent.click(first);
+    await waitFor(() => expect(first).toBeDisabled());
+    expect(second).toBeEnabled();
+    await userEvent.click(second);
+    expect(sent("PUT", `${CREATE}/${OTHER_RULE}`)).toHaveLength(0);
+    flip.release();
+    await waitFor(() => expect(first).toBeEnabled());
+    expect(screen.getAllByText("Inactiva")).toHaveLength(2);
+    expect(screen.queryByText("Activa")).not.toBeInTheDocument();
+  });
+
   const ENDPOINT = "88888888-8888-4888-8888-888888888888";
   const webhookRule: Automation = {
     ...rule,
@@ -974,6 +1229,12 @@ describe("automations page", () => {
     );
     release();
     await screen.findByRole("list", { name: "Ejecuciones" });
+    expect(screen.getByTestId("automation-history-title")).toHaveTextContent(
+      "Pausada",
+    );
+    // La respuesta tardía de la primera regla no anuncia nada ni recupera el sitio.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(screen.getByTestId("automation-history-title")).toHaveTextContent(
       "Pausada",
     );

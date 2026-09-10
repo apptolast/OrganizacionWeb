@@ -267,3 +267,52 @@ componer la acción de devolverla tal cual.
 **Previsión (no medida): 10 mutantes verificados, los 10 MUEREN.** Previsión
 razonada del racimo, contando las ramas de `editingOf` sin cobertura que quedan
 ejercidas: **30 a 40**.
+
+---
+
+## Racimo 6 — los cinco avisos de error y las guardas de respuesta tardía
+
+**Causa común.** De los cinco caminos de error de la vista, **cuatro no se habían
+ejercido jamás**: el guardado que falla, la simulación que falla, la recarga de la
+versión actual que falla y el historial que falla. Los cuatro `setNotice` eran
+mutantes **sin cobertura**, y con ellos se iban los `catch` enteros y sus guardas.
+
+La otra mitad del racimo son las guardas de @s43. Con tres escrituras compartiendo
+un único `writeRequest`, cualquiera cancela a la anterior; la guarda
+`X.current !== controller` del `catch` es lo que impide que la cancelada anuncie un
+error que el propietario no ha provocado. Nadie la comprobaba.
+
+**Oráculos que faltaban.** Once pruebas nuevas y una reforzada:
+
+- `@s40 says so when the rule could not be saved, and keeps the draft` — y que **no**
+  se confunda con el conflicto de versión: si la rama del 412 se abriera para
+  cualquier error, saldría «Otra pestaña cambió esta regla» ante un 503.
+- `@s39 says so when the simulation could not be run`.
+- `@s39 pins a field error of the simulation to its control and focuses it` — la
+  simulación también devuelve errores por campo (@s38) y ese camino estaba muerto.
+- `@s40 says so when the current version could not be loaded`.
+- `@s41 says so when the history could not be loaded`.
+- `@s37 keeps offering the retry when the second read fails too` — y de paso fija
+  que el estado de carga y el estado vacío no conviven con el error.
+- `@s43 drops a save that another write superseded, without announcing anything`.
+- `@s43 drops a simulation that a save superseded, without announcing anything`.
+- `@s43 drops a switch answer that another write superseded, without announcing anything`.
+- `@s40 marks the state of each switch with a class besides the text` — el contrato
+  de @s37 pide el texto **además del color**; el color no se comprobaba.
+- `@s40 blocks the second switch while the first one is still in the air` — el
+  interruptor en vuelo queda deshabilitado y el de otra regla no lanza una segunda
+  escritura.
+- Reforzada `@s43 drops the history of the rule the owner just left`: esperaba a que
+  la respuesta tardía llegara **antes** de mirar, y ahora exige que no anuncie nada.
+
+**Previsión (no medida): 26 mutantes verificados, los 26 MUEREN.** Previsión
+razonada del racimo, con hermanos: **35 a 45**.
+
+**Anotado y no perseguido (fuera de encargo).** Las tres escrituras (`save`,
+`simulate`, `toggle`) comparten un solo `writeRequest`, de modo que empezar una
+cancela la anterior **en silencio**: pulsar «Simular» con un guardado en vuelo lo
+aborta, y como el `finally` está guardado por `writeRequest.current === controller`,
+`saving` se queda a `true` y **«Guardar» no vuelve a habilitarse nunca**. Lo mismo
+con `busyToggle` y el interruptor. No es un hueco de oráculo sino un diseño a
+revisar (un `AbortController` por operación), y cambiarlo aquí sería refactorizar
+de paso.

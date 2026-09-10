@@ -991,6 +991,211 @@ export async function deleteAutomation(`,
   ],
   [
     VIEW,
+    "R6 198 catch de fetchRules -> {}",
+    `    } catch {
+      if (!mounted.current || live.current !== controller) return;
+      setFailed(true);
+    }`,
+    `    } catch {
+    }`,
+  ],
+  [
+    VIEW,
+    "R6 200 setFailed(true) -> false",
+    `      setFailed(true);
+    }
+  }, []);`,
+    `      setFailed(false);
+    }
+  }, []);`,
+  ],
+  [
+    VIEW,
+    "R6 275 guarda del catch de save -> false",
+    `    } catch (error) {
+      if (!mounted.current || writeRequest.current !== controller) return;
+      if (error instanceof AutomationFieldErrors) {
+        invalid.current = controlIdOf(Object.keys(error.fields)[0]);
+        setFields(error.fields);
+      } else if (error instanceof AutomationConflict) setConflict(true);`,
+    `    } catch (error) {
+      if (false) return;
+      if (error instanceof AutomationFieldErrors) {
+        invalid.current = controlIdOf(Object.keys(error.fields)[0]);
+        setFields(error.fields);
+      } else if (error instanceof AutomationConflict) setConflict(true);`,
+  ],
+  [
+    VIEW,
+    "R6 279 instanceof AutomationConflict -> true",
+    `      } else if (error instanceof AutomationConflict) setConflict(true);`,
+    `      } else if (true) setConflict(true);`,
+  ],
+  [
+    VIEW,
+    "R6 280 aviso de guardado -> ''",
+    `      else setNotice("No se ha podido guardar. Inténtalo de nuevo.");`,
+    `      else setNotice("");`,
+  ],
+  [
+    VIEW,
+    "R6 302 guarda del catch de simulate -> false",
+    `      if (!mounted.current || writeRequest.current !== controller) return;
+      if (error instanceof AutomationFieldErrors) {
+        invalid.current = controlIdOf(Object.keys(error.fields)[0]);
+        setFields(error.fields);
+      } else setNotice("No se ha podido simular. Inténtalo de nuevo.");`,
+    `      if (false) return;
+      if (error instanceof AutomationFieldErrors) {
+        invalid.current = controlIdOf(Object.keys(error.fields)[0]);
+        setFields(error.fields);
+      } else setNotice("No se ha podido simular. Inténtalo de nuevo.");`,
+  ],
+  [
+    VIEW,
+    "R6 303 instanceof en simulate -> false",
+    `      if (error instanceof AutomationFieldErrors) {
+        invalid.current = controlIdOf(Object.keys(error.fields)[0]);
+        setFields(error.fields);
+      } else setNotice("No se ha podido simular. Inténtalo de nuevo.");`,
+    `      if (false) {
+        invalid.current = controlIdOf(Object.keys(error.fields)[0]);
+        setFields(error.fields);
+      } else setNotice("No se ha podido simular. Inténtalo de nuevo.");`,
+  ],
+  [
+    VIEW,
+    "R6 305 setFields en simulate -> ;",
+    `        setFields(error.fields);
+      } else setNotice("No se ha podido simular. Inténtalo de nuevo.");`,
+    `        ;
+      } else setNotice("No se ha podido simular. Inténtalo de nuevo.");`,
+  ],
+  [
+    VIEW,
+    "R6 306 aviso de simulación -> ''",
+    `      } else setNotice("No se ha podido simular. Inténtalo de nuevo.");`,
+    `      } else setNotice("");`,
+  ],
+  [
+    VIEW,
+    "R6 311 guarda de busyToggle -> false",
+    `    if (busyToggle) return;`,
+    `    if (false) return;`,
+  ],
+  [
+    VIEW,
+    "R6 321 enabled invertido -> sin invertir",
+    `        { ...toDraft(rule), enabled: !rule.enabled },`,
+    `        { ...toDraft(rule), enabled: rule.enabled },`,
+  ],
+  [
+    VIEW,
+    "R6 329 guarda del catch de toggle -> false",
+    `      if (!mounted.current || writeRequest.current !== controller) return;
+      setNotice("No se ha podido cambiar el estado de la regla.");`,
+    `      if (false) return;
+      setNotice("No se ha podido cambiar el estado de la regla.");`,
+  ],
+  [
+    VIEW,
+    "R6 350 catch de reloadEditing -> {}",
+    `    } catch {
+      if (!mounted.current || live.current !== controller) return;
+      setNotice("No se ha podido cargar la versión actual.");
+    }`,
+    `    } catch {
+    }`,
+  ],
+  [
+    VIEW,
+    "R6 352 aviso de versión actual -> ''",
+    `      setNotice("No se ha podido cargar la versión actual.");`,
+    `      setNotice("");`,
+  ],
+  [
+    VIEW,
+    "R6 372 catch de openHistory -> {}",
+    `    } catch {
+      if (!mounted.current || runsRequest.current !== controller) return;
+      setNotice("No se ha podido cargar el historial.");
+    }`,
+    `    } catch {
+    }`,
+  ],
+  [
+    VIEW,
+    "R6 373 guarda del catch de openHistory -> false",
+    `      if (!mounted.current || runsRequest.current !== controller) return;
+      setNotice("No se ha podido cargar el historial.");`,
+    `      if (false) return;
+      setNotice("No se ha podido cargar el historial.");`,
+  ],
+  [
+    VIEW,
+    "R6 374 aviso de historial -> ''",
+    `      setNotice("No se ha podido cargar el historial.");`,
+    `      setNotice("");`,
+  ],
+  [
+    VIEW,
+    "R6 380 tabIndex del encabezado -> +1",
+    `      <h1 ref={heading} tabIndex={-1}>`,
+    `      <h1 ref={heading} tabIndex={+1}>`,
+  ],
+  [
+    VIEW,
+    "R6 384 estado de carga -> true",
+    `      {rules === null && !failed && (`,
+    `      {true && (`,
+  ],
+  [
+    VIEW,
+    "R6 384 estado de carga LogicalOperator",
+    `      {rules === null && !failed && (`,
+    `      {(rules === null || !failed) && (`,
+  ],
+  [
+    VIEW,
+    "R6 395 estado vacío -> true",
+    `      {rules !== null && rules.length === 0 && (`,
+    `      {true && (`,
+  ],
+  [
+    VIEW,
+    "R6 424 clase del interruptor activo -> ''",
+    `                  className={rule.enabled ? "is-active" : "is-inactive"}`,
+    `                  className={rule.enabled ? "" : "is-inactive"}`,
+  ],
+  [
+    VIEW,
+    "R6 424 clase del interruptor inactivo -> ''",
+    `                  className={rule.enabled ? "is-active" : "is-inactive"}`,
+    `                  className={rule.enabled ? "is-active" : ""}`,
+  ],
+  [
+    VIEW,
+    "R6 427 interruptor deshabilitado -> false",
+    `                  disabled={busyToggle === rule.id}`,
+    `                  disabled={false}`,
+  ],
+  [
+    VIEW,
+    "R6 549 aviso de fallo -> true",
+    `                    {match.preview.type === "CREATE_TASK" &&
+                      match.preview.wouldFail && (`,
+    `                    {true && (`,
+  ],
+  [
+    VIEW,
+    "R6 549 aviso de fallo LogicalOperator",
+    `                    {match.preview.type === "CREATE_TASK" &&
+                      match.preview.wouldFail && (`,
+    `                    {(match.preview.type === "CREATE_TASK" ||
+                      match.preview.wouldFail) && (`,
+  ],
+  [
+    VIEW,
     "490 opciones de proyecto -> undefined",
     `            {projects.map((project) => (
               <option key={project.id} value={project.id}>

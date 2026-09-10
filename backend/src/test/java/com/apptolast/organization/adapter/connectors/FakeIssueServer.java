@@ -28,6 +28,9 @@ final class FakeIssueServer implements AutoCloseable {
   private final List<Received> received = new CopyOnWriteArrayList<>();
   private final Map<String, Reply> replies = new LinkedHashMap<>();
   private volatile long bodyDelayMillis;
+  private final java.util.concurrent.CountDownLatch bodyHold =
+      new java.util.concurrent.CountDownLatch(1);
+  private volatile boolean holdsBody;
 
   record Reply(int status, String body, Map<String, String> headers) {
     static Reply ok(String body) {
@@ -57,6 +60,15 @@ final class FakeIssueServer implements AutoCloseable {
     bodyDelayMillis = millis;
   }
 
+  /**
+   * El proveedor que abre el cuerpo y se calla: manda las cabeceras y no emite ni cierra nunca. Un
+   * techo de tamaño no rescata de éste —no llega ni un byte que contar—, sólo un plazo de lectura.
+   * El cerrojo se suelta en {@link #close()}, para no dejar el hilo colgado al terminar la prueba.
+   */
+  void holdBody() {
+    holdsBody = true;
+  }
+
   List<Received> received() {
     return List.copyOf(received);
   }
@@ -75,6 +87,17 @@ final class FakeIssueServer implements AutoCloseable {
     reply.headers().forEach((name, value) -> exchange.getResponseHeaders().add(name, value));
     exchange.getResponseHeaders().add("Content-Type", "application/json");
     var body = reply.body().getBytes(StandardCharsets.UTF_8);
+    if (holdsBody) {
+      exchange.sendResponseHeaders(reply.status(), 0);
+      exchange.getResponseBody().flush();
+      try {
+        bodyHold.await();
+      } catch (InterruptedException error) {
+        Thread.currentThread().interrupt();
+      }
+      exchange.close();
+      return;
+    }
     if (bodyDelayMillis > 0) {
       exchange.sendResponseHeaders(reply.status(), 0);
       try {
@@ -112,6 +135,7 @@ final class FakeIssueServer implements AutoCloseable {
 
   @Override
   public void close() {
+    bodyHold.countDown();
     server.stop(0);
   }
 }

@@ -25,6 +25,10 @@ import java.util.Optional;
  * <p>No sigue redirecciones: seguir una llevaría el PAT del usuario a un destino que elige GitLab.
  * El token viaja únicamente en la cabecera {@code PRIVATE-TOKEN}, nunca en la URL ni en el cuerpo.
  * Los plazos son cortos y explícitos, porque importar es interactivo y quien espera es una persona.
+ *
+ * <p>El cuerpo se lee acotado, por {@link BoundedResponse}: la base de la API es configuración del
+ * servidor y admite instancias autoalojadas, así que el tamaño de la respuesta lo decide alguien
+ * que no somos nosotros. Ver el {@code @s25}, fila «200 con cuerpo JSON de más de 5 MiB».
  */
 public final class HttpGitlabIssueSource implements IssueSource, GitlabProjectDirectory {
   private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(2);
@@ -114,7 +118,7 @@ public final class HttpGitlabIssueSource implements IssueSource, GitlabProjectDi
     return value.textValue();
   }
 
-  private HttpResponse<String> get(String url, String token) {
+  private BoundedResponse get(String url, String token) {
     var request =
         HttpRequest.newBuilder(URI.create(url))
             .GET()
@@ -123,9 +127,14 @@ public final class HttpGitlabIssueSource implements IssueSource, GitlabProjectDi
             .header("Accept", "application/json")
             .header("User-Agent", "OrganizationWeb")
             .build();
-    HttpResponse<String> response;
+    // El plazo se cuenta desde antes de conectar: cubre el intercambio entero —conexión, cabeceras
+    // y cuerpo—, que es lo que `BodyHandlers.ofString()` daba gratis y `ofInputStream()` no.
+    long deadline = System.nanoTime() + REQUEST_TIMEOUT.toNanos();
+    BoundedResponse response;
     try {
-      response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      response =
+          BoundedResponse.read(
+              client.send(request, HttpResponse.BodyHandlers.ofInputStream()), deadline);
     } catch (InterruptedException error) {
       Thread.currentThread().interrupt();
       throw IssueSourceException.unavailable();
@@ -133,11 +142,11 @@ public final class HttpGitlabIssueSource implements IssueSource, GitlabProjectDi
       // El mensaje de la excepción de red puede llevar la URL, nunca la cabecera con el token.
       throw IssueSourceException.unavailable();
     }
-    if (response.statusCode() != 200) throw classify(response);
+    if (response.status() != 200) throw classify(response);
     return response;
   }
 
-  private JsonNode body(HttpResponse<String> response) {
+  private JsonNode body(BoundedResponse response) {
     try {
       return json.readTree(response.body());
     } catch (com.fasterxml.jackson.core.JsonProcessingException error) {
@@ -150,8 +159,8 @@ public final class HttpGitlabIssueSource implements IssueSource, GitlabProjectDi
    * producto son lo mismo, una conexión que hay que rehacer. El 404 se distingue porque describe el
    * proyecto y no la credencial, aunque acabe en el mismo código de la API.
    */
-  private IssueSourceException classify(HttpResponse<String> response) {
-    int status = response.statusCode();
+  private IssueSourceException classify(BoundedResponse response) {
+    int status = response.status();
     if (status == 401 || status == 403)
       return IssueSourceException.tokenRejected().answeredWith(status);
     if (status == 429) return IssueSourceException.rateLimited(retryAfter(response));
@@ -160,11 +169,11 @@ public final class HttpGitlabIssueSource implements IssueSource, GitlabProjectDi
   }
 
   /** Una respuesta correcta con la cuota a cero es una negativa disfrazada de éxito. */
-  private static boolean quotaExhausted(HttpResponse<String> response) {
+  private static boolean quotaExhausted(BoundedResponse response) {
     return header(response, "ratelimit-remaining").map("0"::equals).orElse(false);
   }
 
-  private int retryAfter(HttpResponse<String> response) {
+  private int retryAfter(BoundedResponse response) {
     var explicit = seconds(response, "retry-after");
     if (explicit.isPresent()) return atLeastOneSecond(explicit.get());
     var reset = seconds(response, "ratelimit-reset");
@@ -178,7 +187,7 @@ public final class HttpGitlabIssueSource implements IssueSource, GitlabProjectDi
         : (int) Math.min(seconds, Integer.MAX_VALUE);
   }
 
-  private static Optional<Long> seconds(HttpResponse<String> response, String name) {
+  private static Optional<Long> seconds(BoundedResponse response, String name) {
     return header(response, name)
         .flatMap(
             value -> {
@@ -190,12 +199,12 @@ public final class HttpGitlabIssueSource implements IssueSource, GitlabProjectDi
             });
   }
 
-  private static Optional<String> header(HttpResponse<String> response, String name) {
-    return response.headers().firstValue(name);
+  private static Optional<String> header(BoundedResponse response, String name) {
+    return response.header(name);
   }
 
   /** GitLab anuncia la página siguiente en {@code X-Next-Page}, vacía cuando no hay más. */
-  private static boolean announcesNextPage(HttpResponse<String> response) {
+  private static boolean announcesNextPage(BoundedResponse response) {
     return header(response, "x-next-page").map(value -> !value.isBlank()).orElse(false);
   }
 }

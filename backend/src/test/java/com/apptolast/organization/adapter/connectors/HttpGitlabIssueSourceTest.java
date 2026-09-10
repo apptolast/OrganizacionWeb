@@ -9,9 +9,11 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -24,6 +26,13 @@ class HttpGitlabIssueSourceTest {
   private static final String PROJECT_PATH = "grupo/sub/proyecto";
   private static final String REFERENCE = "4821";
   private static final Instant NOW = Instant.parse("2026-09-09T12:00:00Z");
+
+  /**
+   * El techo que fija el contrato (@s25, fila «200 con cuerpo JSON de más de 5 MiB»). Se escribe
+   * aquí y no se importa de producción a propósito: si alguien sube la constante del adaptador,
+   * estas dos pruebas tienen que enterarse en vez de seguirla.
+   */
+  private static final int FIVE_MEBIBYTES = 5 * 1024 * 1024;
 
   private FakeIssueServer gitlab;
   private HttpGitlabIssueSource source;
@@ -234,6 +243,60 @@ class HttpGitlabIssueSourceTest {
 
     assertThat(reasonOf(() -> source.list(REFERENCE, TOKEN, 1)))
         .isEqualTo(IssueSourceException.Reason.UNAVAILABLE);
+  }
+
+  /**
+   * @s25, fila «200 con cuerpo JSON de más de 5 MiB». El cuerpo es una issue válida y bien formada:
+   *     lo que el adaptador tiene que rechazar es el <em>tamaño</em>, no la forma. Sin techo el
+   *     adaptador la importaría tan campante, después de haberla cargado entera en memoria, y con
+   *     un {@code api-base} autoalojado —que el contrato permite— eso agota el proceso.
+   */
+  @Test
+  void s25_abodyOverFiveMebibytesIsUnavailableInsteadOfEatingTheMemory() {
+    issuesReply(FakeIssueServer.Reply.ok(issueArrayOfExactly(FIVE_MEBIBYTES + 1)));
+
+    assertThat(reasonOf(() -> source.list(REFERENCE, TOKEN, 1)))
+        .isEqualTo(IssueSourceException.Reason.UNAVAILABLE);
+  }
+
+  /** La otra mitad del techo: justo en el límite todavía se importa, o el corte sería otro. */
+  @Test
+  void s25_abodyOfExactlyFiveMebibytesStillImports() {
+    issuesReply(FakeIssueServer.Reply.ok(issueArrayOfExactly(FIVE_MEBIBYTES)));
+
+    assertThat(source.list(REFERENCE, TOKEN, 1).issues()).hasSize(1);
+  }
+
+  /**
+   * @s25, fila «sin respuesta dentro del tiempo de lectura», la mitad que el techo de tamaño no
+   *     cubre: un proveedor que manda las cabeceras y luego <em>no emite ni cierra</em> no ofrece
+   *     ni un byte que contar, así que sólo un plazo lo corta. El plazo del cliente HTTP no vale,
+   *     porque con {@code ofInputStream()} se cancela en cuanto llegan las cabeceras.
+   *     <p>El oráculo es el {@code @Timeout} en hilo aparte: sin plazo de lectura la llamada no
+   *     termina nunca y esto falla por vencimiento, en vez de colgar la suite. La prueba hermana de
+   *     {@code delayBody} <b>no</b> sirve para esto: allí el proveedor acaba cerrando y el cuerpo
+   *     vacío ya no es un array, de modo que da UNAVAILABLE aunque no haya plazo ninguno.
+   */
+  @Test
+  @Timeout(value = 20, unit = TimeUnit.SECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+  void s25_aproviderThatOpensTheBodyAndGoesSilentIsCutByTheReadDeadline() {
+    issuesReply(FakeIssueServer.Reply.ok("[" + gitlabIssue(9001) + "]"));
+    gitlab.holdBody();
+
+    assertThat(reasonOf(() -> source.list(REFERENCE, TOKEN, 1)))
+        .isEqualTo(IssueSourceException.Reason.UNAVAILABLE);
+  }
+
+  /**
+   * Array JSON de una sola issue válida cuyo tamaño en bytes es exactamente el pedido. Todo el
+   * relleno va en la descripción, y todo es ASCII, así que un carácter es un byte.
+   */
+  private static String issueArrayOfExactly(int bytes) {
+    var head =
+        "[{\"id\":9001,\"title\":\"Issue 9001\",\"issue_type\":\"issue\",\"web_url\":"
+            + "\"https://gitlab.example.com/grupo/proyecto/-/issues/9001\",\"description\":\"";
+    var tail = "\"}]";
+    return head + "x".repeat(bytes - head.length() - tail.length()) + tail;
   }
 
   private static IssueSourceException.Reason reasonOf(Runnable work) {

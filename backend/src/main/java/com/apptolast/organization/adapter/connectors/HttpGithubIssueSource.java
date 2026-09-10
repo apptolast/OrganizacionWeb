@@ -24,6 +24,11 @@ import java.util.List;
  * <p>No sigue redirecciones: seguir una llevaría el PAT del usuario a un destino que GitHub elige.
  * Los plazos son cortos y explícitos, porque importar es una operación interactiva y quien espera
  * es una persona delante de la pantalla.
+ *
+ * <p>El cuerpo se lee acotado, por {@link BoundedResponse}, igual que en el gemelo de GitLab: la
+ * base de la API es configuración del servidor y admite instancias propias, así que el tamaño de la
+ * respuesta lo decide alguien que no somos nosotros. El techo lo fija el {@code @s25} de {@code
+ * features/additional_connectors.feature}, que gobierna a los dos adaptadores.
  */
 public final class HttpGithubIssueSource implements IssueSource, GithubRepositoryDirectory {
   private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(2);
@@ -86,7 +91,7 @@ public final class HttpGithubIssueSource implements IssueSource, GithubRepositor
     return value.textValue();
   }
 
-  private HttpResponse<String> get(String url, String token) {
+  private BoundedResponse get(String url, String token) {
     var request =
         HttpRequest.newBuilder(URI.create(url))
             .GET()
@@ -96,9 +101,14 @@ public final class HttpGithubIssueSource implements IssueSource, GithubRepositor
             .header("X-GitHub-Api-Version", "2022-11-28")
             .header("User-Agent", "OrganizationWeb")
             .build();
-    HttpResponse<String> response;
+    // El plazo se cuenta desde antes de conectar: cubre el intercambio entero —conexión, cabeceras
+    // y cuerpo—, que es lo que `BodyHandlers.ofString()` daba gratis y `ofInputStream()` no.
+    long deadline = System.nanoTime() + REQUEST_TIMEOUT.toNanos();
+    BoundedResponse response;
     try {
-      response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      response =
+          BoundedResponse.read(
+              client.send(request, HttpResponse.BodyHandlers.ofInputStream()), deadline);
     } catch (InterruptedException error) {
       Thread.currentThread().interrupt();
       throw IssueSourceException.unavailable();
@@ -106,11 +116,11 @@ public final class HttpGithubIssueSource implements IssueSource, GithubRepositor
       // El mensaje de la excepción de red puede llevar la URL, nunca la cabecera con el token.
       throw IssueSourceException.unavailable();
     }
-    if (response.statusCode() != 200) throw classify(response);
+    if (response.status() != 200) throw classify(response);
     return response;
   }
 
-  private JsonNode body(HttpResponse<String> response) {
+  private JsonNode body(BoundedResponse response) {
     try {
       return json.readTree(response.body());
     } catch (com.fasterxml.jackson.core.JsonProcessingException error) {
@@ -122,8 +132,8 @@ public final class HttpGithubIssueSource implements IssueSource, GithubRepositor
    * Un 403 es cuota agotada cuando GitHub lo dice —sin peticiones restantes o con un plazo de
    * reintento—, y en cualquier otro caso significa que el repositorio no está a nuestro alcance.
    */
-  private IssueSourceException classify(HttpResponse<String> response) {
-    int status = response.statusCode();
+  private IssueSourceException classify(BoundedResponse response) {
+    int status = response.status();
     if (status == 401) return IssueSourceException.tokenRejected();
     if (status == 429) return IssueSourceException.rateLimited(retryAfter(response));
     if (status == 403)
@@ -135,13 +145,13 @@ public final class HttpGithubIssueSource implements IssueSource, GithubRepositor
     return IssueSourceException.unavailable().answeredWith(status);
   }
 
-  private static boolean exhaustedQuota(HttpResponse<String> response) {
+  private static boolean exhaustedQuota(BoundedResponse response) {
     return header(response, "x-ratelimit-remaining").map("0"::equals).orElse(false)
         || header(response, "retry-after").isPresent();
   }
 
   /** Retry-After manda sobre el instante de reinicio; sin ninguno de los dos, un minuto. */
-  private int retryAfter(HttpResponse<String> response) {
+  private int retryAfter(BoundedResponse response) {
     var explicit = seconds(response, "retry-after");
     if (explicit.isPresent()) return atLeastOneSecond(explicit.get());
     var reset = seconds(response, "x-ratelimit-reset");
@@ -155,7 +165,7 @@ public final class HttpGithubIssueSource implements IssueSource, GithubRepositor
         : (int) Math.min(seconds, Integer.MAX_VALUE);
   }
 
-  private static java.util.Optional<Long> seconds(HttpResponse<String> response, String name) {
+  private static java.util.Optional<Long> seconds(BoundedResponse response, String name) {
     return header(response, name)
         .flatMap(
             value -> {
@@ -167,11 +177,11 @@ public final class HttpGithubIssueSource implements IssueSource, GithubRepositor
             });
   }
 
-  private static java.util.Optional<String> header(HttpResponse<String> response, String name) {
-    return response.headers().firstValue(name);
+  private static java.util.Optional<String> header(BoundedResponse response, String name) {
+    return response.header(name);
   }
 
-  private static boolean announcesNextPage(HttpResponse<String> response) {
+  private static boolean announcesNextPage(BoundedResponse response) {
     return header(response, "link").map(value -> value.contains("rel=\"next\"")).orElse(false);
   }
 }

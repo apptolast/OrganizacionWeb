@@ -38,6 +38,7 @@ existía ningún instante en el que afirmar nada.
 2. VERDE: producción restaurada, 15/15 en `src/automations.test.tsx`.
 
 **Cambios (sólo pruebas).**
+
 - `calls` pasa a `{url, method, headers: Headers}[]` y el doble hace
   `new Headers(options.headers)`.
 - `@s40 flips the switch…`: la ruta PUT lleva promesa retenida; antes de
@@ -100,10 +101,10 @@ rama de render) y en `src/workspace.tsx` (el `RouteLink` con su
 **Ciclo.**
 
 1. ROJO: añadida al guardarraíl `automations Stryker configuration mutates only
-   the feature files` de `scripts/project.test.mjs` la lista de seis entradas y
+the feature files` de `scripts/project.test.mjs` la lista de seis entradas y
    la validación por contenido de los cuatro rangos.
    `node --test scripts/project.test.mjs` → `not ok 88 … Expected values to be
-   strictly deep-equal`, con los cuatro rangos ausentes de la configuración.
+strictly deep-equal`, con los cuatro rangos ausentes de la configuración.
 2. VERDE: los cuatro rangos añadidos a la configuración. 94/94.
 
 **Rangos, con la convención de `stryker.ics-calendar.config.json`** (columna
@@ -156,6 +157,7 @@ pasa igual si el replace conserva, borra u orfana el historial.
 
 **Cambios (sólo pruebas), en
 `backend/src/test/java/com/apptolast/organization/adapter/config/AutomationWiringTest.java`:**
+
 - Helper `run(owner, rule)` que inserta una ejecución `succeeded` real.
 - Test nuevo `s12_replacingARuleKeepsItsTwoRecordedRunsReadableAndUnchanged`:
   crea la regla, le inserta 2 ejecuciones, lee el historial, hace el `replace`
@@ -188,16 +190,16 @@ entre las features 25 y 30, no un hueco de oráculo de @s12.
 
 Producción nueva, toda en el carril de automatizaciones:
 
-| Fichero | Qué es |
-| --- | --- |
-| `domain/AutomationCursor.java` | El cursor **de eventos** por propietario, tupla `(occurredAt, eventId)` con `precedes`. No confundir con `AutomationRunCursor`, que pagina el historial de una regla |
-| `application/AutomationCandidate.java` | Una fila del outbox como la ve el worker: evento, `blocked` y **las ejecuciones ya registradas para ella** |
-| `application/AutomationEffect.java` | Sellado: `None`, `CreateTask`, `Notify` |
-| `application/AutomationOutcome.java` | `(AutomationRun run, AutomationEffect effect)` |
-| `application/AutomationCommit.java` | `(owner, reached, outcomes)`: todo lo que produce un evento, para una sola confirmación |
-| `application/AutomationWork.java` | El puerto único: `ownersWithRules`, `cursor`, `startCursor`, `after`, `commit`, `record` |
-| `application/ExecuteAutomations.java` | El motor |
-| `adapter/config/AutomationSchedule.java` + `AutomationConfiguration.java` | El `@Scheduled` condicionado a `app.automations.enabled` |
+| Fichero                                                                   | Qué es                                                                                                                                                               |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `domain/AutomationCursor.java`                                            | El cursor **de eventos** por propietario, tupla `(occurredAt, eventId)` con `precedes`. No confundir con `AutomationRunCursor`, que pagina el historial de una regla |
+| `application/AutomationCandidate.java`                                    | Una fila del outbox como la ve el worker: evento, `blocked` y **las ejecuciones ya registradas para ella**                                                           |
+| `application/AutomationEffect.java`                                       | Sellado: `None`, `CreateTask`, `Notify`                                                                                                                              |
+| `application/AutomationOutcome.java`                                      | `(AutomationRun run, AutomationEffect effect)`                                                                                                                       |
+| `application/AutomationCommit.java`                                       | `(owner, reached, outcomes)`: todo lo que produce un evento, para una sola confirmación                                                                              |
+| `application/AutomationWork.java`                                         | El puerto único: `ownersWithRules`, `cursor`, `startCursor`, `after`, `commit`, `record`                                                                             |
+| `application/ExecuteAutomations.java`                                     | El motor                                                                                                                                                             |
+| `adapter/config/AutomationSchedule.java` + `AutomationConfiguration.java` | El `@Scheduled` condicionado a `app.automations.enabled`                                                                                                             |
 
 **Migraciones: ninguna.** Comprobado antes de empezar: `automation_cursors`
 ya existe desde `V28__automations.sql:35` y `automation_runs` tiene el
@@ -266,7 +268,7 @@ se procesa sin esperar a un segundo ciclo.
 
 Nota de lectura del contrato: «inicializa el cursor **en el presente**» no puede
 significar «en el instante del primer ciclo», porque el Given pone E41
-*antes* del ciclo y el Then exige que se procese. El presente que vale es el de
+_antes_ del ciclo y el Then exige que se procese. El presente que vale es el de
 la creación de la regla. Se implementa en el worker y no en `CreateAutomation`
 para no tocar un caso de uso de otro alcance.
 
@@ -463,21 +465,21 @@ dado por cubierto código que nadie mutaba. Mismo criterio que el hallazgo 10 co
 
 ## Recuento del ejecutor
 
-| Escenario | Dónde se prueba | Estado |
-| --- | --- | --- |
-| @s15 | `ExecuteAutomationsTest` + `AutomationScheduleTest` | **Cerrado** |
-| @s16 | `ExecuteAutomationsTest` | **Cerrado** |
-| @s17 | `ExecuteAutomationsTest` | **Cerrado** |
-| @s19 | `AutomationExecutionTest` (Postgres) + bitácora en `ExecuteAutomationsTest` | **Cerrado** |
-| @s20 | `ExecuteAutomationsTest` | **Cerrado** |
-| @s22 | `ExecuteAutomationsTest`, dos tests | **Cerrado** |
-| @s23 | `AutomationExecutionTest` (dos hilos reales) | **Cerrado** |
-| @s25 | `AutomationExecutionTest` | **Cerrado** |
-| @s26 | `AutomationExecutionTest` | **Cerrado** |
-| @s18 (medio cubierto) | `ExecuteAutomationsTest`, las dos filas | **Cerrado** |
-| @s21 (medio cubierto) | `ExecuteAutomationsTest`, las cinco filas | **Cerrado** |
-| @s24 (medio cubierto) | `ExecuteAutomationsTest`, dos tests | **Cerrado** |
-| @s28, @s29 (agujero abierto por el ejecutor) | `ExecuteAutomationsTest` | **Cerrado** |
+| Escenario                                    | Dónde se prueba                                                             | Estado      |
+| -------------------------------------------- | --------------------------------------------------------------------------- | ----------- |
+| @s15                                         | `ExecuteAutomationsTest` + `AutomationScheduleTest`                         | **Cerrado** |
+| @s16                                         | `ExecuteAutomationsTest`                                                    | **Cerrado** |
+| @s17                                         | `ExecuteAutomationsTest`                                                    | **Cerrado** |
+| @s19                                         | `AutomationExecutionTest` (Postgres) + bitácora en `ExecuteAutomationsTest` | **Cerrado** |
+| @s20                                         | `ExecuteAutomationsTest`                                                    | **Cerrado** |
+| @s22                                         | `ExecuteAutomationsTest`, dos tests                                         | **Cerrado** |
+| @s23                                         | `AutomationExecutionTest` (dos hilos reales)                                | **Cerrado** |
+| @s25                                         | `AutomationExecutionTest`                                                   | **Cerrado** |
+| @s26                                         | `AutomationExecutionTest`                                                   | **Cerrado** |
+| @s18 (medio cubierto)                        | `ExecuteAutomationsTest`, las dos filas                                     | **Cerrado** |
+| @s21 (medio cubierto)                        | `ExecuteAutomationsTest`, las cinco filas                                   | **Cerrado** |
+| @s24 (medio cubierto)                        | `ExecuteAutomationsTest`, dos tests                                         | **Cerrado** |
+| @s28, @s29 (agujero abierto por el ejecutor) | `ExecuteAutomationsTest`                                                    | **Cerrado** |
 
 **Los nueve del inventario: nueve cerrados.** Más los tres medio cubiertos y los
 dos de la guarda contra bucles.
@@ -494,6 +496,7 @@ dos de la guarda contra bucles.
    > la ronda del 10 de septiembre cerraron más. La única que sigue sin medir es
    > la **cláusula temporal** del `@s32` (los 1500 ms), que es pregunta al
    > propietario, no trabajo pendiente de un carril.
+
 2. **La puerta de mutación**, no ejecutada por instrucción del coordinador. El
    ámbito ya está corregido (`60a3a4e` en backend, hallazgo 11 en frontend).
    Umbral 0,80, y hay que registrar la **lista de supervivientes**.
@@ -557,17 +560,17 @@ Existen y están probados: `CreateAutomation`, `ReadAutomations`,
 
 `features/automations.feature`, sección «Ejecución».
 
-| Esc. | Línea | Qué exige, en una frase | Qué haría falta |
-| --- | --- | --- | --- |
-| @s15 | 213 | Con `app.automations.enabled` ausente no se lee ni se escribe nada; al habilitarlo el ciclo procesa E1 y E2 desde el cursor en E0 y lo deja en E2 | La propiedad y su bean condicional; el puerto de cursor; el ciclo. Oráculo: cero filas y cursor intacto antes; 2 ejecuciones `succeeded`, 2 tareas y cursor en E2 después |
-| @s16 | 222 | La primera regla inicializa el cursor **en el presente**: 40 eventos anteriores no se procesan, sólo E41 | Inicialización del cursor al crear la primera regla (o al primer ciclo sin cursor). Oráculo: exactamente 1 ejecución y 1 tarea, ninguna referencia a los 40, cursor en E41 |
-| @s17 | 231 | Orden `(occurred_at, event_id)`; se omiten los `blocked` y los commits tardíos anteriores al cursor | Lectura por tupla con horizonte de gracia (el patrón de `EnqueueWebhookDeliveries.GRACE`, 5 s). Oráculo: `executedAt` no decreciente en E1, E2, E4; `createdAt` de las 3 tareas en ese orden; sin ejecución para E3 ni T; cursor en E4 |
-| @s19 | 256 | `CREATE_TASK` crea la tarea **por el caso de uso existente**, con su `TaskCreated.v1` en la outbox, todo en **una sola transacción** | El caso de uso de ejecución más un puerto transaccional que confirme ejecución + tarea + evento + cursor juntos. Oráculo: 1 tarea raíz con `completionCriterion ""` y `estimatedMinutes null`, 1 `TaskCreated.v1` con `aggregateId P` y `payload.taskId`, la fila de ejecución exacta, cursor en el evento, y el log con `ruleId/eventId/outcome/attempt/code` **sin** título ni nombre de proyecto |
-| @s20 | 268 | Un fallo de almacenamiento **revierte** ejecución, tarea y evento y registra `attempt 1 / retry / STORAGE_UNAVAILABLE` | Fallo inducido dentro de la transacción y una escritura de la fila `retry` **fuera** de ella. Oráculo: ni tarea ni evento nuevos; 1 ejecución `retry`; cursor sin avanzar |
-| @s22 | 294 | Los `retry` se reintentan **antes** que los eventos nuevos y el tercer intento queda `failed` | Cola de reintentos por propietario, leída antes que la cola de eventos. Oráculo: E1 con `attempt 3 / failed / STORAGE_UNAVAILABLE`, E1 antes que E2 dentro del ciclo, E2 `succeeded attempt 1`, cursor en E2, y ningún cuarto intento |
-| @s23 | 305 | Dos workers concurrentes ejecutan una regla **como máximo una vez** por evento | Se apoya en `UNIQUE (rule_id, event_id)` de `V28__automations.sql`. Oráculo con dos hilos reales contra Postgres, como `AutomationPersistenceTest.s10_…`: 1 ejecución, 1 tarea, 1 `TaskCreated.v1`, ningún error no controlado |
-| @s25 | 326 | Una caída antes de confirmar deja el cursor atrás y la relectura **no duplica** | Simular la caída abortando la transacción tras crear la tarea. Oráculo: cursor previo en el evento anterior; tras el reinicio, exactamente 1 ejecución, 1 tarea y 1 evento para E |
-| @s26 | 335 | `NOTIFY_WEBHOOK` encola el evento **original sin transformarlo** en las entregas de la feature 25, aunque el endpoint no esté suscrito a ese tipo | Puerto de escritura de entregas sobre la feature 25 (hoy sólo existe `WebhookEndpointLookup`, y devuelve `false`). Oráculo: 1 entrega pendiente con `eventId`, `eventType` y `body` byte a byte iguales a la outbox; ejecución `succeeded` con `deliveryId` y `createdTaskId null`; ningún evento nuevo; entrega y ejecución en la misma confirmación |
+| Esc. | Línea | Qué exige, en una frase                                                                                                                           | Qué haría falta                                                                                                                                                                                                                                                                                                                                                                                     |
+| ---- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| @s15 | 213   | Con `app.automations.enabled` ausente no se lee ni se escribe nada; al habilitarlo el ciclo procesa E1 y E2 desde el cursor en E0 y lo deja en E2 | La propiedad y su bean condicional; el puerto de cursor; el ciclo. Oráculo: cero filas y cursor intacto antes; 2 ejecuciones `succeeded`, 2 tareas y cursor en E2 después                                                                                                                                                                                                                           |
+| @s16 | 222   | La primera regla inicializa el cursor **en el presente**: 40 eventos anteriores no se procesan, sólo E41                                          | Inicialización del cursor al crear la primera regla (o al primer ciclo sin cursor). Oráculo: exactamente 1 ejecución y 1 tarea, ninguna referencia a los 40, cursor en E41                                                                                                                                                                                                                          |
+| @s17 | 231   | Orden `(occurred_at, event_id)`; se omiten los `blocked` y los commits tardíos anteriores al cursor                                               | Lectura por tupla con horizonte de gracia (el patrón de `EnqueueWebhookDeliveries.GRACE`, 5 s). Oráculo: `executedAt` no decreciente en E1, E2, E4; `createdAt` de las 3 tareas en ese orden; sin ejecución para E3 ni T; cursor en E4                                                                                                                                                              |
+| @s19 | 256   | `CREATE_TASK` crea la tarea **por el caso de uso existente**, con su `TaskCreated.v1` en la outbox, todo en **una sola transacción**              | El caso de uso de ejecución más un puerto transaccional que confirme ejecución + tarea + evento + cursor juntos. Oráculo: 1 tarea raíz con `completionCriterion ""` y `estimatedMinutes null`, 1 `TaskCreated.v1` con `aggregateId P` y `payload.taskId`, la fila de ejecución exacta, cursor en el evento, y el log con `ruleId/eventId/outcome/attempt/code` **sin** título ni nombre de proyecto |
+| @s20 | 268   | Un fallo de almacenamiento **revierte** ejecución, tarea y evento y registra `attempt 1 / retry / STORAGE_UNAVAILABLE`                            | Fallo inducido dentro de la transacción y una escritura de la fila `retry` **fuera** de ella. Oráculo: ni tarea ni evento nuevos; 1 ejecución `retry`; cursor sin avanzar                                                                                                                                                                                                                           |
+| @s22 | 294   | Los `retry` se reintentan **antes** que los eventos nuevos y el tercer intento queda `failed`                                                     | Cola de reintentos por propietario, leída antes que la cola de eventos. Oráculo: E1 con `attempt 3 / failed / STORAGE_UNAVAILABLE`, E1 antes que E2 dentro del ciclo, E2 `succeeded attempt 1`, cursor en E2, y ningún cuarto intento                                                                                                                                                               |
+| @s23 | 305   | Dos workers concurrentes ejecutan una regla **como máximo una vez** por evento                                                                    | Se apoya en `UNIQUE (rule_id, event_id)` de `V28__automations.sql`. Oráculo con dos hilos reales contra Postgres, como `AutomationPersistenceTest.s10_…`: 1 ejecución, 1 tarea, 1 `TaskCreated.v1`, ningún error no controlado                                                                                                                                                                      |
+| @s25 | 326   | Una caída antes de confirmar deja el cursor atrás y la relectura **no duplica**                                                                   | Simular la caída abortando la transacción tras crear la tarea. Oráculo: cursor previo en el evento anterior; tras el reinicio, exactamente 1 ejecución, 1 tarea y 1 evento para E                                                                                                                                                                                                                   |
+| @s26 | 335   | `NOTIFY_WEBHOOK` encola el evento **original sin transformarlo** en las entregas de la feature 25, aunque el endpoint no esté suscrito a ese tipo | Puerto de escritura de entregas sobre la feature 25 (hoy sólo existe `WebhookEndpointLookup`, y devuelve `false`). Oráculo: 1 entrega pendiente con `eventId`, `eventType` y `body` byte a byte iguales a la outbox; ejecución `succeeded` con `deliveryId` y `createdTaskId null`; ningún evento nuevo; entrega y ejecución en la misma confirmación                                               |
 
 ## Los tres escenarios cubiertos a medias
 
@@ -755,9 +758,9 @@ filas del Examples de @s42.
    tests de @s42 pasaron a fallar por axe con una violación `color-contrast` de
    impacto **serious** (WCAG 1.4.3):
    `Element has insufficient color contrast of 1.01 (foreground color: #ffffff,
-   background color: #fdfefb, font size: 9.0pt (12px))`, sobre el
+background color: #fdfefb, font size: 9.0pt (12px))`, sobre el
    `role="switch"` de cada regla. No era un falso positivo: `.automations
-   [role="switch"]` fijaba `background: var(--editable)` (casi blanco) pero
+[role="switch"]` fijaba `background: var(--editable)` (casi blanco) pero
    heredaba el `color` blanco del botón de acción, así que el texto
    «Activa»/«Inactiva» era **invisible**. Justo el defecto que el dictamen
    predijo que la auditoría no podía ver, porque ese interruptor nunca se
@@ -767,6 +770,7 @@ filas del Examples de @s42.
    verde en 27,6 s**, incluidos los cuatro anchos con axe.
 
 **Cambios.**
+
 - Producción: `frontend/src/styles.scss`, la tinta del interruptor.
 - `e2e/automations.spec.mjs`: helper `seedRule(...)` que crea reglas por la API
   real (`POST /api/v1/me/automations` con `csrfHeaders`) y `openDenseScreen(...)`
@@ -807,11 +811,11 @@ sembrado en `e2e/automations-ux.spec.mjs` (temas, `forced-colors`,
 - `geometry()` gana el campo **`clipped`**: recorte **por elemento** y en **los
   dos ejes**, portado de `e2e/ics-calendar-ux.spec.mjs:171-185`. Recorre
   `main, main *` y marca cuando `overflowX !== "visible" && scrollWidth >
-  clientWidth + 1` o el equivalente vertical, devolviendo etiqueta, `aria-label`,
+clientWidth + 1` o el equivalente vertical, devolviendo etiqueta, `aria-label`,
   los primeros 60 caracteres de texto y las cuatro medidas, para que el fallo
   sea diagnosticable.
 - `assertUsable()` afirma `expect(observed.clipped, "la pantalla recorta
-  contenido (ancho o alto)").toEqual([])`. Como es el oráculo compartido de las
+contenido (ancho o alto)").toEqual([])`. Como es el oráculo compartido de las
   cuatro pruebas, la cláusula queda cubierta en todas las modalidades de golpe.
 
 ### La excepción, decidida por escrito y no en silencio
@@ -830,7 +834,7 @@ Añadido a `frontend/src/styles.scss`, dentro de `.automations`:
 `li { overflow: hidden; max-height: 96px; }`. Resultado con la pila real:
 
 - **3 de las 4 pruebas fallan** con `Error: la pantalla recorta contenido (ancho
-  o alto)` y el detalle `"clientHeight": 94` frente a `"scrollHeight": 327`,
+o alto)` y el detalle `"clientHeight": 94` frente a `"scrollHeight": 327`,
   `249`, `447` y `800` según el ancho y el tema.
 - El oráculo anterior (`documentElement.scrollWidth <= clientWidth`) **no
   detectaba nada** de eso: el contenido queda recortado, no desbordado.
@@ -854,19 +858,19 @@ el `clipped` por compartir `assertUsable`.
 
 ## Recuento final de la sesión
 
-| Hallazgo | Gravedad | Estado |
-| --- | --- | --- |
-| 1 — no existe el ejecutor de reglas | BLOQUEANTE | **CERRADO el 10 de septiembre**: los nueve escenarios del inventario, más @s18, @s21, @s24, @s28 y @s29. Ver la sección del ejecutor arriba |
-| 2 — el interruptor no ataba el If-Match vivo ni el instante | BLOQUEANTE | Cerrado |
-| 3 — la auditoría alcanzaba 2 de 7 estados | BLOQUEANTE | Cerrado (lista, editor y simulación en las cuatro pruebas) |
-| 4 — el Given de @s42 no se cumplía | BLOQUEANTE | Cerrado; destapó un defecto real de contraste |
-| 5 — @s12, historial tras el PUT | ALTA | Cerrado (salvo la fila `NOTIFY_WEBHOOK`, que depende del cableado de la 25) |
-| 6 — aislamiento por identidad | ALTA | Cerrado |
-| 7 — recorte de contenido sin oráculo | ALTA | Cerrado, con mutación de control acreditada |
-| 8 — recorte sólo horizontal y a nivel de documento | MEDIA | Cerrado, mismo oráculo de dos ejes |
-| 9 — recorrido de teclado y foco visible | ALTA | **ABIERTO**; la matriz UX ya no lo declara verificado |
-| 10 — `ApiErrors` fuera del ámbito PIT | MEDIA | Ya venía cerrado del brief |
-| 11 — ámbito Stryker sin la integración con el armazón | MEDIA | Cerrado |
+| Hallazgo                                                    | Gravedad   | Estado                                                                                                                                      |
+| ----------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 — no existe el ejecutor de reglas                         | BLOQUEANTE | **CERRADO el 10 de septiembre**: los nueve escenarios del inventario, más @s18, @s21, @s24, @s28 y @s29. Ver la sección del ejecutor arriba |
+| 2 — el interruptor no ataba el If-Match vivo ni el instante | BLOQUEANTE | Cerrado                                                                                                                                     |
+| 3 — la auditoría alcanzaba 2 de 7 estados                   | BLOQUEANTE | Cerrado (lista, editor y simulación en las cuatro pruebas)                                                                                  |
+| 4 — el Given de @s42 no se cumplía                          | BLOQUEANTE | Cerrado; destapó un defecto real de contraste                                                                                               |
+| 5 — @s12, historial tras el PUT                             | ALTA       | Cerrado (salvo la fila `NOTIFY_WEBHOOK`, que depende del cableado de la 25)                                                                 |
+| 6 — aislamiento por identidad                               | ALTA       | Cerrado                                                                                                                                     |
+| 7 — recorte de contenido sin oráculo                        | ALTA       | Cerrado, con mutación de control acreditada                                                                                                 |
+| 8 — recorte sólo horizontal y a nivel de documento          | MEDIA      | Cerrado, mismo oráculo de dos ejes                                                                                                          |
+| 9 — recorrido de teclado y foco visible                     | ALTA       | **ABIERTO**; la matriz UX ya no lo declara verificado                                                                                       |
+| 10 — `ApiErrors` fuera del ámbito PIT                       | MEDIA      | Ya venía cerrado del brief                                                                                                                  |
+| 11 — ámbito Stryker sin la integración con el armazón       | MEDIA      | Cerrado                                                                                                                                     |
 
 **Cerrados: 8 (más el 10 que venía dado). Abiertos: 2 — el 1 y el 9.**
 

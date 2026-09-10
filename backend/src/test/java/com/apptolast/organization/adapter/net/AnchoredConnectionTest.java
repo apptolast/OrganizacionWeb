@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.InetAddress;
 import java.net.URI;
+import java.net.http.HttpRequest;
 import java.util.Locale;
 import javax.net.ssl.SNIHostName;
 import org.junit.jupiter.api.Test;
@@ -84,6 +85,33 @@ class AnchoredConnectionTest {
     assertEquals(
         NAME + ":8443",
         AnchoredConnection.authority(URI.create("https://" + NAME + ":8443/x"), NAME));
+  }
+
+  /**
+   * La capacidad de la que depende TODO el anclaje, afirmada al nivel en el que de verdad importa:
+   * no «la propiedad está puesta», sino «este JVM deja poner la cabecera».
+   *
+   * <p>No es lo mismo, y la diferencia costó un defecto real. El cliente del JDK lee la propiedad
+   * <b>una sola vez</b>, al inicializar su clase de utilidades, que ocurre en cuanto alguien
+   * construye la primera petición. Si otro componente lo hace antes de que se cargue esta clase, el
+   * bloque estático llega tarde: la propiedad queda puesta y sin efecto. Entonces cada petición
+   * anclada muere con {@code IllegalArgumentException}, y los adaptadores la convierten en «no
+   * alcanzable» sin decir por qué.
+   *
+   * <p>Medido en `main` (6997f5d), antes de este encargo: `HttpCalendarFeedTest` sola daba verde, y
+   * junto a `HttpGithubIssueSourceTest` —que construye un `HttpClient` en su constructor— caían 20
+   * pruebas con FEED_UNREACHABLE en vez de lo esperado. El arreglo es declarar la propiedad al
+   * arrancar el JVM; el bloque estático se queda como red, no como garantía.
+   */
+  @Test
+  void thisJvmAcceptsTheHostHeaderTheAnchoringDependsOn() {
+    assertDoesNotThrow(
+        () ->
+            HttpRequest.newBuilder(URI.create("https://203.0.113.7/x"))
+                .header("Host", NAME)
+                .GET()
+                .build(),
+        "hace falta -Djdk.httpclient.allowRestrictedHeaders=host al arrancar el JVM");
   }
 
   /**

@@ -311,6 +311,67 @@ afirmación vieja en pie sería exactamente la enfermedad que este encargo cura.
 `adapter.feed.HttpCalendarFeed`». Ya no: vive en `adapter.net.AnchoredConnection`
 y la usan los dos. Una línea.
 
+### Ciclo 5 — el defecto que la verificación final destapó, y que venía de `main`
+
+Al correr por última vez las clases tocadas **en pareja**, como manda REGLAS §1,
+`HttpCalendarFeedTest` se cayó entera: 20 pruebas dando `FEED_UNREACHABLE` donde
+esperaban otra cosa. Sola daba verde. Junto a `HttpGithubIssueSourceTest`, no.
+
+**Comprobado que venía de antes.** Worktree temporal en `main` (`6997f5d`), sin
+nada de este encargo, misma pareja de clases: **las mismas 20 caídas**. No lo
+introduje yo; lo destapé. Es un defecto latente de la feature 28, ya integrada,
+que no se vio porque el carril siempre corrió esa clase sola.
+
+**Causa, medida.** El cliente HTTP del JDK lee
+`jdk.httpclient.allowRestrictedHeaders` **una sola vez**, al inicializar su clase
+de utilidades, y eso ocurre en cuanto alguien construye su primera petición.
+`HttpGithubIssueSource` construye un `HttpClient` en su constructor. Si va
+primero, el bloque estático de `HttpCalendarFeed` llega tarde: la propiedad queda
+puesta y sin efecto, `HttpRequest.header("Host", …)` lanza
+`IllegalArgumentException: restricted header name: "Host"`, y el `catch` del
+adaptador lo convierte en «no alcanzable» sin decir por qué.
+
+**Por qué es mío arreglarlo y no sólo anotarlo (REGLAS §9).** Es el mecanismo del
+anclaje, y con el ciclo 1 los webhooks pasan a depender de él: he ampliado el
+radio del defecto. Y no es sólo de pruebas: **Spring construye los beans en el
+orden que le parece**, así que en producción esto significa que todas las
+entregas y todas las sincronizaciones podían fallar según quién se cargara
+primero.
+
+**ROJO acreditado**, y además deja el diagnóstico escrito en el propio mensaje:
+
+```
+AnchoredConnectionTest > thisJvmAcceptsTheHostHeaderTheAnchoringDependsOn FAILED
+  hace falta -Djdk.httpclient.allowRestrictedHeaders=host al arrancar el JVM
+    ==> Unexpected exception thrown:
+        java.lang.IllegalArgumentException: restricted header name: "Host"
+```
+
+El oráculo afirma la **capacidad**, no la propiedad: no «está puesta» —que era
+verdad y no servía de nada— sino «este JVM deja poner la cabecera».
+
+**VERDE.** La autorización deja de depender del orden de carga y pasa a ser del
+JVM:
+
+- `OrganizationApplication.main` llama a `AnchoredConnection.allow()` **como
+  primera línea**, antes de `SpringApplication.run`. Es el único sitio desde el
+  que se puede llegar el primero.
+- `backend/build.gradle.kts`: `systemProperty("jdk.httpclient.allowRestrictedHeaders", "host")`
+  en `tasks.test`, y el `-D` equivalente en los `jvmArgs` de pitest, para que la
+  campaña de mutación no herede el problema.
+- Los bloques estáticos de los dos conectores se quedan como red, no como
+  garantía. Así lo dice ahora su documentación.
+
+Las dos parejas que fallaban, verdes: `HttpCalendarFeedTest` +
+`HttpGithubIssueSourceTest`, y `AnchoredConnectionTest` +
+`HttpGithubIssueSourceTest`.
+
+**Para el orquestador, al integrar:** este arreglo toca `backend/build.gradle.kts`
+—no está en las listas de ficheros compartidos de REGLAS §6 ni de REPARTO §3,
+pero es de todos— con dos líneas aditivas. Y conviene saber que **la suite
+completa de `main` está roja ahora mismo por esto** en cuanto el orden de carga
+sea desfavorable; este commit la arregla.
+
 ## Resumen
 
 **El anclaje no rompe el TLS.** Era la única razón por la que se había revocado,
@@ -332,6 +393,18 @@ features.
 **No ejecutado, por REPARTO §4:** Stryker y PIT. La previsión de mutantes está en
 el ciclo 2.
 
+**Observación fuera de ámbito (REGLAS §9), encontrada al redactar el egreso.** El
+primer borrador de `deploy/EGRESS.md` heredó del texto viejo la frase «los
+conectores salientes (25, 28 y el de GitHub) resuelven una vez y validan todas
+las direcciones», y al ir a firmar que los tres anclan resultó que el de GitHub
+**no ancla ni valida direcciones**: `HttpGithubIssueSource` construye un
+`HttpClient` sin política y pide contra `URI.create(url)`. No es un defecto: su
+base es configuración del servidor validada al arrancar contra una lista fija
+(enmienda B11), y lo que aporta el usuario es el nombre del repositorio, no el
+destino. Corregido el documento para decir eso y no otra cosa, con la condición
+escrita de cuándo dejaría de valer (si la base pasara a ser dato de petición).
+Queda anotado y no se toca el conector: no es de este encargo.
+
 **Ficheros tocados.**
 
 - `backend/src/main/java/com/apptolast/organization/adapter/net/AnchoredConnection.java` (nuevo)
@@ -342,6 +415,8 @@ el ciclo 2.
 - `backend/src/main/java/com/apptolast/organization/adapter/feed/HttpCalendarFeed.java`
 - `backend/src/test/java/com/apptolast/organization/adapter/feed/HttpCalendarFeedTest.java`
 - `backend/src/main/java/com/apptolast/organization/application/OutboundHostGuard.java` (javadoc)
+- `backend/src/main/java/com/apptolast/organization/OrganizationApplication.java` (una línea)
+- `backend/build.gradle.kts` (dos líneas aditivas: `tasks.test` y `jvmArgs` de pitest)
 - `features/external_calendar.feature` (una fila)
 - `project-spec.md` (compartido, un párrafo), `deploy/EGRESS.md`,
   `docs/external-calendar.md`, `progress/current.md` (una nota)

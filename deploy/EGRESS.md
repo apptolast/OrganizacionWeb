@@ -11,15 +11,22 @@ que es distinto y sigue siendo obligatorio.
 
 ## Qué cierra la aplicación
 
-Los conectores salientes —webhooks de la feature 25, calendario externo de la 28
-y conector de GitHub de la 26— resuelven el nombre del destino **una vez**,
-validan **todas** las direcciones devueltas contra `AddressPolicy` y abandonan la
-petición antes de abrir la conexión si una sola está bloqueada.
+Los dos conectores cuyo destino lo elige el usuario —webhooks de la feature 25 y
+calendario externo de la 28— resuelven el nombre del destino **una vez**, validan
+**todas** las direcciones devueltas contra `AddressPolicy` y abandonan la petición
+antes de abrir la conexión si una sola está bloqueada.
 
 Y la petición viaja después **contra esa misma dirección ya validada**, no contra
 el nombre. El cliente HTTP no vuelve a preguntar al DNS, de modo que la ventana
 entre la comprobación y el uso (*DNS rebinding*) **no existe**: no hay una segunda
 resolución que pueda contestar otra cosa.
+
+El conector de GitHub **no** ancla, y no le hace falta por el mismo motivo por el
+que no valida direcciones: su base no la elige el usuario, es configuración del
+servidor validada al arrancar contra una lista fija (enmienda B11). Lo que el
+usuario aporta es el nombre del repositorio, no el destino. Si algún día la base
+pasara a ser dato de petición, este párrafo deja de valer y habría que anclarlo
+igual.
 
 Anclar a una dirección suele romper la verificación del certificado. Aquí no,
 porque el nombre viaja con la petición: en la cabecera `Host` y en la indicación
@@ -42,10 +49,15 @@ Lo acompañan **https obligatorio** en los destinos y `Redirect.NEVER`.
 
 **Lo que el anclaje cuesta**, para que quien despliegue lo sepa:
 
-1. La aplicación necesita `jdk.httpclient.allowRestrictedHeaders=host`. Se activa
-   sola al cargar los conectores, **añadiéndose** a lo que ya hubiera declarado el
-   despliegue, no sustituyéndolo. Si el despliegue pasa la propiedad por su
-   cuenta, que incluya `host`.
+1. La aplicación necesita `jdk.httpclient.allowRestrictedHeaders=host`, y la
+   necesita **antes de que nada construya la primera petición HTTP**: el cliente
+   del JDK lee esa lista una sola vez, al inicializar su clase de utilidades, y
+   lo que se ponga después no tiene efecto. Por eso `OrganizationApplication.main`
+   la declara como primera línea, antes de arrancar Spring, **añadiéndose** a lo
+   que hubiera declarado el despliegue en vez de sustituirlo. Si el despliegue
+   prefiere pasarla con `-D`, perfecto, pero que incluya `host`. Si no se cumple,
+   el fallo no es sutil pero sí silencioso: **todas** las entregas de webhooks y
+   **todas** las sincronizaciones de calendario fallan como «no alcanzable».
 2. Las salidas hablan **HTTP/1.1**. Sobre HTTP/2 la autoridad la fija la URI —la
    dirección literal— y el receptor no vería el nombre.
 3. Si un nombre resuelve a **varias** direcciones se usa la primera y no se

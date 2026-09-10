@@ -581,13 +581,53 @@ class ExternalCalendarPersistenceTest {
             summary(1, false),
             List.of(event("u1", "2030-01-08T20:00:00Z", "2030-01-08T21:00:00Z")),
             NOW);
-    var window =
-        List.of(Instant.parse("2030-01-08T00:00:00Z"), Instant.parse("2030-01-09T00:00:00Z"));
-    assertThat(store().events(A, window.getFirst(), window.get(1)).getFirst().startAt())
-        .isEqualTo(Instant.parse("2030-01-08T09:00:00Z"));
+    // Las dos aserciones que importan van con las DOS filas vivas: el filtro por propietario es un
+    // literal de SQL que la mutación no toca, así que el único oráculo posible es que la fuga se
+    // vea. Después del delete(B) no hay nada que filtrar y cualquier consulta pasaría.
+    var ofA = store().events(A, FROM_EIGHTH, TO_NINTH);
+    assertThat(ofA).hasSize(1);
+    assertThat(ofA.getFirst().startAt()).isEqualTo(Instant.parse("2030-01-08T09:00:00Z"));
+    var ofB = store().events(B, FROM_EIGHTH, TO_NINTH);
+    assertThat(ofB).hasSize(1);
+    assertThat(ofB.getFirst().startAt()).isEqualTo(Instant.parse("2030-01-08T20:00:00Z"));
+    // Y lo mismo para la suscripción: con dos filas en la tabla, cada uno lee la suya.
+    assertThat(store().find(A).orElseThrow().subscription().label()).isEqualTo("Trabajo");
+    assertThat(store().find(B).orElseThrow().subscription().label()).isEqualTo("Suya");
+
     store().delete(B);
+
     assertThat(store().find(A)).isPresent();
-    assertThat(store().events(A, window.getFirst(), window.get(1))).hasSize(1);
+    assertThat(store().find(B)).isEmpty();
+    assertThat(store().events(A, FROM_EIGHTH, TO_NINTH)).hasSize(1);
+    assertThat(store().events(B, FROM_EIGHTH, TO_NINTH)).isEmpty();
+  }
+
+  static final Instant FROM_EIGHTH = Instant.parse("2030-01-08T00:00:00Z");
+  static final Instant TO_NINTH = Instant.parse("2030-01-09T00:00:00Z");
+
+  /**
+   * @s17, @s18, @s20 y @s21: los cuatro contadores viajan a la base y vuelven, cada uno por su
+   *     columna. Con valores distintos entre sí, cruzar dos columnas —en el UPDATE o al leer la
+   *     fila— deja de pasar desapercibido; con los ceros de antes, era invisible.
+   */
+  @Test
+  void s18_theFourCountersSurviveTheRoundTripEachOneInItsOwnColumn() {
+    store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
+    store()
+        .commitSuccess(
+            A,
+            0,
+            new SyncSummary("Europe/Madrid", 4, 3, 2, 1, false),
+            List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")),
+            NOW);
+
+    var reopened = store().find(A).orElseThrow().subscription();
+
+    assertThat(reopened.imported()).isEqualTo(4);
+    assertThat(reopened.skippedRecurring()).isEqualTo(3);
+    assertThat(reopened.skippedCancelled()).isEqualTo(2);
+    assertThat(reopened.skippedInvalid()).isEqualTo(1);
+    assertThat(reopened.truncated()).isFalse();
   }
 
   @Test
@@ -616,6 +656,129 @@ class ExternalCalendarPersistenceTest {
             NOW);
     assertThat(jdbc.queryForObject("SELECT count(*) FROM external_calendar_events", Integer.class))
         .isEqualTo(2);
+  }
+
+  /**
+   * @s25, tercer Then, por el lado del LECTOR: «una lectura concurrente ve la lista anterior
+   *     completa o la nueva completa, nunca una vacía ni mezclada». La prueba de arriba mide al
+   *     escritor, y eso lo garantiza ya la transacción externa: con READ COMMITTED pasaría igual.
+   *     Lo que fija {@code reading()} —solo lectura y REPEATABLE READ— no lo medía nadie.
+   *     <p>Para medirlo hace falta que la transacción de lectura haga <b>dos</b> consultas, y hoy
+   *     hace una sola por llamada; la segunda se cuela por la misma costura que usa {@code
+   *     s25_aConcurrentReadNeverSeesAnEmptyOrMixedSnapshot}: subclasificar el {@link JdbcTemplate}
+   *     del adaptador. Como la conexión está ligada al hilo, esa segunda consulta corre dentro de la
+   *     misma transacción. Entre una y otra, un escritor confirma desde otro hilo.
+   */
+  @Test
+  @Timeout(120)
+  void s25_theReadTransactionSeesTheSameSnapshotInBothOfItsQueries() throws Exception {
+    store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
+    store()
+        .commitSuccess(
+            A,
+            0,
+            summary(2, false),
+            List.of(
+                event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z"),
+                event("u2", "2030-01-08T11:00:00Z", "2030-01-08T12:00:00Z")),
+            EARLIER);
+
+    var writers = Executors.newSingleThreadExecutor();
+    var afterTheCommit = new AtomicReference<List<String>>();
+    var failure = new AtomicReference<Exception>();
+    var asking =
+        new JdbcTemplate(jdbc.getDataSource()) {
+          @Override
+          public <T> List<T> query(
+              String sql, org.springframework.jdbc.core.RowMapper<T> mapper, Object... args) {
+            var first = super.query(sql, mapper, args);
+            if (sql.startsWith("SELECT uid") && afterTheCommit.get() == null)
+              try {
+                writers
+                    .submit(
+                        () ->
+                            store()
+                                .commitSuccess(
+                                    A,
+                                    1,
+                                    summary(1, false),
+                                    List.of(
+                                        event(
+                                            "u3", "2030-01-08T13:00:00Z", "2030-01-08T14:00:00Z")),
+                                    NOW))
+                    .get(30, TimeUnit.SECONDS);
+                afterTheCommit.set(
+                    super.queryForList(sql, args).stream()
+                        .map(row -> String.valueOf(row.get("uid")))
+                        .toList());
+              } catch (Exception unreadable) {
+                failure.set(unreadable);
+              }
+            return first;
+          }
+        };
+
+    try {
+      new PostgresExternalCalendarStore(asking, new TransactionTemplate(manager))
+          .events(A, FROM_EIGHTH, TO_NINTH);
+    } finally {
+      writers.shutdownNow();
+    }
+
+    assertThat(failure.get()).isNull();
+    assertThat(afterTheCommit.get())
+        .as("la segunda consulta de la transacción de lectura debe haberse ejecutado")
+        .isNotNull();
+    assertThat(afterTheCommit.get())
+        .as("la sincronización que confirmó en medio no puede cambiar lo que esta lectura ve")
+        .containsExactly("u1", "u2");
+    // Y fuera de esa transacción, la nueva completa.
+    assertThat(store().events(A, FROM_EIGHTH, TO_NINTH).stream().map(ExternalEvent::uid))
+        .containsExactly("u3");
+  }
+
+  /**
+   * La otra mitad de {@code reading()}: la transacción de lectura es de solo lectura, así que
+   * ningún camino de lectura puede escribir por accidente ni siquiera si alguien lo intentara.
+   */
+  @Test
+  @Timeout(120)
+  void s25_theReadTransactionRefusesToWrite() {
+    store().create(A, UUID.randomUUID(), work(), cipher("C"), NOW);
+    store()
+        .commitSuccess(
+            A,
+            0,
+            summary(1, false),
+            List.of(event("u1", "2030-01-08T09:00:00Z", "2030-01-08T10:00:00Z")),
+            EARLIER);
+
+    var refusal = new AtomicReference<Exception>();
+    var writing =
+        new JdbcTemplate(jdbc.getDataSource()) {
+          @Override
+          public <T> List<T> query(
+              String sql, org.springframework.jdbc.core.RowMapper<T> mapper, Object... args) {
+            var rows = super.query(sql, mapper, args);
+            // Después de la consulta y no antes: al rechazar la escritura, PostgreSQL aborta la
+            // transacción entera, y con ella cualquier consulta posterior (SQL state 25P02).
+            if (sql.startsWith("SELECT uid") && refusal.get() == null)
+              try {
+                super.update("DELETE FROM external_calendar_events WHERE owner_id = ?", A);
+              } catch (Exception rejected) {
+                refusal.set(rejected);
+              }
+            return rows;
+          }
+        };
+
+    new PostgresExternalCalendarStore(writing, new TransactionTemplate(manager))
+        .events(A, FROM_EIGHTH, TO_NINTH);
+
+    assertThat(refusal.get())
+        .as("escribir dentro de la transacción de lectura tiene que ser rechazado")
+        .isNotNull();
+    assertThat(store().events(A, FROM_EIGHTH, TO_NINTH)).hasSize(1);
   }
 
   @Test

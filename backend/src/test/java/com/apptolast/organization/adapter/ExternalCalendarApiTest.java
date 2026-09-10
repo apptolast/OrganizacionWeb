@@ -110,7 +110,7 @@ class ExternalCalendarApiTest {
         12,
         3,
         1,
-        0,
+        7,
         true,
         NOW);
   }
@@ -147,7 +147,7 @@ class ExternalCalendarApiTest {
         .andExpect(jsonPath("$.subscription.imported").value(12))
         .andExpect(jsonPath("$.subscription.skippedRecurring").value(3))
         .andExpect(jsonPath("$.subscription.skippedCancelled").value(1))
-        .andExpect(jsonPath("$.subscription.skippedInvalid").value(0))
+        .andExpect(jsonPath("$.subscription.skippedInvalid").value(7))
         .andExpect(jsonPath("$.subscription.truncated").value(true))
         .andExpect(jsonPath("$.subscription.updatedAt").value("2030-01-07T12:00:00Z"));
   }
@@ -313,6 +313,39 @@ class ExternalCalendarApiTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     verifyNoInteractions(read);
+  }
+
+  /**
+   * @s10 se titula «aplicar seguridad HTTP común en las CINCO rutas», y el rechazo de parámetros
+   *     desconocidos solo estaba medido en dos: GET y POST /sync. Estas dos completan las cinco. La
+   *     comprobación va antes de leer el cuerpo, así que el caso de uso no llega a invocarse.
+   */
+  @Test
+  void s10_anUnknownQueryParameterOnThePutIsRejected() throws Exception {
+    mvc.perform(
+            put(ROUTE)
+                .with(user("owner"))
+                .with(csrf().asHeader())
+                .param("x", "1")
+                .contentType("application/json")
+                .content(VALID_BODY))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+        .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+        .andExpect(jsonPath("$.errors[0].field").value("x"))
+        .andExpect(jsonPath("$.errors[0].code").value("UNKNOWN_PARAMETER"));
+    verifyNoInteractions(save);
+  }
+
+  @Test
+  void s10_anUnknownQueryParameterOnTheDeleteIsRejected() throws Exception {
+    mvc.perform(delete(ROUTE).with(user("owner")).with(csrf().asHeader()).param("x", "1"))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+        .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+        .andExpect(jsonPath("$.errors[0].field").value("x"))
+        .andExpect(jsonPath("$.errors[0].code").value("UNKNOWN_PARAMETER"));
+    verifyNoInteractions(remove);
   }
 
   @Test

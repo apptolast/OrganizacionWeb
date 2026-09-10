@@ -39,8 +39,42 @@ parsea el JSON y lo vuelve a generar, el orden de las claves o los espacios
 pueden cambiar y la firma dejará de cuadrar aunque el contenido sea idéntico.
 Guarda los bytes crudos.
 
+### La clave del HMAC son los bytes de la cadena entera
+
+Esto se equivoca a menudo, así que va aparte: la clave son los **bytes UTF-8 del
+literal completo**, `whsec_` incluido — **no** los 32 bytes que resultan de
+decodificar la parte de base64. Si decodificas, la firma no cuadrará nunca.
+
 El secreto es el `whsec_…` que la aplicación te mostró **una sola vez** al crear
-el endpoint. No se puede volver a consultar: si lo pierdes, hay que rotarlo.
+el endpoint, y no se puede volver a consultar. Si lo pierdes, **elimina el
+endpoint y crea otro**: no hay rotación de secreto, y el contrato la deja
+expresamente fuera de alcance.
+
+### Un ejemplo que puedes usar para probar tu verificador
+
+Con el secreto `whsec_AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8`, este cuerpo
+de exactamente 209 bytes UTF-8:
+
+```json
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "aggregateId": "22222222-2222-4222-8222-222222222222",
+  "ownerId": "owner-a",
+  "occurredAt": "2026-09-08T10:00:00.000000Z",
+  "schemaVersion": 1,
+  "type": "webhook.ping.v1"
+}
+```
+
+y `t=1788861600`, la cabecera es exactamente:
+
+```
+X-OrganizationWeb-Signature: t=1788861600,v1=47db42f51507bea71512fc26bef335a304b9382b45b590a774cfc977d6cd708f
+```
+
+Si reintentamos, el cuerpo es **idéntico byte a byte** y sólo cambia el instante:
+con `t=1788861660` la firma pasa a
+`fc161fb2f63428f0680cae6871216284bb420af9917ee794c8159d0400abe460`.
 
 ## 2. Deduplica por el `eventId` del cuerpo, no por la cabecera
 
@@ -56,16 +90,26 @@ veces sobre el mismo hecho.
 El cuerpo firmado lleva su propio `eventId`, y **ése sí** está cubierto por la
 firma. Deduplica por él.
 
+El cuerpo es el registro de la outbox **tal cual**, así que **los campos dependen
+del tipo**. Los seis comunes están siempre; algunos tipos añaden los suyos. Por
+ejemplo, `TaskCreated.v1` y `SubtaskCreated.v1` llevan **ocho**:
+
 ```json
 {
-  "eventId": "…",
-  "aggregateId": "…",
-  "ownerId": "…",
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "aggregateId": "22222222-2222-4222-8222-222222222222",
+  "ownerId": "owner-a",
   "occurredAt": "2026-09-08T10:00:00.000000Z",
   "schemaVersion": 1,
-  "type": "TaskCreated.v1"
+  "type": "TaskCreated.v1",
+  "taskId": "33333333-3333-4333-8333-333333333333",
+  "title": "Preparar la propuesta"
 }
 ```
+
+**No valides con una lista cerrada de seis campos.** Si lo haces, rechazarás
+todas las entregas de los tipos que llevan campos propios. Lee los que necesites
+e ignora el resto: es lo que permite que se añadan tipos sin romperte.
 
 ## 3. Rechaza los instantes viejos
 
@@ -116,8 +160,10 @@ permite descartar.
 | `WorkSessionExtended.v1`     | Extender sesión               |
 | `WorkSessionClosed.v1`       | Cerrar sesión de trabajo      |
 
-Además, al crear un endpoint puedes enviarte un **ping** de prueba: llega como
-`webhook.ping.v1`, con la misma firma y la misma forma que los demás.
+Además, **en cualquier momento** puedes lanzar un **ping** de prueba a cualquier
+endpoint activo, desde su botón en la aplicación. Llega como `webhook.ping.v1`,
+con la misma firma y la misma forma que los demás, y sirve para comprobar tu
+verificador sin esperar a que ocurra nada.
 
 ---
 

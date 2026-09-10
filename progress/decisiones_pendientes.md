@@ -4,12 +4,12 @@
 
 Llegó a tener **quince**. Se cerraron así:
 
-| Cómo se cerró | Cuántas |
-|---|---|
-| Respondidas por el propietario hoy | 6 |
-| Ya estaban ratificadas y se cerraron **por cita**, sin volver a preguntar | 4 |
-| Desaparecieron con las features retiradas (27, 29 y 30) | 4 |
-| Resuelta por la propia cirugía de retirada | 1 |
+| Cómo se cerró                                                             | Cuántas |
+| ------------------------------------------------------------------------- | ------- |
+| Respondidas por el propietario hoy                                        | 6       |
+| Ya estaban ratificadas y se cerraron **por cita**, sin volver a preguntar | 4       |
+| Desaparecieron con las features retiradas (27, 29 y 30)                   | 4       |
+| Resuelta por la propia cirugía de retirada                                | 1       |
 
 Todas las respuestas y las citas están en `progress/ratificaciones.md`, entradas
 R1 a R13, cada una con la pregunta tal como se hizo y la opción tal como se
@@ -42,3 +42,21 @@ queda.
 Se anota aquí con la misma forma que tenían las quince: **qué pasa**, **por qué se
 hizo**, y **qué hay que decidir**, con recomendación cuando la haya. Nada se da
 por ratificado sin cita.
+
+---
+
+## 1. Feature 25 — una línea del spec que era falsa, ya corregida
+
+**Qué pasaba.** `project-spec.md:2044` decía que la ayuda del formulario de
+webhooks **enlaza** a `docs/webhooks.md`. **No lo enlaza**: no hay ningún
+enlace en `frontend/src/webhooks.tsx`, comprobado con `grep`.
+
+**Lo que he hecho, y por qué.** He corregido **el documento**, no el producto. El
+juez de cierre lo ratificó expresamente con este razonamiento: ningún `@s` del
+contrato pide ese enlace, y fijarlo con un oráculo sería clavar una ruta de
+documentación en la interfaz — frágil, y no mata ningún mutante. La otra salida
+—añadir fila de contrato— la descartó él mismo.
+
+**Lo que falta:** tu contrafirma, porque he tocado un documento normativo. Es una
+línea. Si prefieres que el formulario enlace de verdad, dilo y se hace con su
+fila de contrato y su prueba.

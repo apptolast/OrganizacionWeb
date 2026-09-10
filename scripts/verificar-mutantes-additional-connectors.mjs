@@ -369,7 +369,175 @@ const MUTANTS = [
     `  if (response.status !== 200) return failure(response);\n  const body: unknown = await response.json();\n  signal.throwIfAborted();\n  return decodeReceipt(body);`,
     `  if (false) return failure(response);\n  const body: unknown = await response.json();\n  signal.throwIfAborted();\n  return decodeReceipt(body);`,
   ],
+
+  // -------------- racimo 4: abortos, cabeceras, el error tipado y el mapa de campos
+  ...abortMutants(),
+  [
+    4,
+    "client 188 ObjectLiteral { signal } -> {} (leer conexion)",
+    "client",
+    `const response = await apiRequest(CONNECTION_URL, { signal });`,
+    `const response = await apiRequest(CONNECTION_URL, {});`,
+  ],
+  [
+    4,
+    "client 250 ObjectLiteral { signal } -> {} (leer recibo)",
+    "client",
+    `const response = await apiRequest(\`\${IMPORTS_URL}/\${id}\`, { signal });`,
+    `const response = await apiRequest(\`\${IMPORTS_URL}/\${id}\`, {});`,
+  ],
+  [
+    4,
+    "client 204 ObjectLiteral headers -> {} (conectar)",
+    "client",
+    `    method: "PUT",\n    signal,\n    headers: { "Content-Type": "application/json" },`,
+    `    method: "PUT",\n    signal,\n    headers: {},`,
+  ],
+  [
+    4,
+    "client 204 StringLiteral Content-Type -> '' (conectar)",
+    "client",
+    `    method: "PUT",\n    signal,\n    headers: { "Content-Type": "application/json" },`,
+    `    method: "PUT",\n    signal,\n    headers: { "": "application/json" },`,
+  ],
+  [
+    4,
+    "client 235 ObjectLiteral headers -> {} (importar)",
+    "client",
+    `    method: "POST",\n    signal,\n    headers: { "Content-Type": "application/json" },`,
+    `    method: "POST",\n    signal,\n    headers: {},`,
+  ],
+  [
+    4,
+    "client 235 StringLiteral Content-Type -> '' (importar)",
+    "client",
+    `    method: "POST",\n    signal,\n    headers: { "Content-Type": "application/json" },`,
+    `    method: "POST",\n    signal,\n    headers: { "": "application/json" },`,
+  ],
+  [
+    4,
+    "client 58 CE super(code) -> true",
+    "client",
+    `    super(typeof body.code === "string" ? body.code : "CONNECTOR_ERROR");`,
+    `    super(true ? body.code : "CONNECTOR_ERROR");`,
+  ],
+  [
+    4,
+    "client 58 CE super(code) -> false",
+    "client",
+    `    super(typeof body.code === "string" ? body.code : "CONNECTOR_ERROR");`,
+    `    super(false ? body.code : "CONNECTOR_ERROR");`,
+  ],
+  [
+    4,
+    "client 58 EqualityOperator typeof !== string",
+    "client",
+    `    super(typeof body.code === "string" ? body.code : "CONNECTOR_ERROR");`,
+    `    super(typeof body.code !== "string" ? body.code : "CONNECTOR_ERROR");`,
+  ],
+  [
+    4,
+    "client 58 StringLiteral 'string' -> ''",
+    "client",
+    `    super(typeof body.code === "string" ? body.code : "CONNECTOR_ERROR");`,
+    `    super(typeof body.code === "" ? body.code : "CONNECTOR_ERROR");`,
+  ],
+  [
+    4,
+    "client 58 StringLiteral CONNECTOR_ERROR -> ''",
+    "client",
+    `    super(typeof body.code === "string" ? body.code : "CONNECTOR_ERROR");`,
+    `    super(typeof body.code === "string" ? body.code : "");`,
+  ],
+  [
+    4,
+    "client 59 StringLiteral this.name -> ''",
+    "client",
+    `    this.name = "GitlabConnectorError";`,
+    `    this.name = "";`,
+  ],
+  [
+    4,
+    "client 75 CE filtro entero -> true",
+    "client",
+    `      entry &&\n      typeof entry === "object" &&\n      nonEmpty((entry as Record<string, unknown>).field) &&\n      nonEmpty((entry as Record<string, unknown>).code)`,
+    `      true`,
+  ],
+  [
+    4,
+    "client 75 LogicalOperator ultimo && -> ||",
+    "client",
+    `      entry &&\n      typeof entry === "object" &&\n      nonEmpty((entry as Record<string, unknown>).field) &&\n      nonEmpty((entry as Record<string, unknown>).code)`,
+    `      (entry &&\n        typeof entry === "object" &&\n        nonEmpty((entry as Record<string, unknown>).field)) ||\n      nonEmpty((entry as Record<string, unknown>).code)`,
+  ],
+  [
+    4,
+    "client 75 CE (entry && typeof && field) -> true",
+    "client",
+    `      entry &&\n      typeof entry === "object" &&\n      nonEmpty((entry as Record<string, unknown>).field) &&\n      nonEmpty((entry as Record<string, unknown>).code)`,
+    `      true && nonEmpty((entry as Record<string, unknown>).code)`,
+  ],
+  [
+    4,
+    "client 75 CE (entry && typeof) -> true",
+    "client",
+    `      entry &&\n      typeof entry === "object" &&\n      nonEmpty((entry as Record<string, unknown>).field) &&\n      nonEmpty((entry as Record<string, unknown>).code)`,
+    `      true &&\n      nonEmpty((entry as Record<string, unknown>).field) &&\n      nonEmpty((entry as Record<string, unknown>).code)`,
+  ],
+  [
+    4,
+    "client 75 LogicalOperator segundo && -> ||",
+    "client",
+    `      entry &&\n      typeof entry === "object" &&\n      nonEmpty((entry as Record<string, unknown>).field) &&\n      nonEmpty((entry as Record<string, unknown>).code)`,
+    `      ((entry && typeof entry === "object") ||\n        nonEmpty((entry as Record<string, unknown>).field)) &&\n      nonEmpty((entry as Record<string, unknown>).code)`,
+  ],
+  [
+    4,
+    "client 75 LogicalOperator primer && -> ||",
+    "client",
+    `      entry &&\n      typeof entry === "object" &&\n      nonEmpty((entry as Record<string, unknown>).field) &&\n      nonEmpty((entry as Record<string, unknown>).code)`,
+    `      (entry || typeof entry === "object") &&\n      nonEmpty((entry as Record<string, unknown>).field) &&\n      nonEmpty((entry as Record<string, unknown>).code)`,
+  ],
 ];
+
+/**
+ * Las tres paradas de `throwIfAborted()` de cada una de las cinco llamadas del cliente. Se
+ * generan a partir del texto de cada función para no escribir catorce anclas a mano.
+ */
+function abortMutants() {
+  const functions = [
+    ["readGitlabConnection", 187, `CONNECTION_URL, { signal }`],
+    ["connectGitlab", 200, `CONNECTION_URL, {\n    method: "PUT"`],
+    ["disconnectGitlab", 218, `CONNECTION_URL, {\n    method: "DELETE"`],
+    ["startGitlabImport", 231, `IMPORTS_URL, {\n    method: "POST"`],
+    ["readGitlabImport", 249, `\\\`\${IMPORTS_URL}/\${id}\\\`, { signal }`],
+  ];
+  const source = originals.client;
+  const mutants = [];
+  for (const [name] of functions) {
+    const start = source.indexOf(`export async function ${name}(`);
+    const body = source.slice(start, source.indexOf("\n}\n", start) + 3);
+    const stops = body.split("signal.throwIfAborted();").length - 1;
+    for (let stop = 1; stop <= stops; stop++) {
+      const pieces = body.split("signal.throwIfAborted();");
+      const mutated = pieces.reduce(
+        (text, piece, index) =>
+          index === 0
+            ? piece
+            : `${text}${index === stop ? ";" : "signal.throwIfAborted();"}${piece}`,
+        "",
+      );
+      mutants.push([
+        4,
+        `client ${name} throwIfAborted parada ${stop} de ${stops} -> ;`,
+        "client",
+        body,
+        mutated,
+      ]);
+    }
+  }
+  return mutants;
+}
 
 /**
  * Los 19 mutantes de la cadena `absent` de decodeConnection (líneas 130-136), generados en vez

@@ -280,6 +280,9 @@ it("@s9 sends exactly the token and the project path, and nothing else", async (
     projectPath: "grupo/proyecto",
   });
   expect(new Headers(options.headers).get("X-CSRF-TOKEN")).toBe("csrf-1");
+  expect(new Headers(options.headers).get("Content-Type")).toBe(
+    "application/json",
+  );
 });
 
 it("@s32 never puts the token in the URL", async () => {
@@ -313,6 +316,9 @@ it("@s15 starts an import with exactly the destination project", async () => {
   expect(url).toBe("/api/v1/me/connectors/gitlab/imports");
   expect(options.method).toBe("POST");
   expect(JSON.parse(String(options.body))).toEqual({ projectId });
+  expect(new Headers(options.headers).get("Content-Type")).toBe(
+    "application/json",
+  );
   expect(started).toEqual(receipt);
 });
 
@@ -505,6 +511,9 @@ it("@s36 keeps the seconds of a rate limit so the screen can name them", async (
   expect(error).toBeInstanceOf(GitlabConnectorError);
   expect((error as GitlabConnectorError).code).toBe("RATE_LIMITED");
   expect((error as GitlabConnectorError).retryAfterSeconds).toBe(30);
+  // Lo único que se ve cuando el error escapa de la pantalla es su nombre y su mensaje.
+  expect((error as GitlabConnectorError).name).toBe("GitlabConnectorError");
+  expect((error as GitlabConnectorError).message).toBe("RATE_LIMITED");
 });
 
 it("@s36 keeps the partial counters that travel with a failed import", async () => {
@@ -534,7 +543,67 @@ it("@s36 turns an unreadable problem body into a code the screen can still act o
   )) as GitlabConnectorError;
 
   expect(error.code).toBe("CONNECTOR_ERROR");
+  expect(error.message).toBe("CONNECTOR_ERROR");
   expect(error.retryAfterSeconds).toBeNull();
+});
+
+/**
+ * El mapa campo → código es lo que enciende el `aria-invalid` del control que el servidor
+ * rechazó. El único cuerpo con `errors` que se probaba traía una entrada bien formada, así que
+ * las tres condiciones del filtro se cumplían a la vez y ninguna se podía falsificar.
+ */
+it("@s34 marks the two fields when the server complains about both", async () => {
+  stub(
+    problem(400, {
+      code: "VALIDATION_ERROR",
+      errors: [
+        { field: "token", code: "REQUIRED" },
+        { field: "projectPath", code: "INVALID_FORMAT" },
+      ],
+    }),
+  );
+
+  const error = (await connectGitlab(
+    { token: "", projectPath: "x" },
+    signal(),
+  ).catch((caught: unknown) => caught)) as GitlabConnectorError;
+
+  expect(error.fields).toEqual({
+    token: "REQUIRED",
+    projectPath: "INVALID_FORMAT",
+  });
+});
+
+it("@s34 keeps out of the map the entries that are not a field and a code", async () => {
+  stub(
+    problem(400, {
+      code: "VALIDATION_ERROR",
+      errors: [
+        null,
+        { field: "", code: "SIN_CAMPO" },
+        { field: "token", code: "" },
+        { field: "projectPath", code: "INVALID_FORMAT" },
+      ],
+    }),
+  );
+
+  const error = (await connectGitlab(
+    { token: "", projectPath: "x" },
+    signal(),
+  ).catch((caught: unknown) => caught)) as GitlabConnectorError;
+
+  expect(error.fields).toEqual({ projectPath: "INVALID_FORMAT" });
+});
+
+it("@s34 ignores an errors that is not even a list", async () => {
+  stub(problem(400, { code: "VALIDATION_ERROR", errors: { token: "REQUIRED" } }));
+
+  const error = (await connectGitlab(
+    { token: "", projectPath: "x" },
+    signal(),
+  ).catch((caught: unknown) => caught)) as GitlabConnectorError;
+
+  expect(error.fields).toEqual({});
 });
 
 it("@s36 refuses a negative retry, which would make the screen promise the past", async () => {
@@ -555,6 +624,103 @@ it("@s37 does not decode anything once the caller aborted", async () => {
   controller.abort();
 
   await expect(readGitlabConnection(controller.signal)).rejects.toThrow();
+});
+
+/**
+ * Las cinco llamadas del cliente, cada una con sus tres paradas de aborto: antes de pedir,
+ * después de la respuesta y después de leer el cuerpo. Ninguna prueba distinguía una parada de
+ * otra: bastaba con que la promesa acabara rechazando, y eso lo consigue cualquiera de las tres.
+ * Aquí se afirma qué NO llegó a pasar en cada parada, que es lo que el aborto promete.
+ */
+type Call = [string, (signal: AbortSignal) => Promise<unknown>, number, unknown];
+
+const CALLS: Call[] = [
+  ["readGitlabConnection", (as) => readGitlabConnection(as), 200, connected],
+  [
+    "connectGitlab",
+    (as) => connectGitlab({ token: TOKEN, projectPath: "grupo/proyecto" }, as),
+    200,
+    connected,
+  ],
+  ["disconnectGitlab", (as) => disconnectGitlab(as), 204, null],
+  ["startGitlabImport", (as) => startGitlabImport(projectId, as), 201, receipt],
+  ["readGitlabImport", (as) => readGitlabImport(importId, as), 200, receipt],
+];
+
+const WITH_BODY = CALLS.filter(([name]) => name !== "disconnectGitlab");
+
+it.each(CALLS)(
+  "@s37 %s asks the server for nothing when the caller already aborted",
+  async (_name, call) => {
+    const controller = new AbortController();
+    const fetcher = stub();
+    controller.abort();
+
+    await expect(call(controller.signal)).rejects.toThrow();
+    expect(fetcher).not.toHaveBeenCalled();
+  },
+);
+
+it.each(CALLS)(
+  "@s37 %s does not read the body of a response that landed after the abort",
+  async (_name, call, status, payload) => {
+    const controller = new AbortController();
+    const json = vi.fn(() => Promise.resolve(payload));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => {
+        controller.abort();
+        return Promise.resolve({ status, json });
+      }),
+    );
+
+    await expect(call(controller.signal)).rejects.toThrow();
+    expect(json).not.toHaveBeenCalled();
+  },
+);
+
+it.each(WITH_BODY)(
+  "@s37 %s decodes nothing when the abort lands while the body is being read",
+  async (_name, call, status, payload) => {
+    const controller = new AbortController();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        Promise.resolve({
+          status,
+          json: () => {
+            controller.abort();
+            return Promise.resolve(payload);
+          },
+        }),
+      ),
+    );
+
+    await expect(call(controller.signal)).rejects.toThrow();
+  },
+);
+
+/** Sin la señal en la petición, salir de la pantalla no cancela nada: se queda en vuelo. */
+it("@s37 sends the caller's own signal with the read of the connection", async () => {
+  const controller = new AbortController();
+  const fetcher = stub(Response.json(connected));
+
+  await readGitlabConnection(controller.signal);
+
+  expect((fetcher.mock.calls[0][1] as RequestInit).signal).toBe(
+    controller.signal,
+  );
+});
+
+it("@s37 sends the caller's own signal with the read of a receipt", async () => {
+  const controller = new AbortController();
+  const fetcher = stub(Response.json(receipt));
+
+  await readGitlabImport(importId, controller.signal);
+
+  expect((fetcher.mock.calls[0][1] as RequestInit).signal).toBe(
+    controller.signal,
+  );
 });
 
 // ------------------------------------------------- el contrato, atado a los dos lados

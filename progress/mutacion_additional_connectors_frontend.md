@@ -220,3 +220,60 @@ incompatible» — la pantalla perdería el código con el que decide qué ofrec
 `progress/verificacion_mutantes_additional_connectors3.json`.
 
 **Previsión acumulada: 66 mutantes muertos.**
+
+---
+
+## Racimo 4 — abortos, cabeceras, el error tipado y el mapa de campos (32 mutantes)
+
+### 4.1 Las tres paradas de aborto de cada llamada (14 mutantes)
+
+Causa común: las cinco funciones del cliente tienen **tres paradas** de `throwIfAborted()` —antes
+de pedir, con la respuesta en la mano y con el cuerpo leído— y ninguna prueba distinguía una de
+otra. Bastaba con que la promesa acabara rechazando, y eso lo consigue cualquiera de las tres:
+quitar la primera dejaba que la segunda rechazara igual.
+
+Los oráculos nuevos afirman **qué no llegó a pasar** en cada parada, que es lo que el aborto
+promete:
+
+- `@s37 <llamada> asks the server for nothing when the caller already aborted` → `fetch` no se
+  llamó (mata la parada 1 de las cinco).
+- `@s37 <llamada> does not read the body of a response that landed after the abort` → el `json()`
+  no se llamó (mata la parada 2 de las cinco).
+- `@s37 <llamada> decodes nothing when the abort lands while the body is being read` (mata la
+  parada 3 de las cuatro que leen cuerpo).
+
+Y dos más para la señal: `{ signal }` vaciado dejaba la petición sin cancelar, y ninguna prueba
+del cliente miraba que la señal viajara. Sin ella, salir de la pantalla no cancela nada.
+
+### 4.2 Las cabeceras (4 mutantes)
+
+`Content-Type: application/json` no lo afirmaba nadie en el PUT ni en el POST. Dos líneas en las
+pruebas que ya leen `options.headers` para el CSRF.
+
+### 4.3 `GitlabConnectorError`, su nombre y su mensaje (6 mutantes)
+
+Las pruebas comprobaban `.code`, `.retryAfterSeconds`, `.importId` e `instanceof`, nunca
+`.message` ni `.name`. Un error con el mensaje vacío no dice nada en un volcado ni en el log del
+navegador, que es lo único que se ve cuando el error escapa de la pantalla.
+
+### 4.4 El mapa campo → código (6 mutantes)
+
+El único cuerpo con `errors` que se probaba traía **una** entrada bien formada: las tres
+condiciones del filtro se cumplían a la vez, así que cambiar cualquier `&&` por `||` daba el
+mismo resultado. Dos oráculos: dos entradas válidas marcan los dos campos, y una lista con
+basura (un `null`, un `field` vacío, un `code` vacío) deja fuera exactamente esa basura.
+
+### Equivalente declarado
+
+`76:7 typeof entry === "object" → true`: para distinguirlo haría falta una entrada **no objeto**
+con `.field` y `.code` no vacíos. El cuerpo viene de `response.json()`, y ningún valor JSON
+cumple eso (una cadena o un número no tienen `.field`). No hay prueba que pueda matarlo.
+
+### Acreditación del rojo (32 de 32 mueren)
+
+`node scripts/verificar-mutantes-additional-connectors.mjs 4` →
+`progress/verificacion_mutantes_additional_connectors4.json`. Las catorce paradas de aborto se
+generan del propio código fuente (`abortMutants()`), no se escriben a mano.
+
+**Previsión acumulada: 98 mutantes muertos** — por encima de las 85 que pide el umbral.
+Los racimos siguientes son margen, y van al fichero donde la predicción marcaba defecto.

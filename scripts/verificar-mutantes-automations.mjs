@@ -920,6 +920,77 @@ export async function deleteAutomation(`,
   ],
   [
     VIEW,
+    "R5 actionOf guarda -> true",
+    `  if (editing.rule && editing.rule.action.type !== "CREATE_TASK")`,
+    `  if (true)`,
+  ],
+  [
+    VIEW,
+    "R5 actionOf guarda -> false",
+    `  if (editing.rule && editing.rule.action.type !== "CREATE_TASK")`,
+    `  if (false)`,
+  ],
+  [
+    VIEW,
+    "R5 actionOf LogicalOperator",
+    `  if (editing.rule && editing.rule.action.type !== "CREATE_TASK")`,
+    `  if (editing.rule || editing.rule.action.type !== "CREATE_TASK")`,
+  ],
+  [
+    VIEW,
+    "R5 actionOf EqualityOperator",
+    `  if (editing.rule && editing.rule.action.type !== "CREATE_TASK")`,
+    `  if (editing.rule && editing.rule.action.type === "CREATE_TASK")`,
+  ],
+  [
+    VIEW,
+    "R5 actionOf StringLiteral",
+    `  if (editing.rule && editing.rule.action.type !== "CREATE_TASK")`,
+    `  if (editing.rule && editing.rule.action.type !== "")`,
+  ],
+  [
+    VIEW,
+    "R5 417 destino de la fila -> true",
+    `                  {rule.action.type === "CREATE_TASK"
+                    ? nameOfProject(rule.action.projectId)
+                    : "Webhook"}`,
+    `                  {true
+                    ? nameOfProject((rule.action as never)?.projectId)
+                    : "Webhook"}`,
+  ],
+  [
+    VIEW,
+    "R5 419 Webhook -> ''",
+    `                    : "Webhook"}`,
+    `                    : ""}`,
+  ],
+  [
+    VIEW,
+    "R5 545 previsualización -> true",
+    `                      {match.preview.type === "CREATE_TASK"
+                        ? match.preview.title
+                        : "Aviso al webhook"}`,
+    `                      {true
+                        ? (match.preview as never as { title: string }).title
+                        : "Aviso al webhook"}`,
+  ],
+  [
+    VIEW,
+    "R5 547 Aviso al webhook -> ''",
+    `                        : "Aviso al webhook"}`,
+    `                        : ""}`,
+  ],
+  [
+    VIEW,
+    "R5 599 toDraft -> {}",
+    `function toDraft(rule: Automation): AutomationDraft {
+  return {`,
+    `function toDraft(rule: Automation): AutomationDraft {
+  return {} as never;
+  return {`,
+  ],
+  [
+    VIEW,
     "490 opciones de proyecto -> undefined",
     `            {projects.map((project) => (
               <option key={project.id} value={project.id}>

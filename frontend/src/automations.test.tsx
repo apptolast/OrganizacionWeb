@@ -799,16 +799,17 @@ describe("automations page", () => {
       await screen.findByRole("button", { name: "Editar Seguimiento" }),
     );
     expect(screen.getByLabelText("Sólo en el proyecto")).toHaveValue(PROJECT);
-    expect(screen.getByLabelText("Criterio de la tarea")).toHaveValue(
-      "Con el informe enviado",
-    );
+    const criterion = screen.getByLabelText("Criterio de la tarea");
+    expect(criterion).toHaveValue("Con el informe enviado");
+    await userEvent.clear(criterion);
+    await userEvent.type(criterion, "Con el informe revisado");
     await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
     await waitFor(() => expect(sent("PUT", `${CREATE}/${RULE}`)).toHaveLength(1));
     expect(sent("PUT", `${CREATE}/${RULE}`)[0]).toMatchObject({
       enabled: false,
       condition: { projectId: PROJECT },
       action: {
-        criterionTemplate: "Con el informe enviado",
+        criterionTemplate: "Con el informe revisado",
         estimatedMinutes: null,
       },
     });
@@ -853,6 +854,92 @@ describe("automations page", () => {
       );
       view.unmount();
     }
+  });
+
+  const ENDPOINT = "88888888-8888-4888-8888-888888888888";
+  const webhookRule: Automation = {
+    ...rule,
+    id: OTHER_RULE,
+    name: "Aviso",
+    version: 2,
+    action: { type: "NOTIFY_WEBHOOK", endpointId: ENDPOINT },
+  };
+
+  it("@s37 keeps the endpoint of a webhook rule when only its name changes", async () => {
+    listed(webhookRule);
+    route("PUT", `${CREATE}/${OTHER_RULE}`, 200, {
+      ...webhookRule,
+      version: 3,
+      name: "Aviso renombrado",
+    });
+    render(<Automations owner="owner" />);
+    const row = await screen.findByRole("listitem");
+    expect(within(row).getByText("Webhook")).toBeInTheDocument();
+    expect(within(row).queryByText("Marketing")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Editar Aviso" }));
+    const name = screen.getByLabelText("Nombre");
+    await userEvent.clear(name);
+    await userEvent.type(name, "Aviso renombrado");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() =>
+      expect(sent("PUT", `${CREATE}/${OTHER_RULE}`)).toHaveLength(1),
+    );
+    // Renombrar no puede convertir un aviso en una tarea ni perder el endpoint.
+    expect(sent("PUT", `${CREATE}/${OTHER_RULE}`)[0]).toEqual({
+      name: "Aviso renombrado",
+      enabled: true,
+      trigger: { eventType: "TaskCreated.v1" },
+      condition: null,
+      action: { type: "NOTIFY_WEBHOOK", endpointId: ENDPOINT },
+    });
+  });
+
+  it("@s40 keeps the endpoint of a webhook rule when the switch is flipped", async () => {
+    listed({ ...webhookRule, enabled: false });
+    route("PUT", `${CREATE}/${OTHER_RULE}`, 200, {
+      ...webhookRule,
+      version: 3,
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(await screen.findByRole("switch", { name: /aviso/i }));
+    await waitFor(() =>
+      expect(sent("PUT", `${CREATE}/${OTHER_RULE}`)).toHaveLength(1),
+    );
+    expect(sent("PUT", `${CREATE}/${OTHER_RULE}`)[0]).toEqual({
+      name: "Aviso",
+      enabled: true,
+      trigger: { eventType: "TaskCreated.v1" },
+      condition: null,
+      action: { type: "NOTIFY_WEBHOOK", endpointId: ENDPOINT },
+    });
+  });
+
+  it("@s39 previews a webhook notice instead of a resolved task title", async () => {
+    listed();
+    route("POST", "/api/v1/me/automations/simulate", 200, {
+      evaluatedEvents: 1,
+      matches: [
+        {
+          eventId: "55555555-5555-4555-8555-555555555555",
+          eventType: "TaskCreated.v1",
+          occurredAt: "2026-09-08T10:15:30.123456Z",
+          preview: {
+            type: "NOTIFY_WEBHOOK",
+            endpointId: ENDPOINT,
+            eventId: "55555555-5555-4555-8555-555555555555",
+          },
+          loopGuarded: false,
+        },
+      ],
+    });
+    render(<Automations owner="owner" />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Nueva regla" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Simular" }));
+    const match = await screen.findByRole("listitem");
+    expect(within(match).getByText("Aviso al webhook")).toBeInTheDocument();
+    expect(within(match).queryByText(/Fallaría/)).not.toBeInTheDocument();
   });
 
   it("@s37 shows the identifier of a destination it cannot name", async () => {

@@ -1,10 +1,103 @@
 [
   {
     "file": "frontend/src/automations.tsx",
-    "name": "R4 270 some -> every",
+    "name": "R5 actionOf guarda -> true",
     "verdict": "MUERE",
     "tests": [
-      "@s40 gives back untouched the parts of the rule the editor does not show"
+      "@s38 pins a server field error to its control, focuses it and keeps the draft",
+      "@s39 simulates in place, announces the count and never saves",
+      "@s40 disables save until the answer arrives and sends exactly one request",
+      "@s39 explains every failure the simulation can foresee and repeats the code it does not know",
+      "@s38 focuses the control that owns the field the server complained about",
+      "@s40 sends a brand new rule exactly as the editor shows it",
+      "@s40 sends the trigger, the condition and the criterion the owner picked",
+      "@s40 carries the condition and the criterion of the rule it is editing",
+      "@s37 adds the new rule to the list instead of replacing it",
+      "@s37 still lets a rule be written when the projects could not be read",
+      "@s39 previews a webhook notice instead of a resolved task title"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R5 actionOf guarda -> false",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 keeps the endpoint of a webhook rule when only its name changes"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R5 actionOf LogicalOperator",
+    "verdict": "MUERE",
+    "tests": [
+      "@s38 pins a server field error to its control, focuses it and keeps the draft",
+      "@s39 simulates in place, announces the count and never saves",
+      "@s40 disables save until the answer arrives and sends exactly one request",
+      "@s39 explains every failure the simulation can foresee and repeats the code it does not know",
+      "@s38 focuses the control that owns the field the server complained about",
+      "@s40 sends a brand new rule exactly as the editor shows it",
+      "@s40 sends the trigger, the condition and the criterion the owner picked",
+      "@s40 carries the condition and the criterion of the rule it is editing",
+      "@s37 adds the new rule to the list instead of replacing it",
+      "@s37 still lets a rule be written when the projects could not be read",
+      "@s39 previews a webhook notice instead of a resolved task title"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R5 actionOf EqualityOperator",
+    "verdict": "MUERE",
+    "tests": [
+      "@s40 carries the condition and the criterion of the rule it is editing",
+      "@s37 keeps the endpoint of a webhook rule when only its name changes"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R5 actionOf StringLiteral",
+    "verdict": "MUERE",
+    "tests": [
+      "@s40 carries the condition and the criterion of the rule it is editing"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R5 417 destino de la fila -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 keeps the endpoint of a webhook rule when only its name changes"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R5 419 Webhook -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s37 keeps the endpoint of a webhook rule when only its name changes"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R5 545 previsualización -> true",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 previews a webhook notice instead of a resolved task title"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R5 547 Aviso al webhook -> ''",
+    "verdict": "MUERE",
+    "tests": [
+      "@s39 previews a webhook notice instead of a resolved task title"
+    ]
+  },
+  {
+    "file": "frontend/src/automations.tsx",
+    "name": "R5 599 toDraft -> {}",
+    "verdict": "MUERE",
+    "tests": [
+      "@s40 keeps the endpoint of a webhook rule when the switch is flipped"
     ]
   }
 ]

@@ -203,3 +203,67 @@ la cadena vacía. Queda anotado, no perseguido.
 Previsión razonada del racimo, contando hermanos: **55 a 65**.
 
 `git diff` sobre producción: vacío.
+
+---
+
+## Racimo 5 — las reglas de aviso al webhook no existían para la vista
+
+**DEFECTO DE PRODUCTO ENCONTRADO Y ARREGLADO.**
+
+Los 51 mutantes sin cobertura de `automations.tsx` se concentraban en las ramas de
+`editingOf()` y del renderizado que sólo se ejecutan cuando la acción de la regla
+**no** es `CREATE_TASK`. Nadie había abierto nunca una regla de webhook en la
+interfaz. Al escribir la primera prueba salió esto:
+
+> **Renombrar una regla de aviso al webhook la convertía en una regla de crear
+> tareas y perdía el endpoint.**
+
+`draftOf()` componía siempre `action: { type: "CREATE_TASK", ... }` con los campos
+que `editingOf()` había dejado vacíos para una regla de webhook. El cuerpo que
+salía por el PUT era:
+
+```
+action: { type: "CREATE_TASK", projectId: "", titleTemplate: "",
+          criterionTemplate: null, estimatedMinutes: null }
+```
+
+El `endpointId` desaparecía. Contra un servidor que valida (@s7 exige un endpoint
+propio y activo) esto acaba en un 422 sobre `action.projectId`, que `controlIdOf`
+no sabe situar y manda al control del nombre: el propietario ve un error absurdo
+en el campo equivocado y no entiende por qué no puede renombrar su regla. Y si el
+servidor fuera más laxo, la regla quedaría convertida en otra cosa.
+
+**Rojo demostrado.** La prueba `@s37 keeps the endpoint of a webhook rule when only
+its name changes` falla contra la producción de origen con:
+
+```
+-     "endpointId": "88888888-8888-4888-8888-888888888888",
++     "projectId": "",
+```
+
+**Arreglo.** Se extrae `actionOf(editing)`: este editor **sólo compone acciones
+`CREATE_TASK`**, así que la acción de cualquier otra regla vuelve intacta. Es el
+mismo criterio que ya seguía `toDraft()` para el interruptor, que sí conservaba la
+acción; el camino de guardar era el único que la destruía.
+
+**Queda anotado, fuera de este encargo:** el editor sigue mostrando «Título de la
+tarea» y «Criterio de la tarea» vacíos al abrir una regla de webhook, y ahora los
+ignora en vez de destruir la regla. Lo correcto sería no ofrecer esos controles
+para una acción que no crea tareas, o mostrar el endpoint. Es un cambio de
+interfaz que no está en el contrato de @s38 y no lo hago de paso.
+
+**Oráculos nuevos.** Tres pruebas:
+
+- `@s37 keeps the endpoint of a webhook rule when only its name changes` — más la
+  fila de la lista, que dice «Webhook» como destino y no un nombre de proyecto.
+- `@s40 keeps the endpoint of a webhook rule when the switch is flipped`.
+- `@s39 previews a webhook notice instead of a resolved task title` — «Aviso al
+  webhook» y ni rastro de «Fallaría».
+
+Y se refuerza `@s40 carries the condition and the criterion of the rule it is
+editing`: ahora **cambia** el criterio antes de guardar, para que se distinga
+componer la acción de devolverla tal cual.
+
+**Previsión (no medida): 10 mutantes verificados, los 10 MUEREN.** Previsión
+razonada del racimo, contando las ramas de `editingOf` sin cobertura que quedan
+ejercidas: **30 a 40**.

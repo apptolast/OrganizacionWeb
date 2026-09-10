@@ -114,9 +114,17 @@ it("@s37 muestra el formulario de alta cuando no hay suscripción", async () => 
 it("@s37 muestra host y cola pero nunca la dirección completa", async () => {
   withSubscription(subscription);
   render(<ExternalCalendar />);
-  expect(await screen.findByText("calendar.google.com")).toBeInTheDocument();
+  const host = await screen.findByText("calendar.google.com");
   expect(screen.getByText(".ics")).toBeInTheDocument();
+  // `not.toContain("https://")` por sí solo no puede fallar: el DTO no transporta
+  // la dirección completa, así que ningún mutante la haría aparecer. Lo que sí
+  // falla si la producción se rompe es la forma exacta del recorte y que el
+  // separador quede fuera del árbol de accesibilidad.
   expect(document.body.textContent).not.toContain("https://");
+  const shown = host.closest("p")!;
+  expect(shown.textContent).toBe("calendar.google.com … .ics");
+  expect(shown.querySelector('[aria-hidden="true"]')?.textContent).toBe(" … ");
+  expect(screen.getByLabelText("Etiqueta")).toHaveValue("Trabajo");
   expect(
     screen.getByRole("button", { name: "Sincronizar ahora" }),
   ).toBeInTheDocument();
@@ -241,12 +249,26 @@ it("@s38 conserva el borrador y enfoca el campo cuando la dirección se rechaza"
   await waitFor(() => expect(address).toHaveFocus());
 });
 
+// @s38 fila 3 pide un mensaje distinto del genérico cuando los conectores están
+// deshabilitados. Las dos filas compartían la aserción /no sabemos si se guardó/,
+// que es cierta en los dos casos: borrando entero el bloque de
+// ConnectorsDisabledError de failed() las dos seguían verdes. Ahora cada fila fija
+// su texto completo y niega el de la otra.
+const UNCERTAIN =
+  "No sabemos si se guardó. Vuelve a intentarlo cuando quieras.";
+const DISABLED_PREFIX = "Los conectores externos no están disponibles.";
+
 it.each([
-  ["503", { status: 503, code: "CONNECTORS_DISABLED" }, 503],
-  ["red", "network", 200],
+  [
+    "503",
+    { status: 503, code: "CONNECTORS_DISABLED" },
+    503,
+    `${DISABLED_PREFIX} ${UNCERTAIN}`,
+  ],
+  ["red", "network", 200, UNCERTAIN],
 ])(
   "@s38 deja estado incierto y conserva el borrador con %s",
-  async (_name, body, status) => {
+  async (_name, body, status, message) => {
     withoutSubscription();
     answer(ROUTE, "PUT", body, status);
     const user = userEvent.setup();
@@ -255,11 +277,14 @@ it.each([
     const address = screen.getByLabelText("Dirección secreta iCal");
     await user.type(address, "https://calendar.google.com/a.ics");
     await user.click(screen.getByRole("button", { name: "Guardar" }));
-    expect(
-      await screen.findByText(/no sabemos si se guardó/i),
-    ).toBeInTheDocument();
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(message);
+    expect(alert.textContent).toBe(message);
     expect(address).toHaveValue("https://calendar.google.com/a.ics");
     expect(screen.getByRole("button", { name: "Guardar" })).toBeEnabled();
+    // Y la región viva deja de decir «Guardando…»: si no, el role=status
+    // anunciaría un guardado en curso mientras el role=alert dice que falló.
+    expect(screen.getByRole("status").textContent).toBe("");
   },
 );
 
@@ -338,8 +363,11 @@ it("@s38 anuncia Sincronizando, envía una sola petición y bloquea los controle
   expect(screen.getByLabelText("Dirección secreta iCal")).toHaveAttribute(
     "readonly",
   );
-  // Segundo intento con la primera petición aún en vuelo: ni el bloqueo del
-  // botón ni el guardián de reentrada pueden dejar salir un segundo POST.
+  // Segundo intento con la primera petición aún en vuelo. Quien lo impide aquí es
+  // el atributo disabled: user-event no despacha el clic sobre un botón
+  // deshabilitado, así que synchronise() ni se ejecuta. El guardián de reentrada
+  // de synchronise no es alcanzable desde la interfaz; el que sí lo es, y tiene su
+  // propia prueba, es el de confirmRemoval.
   await user.click(sync);
   expect(calls.filter((call) => call.method === "POST")).toHaveLength(1);
   release?.();
@@ -369,6 +397,34 @@ it("@s38 muestra el mensaje del código y conserva la lista cuando la sincroniza
   ).toBeInTheDocument();
   expect(screen.getByText("Reunión")).toBeInTheDocument();
   expect(calls.filter((call) => call.method === "POST")).toHaveLength(1);
+  // @s38 fila 7: «la lista anterior permanece». Permanece porque una sincronización
+  // fallida NO vuelve a pedir /events; contar la petición es lo único que distingue
+  // eso de recargarla y que por casualidad devuelva lo mismo.
+  expect(
+    calls.filter(
+      (call) => call.method === "GET" && call.url.includes("/events"),
+    ),
+  ).toHaveLength(1);
+  expect(screen.getByRole("status").textContent).toBe(
+    "Sincronización fallida.",
+  );
+});
+
+it("@s38 una sincronización correcta sí vuelve a pedir la lista y lo anuncia", async () => {
+  withSubscription(synced, [meeting]);
+  answer(`${ROUTE}/sync`, "POST", { performed: true, subscription: synced });
+  const user = userEvent.setup();
+  render(<ExternalCalendar />);
+  await screen.findByText("Reunión");
+  await user.click(screen.getByRole("button", { name: "Sincronizar ahora" }));
+  await waitFor(() =>
+    expect(screen.getByRole("status").textContent).toBe("Sincronizado."),
+  );
+  expect(
+    calls.filter(
+      (call) => call.method === "GET" && call.url.includes("/events"),
+    ),
+  ).toHaveLength(2);
 });
 
 it("@s38 vuelve al formulario vacío cuando la suscripción ya no existe", async () => {

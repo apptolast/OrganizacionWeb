@@ -206,3 +206,75 @@ que pide @s38 («se envía exactamente una petición»). Son 5 de los ~16 previs
 para este racimo; los otros 8 mueren.
 
 Estado tras el racimo: **95 pruebas verdes**.
+
+---
+
+## Racimo D — las aserciones que no pueden fallar (categoría 2 del encargo)
+
+Cuatro sitios, todos denunciados por la predicción o por sus refutaciones.
+
+### D.1 · Los dos mensajes de fallo de guardado eran indistinguibles
+
+`external-calendar.test.tsx`, el `it.each` de dos filas (503 `CONNECTORS_DISABLED`
+y fallo de red) usaba **la misma** aserción `/no sabemos si se guardó/i` para las
+dos. Borrando entero el bloque de `ConnectorsDisabledError` de `failed()`
+(`external-calendar.tsx:177-180`) las dos filas seguían verdes, porque el 503 cae
+en el `setFailure(UNCERTAIN)` genérico y produce un texto que también contiene esa
+frase. @s38 fila 3 pide un mensaje distinto del genérico.
+
+Ahora cada fila lleva su **texto completo** y se afirma el `textContent` exacto del
+`role="alert"`, así que cada una niega implícitamente el de la otra. Y de paso se
+afirma que el `role="status"` queda vacío: si `setAnnouncement("")` del catch se
+perdiera, la región viva seguiría diciendo «Guardando…» mientras la alerta dice que
+falló.
+
+### D.2 · El recuento de botones de la sección de Hoy
+
+`today-external-calendar.test.tsx:96`,
+`expect(within(section).queryAllByRole("button")).toHaveLength(0)`: la sección no
+renderiza **ningún** botón en ninguna de sus ramas, así que la cuenta es cero por
+construcción y ningún mutante puede tumbarla. Sustituida por dos aserciones que sí
+caen: no hay enlace de rescate (lo que distingue el camino feliz del de fallo) y no
+se anuncia «Sincronización pendiente.» (la rama falsa que nadie fijaba).
+
+### D.3 · «ningún nodo del DOM contiene la URL completa»
+
+`external-calendar.test.tsx:119`, `not.toContain("https://")`: estructuralmente
+infalible, porque el DTO solo transporta `urlHost` y `urlTail` y la URL completa no
+existe en el fixture. Se conserva como documentación del And de @s37, pero el test
+ahora fija además la forma exacta del recorte
+(`"calendar.google.com … .ics"`), que el separador esté fuera del árbol de
+accesibilidad (`aria-hidden="true"`) y que la etiqueta llegue al campo.
+
+### D.4 · La sincronización fallida que «conserva la lista» por casualidad
+
+La prueba de @s38 fila 7 afirmaba que «Reunión» sigue en pantalla, pero el doble de
+`fetch` reutiliza la última respuesta encolada: si el mutante quitara la guarda
+`if (outcome.subscription.lastStatus === "OK") await loadEvents(signal)`, la
+recarga devolvería lo mismo y la prueba pasaría igual. Ahora se **cuenta** la
+petición: una sola lectura de `/events` tras una sincronización fallida, dos tras
+una correcta. Y se afirma el anuncio «Sincronización fallida.», que no aparecía en
+ninguna prueba del repositorio.
+
+También se corrigió el comentario engañoso de la prueba del doble clic de
+Sincronizar: quien impide el segundo POST es el atributo `disabled`, no el
+guardián de reentrada.
+
+### Acreditación por mutante (racimo D) — 12 de 12 mueren
+
+| Mutante | Quién lo mata |
+|---|---|
+| `failed()`: se borra el bloque de `ConnectorsDisabledError` | `@s38 … con 503` |
+| `failed()`: el prefijo de conectores se pierde al componer | `@s38 … con 503` |
+| `save`: `setAnnouncement("")` del catch → se borra | las dos filas de `@s38 … estado incierto` |
+| separador `" … "` → `""` | `@s37 muestra host y cola…` |
+| `aria-hidden="true"` → `""` | `@s37 muestra host y cola…` |
+| `setLabel(subscription.label)` → `""` | `@s37 muestra host y cola…` |
+| literal «Sincronización fallida.» → `""` | `@s38 muestra el mensaje del código…` |
+| ternario del anuncio → siempre «Sincronizado.» | `@s38 muestra el mensaje del código…` |
+| guarda de recarga → recarga siempre | `@s38 muestra el mensaje del código…` |
+| guarda de recarga → no recarga nunca | `@s38 sincroniza…` y `@s38 una sincronización correcta sí vuelve a pedir…` |
+| Hoy: `pendingSync ? … : null` → `true` | `@s35 muestra el evento en hora local…` |
+| Hoy: el ternario de fallo → `true` | siete pruebas |
+
+Estado tras el racimo: **96 pruebas verdes**.

@@ -93,7 +93,15 @@ it("@s35 muestra el evento en hora local y la marca de la última sincronizació
   expect(
     within(section).getByText(/Según sincronización de 12:00/),
   ).toBeInTheDocument();
-  expect(within(section).queryAllByRole("button")).toHaveLength(0);
+  // «Sin botones de edición» (@s35): la sección no renderiza ningún botón en
+  // ninguna de sus ramas, así que contarlos era una aserción que no puede fallar.
+  // Lo que sí distingue este estado del de fallo es que no hay enlace de rescate,
+  // y lo que distingue el camino feliz es que no se anuncia sincronización
+  // pendiente: las dos sí caen si la producción se rompe.
+  expect(within(section).queryByRole("link")).not.toBeInTheDocument();
+  expect(
+    within(section).queryByText("Sincronización pendiente."),
+  ).not.toBeInTheDocument();
 });
 
 it("@s35 un evento de todo el día se muestra sin horas", async () => {

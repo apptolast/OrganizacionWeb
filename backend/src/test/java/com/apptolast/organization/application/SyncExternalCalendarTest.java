@@ -283,6 +283,51 @@ class SyncExternalCalendarTest {
     assertEquals(Instant.parse("2030-01-08T09:00:00Z"), store.stored(OWNER).getFirst().startAt());
   }
 
+  /**
+   * @s17, @s18, @s20 y @s21 hablan de «los contadores que publica la sincronización», y hasta aquí
+   *     todos los oráculos fuera de {@code IcsFeedTest} los afirmaban en cero: los cuatro accesores
+   *     podían devolver 0 siempre y la suite seguía verde. Un feed con las tres omisiones a la vez y
+   *     los cuatro contadores en valores <b>distintos entre sí</b> y distintos de cero cierra el
+   *     tramo entero —parser, SyncSummary, fila y DTO— y además delata cualquier cruce entre ellos,
+   *     que un valor repetido escondería.
+   */
+  @Test
+  void s18_theThreeSkipCountersTravelFromTheParserToTheSubscription() {
+    subscribed();
+    feed.answer = FeedFetch.downloaded(feedWithEveryKindOfOmission());
+
+    var subscription = sync().execute(OWNER, false).subscription();
+
+    assertEquals(4, subscription.imported());
+    assertEquals(3, subscription.skippedRecurring());
+    assertEquals(2, subscription.skippedCancelled());
+    assertEquals(1, subscription.skippedInvalid());
+    assertEquals(4, store.stored(OWNER).size(), "solo se almacenan los válidos no omitidos");
+  }
+
+  /** Cuatro válidos, tres recurrentes, dos cancelados y un UID repetido. */
+  static String feedWithEveryKindOfOmission() {
+    var ics = new StringBuilder("BEGIN:VCALENDAR\r\nVERSION:2.0\r\n");
+    for (int i = 0; i < 4; i++) ics.append(vevent("valido-" + i, 8 + i, ""));
+    ics.append(vevent("valido-0", 12, ""));
+    for (int i = 0; i < 3; i++) ics.append(vevent("repetido-" + i, 13, "RRULE:FREQ=WEEKLY\r\n"));
+    for (int i = 0; i < 2; i++) ics.append(vevent("anulado-" + i, 14, "STATUS:CANCELLED\r\n"));
+    return ics.append("END:VCALENDAR\r\n").toString();
+  }
+
+  static String vevent(String uid, int hour, String extra) {
+    var start = Instant.parse("2030-01-08T00:00:00Z").plusSeconds(3600L * hour);
+    return "BEGIN:VEVENT\r\nUID:"
+        + uid
+        + "\r\nDTSTART:"
+        + compact(start)
+        + "\r\nDTEND:"
+        + compact(start.plusSeconds(3600))
+        + "\r\n"
+        + extra
+        + "END:VEVENT\r\n";
+  }
+
   @Test
   void s24_countersDescribeTheWholeFeedWhileTheSnapshotIsTruncated() {
     subscribed();

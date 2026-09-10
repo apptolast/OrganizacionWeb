@@ -101,3 +101,42 @@ el propietario ve por qué falló esa entrega en vez de una pantalla ciega._
 
 **Alcanza a:** `features/webhooks.feature` (`@s25`), `project-spec.md:2038`, y
 `frontend/src/webhooks-client.ts` (que hoy la rechaza y deja el panel ciego).
+
+---
+
+## R7 — 10 de septiembre de 2026 — la feature 29 se retira del producto
+
+**Pregunta:** «Dijiste que la feature 29 se puede quitar entera. Tiene 38 ficheros
+de producción y sus piezas las comparte con el conector de GitHub (feature 27),
+que sí quieres. ¿Qué quieres exactamente?»
+
+**Opción elegida:** «**Borrarla entera del producto**», descrita en la propia
+pregunta con sus costes delante:
+
+> Cirugía: hay que des-unificar `ImportIssues`, devolver a la 27 su forma de
+> recibo anterior (revirtiendo una enmienda de contrato), quitar
+> `BoundedResponse` del origen de GitHub perdiendo el techo de 5 MiB, y revertir
+> la migración V29. **Días, y con riesgo real de romper la 27.**
+
+**Alcance:** desaparecen el catálogo de conectores y el conector de GitLab —su
+producción, sus pruebas, sus specs de E2E, su contrato
+`features/additional_connectors.feature` y su entrada en `feature_list.json`, que
+pasa de 30 features a **29**—.
+
+**Tres decisiones técnicas que tomo yo dentro del encargo, y por qué:**
+
+1. **`BoundedResponse` se queda**, como código de la feature 27. Es el techo de
+   5 MiB que impide que un proveedor agote la memoria del proceso, y lo usa
+   `HttpGithubIssueSource`. Borrarlo reabriría ese agujero: el propietario pidió
+   quitar una feature, no introducir una vulnerabilidad.
+2. **`ImportIssues` se queda unificado**, sirviendo sólo a GitHub. Des-unificarlo
+   es riesgo puro sin ganancia.
+3. **La forma del recibo se queda** con `source` y `projectPath`. Los introdujo la
+   29, pero hoy son la forma del recibo de la 27 y su contrato ya se enmendó para
+   casarlos: revertirlo rompería justo lo que hay que proteger.
+
+**Y una consecuencia que conviene tener escrita:** la migración `V29` no sólo creó
+tablas, también renombró `issue_import_receipts.repository` a `project_path` y
+añadió `source`. Esas dos **no se revierten** por lo dicho en el punto 3. La
+migración de retirada se limita a `gitlab_connections` y al `CHECK` de
+`task_external_links`.

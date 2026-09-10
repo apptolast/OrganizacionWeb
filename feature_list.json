@@ -322,17 +322,6 @@
       "status": "in_progress"
     },
     {
-      "id": 29,
-      "name": "additional_connectors",
-      "title": "Otros conectores",
-      "description": "Catálogo de conectores con estado y segundo gestor de issues (GitLab) sobre el puerto compartido IssueSource; contrato de 38 escenarios en features/additional_connectors.feature aprobado por autorización global. Depende de 25–28 integradas.",
-      "acceptance": [
-        "Cumplir @s1–@s38 de features/additional_connectors.feature con revisión, pruebas y mutación antes del cierre."
-      ],
-      "sdd": true,
-      "status": "in_progress"
-    },
-    {
       "id": 30,
       "name": "automations",
       "title": "Automatizaciones",

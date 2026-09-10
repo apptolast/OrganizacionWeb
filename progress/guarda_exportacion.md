@@ -181,3 +181,158 @@ No he lanzado mutación y no he tocado `backend/build.gradle.kts`. El cambio es
 **sólo de test**: cero líneas de producción. Si quieres que
 `ExportCollectionSetTest` cuente dentro del `mutationScope` de la feature 22,
 es una línea en ese fichero y la llevas tú.
+
+---
+
+# Segunda tanda: cerrar el aviso 5.3 — el `default -> 0` deja de callar
+
+Encargo del coordinador tras integrar la primera tanda: convertir en guarda el
+tercer aviso. Producción de la feature 22 (`done`) tocada **con su aprobación
+explícita** y por el razonamiento del propio aviso.
+
+## 1. Por qué la guarda anterior no bastaba
+
+`ExportCollectionSetTest` afirma el conjunto de **claves** del JSON. Una
+colección que cayera en `default -> 0` **sí tendría su clave**: aparecería como
+`[]` con `count: 0`, y la respuesta seguiría siendo 200. El conjunto estaría
+intacto y el archivo, incompleto. El coordinador lo señaló antes de que yo
+pudiera darlo por cubierto, y tenía razón: son dos guardas distintas.
+
+## 2. El cambio de producción
+
+`PostgresExportDataQueries`:
+
+```java
+-      default -> 0;
++      default -> throw new IllegalStateException("Unknown export collection: " + collection);
+```
+
+El mensaje nombra la colección, que era el requisito: quien lo lea en un log
+sabe cuál falta sin abrir el código.
+
+Adónde va a parar: el `catch (RuntimeException error)` de `prepare` lo envuelve
+en `StorageUnavailableException`, es decir **503 STORAGE_UNAVAILABLE sin
+Content-Disposition ni bytes**, que es exactamente lo que `@s17` exige de un
+fallo tardío de preparación. No hay 200 posible por esa ruta.
+
+Mensaje en inglés a propósito, por homogeneidad con los otros errores internos
+del mismo fichero (`"Invalid session relationship"`, `"Stored scalar exceeds the
+bounded reader"`). No lo ve el usuario: la traducción española la pone
+`ApiErrors` sobre `StorageUnavailableException`.
+
+### El alcance real: una línea más una extracción de método
+
+Aviso honesto, porque el coordinador pidió que avisara si crecía. El `switch`
+vivía **dentro de una lambda anónima**, dentro de una transacción, dentro de
+`prepare`: desde una prueba no había forma de llamarlo con un nombre
+desconocido sin levantar la exportación entera. Así que hubo un paso previo:
+
+- **Extract method** puro, sin cambio de comportamiento: el `switch` pasa a
+  `long writeCollection(String owner, String collection, JsonGenerator json)`,
+  visible en el paquete, y la lambda queda
+  `(collection, json) -> writeCollection(owner, collection, json)`.
+
+Es refactor mecánico y quedó cubierto por las pruebas existentes antes de tocar
+el `default`. **Nada dependía del cero silencioso**: `default` era inalcanzable
+en producción, porque la única fuente de nombres es `ExportJsonWriter.COLLECTIONS`
+y sus catorce tienen `case`. Ningún otro `CollectionWriter` existe en el
+repositorio (`empty()` usa su propia lambda `(collection, json) -> 0`, que no
+pasa por aquí).
+
+## 3. La guarda
+
+`backend/src/test/java/com/apptolast/organization/adapter/persistence/ExportCollectionCoverageTest.java`,
+trazada a `@s1` y `@s2`. Se construye sobre un `DriverManagerDataSource` **sin
+driver**, de modo que «tocar la base de datos» es observable como fallo
+inmediato y distinguible de «resolverse sin tocarla». Sin contenedor y sin red.
+
+- `s1_anUnknownCollectionFailsLoudlyInsteadOfExportingAnEmptyArray` — un nombre
+  que el `switch` no conoce debe estallar nombrándolo, no devolver cero.
+- `s2_everyCollectionOfSection22ReachesItsQuery` (parametrizada, 14 casos) — sin
+  base de datos, **cada una de las catorce debe fallar**. Una que se resolviera
+  sola es precisamente la que no consulta su tabla.
+
+## 4. Los rojos acreditados
+
+### Rojo D — el `default` callaba
+
+Con la extracción hecha y `default -> 0` todavía en pie:
+
+```
+ExportCollectionCoverageTest > s1_anUnknownCollectionFailsLoudlyInsteadOfExportingAnEmptyArray() FAILED
+java.lang.AssertionError: [una colección sin consulta no puede pasar por exportada]
+Expecting actual not to be null
+	at ExportCollectionCoverageTest.s1_anUnknownCollectionFailsLoudlyInsteadOfExportingAnEmptyArray(ExportCollectionCoverageTest.java:51)
+```
+
+«Expecting actual not to be null» es el retrato del defecto: no hubo excepción
+ninguna. La colección desconocida se exportó como array vacío, en silencio.
+Los otros catorce casos ya iban en verde en esta misma ejecución — ver §5.
+
+### Rojo E — un `case` que falta
+
+Ya con el `default` lanzando, se retiró `case "appearance" -> appearance(owner, json);`,
+que es el olvido futuro que el aviso describía:
+
+```
+java.lang.AssertionError: [appearance debe consultar su tabla, no resolverse en silencio sin base de datos]
+Expecting actual throwable to be an instance of any of the following types:
+  [org.springframework.jdbc.CannotGetJdbcConnectionException,
+    com.apptolast.organization.application.StorageUnavailableException]
+but was:
+  java.lang.IllegalStateException: Unknown export collection: appearance
+	at PostgresExportDataQueries.writeCollection(PostgresExportDataQueries.java:98)
+```
+
+Nótese el mensaje: dice **cuál** falta. `case` restaurado, verde de vuelta.
+
+## 5. Ninguna de las catorce caía ahí — no hay defecto vivo
+
+Comprobado por dos caminos independientes:
+
+1. **Unitario y permanente**: los 14 casos de `s2` pasaron **ya en la ejecución
+   roja**, con `default -> 0` todavía puesto. Si alguna colección hubiese estado
+   sin `case`, habría devuelto 0 sin tocar la base y su caso habría fallado.
+2. **Integración con Postgres real**: `ExportPersistenceTest` verde tras el
+   cambio, con datos reales en todas las familias. Si alguna de las catorce
+   hubiese caído en el nuevo `default`, la exportación habría reventado en 503.
+
+Un ajuste de la propia prueba durante el camino, por honestidad: mi primera
+versión de `s2` exigía `CannotGetJdbcConnectionException` para las catorce y
+falló en `customization`, `projectCustomFieldValues` y `taskCustomFieldValues`.
+**No era un defecto**: esas tres pasan por `PostgresCustomizationStore`, que
+envuelve el fallo de conexión en `StorageUnavailableException`. Las tres sí
+consultan. Mi expectativa era la equivocada y se corrigió a `isInstanceOfAny`.
+
+## 6. Verde final
+
+Por clase concreta, sin suite entera y sin campañas de mutación:
+
+| Clase | Resultado |
+|---|---|
+| `ExportCollectionCoverageTest` (15) | BUILD SUCCESSFUL |
+| `ExportCollectionSetTest` (2) | BUILD SUCCESSFUL |
+| `ExportJsonWriterTest`, `ExportBufferTest`, `ExportReceiptWriterTest` | BUILD SUCCESSFUL |
+| `ExportPersistenceTest` (Testcontainers) | BUILD SUCCESSFUL |
+| `ExportDataApiTest`, `ExportDataHttpPersistenceTest` | BUILD SUCCESSFUL |
+
+`spotlessCheck` limpio.
+
+## 7. Ámbito de mutación: **sí hay que remedir la 22**
+
+- `backend/build.gradle.kts:363` incluye
+  `com.apptolast.organization.adapter.persistence.PostgresExportDataQueries*`
+  en `exportPersistenceClasses`, el conjunto **mutado** del scope
+  `export_data_persistence`. He cambiado esa clase, así que la campaña anterior
+  ya no describe el código actual.
+- Target: `node scripts/project.mjs mutate export_data-persistence-backend`
+  (`-PmutationScope=export_data_persistence`).
+- **No hace falta que toques `build.gradle.kts`.** Las dos guardas nuevas ya
+  entran solas: `exportAdapterTests` incluye el patrón
+  `com.apptolast.organization.adapter.persistence.Export*Test`, y además el
+  scope `exportPersistenceOnly` fija `targetTests` a
+  `com.apptolast.organization.*` (línea 584), que las cubre igualmente.
+- Expectativa razonable: el `default` pasa de ser una rama **inmatable** (un `0`
+  inalcanzable que ningún test podía distinguir) a una rama con dos pruebas
+  encima. La cobertura de mutación de la clase debería subir, no bajar. Pero es
+  tu campaña y tu fichero: no la lanzo.

@@ -218,6 +218,54 @@ class HttpCalendarFeedTest {
     assertTrue(elapsed < 5_000, "la lectura del cuerpo tardó " + elapsed + " ms en cortarse");
   }
 
+  /** Cuánto se le concede a la guillotina sobre el plazo antes de dar por rota la cota. */
+  static final int DEADLINE_TOLERANCE = 3;
+
+  /**
+   * feature:13-14, la mitad que faltaba de @s12: «el plazo de 5 s es del intercambio completo» y
+   * «ninguna descarga puede retener un hilo más de 5 s». El proveedor sirve las cabeceras y después
+   * <b>enmudece del todo</b>: ni un byte más, ni cierre. Es el único caso que obliga a la
+   * guillotina, y por eso no lo cubría la prueba del goteo: mientras algo llega, {@code read}
+   * retorna y quien corta es la comprobación del instante límite por trozo. Aquí {@code read} se
+   * queda bloqueado dentro del socket, así que sólo puede desbloquearlo el cierre programado.
+   *
+   * <p>Sin esa guillotina la prueba no termina: de ahí {@link Timeout}, que es lo que convierte
+   * «retiene el hilo para siempre» en un fallo y no en una suite colgada.
+   */
+  @Test
+  @Timeout(20)
+  void s12_aProviderThatGoesSilentAfterTheHeadersIsCutByTheDeadline() {
+    var hungUp = new CountDownLatch(1);
+    handler =
+        exchange -> {
+          exchange.getResponseHeaders().add("Content-Type", "text/calendar");
+          exchange.sendResponseHeaders(200, 0);
+          exchange.getResponseBody().flush();
+          try {
+            hungUp.await(SILENCE_BEFORE_HANGING_UP_SECONDS, TimeUnit.SECONDS);
+          } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+          } finally {
+            exchange.close();
+          }
+        };
+    var budget = Duration.ofMillis(600);
+    var mute = feed(budget);
+    long started = System.nanoTime();
+    FeedError code;
+    try {
+      code = codeOf(mute.fetch(url("/cal.ics")));
+    } finally {
+      hungUp.countDown();
+    }
+    long elapsed = Duration.ofNanos(System.nanoTime() - started).toMillis();
+
+    assertEquals(FeedError.FEED_UNREACHABLE, code);
+    assertTrue(
+        elapsed < DEADLINE_TOLERANCE * budget.toMillis(),
+        "el hilo quedó retenido " + elapsed + " ms con un plazo de " + budget.toMillis() + " ms");
+  }
+
   /**
    * Enmienda B3: se conecta contra la dirección ya validada, no contra el nombre. El nombre usado
    * aquí no existe en ningún DNS; si el cliente volviera a resolverlo —que es lo que hacía antes—
@@ -380,6 +428,79 @@ class HttpCalendarFeedTest {
   @Test
   void s12_anUnparseableUrlIsUnreachableInsteadOfAnException() {
     assertEquals(FeedError.FEED_UNREACHABLE, codeOf(feed().fetch("https://")));
+  }
+
+  // --- @s12: las cuatro degradaciones que ocurren ANTES de abrir el socket ------------------------
+  //
+  // feature:14 cierra la lista de códigos de fallo, y feature:15 exige que un fallo deje la
+  // instantánea anterior intacta: para eso, todo lo que pueda torcerse aquí tiene que salir como un
+  // código, nunca como una excepción que suba al caso de uso. Las cuatro comparten oráculo: el
+  // código es FEED_UNREACHABLE y el proveedor no recibe ni una petición.
+
+  /**
+   * Una URL que sí parsea pero no tiene nombre de servidor. La validación de @s5 no deja guardar
+   * ninguna así, de modo que esto es la segunda línea del adaptador, no la primera.
+   */
+  @ParameterizedTest
+  @CsvSource({"http:///cal.ics", "file:/tmp/cal.ics", "mailto:calendario@example.test"})
+  void s12_aUrlWithoutAHostIsUnreachableWithoutResolvingAnything(String url) {
+    var resolutions = new java.util.concurrent.atomic.AtomicInteger();
+    var counting =
+        new HttpCalendarFeed(
+            HttpCalendarFeed.TIMEOUT,
+            host -> {
+              resolutions.incrementAndGet();
+              return List.of(InetAddress.getLoopbackAddress());
+            },
+            address -> true);
+    assertEquals(FeedError.FEED_UNREACHABLE, codeOf(counting.fetch(url)));
+    assertEquals(0, resolutions.get(), "sin nombre no hay nada que resolver");
+    assertTrue(received.isEmpty());
+  }
+
+  /** El resolutor revienta: el DNS no responde, por ejemplo. */
+  @Test
+  void s12_aResolverThatThrowsIsUnreachable() {
+    var breaking =
+        new HttpCalendarFeed(
+            HttpCalendarFeed.TIMEOUT,
+            host -> {
+              throw new IllegalStateException("el DNS no responde");
+            },
+            address -> true);
+    assertEquals(FeedError.FEED_UNREACHABLE, codeOf(breaking.fetch(url("/cal.ics"))));
+    assertTrue(received.isEmpty());
+  }
+
+  /**
+   * El nombre no tiene ninguna dirección. Sin esta guarda, {@code getFirst()} sobre la lista vacía
+   * subiría una excepción en vez de un código, y con una lista nula ni siquiera se llegaría a
+   * mirar la política.
+   */
+  @ParameterizedTest
+  @CsvSource({"vacía", "nula"})
+  void s12_aNameWithoutAddressesIsUnreachableWithoutConnecting(String answer) {
+    var empty =
+        new HttpCalendarFeed(
+            HttpCalendarFeed.TIMEOUT,
+            host -> "nula".equals(answer) ? null : List.of(),
+            address -> true);
+    assertEquals(FeedError.FEED_UNREACHABLE, codeOf(empty.fetch(url("/cal.ics"))));
+    assertTrue(received.isEmpty());
+  }
+
+  /**
+   * Construir la petición puede ser rechazado por el propio cliente del JDK. Aquí se provoca con un
+   * esquema que {@code HttpRequest.newBuilder} no admite; el otro disparador de ese mismo catch —un
+   * despliegue que no autorice la cabecera Host restringida— no se puede provocar dentro de este
+   * JVM, y queda documentado en la bitácora de bloqueantes (B5). Lo que esta prueba mide es lo que
+   * el adaptador hace cuando ocurre: devolver el código, no conectar y no propagar la excepción.
+   */
+  @Test
+  void s12_aRequestTheClientRefusesToBuildIsUnreachableWithoutConnecting() {
+    var unsupported = "ftp://feed.example.test:" + port() + "/cal.ics";
+    assertEquals(FeedError.FEED_UNREACHABLE, codeOf(feed().fetch(unsupported)));
+    assertTrue(received.isEmpty(), "no puede haberse abierto ninguna conexión");
   }
 
   // --- @s12, enmienda B3: el apretón de manos del camino anclado ---------------------------------

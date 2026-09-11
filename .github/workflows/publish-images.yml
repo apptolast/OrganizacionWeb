@@ -2,15 +2,23 @@ name: Publish container images
 
 # Publica ocholoko888/organizationweb-api y ocholoko888/organizationweb-web
 # para linux/amd64 sólo después de que "Application CI" (harness-ci.yml) salga
-# en verde sobre un push a main. Etiquetas: el SHA completo de 40 caracteres
-# (asa inmutable para volver atrás) y :latest (sólo si ese commit sigue siendo
-# la punta de main). La configuración de la imagen lleva
-# org.opencontainers.image.revision=<SHA completo>.
+# en verde sobre un push a main hecho por el propietario. Etiquetas: el SHA
+# completo de 40 caracteres (asa inmutable para volver atrás) y :latest. La
+# configuración de la imagen lleva org.opencontainers.image.revision=<SHA>.
 #
 # El servidor sigue el canal :latest (decisión del propietario del 11 de
-# septiembre de 2026): cualquier fusión a main con la CI verde llega a
-# producción. Secretos requeridos: DOCKERHUB_USERNAME y DOCKERHUB_TOKEN, con
-# lectura y escritura sólo sobre los dos repositorios.
+# septiembre de 2026): mover :latest ES desplegar en producción. Por eso:
+# - los builds empujan sólo :<SHA>; :latest se mueve en un único paso final,
+#   después de verificar los dos digests y de volver a comprobar que el SHA
+#   sigue siendo la punta de main, re-etiquetando los digests verificados sin
+#   reconstruir, y se comprueba a qué digest resuelve :latest después;
+# - sólo publica si el commit está en main, lo empujó el propietario y lo
+#   verificó harness-ci.yml (no otro workflow que se llame igual);
+# - DOCKERHUB_USERNAME y DOCKERHUB_TOKEN viven SÓLO en el environment
+#   dockerhub-publish, restringido a la rama main. Nunca como secretos de
+#   repositorio: cualquier workflow de cualquier rama podría leerlos y empujar
+#   :latest saltándose todo esto. El job se niega a publicar si el environment
+#   no está restringido exactamente a main.
 
 on:
   workflow_run:
@@ -29,18 +37,71 @@ concurrency:
 jobs:
   publish:
     name: Build and push api/web (linux/amd64)
+    # Lista de actores permitidos: hoy sólo el propietario. Un push directo a
+    # main del bot autónomo (o de cualquier otro) no publica nada.
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_branch == 'main' &&
-      github.event.workflow_run.head_repository.full_name == github.repository
+      github.event.workflow_run.path == '.github/workflows/harness-ci.yml' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.actor.login == 'PabloHurtadoGonzalo86' &&
+      github.event.workflow_run.triggering_actor.login == 'PabloHurtadoGonzalo86'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    environment: dockerhub-publish
+    permissions:
+      contents: read
+      actions: read # leer la política de ramas del environment
     env:
       REVISION: ${{ github.event.workflow_run.head_sha }}
       API_IMAGE: docker.io/ocholoko888/organizationweb-api
       WEB_IMAGE: docker.io/ocholoko888/organizationweb-web
+      PUBLISH_ENVIRONMENT: dockerhub-publish
+      GH_TOKEN: ${{ github.token }}
     steps:
+      - name: Require the environment to be restricted to main
+        run: |
+          set -euo pipefail
+          # Un environment que no existe se crea solo al primer uso, sin
+          # restricción de ramas. Falla cerrado si no está limitado a main.
+          base="repos/${GITHUB_REPOSITORY}/environments/${PUBLISH_ENVIRONMENT}"
+          if ! gh api "${base}" | jq -e '
+            .deployment_branch_policy.protected_branches == false and
+            .deployment_branch_policy.custom_branch_policies == true' >/dev/null
+          then
+            echo "::error::${PUBLISH_ENVIRONMENT} has no custom branch policy"
+            exit 1
+          fi
+          if ! gh api "${base}/deployment-branch-policies" | jq -e '
+            .total_count == 1 and (.branch_policies | length) == 1 and
+            .branch_policies[0].name == "main" and
+            ((.branch_policies[0].type // "branch") == "branch")' >/dev/null
+          then
+            echo "::error::${PUBLISH_ENVIRONMENT} must allow exactly branch main"
+            exit 1
+          fi
+
+      - name: Require the commit to be on main
+        run: |
+          set -euo pipefail
+          [[ "${REVISION}" =~ ^[0-9a-f]{40}$ ]]
+          tip="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" \
+            --jq .object.sha)"
+          [[ "${tip}" =~ ^[0-9a-f]{40}$ ]]
+          # head_branch es texto libre (un tag llamado main también lo da):
+          # exige que el SHA sea antecesor o igual de la punta real de main.
+          status="$(gh api \
+            "repos/${GITHUB_REPOSITORY}/compare/${tip}...${REVISION}" \
+            --jq .status)"
+          case "${status}" in
+            identical|behind) ;;
+            *)
+              echo "::error::${REVISION} is not on main (${status} vs ${tip})"
+              exit 1
+              ;;
+          esac
+
       - name: Check out the exact commit that passed Application CI
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
         with:
@@ -50,7 +111,6 @@ jobs:
       - name: Require a clean, world-readable build context
         run: |
           set -euo pipefail
-          [[ "${REVISION}" =~ ^[0-9a-f]{40}$ ]]
           test "$(git rev-parse HEAD)" = "${REVISION}"
           test -z "$(git status --porcelain --untracked-files=all)"
           echo "runner umask: $(umask)"
@@ -63,18 +123,6 @@ jobs:
             exit 1
           fi
 
-      - name: Decide whether this commit may move :latest
-        id: tip
-        run: |
-          set -euo pipefail
-          tip="$(git ls-remote origin refs/heads/main | cut -f1)"
-          if [ "${tip}" = "${REVISION}" ]; then
-            echo "latest=true" >> "${GITHUB_OUTPUT}"
-          else
-            echo "::warning::main moved to ${tip}; publishing ${REVISION} without :latest"
-            echo "latest=false" >> "${GITHUB_OUTPUT}"
-          fi
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e  # v4.3.0
 
@@ -84,6 +132,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # Los builds empujan SÓLO :<SHA>. :latest se mueve al final.
       - name: Build and push the API image
         id: api
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a  # v7.3.0
@@ -97,9 +146,7 @@ jobs:
           labels: |
             org.opencontainers.image.revision=${{ env.REVISION }}
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-          tags: |
-            ${{ env.API_IMAGE }}:${{ env.REVISION }}
-            ${{ steps.tip.outputs.latest == 'true' && format('{0}:latest', env.API_IMAGE) || '' }}
+          tags: ${{ env.API_IMAGE }}:${{ env.REVISION }}
 
       - name: Build and push the web image
         id: web
@@ -114,9 +161,7 @@ jobs:
           labels: |
             org.opencontainers.image.revision=${{ env.REVISION }}
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-          tags: |
-            ${{ env.WEB_IMAGE }}:${{ env.REVISION }}
-            ${{ steps.tip.outputs.latest == 'true' && format('{0}:latest', env.WEB_IMAGE) || '' }}
+          tags: ${{ env.WEB_IMAGE }}:${{ env.REVISION }}
 
       - name: Verify the pushed images like the Swarm role does
         env:
@@ -124,6 +169,9 @@ jobs:
           WEB_DIGEST: ${{ steps.web.outputs.digest }}
         run: |
           set -euo pipefail
+          for digest in "${API_DIGEST}" "${WEB_DIGEST}"; do
+            [[ "${digest}" =~ ^sha256:[0-9a-f]{64}$ ]]
+          done
           for ref in "${API_IMAGE}@${API_DIGEST}" "${WEB_IMAGE}@${WEB_DIGEST}"; do
             docker pull --platform linux/amd64 "${ref}"
             docker image inspect "${ref}" | jq -e --arg rev "${REVISION}" '
@@ -134,5 +182,70 @@ jobs:
             echo "### Published ${REVISION}"
             echo "- api: \`${API_IMAGE}@${API_DIGEST}\`"
             echo "- web: \`${WEB_IMAGE}@${WEB_DIGEST}\`"
-            echo "- moved :latest: ${{ steps.tip.outputs.latest }}"
           } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Move :latest to the verified digests if still the tip of main
+        id: latest
+        env:
+          API_DIGEST: ${{ steps.api.outputs.digest }}
+          WEB_DIGEST: ${{ steps.web.outputs.digest }}
+        run: |
+          set -euo pipefail
+          # Resuelve el digest del índice al que apunta una etiqueta; vacío
+          # si la etiqueta aún no existe.
+          resolve() {
+            local d
+            d="$(docker buildx imagetools inspect "$1" \
+              --format '{{json .Manifest}}' 2>/dev/null | jq -r .digest)" || d=""
+            if [[ "${d}" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+              printf '%s\n' "${d}"
+            fi
+          }
+          # Segunda comprobación de la punta: los builds tardan minutos y main
+          # puede haber avanzado mientras tanto.
+          tip="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" \
+            --jq .object.sha)"
+          if [ "${tip}" != "${REVISION}" ]; then
+            echo "::notice::main moved to ${tip}; ${REVISION} keeps only its SHA tag"
+            {
+              echo "- main is now at \`${tip}\`: that SHA must hold :latest;"
+              echo "  re-run its publish by hand if no later run moved it."
+            } >> "${GITHUB_STEP_SUMMARY}"
+            echo "moved=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          prev_api="$(resolve "${API_IMAGE}:latest")"
+          prev_web="$(resolve "${WEB_IMAGE}:latest")"
+          {
+            echo "- previous api :latest: \`${prev_api:-none}\`"
+            echo "- previous web :latest: \`${prev_web:-none}\`"
+          } >> "${GITHUB_STEP_SUMMARY}"
+          # Re-etiqueta el mismo índice (mismo digest), sin reconstruir. El
+          # API va primero; si el web falla, se intenta devolver el API a su
+          # digest anterior para no dejar una pareja api/web desparejada.
+          docker buildx imagetools create \
+            --tag "${API_IMAGE}:latest" "${API_IMAGE}@${API_DIGEST}"
+          if ! docker buildx imagetools create \
+            --tag "${WEB_IMAGE}:latest" "${WEB_IMAGE}@${WEB_DIGEST}"; then
+            echo "::error::web :latest did not move; restoring api :latest"
+            if [ -n "${prev_api}" ]; then
+              docker buildx imagetools create \
+                --tag "${API_IMAGE}:latest" "${API_IMAGE}@${prev_api}" ||
+                echo "::error::api :latest left at ${API_DIGEST}; web at ${prev_web:-none}"
+            else
+              echo "::error::api :latest had no previous digest to restore"
+            fi
+            exit 1
+          fi
+          test "$(resolve "${API_IMAGE}:latest")" = "${API_DIGEST}"
+          test "$(resolve "${WEB_IMAGE}:latest")" = "${WEB_DIGEST}"
+          echo "moved=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Record whether :latest moved
+        if: always()
+        env:
+          MOVED_LATEST: ${{ steps.latest.outputs.moved }}
+        run: |
+          set -euo pipefail
+          echo "- moved :latest: ${MOVED_LATEST:-false (step failed or skipped)}" \
+            >> "${GITHUB_STEP_SUMMARY}"

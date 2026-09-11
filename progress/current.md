@@ -964,6 +964,9 @@ en HEAD. Nada de esto llegó a `main`.
 ## Publicación automática de imágenes — 11 de septiembre
 
 Nuevo `.github/workflows/publish-images.yml`: tras «Application CI» en verde
-sobre `main`, publica api y web con `:<SHA>` y `:latest`. Faltan los secretos
-de Docker Hub y la revisión del propietario. Detalle en
+sobre un push del propietario a `main`, publica api y web con `:<SHA>` y, en
+un paso final tras verificar los digests, mueve los dos `:latest`. Faltan, por
+este orden: el environment `dockerhub-publish` limitado a `main`, un ruleset
+sobre `main` sin bypass para el bot, los secretos de Docker Hub sólo en ese
+environment y la revisión del propietario. Detalle en
 `progress/publicacion_imagenes_latest.md`.

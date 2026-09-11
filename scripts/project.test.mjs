@@ -2443,3 +2443,28 @@ test("the Gradle shard block parses strictly, excludes instead of rewriting and 
     ),
   );
 });
+
+test("the harness refuses to run while either shard signal is in the environment", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  // Las mismas dos senales que lee Gradle: la propiedad y la variable del runner.
+  assert.ok(build.includes('providers.gradleProperty("mutationShard")'));
+  assert.ok(build.includes('providers.environmentVariable("MUTATION_SHARD_RUNNER")'));
+  for (const name of ["MUTATION_SHARD_RUNNER", "ORG_GRADLE_PROJECT_mutationShard"]) {
+    const saved = process.env[name];
+    const { calls, project } = capture();
+    try {
+      for (const value of ["scripts/mutation-shards.mjs", "1/4", ""]) {
+        process.env[name] = value;
+        for (const [task, target] of [["mutate"], ["mutate", "today-backend"], ["test"]])
+          assert.throws(() => project(task, target), new RegExp(`${name} is set`));
+      }
+    } finally {
+      if (saved === undefined) delete process.env[name];
+      else process.env[name] = saved;
+    }
+    assert.deepEqual(calls, []);
+  }
+  const { calls, project } = capture();
+  project("mutate");
+  assert.equal(calls.length, 2);
+});

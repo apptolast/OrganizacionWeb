@@ -50,6 +50,14 @@ export const MAX_SHARDS = 20;
 export const PIT_VERSION = "1.22.0";
 // Sin punto inicial: upload-artifact@v4 omite por defecto rutas ocultas.
 export const STAGE_DIR = "mutation-shards-out";
+// Segunda senal del modo troceado de Gradle. La propiedad `mutationShard` sola
+// no basta: Gradle tambien la lee de ORG_GRADLE_PROJECT_mutationShard, de
+// ~/.gradle/gradle.properties y de -P en GRADLE_OPTS, y un `harness verify`
+// local con cualquiera de esas fuentes mutaria 1/N de las clases con umbral 0 y
+// diria verde. Solo `runShard` pone esta variable, y solo en el entorno del hijo
+// Gradle; scripts/project.mjs se niega a correr si la ve.
+export const SHARD_RUNNER_ENV = "MUTATION_SHARD_RUNNER";
+export const SHARD_RUNNER = "scripts/mutation-shards.mjs";
 
 // DetectionStatus de PIT 1.22.0: detected=true para estos cinco.
 export const PIT_DETECTED = new Set([
@@ -437,6 +445,12 @@ function checkArtifact(dir, name, expect, reportRel, sha, fail) {
     fail(`${name}: falta el artefacto`);
     return null;
   }
+  // Sin done.json el mutador no termino: agotado, cancelado o roto. started.json
+  // puede estar (se escribe antes de lanzarlo), pero es evidencia, no permiso.
+  if (!existsSync(join(dir, "done.json"))) {
+    fail(`${name}: sin done.json, el mutador no termino`);
+    return null;
+  }
   let done;
   let manifestText;
   try {
@@ -489,6 +503,30 @@ const minutes = (done) => {
   const ms = Date.parse(done?.endedAt) - Date.parse(done?.startedAt);
   return Number.isFinite(ms) ? (ms / 60000).toFixed(1) : "?";
 };
+
+// Fila de la tabla del veredicto. Sin done.json, started.json deja al menos
+// cuando empezo y en que intento: un trozo agotado en la calibracion no queda
+// como "?" sin mas. No cambia nada del rojo, que ya puso checkArtifact.
+function shardRow(name, dir, got) {
+  let started = null;
+  try {
+    started = readJson(join(dir, "started.json"));
+  } catch {
+    started = null;
+  }
+  const done = got?.done;
+  return {
+    name,
+    attempt: done?.runAttempt ?? started?.runAttempt ?? "?",
+    minutes: done
+      ? minutes(done)
+      : typeof started?.startedAt === "string"
+        ? `sin terminar (desde ${started.startedAt})`
+        : "?",
+    mutants: 0,
+    detected: 0,
+  };
+}
 
 export function verdict({
   root = ROOT,
@@ -561,7 +599,7 @@ export function verdict({
     const k = i + 1;
     const name = pitName(k, backendShards);
     const got = checkArtifact(join(artifacts, name), name, { tool: "pit", k, n: backendShards }, PIT_REPORT, sha, fail);
-    const row = { name, minutes: minutes(got?.done), mutants: 0, detected: 0 };
+    const row = shardRow(name, join(artifacts, name), got);
     rows.push(row);
     if (!got) return;
     const m = got.manifest;
@@ -618,6 +656,15 @@ export function verdict({
 
   // Frontend.
   const configSha = sha256(strykerBaseBytes);
+  // Un fichero de `mutate` que ya no existe no rompe Stryker: solo avisa ("did
+  // not result in any files") y la campana mide menos sin decirlo. El informe
+  // tampoco lo delata, porque Stryker 10.0.0 no lista ficheros sin mutantes.
+  // Asi que se exige desde el arbol.
+  for (const unit of frontendUnits(strykerBase)) {
+    const path = resolve(root, "frontend", unit.file);
+    if (!existsSync(path) || !statSync(path).isFile())
+      fail(`frontend: ${unit.file} esta en stryker.config.json y no existe en el arbol`);
+  }
   const strykerKeys = new Map();
   const strykerManifests = [];
   const mergedFiles = {};
@@ -627,7 +674,7 @@ export function verdict({
     const k = i + 1;
     const name = strykerName(k, frontendShards);
     const got = checkArtifact(join(artifacts, name), name, { tool: "stryker", k, n: frontendShards }, STRYKER_REPORT, sha, fail);
-    const row = { name, minutes: minutes(got?.done), mutants: 0, detected: 0 };
+    const row = shardRow(name, join(artifacts, name), got);
     rows.push(row);
     if (!got) return;
     const m = got.manifest;
@@ -650,6 +697,15 @@ export function verdict({
     if (schemaVersion === undefined) schemaVersion = report.schemaVersion;
     else if (report.schemaVersion !== schemaVersion)
       fail(`${name}: schemaVersion ${report.schemaVersion} distinto de ${schemaVersion}`);
+    // El informe trae las opciones con las que corrio Stryker (`config`, que
+    // mutation-test-report-helper de 10.0.0 rellena con las opciones). Su
+    // `mutate` tiene que ser el del trozo: asi se prueba lo que se midio, no
+    // solo el plan. Lo que sigue sin poder probarse es que un fichero con cero
+    // mutantes no se haya descartado: Stryker construye `files` solo a partir
+    // de los resultados, asi que exigir cada fichero en `files` pondria rojo un
+    // fichero legitimo sin mutantes. PIT tiene el mismo hueco con sus clases.
+    if (!sameList(report.config?.mutate, m.entries))
+      fail(`${name}: Stryker no corrio con el mutate del trozo (config.mutate del informe)`);
     const mine = new Set(Array.isArray(m.files) ? m.files : []);
     for (const [file, data] of Object.entries(report.files ?? {})) {
       if (!mine.has(file)) {
@@ -730,8 +786,13 @@ export function summaryMarkdown(result) {
     lines.push(
       `- Frontend (Stryker): ${result.frontend.total} mutantes, puntuacion ${Number.isFinite(result.frontend.score) ? result.frontend.score.toFixed(2) : "NaN"} (break ${result.frontend.threshold}).`,
     );
-  lines.push("", "| trozo | minutos | mutantes | detectados |", "| --- | --- | --- | --- |");
-  for (const r of result.rows) lines.push(`| ${r.name} | ${r.minutes} | ${r.mutants} | ${r.detected} |`);
+  lines.push(
+    "",
+    "| trozo | intento | minutos | mutantes | detectados |",
+    "| --- | --- | --- | --- | --- |",
+  );
+  for (const r of result.rows)
+    lines.push(`| ${r.name} | ${r.attempt} | ${r.minutes} | ${r.mutants} | ${r.detected} |`);
   if (result.errors.length) {
     lines.push("", "### Fallos", "");
     for (const e of result.errors) lines.push(`- ${e}`);
@@ -798,7 +859,8 @@ function stageAndRecord({ root, name, tool, k, n, startedAt, exitCode, reportDir
   return exitCode;
 }
 
-export function runShard(tool, shardText, root = ROOT) {
+// `spawn` se inyecta solo en los tests, para no lanzar Gradle ni Stryker.
+export function runShard(tool, shardText, root = ROOT, spawn = spawnSync) {
   const { k, n } = parseShard(shardText);
   if (tool !== "backend" && tool !== "frontend") throw new Error(`Herramienta invalida: ${tool}`);
   const name = tool === "backend" ? pitName(k, n) : strykerName(k, n);
@@ -806,6 +868,24 @@ export function runShard(tool, shardText, root = ROOT) {
   rmSync(stage, { recursive: true, force: true });
   mkdirSync(stage, { recursive: true });
   const startedAt = new Date().toISOString();
+  // Antes de lanzar el mutador: si el job se agota o se cancela, done.json no
+  // llega a escribirse, pero el artefacto conserva cuando empezo el trozo.
+  const recordStart = (recorded) =>
+    writeFileSync(
+      join(stage, "started.json"),
+      `${JSON.stringify(
+        {
+          tool: recorded,
+          k,
+          N: n,
+          sha: headSha(root),
+          runAttempt: process.env.GITHUB_RUN_ATTEMPT ?? null,
+          startedAt,
+        },
+        null,
+        2,
+      )}\n`,
+    );
   if (tool === "backend") {
     if (process.platform === "win32")
       throw new Error("El modo troceado es solo Linux/CI: excludedClasses no cabe en la linea de ordenes de Windows");
@@ -813,9 +893,11 @@ export function runShard(tool, shardText, root = ROOT) {
     const manifest = `${reportDir}.manifest.json`;
     rmSync(reportDir, { recursive: true, force: true });
     rmSync(manifest, { force: true });
-    const r = spawnSync("./gradlew", ["pitest", "--no-daemon", `-PmutationShard=${k}/${n}`], {
+    recordStart("pit");
+    const r = spawn("./gradlew", ["pitest", "--no-daemon", `-PmutationShard=${k}/${n}`], {
       cwd: resolve(root, "backend"),
       stdio: "inherit",
+      env: { ...process.env, [SHARD_RUNNER_ENV]: SHARD_RUNNER },
     });
     return stageAndRecord({
       root, name, tool: "pit", k, n, startedAt,
@@ -837,9 +919,10 @@ export function runShard(tool, shardText, root = ROOT) {
   const jsonReport = base.jsonReporter?.fileName ?? "reports/mutation/mutation.json";
   const reportDir = resolve(root, "frontend", jsonReport, "..");
   rmSync(reportDir, { recursive: true, force: true });
+  recordStart("stryker");
   let status;
   try {
-    const r = spawnSync("pnpm", ["--dir", "frontend", "exec", "stryker", "run", "stryker.shard.config.json"], {
+    const r = spawn("pnpm", ["--dir", "frontend", "exec", "stryker", "run", "stryker.shard.config.json"], {
       cwd: root,
       stdio: "inherit",
       shell: process.platform === "win32",

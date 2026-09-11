@@ -29,6 +29,17 @@ export function run(command, args, options = {}) {
 }
 export function createProject(runner = run) {
   return function project(task, target) {
+    // El modo troceado de PIT corre sin umbral propio: su puerta es el veredicto
+    // de scripts/mutation-shards.mjs. Si una de sus dos senales llegase hasta
+    // aqui, `harness mutate`/`verify` mediria 1/N de las clases y diria verde.
+    for (const name of [
+      "MUTATION_SHARD_RUNNER",
+      "ORG_GRADLE_PROJECT_mutationShard",
+    ])
+      if (process.env[name] !== undefined)
+        throw new Error(
+          `${name} is set: the harness never runs a threshold-free mutation shard`,
+        );
     if (
       target !== undefined &&
       target !== "" &&

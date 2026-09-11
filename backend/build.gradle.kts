@@ -682,6 +682,15 @@ pitest {
     // todos los trozos, y el veredicto la caza como mutante repetido.
     val shard = providers.gradleProperty("mutationShard").orNull
     if (shard != null) {
+        // SEGUNDA SENAL, antes que nada. La propiedad sola no basta: Gradle tambien la lee de
+        // ORG_GRADLE_PROJECT_mutationShard, de ~/.gradle/gradle.properties y de -P en GRADLE_OPTS,
+        // y con cualquiera de esas un `harness verify` local mutaria 1/N de las clases con umbral
+        // 0 y diria "Todo verde". Esta variable solo la pone scripts/mutation-shards.mjs en el
+        // entorno de este Gradle, y scripts/project.mjs se niega a correr si la ve: por el arnes
+        // no se pueden tener las dos.
+        if (providers.environmentVariable("MUTATION_SHARD_RUNNER").orNull != "scripts/mutation-shards.mjs") {
+            throw GradleException("mutationShard solo lo activa scripts/mutation-shards.mjs (falta MUTATION_SHARD_RUNNER): '$shard'")
+        }
         // Un valor raro NUNCA se degrada a "todo", que es lo que hizo `noche_cinco`.
         val shardMatch = Regex("^([1-9][0-9]*)/([1-9][0-9]*)$").matchEntire(shard)
             ?: throw GradleException("mutationShard debe ser k/N con 1 <= k <= N y sin ceros a la izquierda: '$shard'")

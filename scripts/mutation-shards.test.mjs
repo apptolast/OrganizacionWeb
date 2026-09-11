@@ -6,6 +6,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -29,8 +30,13 @@ import {
   pitName,
   pitScore,
   plan,
+  runShard,
+  SHARD_RUNNER,
+  SHARD_RUNNER_ENV,
   shardStrykerConfig,
+  STAGE_DIR,
   strykerName,
+  summaryMarkdown,
   verdict,
 } from "./mutation-shards.mjs";
 
@@ -307,6 +313,7 @@ function fixtureRepo(t) {
     write(join(dir, "backend/src/main/java", `${c}.java`), `class ${c.split("/").pop()} {}\n`);
   write(join(dir, "backend/src/main/java/com/acme/domain/package-info.java"), "package com.acme.domain;\n");
   write(join(dir, "frontend/stryker.config.json"), `${JSON.stringify(FIXTURE_STRYKER, null, 2)}\n`);
+  for (const { file } of frontendUnits(FIXTURE_STRYKER)) write(join(dir, "frontend", file), "export {};\n");
   write(join(dir, "harness.config.json"), JSON.stringify({ mutation: { threshold: 0.8, targets: [] } }));
   return dir;
 }
@@ -356,7 +363,7 @@ function buildArtifacts(repo, { nb = 3, nf = 2, tamper = {} } = {}) {
       pitestVersion: "1.22.0",
     };
     let mutations = pitMutationsFor(owners);
-    let done = { tool: "pit", k, N: nb, exitCode: 0, sha: SHA, startedAt: "2026-09-11T00:00:00Z", endedAt: "2026-09-11T01:30:00Z" };
+    let done = { tool: "pit", k, N: nb, exitCode: 0, sha: SHA, runAttempt: "1", startedAt: "2026-09-11T00:00:00Z", endedAt: "2026-09-11T01:30:00Z" };
     ({ manifest, mutations, done } = tamper.pit?.({ k, manifest, mutations, done }) ?? { manifest, mutations, done });
     const xml = tamper.pitXml?.({ k, xml: pitXml(mutations) }) ?? pitXml(mutations);
     const manifestText = `${JSON.stringify(manifest)}\n`;
@@ -376,9 +383,11 @@ function buildArtifacts(repo, { nb = 3, nf = 2, tamper = {} } = {}) {
     let files = Object.fromEntries(
       part.files.map((f) => [f, { language: "typescript", source: "", mutants: strykerMutants(f) }]),
     );
-    let done = { tool: "stryker", k, N: nf, exitCode: 0, sha: SHA, startedAt: "2026-09-11T00:00:00Z", endedAt: "2026-09-11T02:00:00Z" };
-    ({ manifest, files, done } = tamper.stryker?.({ k, manifest, files, done }) ?? { manifest, files, done });
-    const json = JSON.stringify({ schemaVersion: "2", thresholds: { high: 90, low: 80 }, files });
+    let done = { tool: "stryker", k, N: nf, exitCode: 0, sha: SHA, runAttempt: "1", startedAt: "2026-09-11T00:00:00Z", endedAt: "2026-09-11T02:00:00Z" };
+    // `config` como lo deja Stryker 10.0.0: las opciones con las que corrio.
+    let config = { mutate: [...part.entries], thresholds: { high: 90, low: 80, break: null } };
+    ({ manifest, files, done, config } = tamper.stryker?.({ k, manifest, files, done, config }) ?? { manifest, files, done, config });
+    const json = JSON.stringify({ schemaVersion: "2", thresholds: { high: 90, low: 80 }, config, files });
     const manifestText = `${JSON.stringify(manifest)}\n`;
     write(join(artifacts, name, "manifest.json"), manifestText);
     write(join(artifacts, name, "report/mutation.json"), json);
@@ -429,6 +438,9 @@ test("verdict is green when every shard is present, complete, disjoint and above
   assert.deepEqual(result.backend, { total: 35, detected: 28, score: 80, threshold: 80 });
   assert.equal(result.frontend.score, 80);
   assert.equal(result.rows.length, 5);
+  // Reparto de 7 en 3: el trozo 1 es ApiClient, A y D, 5 mutantes por clase.
+  assert.deepEqual(result.rows[0], { name: "pit-shard-1-of-3", attempt: "1", minutes: "90.0", mutants: 15, detected: 12 });
+  assert.match(summaryMarkdown(result), /\n\| pit-shard-1-of-3 \| 1 \| 90\.0 \| 15 \| 12 \|\n/);
 });
 
 test("PIT XML is parsed with entities decoded and a truncated file is refused", () => {
@@ -564,6 +576,30 @@ const RED_CASES = [
     /no son el reparto recalculado|entradas de los manifiestos/,
   ],
   [
+    "a shard that never finished (started.json but no done.json)",
+    (repo, a) => {
+      rmSync(join(a, pitName(2, 3), "done.json"));
+      write(join(a, pitName(2, 3), "started.json"), JSON.stringify({ tool: "pit", k: 2, N: 3, startedAt: "2026-09-11T00:00:00Z" }));
+    },
+    /pit-shard-2-of-3: sin done\.json, el mutador no termino/,
+  ],
+  [
+    "a Stryker shard that ran with another mutate list",
+    { stryker: (x) => (x.k === 1 ? { ...x, config: { ...x.config, mutate: ["src/a.ts"] } } : x) },
+    /stryker-shard-1-of-2: Stryker no corrio con el mutate del trozo/,
+  ],
+  [
+    "a Stryker report without the options it ran with",
+    { stryker: (x) => (x.k === 2 ? { ...x, config: undefined } : x) },
+    /stryker-shard-2-of-2: Stryker no corrio con el mutate del trozo/,
+  ],
+  [
+    "a mutate file that no longer exists in the tree",
+    // Stryker solo avisaria "did not result in any files" y mediria menos.
+    (repo) => rmSync(join(repo, "frontend/src/b.ts")),
+    /frontend: src\/b\.ts esta en stryker\.config\.json y no existe en el arbol/,
+  ],
+  [
     "a frontend score below break",
     {
       stryker: (x) => ({
@@ -596,4 +632,136 @@ test("verdict goes red when no artifact was downloaded at all or N disagrees", (
   assertRed(noMetrics, /frontend: mutation-testing-metrics fallo \(falta calculateMutationTestMetrics\)/);
   // El resto de comprobaciones sigue corriendo: la puerta de backend se calcula.
   assert.deepEqual(noMetrics.backend, { total: 35, detected: 28, score: 80, threshold: 80 });
+});
+
+test("a shard killed before done.json still shows when it started, and stays red", (t) => {
+  const repo = fixtureRepo(t);
+  const artifacts = buildArtifacts(repo);
+  rmSync(join(artifacts, pitName(3, 3), "done.json"));
+  write(
+    join(artifacts, pitName(3, 3), "started.json"),
+    JSON.stringify({ tool: "pit", k: 3, N: 3, runAttempt: "2", startedAt: "2026-09-11T00:00:00Z" }),
+  );
+  const result = judge(repo, artifacts);
+  assertRed(result, /pit-shard-3-of-3: sin done\.json/);
+  const row = result.rows.find((r) => r.name === pitName(3, 3));
+  assert.deepEqual(row, {
+    name: "pit-shard-3-of-3",
+    attempt: "2",
+    minutes: "sin terminar (desde 2026-09-11T00:00:00Z)",
+    mutants: 0,
+    detected: 0,
+  });
+  // Sin started.json tampoco se inventa nada.
+  rmSync(join(artifacts, pitName(3, 3), "started.json"));
+  const bare = judge(repo, artifacts).rows.find((r) => r.name === pitName(3, 3));
+  assert.equal(bare.minutes, "?");
+  assert.equal(bare.attempt, "?");
+});
+
+test(
+  "a backend shard writes started.json before Gradle and is the only one that hands Gradle the runner signal",
+  { skip: process.platform === "win32" },
+  (t) => {
+    const repo = fixtureRepo(t);
+    const stage = join(repo, STAGE_DIR, pitName(2, 3));
+    const reportDir = join(repo, "backend/build/reports/pitest-shard-2-of-3");
+    const spawned = [];
+    const fake = (status) => (command, args, options) => {
+      spawned.push({
+        command,
+        args,
+        cwd: options.cwd,
+        env: options.env,
+        started: JSON.parse(readFileSync(join(stage, "started.json"), "utf8")),
+        doneBefore: existsSync(join(stage, "done.json")),
+      });
+      write(join(reportDir, "mutations.xml"), pitXml([]));
+      write(`${reportDir}.manifest.json`, "{}\n");
+      return { status };
+    };
+    assert.equal(runShard("backend", "2/3", repo, fake(0)), 0);
+    const [call] = spawned;
+    assert.equal(call.command, "./gradlew");
+    assert.deepEqual(call.args, ["pitest", "--no-daemon", "-PmutationShard=2/3"]);
+    assert.equal(call.cwd, resolve(repo, "backend"));
+    assert.equal(call.env[SHARD_RUNNER_ENV], SHARD_RUNNER);
+    assert.equal(call.doneBefore, false);
+    assert.equal(call.started.tool, "pit");
+    assert.equal(call.started.k, 2);
+    assert.equal(call.started.N, 3);
+    assert.ok(!Number.isNaN(Date.parse(call.started.startedAt)));
+    const done = JSON.parse(readFileSync(join(stage, "done.json"), "utf8"));
+    assert.equal(done.exitCode, 0);
+    assert.equal(done.startedAt, call.started.startedAt);
+    assert.ok(existsSync(join(stage, "report/mutations.xml")));
+    // Un mutador que falla deja su codigo, y started.json sigue ahi.
+    assert.equal(runShard("backend", "2/3", repo, fake(3)), 3);
+    assert.equal(JSON.parse(readFileSync(join(stage, "done.json"), "utf8")).exitCode, 3);
+    assert.ok(existsSync(join(stage, "started.json")));
+    // El proceso padre no se lleva la senal: solo el hijo Gradle la ve.
+    assert.equal(process.env[SHARD_RUNNER_ENV], undefined);
+  },
+);
+
+test("a frontend shard writes started.json and its manifest before Stryker and removes its config after", (t) => {
+  const repo = fixtureRepo(t);
+  const stage = join(repo, STAGE_DIR, strykerName(1, 2));
+  const shardConfig = join(repo, "frontend/stryker.shard.config.json");
+  const seen = [];
+  const code = runShard("frontend", "1/2", repo, (command, args) => {
+    seen.push({
+      command,
+      args,
+      started: JSON.parse(readFileSync(join(stage, "started.json"), "utf8")),
+      manifest: JSON.parse(readFileSync(join(stage, "manifest.json"), "utf8")),
+      config: JSON.parse(readFileSync(shardConfig, "utf8")),
+    });
+    write(join(repo, "frontend/reports/mutation/mutation.json"), "{}");
+    return { status: 0 };
+  });
+  assert.equal(code, 0);
+  const [call] = seen;
+  assert.equal(call.command, "pnpm");
+  assert.deepEqual(call.args, ["--dir", "frontend", "exec", "stryker", "run", "stryker.shard.config.json"]);
+  assert.equal(call.started.tool, "stryker");
+  assert.equal(call.started.k, 1);
+  assert.deepEqual(call.config.mutate, call.manifest.entries);
+  assert.equal(call.config.thresholds.break, null);
+  assert.ok(!existsSync(shardConfig));
+  assert.ok(existsSync(join(stage, "done.json")));
+});
+
+test("the Gradle shard block demands the runner signal before anything else", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  const opened = build.indexOf("    if (shard != null) {\n");
+  const guard = build.indexOf(
+    `        if (providers.environmentVariable("${SHARD_RUNNER_ENV}").orNull != "${SHARD_RUNNER}") {\n            throw GradleException(`,
+  );
+  assert.ok(opened > 0, "shard block");
+  assert.ok(guard > opened, "runner guard inside the shard block");
+  // Entre la apertura y la guarda solo hay comentarios: es lo primero del bloque.
+  const before = build.slice(build.indexOf("\n", opened) + 1, guard).split("\n").filter(Boolean);
+  assert.ok(before.every((line) => /^ {8}\/\//.test(line)), before.join("\n"));
+  assert.ok(guard < build.indexOf("        val shardMatch = "));
+  assert.ok(guard < build.indexOf("        mutationThreshold.set(0)"));
+  assert.ok(guard < build.indexOf("        excludedClasses.set("));
+});
+
+test("the campaign workflow survives a re-run and keeps the token out of the mutators", () => {
+  const workflow = readFileSync(resolve(root, ".github/workflows/harness-mutation.yml"), "utf8");
+  const checkouts = (workflow.match(/- uses: actions\/checkout@/g) || []).length;
+  assert.equal(checkouts, 5);
+  assert.equal(
+    (workflow.match(/ {6}- uses: actions\/checkout@v5\n {8}with:\n {10}persist-credentials: false\n/g) || []).length,
+    checkouts,
+  );
+  const uploads = workflow.split("- uses: actions/upload-artifact@v4\n").slice(1).map((s) => s.slice(0, s.indexOf("\n\n")));
+  assert.equal(uploads.length, 2);
+  for (const upload of uploads) {
+    assert.match(upload, /\n {10}overwrite: true\n/);
+    assert.match(upload, /\n {10}if-no-files-found: error\n/);
+  }
+  for (const line of workflow.split("\n"))
+    if (/^\s*#/.test(line)) assert.ok(line.length <= 80, `comentario de mas de 80 columnas: ${line}`);
 });

@@ -409,6 +409,8 @@ export function createProject(runner = run) {
       for (const file of [
         "scripts/project.mjs",
         "scripts/project.test.mjs",
+        "scripts/mutation-shards.mjs",
+        "scripts/mutation-shards.test.mjs",
         "scripts/e2e.mjs",
         "playwright.config.mjs",
         // Siete entradas de esta lista murieron el 10 de septiembre de 2026 al
@@ -422,7 +424,11 @@ export function createProject(runner = run) {
       }
     }
     if (task === "test")
-      runner(process.execPath, ["--test", "scripts/project.test.mjs"]);
+      runner(process.execPath, [
+        "--test",
+        "scripts/project.test.mjs",
+        "scripts/mutation-shards.test.mjs",
+      ]);
     backend(commands[task]);
     runner("pnpm", ["--dir", "frontend", task]);
   };

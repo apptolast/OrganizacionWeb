@@ -1,3 +1,5 @@
+import java.security.MessageDigest
+
 plugins {
     java
     id("com.diffplug.spotless") version "7.2.1"
@@ -742,7 +744,7 @@ pitest {
         // Quitar ese job deja los trozos sin ninguna puerta: scripts/mutation-shards.test.mjs
         // exige que este bloque y el veredicto existan juntos.
         mutationThreshold.set(0)
-        val shardDigest = java.security.MessageDigest.getInstance("SHA-256")
+        val shardDigest = MessageDigest.getInstance("SHA-256")
             .digest(shardPatterns.joinToString("\n").toByteArray(Charsets.UTF_8))
             .joinToString("") { "%02x".format(it) }
         val shardJson = "{\"tool\":\"pit\",\"k\":$shardK,\"N\":$shardN," +

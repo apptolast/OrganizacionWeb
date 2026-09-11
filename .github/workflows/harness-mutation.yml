@@ -147,7 +147,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
-          # Sin pnpm en este job: setup-node v5 detecta pnpm por packageManager y falla.
+          # Sin pnpm aqui: setup-node v5 lo detecta y fallaria.
           package-manager-cache: false
       - id: plan
         env:
@@ -175,7 +175,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
-          # Sin pnpm en este job: setup-node v5 detecta pnpm por packageManager y falla.
+          # Sin pnpm aqui: setup-node v5 lo detecta y fallaria.
           package-manager-cache: false
       - uses: actions/setup-java@v5
         with:

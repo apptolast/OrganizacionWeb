@@ -1,3 +1,27 @@
+# Estado actual — 11 de septiembre de 2026: troceado de la mutación completa
+
+## En curso: la campaña completa, repartida en trozos (rama `codex/mutation-shards`)
+
+Está aplicado en local y **pendiente de calibración**: todavía no ha corrido en
+GitHub. El diseño y la evidencia están en `progress/troceado_mutacion.md`.
+
+- Backend: `-PmutationShard=k/N` al final del bloque `pitest`, repartido por
+  **exclusión** sobre las 456 clases de la rama `else`. Sin la propiedad, nada
+  cambia.
+- Frontend: los 53 ficheros de `stryker.config.json`, con los dos rangos de
+  `session-gate.tsx` juntos. La configuración base no se toca.
+- Cada trozo corre sin umbral propio. El job `verdict` recalcula el universo desde
+  el árbol y exige que no falte ni sobre un trozo, que no haya solapes ni
+  mutantes duplicados y que los dos 80 se cumplan con las fórmulas de PIT y de
+  Stryker.
+- `scripts/mutation-shards.test.mjs` (37 tests) entra en `harness init`.
+- Sin cron: vuelve cuando el trozo más lento medido quede en 150 min o menos.
+
+Lo que falta es del propietario: revisar la rama (toca rutas que vigila el
+guardián), empujarla y lanzar el primer `workflow_dispatch` de calibración.
+
+---
+
 # Estado actual — 10 de septiembre de 2026, 19:30
 
 ## Lo primero: quedan **dos** features, no cinco

@@ -200,3 +200,54 @@ de cada `done.json`, y del resumen del veredicto, el tiempo y los mutantes:
   que el bloque Kotlin no se ha ejecutado. Sólo lo cubren las guardas textuales
   de `scripts/project.test.mjs` y el cruce del veredicto (`patternsSha256`,
   clases del manifiesto). El primer run de CI es su prueba real.
+
+## 7. Revisión del mismo día: seis hallazgos, cinco arreglados y uno corregido
+
+Todos se comprobaron contra el código antes de tocar nada. Cada arreglo tiene
+su test, y se comprobó que el test se pone rojo si se quita el arreglo.
+
+1. **Falso verde por el entorno. Real, arreglado.**
+   `providers.gradleProperty("mutationShard")` también se lee de
+   `ORG_GRADLE_PROJECT_mutationShard`, de `~/.gradle/gradle.properties` y de
+   `-P` en `GRADLE_OPTS`. Con cualquiera de ellas, un `harness verify` local
+   mutaba 1/N con umbral 0 y decía «Todo verde». Ahora hay dos cierres:
+   - El bloque de Gradle exige, antes que nada, la segunda señal
+     `MUTATION_SHARD_RUNNER=scripts/mutation-shards.mjs`. Es una variable de
+     entorno que sólo `runShard` pone, y sólo en el entorno del hijo Gradle.
+   - `scripts/project.mjs` se niega a correr cualquier tarea si ve
+     `MUTATION_SHARD_RUNNER` o `ORG_GRADLE_PROJECT_mutationShard`.
+
+   Por el arnés no se pueden tener las dos: sin la variable, Gradle lanza; con
+   ella, el arnés no arranca.
+2. **Ficheros de Stryker descartados. El hueco es real, pero el arreglo
+   propuesto no.** Proponía exigir cada fichero del manifiesto en
+   `mutation.json`, supuesto que Stryker liste también los que tienen cero
+   mutantes. Leído en la fuente de `@stryker-mutator/core` 10.0.0
+   (`mutation-test-report-helper.ts`, `toFileResults`): `files` se construye
+   **sólo** a partir de los resultados, así que un fichero sin mutantes no
+   aparece. Ese check pondría rojo un fichero legítimo. En su lugar:
+   - El `mutate` de `config` en el informe, que son las opciones con las que
+     corrió Stryker (`config: this.options`), tiene que ser el del trozo.
+   - Cada fichero de `stryker.config.json` tiene que existir en el árbol.
+     Stryker sólo avisa con «did not result in any files»
+     (`project-reader.ts`).
+
+   Sigue sin poder distinguirse un fichero con cero mutantes de uno descartado
+   con el fichero presente, como en PIT. La pasada sin trocear tiene el mismo
+   hueco.
+3. **Relanzar un trozo fallido. Arreglado.** `overwrite: true` en los dos
+   `upload-artifact@v4`, y el veredicto enseña el intento (`runAttempt`) de
+   cada trozo. El 409 de v4 al relanzar no se ha podido comprobar aquí.
+4. **Trozo agotado sin evidencia. Arreglado.** `runShard` escribe
+   `started.json` (herramienta, k, N, SHA, intento, hora) antes de lanzar el
+   mutador. Sin `done.json` el veredicto sigue rojo, ahora con «sin done.json,
+   el mutador no termino», y la fila dice desde cuándo corría. No se copia el
+   informe parcial de PIT, que sólo escribe `mutations.xml` al final.
+5. **Token en `.git/config`. Arreglado.** `persist-credentials: false` en los
+   cinco `checkout`. Ningún job usa git con credenciales después.
+6. **Línea de 97 columnas en la cabecera. Arreglado.** Se reenvuelve junto con
+   otra de 81. Un test exige que ningún comentario del workflow pase de 80.
+
+No verificado aquí, como antes: el bloque Kotlin no se ha ejecutado, porque no
+hay Java en esta máquina. Tampoco el 409 de v4, ni si la subida `always()`
+llega a correr cuando el job se agota.

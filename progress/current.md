@@ -14,7 +14,12 @@ GitHub. El diseño y la evidencia están en `progress/troceado_mutacion.md`.
   el árbol y exige que no falte ni sobre un trozo, que no haya solapes ni
   mutantes duplicados y que los dos 80 se cumplan con las fórmulas de PIT y de
   Stryker.
-- `scripts/mutation-shards.test.mjs` (37 tests) entra en `harness init`.
+- `scripts/mutation-shards.test.mjs` entra en `harness init`.
+- Revisión del mismo día, en `progress/troceado_mutacion.md` §7: el modo
+  troceado exige una segunda señal que sólo pone el runner, y el arnés se niega
+  a correr si la ve. El veredicto comprueba el `mutate` con que corrió Stryker
+  y que cada fichero exista, y deja evidencia de los trozos sin terminar. Las
+  subidas admiten relanzar y los checkout no guardan el token.
 - Sin cron: vuelve cuando el trozo más lento medido quede en 150 min o menos.
 
 Lo que falta es del propietario: revisar la rama (toca rutas que vigila el

@@ -147,6 +147,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
+          # Sin pnpm en este job: setup-node v5 detecta pnpm por packageManager y falla.
+          package-manager-cache: false
       - id: plan
         env:
           REQUESTED_BACKEND: ${{ inputs.backend_shards }}
@@ -173,6 +175,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
+          # Sin pnpm en este job: setup-node v5 detecta pnpm por packageManager y falla.
+          package-manager-cache: false
       - uses: actions/setup-java@v5
         with:
           distribution: temurin

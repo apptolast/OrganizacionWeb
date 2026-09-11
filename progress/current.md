@@ -958,3 +958,12 @@ reschedule-block y split-task (1 cada uno).
 
 La instrumentación se retiró: `test-setup.ts` y la fixture están byte a byte como
 en HEAD. Nada de esto llegó a `main`.
+
+---
+
+## Publicación automática de imágenes — 11 de septiembre
+
+Nuevo `.github/workflows/publish-images.yml`: tras «Application CI» en verde
+sobre `main`, publica api y web con `:<SHA>` y `:latest`. Faltan los secretos
+de Docker Hub y la revisión del propietario. Detalle en
+`progress/publicacion_imagenes_latest.md`.

@@ -1,0 +1,138 @@
+name: Publish container images
+
+# Publica ocholoko888/organizationweb-api y ocholoko888/organizationweb-web
+# para linux/amd64 sólo después de que "Application CI" (harness-ci.yml) salga
+# en verde sobre un push a main. Etiquetas: el SHA completo de 40 caracteres
+# (asa inmutable para volver atrás) y :latest (sólo si ese commit sigue siendo
+# la punta de main). La configuración de la imagen lleva
+# org.opencontainers.image.revision=<SHA completo>.
+#
+# El servidor sigue el canal :latest (decisión del propietario del 11 de
+# septiembre de 2026): cualquier fusión a main con la CI verde llega a
+# producción. Secretos requeridos: DOCKERHUB_USERNAME y DOCKERHUB_TOKEN, con
+# lectura y escritura sólo sobre los dos repositorios.
+
+on:
+  workflow_run:
+    workflows: ["Application CI"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Serializa las publicaciones; nunca cancela una que pueda estar a medio push.
+concurrency:
+  group: publish-images-main
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build and push api/web (linux/amd64)
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      REVISION: ${{ github.event.workflow_run.head_sha }}
+      API_IMAGE: docker.io/ocholoko888/organizationweb-api
+      WEB_IMAGE: docker.io/ocholoko888/organizationweb-web
+    steps:
+      - name: Check out the exact commit that passed Application CI
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      - name: Require a clean, world-readable build context
+        run: |
+          set -euo pipefail
+          [[ "${REVISION}" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "${REVISION}"
+          test -z "$(git status --porcelain --untracked-files=all)"
+          echo "runner umask: $(umask)"
+          # Semántica de umask 022: todo fichero o+r, todo directorio o+rx.
+          bad="$(find . -path ./.git -prune -o \
+            \( -type f ! -perm -o=r -print \) -o \
+            \( -type d ! -perm -o=rx -print \))"
+          if [ -n "${bad}" ]; then
+            printf 'not world-readable:\n%s\n' "${bad}" >&2
+            exit 1
+          fi
+
+      - name: Decide whether this commit may move :latest
+        id: tip
+        run: |
+          set -euo pipefail
+          tip="$(git ls-remote origin refs/heads/main | cut -f1)"
+          if [ "${tip}" = "${REVISION}" ]; then
+            echo "latest=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "::warning::main moved to ${tip}; publishing ${REVISION} without :latest"
+            echo "latest=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e  # v4.3.0
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f  # v4.6.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push the API image
+        id: api
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a  # v7.3.0
+        with:
+          context: backend
+          file: backend/Dockerfile
+          platforms: linux/amd64
+          push: true
+          pull: true
+          provenance: mode=max
+          labels: |
+            org.opencontainers.image.revision=${{ env.REVISION }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          tags: |
+            ${{ env.API_IMAGE }}:${{ env.REVISION }}
+            ${{ steps.tip.outputs.latest == 'true' && format('{0}:latest', env.API_IMAGE) || '' }}
+
+      - name: Build and push the web image
+        id: web
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a  # v7.3.0
+        with:
+          context: .
+          file: deploy/web.Dockerfile
+          platforms: linux/amd64
+          push: true
+          pull: true
+          provenance: mode=max
+          labels: |
+            org.opencontainers.image.revision=${{ env.REVISION }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          tags: |
+            ${{ env.WEB_IMAGE }}:${{ env.REVISION }}
+            ${{ steps.tip.outputs.latest == 'true' && format('{0}:latest', env.WEB_IMAGE) || '' }}
+
+      - name: Verify the pushed images like the Swarm role does
+        env:
+          API_DIGEST: ${{ steps.api.outputs.digest }}
+          WEB_DIGEST: ${{ steps.web.outputs.digest }}
+        run: |
+          set -euo pipefail
+          for ref in "${API_IMAGE}@${API_DIGEST}" "${WEB_IMAGE}@${WEB_DIGEST}"; do
+            docker pull --platform linux/amd64 "${ref}"
+            docker image inspect "${ref}" | jq -e --arg rev "${REVISION}" '
+              .[0].Os == "linux" and .[0].Architecture == "amd64" and
+              .[0].Config.Labels["org.opencontainers.image.revision"] == $rev'
+          done
+          {
+            echo "### Published ${REVISION}"
+            echo "- api: \`${API_IMAGE}@${API_DIGEST}\`"
+            echo "- web: \`${WEB_IMAGE}@${WEB_DIGEST}\`"
+            echo "- moved :latest: ${{ steps.tip.outputs.latest }}"
+          } >> "${GITHUB_STEP_SUMMARY}"

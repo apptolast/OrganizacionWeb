@@ -22,6 +22,12 @@ GitHub. El diseño y la evidencia están en `progress/troceado_mutacion.md`.
   subidas admiten relanzar y los checkout no guardan el token.
 - Sin cron: vuelve cuando el trozo más lento medido quede en 150 min o menos.
 
+- Flake de la prueba en seco de Stryker (run `34610657835`, trozo 10/12,
+  `expected '' to be 'dark'`): el tema se aplicaba en un efecto pasivo y la
+  suite lo miraba en el hueco entre el commit y ese efecto. Pasa a
+  `useLayoutEffect` con prueba de regresión determinista. Detalle y medidas en
+  `progress/tdd_theme_commit_flake.md`.
+
 Lo que falta es del propietario: revisar la rama (toca rutas que vigila el
 guardián), empujarla y lanzar el primer `workflow_dispatch` de calibración.
 

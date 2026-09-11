@@ -1,8 +1,9 @@
 name: Prueba de mutación
 
-# Campaña completa de mutación: `harness verify` es init más la mutación de
-# `harness.config.json`. Es cara en CPU por diseño (reejecuta la suite por cada
-# mutante), así que corre de noche y a petición, no en cada push.
+# Campaña completa de mutación: lo mismo que `harness verify` (init más la
+# mutación sin objetivo de `harness.config.json`), repartido en trozos. Es cara
+# en CPU por diseño (reejecuta la suite por cada mutante), así que corre a
+# petición, no en cada push.
 #
 # Esto NO relaja la puerta de cierre del proceso: `docs/verification.md` y
 # `CHECKPOINTS.md` C7 siguen exigiendo mutación por encima del umbral antes de
@@ -13,11 +14,12 @@ name: Prueba de mutación
 # ── POR QUÉ AQUÍ NO HAY CRON, 11 de septiembre de 2026 ──────────────────────
 #
 # Había uno diario ("0 2 * * *") y NUNCA completó una campaña. Los runs del 7,
-# 8 y 9 de septiembre duran exactamente 4 h 00 m: son el `timeout-minutes: 240`
-# de abajo matándolos. Medido en el log del run 34322164783: init verde en
-# 10 min 39 s, PIT calculó cobertura en 470 s, creó 254 unidades de mutación a
-# las 07:24:57 y siguió analizando 3 h 41 min 26 s sin terminar el backend. La
-# campaña de frontend no llegó a arrancar ni una sola vez.
+# 8 y 9 de septiembre duran exactamente 4 h 00 m: es el `timeout-minutes: 240`
+# que tenía entonces su único job matándolos. Medido en el log del run
+# 34322164783: init verde en 10 min 39 s, PIT calculó cobertura en 470 s, creó
+# 254 unidades de mutación a las 07:24:57 y siguió analizando 3 h 41 min 26 s
+# sin terminar el backend. La campaña de frontend no llegó a arrancar ni una
+# sola vez.
 #
 # No es un timeout mal puesto: NO CABE. Doce de los ámbitos documentados en
 # progress/ suman 6 h 37 m ellos solos, y el techo duro de un job hospedado son
@@ -36,30 +38,81 @@ name: Prueba de mutación
 # feature no es ésta: es la mutación POR FEATURE que exige CHECKPOINTS.md C7,
 # ejecutada por `mutation_tester` sobre el ámbito de esa feature, y sigue viva.
 #
-# PARA DEVOLVERLE EL CRON hace falta antes trocear de verdad: partición mecánica
-# del universo (`-PmutationShard=k/N`), que preserva la cobertura por
-# construcción en vez de por revisión humana, más un job de veredicto que se
-# ponga rojo si falta una clase. Diseñado y verificado, sin aplicar. No vuelvas
-# a poner un cron aquí sin eso: volvería a morir cada noche.
+# ── EL TROCEADO, APLICADO ─────────────────────────────────────────────────────
+#
+# Partición MECÁNICA del universo, que preserva la cobertura por construcción y
+# no por revisión humana. Diseño, evidencia y tabla de calibración en
+# progress/troceado_mutacion.md; la lógica en scripts/mutation-shards.mjs.
+#
+# - Backend: `-PmutationShard=k/N`. El universo es la rama `else` de
+#   targetClasses (hoy 456 clases propietarias); se ordena y el trozo k se lleva
+#   las posiciones i con i % N == k-1. Se reparte por EXCLUSIÓN (excludedClasses
+#   con las clases de los demás trozos), así cada trozo muta exactamente lo que
+#   hoy se muta de sus clases, ni una anidada más.
+# - Frontend: los ficheros de frontend/stryker.config.json (hoy 53, con los dos
+#   rangos de session-gate.tsx viajando juntos), mismo reparto, misma config
+#   salvo `mutate` y `thresholds.break`.
+# - Cada trozo corre SIN umbral propio (PIT mutationThreshold 0, Stryker break
+#   null). La puerta es la de siempre, 80 sobre el agregado con la fórmula de
+#   cada herramienta, y la aplica el job `verdict`, que corre SIEMPRE
+#   (`if: always()`) y se pone rojo si falta o sobra un trozo, si una clase o un
+#   fichero no está en ningún trozo o está en dos, si un mutante se cuenta dos
+#   veces, si algún job previo no terminó en verde o si el umbral deriva entre
+#   build.gradle.kts, stryker.config.json y harness.config.json. SIN ESE JOB LOS
+#   TROZOS NO PRUEBAN NADA: no lo quites ni lo hagas opcional
+#   (scripts/mutation-shards.test.mjs lo exige junto al bloque de Gradle).
+#
+# N vive en un solo sitio (env de abajo) y se puede forzar al lanzar a mano
+# (1..20). Cambiar N nunca cambia la cobertura: el reparto y el veredicto son
+# funciones de N.
+#
+# SIGUE SIN CRON, a propósito. N_B=6 y N_F=12 son estimaciones: el backend
+# completo nunca ha terminado y el frontend por defecto nunca se ha medido. La
+# primera ejecución es de calibración. El cron vuelve cuando el trozo más lento
+# medido quede en 150 min o menos (25 % de margen bajo el timeout de 200, y
+# lejos del techo de 360), anotado en progress/troceado_mutacion.md. No antes.
+#
+# Todos los checkout van con persist-credentials: false. Ningún job necesita
+# credenciales de git después del checkout, y PIT y Stryker ejecutan la suite
+# entera cientos de veces: el GITHUB_TOKEN no se queda en .git/config mientras.
 
 on:
   workflow_dispatch:
+    inputs:
+      backend_shards:
+        description: "Trozos de backend (1-20). Vacío = MUTATION_BACKEND_SHARDS."
+        required: false
+        default: ""
+        type: string
+      frontend_shards:
+        description: "Trozos de frontend (1-20). Vacío = MUTATION_FRONTEND_SHARDS."
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
 
-# Grupo propio y sin cancelación: una campaña nocturna no debe morir porque
-# alguien empuje a main mientras corre.
+# Grupo propio y sin cancelación: una campaña no debe morir porque alguien
+# empuje a main mientras corre.
 concurrency:
   group: mutation-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  MUTATION_BACKEND_SHARDS: "6"
+  MUTATION_FRONTEND_SHARDS: "12"
+
 jobs:
-  mutation:
+  # La mitad `init` de `harness verify`: entorno, lint y suites.
+  init:
+    name: Init del arnés
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: pnpm/action-setup@v4
         with:
           version: 10.21.0
@@ -76,4 +129,165 @@ jobs:
           java-version: "25"
       - uses: gradle/actions/setup-gradle@v4
       - run: node scripts/project.mjs install
-      - run: node .harness/harness.mjs verify
+      - run: node .harness/harness.mjs init
+
+  plan:
+    name: Reparto
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      backend: ${{ steps.plan.outputs.backend }}
+      frontend: ${{ steps.plan.outputs.frontend }}
+      backend_shards: ${{ steps.plan.outputs.backend_shards }}
+      frontend_shards: ${{ steps.plan.outputs.frontend_shards }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          # Sin pnpm aqui: setup-node v5 lo detecta y fallaria.
+          package-manager-cache: false
+      - id: plan
+        env:
+          REQUESTED_BACKEND: ${{ inputs.backend_shards }}
+          REQUESTED_FRONTEND: ${{ inputs.frontend_shards }}
+        run: >-
+          node scripts/mutation-shards.mjs plan
+          --backend "${REQUESTED_BACKEND:-$MUTATION_BACKEND_SHARDS}"
+          --frontend "${REQUESTED_FRONTEND:-$MUTATION_FRONTEND_SHARDS}"
+          --github-output "$GITHUB_OUTPUT"
+
+  backend-shard:
+    name: PIT ${{ matrix.shard }}
+    needs: [init, plan]
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.backend) }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          # Sin pnpm aqui: setup-node v5 lo detecta y fallaria.
+          package-manager-cache: false
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: PIT sobre el trozo
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: node scripts/mutation-shards.mjs run backend "$SHARD"
+      # overwrite: con v4 el nombre es único por run, y un «Re-run failed jobs»
+      # chocaría con el artefacto del intento anterior (409) y dejaría el trozo
+      # rojo para siempre. Es seguro: el veredicto rechaza otro SHA, verifica
+      # los hashes de done.json y enseña el intento de cada trozo.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ matrix.name }}
+          path: mutation-shards-out/${{ matrix.name }}/
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 14
+
+  frontend-shard:
+    name: Stryker ${{ matrix.shard }}
+    needs: [init, plan]
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.frontend) }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.21.0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            frontend/pnpm-lock.yaml
+      - run: node scripts/project.mjs install
+      - name: Stryker sobre el trozo
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: node scripts/mutation-shards.mjs run frontend "$SHARD"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ matrix.name }}
+          path: mutation-shards-out/${{ matrix.name }}/
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 14
+
+  # La puerta. Corre SIEMPRE, también si un trozo falla, se cancela o agota el
+  # tiempo: en esos casos tiene que ponerse roja, nunca quedarse en «omitido».
+  verdict:
+    name: Veredicto de cobertura y umbral
+    needs: [plan, init, backend-shard, frontend-shard]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.21.0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            frontend/pnpm-lock.yaml
+      # Para cargar mutation-testing-metrics desde @stryker-mutator/core.
+      - run: pnpm --dir frontend install --frozen-lockfile
+      # Si falta algún artefacto la descarga no para: el veredicto lo nombra y
+      # se pone rojo.
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: "*-shard-*"
+          path: artifacts
+      - name: Veredicto
+        env:
+          BACKEND_SHARDS: ${{ needs.plan.outputs.backend_shards }}
+          FRONTEND_SHARDS: ${{ needs.plan.outputs.frontend_shards }}
+          SHA: ${{ github.sha }}
+        run: >-
+          node scripts/mutation-shards.mjs verdict --artifacts artifacts
+          --backend "$BACKEND_SHARDS" --frontend "$FRONTEND_SHARDS"
+          --sha "$SHA"
+      - name: Todos los jobs previos en verde
+        if: always()
+        env:
+          PLAN: ${{ needs.plan.result }}
+          INIT: ${{ needs.init.result }}
+          BACKEND: ${{ needs.backend-shard.result }}
+          FRONTEND: ${{ needs.frontend-shard.result }}
+        run: |
+          echo "plan=$PLAN init=$INIT backend-shard=$BACKEND frontend-shard=$FRONTEND"
+          for result in "$PLAN" "$INIT" "$BACKEND" "$FRONTEND"; do
+            if [ "$result" != "success" ]; then
+              echo "::error::Un job previo terminó en '$result': la campaña no está completa."
+              exit 1
+            fi
+          done

@@ -1398,7 +1398,7 @@ test("normal CI test and lint include the script regression", () => {
   testing.project("test");
   assert.deepEqual(testing.calls[0], [
     process.execPath,
-    ["--test", "scripts/project.test.mjs"],
+    ["--test", "scripts/project.test.mjs", "scripts/mutation-shards.test.mjs"],
   ]);
   assert.deepEqual(
     testing.calls.slice(1).map((call) => call[1]),
@@ -1417,6 +1417,19 @@ test("normal CI test and lint include the script regression", () => {
         call[1][1] === "scripts/project.test.mjs",
     ),
   );
+  for (const file of [
+    "scripts/mutation-shards.mjs",
+    "scripts/mutation-shards.test.mjs",
+  ])
+    assert.ok(
+      linting.calls.some(
+        (call) =>
+          call[0] === process.execPath &&
+          call[1][0] === "--check" &&
+          call[1][1] === file,
+      ),
+      file,
+    );
 });
 
 test("CLI rejects extra arguments instead of silently discarding them", () => {
@@ -2360,4 +2373,98 @@ test("every webhooks mutation pattern resolves to a file that exists today", () 
       `${file} no existe: Stryker mutaria la nada`,
     );
   }
+});
+
+test("the untargeted campaign stays byte-identical: no shard flag reaches PIT or Stryker", () => {
+  const { calls, project } = capture();
+  project("mutate");
+  assert.deepEqual(
+    calls.map((call) => call[1]),
+    [
+      ["pitest", "--no-daemon"],
+      ["--dir", "frontend", "mutate"],
+    ],
+  );
+  assert.ok(!JSON.stringify(calls).includes("mutationShard"));
+  assert.ok(!JSON.stringify(calls).includes("stryker.shard"));
+});
+
+test("a shard is not a harness target, so harness mutate can never pass one without a threshold", () => {
+  const { calls, project } = capture();
+  for (const target of [
+    "backend-shard-1-of-4",
+    "frontend-shard-1-of-4",
+    "1/4",
+    "-PmutationShard=1/4",
+    "mutationShard",
+  ])
+    assert.throws(() => project("mutate", target), /Invalid target/);
+  assert.deepEqual(calls, []);
+});
+
+test("the Gradle shard block parses strictly, excludes instead of rewriting and drops the threshold only inside itself", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  assert.ok(
+    build.includes(
+      'val shard = providers.gradleProperty("mutationShard").orNull',
+    ),
+  );
+  assert.ok(
+    build.includes('Regex("^([1-9][0-9]*)/([1-9][0-9]*)$").matchEntire(shard)'),
+  );
+  assert.ok(
+    build.includes(
+      'if (shardK > shardN) throw GradleException("mutationShard exige 1 <= k <= N',
+    ),
+  );
+  assert.match(
+    build,
+    /if \(scope != null\) \{\n\s+throw GradleException\("mutationShard y mutationScope son excluyentes/,
+  );
+  assert.ok(build.includes("val shardPatterns = targetClasses.get().toSortedSet()"));
+  assert.ok(
+    build.includes(
+      'excludedClasses.set(shardOthers.flatMap { listOf(it, "$it\\$*") }.toSet())',
+    ),
+  );
+  // targetClasses sigue fijado una sola vez, por el when: el trozo no lo reescribe.
+  assert.equal(build.match(/targetClasses\.set\(/g).length, 1);
+  assert.equal(build.match(/^ {4}mutationThreshold\.set\(80\)$/gm).length, 1);
+  const zero = build.match(/^.*mutationThreshold\.set\(0\).*$/gm);
+  assert.deepEqual(zero, ["        mutationThreshold.set(0)"]);
+  const opened = build.indexOf("    if (shard != null) {\n");
+  const at = build.indexOf("        mutationThreshold.set(0)");
+  const pitestEnd = build.indexOf("\n}\n", build.indexOf("\npitest {\n") + 1);
+  assert.ok(opened > build.indexOf("    mutationThreshold.set(80)"));
+  assert.ok(opened > 0 && at > opened && at < pitestEnd);
+  assert.ok(
+    build.includes(
+      'reportDir.set(layout.buildDirectory.dir("reports/pitest-shard-$shardK-of-$shardN"))',
+    ),
+  );
+});
+
+test("the harness refuses to run while either shard signal is in the environment", () => {
+  const build = readFileSync(resolve(root, "backend/build.gradle.kts"), "utf8");
+  // Las mismas dos senales que lee Gradle: la propiedad y la variable del runner.
+  assert.ok(build.includes('providers.gradleProperty("mutationShard")'));
+  assert.ok(build.includes('providers.environmentVariable("MUTATION_SHARD_RUNNER")'));
+  for (const name of ["MUTATION_SHARD_RUNNER", "ORG_GRADLE_PROJECT_mutationShard"]) {
+    const saved = process.env[name];
+    const { calls, project } = capture();
+    try {
+      for (const value of ["scripts/mutation-shards.mjs", "1/4", ""]) {
+        process.env[name] = value;
+        for (const [task, target] of [["mutate"], ["mutate", "today-backend"], ["test"]])
+          assert.throws(() => project(task, target), new RegExp(`${name} is set`));
+      }
+    } finally {
+      if (saved === undefined) delete process.env[name];
+      else process.env[name] = saved;
+    }
+    assert.deepEqual(calls, []);
+  }
+  const { calls, project } = capture();
+  project("mutate");
+  assert.equal(calls.length, 2);
 });

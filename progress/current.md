@@ -1,3 +1,38 @@
+# Estado actual — 11 de septiembre de 2026: troceado de la mutación completa
+
+## En curso: la campaña completa, repartida en trozos (rama `codex/mutation-shards`)
+
+Está aplicado en local y **pendiente de calibración**: todavía no ha corrido en
+GitHub. El diseño y la evidencia están en `progress/troceado_mutacion.md`.
+
+- Backend: `-PmutationShard=k/N` al final del bloque `pitest`, repartido por
+  **exclusión** sobre las 456 clases de la rama `else`. Sin la propiedad, nada
+  cambia.
+- Frontend: los 53 ficheros de `stryker.config.json`, con los dos rangos de
+  `session-gate.tsx` juntos. La configuración base no se toca.
+- Cada trozo corre sin umbral propio. El job `verdict` recalcula el universo desde
+  el árbol y exige que no falte ni sobre un trozo, que no haya solapes ni
+  mutantes duplicados y que los dos 80 se cumplan con las fórmulas de PIT y de
+  Stryker.
+- `scripts/mutation-shards.test.mjs` entra en `harness init`.
+- Revisión del mismo día, en `progress/troceado_mutacion.md` §7: el modo
+  troceado exige una segunda señal que sólo pone el runner, y el arnés se niega
+  a correr si la ve. El veredicto comprueba el `mutate` con que corrió Stryker
+  y que cada fichero exista, y deja evidencia de los trozos sin terminar. Las
+  subidas admiten relanzar y los checkout no guardan el token.
+- Sin cron: vuelve cuando el trozo más lento medido quede en 150 min o menos.
+
+- Flake de la prueba en seco de Stryker (run `34610657835`, trozo 10/12,
+  `expected '' to be 'dark'`): el tema se aplicaba en un efecto pasivo y la
+  suite lo miraba en el hueco entre el commit y ese efecto. Pasa a
+  `useLayoutEffect` con prueba de regresión determinista. Detalle y medidas en
+  `progress/tdd_theme_commit_flake.md`.
+
+Lo que falta es del propietario: revisar la rama (toca rutas que vigila el
+guardián), empujarla y lanzar el primer `workflow_dispatch` de calibración.
+
+---
+
 # Estado actual — 10 de septiembre de 2026, 19:30
 
 ## Lo primero: quedan **dos** features, no cinco

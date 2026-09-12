@@ -1,8 +1,8 @@
-import { render, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { AppearanceProvider } from "./appearance-state";
+import { AppearanceProvider, useAppearance } from "./appearance-state";
 
 const LIGHT_CANVAS = "#f8f9f5";
 const DARK_CANVAS = "#111827";
@@ -137,3 +137,48 @@ it("leaving the session returns theme-color to the system canvas (@s32)", async 
   expect(document.documentElement.dataset.theme).toBeUndefined();
   expect(meta.content).toBe(LIGHT_CANVAS);
 });
+
+// Carrera del run 34610657835 (Stryker 10/12): el formulario ya mostraba la
+// apariencia confirmada y el documento seguía sin tema, porque el tema se
+// aplicaba en un efecto pasivo que React agenda para una tarea posterior.
+// El MutationObserver dispara justo tras el commit, antes de esa tarea.
+function ConfirmedTheme() {
+  const { snapshot } = useAppearance();
+  return snapshot ? (
+    <p data-testid="confirmed-theme">{snapshot.theme}</p>
+  ) : null;
+}
+it.each([
+  { preference: "DARK", theme: "dark", canvas: DARK_CANVAS },
+  { preference: "LIGHT", theme: "light", canvas: LIGHT_CANVAS },
+])(
+  "the document already wears $preference in the same commit that shows it",
+  async ({ preference, theme, canvas }) => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(() => snapshot(preference)),
+    );
+    let painted:
+      { theme?: string; colorScheme: string; meta: string } | undefined;
+    const observer = new MutationObserver(() => {
+      if (!painted && document.querySelector('[data-testid="confirmed-theme"]'))
+        painted = {
+          theme: document.documentElement.dataset.theme,
+          colorScheme: document.documentElement.style.colorScheme,
+          meta: meta.content,
+        };
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    try {
+      render(
+        <AppearanceProvider>
+          <ConfirmedTheme />
+        </AppearanceProvider>,
+      );
+      await screen.findByTestId("confirmed-theme");
+    } finally {
+      observer.disconnect();
+    }
+    expect(painted).toEqual({ theme, colorScheme: theme, meta: canvas });
+  },
+);

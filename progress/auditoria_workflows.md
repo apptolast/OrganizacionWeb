@@ -72,6 +72,12 @@ en silencio a «todo», en vez de gritar.
   mecánica `-PmutationShard=k/N`, cobertura idéntica por construcción), pero es
   cirugía en `build.gradle.kts` y trae tres correcciones bloqueantes pendientes.
   No se aplica sin luz verde.
+  **Actualización del mismo día:** aplicado en la rama local
+  `codex/mutation-shards`, pendiente de calibración. El diseño original no se
+  pudo recuperar, así que es una reconstrucción. Sus tres correcciones probables
+  son exclusión en vez de inclusión, umbral agregado en vez de por trozo y
+  completitud probada por manifiestos. Detalle en `progress/troceado_mutacion.md`.
+  Sigue sin cron hasta medir que cada trozo cabe.
 
 ## 5. Lo que sí se ha hecho hoy
 

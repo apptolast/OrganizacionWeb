@@ -133,7 +133,9 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
     setReading(true);
     return load();
   };
-  useEffect(() => {
+  // El tema entra en el mismo commit que muestra la apariencia confirmada: un
+  // efecto pasivo dejaba un fotograma con el formulario nuevo y el tema viejo.
+  useLayoutEffect(() => {
     if (!snapshot) return;
     const media =
       snapshot.theme === "SYSTEM"

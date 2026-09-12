@@ -1,3 +1,5 @@
+import java.security.MessageDigest
+
 plugins {
     java
     id("com.diffplug.spotless") version "7.2.1"
@@ -667,6 +669,98 @@ pitest {
     // campanas van por feature. Esta linea la fijan nueve guardas del arnes: no cambiarla
     // sin actualizarlas.
     threads.set(if (integrationApiOnly || integrationApiHttpOnly) 8 else 4)
+    // Troceado mecanico de la campana completa: -PmutationShard=k/N. Solo lo usa el CI
+    // (.github/workflows/harness-mutation.yml, via scripts/mutation-shards.mjs), porque la
+    // campana entera no cabe en un job hospedado. Sin la propiedad no cambia nada: `harness
+    // verify` y `harness mutate` locales ven exactamente la configuracion de arriba.
+    //
+    // Va al final del bloque a proposito: lee targetClasses YA resuelto por el `when` (la rama
+    // else, sin copiarla) y pisa el umbral de arriba solo en modo troceado. Se reparte por
+    // EXCLUSION, no por inclusion: targetClasses no se toca y excludedClasses se lleva las clases
+    // de los demas trozos. Asi trozo_k = (lo que se muta hoy) interseccion (sus clases), exacto.
+    // Una lista de inclusion "FQN" + "FQN$*" anadiria anidadas que hoy no se mutan (los patrones
+    // exactos de TaskController y companeros no las cubren), y "FQN*" meteria TaskController en
+    // el trozo de Task. Una clase compilada sin fuente propietaria no se excluye nunca: sale en
+    // todos los trozos, y el veredicto la caza como mutante repetido.
+    val shard = providers.gradleProperty("mutationShard").orNull
+    if (shard != null) {
+        // SEGUNDA SENAL, antes que nada. La propiedad sola no basta: Gradle tambien la lee de
+        // ORG_GRADLE_PROJECT_mutationShard, de ~/.gradle/gradle.properties y de -P en GRADLE_OPTS,
+        // y con cualquiera de esas un `harness verify` local mutaria 1/N de las clases con umbral
+        // 0 y diria "Todo verde". Esta variable solo la pone scripts/mutation-shards.mjs en el
+        // entorno de este Gradle, y scripts/project.mjs se niega a correr si la ve: por el arnes
+        // no se pueden tener las dos.
+        if (providers.environmentVariable("MUTATION_SHARD_RUNNER").orNull != "scripts/mutation-shards.mjs") {
+            throw GradleException("mutationShard solo lo activa scripts/mutation-shards.mjs (falta MUTATION_SHARD_RUNNER): '$shard'")
+        }
+        // Un valor raro NUNCA se degrada a "todo", que es lo que hizo `noche_cinco`.
+        val shardMatch = Regex("^([1-9][0-9]*)/([1-9][0-9]*)$").matchEntire(shard)
+            ?: throw GradleException("mutationShard debe ser k/N con 1 <= k <= N y sin ceros a la izquierda: '$shard'")
+        val shardK = shardMatch.groupValues[1].toIntOrNull()
+            ?: throw GradleException("mutationShard fuera de rango: '$shard'")
+        val shardN = shardMatch.groupValues[2].toIntOrNull()
+            ?: throw GradleException("mutationShard fuera de rango: '$shard'")
+        if (shardK > shardN) throw GradleException("mutationShard exige 1 <= k <= N: '$shard'")
+        if (scope != null) {
+            throw GradleException("mutationShard y mutationScope son excluyentes: el troceado reparte la campana completa, no un ambito ('$scope')")
+        }
+        val shardPatterns = targetClasses.get().toSortedSet()
+        val shardRegexes = shardPatterns.map { pattern ->
+            // Mismo alfabeto que admite scripts/mutation-shards.mjs; lo demas lo trataria PIT de
+            // forma especial ('~' regex, '**.', '+') y aqui no se aproxima.
+            if (!Regex("^[A-Za-z0-9_.\$*?]+\$").matches(pattern) || pattern.contains("**")) {
+                throw GradleException("Patron de targetClasses no troceable: '$pattern'")
+            }
+            Regex(pattern.map { c ->
+                when (c) {
+                    '*' -> ".*"
+                    '?' -> "."
+                    else -> Regex.escape(c.toString())
+                }
+            }.joinToString(""))
+        }
+        val shardSources = layout.projectDirectory.dir("src/main/java").asFile
+        val shardOwners = shardSources.walkTopDown()
+            .filter { it.isFile && it.name.endsWith(".java") && it.name != "package-info.java" && it.name != "module-info.java" }
+            .map { it.relativeTo(shardSources).invariantSeparatorsPath.removeSuffix(".java").replace('/', '.') }
+            .filter { fqn -> shardRegexes.any { it.matches(fqn) } }
+            .sorted()
+            .toList()
+        shardOwners.forEach { owner ->
+            if (!Regex("^[A-Za-z0-9_.]+\$").matches(owner)) throw GradleException("Clase no troceable: '$owner'")
+        }
+        if (shardN > shardOwners.size) {
+            throw GradleException("mutationShard: N=$shardN es mayor que el universo (${shardOwners.size} clases)")
+        }
+        // Round-robin sobre la lista ordenada: la misma funcion que partition() en Node.
+        val shardMine = shardOwners.filterIndexed { i, _ -> i % shardN == shardK - 1 }
+        val shardOthers = shardOwners.filterIndexed { i, _ -> i % shardN != shardK - 1 }
+        excludedClasses.set(shardOthers.flatMap { listOf(it, "$it\$*") }.toSet())
+        reportDir.set(layout.buildDirectory.dir("reports/pitest-shard-$shardK-of-$shardN"))
+        // UMBRAL: la puerta de hoy es UNA puntuacion sobre todo el universo. Un 80 por trozo seria
+        // otra puerta, no equivalente, y un fallo de umbral no se distingue de un fallo de PIT. Por
+        // eso el trozo corre sin umbral y la puerta agregada, con este mismo 80 y la misma formula
+        // de PIT, la aplica el job `verdict` del workflow, que es obligatorio (`if: always()`).
+        // Quitar ese job deja los trozos sin ninguna puerta: scripts/mutation-shards.test.mjs
+        // exige que este bloque y el veredicto existan juntos.
+        mutationThreshold.set(0)
+        val shardDigest = MessageDigest.getInstance("SHA-256")
+            .digest(shardPatterns.joinToString("\n").toByteArray(Charsets.UTF_8))
+            .joinToString("") { "%02x".format(it) }
+        val shardJson = "{\"tool\":\"pit\",\"k\":$shardK,\"N\":$shardN," +
+            "\"owners\":[" + shardMine.joinToString(",") { "\"$it\"" } + "]," +
+            "\"ownersTotal\":${shardOwners.size},\"patternsSha256\":\"$shardDigest\"," +
+            "\"excludedCount\":${shardOthers.size * 2},\"pitestVersion\":\"${pitestVersion.get()}\"}\n"
+        // Hermano del directorio de informes, no dentro: PIT no puede pisarlo.
+        val shardManifest = layout.buildDirectory.file("reports/pitest-shard-$shardK-of-$shardN.manifest.json")
+        tasks.named("pitest") {
+            doFirst {
+                val file = shardManifest.get().asFile
+                file.parentFile.mkdirs()
+                file.writeText(shardJson)
+            }
+        }
+    }
 }
 
 spotless { java { googleJavaFormat("1.31.0") } }

@@ -8,17 +8,14 @@
 ## C1 — El arnés está completo
 
 - [ ] Existen los ficheros base: `AGENTS.md`, `CLAUDE.md`, `CHECKPOINTS.md`,
-      `harness.config.json`, `feature_list.json`, `progress/current.md`.
-- [ ] Existen los docs: `docs/workflow.md`, `docs/architecture.md`,
-      `docs/conventions.md`, `docs/verification.md`.
+      `harness.config.json`.
+- [ ] Existen los docs: `docs/architecture.md`, `docs/conventions.md`,
+      `docs/verification.md`.
 - [ ] `bin/harness init` termina con exit code 0.
 
 ## C2 — El estado es coherente
 
-- [ ] Como mucho una feature en `in_progress` en `feature_list.json`.
-- [ ] Toda feature `done` tiene tests asociados que pasan.
-- [ ] `progress/current.md` está vacío o describe la sesión activa
-      (no contiene basura de sesiones anteriores).
+- [ ] Toda tarea terminada tiene tests asociados que pasan.
 
 ## C3 — El código respeta la arquitectura
 
@@ -37,32 +34,38 @@
 
 - [ ] No hay archivos sin trackear sospechosos (temporales, cachés fuera del
       `.gitignore`).
-- [ ] `progress/history.md` tiene una entrada por la última sesión.
-- [ ] La última feature trabajada está reflejada en su estado correcto.
+- [ ] La última tarea trabajada está reflejada en su issue (casillas y
+      «Resultados de la ejecución»).
 
-## C6 — Contrato Gherkin (BDD)
+## C6 — Criterios Given/When/Then y spec viva
 
-- [ ] Toda feature con `"sdd": true` en estado `spec_ready`, `in_progress`
-      o `done` tiene su `features/<name>.feature` y una sección en
-      `project-spec.md`.
-- [ ] El `.feature` usa Gherkin con escenarios tagueados `@s1`, `@s2`, …
-      y cada `Then` afirma algo medible (ver `docs/gherkin.md`).
-- [ ] Cada escenario `@s` está cubierto por al menos un test concreto
-      (mapa `@s → test` en `progress/tdd_<name>.md`).
-- [ ] No hay código de producción que ningún test rojo haya pedido
-      (disciplina TDD, ver `docs/tdd.md`).
+- [ ] Cada criterio de aceptación (Given/When/Then, en el issue)
+      está cubierto por al menos un test concreto cuyo nombre lo refleja, y el
+      PR declara en «Cómo se probó» cuál (ver `docs/verification.md`). En un
+      bugfix, el test de regresión se escribió antes del arreglo y se vio fallar.
+- [ ] Si la capacidad tiene su spec viva `features/<capacidad>.feature`
+      (opcional, ver `docs/gherkin.md`): el mismo PR que cambia el
+      comportamiento la actualiza, usa Gherkin con escenarios tagueados
+      `@s1`, `@s2`, …, cada `Then` afirma algo medible y cada escenario `@s`
+      está cubierto por al menos un test (mapa `@s → test` en el issue o en el PR).
+- [ ] Solo nivel crítico: TDD estricto; no hay código de producción que ningún
+      test rojo haya pedido (ver `docs/tdd.md`).
 
-## C7 — Prueba de mutación
+## C7 — Prueba de mutación (solo nivel crítico)
 
-- [ ] La feature `done` superó la prueba de mutación
-      (`bin/harness mutate`) con la puntuación por encima del umbral de
-      `harness.config.json` (`mutation.threshold`).
-- [ ] Cualquier mutante sobreviviente queda documentado en
-      `progress/mutation_<name>.md` (matado con un test nuevo, o
-      justificado como equivalente).
+Solo aplica si el plan clasificó la tarea como **crítica**; en los demás
+niveles no se corre (política en `docs/verification.md`).
+
+- [ ] La tarea crítica superó la prueba de mutación
+      (`bin/harness mutate <módulo>`) sobre los módulos que fija el plan, con
+      la puntuación por encima del umbral de `harness.config.json`
+      (`mutation.threshold`, 0,8 por defecto).
+- [ ] Cualquier mutante sobreviviente queda documentado en el issue o en
+      el PR (matado con un test nuevo, o justificado como equivalente).
 
 ---
 
-**Cómo usar este archivo:** el agente `judge` (`.claude/agents/judge.md`)
-recorre C1-C6 y el `mutation_tester` valida C7. Se rechaza el cierre de
-sesión si quedan boxes vacíos.
+**Cómo usar este archivo:** quien revisa el trabajo
+recorre C1-C6 y, si la tarea es crítica, C7 (`bin/harness mutate <módulo>`).
+Se rechaza el cierre de sesión si quedan boxes vacíos; los que solo aplican en
+nivel crítico o con spec viva se marcan «n/a» cuando no corresponden.

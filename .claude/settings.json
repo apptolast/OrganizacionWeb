@@ -1,4 +1,5 @@
 {
+  "model": "opusplan",
   "permissions": {
     "allow": [
       "Bash(./init.sh)",
@@ -6,22 +7,7 @@
       "Bash(node .harness/harness.mjs:*)"
     ]
   },
-  "$schema_comment": "Hooks que automatizan la verificación del arnés. El harness los ejecuta (no el agente), así que no se pueden saltar. Usan el motor agnóstico: los comandos concretos salen de harness.config.json. El hook PostToolUse que corría la suite completa tras CADA Edit/Write se retiró el 9 de septiembre de 2026: con varios carriles en paralelo levantaba decenas de contenedores PostgreSQL por minuto y bloqueaba la máquina. La puerta de cierre sigue siendo el hook Stop.",
   "enabledPlugins": {
     "ecc@ecc": true
-  },
-  "hooks_disabled_during_parallel_lanes": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .harness/harness.mjs init",
-            "description": "Antes de cerrar la sesión, fuerza una verificación completa del entorno y el arnés."
-          }
-        ]
-      }
-    ]
-  },
-  "$hooks_note": "Aparcada otra vez durante la fase paralela de la noche del 9 al 10 de septiembre. La puerta Stop corre la suite completa de backend (49 contenedores) en CADA turno del orquestador. Restaurar al integrar."
+  }
 }

@@ -12,19 +12,13 @@
   },
   "paths": {
     "src": "backend/src/main",
-    "tests": "backend/src/test",
-    "features": "features",
-    "progress": "progress",
-    "spec": "project-spec.md",
-    "feature_list": "feature_list.json"
+    "tests": "backend/src/test"
   },
   "mutation": {
     "threshold": 0.8,
     "targets": []
   },
   "rules": {
-    "one_feature_at_a_time": false,
-    "require_approved_spec_to_implement": true,
     "require_tests_to_close": true,
     "require_mutation_to_close": true
   }

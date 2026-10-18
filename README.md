@@ -102,7 +102,7 @@ Las pruebas de producto y sus resultados concretos se registran en `progress/`; 
 - [Campos y recorrido](docs/product-fields.md).
 - [Guía de uso del MVP](docs/mvp-user-guide.md): planificar, trabajar, cerrar y consultar el historial.
 - [Personalización, conectores e infraestructura](docs/implementation-proposal.md).
-- [Proceso SDD](docs/workflow.md) y [plantilla original](docs/template-harness.md).
+- [Proceso de trabajo](AGENTS.md) y [plantilla original](docs/template-harness.md).
 
 Las skills de React y revisión de interfaces están versionadas en `.agents/skills/`. Todos los agentes aplican también Ponytail full y Caveman lite siguiendo [su integración documentada](docs/agent-efficiency.md): reutilizar soluciones existentes, evitar complejidad innecesaria y comunicar con brevedad, conservando arquitectura, validación, seguridad y accesibilidad. Los plugins del agente no son los conectores del producto.
 

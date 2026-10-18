@@ -1,21 +1,16 @@
 # Configuración — cómo adaptar el arnés a cualquier stack
 
-> El proceso Uncle Bob (spec → Gherkin → TDD → judge → mutación), los agentes
-> y las puertas son **fijos**. Lo único que cambia por proyecto son los
-> comandos de tu stack, declarados en `harness.config.json`. Eso es lo que
-> hace a esta plantilla agnóstica al lenguaje.
+> La política de trabajo (`AGENTS.md`: niveles, puerta humana, delegación) y los agentes son **fijos**. Lo único que cambia por proyecto son los comandos de tu stack, declarados en `harness.config.json`. Eso hace a la plantilla agnóstica al lenguaje.
 
 ## El motor
 
-`.harness/harness.mjs` es un motor de **cero dependencias** (solo la stdlib de
-Node ≥ 18). Lee `harness.config.json` del directorio actual y ejecuta los
-comandos que declaras. Se invoca con los lanzadores:
+`.harness/harness.mjs` es un motor de **cero dependencias** (stdlib de Node ≥ 18). Lee `harness.config.json` del directorio actual y ejecuta los comandos que declaras. Se invoca con:
 
 - POSIX/macOS/Linux: `./init.sh`, `bin/harness <cmd>`
 - Windows/PowerShell: `pwsh ./init.ps1`, `bin\harness.ps1 <cmd>`
 - Directo: `node .harness/harness.mjs <cmd>`
 
-Comandos: `init`, `test`, `mutate [target]`, `verify`, `status`, `help`.
+Comandos: `init`, `test`, `mutate [target]`, `verify`, `help`. `verify` es `init` más las comprobaciones que activen las `rules` (comando de tests declarado y mutación completa) y se usa antes de una entrega; el cierre ordinario de una tarea es `init` + `test`.
 
 ## `harness.config.json` — campos
 
@@ -24,7 +19,7 @@ Comandos: `init`, `test`, `mutate [target]`, `verify`, `status`, `help`.
   "$schema": "./harness.schema.json",
   "project": "mi-proyecto",
   "language": "python",          // etiqueta informativa
-  "standalone": true,             // false = hereda el arnés raíz (para examples/)
+  "standalone": true,             // false = hereda el arnés raíz (sub-proyecto)
   "commands": {
     "install": "…",               // opcional
     "lint":    "…",               // vacío = se omite
@@ -32,110 +27,53 @@ Comandos: `init`, `test`, `mutate [target]`, `verify`, `status`, `help`.
     "mutate":  "…",               // sale != 0 si no supera el umbral
     "build":   "…"                // opcional
   },
-  "paths": {                       // por si tu layout difiere de los defaults
-    "src": "src", "tests": "tests", "features": "features",
-    "progress": "progress", "spec": "project-spec.md",
-    "feature_list": "feature_list.json"
-  },
+  "paths": { "src": "src", "tests": "tests" },   // solo si tu layout difiere de los defaults
   "mutation": { "threshold": 0.8, "targets": ["src/…"] },
   "rules": {
-    "one_feature_at_a_time": true,
-    "require_approved_spec_to_implement": true,
     "require_tests_to_close": true,
     "require_mutation_to_close": true
   }
 }
 ```
 
+- El motor no lee `feature_list.json`, `progress/` ni `features/`: si tu proyecto los conserva, son tuyos. Si tu `harness.config.json` aún trae `paths.features`, `paths.progress`, `paths.spec`, `paths.feature_list`, `rules.one_feature_at_a_time` o `rules.require_approved_spec_to_implement`, el motor las ignora; puedes borrarlas.
+- `require_tests_to_close` y `require_mutation_to_close` rigen solo `verify`. Con `require_tests_to_close: true`, `verify` aborta si `commands.test` está vacío. Con `require_mutation_to_close: true`, `verify` ejecuta `commands.mutate` (todos los `mutation.targets`) y aborta si está vacío o no supera el umbral; con `false` **no ejecuta la mutación**, aunque `commands.mutate` esté declarado. El `harness.config.json` de la plantilla las trae a `false` porque no declara stack; ponlas a `true` cuando declares `commands.test` y `commands.mutate`.
+
 ### Tokens en `commands`
 
-- `{{py}}` → se resuelve al intérprete de Python disponible (`python3` o
-  `python`). Útil para portabilidad Windows/Unix.
-- `{{target}}` → en `commands.mutate`, recibe el módulo a mutar. Si pasas
-  `bin/harness mutate <target>`, ese único módulo; si lo omites (`bin/harness
-  mutate` o `bin/harness verify`), el motor **itera `mutation.targets`** y solo
-  da verde si todos superan el umbral. Con `mutation.targets` vacía se ejecuta
-  el comando tal cual (mutadores que cubren todo el proyecto, p. ej. Stryker).
+- `{{py}}` → el intérprete de Python disponible (`python3` o `python`).
+- `{{target}}` → en `commands.mutate`, el módulo a mutar. Con `bin/harness mutate <target>`, ese único módulo; sin argumento (o con `bin/harness verify`) el motor **itera `mutation.targets`** y solo da verde si todos superan el umbral. Con `mutation.targets` vacía se ejecuta el comando una sola vez, sin `{{target}}` (herramientas cuyo alcance se fija en su configuración, p. ej. Cosmic Ray).
+- `{{threshold}}` y `{{threshold_pct}}` → `mutation.threshold` en 0–1 (`0.8`) y en 0–100, entero (`80`), para pasárselo a la herramienta de mutación por línea de comandos. Son opcionales: el motor no mide ni aplica el umbral, solo mira el código de salida de `commands.mutate`. Si tu herramienta lo admite por línea de comandos, usa el token; si no (p. ej. Stryker, que lo lee de su fichero de configuración), mantén su valor alineado a mano con `mutation.threshold`. Detalle por herramienta en `docs/mutation-testing.md`.
 
-## Recetas por stack (adaptadores)
+## Recetas por stack
 
-### Python (cero dependencias) — ver `examples/python-notes-cli`
+Los adaptadores por lenguaje están en `.harness/adapters/` (`python.md`, `node.md`, `go.md`, `rust.md`, `java.md` y el genérico `generic.md`): cada uno trae la herramienta de mutación estándar de su stack y cómo le llega el umbral. Las de referencia:
 
 ```json
-"commands": {
-  "test":   "{{py}} -m unittest discover -s tests -q",
-  "mutate": "{{py}} tools/mutate.py {{target}}"
-}
+// Node / TypeScript (Vitest + Stryker + ESLint)
+"commands": { "install": "pnpm install", "lint": "eslint . && tsc --noEmit",
+              "test": "vitest run", "mutate": "stryker run --mutate \"{{target}}\"", "build": "vite build" }
+
+// Go
+"commands": { "lint": "go vet ./...", "test": "go test ./...",
+              "mutate": "gremlins unleash --threshold-efficacy {{threshold_pct}}" }
+
+// Rust
+"commands": { "lint": "cargo clippy -- -D warnings", "test": "cargo test",
+              "mutate": "cargo mutants -f {{target}}" }
+
+// Java
+"commands": { "lint": "mvn -q checkstyle:check", "test": "mvn -q test",
+              "mutate": "mvn test-compile org.pitest:pitest-maven:mutationCoverage -DmutationThreshold={{threshold_pct}} -DtargetClasses=\"{{target}}\"" }
 ```
 
-### Node / TypeScript (cero dependencias) — ver `examples/node-notes-cli`
+Para Python, [Cosmic Ray](https://cosmic-ray.readthedocs.io/en/latest/reference/cli.html) es la herramienta que puede hacer de puerta por sí sola; `mutmut` no. `python.md` tiene el comando completo.
 
-```json
-"commands": {
-  "test":   "node --test",
-  "mutate": "node tools/mutate.mjs {{target}}"
-}
-```
-
-### Node / TypeScript de producción (Vitest + Stryker + ESLint)
-
-```json
-"commands": {
-  "install": "pnpm install",
-  "lint":    "eslint . && tsc --noEmit",
-  "test":    "vitest run",
-  "mutate":  "stryker run",
-  "build":   "vite build"
-}
-```
-
-### Go — ver `.harness/adapters/go.md` y `examples/go-notes-cli`
-
-```json
-"commands": {
-  "lint":   "go vet ./...",
-  "test":   "go test ./...",
-  "mutate": "gremlins unleash {{target}} --dry-run=false"
-}
-```
-
-`gremlins` es la herramienta de mutación de referencia para producción. El
-ejemplo `examples/go-notes-cli` usa en su lugar un mutador propio sin
-dependencias (`tools/mutate.go`, sobre `go/scanner`, `"mutate": "go run ./tools
-{{target}}"`), coherente con los mutadores caseros de los ejemplos Python/Node.
-
-### Rust — ver `.harness/adapters/rust.md` y `examples/rust-notes-cli`
-
-```json
-"commands": {
-  "lint":   "cargo clippy -- -D warnings",
-  "test":   "cargo test",
-  "mutate": "cargo mutants --file {{target}}"
-}
-```
-
-`cargo mutants` es la herramienta de referencia para producción. Como en los
-demás ejemplos, `examples/rust-notes-cli` usa en su lugar un mutador propio sin
-dependencias (`tools/mutate.rs`, `"mutate": "cargo build --quiet --bin mutate &&
-./target/debug/mutate {{target}}"`) para ser autocontenido y determinista en CI.
-
-### Java — ver `.harness/adapters/java.md`
-
-```json
-"commands": {
-  "lint":   "mvn -q checkstyle:check",
-  "test":   "mvn -q test",
-  "mutate": "mvn -q org.pitest:pitest-maven:mutationCoverage -DtargetClasses={{target}}"
-}
-```
-
-## Portar a un stack nuevo (checklist)
+## Portar a un stack nuevo
 
 1. Copia `harness.config.json` y rellena `commands` con los de tu stack.
 2. Asegura que `commands.test` sale con código 0 solo si todos los tests pasan.
 3. Elige un mutador y ponlo en `commands.mutate` (debe salir != 0 bajo umbral).
-4. Ajusta `paths` si tu layout no usa `src/`/`tests/`.
-5. `bin/harness init` en verde → listo.
-
-Los adaptadores documentados están en `.harness/adapters/`: `python.md`,
-`node.md`, `go.md`, `rust.md`, `java.md` y el genérico `generic.md`.
+4. Pon `require_tests_to_close` y `require_mutation_to_close` a `true` si quieres que `verify` exija el comando de tests y ejecute la mutación (con `false`, `verify` no ejecuta la mutación).
+5. Ajusta `paths` si tu layout no usa `src/`/`tests/`.
+6. `bin/harness init` en verde → listo.
